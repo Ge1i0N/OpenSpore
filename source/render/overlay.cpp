@@ -234,9 +234,11 @@ void Overlay::begin(int screen_w, int screen_h) {
 void Overlay::flush_text() {
     if (m_vcount == 0) return;
     set_text_states(m_dev, m_atlas);
-    for (int i = 0; i + 3 < m_vcount; i += 4) {
-        m_dev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &m_verts[i], sizeof(Vert));
-    }
+    // ONE DrawPrimitiveUP for the whole batch. The previous version issued one call per
+    // quad; when the loader started drawing the 57-line package list that became ~3400
+    // draw calls per frame and took the app from 30 fps to 4. Vertices are emitted as a
+    // triangle list (6 per glyph) precisely so they can go out in a single call.
+    m_dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, (UINT)m_vcount / 3, m_verts, sizeof(Vert));
     m_vcount = 0;
     m_flat_drawn = false;
 }
@@ -272,17 +274,21 @@ void Overlay::text(float x, float y, u32 argb, const std::string& s) {
             fx += m_advance * 0.5f;
             continue;
         }
-        if (m_vcount + 4 > (int)(sizeof(m_verts) / sizeof(m_verts[0]))) flush_text();
+        if (m_vcount + 6 > (int)(sizeof(m_verts) / sizeof(m_verts[0]))) flush_text();
         int gi = ch - kFirstChar;
         int gx = (gi % m_cols) * m_cell_w;
         int gy = (gi / m_cols) * m_cell_h;
         float u0 = gx / aw, v0 = gy / ah, u1 = (gx + m_cell_w) / aw, v1 = (gy + m_cell_h) / ah;
+        float x0 = fx, x1 = fx + (float)m_cell_w, y0 = y, y1 = y + (float)m_cell_h;
+        // 6 verts (two triangles), so the whole string can go out in ONE draw call.
         Vert* v = &m_verts[m_vcount];
-        m_vcount += 4;
-        v[0] = {fx, y, 0, 1, argb, u0, v0};
-        v[1] = {fx, y + (float)m_cell_h, 0, 1, argb, u0, v1};
-        v[2] = {fx + (float)m_cell_w, y, 0, 1, argb, u1, v0};
-        v[3] = {fx + (float)m_cell_w, y + (float)m_cell_h, 0, 1, argb, u1, v1};
+        m_vcount += 6;
+        v[0] = {x0, y0, 0, 1, argb, u0, v0};
+        v[1] = {x0, y1, 0, 1, argb, u0, v1};
+        v[2] = {x1, y0, 0, 1, argb, u1, v0};
+        v[3] = {x1, y0, 0, 1, argb, u1, v0};
+        v[4] = {x0, y1, 0, 1, argb, u0, v1};
+        v[5] = {x1, y1, 0, 1, argb, u1, v1};
         fx += (float)m_advance;  // cell width == advance, so overlap is impossible
     }
 }

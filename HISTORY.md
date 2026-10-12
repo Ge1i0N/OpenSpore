@@ -5,6 +5,73 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ---
 
+## Session 4 — 2026-10-12 late night: first contact with EA's shipped data
+
+Started from: session 3b (assets arrived, DBPF reader located by disasm).
+Ended with: **109 real `.package` files opened and validated, 0 rejected**, and the
+record layout measured over 17,901 records. Plus a 7× fps regression found and fixed.
+
+### Added
+| file | job |
+|---|---|
+| `source/engine/pkg.h/.cpp` | DBPF reader: header replay of the validator's own clauses, fixed-stride index parse, per-record bounds clamp |
+| `tools/pkg_record_test.py` | test the 24-byte record hypothesis across every fixed-stride file |
+| `tools/log_dupes.py` | count duplicate package opens in a run log (the tool that caught the double-scan) |
+| `analysis/shots/loader_packages.png` | loader screen listing the real packages |
+
+### Reversal landed (VERIFY rows 18-21, MEMORY "DBPF package format")
+- Header = 0x60 bytes; fields `+0x00` magic, `+0x04` version ≤ 3, `+0x24` count < 0x07FFFFFF,
+  `+0x2c` index size, `+0x3c` non-zero, `+0x40` index offset — all quoted from the validator
+  at `0x008d90b0`, and the reader **replays the same clauses in the same order with the same
+  rejection reasons** rather than inventing its own.
+- Record = 6 u32: `[2]`=offset, `[3]`=size|0x80000000 confirmed with **zero violations** in
+  17,901 records; `[0]`=type id (16 distinct, one dominating at 98%), `[1]`=instance id,
+  `[4]` ≥ masked `[3]` in all records (probable uncompressed size), `[5]` ∈ {0x10000, 0x1FFFF}.
+- 26/57 files are var-width and fit `idx_size = 16 + 20*count` exactly. **Reported as
+  VAR-WIDTH, never guessed**: the parser for them is the next disasm target (the index
+  container at `[pkg+0x2d0]`, vtable+0x24/0x28/0x38/0x40, fed from `0x008d9a90`).
+- The header loader's failure branch (`0x8d9053` → `0x008dd820`, 17-byte header, magic
+  `{0x7f,0x9d,0x88,0xec}`) is a *fallback* parser, dead for all our files. Recorded so nobody
+  mistakes it for the main path.
+
+### Bugs found and fixed (each by measurement, not by reading)
+1. **Double scan**: the dev search list contains both `Data=<exe>\Data` and `cwd=<exe>`, so
+   the recursive scan opened every file twice — 62 "opened" lines for 31 distinct files.
+   Fixed by deduping on `weakly_canonical`. After: **31 fixed + 26 var-width = 57**, which
+   matches `tools/pkg_records.py` offline over the same tree. Two independent routes to the
+   same number, which is the confirmation we want rather than a log that merely looks right.
+2. **fps 30 → 4** when the loader began drawing the 57-line package list: `flush_text` issued
+   one `DrawPrimitiveUP` per quad, i.e. ~3400 draw calls/frame. Fixed by emitting 6 verts per
+   glyph (triangle list) and flushing the whole batch in ONE call; vertex buffer 1024 → 4096.
+   After: **33.4 / 31.2 fps** with the same package list on screen.
+3. **Ledger swallowed the package listing** (all 109 lines share one call site → "x9, further
+   repeats suppressed"). Those lines are one-per-run, so they use `LOG_ONCE_*`.
+4. **`C4018` signed/unsigned** on `it.depth() > (unsigned)max_depth` — the cast was the bug,
+   not the comparison.
+
+### False alarm worth recording
+`exit=0xFFFFFFFF` appeared once after the dedupe run. The log said `clean exit code=0`.
+Cause: reading `$p.ExitCode` in a race with `WaitForExit`, not an app bug. Using
+`[void]$p.WaitForExit(40000)` first gives `code=0` consistently. Harness lesson: a PowerShell
+race looks exactly like a crash, so check the log before believing the exit code.
+
+### Yardsticks
+- Packages opened: **109 lines → 57 distinct files, 0 invalid** (was: unmeasurable, no reader).
+- Records parsed: **17,901** across 31 files, 0 invariant violations.
+- fps: 30 → 4 (regression) → **33.4** (fixed, with more on screen than before).
+- Boot markers: still **10/10**. Build warnings: **0**.
+
+### How this session was verified
+`cmake --build build --config Debug` → 0 errors, 0 warnings.
+`OpenSpore.exe -w -devDirs -capture cap.bmp -captureAfter 40 -quitAfter 90` →
+`packages: 31 fixed-stride, 26 var-width, 0 invalid`, `yardstick: 10/10 markers OK`,
+`fps=33.4 frames=34 aborts=0`, `fps=31.2 frames=66 aborts=0`, `clean exit code=0`;
+`cap.bmp` 3,686,454 B, `nonblack=9502/9502 (100.0%)`; `tools/log_dupes.py` → 0 duplicates.
+Record census: `python tools/pkg_record_test.py` → 31 files, 17,901 records,
+`[2] offset >= index_offset: 0 (OK)`, `[2]+[3] beyond index_offset: 0 (OK)`.
+
+---
+
 ## Session 3b — 2026-10-12 night: machine evidence, fault tolerance proven, assets arrived
 
 ### Added

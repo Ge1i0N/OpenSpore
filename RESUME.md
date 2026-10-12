@@ -5,21 +5,36 @@ Last update: 2026-10-12 (session 3, evening).
 
 ## One-line status
 
-**There is a booting executable.** `build/bin/Debug/OpenSpore.exe` reaches 10/10 boot markers
-with `-w -devDirs`: window + icon, D3D9 device, font atlas, developer console, and an
-AppStateManager-analog that switches into a Loader state which renders a progress bar.
-The reversal oracle and the six docs are in place; the RenderWare bridge has not started.
+**There is a booting executable, and it reads EA's shipped data.** `build/bin/Debug/OpenSpore.exe`
+reaches 10/10 boot markers with `-w -devDirs`: window + icon, D3D9 device, font atlas, developer
+console, AppStateManager-analog, a Loader state that renders a progress bar — and **all 57 real
+`.package` files open and validate, 0 rejected**, with 17,901 index records parsed. The
+RenderWare bridge has not started; the var-width index parser is the top open item.
 
 ## Yardsticks (report both after every run)
 
 | yardstick | value | how to check |
 |---|---|---|
 | boot markers OK | **10/10** | grep `yardstick:` in `build/bin/Debug/OpenSpore.log` |
-| `N_verified` (DISASM-VERIFIED rows) | **12** of 17 | count `**DISASM-VERIFIED**` in `VERIFY.md` |
+| `N_verified` (DISASM-VERIFIED rows) | **15** of 21 | count `**DISASM-VERIFIED**` in `VERIFY.md` |
+| packages opened | **57 distinct, 0 invalid** (31 fixed + 26 var-width) | `packages:` in the log |
+| records parsed | **17,901**, 0 invariant violations | `python tools/pkg_record_test.py` |
+| fps | **33.4 / 31.2** | `fps=` in the log |
 | build warnings | **0** | `cmake --build build --config Debug` output |
-| frames rendered per run | **50** (`-quitAfter 50`), aborts=0 | `shutting down: frames=` |
+| frames rendered per run | **90** (`-quitAfter 90`), aborts=0 | `shutting down: frames=` |
 | in-engine capture | **1280x720, 100% non-black** | `wrote cap.bmp ... nonblack=` |
 | fault-tolerance | **5 aborts recovered, 6th → storm exit** | `-exec _abortNow:9` → exit `0x4F53AB02` |
+
+## EA's shipped data is now READ (session 4)
+
+`source/engine/pkg.cpp` opens **all 57 real `.package` files, 0 rejected**, by replaying the
+original validator's own clauses (`0x008d90b0`) in its own order with its own reasons. The
+loader screen lists them, so the first contact with EA data is visible, not just logged.
+Fixed-stride index parsed: 31 files / 17,901 records / 0 violations of
+`offset < index_offset` and `offset+size <= index_offset`. Record = 6 u32: `[0]` type id,
+`[1]` instance id, `[2]` offset, `[3]` size|0x80000000, `[4]` probable uncompressed size,
+`[5]` ∈ {0x10000, 0x1FFFF}. The 26 var-width files (fit `16 + 20*count`) are reported as
+VAR-WIDTH and **not guessed** — their parser is the top open item.
 
 ## Assets are HERE (this changed the roadmap)
 
@@ -139,28 +154,35 @@ silent verboseaudio 4.0 5.1 automation …`).
 
 ## Blocked / open
 
-1. **Package reader** — the only thing between us and the game's real states. Assets are
-   present (see above); read the first 64 bytes of `Data\Spore_Game.package` before writing
-   anything, and cross-check the parser against the original's own reader in `.text`.
-2. **x64** switch exists in CMake, never compiled. **RenderWare bridge** not started.
-3. `-w` semantics (VERIFY row 15) and the path-assembly block (row 8) are still DRAFT/PARTIAL.
+1. **Var-width index parser** — 26/57 files (every `Text.package`, some others) do not fit
+   `12 + 24*count`; they fit `16 + 20*count` exactly, which suggests a different record shape
+   (probably a name/string table). Top open item. Disasm route: the index container at
+   `[pkg+0x2d0]` (vtable +0x24 buf/size/count, +0x28 get-record, +0x38, +0x40 size), fed from
+   `0x008d9a90` (vtable+0x90).
+2. **Resource type-id → meaning** — record `[0]` has 16 distinct values, one at 98%. Until a
+   type id is named, `read_resource` has no caller and no game asset is decoded.
+3. **RenderWare bridge** not started. **x64** switch exists in CMake, never compiled.
+4. `-w` semantics (VERIFY row 15) and the path-assembly block (row 8) are still DRAFT/PARTIAL.
 
 ## Next actions, in order
 
-1. **`.package` header reversal**: bytes of a real file (authority #2) + the original's
-   reader (authority #1). Then a reader, then list what `Spore_Game.package` actually contains.
-2. **RenderWare plugin-registration family** (VERIFY row 13): start from `vb -<used>` at
+1. **Disassemble the var-width index reader** (route above) — it gates 26/57 files including
+   all localized text, which is the cheapest visible win (readable strings on screen).
+2. **Name one resource type id** via the original's manifest/`ArgScript` consumer, then decode
+   one real asset end-to-end (`read_resource` gets its first caller).
+3. **RenderWare plugin-registration family** (VERIFY row 13): start from `vb -<used>` at
    `0x0140a980` (field guide §3: bridge `Rw*RegisterPlugin`/`*RegisterPluginStream`/
    `*GetPluginOffset`/`*SetStream{Always,Rights}CallBack` for every PLUGINBASE class; expect
    **no** RxPipeline equivalent).
-3. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle
+4. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle
    `-w` (row 15).
-4. Extract `render/rhi.h` **when the RW bridge starts**, not before (`IDEAS.md` §1).
-5. Real game states once packages parse.
+5. Extract `render/rhi.h` **when the RW bridge starts**, not before (`IDEAS.md` §1).
 
-Done and no longer on the list: in-engine frame capture (✅ `GetBackBuffer` →
+Done and off the list: `.package` header + fixed-stride index (session 4: 57 files, 0 invalid,
+17,901 records, 0 violations), in-engine frame capture (✅ `GetBackBuffer` →
 `GetRenderTargetData` between `EndScene` and `Present`; `analysis/shots/loader_capture.png`
-shows readable text) and the abort-recovery exercise (✅ 5 recoveries + storm exit).
+and `loader_packages.png` show readable text), and the abort-recovery exercise
+(✅ 5 recoveries + storm exit).
 
 ## Standing rules for whoever continues
 

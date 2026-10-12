@@ -150,15 +150,32 @@ So the **confirmed** header fields are:
 and `index_offset` is always the *last* thing in the file. That is the invariant the
 validator enforces, and it is what makes a reader testable without any wiki.
 
-**Index records — NOT yet reversed (explicit).** The naive `index_size / count` is not an
-integer (UI 84/3=28, NameGen 348/14=24.86, Text 3936/196=20.08), so records are
-**variable-width** and contain a per-record size. The header loader maps `+0x20`→`[obj+0x328]`
-and `+0x28`→`[obj+0x32c]`, while the validator checks `+0x24`/`+0x2c`/`+0x40` — i.e. the
-loader's cached copies and the validator's offsets are *different fields*, so "count at
-+0x24" and "size at +0x2c" are the validator's truth and the loader's +0x20/+0x28 copies are
-something else (a second count/size pair). Do not guess the record layout from hexdumps:
-the next step is to disassemble the vtable+0x24 parse call that `0x8d9a90` makes on the
-stream object at `[obj+0x2d0]`, which is where the stride and the name/string table live.
+**Index records — layout measured on 17,901 records (31 fixed-stride files), parser
+disasm still pending.** Record = 6 u32 LE:
+| word | meaning | evidence |
+|---|---|---|
+| [0] | **type id** | 16 distinct values over 31 files; one dominates (0x01A510BB, 98%). Constant per resource class |
+| [1] | **instance id** | varies per record; the accessor at `0x008da6f0` copies record words [0],[1],[2] + a WORD at +0xC into its out-param, i.e. (type, instance, offset) is the lookup identity |
+| [2] | **file offset** | `offset < index_offset` in 17,901/17,901 records (zero violations) |
+| [3] | **size \| 0x80000000** | high bit set in 17,901/17,901 — a constant validity flag, not a compression toggle |
+| [4] | uncompressed size (probable) | `[4] >= masked [3]` in 17,901/17,901; unproven, kept raw |
+| [5] | sentinel | exactly two values: 0x10000 (88%), 0x1FFFF (12%) |
+Invariant verified: `offset + size <= index_offset` for every record of every fixed file.
+The 12-byte index prefix = 3 u32: `[0]` = format tag (seen: 6 for NameGen, 7 for UI),
+`[1]` = an id/hash, `[2]` = 0 for NameGen / nonzero for UI.
+
+**Var-width files (26/57, e.g. every `Text.package`)**: `idx_size = 16 + 20*count` fits
+exactly (Text: 16+196*20=3936 ✓). The prefix is longer and the stride shorter — probably
+records without the [4]/[5] pair plus a name table. DO NOT code against this until the
+container-load path is disassembled: the index lives in the object at `[pkg+0x2d0]`
+(container vtable methods +0x24 (buf,size,count) / +0x28 (get record by index) / +0x38 /
++0x40 (size)), fed from `0x008d9a90` (vtable+0x90). That cluster is the next disasm target.
+
+**The header loader's failure branch** (`0x8d9053 je 0x8d905d`): when the validator returns
+false, it calls `0x008dd820` with `[obj+0x20]` — a *fallback* parser that reads a 17-byte
+header and matches the 4-byte magic `{0x7f,0x9d,0x88,0xec}` against the stream (plus a
+compare against the dword at `0x01436b20`). All 57 shipped files pass the DBPF validator,
+so this path is dead for our data; recorded so nobody mistakes it for the main parser.
 
 ## Beta PDB facts (level 1: the PDB's own bytes)
 

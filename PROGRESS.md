@@ -4,9 +4,16 @@ Status legend: ✅ done+verified · 🚧 partial · ❌ not started · ⛔ block
 
 ## Yardstick
 
-`N_verified` = rows in `VERIFY.md` at status `DISASM-VERIFIED`. Currently **3**.
-Runtime yardstick (now that a build boots): **boot-chain markers OK = 10/10**.
-Both are monotonic and machine-checkable; report both after every run.
+`N_verified` = rows in `VERIFY.md` at status `DISASM-VERIFIED`. Currently **15** (rows 1-12,
+17-19, 21). Runtime yardsticks, all machine-checkable, report after every run:
+
+| yardstick | value | how |
+|---|---|---|
+| boot markers OK | **10/10** | `yardstick:` in `OpenSpore.log` |
+| packages opened | **57 distinct, 0 invalid** (31 fixed + 26 var-width) | `packages:` |
+| records parsed | **17,901**, 0 invariant violations | `python tools/pkg_record_test.py` |
+| fps | **33.4 / 31.2** | `fps=` |
+| build warnings | **0** | `cmake --build` output |
 
 ## Boot chain (our executable)
 
@@ -30,8 +37,12 @@ Both are monotonic and machine-checkable; report both after every run.
 | Step | Status | Note |
 |---|---|---|
 | Locate `Data/`, `BaseData/`, `Locale/`, `Config/`, `UserData/` | ✅ | our interpretation, from the reversed prefixes |
-| Assets present | ✅ | user dropped ~5.7 GB: `Data\` (base game, 7 `.package`) + `DataEP1\` (GA, 5 `.package` + `Config`). **Extension is `.package`, not `.package.big`** |
-| Read `.package` | ❌ **now the top priority** | format must come from the first bytes of a real file (authority #2) cross-checked against the original's reader (authority #1) |
+| Assets present | ✅ | user dropped ~5.7 GB: `Data\` (base game, 7 `.package`) + `DataEP1\` (GA, 5 `.package` + `Config`) + 17 locale dirs. **Extension is `.package`, not `.package.big`** |
+| Open + validate `.package` header | ✅ | **57 distinct files, 0 rejected.** Reader replays the validator's own clauses (`0x008d90b0`) in order, with its reasons |
+| Parse fixed-stride index | ✅ | 31 files / 17,901 records, 0 invariant violations (`offset < idx_off` and `offset+size <= idx_off`) |
+| Read a resource's bytes | ✅ built, ⏳ unexercised | `Package::read_resource` is bounds-clamped; nothing calls it until a type id has meaning |
+| Parse var-width index | ❌ | 26 files fit `16 + 20*count` exactly; reported VAR-WIDTH, never guessed. Next disasm: index container at `[pkg+0x2d0]` via `0x008d9a90` |
+| Resource type-id → meaning | ❌ | record `[0]` has 16 distinct values, one at 98%; needs the original's manifest/`ArgScript` side |
 | RenderWare plugin registration family | ❌ | field guide §3; start from `vb -<used>` at 0x0140a980 |
 | RW stream reader (`RpClumpStreamRead`) | ❌ | blocked on the above |
 | `MoviePlayer` / `.bik` splash | ❌ | field guide: stub the intro path, keep windowed device creation ours |
@@ -46,11 +57,11 @@ Both are monotonic and machine-checkable; report both after every run.
 
 | Item | Status |
 |---|---|
-| Static-analysis toolchain (`tools/*.py`) | ✅ 12 tools, all evidence-producing |
+| Static-analysis toolchain (`tools/*.py`) | ✅ 18 tools, all evidence-producing |
 | Build: CMake + MSVC, x86 Debug, icon, version resource | ✅ clean build, 0 warnings |
 | x64 build | ❌ CMake has an `OS_ARCH` switch; never exercised |
 | Crash/stack harness | ✅ proven live (symbolised `file:line` stack from a real throw) |
-| Abort-resilient frame loop (`diag::run_guarded`) | ✅ built, **not yet exercised** — needs a deliberate abort test |
+| Abort-resilient frame loop (`diag::run_guarded`) | ✅ **exercised**: 5 aborts recovered inside the guard, 6th in 1 s → storm exit `0x4F53AB02` |
 | Log consolidation (per-site ledger) | ✅ live; boot markers moved to `LOG_ONCE` after the ledger swallowed 9/10 |
 | Screenshot harness | 🚧 `tools/shot.ps1` works for GDI windows, **useless for D3D9 content** (PrintWindow returns all-black) |
 | In-engine frame capture | ✅ `GetBackBuffer(0,0,MONO)` → `GetRenderTargetData` → SYSTEMMEM → `LockRect` → 32bpp BMP, executed **between `EndScene` and `Present`**. `-capture <path> -captureAfter <n>`, and the `capture <path>` console verb. Log reports ink coverage (`nonblack=9502/9502`), and `analysis/shots/loader_capture.png` shows readable text |

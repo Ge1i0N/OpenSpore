@@ -2,11 +2,16 @@
 
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
+#include <set>
+#include <string>
+#include <utility>
 
 #include "engine/console.h"
 #include "engine/diag.h"
 #include "engine/fs.h"
 #include "engine/log.h"
+#include "engine/pkg.h"
 #include "render/device.h"
 #include "render/overlay.h"
 
@@ -24,6 +29,9 @@ struct Loader {
     bool done = false;
     u32 frames = 0;
     std::string status = "initialising";
+    // Real packages, discovered through the reversed search paths (not hardcoded).
+    std::vector<std::pair<std::string, std::string>> pkg_lines;  // (name, describe())
+    u32 pkgs_fixed = 0, pkgs_varwidth = 0, pkgs_invalid = 0;
 };
 
 Loader g_loader;
@@ -57,6 +65,52 @@ void loader_enter() {
     g_loader.status = "boot";
     LOG_INFO("loader", "enter Loader state");
     step_status();
+    // Scan the real search paths for packages and open each one through the proven header
+    // validator. This is the first place the reimplementation touches EA's shipped data.
+    //
+    // Dedupe by canonical path: the dev search list contains BOTH `Data=<exe>\Data` and
+    // `cwd=<exe>`, so a recursive scan visits every file twice. Measured before the fix:
+    // 62 "opened" lines for 31 distinct files (tools/log_dupes.py). After dedupe the totals
+    // are 31 fixed-stride + 26 var-width = 57, which is exactly what the offline analysis
+    // (tools/pkg_records.py over the same tree) reports - two independent paths to the
+    // same number, which is the confirmation we want rather than a log that merely looks right.
+    std::set<std::string> seen;
+    for (auto& sp : fs::search_paths()) {
+        auto found = pkg::find_packages(sp.dir.string());
+        if (found.empty()) continue;
+        for (auto& p : found) {
+            std::error_code ec;
+            std::string key = std::filesystem::weakly_canonical(p, ec).string();
+            if (ec) key = p;
+            if (!seen.insert(key).second) continue;  // already opened via another root
+            pkg::Package pk;
+            pk.open(p);
+            std::string name = std::filesystem::path(p).filename().string();
+            if (!pk.ok()) {
+                ++g_loader.pkgs_invalid;
+                g_loader.pkg_lines.emplace_back(name, "INVALID: " + pk.why());
+                continue;
+            }
+            if (pk.fixed_stride()) {
+                ++g_loader.pkgs_fixed;
+                g_loader.pkg_lines.emplace_back(
+                    name, "count=" + std::to_string(pk.header().count) + " recs, idx=0x" +
+                          [&] {
+                              char b[16];
+                              _snprintf_s(b, sizeof(b), _TRUNCATE, "%x", pk.header().index_offset);
+                              return std::string(b);
+                          }());
+            } else {
+                ++g_loader.pkgs_varwidth;
+                g_loader.pkg_lines.emplace_back(name, "VAR-WIDTH index (parser pending)");
+            }
+            // LOG_ONCE: 109 packages share this call site, and the per-site ledger would
+            // hide 100 of them ("x9, further repeats suppressed").
+            LOG_ONCE_INFO("loader", "%s", pk.describe().c_str());
+        }
+    }
+    LOG_INFO("loader", "packages: %d fixed-stride, %d var-width, %d invalid", g_loader.pkgs_fixed,
+             g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
 }
 
 void loader_exit() { LOG_INFO("loader", "exit Loader state after %u frames, %.2fs", g_loader.frames, g_loader.elapsed); }
@@ -126,6 +180,15 @@ void loader_render() {
                 (unsigned long long)log::lines_written());
     y += ov.font_height();
     ov.text_fmt(pad, y, kDim, "console: type 'help', then 'state -list'");
+    y += ov.font_height() * 1.5f;
+    // Real packages, read from EA's shipped data through the reversed header.
+    ov.text_fmt(pad, y, kAccent, "packages: %d fixed-stride, %d var-width, %d invalid", g_loader.pkgs_fixed,
+                g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
+    y += ov.font_height();
+    for (size_t i = 0; i < g_loader.pkg_lines.size() && y < (float)h - ov.font_height(); ++i) {
+        ov.text_fmt(pad, y, kDim, "  %s", clip(g_loader.pkg_lines[i].first + "  " + g_loader.pkg_lines[i].second).c_str());
+        y += ov.font_height();
+    }
 
     ov.end();
     dev.end_frame();

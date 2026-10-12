@@ -113,6 +113,7 @@ set(OS_SOURCES
   source/engine/cmdline.cpp
   source/engine/fs.cpp
   source/engine/console.cpp
+  source/engine/pkg.cpp
   source/render/device.cpp
   source/render/overlay.cpp
   source/states/statemgr.cpp

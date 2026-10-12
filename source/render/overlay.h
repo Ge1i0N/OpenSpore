@@ -55,7 +55,7 @@ private:
     int m_cols = 16;    // atlas grid width in cells
     int m_advance = 8;  // horizontal pen step, px
     int m_screen_w = 0, m_screen_h = 0;
-    Vert m_verts[1024];
+    Vert m_verts[4096];
     int m_vcount = 0;
     bool m_flat_drawn = false;  // a rect() reset the states; text must re-arm
 };
