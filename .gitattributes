@@ -1,0 +1,20 @@
+# Normalize line endings once, so the repo does not accumulate a CRLF diff storm on
+# every touch (git was warning "LF will be replaced by CRLF" on all 50+ files at first add).
+* text=auto eol=crlf
+
+# Evidence and source that must never be re-encoded
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.bmp  binary
+*.pdb  binary
+*.exe  binary
+*.dll  binary
+*.lib  binary
+*.zip  binary
+
+# Python tooling: keep as-is, CRLF is fine on Windows but do not let a filter touch it
+*.py text eol=crlf
+
+# Markdown docs are the durable evidence: never let a diff appear from whitespace alone
+*.md text eol=crlf

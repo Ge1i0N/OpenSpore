@@ -1,0 +1,2 @@
+0x01720000	a	nvapi.dll
+0x0172000a	a	nvapi_QueryInterface

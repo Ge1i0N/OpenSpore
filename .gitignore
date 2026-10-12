@@ -426,3 +426,31 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+
+# OpenSpore related
+
+# Reference binaries/PDBs the reversal works against (large, third-party, never committed).
+# Only the analysis/*.md evidence and tools/*.py derived from them are tracked.
+refs/
+
+# CMake build tree (includes build/bin/<Config>/OpenSpore.exe + .pdb + runtime logs).
+build/
+
+# Runtime artifacts, wherever they land (the app writes them into its cwd).
+OpenSpore.log
+OpenSpore.crash.log
+*.crash.log
+osr_capture_*.bmp
+
+# Python tooling caches
+__pycache__/
+*.py[cod]
+
+# Local scratch that must never be mistaken for evidence
+scratch/
+tmp/
+*.bak
+
+# NOTE: analysis/ IS tracked (generated evidence, incl. analysis/strings/*.txt and
+# analysis/shots/*.png). assets/ IS tracked (our own icon). Do not widen the patterns above
+# to cover either.
