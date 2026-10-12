@@ -34,6 +34,10 @@ no disasm yet) · `UNVERIFIED-DRAFT` (a drafted body, by definition not a revers
 | 15 | `-w` (windowed) handling | raw-argv parser at `0x00e20b5a` (sole `GetCommandLineA` consumer) | `screenWindowed` 0x014111d0 (**no** immediate .text ref) | **DRAFT** — our `-w` is our own convention | `cmdline.cpp` |
 | 16 | Package/asset format | — | `package.big`, `Spore Baked Texture` 0x013ef048, `Created by Spore Editor` 0x013ef05c | **UNVERIFIED-DRAFT** | ⛔ blocked on assets |
 | 17 | Beta PDB module topology | — | `c:\BuildAgent\cm4-build312-spore\CMBuild\obj\Win32\debugrelease\SPGonzago\SPGonzagoPCH.obj` | **DISASM-VERIFIED** (ANSI in module streams) | `analysis/pdb_topology.md` (9 projects; `SPGonzago` 348 paths) |
+| 18 | **DBPF magic is an immediate, not a string** | `0x008d90d6` (`cmp dword [ecx],0x46504244`) | none — "DBPF" appears 0 times in `.rdata`/`.text` | **DISASM-VERIFIED** (`tools/find_imm.py --ascii DBPF` → 2 sites) | `tools/pkg_records.py` reads it from the files |
+| 19 | DBPF header = 0x60 bytes; fields +0x00 magic, +0x04 ver≤3, +0x24 count<0x07FFFFFF, +0x2c index size, +0x3c non-zero, +0x40 index offset | validator `0x008d90b0`; loader `0x008d8f70` (`cmp eax,0x60`) | — | **DISASM-VERIFIED** (quoted in MEMORY) + **57/57 files**: `idx_off+idx_size == filesize` | `source/engine/pkg.*` (pending) |
+| 20 | Index = 12-byte prefix + `count` × 24-byte records (fixed-width subset) | parser reached from `0x008d9a90` (vtable+0x90) | — | **DISASM-PARTIAL**: stride proven on **31/57** files by `12+24*count == idx_size`; 25 files (Text/NameGeneration/etc.) carry variable-width records and need the record parser disassembled | — |
+| 21 | Package class vtable | `0x01436938` (33+ slots; +0x68 loader, +0x74 validator, +0x80 getsize, +0x90 index loader, +0x34 resource accessor) | — | **DISASM-VERIFIED** (walked from the `0x8d9320` pointer) | roadmap for `pkg.*` |
 
 ## Ordered next actions
 

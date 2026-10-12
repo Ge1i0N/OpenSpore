@@ -1,6 +1,30 @@
 # MEMORY — durable facts, layouts, traps
 
-Authority order (from `ai-brief-and-commands.md`, memorised): 1. disassembly of the original
+## TOOL PRIORITY (user rule, 2026-10-12 — this overrides habit, follow it first)
+
+**Disassembly is THE PRIMARY tool.** Study the data files (hexdumps, header diffs, entropy)
+**only when the disassembly does not answer the question** — never as the first move.
+
+Concretely, for every "how does X work?" the order is now:
+1. `objdump` the oracle (`refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe`) for the function
+   that implements X. Find it by: string xref (`tools/xref.py`), immediate-magic xref
+   (`tools/find_imm.py` — for format magics/hashes there is often NO string), import
+   consumer (`tools/arg_vocab.py` pattern), or the caller chain of something already known.
+2. Read the disassembly until the algorithm is clear, quoting instructions in the comment.
+3. **Only if** the code is ambiguous, stripped, or data-dependent in a way disasm cannot
+   resolve → look at the shipped data files (`tools/hd.py`, `tools/pkg_headers.py`) to
+   confirm which branch the real bytes take.
+4. Data-driven inference (entropy, correlation across files) is a *tie-breaker and a
+   sanity check*, not a discovery method. It produced useful numbers this project, but
+   every time it led, we then had to spend builds guessing API shapes — see the trap list.
+
+Why the rule exists: the data-first detour in session 3b cost several compiler errors
+(`GetTextMetricW`, `ETO_CLAMPED`, `GetSurfaceDesc`, `GetFrontBufferData` under DISCARD) that
+one grep of the right header, or reading the original's own calls, would have prevented.
+The original binary already solved every one of those problems; reading its answer is faster
+than deriving our own and being wrong.
+
+## Authority order (from `ai-brief-and-commands.md`, memorised): 1. disassembly of the original
 binary (+ its PDB, + its `.data`) → 2. its shipped data files → 3. other reimplementations of
 the same *engine* (approach only) → 4. wikis/SDK headers (names/types only) → 5. my reasoning.
 Everything below says which level it came from.
@@ -92,6 +116,49 @@ Sibling keys: `dataDir` 0x01413cfc, `userDataDir` 0x01413c74. Path prefixes in t
 `UserData/` `BaseData/` `Locale/` `Config/` `Data/` `./` `../UserData/` `BaseData`.
 
 `-w` (windowed) is **not yet located** — it is not among these keys. Open task, see VERIFY.md.
+
+## DBPF package format (level 1: disasm of the oracle; level 2: 57 real files)
+
+Found by `tools/find_imm.py --ascii DBPF` (the magic is an **immediate**, not a string —
+there is no "DBPF" anywhere in `.rdata`), then confirmed field-by-field.
+
+**Reader cluster** (all in one class, vtable at `0x01436938`, 33+ slots):
+| address | slot | role |
+|---|---|---|
+| `0x008d8f70` | vtable+0x68 | header loader: seeks, reads `0x60` bytes, `cmp eax,0x60` (must read exactly 96), maps fields |
+| `0x008d90b0` | vtable+0x74 | header **validator** |
+| `0x008d8bf0` | — | the byte reader (`read(buf,size)`), 3 direct callers |
+| `0x008d9a90` | vtable+0x90 | index loader: reads `[obj+0x324]`(offset) + `[obj+0x32c]`(size) via `0x8dc4b0`, then parses |
+| `0x008d9320` | vtable+0x80 | get-size |
+| `0x008da6f0` | vtable+0x34 | the resource accessor |
+
+**Header = 0x60 (96) bytes.** Validator `0x8d90ae` (quoted):
+```
+8d90d6: cmp DWORD PTR [ecx],0x46504244   ; "DBPF"
+8d90de: cmp DWORD PTR [ecx+0x4],0x3      ; version <= 3   (ja = reject)
+8d90e4: cmp DWORD PTR [ecx+0x24],0x7ffffff ; count < 0x07FFFFFF
+8d90ed: mov edx,[ecx+0x40] / cmp edx,eax / jae   ; index_offset < filesize
+8d90f4: mov esi,[ecx+0x2c] / add esi,edx / cmp esi,eax / ja  ; index_size + index_offset <= filesize
+8d90fd: cmp DWORD PTR [ecx+0x3c],0x0 / je       ; field +0x3c must be non-zero
+```
+So the **confirmed** header fields are:
+`+0x00` magic "DBPF" · `+0x04` version (≤3; all 57 files are 3) · `+0x24` entry count ·
+`+0x2c` index byte size · `+0x3c` non-zero (unknown meaning) · `+0x40` index file offset.
+
+**Data confirmation (authority #2, `tools/pkg_records.py`):** across **all 57** shipped
+`.package` files, `index_offset + index_size == filesize` exactly (`tail = +0` for 57/57),
+and `index_offset` is always the *last* thing in the file. That is the invariant the
+validator enforces, and it is what makes a reader testable without any wiki.
+
+**Index records — NOT yet reversed (explicit).** The naive `index_size / count` is not an
+integer (UI 84/3=28, NameGen 348/14=24.86, Text 3936/196=20.08), so records are
+**variable-width** and contain a per-record size. The header loader maps `+0x20`→`[obj+0x328]`
+and `+0x28`→`[obj+0x32c]`, while the validator checks `+0x24`/`+0x2c`/`+0x40` — i.e. the
+loader's cached copies and the validator's offsets are *different fields*, so "count at
++0x24" and "size at +0x2c" are the validator's truth and the loader's +0x20/+0x28 copies are
+something else (a second count/size pair). Do not guess the record layout from hexdumps:
+the next step is to disassemble the vtable+0x24 parse call that `0x8d9a90` makes on the
+stream object at `[obj+0x2d0]`, which is where the stride and the name/string table live.
 
 ## Beta PDB facts (level 1: the PDB's own bytes)
 
