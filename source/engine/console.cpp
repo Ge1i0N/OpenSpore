@@ -187,6 +187,8 @@ bool exec_line(const std::string& line, std::string& out_result) {
     //   -exec "_abortNow 9"      needs the shell to survive PowerShell -> CreateProcess
     //                            (it does not: the value arrived as '"_abortNow 9\')
     //   -exec _abortNow:9        needs nothing.
+    // Multiple arguments are separated by ',' AFTER the first ':' (e.g. pkg:-rec,0,3),
+    // because ':' cannot be reused: resource paths legitimately contain it (D:\x.bmp).
     // Splitting on the FIRST colon only when the prefix is a registered command keeps
     // `capture:D:\shots\x.bmp` working (prefix `capture` is a command, the rest is the path).
     {
@@ -207,8 +209,15 @@ bool exec_line(const std::string& line, std::string& out_result) {
                 std::string rest = c.args[0].substr(colon + 1);
                 c.args.erase(c.args.begin());
                 c.args.insert(c.args.begin(), head);
-                // the remainder becomes argv[1]; existing argv shifts after it
-                if (!rest.empty()) c.args.insert(c.args.begin() + 1, rest);
+                size_t pos = 0;
+                size_t at = 1;
+                while (pos <= rest.size()) {
+                    size_t comma = rest.find(',', pos);
+                    std::string a = (comma == std::string::npos) ? rest.substr(pos) : rest.substr(pos, comma - pos);
+                    pos = (comma == std::string::npos) ? rest.size() + 1 : comma + 1;
+                    if (a.empty()) continue;
+                    c.args.insert(c.args.begin() + at++, a);
+                }
             }
         }
     }

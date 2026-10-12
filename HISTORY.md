@@ -5,6 +5,96 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ---
 
+## Session 5 — 2026-10-13 00:00: upstream RE knowledge adopted, tested, and two of our bugs fixed
+
+Started from: session 4 (57 packages opening, but only 31 with a parsed index; `sentinel` and
+`[1]` unexplained; FNV variant unverified).
+Ended with: **all 57 packages' indexes parsed**, a corrected hash, a corrected index model, the
+first README, and our own upstream copy.
+
+### The user pointed us at `E:\_DPT_Projects_E\_Harness\SporeMaster3`
+Another team's from-scratch RE of the same game. Per the authority order that is **level 4**
+(hints and names, never values), so nothing was copied blind: every claim was tested against
+either the oracle's disassembly (level 1) or our 57 shipped packages (level 2) first.
+
+Copied into the repo (tracked, ~9.8 MB, `upstream/SporeMaster3/`): 21 format docs, the four
+registries (`reg_type` 593 lines, `reg_file` 2.8 MB, `reg_property`, `reg_simulator`),
+`resources.csv` (6,005 resource rows) and the beta `KeyMap.txt`. Deliberately NOT copied:
+their 20 MB of hash-guesser dictionaries — tooling, not format knowledge.
+
+### What their model got right (adopted, and it fixed our code)
+* **Index dword[0] is a shared-field bit mask**, not a kind selector: bit0 `type`, bit1
+  `group`, bit2 `unknown` are hoisted into the prefix when set. Therefore
+  `prefix = 4 + 4*popcount(K)`, `stride = 32 - 4*popcount(K)`, and a full record is 32 bytes.
+  Our previous `prefix = 4+K / stride = 32-K` fitted K=4 and K=7 **but not K=6** (it predicted
+  10 where the measured prefix is 12). This is the correction that made 26 more packages parse.
+* **The last u32 is `compression:u16 + flags:u16`**, not a magic sentinel. Split, the two
+  observed values explain themselves completely, and we verified the split by probing the
+  payload's first bytes at every record offset across all 57 packages:
+  `0xFFFF` → starts `10 FB` in 100% of 98,407 samples with `packed < mem`;
+  `0x0000` → starts `10 FB` in 0% of 52,538 samples with `packed == mem`.
+  So `0x80000000` on the size word is a validity bit and **compression is what toggles** —
+  which also disproves our own session-4 note that the resource we dumped was plaintext.
+* Their `resources.csv` column model (`type,group,instance,compressed,packedSize,memSize`)
+  matched our records exactly once the u32 was split.
+
+### What they got wrong (NOT adopted, recorded in IDEAS.md §5)
+* **"RefPack size is little-endian"** — it is BIG-endian. `10 fb 00 08 48` → BE = 2120 = that
+  record's `memSize`; LE = 4,720,640 for a 1371-byte payload. Confirmed independently in the
+  oracle: `0x0092ccdc` reads the length through the BE helper `0x0092c4e0`.
+* **"A registry line without a hash means ID = FNV(name)"** — false for type ids: 6/6 pairs
+  from `reg_type.txt` (`rw4`=0x2f4e681b, `prop`, `soundProp`, `gmdl`, `plt`,
+  `creature_traits`) fail to match FNV-1 or FNV-1a in raw/lower/upper. Type ids are assigned.
+  (Their own hash-guesser doc admits ~9% Top-1 accuracy, so name-by-hash is weak; KeyMap is
+  the real answer.)
+
+### Two real bugs of ours, found while checking them
+1. **Our FNV was the wrong variant.** `common.h` implemented FNV-1a with uppercase folding.
+   The oracle's hash at `0x00932e50` is `imul edi,edi,0x1000193` **then** `xor edi,eax` — FNV-1
+   — and arg3 selects folding via the CRT: mode 0 raw, 1 `tolower` (IAT slot 0x013cc2ec),
+   2 `toupper` (0x013cc500), both verified with pefile. The state-registration site
+   `0x007e40f2` pushes `(name, 0x811c9dc5, 1)`, so a game state id is **FNV-1 + tolower**.
+   `Loader` was `0x69cdcb22`, now `0xd7d04c04`. Silent by construction: ids only ever compare
+   to other ids, so our own `state -list` and `goto` kept working throughout.
+2. **`pkg:-list` said 109 while the Loader said 57** for the same tree. The session-4 dedupe
+   lived only in the Loader. Moved into one `all_packages()` helper shared by every `pkg:`
+   subcommand. Two views of one dataset disagreeing by 2x is exactly the kind of thing a
+   yardstick is supposed to catch; now both say 57.
+
+### Also this session
+* `tools/refpack.py` written, and left explicitly **UNVERIFIED**: its command table came from
+  the third-party doc, and it still faults on a real stream (offset 522 at output length 20).
+  The verified next step is recorded in IDEAS.md §6 — disassemble `0x0092c5b0`, not guess again.
+* RefPack entry points confirmed in the oracle: `0x0092ccdc` (header: tests bit 0x8000 to pick
+  a 3- or 4-byte BE length), `0x0092cd40` (detector: `bswap(word) & 0x1FFF == 0x10FB`),
+  `0x0092c4e0` (BE reader, exactly one caller: `0x92cd05`).
+* **First README.md**, with `analysis/shots/hero.png` (in-engine capture of the Loader listing
+  all 57 real packages) as the proof-of-concept image.
+* `IDEAS.md` restructured after a bad edit of mine lost the §5 heading and put items 16-21
+  inside §4; §6 (open questions, precisely stated) added so the next disasm run is aimed.
+
+### Measurements
+* Packages with a **parsed index**: 31 → **57 / 57** (0 kind-unknown, 0 invalid).
+* Records: 17,901 → **150,945**, still 0 bounds violations, 0 `usize<size` violations.
+* State id `Loader`: `0x69cdcb22` (wrong variant) → **`0xd7d04c04`** (matches the original).
+* `pkg:-list` and the Loader agree on **57** (was 109 vs 57).
+* Build: 0 errors, 0 warnings. Exit code 0 on every run this session.
+
+### How this session was verified
+`cmake --build build --config Debug` → 0 errors, 0 warnings.
+`OpenSpore.exe -w -devDirs -exec pkg:-list -exec pkg:-hdr,0 -exec pkg:-rec,0,3
+ -exec pkg:-dump,0,3,res0.bin -quitAfter 12` →
+`packages: 57 index-parsed, 0 kind-unknown, 0 invalid`, `-> packages (57):`,
+`rec[3]: type=0x024a0e52 inst=0x65e81724 off=0x00004c11 packed=1371 mem=2120 REFPACK
+flags=0x0001`, `dumped 1371 bytes -> res0.bin` (file present, 1371 B), `clean exit code=0`.
+`-exec state:-list` → `Loader [0xd7d04c04] <- current`.
+Record census: `python tools/pkg_kinds.py` → kinds {6:30, 7:18, 4:9}, 150,945 records,
+0 formula / 0 bounds / 0 usize violations, sentinels {131071: 98407, 65536: 52538}.
+Upstream claims: the BE/LE and FNV tests are reproducible with the snippets in MEMORY.md
+"Upstream knowledge" and IDEAS.md §5 items 19-20.
+
+---
+
 ## Session 4 — 2026-10-12 late night: first contact with EA's shipped data
 
 Started from: session 3b (assets arrived, DBPF reader located by disasm).

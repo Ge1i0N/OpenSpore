@@ -5,13 +5,17 @@
 #include <cstdio>
 #include <cstdlib>  // abort(), for the deliberate fault-tolerance probe
 #include <cstring>
+#include <filesystem>
+#include <set>
 #include <string>
+#include <vector>
 
 #include "engine/cmdline.h"
 #include "engine/console.h"
 #include "engine/diag.h"
 #include "engine/fs.h"
 #include "engine/log.h"
+#include "engine/pkg.h"
 #include "render/device.h"
 #include "render/overlay.h"
 #include "states/statemgr.h"
@@ -330,6 +334,83 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                       // Same deferral as the -capture launch key: poll() runs outside the scene.
                       render::device().request_capture(p.c_str());
                       return "capture scheduled for the next frame -> " + p;
+                  }});
+    console::reg({"pkg", "Inspect a .package: list, header, records, or dump one resource.",
+                  "-list | -hdr <i> | -rec <i> <n> | -dump <i> <n> <out.bin>",
+                  [](const console::CmdContext& c) -> std::string {
+                      if (c.args.size() < 2) return "usage: pkg -list | -hdr <i> | -rec <i> <n> | -dump <i> <n> <file>";
+                      const std::string& sub = c.args[1];
+                      // One helper for the whole command, deduplicating by canonical path.
+                      // Without the dedupe this verb reported 109 packages while the Loader
+                      // reported 57 for the same tree (the dev search list has both
+                      // Data=<exe>\Data and cwd=<exe>, so a recursive scan visits every
+                      // file twice). Two views of one dataset must not disagree by 2x.
+                      auto all_packages = []() {
+                          std::vector<std::string> out;
+                          std::set<std::string> seen;
+                          for (auto& sp : fs::search_paths()) {
+                              for (auto& p : pkg::find_packages(sp.dir.string())) {
+                                  std::error_code ec;
+                                  std::string key = std::filesystem::weakly_canonical(p, ec).string();
+                                  if (ec) key = p;
+                                  if (seen.insert(key).second) out.push_back(p);
+                              }
+                          }
+                          return out;
+                      };
+                      auto resolve_idx = [&](int i, std::string& path) -> bool {
+                          auto all = all_packages();
+                          if (i < 0 || i >= (int)all.size()) return false;
+                          path = all[(size_t)i];
+                          return true;
+                      };
+                      if (sub == "-list") {
+                          auto all = all_packages();
+                          std::string s = "packages (" + std::to_string(all.size()) + "):";
+                          for (size_t i = 0; i < all.size(); ++i) s += "\n  [" + std::to_string(i) + "] " + all[i];
+                          return s;
+                      }
+                      if (c.args.size() < 3) return "pkg: " + sub + " needs an index";
+                      int i = atoi(c.args[2].c_str());
+                      std::string path;
+                      if (!resolve_idx(i, path)) return "pkg: index out of range";
+                      pkg::Package pk;
+                      if (!pk.open(path)) return "pkg: cannot open/validate " + path + ": " + pk.why();
+                      if (sub == "-hdr") {
+                          const auto& h = pk.header();
+                          char b[512];
+                          _snprintf_s(b, sizeof(b), _TRUNCATE,
+                                      "kind=%u ver=%u count=%u idx_size=%u idx_off=0x%x +0x3c=%u filesize=%llu records=%zu",
+                                      h.kind, h.version, h.count, h.index_size, h.index_offset, h.field_3c,
+                                      (unsigned long long)h.file_size, pk.records().size());
+                          return path + "\n  " + b;
+                      }
+                      if (sub == "-rec") {
+                          if (c.args.size() < 4) return "pkg: -rec needs a record number";
+                          u32 n = (u32)atoi(c.args[3].c_str());
+                          if (n >= pk.records().size()) return "pkg: record index out of range";
+                          const auto& r = pk.records()[n];
+                          char b[512];
+                          _snprintf_s(
+                              b, sizeof(b), _TRUNCATE,
+                              "rec[%u]: type=0x%08x inst=0x%08x off=0x%08x packed=%u mem=%u %s flags=0x%04x", n,
+                              r.type(), r.instance(), r.offset(), r.packed_size(), r.mem_size(),
+                              r.refpacked() ? "REFPACK" : "raw", r.flags());
+                          return b;
+                      }
+                      if (sub == "-dump") {
+                          if (c.args.size() < 5) return "pkg: -dump needs <record> <outfile>";
+                          u32 n = (u32)atoi(c.args[3].c_str());
+                          if (n >= pk.records().size()) return "pkg: record index out of range";
+                          std::vector<u8> bytes;
+                          if (!pk.read_resource(n, bytes)) return "pkg: read_resource failed for record " + std::to_string(n);
+                          FILE* fo = nullptr;
+                          if (fopen_s(&fo, c.args[4].c_str(), "wb") != 0 || !fo) return "pkg: cannot write " + c.args[4];
+                          fwrite(bytes.data(), 1, bytes.size(), fo);
+                          fclose(fo);
+                          return "dumped " + std::to_string(bytes.size()) + " bytes -> " + c.args[4];
+                      }
+                      return "pkg: unknown subcommand " + sub;
                   }});
     console::reg({"_abortNow",
                   "Deliberately abort() inside the guarded frame to prove run_guarded recovers.",

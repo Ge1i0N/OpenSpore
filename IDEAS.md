@@ -128,6 +128,52 @@ The D3D9 backend stays the regression oracle: any GL output is diffed against it
 
 ## 5. ⚠️ Disproven — do not repeat
 
+16. **"The index kind dword is a format selector (`4`/`6`/`7`), with prefix = 4+K and
+    stride = 32-K."** Half wrong. It is a **shared-field bit mask** (bit0 type, bit1 group,
+    bit2 unknown), so `prefix = 4 + 4*popcount(K)` and `stride = 32 - 4*popcount(K)`. The
+    `4+K` form coincidentally fits K=4 (8) and K=7 (16) but gives 10 for K=6 where the
+    measured prefix is 12. Adopted from the SporeMaster3 model and then confirmed on our own
+    data (57/57 files, 150,945 records).
+17. **"The record's last u32 is a sentinel with two values (0x10000 / 0x1FFFF)."** It is not
+    one field: it is `compression:u16` + `flags:u16`. Split, it explains itself completely -
+    0xFFFF = RefPack, 0x0000 = raw, flags always 0x0001. Verified by probing the payload's
+    first bytes at every record offset: 0xFFFF → `10 FB` in 100% of 98,407 samples with
+    `packed < mem`; 0x0000 → `10 FB` in 0% of 52,538 samples with `packed == mem`.
+18. **"K=4 word[1] is a float."** Disproved: 69,365 of 130,079 values decode to implausible
+    magnitudes (range -62.4..796.0, only 121 distinct). It is the `group` field, which is
+    per-record exactly when kind bit 1 is clear - the bit-mask model predicts this with no
+    residual.
+19. **"RefPack's 3-byte size field is little-endian" (SporeMaster3 docs, DBPF_FORMAT.md §5).**
+    Wrong, and copying it would have broken our decoder. It is BIG-endian: `10 fb 00 08 48`
+    → 2120, which equals that record's `memSize`; LE would give 4,720,640 for a 1371-byte
+    payload. Independently confirmed in the oracle: `0x0092ccdc` reads the length through the
+    big-endian helper `0x0092c4e0` (which does `shl 8 / or` twice for size 3, i.e. BE).
+20. **"A registry line without a hash means ID = FNV(name)" (same doc, §6).** Wrong for type
+    ids: 6/6 pairs from `reg_type.txt` (`rw4`=0x2f4e681b, `prop`, `soundProp`, `gmdl`, `plt`,
+    `creature_traits`) fail to match FNV-1 or FNV-1a in raw/lower/upper form. Type ids are
+    assigned, not derived. (Instance/group names may still be FNV - untested, and the
+    doc's own hash-guesser section says their guesser is only ~9% correct, so treat the whole
+    name-by-hash idea as weak until the KeyMap is consulted instead.)
+21. **"Our FNV-1a-uppercase state hash is the game's."** It was not. The original is FNV-1
+    (multiply before xor, `0x00932e8a`) and the registration site passes mode=1 = `tolower`
+    (`0x007e40f2`). `Loader` was 0x69cdcb22, correct is 0xd7d04c04. Silent bug by design:
+    ids only ever compare against other ids.
+
+## 6. Open questions, precisely stated (so the next disasm run is aimed, not wandering)
+
+- **RefPack bit-level decoder.** Confirmed entry points in the oracle: `0x0092ccdc` (header:
+  swaps the magic word, tests bit `0x8000` to choose a 3- or 4-byte big-endian length, then
+  calls `0x0092c5b0`), `0x0092cd40` (detector: `bswap(word) & 0x1FFF == 0x10FB`),
+  `0x0092c4e0` (1/2/3/4-byte big-endian reader, only 1 caller: `0x92cd05`).
+  `tools/refpack.py` is **UNVERIFIED** and still faults on a real stream (offset 522 at
+  output length 20) because its command table was transcribed from the third-party doc
+  instead of from `0x0092c5b0`. Next move: disassemble `0x0092c5b0`..`0x0092c77f` and derive
+  the command table from the instructions. Do not patch the Python by guessing again.
+- **What `group`/`unknown` mean**, and why kind 4 keeps `group` per-record while 6/7 differ.
+- **The original's `type`→name mapping**: `upstream/SporeMaster3/data/reg_type.txt` (593
+  lines) is the practical answer, not a hash. Our top type ids: 0x01A510BB (98% of fixed
+  records), 0x2F4E681B (= `rw4`, 12,987 records), 0x024A0E52 (the Czech lexicon we dumped).
+
 1. **"The `FindTheUnencryptedDotText` binaries are the same build as the GA target."**
    Disproved by `analysis/build_identity.md`: 0/12 candidates match on CodeView GUID/age,
    `.rdata` sha256 or `.data` sha256. They are secondary oracles (names/approach only),

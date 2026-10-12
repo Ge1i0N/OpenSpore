@@ -10,8 +10,52 @@ namespace {
 
 constexpr u32 kMagic = 0x46504244u;  // "DBPF", from the validator's immediate at 0x8d90d6
 constexpr u32 kHdrSize = 0x60;
-constexpr u32 kPrefix = 12;   // confirmed: 31/57 files have index_size == 12 + 24*count
-constexpr u32 kRecord = 24;
+
+struct KindInfo {
+    u32 prefix, stride, nwords;
+    u32 i_type, i_group, i_unknown, i_instance, i_offset, i_size, i_usize, i_flags;
+    bool has_type, has_group, has_unknown, has_instance;
+};
+
+// K is a bit mask of which fields are SHARED (hoisted into the prefix):
+//   bit 0 -> type, bit 1 -> group, bit 2 -> unknown.
+// A full record is type,group,unknown,instance,offset,packedSize,memSize,compression:u16,
+// flags:u16 = 32 bytes, so prefix = 4 + 4*popcount(K) and stride = 32 - 4*popcount(K).
+// Observed on all 57 shipped packages: K=4 -> (8,28), K=6 -> (12,24), K=7 -> (16,20).
+bool kind_info(u32 k, KindInfo& ki) {
+    auto popcount = [](u32 v) {
+        u32 n = 0;
+        for (; v; v >>= 1) n += v & 1;
+        return n;
+    };
+    const u32 shared = popcount(k & 7);
+    const u32 prefix = 4 + 4 * shared;
+    const u32 stride = 32 - 4 * shared;
+    if (stride < 20 || stride > 32 || (stride % 4) != 0) return false;
+    ki.prefix = prefix;
+    ki.stride = stride;
+    ki.nwords = stride / 4;
+    // Fields appear in the fixed order type,group,unknown,instance,offset,packedSize,memSize,flags;
+    // the shared ones are skipped in the record and read from the prefix instead.
+    u32 w = 0;
+    ki.i_type = w;
+    ki.has_type = !(k & 1);
+    if (ki.has_type) ++w;
+    ki.i_group = w;
+    ki.has_group = !(k & 2);
+    if (ki.has_group) ++w;
+    ki.i_unknown = w;
+    ki.has_unknown = !(k & 4);
+    if (ki.has_unknown) ++w;
+    ki.i_instance = w;
+    ki.has_instance = true;  // instance is never masked in the observed kinds
+    ++w;
+    ki.i_offset = w++;
+    ki.i_size = w++;
+    ki.i_usize = w++;
+    ki.i_flags = w++;
+    return w == ki.nwords;  // the layout must account for every word, or the kind is unknown
+}
 
 u32 le32(const u8* p) { return (u32)p[0] | ((u32)p[1] << 8) | ((u32)p[2] << 16) | ((u32)p[3] << 24); }
 
@@ -73,12 +117,24 @@ bool Package::open(const std::string& path) {
 
     m_file = f;
     m_ok = true;
-    m_fixed = (m_hdr.index_size == kPrefix + kRecord * m_hdr.count) && m_hdr.count != 0;
-    if (!m_fixed) {
-        LOG_ONCE_WARN("pkg", "%s: index_size %u != 12 + 24*count (%u) - variable-width records, "
-                            "parser not disassembled yet; enumerating 0 records",
-                      path.c_str(), m_hdr.index_size, kPrefix + kRecord * m_hdr.count);
-        return true;
+
+    // Read the kind dword (index dword[0]) and check the measured formula.
+    u8 kb[4] = {};
+    if (fseek(f, (long)m_hdr.index_offset, SEEK_SET) != 0 || fread(kb, 1, 4, f) != 4) {
+        m_why = "cannot read index kind";
+        m_ok = false;
+        LOG_ONCE_ERROR("pkg", "%s: %s at 0x%x", path.c_str(), m_why.c_str(), m_hdr.index_offset);
+        return false;
+    }
+    m_hdr.kind = le32(kb);
+    KindInfo ki{};
+    m_kind_known = kind_info(m_hdr.kind, ki);
+    if (!m_kind_known || m_hdr.index_size != ki.prefix + ki.stride * m_hdr.count) {
+        LOG_ONCE_WARN("pkg", "%s: kind=%u count=%u idx_size=%u does not fit prefix+stride*count "
+                            "(predicted %u) - index NOT parsed",
+                      path.c_str(), m_hdr.kind, m_hdr.count, m_hdr.index_size,
+                      m_kind_known ? ki.prefix + ki.stride * m_hdr.count : 0u);
+        return true;  // header valid, index unknown
     }
 
     std::vector<u8> idx(m_hdr.index_size);
@@ -86,30 +142,51 @@ bool Package::open(const std::string& path) {
         fread(idx.data(), 1, m_hdr.index_size, f) != m_hdr.index_size) {
         m_why = "cannot read index";
         m_ok = false;
-        LOG_ERROR("pkg", "%s: %s at 0x%x", path.c_str(), m_why.c_str(), m_hdr.index_offset);
+        LOG_ONCE_ERROR("pkg", "%s: %s at 0x%x", path.c_str(), m_why.c_str(), m_hdr.index_offset);
         return false;
+    }
+    // The prefix is the kind dword followed by one u32 per SHARED field, in field order.
+    // A field is shared when its bit is SET in the kind mask (i.e. when has_* is false).
+    {
+        u32 w = 1;
+        auto next = [&](u32& dst, bool shared) {
+            if (shared && w * 4 < ki.prefix) dst = le32(idx.data() + 4 * w++);
+        };
+        next(m_shared.type, !ki.has_type);
+        next(m_shared.group, !ki.has_group);
+        next(m_shared.unknown, !ki.has_unknown);
     }
     m_records.resize(m_hdr.count);
     for (u32 i = 0; i < m_hdr.count; ++i) {
-        const u8* p = idx.data() + kPrefix + i * kRecord;
-        for (u32 w = 0; w < 6; ++w) m_records[i].raw[w] = le32(p + w * 4);
+        const u8* p = idx.data() + ki.prefix + i * ki.stride;
+        Record& r = m_records[i];
+        r.nwords = ki.nwords;
+        r.i_type = ki.i_type;
+        r.i_group = ki.i_group;
+        r.i_unknown = ki.i_unknown;
+        r.i_instance = ki.i_instance;
+        r.i_offset = ki.i_offset;
+        r.i_size = ki.i_size;
+        r.i_usize = ki.i_usize;
+        r.i_flags = ki.i_flags;
+        r.has_group = ki.has_group;
+        r.has_unknown = ki.has_unknown;
+        r.has_instance = ki.has_instance;
+        for (u32 x = 0; x < ki.nwords; ++x) r.raw[x] = le32(p + x * 4);
     }
     // Enforce the validator's invariant per record, so a corrupt index cannot make a later
     // read go out of bounds (this is the clamp the field guide §"defensive clamp" asks for).
     u32 dropped = 0;
     for (auto& r : m_records) {
-        if ((u64)r.offset() >= m_hdr.index_offset || (u64)r.offset() + r.size() > m_hdr.index_offset) {
+        if ((u64)r.offset() >= m_hdr.index_offset || (u64)r.offset() + r.packed_size() > m_hdr.index_offset) {
             ++dropped;
-            r.raw[3] = 0;  // mark unreadable rather than trust it
+            r.raw[r.i_size] = 0;  // mark unreadable rather than trust it
         }
     }
     if (dropped) LOG_WARN("pkg", "%s: %u/%u records violate offset+size<=index_offset", path.c_str(), dropped,
                           m_hdr.count);
-    // LOG_ONCE: one line per package, all from this call site. The per-site ledger would
-    // consolidate everything past the 8th package ("x9, further repeats suppressed"), and
-    // a package listing is exactly the one-per-run line LOG_ONCE exists for.
-    LOG_ONCE_INFO("pkg", "opened %s: ver=%u count=%u idx_off=0x%x idx_size=%u fixed_stride=yes records=%zu",
-                  path.c_str(), m_hdr.version, m_hdr.count, m_hdr.index_offset, m_hdr.index_size, m_records.size());
+    LOG_ONCE_INFO("pkg", "opened %s: ver=%u kind=%u count=%u idx_off=0x%x idx_size=%u records=%zu", path.c_str(),
+                  m_hdr.version, m_hdr.kind, m_hdr.count, m_hdr.index_offset, m_hdr.index_size, m_records.size());
     return true;
 }
 
@@ -120,7 +197,7 @@ void Package::close() {
     }
     m_records.clear();
     m_ok = false;
-    m_fixed = false;
+    m_kind_known = false;
     m_hdr = Header{};
 }
 
@@ -141,9 +218,9 @@ bool Package::read_resource(u32 record_index, std::vector<u8>& out_bytes) {
 
 std::string Package::describe() const {
     char b[320];
-    _snprintf_s(b, sizeof(b), _TRUNCATE, "%s: ver=%u count=%u idx=0x%x+%u %s records=%zu",
-                m_path.c_str(), m_hdr.version, m_hdr.count, m_hdr.index_offset, m_hdr.index_size,
-                m_ok ? (m_fixed ? "fixed" : "VAR-WIDTH") : "INVALID", m_records.size());
+    _snprintf_s(b, sizeof(b), _TRUNCATE, "%s: ver=%u kind=%u count=%u idx=0x%x+%u %s records=%zu", m_path.c_str(),
+                m_hdr.version, m_hdr.kind, m_hdr.count, m_hdr.index_offset, m_hdr.index_size,
+                m_ok ? (m_kind_known ? "parsed" : "KIND-UNKNOWN") : "INVALID", m_records.size());
     return b;
 }
 

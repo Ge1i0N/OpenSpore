@@ -1,15 +1,24 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-12 (session 3, evening).
+Last update: 2026-10-13 (session 5).
 
 ## One-line status
 
-**There is a booting executable, and it reads EA's shipped data.** `build/bin/Debug/OpenSpore.exe`
-reaches 10/10 boot markers with `-w -devDirs`: window + icon, D3D9 device, font atlas, developer
-console, AppStateManager-analog, a Loader state that renders a progress bar — and **all 57 real
-`.package` files open and validate, 0 rejected**, with 17,901 index records parsed. The
-RenderWare bridge has not started; the var-width index parser is the top open item.
+**There is a booting executable that reads EA's shipped data end-to-end.**
+`build/bin/Debug/OpenSpore.exe` reaches 10/10 boot markers with `-w -devDirs`: window + icon,
+D3D9 device, font atlas, developer console, AppStateManager-analog, a Loader state that renders
+a progress bar — and **all 57 real `.package` files open AND index-parse, 0 rejected**
+(150,945 records). The first resource has been dumped through the reversed index. The
+RenderWare bridge has not started; RefPack is the next decode gap.
+
+## Upstream knowledge is now IN the repo (level 4, tested before use)
+
+`upstream/SporeMaster3/` (tracked, ~9.8 MB): another team's RE docs (21 files), the type/group
+registries, `resources.csv` (6,005 resource rows) and the beta `KeyMap.txt`. It fixed two of our
+bugs and was itself found wrong in two byte-level places. **Never adopt a claim from it without
+testing it against the oracle (level 1) or our 57 packages (level 2)** — see MEMORY.md "Upstream
+knowledge" and IDEAS.md §5 items 19-20 for the failures.
 
 ## Yardsticks (report both after every run)
 
@@ -17,8 +26,9 @@ RenderWare bridge has not started; the var-width index parser is the top open it
 |---|---|---|
 | boot markers OK | **10/10** | grep `yardstick:` in `build/bin/Debug/OpenSpore.log` |
 | `N_verified` (DISASM-VERIFIED rows) | **15** of 21 | count `**DISASM-VERIFIED**` in `VERIFY.md` |
-| packages opened | **57 distinct, 0 invalid** (31 fixed + 26 var-width) | `packages:` in the log |
-| records parsed | **17,901**, 0 invariant violations | `python tools/pkg_record_test.py` |
+| packages **index-parsed** | **57 / 57** (0 kind-unknown, 0 invalid) | `packages:` in the log |
+| records parsed | **150,945**, 0 invariant violations | `python tools/pkg_kinds.py` |
+| state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower, as the original) | `-exec state:-list` |
 | fps | **33.4 / 31.2** | `fps=` in the log |
 | build warnings | **0** | `cmake --build build --config Debug` output |
 | frames rendered per run | **90** (`-quitAfter 90`), aborts=0 | `shutting down: frames=` |
@@ -30,11 +40,28 @@ RenderWare bridge has not started; the var-width index parser is the top open it
 `source/engine/pkg.cpp` opens **all 57 real `.package` files, 0 rejected**, by replaying the
 original validator's own clauses (`0x008d90b0`) in its own order with its own reasons. The
 loader screen lists them, so the first contact with EA data is visible, not just logged.
-Fixed-stride index parsed: 31 files / 17,901 records / 0 violations of
-`offset < index_offset` and `offset+size <= index_offset`. Record = 6 u32: `[0]` type id,
-`[1]` instance id, `[2]` offset, `[3]` size|0x80000000, `[4]` probable uncompressed size,
-`[5]` ∈ {0x10000, 0x1FFFF}. The 26 var-width files (fit `16 + 20*count`) are reported as
-VAR-WIDTH and **not guessed** — their parser is the top open item.
+**All 57 packages index-parse** (0 kind-unknown, 0 invalid), 150,945 records, 0 violations of
+`offset < index_offset` and `offset+packedSize <= index_offset`.
+
+Corrected record model (session 5; the session-4 description of it was wrong in two places):
+the index's first dword K is a **shared-field bit mask** (bit0 `type`, bit1 `group`, bit2
+`unknown`), so `prefix = 4 + 4*popcount(K)` and `stride = 32 - 4*popcount(K)`; a full record is
+32 bytes = `type, group, unknown, instance, offset, packedSize, memSize, compression:u16,
+flags:u16`. Observed kinds: K=4 → (8,28), K=6 → (12,24), K=7 → (16,20).
+Our earlier `prefix = 4+K / stride = 32-K` fitted K=4 and K=7 but **not K=6** (predicted 10,
+measured 12) — that formula left 26 packages unparsed until the bit-mask model fixed it.
+The word we used to call a "sentinel" is really `compression:u16 + flags:u16`: 0xFFFF = RefPack
+(98,407 records, payload starts `10 FB`, `packed < mem`) and 0x0000 = raw (52,538 records,
+never `10 FB`, `packed == mem`) — verified by probing payload bytes across every record.
+
+## First resource read end-to-end
+
+`-exec pkg:-dump,0,3,res0.bin` → 1371 bytes out of `Data\Locale\cs-cz\NameGeneration.package`
+(record type `0x024a0e52`, instance `0x65e81724`, offset `0x4c11`, packed 1371 / mem 2120,
+RefPack). The payload is a Czech name-generation lexicon. **RefPack decoding itself is not
+implemented** — `tools/refpack.py` is explicitly UNVERIFIED and still faults on a real stream,
+because its command table was transcribed from a third-party doc instead of from the oracle's
+decoder at `0x0092c5b0`. The aimed next step is in IDEAS.md §6.
 
 ## Assets are HERE (this changed the roadmap)
 
@@ -154,22 +181,29 @@ silent verboseaudio 4.0 5.1 automation …`).
 
 ## Blocked / open
 
-1. **Var-width index parser** — 26/57 files (every `Text.package`, some others) do not fit
-   `12 + 24*count`; they fit `16 + 20*count` exactly, which suggests a different record shape
-   (probably a name/string table). Top open item. Disasm route: the index container at
-   `[pkg+0x2d0]` (vtable +0x24 buf/size/count, +0x28 get-record, +0x38, +0x40 size), fed from
-   `0x008d9a90` (vtable+0x90).
-2. **Resource type-id → meaning** — record `[0]` has 16 distinct values, one at 98%. Until a
-   type id is named, `read_resource` has no caller and no game asset is decoded.
-3. **RenderWare bridge** not started. **x64** switch exists in CMake, never compiled.
-4. `-w` semantics (VERIFY row 15) and the path-assembly block (row 8) are still DRAFT/PARTIAL.
+1. **RefPack decoder** — the one thing between us and decoded game content. `tools/refpack.py`
+   is UNVERIFIED and faults on a real stream. Aimed route (IDEAS.md §6): disassemble
+   `0x0092c5b0..0x0092c77f` and derive the command table from the instructions; the header side
+   is already confirmed (`0x0092ccdc` tests bit `0x8000` to pick a 3- or 4-byte **big-endian**
+   length; `0x0092cd40` detects `bswap(word) & 0x1FFF == 0x10FB`; `0x0092c4e0` is the BE reader
+   with exactly one caller, `0x92cd05`). Do not transcribe a table from a doc again — the
+   upstream doc says LE and is wrong.
+2. **`group` / `unknown` semantics** — the bit-mask model names them but not their meaning; and
+   why K=4 keeps `group` per-record while 6/7 hoist it.
+3. **Type-id → name** is now a *lookup*, not a puzzle: `upstream/SporeMaster3/data/reg_type.txt`
+   (593 lines) is the practical answer, since type ids are **not** FNV of their name
+   (0/6 tested — IDEAS.md §5.20). Our top ids: `0x01A510BB` (98% of the fixed records),
+   `0x2F4E681B` = `rw4` (12,987 records), `0x024A0E52` (the Czech lexicon we dumped).
+4. **RenderWare bridge** not started. **x64** switch exists in CMake, never compiled.
+5. `-w` semantics (VERIFY row 15) and the path-assembly block (row 8) are still DRAFT/PARTIAL.
 
 ## Next actions, in order
 
-1. **Disassemble the var-width index reader** (route above) — it gates 26/57 files including
-   all localized text, which is the cheapest visible win (readable strings on screen).
-2. **Name one resource type id** via the original's manifest/`ArgScript` consumer, then decode
-   one real asset end-to-end (`read_resource` gets its first caller).
+1. **Disassemble `0x0092c5b0`** and finish RefPack from the instructions, then decode one real
+   resource end-to-end (`pkg:-dump` gains a `-decode` path). This is the shortest visible win:
+   it turns 150,945 indexed records into actual game bytes.
+2. **Name the top type ids** via `reg_type.txt` + `reg_file.txt` + `KeyMap.txt`, and show a
+   named resource on the Loader screen.
 3. **RenderWare plugin-registration family** (VERIFY row 13): start from `vb -<used>` at
    `0x0140a980` (field guide §3: bridge `Rw*RegisterPlugin`/`*RegisterPluginStream`/
    `*GetPluginOffset`/`*SetStream{Always,Rights}CallBack` for every PLUGINBASE class; expect

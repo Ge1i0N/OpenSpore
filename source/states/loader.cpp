@@ -91,10 +91,11 @@ void loader_enter() {
                 g_loader.pkg_lines.emplace_back(name, "INVALID: " + pk.why());
                 continue;
             }
-            if (pk.fixed_stride()) {
+            if (pk.index_parsed()) {
                 ++g_loader.pkgs_fixed;
                 g_loader.pkg_lines.emplace_back(
-                    name, "count=" + std::to_string(pk.header().count) + " recs, idx=0x" +
+                    name, "kind=" + std::to_string(pk.kind()) + " count=" + std::to_string(pk.header().count) +
+                          " recs, idx=0x" +
                           [&] {
                               char b[16];
                               _snprintf_s(b, sizeof(b), _TRUNCATE, "%x", pk.header().index_offset);
@@ -102,14 +103,14 @@ void loader_enter() {
                           }());
             } else {
                 ++g_loader.pkgs_varwidth;
-                g_loader.pkg_lines.emplace_back(name, "VAR-WIDTH index (parser pending)");
+                g_loader.pkg_lines.emplace_back(name, "KIND-UNKNOWN (kind=" + std::to_string(pk.kind()) + ")");
             }
             // LOG_ONCE: 109 packages share this call site, and the per-site ledger would
             // hide 100 of them ("x9, further repeats suppressed").
             LOG_ONCE_INFO("loader", "%s", pk.describe().c_str());
         }
     }
-    LOG_INFO("loader", "packages: %d fixed-stride, %d var-width, %d invalid", g_loader.pkgs_fixed,
+    LOG_INFO("loader", "packages: %d index-parsed, %d kind-unknown, %d invalid", g_loader.pkgs_fixed,
              g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
 }
 
@@ -182,7 +183,7 @@ void loader_render() {
     ov.text_fmt(pad, y, kDim, "console: type 'help', then 'state -list'");
     y += ov.font_height() * 1.5f;
     // Real packages, read from EA's shipped data through the reversed header.
-    ov.text_fmt(pad, y, kAccent, "packages: %d fixed-stride, %d var-width, %d invalid", g_loader.pkgs_fixed,
+    ov.text_fmt(pad, y, kAccent, "packages: %d parsed, %d kind-unknown, %d invalid", g_loader.pkgs_fixed,
                 g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
     y += ov.font_height();
     for (size_t i = 0; i < g_loader.pkg_lines.size() && y < (float)h - ov.font_height(); ++i) {

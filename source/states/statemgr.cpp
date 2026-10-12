@@ -21,7 +21,7 @@ std::string fmt_current(const State* s) {
 }  // namespace
 
 bool Manager::reg(State st) {
-    st.id = (u32)fnv1a_upper(st.name.c_str());
+    st.id = fnv1_lower(st.name.c_str());  // FNV-1 + tolower, the original's arg3=1
     for (auto* e : m_all) {
         if (e->id == st.id) {
             // Original: push "A state with this ID already exists" (0x01413600) and assert.
@@ -38,7 +38,7 @@ bool Manager::reg(State st) {
 }
 
 State* Manager::find(const std::string& name) {
-    u32 id = (u32)fnv1a_upper(name.c_str());
+    u32 id = fnv1_lower(name.c_str());  // must match reg(): FNV-1 + tolower
     for (auto* e : m_all) {
         if (e->id == id) return e;
     }

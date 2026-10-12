@@ -177,6 +177,46 @@ header and matches the 4-byte magic `{0x7f,0x9d,0x88,0xec}` against the stream (
 compare against the dword at `0x01436b20`). All 57 shipped files pass the DBPF validator,
 so this path is dead for our data; recorded so nobody mistakes it for the main parser.
 
+## Upstream knowledge: SporeMaster3 (authority #4 — hints, verified before use)
+
+`upstream/SporeMaster3/` (TRACKED, ~9.8 MB) holds a copy of another team's reverse-engineering
+of the same game: 21 format docs + `reg_type/reg_file/reg_property/reg_simulator` +
+`resources.csv` + the beta `KeyMap.txt`. Deliberately excluded: their 20 MB of hash-guesser
+dictionaries (`guess_left/right.txt`), which are tooling, not format knowledge.
+
+It is level 4 in the authority order, so **every claim from it was tested before being used**.
+Score of this session:
+
+| their claim | verdict | how |
+|---|---|---|
+| index dword[0] is a **shared-field bit mask** (bit0 type, bit1 group, bit2 unknown) | **CONFIRMED**, and it fixes our formula | their model implies `prefix = 4+4*popcount(K)`, `stride = 32-4*popcount(K)`; measured K=4→(8,28), K=6→(12,24), K=7→(16,20) on all 57 files |
+| `compression:u16 = 0xFFFF` means RefPack, `0x0000` means raw | **CONFIRMED** on 150,945 records | probed the first bytes at every record's offset: 0xFFFF → starts `10 FB` in 100% of 98,407 samples and `packed < mem`; 0x0000 → `10 FB` in 0% of 52,538 samples and `packed == mem` |
+| a full record is 32 bytes (type,group,unknown,instance,offset,packedSize,memSize,compression:u16,flags:u16) | **CONFIRMED** | explains the constant 36 = prefix+stride we had measured without understanding |
+| "RefPack size field is little-endian" | **WRONG** — it is BIG-endian | `10 fb 00 08 48` → BE = 2120 = that record's `memSize`; LE = 4,720,640, absurd for a 1371-byte payload. Also confirmed in the oracle at `0x0092ccdc`, which reads the length through the big-endian helper at `0x0092c4e0` |
+| "registry line without a hash means `ID = FNV(name)`" | **WRONG for type ids** | tested 6 pairs from `reg_type.txt` (`rw4`=0x2f4e681b, `prop`, `soundProp`, `gmdl`, `plt`, `creature_traits`) against FNV-1/FNV-1a × {raw,lower,upper}: **0/6 match**. Type ids are assigned, not hashed |
+| `resources.csv` columns `type,group,instance,compressed,packedSize,memSize,path` | **CONFIRMED shape**, different package set | none of our type ids appear in it (it was generated from their corpus), but the column model matched our records exactly once split |
+
+So: their **structural** model was right and we adopt it; their **byte-level** claims were
+wrong in two places, and one of those (LE) would have broken our decoder had we copied it.
+This is the authority order earning its keep.
+
+## Our own hash bug, found because of them (FIXED)
+
+Their docs say the hash is FNV-1; our `common.h` implemented **FNV-1a** with uppercase
+folding. Disassembly of the oracle settles it — `0x00932e50`:
+
+```
+932e8a: imul edi,edi,0x1000193   ; h *= prime  FIRST
+932e90: xor  edi,eax             ; h ^= c      SECOND
+```
+
+and the third argument selects the folding via the CRT (IAT slots verified with pefile):
+mode 0 = raw (`0x932ed6`), mode 1 = `tolower` (`0x013cc2ec`), mode 2 = `toupper`
+(`0x013cc500`). The state-registration site `0x007e40f2` pushes `(name, 0x811c9dc5, 1)`,
+so **a game state id is FNV-1 with tolower**. `Loader` was `0x69cdcb22` (wrong) and is now
+`0xd7d04c04` (matches the original's algorithm). This bug was silent by construction: ids
+are only ever compared to other ids, so our own `state -list`/`goto` kept working.
+
 ## Beta PDB facts (level 1: the PDB's own bytes)
 
 - MSF 7.00, page_size **1024**, num_pages 131123, dir_size 532088 (0x81E78), 2683 streams,

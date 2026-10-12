@@ -10,8 +10,9 @@ Status legend: ✅ done+verified · 🚧 partial · ❌ not started · ⛔ block
 | yardstick | value | how |
 |---|---|---|
 | boot markers OK | **10/10** | `yardstick:` in `OpenSpore.log` |
-| packages opened | **57 distinct, 0 invalid** (31 fixed + 26 var-width) | `packages:` |
-| records parsed | **17,901**, 0 invariant violations | `python tools/pkg_record_test.py` |
+| packages **index-parsed** | **57 / 57** (0 kind-unknown, 0 invalid) | `packages:` |
+| records parsed | **150,945**, 0 invariant violations | `python tools/pkg_kinds.py` |
+| state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower) | `-exec state:-list` |
 | fps | **33.4 / 31.2** | `fps=` |
 | build warnings | **0** | `cmake --build` output |
 
@@ -40,9 +41,12 @@ Status legend: ✅ done+verified · 🚧 partial · ❌ not started · ⛔ block
 | Assets present | ✅ | user dropped ~5.7 GB: `Data\` (base game, 7 `.package`) + `DataEP1\` (GA, 5 `.package` + `Config`) + 17 locale dirs. **Extension is `.package`, not `.package.big`** |
 | Open + validate `.package` header | ✅ | **57 distinct files, 0 rejected.** Reader replays the validator's own clauses (`0x008d90b0`) in order, with its reasons |
 | Parse fixed-stride index | ✅ | 31 files / 17,901 records, 0 invariant violations (`offset < idx_off` and `offset+size <= idx_off`) |
-| Read a resource's bytes | ✅ built, ⏳ unexercised | `Package::read_resource` is bounds-clamped; nothing calls it until a type id has meaning |
-| Parse var-width index | ❌ | 26 files fit `16 + 20*count` exactly; reported VAR-WIDTH, never guessed. Next disasm: index container at `[pkg+0x2d0]` via `0x008d9a90` |
-| Resource type-id → meaning | ❌ | record `[0]` has 16 distinct values, one at 98%; needs the original's manifest/`ArgScript` side |
+| Parse **all** indexes | ✅ (session 5) | the index's first dword is a **shared-field bit mask**, so `prefix = 4+4*popcount(K)`, `stride = 32-4*popcount(K)` → **57/57 files, 150,945 records, 0 violations** |
+| Split the former "sentinel" u32 | ✅ (session 5) | it is `compression:u16 + flags:u16`; 0xFFFF=RefPack (98,407 recs, payload starts `10 FB`, packed<mem), 0x0000=raw (52,538 recs, never `10 FB`, packed==mem) — verified by probing payload bytes |
+| Read a resource's bytes | ✅ | `pkg:-dump,0,3,res0.bin` → 1371 B out of `Data\Locale\cs-cz\NameGeneration.package` (type 0x024A0E52, RefPack) |
+| RefPack decode | ❌ | `tools/refpack.py` is **UNVERIFIED** and faults on a real stream; its table came from a third-party doc (which is also wrong about endianness). Aimed route in IDEAS.md §6: disasm `0x0092c5b0` |
+| Resource type-id → name | 🚧 | ids are **not** FNV of names (0/6 tested); the answer is the registry lookup in `upstream/SporeMaster3/data/reg_type.txt` (593 lines). Top ids known: 0x01A510BB (98%), 0x2F4E681B=`rw4`, 0x024A0E52 (Czech lexicon) |
+| `group`/`unknown` semantics | ❌ | the bit-mask model names them but not their meaning |
 | RenderWare plugin registration family | ❌ | field guide §3; start from `vb -<used>` at 0x0140a980 |
 | RW stream reader (`RpClumpStreamRead`) | ❌ | blocked on the above |
 | `MoviePlayer` / `.bik` splash | ❌ | field guide: stub the intro path, keep windowed device creation ours |
