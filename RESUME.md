@@ -17,6 +17,25 @@ The reversal oracle and the six docs are in place; the RenderWare bridge has not
 | boot markers OK | **10/10** | grep `yardstick:` in `build/bin/Debug/OpenSpore.log` |
 | `N_verified` (DISASM-VERIFIED rows) | **12** of 17 | count `**DISASM-VERIFIED**` in `VERIFY.md` |
 | build warnings | **0** | `cmake --build build --config Debug` output |
+| frames rendered per run | **50** (`-quitAfter 50`), aborts=0 | `shutting down: frames=` |
+| in-engine capture | **1280x720, 100% non-black** | `wrote cap.bmp ... nonblack=` |
+| fault-tolerance | **5 aborts recovered, 6th → storm exit** | `-exec _abortNow:9` → exit `0x4F53AB02` |
+
+## Assets are HERE (this changed the roadmap)
+
+User dropped the real game data into `build\bin\Debug\` (the app's own cwd):
+- `Data\` (Spore base game): `Spore_Game.package` 20,210,108 · `Spore_Content.package` 995 MB ·
+  `Spore_Graphics.package` 943 MB · `Spore_Audio1/2.package` ~1 GB each ·
+  `Spore_Pack_03.package` 9.6 MB · `PatchData.package` 80 MB · `Config\` `Locale\`
+- `DataEP1\` (Galactic Adventures): `Spore_EP1_Data.package` 715 MB · `Spore_EP1_Content_01/02`
+  477/758 MB · `Spore_EP1_Locale_01/02` · `Config\`
+
+Total ~5.7 GB of `.package` files. **`.package`, not `.package.big`** — the user corrected
+this: `.big` is just what EA internally called the archives. Consequences:
+- `fs.cpp` already finds them (dev mode resolves `Data\`), verified: SHIP mode reports 3 paths.
+- The package reader is now the highest-value next reversal, and its format must come from
+  **the first bytes of a real file** (authority #2), not from any wiki.
+- The game's real states may become reachable once packages parse (VERIFY row 16 unblocks).
 
 ## Exact commands
 
@@ -120,30 +139,28 @@ silent verboseaudio 4.0 5.1 automation …`).
 
 ## Blocked / open
 
-1. **Machine evidence for the loader screen.** `tools/shot.ps1` returns all-black for D3D9
-   content (`PrintWindow` limitation), so the rendered frame is human-confirmed only. Fix:
-   in-engine capture via `GetFrontBufferData` → `GetRenderTargetData` (SYSTEMMEM) →
-   `LockRect` → BMP. This is next action 1.
-2. **`diag::run_guarded` has never fired.** The abort-recovery path is built but unexercised,
-   so "динамически отказоустойчиво" is a claim, not a result. Next action 2: a console verb
-   that deliberately aborts, then confirm the loop survives and the crash log holds the stack.
-3. **No assets.** User offered to drop packages into `Data/` (the app's own search list is
-   `build/bin/Debug/{Data,BaseData,Locale/en-US,Config,UserData}`). When they arrive, read the
-   first 64 bytes of a real `.package.big` before writing any reader (authority #2).
-4. **x64** switch exists in CMake, never compiled. **RenderWare bridge** not started.
+1. **Package reader** — the only thing between us and the game's real states. Assets are
+   present (see above); read the first 64 bytes of `Data\Spore_Game.package` before writing
+   anything, and cross-check the parser against the original's own reader in `.text`.
+2. **x64** switch exists in CMake, never compiled. **RenderWare bridge** not started.
+3. `-w` semantics (VERIFY row 15) and the path-assembly block (row 8) are still DRAFT/PARTIAL.
 
 ## Next actions, in order
 
-1. In-engine frame capture (see Blocked 1) — makes every future visual claim machine-checkable.
-2. Exercise `run_guarded` with a deliberate abort (see Blocked 2).
+1. **`.package` header reversal**: bytes of a real file (authority #2) + the original's
+   reader (authority #1). Then a reader, then list what `Spore_Game.package` actually contains.
+2. **RenderWare plugin-registration family** (VERIFY row 13): start from `vb -<used>` at
+   `0x0140a980` (field guide §3: bridge `Rw*RegisterPlugin`/`*RegisterPluginStream`/
+   `*GetPluginOffset`/`*SetStream{Always,Rights}CallBack` for every PLUGINBASE class; expect
+   **no** RxPipeline equivalent).
 3. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle
-   `-w` (VERIFY row 15, currently DRAFT).
-4. RenderWare plugin-registration family, starting from `vb -<used>` at `0x0140a980`
-   (field guide §3: bridge `Rw*RegisterPlugin`/`*RegisterPluginStream`/`*GetPluginOffset`/
-   `*SetStream{Always,Rights}CallBack` for every PLUGINBASE class; expect **no** RxPipeline).
-5. Assets → `.package.big` reader → real game states.
-6. Extract `render/rhi.h` **when the RW bridge starts**, not before (`IDEAS.md` §1 — the user
-   asked for a light internal wrapper now with OpenGL later; the sequencing argument is there).
+   `-w` (row 15).
+4. Extract `render/rhi.h` **when the RW bridge starts**, not before (`IDEAS.md` §1).
+5. Real game states once packages parse.
+
+Done and no longer on the list: in-engine frame capture (✅ `GetBackBuffer` →
+`GetRenderTargetData` between `EndScene` and `Present`; `analysis/shots/loader_capture.png`
+shows readable text) and the abort-recovery exercise (✅ 5 recoveries + storm exit).
 
 ## Standing rules for whoever continues
 

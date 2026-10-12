@@ -169,3 +169,20 @@ The D3D9 backend stays the regression oracle: any GL output is diffed against it
 10. **"`Clear()` outside a scene is fine."** D3D9 silently drops it. The first loader frame
     cleared before `BeginScene()`; correct order is `begin_frame()` → `clear()` → draw →
     `end_frame()`, and `end_frame()` must only Present if the scene actually opened.
+11. **"`PrintWindow` is a usable screenshot path for a D3D9 window."** It is not: it returned
+    an all-black client area (1 colour × 1600 samples) for a window that was verifiably
+    rendering. Machine evidence needs the in-engine capture
+    (`GetBackBuffer` → `GetRenderTargetData` between `EndScene` and `Present`).
+12. **"`GetFrontBufferData` only needs an open scene."** It also needs a *persistent* front
+    buffer, which `D3DSWAPEFFECT_DISCARD` does not provide: `D3DERR_INVALIDCALL` (0x8876086C)
+    with `scene_open=1` logged. Same HRESULT as the unrelated `LockRect` failure — never
+    diagnose from the code alone.
+13. "`ETO_CLAMPED` / `GetTextMetricW` / `IDirect3DSurface9::GetSurfaceDesc` exist here."
+    0 / 0 / 0 hits in SDK 10.0.26100. Real names: none / `GetTextMetricsW` / `GetDesc`.
+14. "A console verb can test `run_guarded` by calling `abort()` in its handler." Verb handlers
+    run in `console::poll()`, which is *outside* the guarded frame. The verb must arm a flag
+    that the frame body consumes inside the guard.
+15. "The June-2010 DirectX SDK is needed for the loader." It is not installed and nothing was
+    missing: the original imports 9 `d3dx9_27` functions (7 trivial math, 2 shader-compile
+    helpers now served by `d3dcompiler`), and we call none of them. Old SDK headers add MSVC
+    19.44 friction for zero gain; any future D3DX-shaped need goes through the RHI wrapper.

@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include <cstdio>
+#include <cstdlib>  // abort(), for the deliberate fault-tolerance probe
 #include <cstring>
 #include <string>
 
@@ -192,8 +193,25 @@ struct FrameCtx {
     f32 dt;
 };
 
+// Pending deliberate aborts, requested by the `_abortNow` verb. The command itself only
+// sets this counter; frame_body() consumes it INSIDE the guarded region. Executing abort()
+// in console::poll() would test nothing, because poll() runs outside run_guarded.
+volatile LONG g_pending_aborts = 0;
+
+void request_abort(int times) { InterlockedExchange(&g_pending_aborts, (LONG)times); }
+
 void frame_body(void* p) {
     auto* fc = static_cast<FrameCtx*>(p);
+    LONG n = g_pending_aborts;
+    if (n > 0) {
+        // One abort per frame, not nine in a single frame: that is what a real fault looks
+        // like (a state that dies on entry), and it is the only way to reach diag's
+        // storm limit (>5 aborts within 1s) instead of recovering forever.
+        InterlockedDecrement(&g_pending_aborts);
+        LOG_ERROR("fault", "deliberate abort() from INSIDE the guarded frame (%ld left)", (long)g_pending_aborts);
+        void (*volatile fp)() = abort;
+        fp();
+    }
     states::manager().tick(fc->dt);
     states::manager().render();
 }
@@ -302,6 +320,30 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     console::init(dev);
     states::install_console_command(states::manager());
     states::install_loader(states::manager());
+
+    // Capture + fault-tolerance probes. `capture` is unconditional (it is the only way to
+    // get machine evidence of a rendered frame); `_abortNow` is dev-only by the '_' rule.
+    console::reg({"capture", "Write the current front buffer to a BMP (PrintWindow cannot do D3D9).",
+                  "-<path>",
+                  [](const console::CmdContext& c) -> std::string {
+                      std::string p = c.args.size() > 1 ? c.args[1] : "OpenSpore_capture.bmp";
+                      // Same deferral as the -capture launch key: poll() runs outside the scene.
+                      render::device().request_capture(p.c_str());
+                      return "capture scheduled for the next frame -> " + p;
+                  }});
+    console::reg({"_abortNow",
+                  "Deliberately abort() inside the guarded frame to prove run_guarded recovers.",
+                  "-<times:n>",
+                  [](const console::CmdContext& c) -> std::string {
+                      int times = c.args.size() > 1 ? atoi(c.args[1].c_str()) : 1;
+                      if (times < 1) times = 1;
+                      // Do NOT abort here: this handler runs in console::poll(), which is
+                      // outside run_guarded, so it would test the handler but not the
+                      // recovery. Set the flag; frame_body() consumes it inside the guard.
+                      request_abort(times);
+                      LOG_WARN("fault", "_abortNow: armed %d abort(s) for the next frame", times);
+                      return "armed: the next frame will abort inside run_guarded";
+                  }});
     mark(7, true, std::to_string(console::count()) + " commands");
     mark(8, true, "Loader registered");
 
@@ -372,6 +414,37 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
         }
 
         ++g_frames;
+        if (!g_args.capture_path.empty() && g_frames == (u64)g_args.capture_after) {
+            // Defer into the scene: GetFrontBufferData is only legal between BeginScene and
+            // EndScene, and this point in the loop is outside it. end_frame() performs it.
+            render::device().request_capture(g_args.capture_path.c_str());
+            LOG_ONCE_INFO("capture", "capture requested for frame %llu -> %s", (unsigned long long)g_frames,
+                          g_args.capture_path.c_str());
+        }
+        if (!g_args.exec_cmds.empty() && g_frames == (u64)g_args.exec_after) {
+            // Split on ';' and run each through the real command path, so an unattended
+            // test exercises exactly what a human types.
+            std::string s = g_args.exec_cmds;
+            size_t pos = 0;
+            while (pos < s.size()) {
+                size_t sc = s.find(';', pos);
+                std::string one = (sc == std::string::npos) ? s.substr(pos) : s.substr(pos, sc - pos);
+                pos = (sc == std::string::npos) ? s.size() : sc + 1;
+                // strip surrounding spaces
+                size_t a0 = one.find_first_not_of(" \t");
+                if (a0 == std::string::npos) continue;
+                size_t a1 = one.find_last_not_of(" \t");
+                one = one.substr(a0, a1 - a0 + 1);
+                std::string res;
+                bool cmd_ok = console::exec_line(one, res);
+                LOG_ONCE_INFO("exec", "-exec '%s' -> ok=%d %s", one.c_str(), (int)cmd_ok, res.c_str());
+            }
+        }
+        if (g_args.quit_after_frames > 0 && g_frames >= (u64)g_args.quit_after_frames) {
+            LOG_ONCE_INFO("app", "auto-quit after %llu frames (-quitAfter %d)", (unsigned long long)g_frames,
+                          g_args.quit_after_frames);
+            break;
+        }
         fps_acc += dt;
         ++fps_frames;
         if ((double)(t_now.QuadPart - t_fps.QuadPart) / (double)qpf.QuadPart >= 1.0) {

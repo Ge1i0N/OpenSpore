@@ -50,12 +50,28 @@ struct Args {
     int height = 720;            // -height
     std::string log_level = "debug";  // -logLevel <fatal|error|warn|info|debug|trace>
 
+    // -capture <path>: write one frame to a BMP from inside the device, then keep going.
+    // Needed because PrintWindow cannot capture D3D9 content (it returns all-black), so
+    // without this the rendered frame has no machine-checkable evidence at all.
+    std::string capture_path;
+    int capture_after = 30;  // -captureAfter <n> frames; 30 is enough to be past any reset
+
+    // Unattended harness: run console commands and quit without a human or a pipe, so the
+    // fault-tolerance path and the frame capture are TESTABLE rather than merely built.
+    // -exec is ';'-separated; -execAfter is in frames, i.e. it fires inside the loop after
+    // the renderer produced real frames - which is what makes it a test and not a mock.
+    std::string exec_cmds;
+    int exec_after = 5;
+    int quit_after_frames = 0;  // -quitAfter <n>; 0 = never
+
     // Effective devDirs decision, exactly the original's precedence:
     // devDirs sets it, shipDirs afterwards clears it, so shipDirs wins.
     bool use_dev_dirs() const { return dev_dirs && !ship_dirs; }
 
     bool has(const std::string& key) const;
     std::string get(const std::string& key, const std::string& def = {}) const;
+    // Every value given for a repeatable key (-exec, -capture), in command-line order.
+    std::vector<std::string> all(const std::string& key) const;
 };
 
 // Parse a Win32 command line (or an explicit token list, used by tests).

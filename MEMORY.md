@@ -158,6 +158,51 @@ verboseaudio 4.0 5.1 automation`.
 Keys are stored **without** a leading dash; the dash is the shell-side convention.
 `-w` is absent from this list → our windowed flag is our own convention (VERIFY row 15).
 
+## Traps hit in session 3b (capture + fault tolerance)
+
+1. **MSVC `signal()` resets the handler to SIG_DFL on every invocation** (C99 semantics).
+   Our abort handler *recovers* instead of terminating, so the second `abort()` in the
+   process went to the default handler and exited `3`. Observed exactly: hit #1 intercepted
+   and recovered, hit #2 vanished with no log line. Fix: re-arm `signal(SIGABRT, handler)`
+   as the first statement inside the handler. (`_signal()` also exists; re-arming is
+   explicit and survives a future change of install site.)
+2. **`GetRenderTargetData` while the source is the current render target hangs.** The first
+   capture attempt ran inside the open scene: the request logged, `cap.bmp` was never
+   created, and the process had to be killed. Correct slot is **between `EndScene` and
+   `Present`** — frame complete, scene closed, back buffer still holding the image.
+3. **`GetFrontBufferData` fails with `D3DERR_INVALIDCALL` (0x8876086C) under
+   `D3DSWAPEFFECT_DISCARD`** even inside an open scene (`scene_open=1` in the log). DISCARD
+   gives no persistent front buffer. Same HRESULT as the earlier `LockRect` failure — an
+   HRESULT alone is not a diagnosis; log the call site and the state.
+4. **`ETO_OPAQUE` fills the rectangle with the BACKGROUND colour.** With the default white
+   background, every atlas cell became solid after the luminance→alpha conversion, so text
+   rendered as white bars (caught by looking at the first captured frame). Fix:
+   `SetBkMode(OPAQUE)` + `SetBkColor(RGB(0,0,0))` + white text. Guard added: the atlas now
+   logs its ink coverage and errors if it is 0% or >90% (this bug showed as ~100%).
+5. **`GetTextMetricW` does not exist** — it is `GetTextMetricsW` (verified: 0 vs 3 hits in
+   SDK 10.0.26100). `ETO_CLAMPED` does **not** exist in this SDK at all (0 hits).
+   `IDirect3DSurface9::GetSurfaceDesc` does not exist either — it is `GetDesc`
+   (`shared\d3d9.h:1639`). Pattern: these were all guesses; every one cost a build. Grep the
+   header before writing the call.
+6. **Cell width must equal the advance.** A 16×16 square cell with a 0.6·cell advance made
+   glyphs overlap by ~6 px — bars again. Now the cell is derived from `TEXTMETRICW`
+   (`tmAveCharWidth` × `tmHeight` → 7×15 for Consolas at −13) and cell width == advance.
+   Also use POINT filtering: LINEAR bleeds neighbouring cells at these sizes.
+7. **PowerShell quoting through `Start-Process -ArgumentList` is unreliable**: `-exec`
+   `\"_abortNow 9\"` arrived at the app as `"_abortNow 9\`. Do not build a harness that
+   depends on shell quoting — added the `name:arg` form (`_abortNow:9`) plus repeatable
+   `-exec`, which needs no quotes at all.
+8. **Command names must be lower-cased at registration.** `exec_line` lower-cases the input
+   before comparing, so `logLevel`/`_abortNow` could never match ("unknown command:
+   _abortnow"). Found only by running the verb.
+9. **A test that fires outside the guarded region tests nothing.** The first `_abortNow`
+   called `abort()` inside its own handler, which runs in `console::poll()` — outside
+   `run_guarded`. It now arms a counter that `frame_body()` consumes one-per-frame *inside*
+   the guard, which is also the only way to reach the storm limit (>5/1s).
+10. **A fully-buffered log hides a working frame loop** (see session-3 trap 11): the tail
+    after the last forced flush is lost when the process is killed, so a healthy app looked
+    hung at the boot chain. Now every line flushes.
+
 ## Traps hit in session 3 (first booting build; each one cost a run)
 
 1. **`setvbuf(f, nullptr, _IOLBF, 0)` is not "let the CRT choose".** NULL buffer means

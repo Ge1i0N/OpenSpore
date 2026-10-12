@@ -30,7 +30,8 @@ Both are monotonic and machine-checkable; report both after every run.
 | Step | Status | Note |
 |---|---|---|
 | Locate `Data/`, `BaseData/`, `Locale/`, `Config/`, `UserData/` | ✅ | our interpretation, from the reversed prefixes |
-| Read `.package.big` | ⛔ | no assets yet — user offered to drop them in `Data/` (see RESUME.md) |
+| Assets present | ✅ | user dropped ~5.7 GB: `Data\` (base game, 7 `.package`) + `DataEP1\` (GA, 5 `.package` + `Config`). **Extension is `.package`, not `.package.big`** |
+| Read `.package` | ❌ **now the top priority** | format must come from the first bytes of a real file (authority #2) cross-checked against the original's reader (authority #1) |
 | RenderWare plugin registration family | ❌ | field guide §3; start from `vb -<used>` at 0x0140a980 |
 | RW stream reader (`RpClumpStreamRead`) | ❌ | blocked on the above |
 | `MoviePlayer` / `.bik` splash | ❌ | field guide: stub the intro path, keep windowed device creation ours |
@@ -51,9 +52,10 @@ Both are monotonic and machine-checkable; report both after every run.
 | Crash/stack harness | ✅ proven live (symbolised `file:line` stack from a real throw) |
 | Abort-resilient frame loop (`diag::run_guarded`) | ✅ built, **not yet exercised** — needs a deliberate abort test |
 | Log consolidation (per-site ledger) | ✅ live; boot markers moved to `LOG_ONCE` after the ledger swallowed 9/10 |
-| Screenshot harness | 🚧 `tools/shot.ps1` works for GDI windows, useless for D3D9 content |
-| In-engine frame capture | ❌ **next**: `IDirect3DDevice9::GetFrontBufferData` → `GetRenderTargetData` (SYSTEMMEM) → `LockRect` → write BMP. This is the only machine-checkable visual evidence available without D3DX. |
-| Unattended run script | 🚧 ad-hoc in this session; needs `tools/run.ps1` |
+| Screenshot harness | 🚧 `tools/shot.ps1` works for GDI windows, **useless for D3D9 content** (PrintWindow returns all-black) |
+| In-engine frame capture | ✅ `GetBackBuffer(0,0,MONO)` → `GetRenderTargetData` → SYSTEMMEM → `LockRect` → 32bpp BMP, executed **between `EndScene` and `Present`**. `-capture <path> -captureAfter <n>`, and the `capture <path>` console verb. Log reports ink coverage (`nonblack=9502/9502`), and `analysis/shots/loader_capture.png` shows readable text |
+| Unattended run script | ✅ `-exec <cmds>` / `-execAfter <n>` / `-quitAfter <n>` + repeatable `-exec`, with `name:arg` so no shell quoting is needed |
+| Fault-tolerance exercised | ✅ `_abortNow <n>` arms one abort **per frame inside `run_guarded`**: 5 recovered with the loop continuing (frames kept counting), the 6th within 1 s hit the storm limit and exited `0x4F53AB02`. Single-abort case still exits clean (`frames=40 aborts=1 code=0`) |
 
 ## Explicitly not started (roadmap, not forgetting)
 

@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include <atomic>
+#include <cctype>  // tolower, used to normalise command names and their input
 #include <cstdio>
 #include <deque>
 #include <mutex>
@@ -151,14 +152,20 @@ void shutdown() {
 
 void reg(const Command& cmd) {
     std::lock_guard<std::mutex> lk(g_mux);
-    for (auto& c : g_cmds) {
-        if (c.name == cmd.name) {
-            LOG_WARN("console", "command re-registered: %s", cmd.name.c_str());
-            c = cmd;
+    // Normalise the registered name to lower case: exec_line lower-cases the user's input
+    // before comparing, so a CamelCase name (logLevel, _abortNow) could never match. This
+    // was found by actually running `-exec _abortNow`, which reported "unknown command"
+    // instead of testing the abort path - an unexercised path is a hypothesis, not a feature.
+    Command c = cmd;
+    for (auto& ch : c.name) ch = (char)tolower((unsigned char)ch);
+    for (auto& e : g_cmds) {
+        if (e.name == c.name) {
+            LOG_WARN("console", "command re-registered: %s", c.name.c_str());
+            e = c;
             return;
         }
     }
-    g_cmds.push_back(cmd);
+    g_cmds.push_back(c);
 }
 
 const std::vector<Command>& commands() { return g_cmds; }
@@ -176,6 +183,35 @@ bool exec_line(const std::string& line, std::string& out_result) {
     CmdContext c;
     c.args = toks;
     for (auto& ch : c.args[0]) ch = (char)tolower((unsigned char)ch);
+    // `name:arg` form, so the unattended harness never depends on shell quoting:
+    //   -exec "_abortNow 9"      needs the shell to survive PowerShell -> CreateProcess
+    //                            (it does not: the value arrived as '"_abortNow 9\')
+    //   -exec _abortNow:9        needs nothing.
+    // Splitting on the FIRST colon only when the prefix is a registered command keeps
+    // `capture:D:\shots\x.bmp` working (prefix `capture` is a command, the rest is the path).
+    {
+        const size_t colon = c.args[0].find(':');
+        if (colon != std::string::npos && colon > 0) {
+            std::string head = c.args[0].substr(0, colon);
+            bool known = false;
+            {
+                std::lock_guard<std::mutex> lk(g_mux);
+                for (auto& cmd : g_cmds) {
+                    if (cmd.name == head) {
+                        known = true;
+                        break;
+                    }
+                }
+            }
+            if (known) {
+                std::string rest = c.args[0].substr(colon + 1);
+                c.args.erase(c.args.begin());
+                c.args.insert(c.args.begin(), head);
+                // the remainder becomes argv[1]; existing argv shifts after it
+                if (!rest.empty()) c.args.insert(c.args.begin() + 1, rest);
+            }
+        }
+    }
     // Copy the handler out under the lock instead of keeping a Command*: a handler that
     // registers a new command would grow g_cmds and reallocate it, leaving a pointer into
     // freed memory. (Command execution is main-thread-only via poll(), so this is about
@@ -227,9 +263,20 @@ void exec_file(const std::string& path) {
 }
 
 void start_stdin_thread() {
-    if (!GetConsoleWindow()) return;  // GUI build without a console: nothing to read
+    // Read stdin when it is a real console OR when it is a redirect/pipe. The second case
+    // is what makes the app scriptable unattended:
+    //   Start-Process ... -RedirectStandardInput cmds.txt
+    // The first version only checked GetConsoleWindow(), so a piped script was silently
+    // ignored and the console looked dead.
+    HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
+    const UINT kind = in == INVALID_HANDLE_VALUE ? 0 : GetFileType(in);
+    if (!GetConsoleWindow() && kind != FILE_TYPE_PIPE && kind != FILE_TYPE_DISK) {
+        LOG_INFO("console", "stdin is neither a console nor a redirect (%u) - no reader thread", kind);
+        return;
+    }
     g_run.store(true);
     g_thread = std::thread(stdin_worker);
+    LOG_INFO("console", "stdin reader thread started (kind=%u)", kind);
 }
 
 void stop_stdin_thread() {

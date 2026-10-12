@@ -5,6 +5,65 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ---
 
+## Session 3b — 2026-10-12 night: machine evidence, fault tolerance proven, assets arrived
+
+### Added
+- **In-engine frame capture** (`Device::capture_frame` + `request_capture`): `GetBackBuffer`
+  → `GetRenderTargetData` → SYSTEMMEM → `LockRect` → 32bpp BMP, executed between `EndScene`
+  and `Present`. Launched by `-capture <path> -captureAfter <n>` or the `capture` verb. Logs
+  pixel coverage so a blank frame is detectable without looking at it.
+- **Unattended harness**: `-exec <cmds>` (repeatable, `;`-separated), `-execAfter <n>`,
+  `-quitAfter <n>`, and `name:arg` so no shell quoting is involved. `Args::all()`.
+- **Fault-tolerance test**: `_abortNow <n>` arms one abort per frame *inside* `run_guarded`.
+- **Atlas health check**: ink coverage logged, error if 0% or >90%.
+
+### Fixed (each found by running, not by reading)
+- MSVC `signal()` resets to SIG_DFL per invocation → the 2nd abort exited `3` unhandled.
+  Re-armed inside the handler. (`MEMORY.md` session-3b trap 1.)
+- Capture hung the process when called with the scene open → moved between EndScene/Present.
+- `GetFrontBufferData` is invalid under `D3DSWAPEFFECT_DISCARD` → route 2 (`GetBackBuffer`).
+- `ETO_OPAQUE` with a white background made the font atlas solid → black background; text was
+  white bars in two consecutive captures before this was understood.
+- Glyph advance ≠ cell width (16×16 cell, 9.6 px advance) → overlap; now cell = font metric
+  (7×15) and advance = cell width, POINT filtering.
+- Command names not lower-cased at registration → `logLevel`/`_abortNow` unreachable.
+- Log fully buffered after the last forced flush → a healthy frame loop looked hung; now
+  flush every line.
+- Guessed APIs that do not exist: `GetTextMetricW` (→ `GetTextMetricsW`), `ETO_CLAMPED`,
+  `IDirect3DSurface9::GetSurfaceDesc` (→ `GetDesc`).
+
+### Measurements (all from runs, not reasoning)
+- Capture: `cap.bmp` 3,686,454 B = 1280×720×4+54, `nonblack=9502/9502 (100.0%)`, and
+  `analysis/shots/loader_capture.png` shows readable text (title, mode line, `state: Loader`,
+  search paths, 28% bar, `frames: 20 t=0.70s log lines: 32`). **This replaces the
+  human-only "я видел полоски загрузки" evidence.**
+- Fault tolerance: `-exec _abortNow:9` → hits #1..#5 intercepted inside `run_guarded` with
+  symbolised stacks, loop kept counting frames; hit #6 within 1 s → storm exit `0x4F53AB02`.
+  Single abort → `frames=40 aborts=1`, `clean exit code=0`.
+- Regression A (`-w -devDirs -capture -quitAfter 50`): `yardstick: 10/10 markers OK`,
+  `frames=50 aborts=0 asserts=0`, exit 0.
+- Regression C (`-devDirs -shipDirs -exec 'state -list'`): `useDevDirs=0`,
+  `search mode=SHIP, 3 paths`, `Current state: 'Loader'`.
+- Build: 0 errors, 0 warnings.
+
+### Assets arrived (changes the roadmap)
+User placed the real game data in `build\bin\Debug\`: `Data\` (base game, 7 `.package`,
+incl. `Spore_Game.package` 20,210,108 B) and `DataEP1\` (GA, 5 `.package` + `Config`),
+~5.7 GB total. Correction recorded: the extension is **`.package`**, not `.package.big`
+(`.big` is only EA's internal name for the archives). `fs.cpp` already resolves them.
+Top priority is now the `.package` header reversal, from the file's own bytes (authority #2)
+cross-checked against the original's reader (authority #1).
+
+### Decision recorded: do not install the June-2010 DX SDK
+The user offered to install it. Answer: no. The original imports exactly 9 `d3dx9_27`
+functions, 7 of which are trivial matrix/vector math and 2 are shader-compile helpers now
+served by `d3dcompiler` (already present). We call no D3DX function; the atlas uses a
+staging texture + device `UpdateSurface`. Installing an old SDK adds header friction with
+MSVC 19.44 for no gain, and the planned internal RHI wrapper (`IDEAS.md` §1) is where any
+D3DX-shaped need gets absorbed.
+
+---
+
 ## Session 3 — 2026-10-12 evening: first booting executable (Loader state)
 
 Started from: session-2 state (oracle verified, reversal docs written, no build system).

@@ -36,6 +36,14 @@ std::string Args::get(const std::string& key, const std::string& def) const {
     return def;
 }
 
+std::vector<std::string> Args::all(const std::string& key) const {
+    std::vector<std::string> out;
+    for (auto& [k, v] : kv) {
+        if (ci_eq(k, key) && !v.empty()) out.push_back(v);
+    }
+    return out;
+}
+
 Args parse_tokens(const std::vector<std::string>& tokens) {
     Args a;
     for (size_t i = 0; i < tokens.size(); ++i) {
@@ -56,8 +64,9 @@ Args parse_tokens(const std::vector<std::string>& tokens) {
             // "-state Loader" style: the next token is the value iff it is not another flag
             if (i + 1 < tokens.size() && !tokens[i + 1].empty() && tokens[i + 1][0] != '-' && tokens[i + 1][0] != '/') {
                 const std::string& nx = tokens[i + 1];
-                static const char* value_keys[] = {"state",  "preload", "locale",    "dataDir",     "userDataDir",
-                                                   "width",  "height",  "logLevel",  "dataBaseDir", "shipDirs"};
+                static const char* value_keys[] = {"state",  "preload",  "locale",     "dataDir",   "userDataDir",
+                                                   "width",  "height",   "logLevel",   "dataBaseDir",
+                                                   "capture", "captureAfter", "exec", "execAfter", "quitAfter"};
                 for (const char* vk : value_keys) {
                     if (ci_eq(key, vk)) {
                         val = nx;
@@ -95,6 +104,20 @@ Args parse_tokens(const std::vector<std::string>& tokens) {
     if (a.has("width")) a.width = atoi(a.get("width").c_str());
     if (a.has("height")) a.height = atoi(a.get("height").c_str());
     a.log_level = lower(a.get("loglevel", a.log_level));
+    // NOTE: devDirs/shipDirs are PRESENCE flags in the original (the helper's return is
+    // compared to -1, never read as a value), so they must not appear in value_keys above.
+    a.capture_path = a.get("capture");
+    if (a.has("captureafter")) a.capture_after = atoi(a.get("captureafter").c_str());
+    if (a.capture_after < 1) a.capture_after = 1;
+    // Repeatable keys: every -exec accumulates (in order), so a harness can script
+    // `_abortNow:1;state -list` across several flags instead of one giant quoted string.
+    for (const auto& e : a.all("exec")) {
+        if (!a.exec_cmds.empty()) a.exec_cmds += ";";
+        a.exec_cmds += e;
+    }
+    if (a.has("execafter")) a.exec_after = atoi(a.get("execafter").c_str());
+    if (a.exec_after < 1) a.exec_after = 1;
+    if (a.has("quitafter")) a.quit_after_frames = atoi(a.get("quitafter").c_str());
     if (a.width <= 0) a.width = 1280;
     if (a.height <= 0) a.height = 720;
     return a;

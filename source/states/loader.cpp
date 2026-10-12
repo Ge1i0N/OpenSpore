@@ -90,12 +90,27 @@ void loader_render() {
     float pad = 24.f;
     ov.text_fmt(pad, pad, kAccent, "OpenSpore - Evo reversed");
     float y = pad + (float)ov.font_height() + 8.f;
-    ov.text_fmt(pad, y, kDim, "mode: %s %dx%d vsync=%d  desktop=%dx%d", dev.windowed() ? "windowed" : "fullscreen", w,
-                h, (int)dev.vsync(), dev.desktop_mode().Width, dev.desktop_mode().Height);
+    // Clip every readout line to the screen width: the search-path dump alone is longer
+    // than 1280 px, and an unclipped line ran off the window in the first captured frame.
+    const float max_chars = (float)(w - (int)pad * 2) / 8.0f;  // 8 px = the Consolas advance here
+    auto clip = [&](std::string s) {
+        size_t n = (size_t)max_chars;
+        if (n < 4) n = 4;
+        if (s.size() > n) s = s.substr(0, n - 3) + "...";
+        return s;
+    };
+    auto fmt_mode = [&](os::render::Device& d) {
+        char b[192];
+        _snprintf_s(b, sizeof(b), _TRUNCATE, "mode: %s %dx%d vsync=%d  desktop=%dx%d",
+                    d.windowed() ? "windowed" : "fullscreen", d.width(), d.height(), (int)d.vsync(),
+                    (int)d.desktop_mode().Width, (int)d.desktop_mode().Height);
+        return std::string(b);
+    };
+    ov.text(pad, y, kDim, clip(fmt_mode(dev)));
     y += ov.font_height();
     ov.text_fmt(pad, y, kDim, "state: %s", g_mgr ? g_mgr->current_name().c_str() : "?");
     y += ov.font_height();
-    ov.text_fmt(pad, y, kDim, "%s", fs::dump_search_list().c_str());
+    ov.text(pad, y, kDim, clip(fs::dump_search_list()));
     y += ov.font_height() * 1.5f;
 
     // Progress bar

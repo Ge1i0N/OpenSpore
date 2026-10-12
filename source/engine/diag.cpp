@@ -128,6 +128,12 @@ LONG WINAPI unhandled_filter(EXCEPTION_POINTERS* ep) {
 
 void abort_handler(int sig) {
     (void)sig;
+    // Re-arm FIRST. MSVC's signal() implements C99 semantics: the disposition is reset to
+    // SIG_DFL at the start of every invocation of the handler. Since our handler does not
+    // terminate the process (it longjmps back into the frame loop), the second abort() in
+    // the run would otherwise hit the default handler and _exit(3) - observed exactly:
+    // hit #1 was intercepted and recovered, hit #2 vanished with exit code 3.
+    signal(SIGABRT, abort_handler);
     LONG hits = InterlockedIncrement(&g_abort_hits);
     // Repeatable recovery, bounded: N aborts in quick succession means we are stuck in a
     // loop, not that one bad frame happened. Then we let it die with a distinct code.

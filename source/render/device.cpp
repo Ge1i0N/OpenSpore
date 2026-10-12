@@ -1,5 +1,7 @@
 #include "render/device.h"
 
+#include <windows.h>
+
 #include <cstring>
 
 #include "engine/log.h"
@@ -137,6 +139,17 @@ void Device::end_frame() {
         m_device->EndScene();
         m_in_scene = false;
     }
+    // Deferred capture goes HERE, between EndScene and Present. Calling it while the scene
+    // is open hangs: GetRenderTargetData on a surface that is the current render target
+    // never returns (verified by observation - the capture request logged, cap.bmp was
+    // never created, and the process had to be killed). After EndScene the back buffer is
+    // complete, and before Present it still holds the frame, so this is the only safe slot.
+    if (m_capture_request[0]) {
+        char p[MAX_PATH];
+        lstrcpynA(p, m_capture_request, MAX_PATH);
+        m_capture_request[0] = '\0';
+        capture_frame(p);
+    }
     if (!m_lost) m_device->Present(nullptr, nullptr, nullptr, nullptr);
 }
 
@@ -146,5 +159,131 @@ void Device::clear(u32 argb) {
 }
 
 Device& device() { return g_device; }
+
+void Device::request_capture(const char* path) {
+    if (!path || !*path) return;
+    lstrcpynA(m_capture_request, path, MAX_PATH);
+}
+
+bool Device::capture_frame(const char* path) {
+    if (!m_device || !path) return false;
+    const UINT w = m_width, h = m_height;
+    IDirect3DSurface9* src = nullptr;   // CPU-visible surface we end up reading
+    bool owned_by_us = false;           // src was created here (vs. obtained from the device)
+    HRESULT hr_front = E_FAIL, hr_back = E_FAIL, hr_grd = E_FAIL;
+
+    // Route 1: GetFrontBufferData. Requires a *persistent* front buffer, which
+    // D3DSWAPEFFECT_DISCARD does not give us: with DISCARD the contents are undefined after
+    // present and the call fails with D3DERR_INVALIDCALL (0x8876086C) even inside an open
+    // scene (verified live: `GetFrontBufferData 0x8876086c (scene_open=1)`). Kept as the
+    // first attempt because it is the cheapest and would work if we ever switch swap effect.
+    {
+        IDirect3DSurface9* f = nullptr;
+        hr_front = m_device->CreateOffscreenPlainSurface(w, h, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &f, nullptr);
+        if (SUCCEEDED(hr_front) && f) {
+            hr_front = m_device->GetFrontBufferData(0, f);
+            if (SUCCEEDED(hr_front)) {
+                src = f;
+                owned_by_us = true;
+                f = nullptr;
+            }
+        }
+        if (f) f->Release();
+    }
+
+    // Route 2: GetBackBuffer(0,0,MONO) -> GetRenderTargetData into a SYSTEMMEM surface.
+    // The destination format must match the source exactly, so it is queried from the
+    // surface rather than assumed (in windowed mode we requested D3DFMT_UNKNOWN, which the
+    // runtime resolved to the desktop format).
+    if (!src) {
+        IDirect3DSurface9* back = nullptr;
+        hr_back = m_device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &back);
+        if (SUCCEEDED(hr_back) && back) {
+            D3DSURFACE_DESC sd{};
+            back->GetDesc(&sd);  // IDirect3DSurface9::GetDesc, shared\d3d9.h:1639
+                                 // (GetSurfaceDesc does not exist on this interface - the
+                                 // first revision of this function guessed it and did not compile)
+            IDirect3DSurface9* sys = nullptr;
+            hr_back = m_device->CreateOffscreenPlainSurface(sd.Width, sd.Height, sd.Format, D3DPOOL_SYSTEMMEM, &sys,
+                                                            nullptr);
+            if (SUCCEEDED(hr_back) && sys) {
+                hr_grd = m_device->GetRenderTargetData(back, sys);
+                if (SUCCEEDED(hr_grd)) {
+                    src = sys;
+                    owned_by_us = true;
+                    sys = nullptr;
+                }
+            }
+            if (sys) sys->Release();
+            back->Release();
+        }
+    }
+
+    if (!src) {
+        LOG_ERROR("capture", "both routes failed: front=0x%08lx back=0x%08lx grd=0x%08lx (scene_open=%d swap=DISCARD)",
+                  (unsigned long)hr_front, (unsigned long)hr_back, (unsigned long)hr_grd, (int)m_in_scene);
+        return false;
+    }
+
+    bool ok = false;
+    D3DLOCKED_RECT lr{};
+    hr_back = src->LockRect(&lr, nullptr, 0);
+    if (FAILED(hr_back)) {
+        LOG_ERROR("capture", "LockRect 0x%08lx", (unsigned long)hr_back);
+        if (owned_by_us) src->Release();
+        return false;
+    }
+    FILE* f = nullptr;
+    if (fopen_s(&f, path, "wb") == 0 && f) {
+        // 32bpp BI_RGB, bottom-up, uncompressed. D3D's A8R8G8B8/X8R8G8B8 is already
+        // B,G,R,A in memory, which is exactly what a 32-bit BMP row expects.
+        const DWORD px = w * h;
+        const DWORD img = px * 4;
+        const DWORD file_size = 14 + 40 + img;
+        u8 hdr[54];
+        ZeroMemory(hdr, sizeof(hdr));
+        hdr[0] = 'B';
+        hdr[1] = 'M';
+        memcpy(hdr + 2, &file_size, 4);
+        const DWORD off = 54;
+        memcpy(hdr + 10, &off, 4);
+        const DWORD hs = 40;
+        memcpy(hdr + 14, &hs, 4);
+        memcpy(hdr + 18, &w, 4);
+        memcpy(hdr + 22, &h, 4);
+        hdr[26] = 1;
+        hdr[28] = 32;
+        memcpy(hdr + 34, &img, 4);
+        const DWORD ppm = 2835;  // 72 dpi
+        memcpy(hdr + 38, &ppm, 4);
+        memcpy(hdr + 42, &ppm, 4);
+        fwrite(hdr, 1, 54, f);
+        for (int y = (int)h - 1; y >= 0; --y) {
+            fwrite((const u8*)lr.pBits + (size_t)y * lr.Pitch, 1, (size_t)w * 4, f);
+        }
+        fflush(f);
+        fclose(f);
+        ok = true;
+        // Report the pixel statistics: "a file was written" is not evidence that anything
+        // was drawn (field guide §4.3 - log the state, not the symptom).
+        const u32* px32 = (const u32*)lr.pBits;
+        const int row_words = lr.Pitch / 4;
+        u32 nonblack = 0, samples = 0;
+        u32 first[3] = {0, 0, 0};
+        for (UINT i = 0; i < px; i += 97) {
+            u32 c = px32[(size_t)(i / w) * row_words + (i % w)];
+            if (c & 0x00FFFFFFu) ++nonblack;
+            ++samples;
+            if (samples <= 3) first[samples - 1] = c;
+        }
+        LOG_INFO("capture", "wrote %s %ux%u: nonblack=%u/%u sampled (%.1f%%), px=%08x %08x %08x", path, w, h, nonblack,
+                 samples, 100.0 * nonblack / (double)(samples ? samples : 1), first[0], first[1], first[2]);
+    } else {
+        LOG_ERROR("capture", "cannot open %s for writing", path);
+    }
+    src->UnlockRect();
+    if (owned_by_us) src->Release();
+    return ok;
+}
 
 }  // namespace os::render

@@ -55,6 +55,22 @@ public:
     void end_frame();
     void clear(u32 argb);
 
+    // In-engine frame capture. PrintWindow cannot grab D3D9 content (it returns an
+    // all-black client area for a window that is verifiably rendering), so the only
+    // machine-checkable visual evidence is a capture from inside the device:
+    // GetFrontBufferData -> SYSTEMMEM surface -> LockRect -> 32bpp BMP.
+    // Signatures verified against SDK 10.0.26100 shared\d3d9.h:466-467:
+    //   GetRenderTargetData(IDirect3DSurface9* pRenderTarget, IDirect3DSurface9* pDestSurface)
+    //   GetFrontBufferData (UINT iSwapChain,               IDirect3DSurface9* pDestSurface)
+    // Both take a READY destination surface, not a **out** parameter - the first version of
+    // this function passed &front and did not compile.
+    bool capture_frame(const char* path);
+
+    // Defer a capture to the next end_frame(), which is the only point where a scene is
+    // guaranteed open (GetFrontBufferData requires one). Returns the path for logging.
+    void request_capture(const char* path);
+    bool capture_pending() const { return m_capture_request[0] != '\0'; }
+
 private:
     void fill_pp(D3DPRESENT_PARAMETERS& pp, int w, int h, bool windowed) const;
 
@@ -70,6 +86,9 @@ private:
     bool m_present_interval_one = false;
     bool m_lost = false;
     bool m_in_scene = false;
+    // Deferred capture: GetFrontBufferData only works inside an open scene, so the request
+    // is recorded here and performed by the state's render callback while the scene is live.
+    char m_capture_request[MAX_PATH] = {};
 };
 
 // One device for the whole app (the original has exactly one Direct3DCreate9 import).

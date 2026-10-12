@@ -42,7 +42,7 @@ public:
     void text_fmt(float x, float y, u32 argb, const char* fmt, ...);
     float text_width(const std::string& s) const;
 
-    int font_height() const { return m_cell; }
+    int font_height() const { return m_cell_h; }
 
 private:
     bool build_atlas(IDirect3DDevice9* dev);
@@ -50,8 +50,10 @@ private:
 
     IDirect3DDevice9* m_dev = nullptr;
     IDirect3DTexture9* m_atlas = nullptr;
-    int m_cell = 16;  // glyph cell, px
-    int m_cols = 16;  // atlas grid width in cells
+    int m_cell_w = 8;   // glyph cell width, px  (== the advance; monospace, so one value serves both)
+    int m_cell_h = 16;  // glyph cell height, px
+    int m_cols = 16;    // atlas grid width in cells
+    int m_advance = 8;  // horizontal pen step, px
     int m_screen_w = 0, m_screen_h = 0;
     Vert m_verts[1024];
     int m_vcount = 0;

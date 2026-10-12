@@ -27,8 +27,10 @@ void set_text_states(IDirect3DDevice9* dev, IDirect3DTexture9* atlas) {
     dev->SetRenderState(D3DRS_LIGHTING, FALSE);
     dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     dev->SetRenderState(D3DRS_ZENABLE, FALSE);
-    dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-    dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+    // POINT filtering: LINEAR bleeds neighbouring atlas cells into each other at these
+    // small cell sizes (7x15), which would smear the glyphs back into bars.
+    dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+    dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
     dev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
     dev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
     dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
@@ -55,7 +57,8 @@ bool Overlay::init(IDirect3DDevice9* dev) {
     m_dev = dev;
     if (!dev) return false;
     if (!build_atlas(dev)) return false;
-    LOG_INFO("overlay", "font atlas ready: cell=%d cols=%d glyphs=%d", m_cell, m_cols, kGlyphCount);
+    LOG_INFO("overlay", "font atlas ready: cell=%dx%d advance=%d cols=%d glyphs=%d", m_cell_w, m_cell_h, m_advance,
+             m_cols, kGlyphCount);
     return true;
 }
 
@@ -68,11 +71,37 @@ void Overlay::shutdown() {
 }
 
 bool Overlay::build_atlas(IDirect3DDevice9* dev) {
-    m_cell = 16;
+    // Cell geometry comes from the FONT, not from a round number. The first version used a
+    // square 16x16 cell with a 0.6*cell advance, so every glyph overlapped its neighbour by
+    // ~6 px and the loader text rendered as solid white bars (visible in the first captured
+    // frame). GetTextMetricW gives the true average advance; we make cell width == advance
+    // so the pen step can never cause overlap for a monospace face.
+    m_cell_h = 16;
     m_cols = 16;
+    {
+        HDC s = GetDC(nullptr);
+        HDC m = CreateCompatibleDC(s);
+        HFONT f = CreateFontW(-13, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+                              CLIP_DEFAULT_PRECIS, PROOF_QUALITY, FIXED_PITCH | FF_MODERN, L"Consolas");
+        HFONT of = (HFONT)SelectObject(m, f);
+        TEXTMETRICW tm{};
+        // GetTextMetricsW (plural) is the real API; `GetTextMetricW` does not exist and the
+        // first revision of this function failed to compile on exactly that typo.
+        if (GetTextMetricsW(m, &tm)) {
+            m_advance = tm.tmAveCharWidth > 0 ? tm.tmAveCharWidth : 8;
+            if (tm.tmHeight > 0) m_cell_h = tm.tmHeight;
+        } else {
+            m_advance = 8;
+        }
+        SelectObject(m, of);
+        DeleteObject(f);
+        DeleteDC(m);
+        ReleaseDC(nullptr, s);
+    }
+    m_cell_w = m_advance;
     const int rows = (kGlyphCount + m_cols - 1) / m_cols;  // 6
-    const int W = m_cell * m_cols;                          // 256
-    const int H = m_cell * rows;                            // 96
+    const int W = m_cell_w * m_cols;
+    const int H = m_cell_h * rows;
 
     // Rasterise with GDI into a DIB, upload while the DIB bits are still alive.
     // Ordering matters: the previous revision deleted the DIB before LockRect and then
@@ -98,24 +127,41 @@ bool Overlay::build_atlas(IDirect3DDevice9* dev) {
     HFONT font = CreateFontW(-13, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
                              CLIP_DEFAULT_PRECIS, PROOF_QUALITY, FIXED_PITCH | FF_MODERN, L"Consolas");
     HFONT old_font = (HFONT)SelectObject(mem, font);
-    SetBkMode(mem, TRANSPARENT);
+    SetBkMode(mem, OPAQUE);
+    // ETO_OPAQUE fills the rect with the *background* colour before drawing the glyph.
+    // Leaving the default (white) made every cell solid after the luminance->alpha
+    // conversion below, so the loader text rendered as solid white bars in the captured
+    // frame. Black background + white foreground is what makes alpha mean ink.
+    SetBkColor(mem, RGB(0, 0, 0));
     SetTextColor(mem, RGB(255, 255, 255));
 
     auto* px = (u32*)bits;
     memset(px, 0, (size_t)W * H * 4);
     for (int i = 0; i < kGlyphCount; ++i) {
-        int cx = (i % m_cols) * m_cell;
-        int cy = (i / m_cols) * m_cell;
+        int cx = (i % m_cols) * m_cell_w;
+        int cy = (i / m_cols) * m_cell_h;
         wchar_t ch = (wchar_t)(kFirstChar + i);
-        RECT rc{cx, cy, cx + m_cell, cy + m_cell};
-        ExtTextOutW(mem, cx + 1, cy + 1, ETO_OPAQUE, &rc, &ch, 1, nullptr);
+        RECT rc{cx, cy, cx + m_cell_w, cy + m_cell_h};
+        // No ETO_CLAMPED: it is absent from SDK 10.0.26100 (grep found 0 hits), and it is
+        // unnecessary here - the cell width equals the font's average advance, and for a
+        // FIXED_PITCH face the ink of every glyph fits inside one advance.
+        ExtTextOutW(mem, cx, cy, ETO_OPAQUE, &rc, &ch, 1, nullptr);
     }
     // Luminance -> alpha (white RGB, A=lum) so one blend mode serves every tint.
+    u32 ink = 0;
     for (int i = 0; i < W * H; ++i) {
         u32 c = px[i];
         u8 r = (u8)(c & 0xFF), g = (u8)((c >> 8) & 0xFF), b = (u8)((c >> 16) & 0xFF);
         u8 lum = (u8)((r * 77 + g * 151 + b * 28) >> 8);
         px[i] = 0x00FFFFFFu | ((u32)lum << 24);
+        if (lum) ++ink;
+    }
+    // Ink coverage is the atlas's own health check: a solid-background bug shows up here as
+    // ~100% before it ever reaches a screenshot, and an empty atlas shows up as 0%.
+    LOG_INFO("overlay", "atlas %dx%d ink=%u/%u (%.1f%%)", W, H, ink, (u32)(W * H), 100.0 * ink / (double)(W * H));
+    if (ink == 0 || ink > 90 * (u32)(W * H) / 100) {
+        LOG_ERROR("overlay", "atlas ink coverage %.1f%% is implausible - glyphs are %s",
+                  100.0 * ink / (double)(W * H), ink == 0 ? "missing" : "solid (background not black?)");
     }
 
     IDirect3DTexture9* tex = nullptr;
@@ -217,28 +263,27 @@ void Overlay::rect(float x, float y, float w, float h, u32 argb) {
 
 void Overlay::text(float x, float y, u32 argb, const std::string& s) {
     if (!m_dev || !m_atlas) return;
-    const int cell = m_cell;
     const int rows = (kGlyphCount + m_cols - 1) / m_cols;
-    const float aw = (float)(cell * m_cols);
-    const float ah = (float)(cell * rows);
+    const float aw = (float)(m_cell_w * m_cols);
+    const float ah = (float)(m_cell_h * rows);
     float fx = x;
     for (unsigned char ch : s) {
         if (ch < kFirstChar || ch > kLastChar) {
-            fx += cell * 0.5f;
+            fx += m_advance * 0.5f;
             continue;
         }
         if (m_vcount + 4 > (int)(sizeof(m_verts) / sizeof(m_verts[0]))) flush_text();
         int gi = ch - kFirstChar;
-        int gx = (gi % m_cols) * cell;
-        int gy = (gi / m_cols) * cell;
-        float u0 = gx / aw, v0 = gy / ah, u1 = (gx + cell) / aw, v1 = (gy + cell) / ah;
+        int gx = (gi % m_cols) * m_cell_w;
+        int gy = (gi / m_cols) * m_cell_h;
+        float u0 = gx / aw, v0 = gy / ah, u1 = (gx + m_cell_w) / aw, v1 = (gy + m_cell_h) / ah;
         Vert* v = &m_verts[m_vcount];
         m_vcount += 4;
         v[0] = {fx, y, 0, 1, argb, u0, v0};
-        v[1] = {fx, y + cell, 0, 1, argb, u0, v1};
-        v[2] = {fx + cell, y, 0, 1, argb, u1, v0};
-        v[3] = {fx + cell, y + cell, 0, 1, argb, u1, v1};
-        fx += cell * 0.6f;  // Consolas advance at this size
+        v[1] = {fx, y + (float)m_cell_h, 0, 1, argb, u0, v1};
+        v[2] = {fx + (float)m_cell_w, y, 0, 1, argb, u1, v0};
+        v[3] = {fx + (float)m_cell_w, y + (float)m_cell_h, 0, 1, argb, u1, v1};
+        fx += (float)m_advance;  // cell width == advance, so overlap is impossible
     }
 }
 
@@ -251,7 +296,7 @@ void Overlay::text_fmt(float x, float y, u32 argb, const char* fmt, ...) {
     text(x, y, argb, buf);
 }
 
-float Overlay::text_width(const std::string& s) const { return (float)s.size() * m_cell * 0.6f; }
+float Overlay::text_width(const std::string& s) const { return (float)s.size() * (float)m_advance; }
 
 Overlay& overlay() { return g_overlay; }
 

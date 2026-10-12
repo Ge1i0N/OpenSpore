@@ -37,19 +37,19 @@ no disasm yet) · `UNVERIFIED-DRAFT` (a drafted body, by definition not a revers
 
 ## Ordered next actions
 
-1. **In-engine frame capture** (`GetFrontBufferData` → `GetRenderTargetData` → `LockRect` →
-   BMP). `PrintWindow` returns all-black for D3D9 content, so the loader screen currently has
-   human evidence but no machine evidence. This is the cheapest way to make every future
-   visual claim checkable.
-2. **Abort-resilience test**: add a console verb that deliberately calls `abort()` and confirm
-   `diag::run_guarded` recovers, the crash log holds the stack, and the loop survives. The
-   mechanism is built but never exercised — an unexercised recovery path is a hypothesis.
+1. **`.package` header reversal** — assets are HERE (~5.7 GB in `build/bin/Debug/Data` and
+   `DataEP1`, 12 `.package` files). Read the first 64 bytes of `Data\Spore_Game.package`
+   (authority #2) and find the original's reader (authority #1) **before** writing a parser.
+   The extension is `.package`, not `.package.big` (user correction: `.big` is just EA's
+   internal name for the archives).
+2. **RenderWare plugin-registration family** (row 13): from `0x0140a980`'s referrers outward.
 3. **Disassemble `0x00e20b5a`'s callee** to settle `-w` (row 15).
-4. **RenderWare plugin-registration family** (row 13): from `0x0140a980`'s referrers outward.
-5. **Assets**: user offered to drop packages into `Data/`. When they arrive, read the first
-   64 bytes of a real `.package.big` before writing any reader (authority #2).
-6. Row 8 completion: walk the path-assembly block, then upgrade `fs.cpp` from interpretation
+4. Row 8 completion: walk the path-assembly block, then upgrade `fs.cpp` from interpretation
    to reversal.
+5. Extract `render/rhi.h` when the RW bridge starts (`IDEAS.md` §1).
+
+Done since this list was first written: **in-engine frame capture** and **the abort-resilience
+exercise** — both are in the matrix below with their measurements.
 
 ## Verification matrix for our own build (what "verified" means here)
 
@@ -58,9 +58,11 @@ no disasm yet) · `UNVERIFIED-DRAFT` (a drafted body, by definition not a revers
 | Builds clean | `cmake --build build --config Debug` → `-> ...\OpenSpore.exe`, no `error C/LNK`, no `warning C` |
 | Boots | log shows `yardstick: 10/10 markers OK` |
 | Runs with `-w -devDirs` | log: `flags: windowed=1 devDirs=1 shipDirs=0 useDevDirs=1` |
+| shipDirs wins | log: `-devDirs -shipDirs` → `useDevDirs=0`, `search mode=SHIP, 3 paths` |
 | Window + icon exist | log: `window 010C0D18 'OpenSpore - Loader' … icon=embedded` |
 | Renderer initialised | log: `device windowed 1280x720 vsync=1 (desktop 1692x919 fmt=22)` |
-| Loader screen renders | **human-observed only** ("я видел полоски загрузки"); machine capture pending (action 1) |
+| **Frame actually rendered** | in-engine capture wrote `cap.bmp` 3,686,454 B (=1280×720×4+54) with `nonblack=9502/9502 (100.0%)`; `analysis/shots/loader_capture.png` shows readable text: title, `mode: windowed 1280x720 vsync=1 desktop=1692x919`, `state: Loader`, the search-path list, a 28% progress bar, `frames: 20 t=0.70s log lines: 32` |
+| **Frame loop survives an abort** | `-exec _abortNow:9` → 5 aborts intercepted inside `run_guarded`, each with a symbolised stack (`abort_handler ← raise ← abort ← frame_body ← os_guarded_call ← run_guarded`), loop kept counting frames; the 6th within 1 s hit the storm limit and exited `0x4F53AB02`. `-exec _abortNow` (single) → `frames=40 aborts=1` then `clean exit code=0` |
 | Crash harness works | live: a real `std::mutex` re-lock produced a symbolised 16-frame stack with file:line |
 | Log is tailable while running | live: read with `[IO.FileShare]::ReadWrite` while the process was alive |
-| Frame loop survives an abort | **NOT verified** — path built, never exercised (action 2) |
+| Clean shutdown | `WM_CLOSE` / `-quitAfter` → `shutting down: frames=N aborts=… asserts=0` → `clean exit code=0` |
