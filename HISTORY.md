@@ -7,6 +7,16 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### Model <-> texture binding by instance id (100% match)
+The Loader now binds a model's OWN texture: a `raster` whose instance id equals the gmdl's instance
+id. Measured: **865 of 865** gmdl instances in `Spore_Content` have a matching raster instance, so
+the binding is exact (not a heuristic). The Loader decodes the mesh first, then looks up the raster
+with the same instance. Result: `analysis/shots/model_matched_texture.png` shows the Spore creature
+textured with its **correct** palette (pink body, dark head, white eyes/feet) - previously the
+texture was picked by a density heuristic and was the wrong one (green/purple). Log:
+`model texture: 0x40622900/0x067b0fbc.raster (512x512 DXT5) matched by instance 0x067b0fbc` for the
+mesh `0x40627100/0x067b0fbc.gmdl`. 10/10 markers, exit 0.
+
 ### gmdl: the vertex stride is variable (vertex_bytes/vertex_count) - 3.4x more models
 Found and fixed the real bug behind the low parse rate: the vertex stride is NOT a constant 36, it is
 `vertex_bytes / vertex_count` and it varies with the declaration count N. Measured on the exact

@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 80.8%** | **Overall: 73.8%** | done 166 / partial 22 / todo 52 (240 features)
+**Engine reversal: 80.9%** | **Overall: 73.9%** | done 167 / partial 22 / todo 52 (241 features)
 
 **Legend**
 
@@ -25,7 +25,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | startup | **95%** | 25 | 3 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
 | packages (DBPF) | **90%** | 33 | 4 | 2 |
-| gmdl (meshes) | **90%** | 22 | 3 | 1 |
+| gmdl (meshes) | **91%** | 23 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **80%** | 20 | 0 | 5 |
 | formats | **22%** | 2 | 5 | 13 |
@@ -182,9 +182,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## gmdl (meshes) — 90%
+## gmdl (meshes) — 91%
 
-*22 done · 3 partial · 1 todo*
+*23 done · 3 partial · 1 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -208,6 +208,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | position float3 | offset 0 at every stride; bbox exact on 1747/4209 |
 | ✅ | done | uv (N=6) | 2 floats at offset 16, in [0,1] 100% |
 | ✅ | done | textured mesh draw | mesh.cpp applies the raster texture via UVs (MODULATE) |
+| ✅ | done | model<->texture binding | raster with the same instance id (865/865 match); Loader binds it |
 | ✅ | done | bbox exact check | err 0.0000 on 4 variants |
 | 🚧 | partial | attrib semantics | uv found; normals/extra open |
 | 🚧 | partial | normals | computed from faces, not read |

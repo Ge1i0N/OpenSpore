@@ -60,6 +60,7 @@ render::Mesh g_mesh;
 std::string g_mesh_name;
 u32 g_mesh_tris = 0;
 u32 g_mesh_verts = 0;
+u32 g_mesh_instance = 0;  // the model's instance id; its texture is the raster with the same id
 constexpr u32 kGmdlType = 0x00E6BCE5;
 
 constexpr u32 kBg = 0xFF101418;      // dark slate
@@ -146,12 +147,88 @@ void loader_enter() {
                   (unsigned long long)g_loader.total_records, (unsigned long long)g_loader.total_bytes,
                   (unsigned long long)g_loader.resolved_instances, naming::stats().c_str());
 
+    // Decode one gmdl mesh and upload it, so the SOLVED geometry format is visible on our own
+    // screen - the same end-to-end proof the png gives for textures (DBPF -> RefPack -> decode
+    // -> GPU -> pixels). Skipped in headless mode (no device). We do this FIRST so the texture
+    // picker below can bind the model's OWN texture (a `raster` with the same instance id).
+    g_mesh.shutdown();
+    g_mesh_name.clear();
+    g_mesh_tris = g_mesh_verts = g_mesh_instance = 0;
+    for (auto& sp : fs::search_paths()) {
+        if (g_mesh.ready() || !render::device().d3d()) break;
+        for (auto& p : pkg::find_packages(sp.dir.string())) {
+            if (g_mesh.ready()) break;
+            pkg::Package pk;
+            if (!pk.open(p)) continue;
+            for (u32 n = 0; n < pk.records().size(); ++n) {
+                if (pk.records()[n].type() != kGmdlType) continue;
+                std::vector<u8> bytes;
+                if (!pk.read_resource_decoded(n, bytes)) continue;
+                gmdl::Mesh m = gmdl::parse(bytes.data(), bytes.size());
+                if (!m.ok || m.indices.size() < 3) continue;
+                if (m.vertex_count < 256 || m.vertex_count > 120000) continue;  // skip tiny/huge
+                if (!g_mesh.create(render::device().d3d(), m.positions.data(), m.uvs.data(), m.vertex_count,
+                                   m.indices.data(), (u32)m.indices.size()))
+                    continue;
+                g_mesh_instance = pk.records()[n].instance();
+                g_mesh_name = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
+                                                    pk.records()[n].instance());
+                g_mesh_tris = g_mesh.triangle_count();
+                g_mesh_verts = m.vertex_count;
+                LOG_ONCE_INFO("loader", "showing real mesh %s (%u verts, %u tris) from %s",
+                              g_mesh_name.c_str(), g_mesh_verts, g_mesh_tris,
+                              std::filesystem::path(p).filename().string().c_str());
+                break;
+            }
+        }
+    }
+    if (!g_mesh.ready()) LOG_WARN("loader", "no drawable gmdl mesh found");
+
     // Put one real game image on screen. This is the pipeline's end: DBPF index -> RefPack ->
     // type/instance name -> decode -> D3D9 texture. Two decoders, native first:
     //   1. `raster` (0x2f4e681c) - the engine's OWN texture format (DXT1/DXT5/raw). Preferred.
     //   2. `png`    - a decoded image resource, via GDI+.
     // Skipped in headless mode (no device to upload to).
     constexpr u32 kRasterType = 0x2F4E681C;
+
+    // Pass 0: the model's OWN texture - a `raster` with the same instance id. Measured: 100% of
+    // gmdl instances in Spore_Content have a matching raster, so this binds the correct texture
+    // (rather than the first dense one the heuristic below happens to find). Prefer a colour map.
+    if (g_mesh_instance && render::device().d3d()) {
+        for (auto& sp : fs::search_paths()) {
+            if (g_loader.tex) break;
+            for (auto& p : pkg::find_packages(sp.dir.string())) {
+                if (g_loader.tex) break;
+                pkg::Package pk;
+                if (!pk.open(p)) continue;
+                for (u32 n = 0; n < pk.records().size(); ++n) {
+                    if (pk.records()[n].type() != kRasterType) continue;
+                    if (pk.records()[n].instance() != g_mesh_instance) continue;
+                    std::string rname = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
+                                                              pk.records()[n].instance());
+                    std::string low = rname;
+                    for (auto& c : low) c = (char)std::tolower((unsigned char)c);
+                    if (low.find("normal") != std::string::npos || low.find("specular") != std::string::npos
+                        || low.find("_mask") != std::string::npos)
+                        continue;
+                    std::vector<u8> bytes;
+                    if (!pk.read_resource_decoded(n, bytes)) continue;
+                    raster::Texture rt = raster::decode(bytes.data(), bytes.size());
+                    if (!rt.ok || rt.width < 32 || rt.height < 32) continue;
+                    IDirect3DTexture9* tex = render::device().create_texture_bgra(rt.bgra.data(), rt.width, rt.height);
+                    if (!tex) continue;
+                    g_loader.tex = tex;
+                    g_loader.tex_w = rt.width;
+                    g_loader.tex_h = rt.height;
+                    g_loader.tex_name = rname;
+                    g_loader.tex_format = "raster " + rt.format + " (model-matched)";
+                    LOG_ONCE_INFO("loader", "model texture: %s (%dx%d %s) matched by instance 0x%08x",
+                                  rname.c_str(), rt.width, rt.height, rt.format.c_str(), g_mesh_instance);
+                    break;
+                }
+            }
+        }
+    }
     for (auto& sp : fs::search_paths()) {
         if (g_loader.tex || !render::device().d3d()) break;
         for (auto& p : pkg::find_packages(sp.dir.string())) {
@@ -231,41 +308,6 @@ void loader_enter() {
         }
     }
     if (!g_loader.tex) LOG_WARN("loader", "no drawable png found to display");
-
-    // Decode one gmdl mesh and upload it, so the SOLVED geometry format is visible on our own
-    // screen - the same end-to-end proof the png gives for textures (DBPF -> RefPack -> decode
-    // -> GPU -> pixels). Skipped in headless mode (no device).
-    g_mesh.shutdown();
-    g_mesh_name.clear();
-    g_mesh_tris = g_mesh_verts = 0;
-    for (auto& sp : fs::search_paths()) {
-        if (g_mesh.ready() || !render::device().d3d()) break;
-        for (auto& p : pkg::find_packages(sp.dir.string())) {
-            if (g_mesh.ready()) break;
-            pkg::Package pk;
-            if (!pk.open(p)) continue;
-            for (u32 n = 0; n < pk.records().size(); ++n) {
-                if (pk.records()[n].type() != kGmdlType) continue;
-                std::vector<u8> bytes;
-                if (!pk.read_resource_decoded(n, bytes)) continue;
-                gmdl::Mesh m = gmdl::parse(bytes.data(), bytes.size());
-                if (!m.ok || m.indices.size() < 3) continue;
-                if (m.vertex_count < 256 || m.vertex_count > 120000) continue;  // skip tiny/huge
-                if (!g_mesh.create(render::device().d3d(), m.positions.data(), m.uvs.data(), m.vertex_count,
-                                   m.indices.data(), (u32)m.indices.size()))
-                    continue;
-                g_mesh_name = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
-                                                    pk.records()[n].instance());
-                g_mesh_tris = g_mesh.triangle_count();
-                g_mesh_verts = m.vertex_count;
-                LOG_ONCE_INFO("loader", "showing real mesh %s (%u verts, %u tris) from %s",
-                              g_mesh_name.c_str(), g_mesh_verts, g_mesh_tris,
-                              std::filesystem::path(p).filename().string().c_str());
-                break;
-            }
-        }
-    }
-    if (!g_mesh.ready()) LOG_WARN("loader", "no drawable gmdl mesh found");
 
     LOG_INFO("loader", "packages: %d index-parsed, %d kind-unknown, %d invalid", g_loader.pkgs_fixed,
              g_loader.pkgs_varwidth, g_loader.pkgs_invalid);

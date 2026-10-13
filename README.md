@@ -33,7 +33,8 @@ texture format** (here a 512×512 DXT5). Earlier captures: `analysis/shots/mesh_
 | Names EA's data | **112,155 / 150,945 resource names resolved** (type + group + instance) |
 | Writes EA's data | **unpacker**: 2,944 locale + 14,549 png files written under real names, 0 failed; solved formats export as **BMP/OBJ** (whole game: 5,747 textures + 6,066 models, 0 failed) |
 | **Renders EA's data** | a real decoded `.png` **and a real decoded `gmdl` mesh** (creature, 3,765 verts) **and the engine's own `raster` texture format** (DXT1/DXT5/raw) drawn on our own D3D9 renderer (see the screenshot) |
-| `gmdl` (meshes) | **solved** — stride 36, position = first float3, UV at offset 16; positions reproduce the file's own bbox exactly (err 0.0000) on 4 variants (11,041 resources) |
+| `gmdl` (meshes) | **solved** — variable stride (vertex_bytes/count; N=3/4/6 -> 24/28/36), position = first float3; **55% of the game parses** (bbox-validated) |
+| **Model + texture** | a model's texture is the `raster` with the **same instance id** (865/865 match); the engine binds it |
 | **Textured model** | the engine draws a real `gmdl` mesh **with its real `raster` texture** (UVs + MODULATE) |
 | `rw4` (models) | header pinned down; object table not reversed (12,987 resources) |
 | First real content | Czech name/place lexicon, decoded end-to-end (`LexiconPlanets_CS.trigger`) |
