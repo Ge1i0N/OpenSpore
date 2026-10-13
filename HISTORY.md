@@ -57,6 +57,22 @@ guesses to check by disassembly; output `analysis/name_guesses.md`. Also: `tools
 shows the PDB is NOT stripped — 136,433 unique function/method name paths (SP 63,246, EA 24,214,
 eastl 9,874, rw 6,582, nSPCreatureAnim 2,423). The feature map gained a `tooling` category (89%).
 
+### Content loading: the resource manager and the Config/*.txt scripts
+Found the layer above DBPF: the resource-manager getter `0x8de4b0` (global `0x1667aa0`) and two
+query entry points (`0x686450`, `0x847780`) taking a `{group, type}` descriptor. The game's configs
+are `trigger` resources (type `0x024a0e52`) referenced at three sites. Resolving the group ids with
+FNV-1-lower over `reg_file.txt` gave real names: `0x658b0ab2`=`properties`, `0x9a06678c`=
+`ConfigManager`, `0xd6396913`=`SporeAppStates` — so `run` loads the state list from group
+`SporeAppStates` (at `0xf48505`).
+
+Decisively, those configs are **loose text files**: `Data/Config/Properties.txt`,
+`ConfigManager.txt`, `VideoCards.txt`. `Properties.txt` is the game's own option table
+(`property <Name> <0xid> <type>`, 47 options); `ConfigManager.txt` is an imperative script
+(`set/setOption/if/elseif/endif/trace/include/alert/...`). The option ids are a MIX — only 2 are
+FNV-1-lower of the name, the rest explicitly assigned — so the file is authoritative. This answers
+"how does the game read its config/state text": loose `Config/*.txt` scripts plus `trigger`
+resources, via the resource manager. New: `analysis/content-loading.md`, `analysis/config-scripts.md`.
+
 ### The MAIN LOOP is found: 0x008482f0
 After ruling out run, every AppMode vtable slot, and a direct pump call, the loop was found by a
 different route: the engine imports **`TranslateMessage` (IAT 0x13cc5cc)** and **`DispatchMessageW`

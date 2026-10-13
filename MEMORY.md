@@ -397,6 +397,21 @@ raster and draws it via `create_texture_bgra`, preferring it over the png path. 
 real raster 0x40642901/0x067a07e7.raster (512x512 DXT5)` and `analysis/shots/raster_engine.png`
 show the game's OWN texture format rendered by our renderer, next to the gmdl mesh.
 
+## Config scripts = loose text in Config/ (session 13)
+
+The game's options/config are **loose text files**, not packaged resources:
+`Data/Config/{Properties.txt,ConfigManager.txt,VideoCards.txt}` (and `DataEP1/Config/...`). This
+matches the resource groups the disassembly loads (`properties`, `ConfigManager` — see
+`analysis/content-loading.md`).
+
+- `Properties.txt` declares options as `property <Name> <0xid> <type>` — the game's own name->id
+  table (47 options). Their ids are a **mix**: only 2 are FNV-1-lower of the name (e.g.
+  `OptionDOF` 0x4c0dd839); the rest are explicitly assigned (a contiguous block
+  `0x0461709d..0x046170a7`). **Do not assume a hash for these ids; the file is authoritative.**
+- `ConfigManager.txt` is an imperative script with keywords `set/seti/setb/setOption/boolProp/
+  intProp/setResolution/setVariables/if/elseif/else/endif/trace/include/property/alert`.
+- Full table + language notes: `analysis/config-scripts.md`.
+
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 
 **Priority rule (user, repeated): disassembly first, always.** Third-party sources — docs,
