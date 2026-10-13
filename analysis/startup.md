@@ -64,19 +64,44 @@ run  0x00f47e90
   `0x007e76e0`) and stored at `[app+0x20]`; the whole run method then dispatches through its vtable.
   This is the object whose state machinery we reversed (`AppStateManager`, the `state` verb).
 
+## run `0x00f47e90` — full extent and what it does
+
+`run` spans **`0x00f47e90`..`0x00f4880a`** (`ret 0x4`, returns 1). It does NOT itself contain the
+message loop; it initialises subsystems and dispatches through the AppMode object's vtable.
+
+- **args it reads** (all through `0x92b570`): `demo` 0x01413db0, `devDirs` 0x013f8dc8,
+  `shipDirs` 0x013f8db4, `baseGame` 0x014081a8, `automation` 0x0148d898, `mouse` 0x0148d88c,
+  `hostIP` 0x0148d870, `clientIP` 0x0148d85c, `isHost` 0x0148d84c.
+- Allocates several objects through `0xf47240` (tag `App`): 0x148-byte (0x920960), 328-byte,
+  0x48-byte `Editor` (0x5d68a0), 0x48-byte (0x6249e0), 0x124-byte (0x7da070), 0x2e0-byte (0x8142a0).
+- **Creates the AppMode / config object** via `0x007e8a00` (496 bytes, ctor `0x007e76e0`) and
+  stores it at `[app+0x20]`.
+- **Dispatches through the AppMode vtable `0x01413b50`**:
+  | slot | method | what it is |
+  |---|---|---|
+  | +0x14 | `0x007e6850` | **subsystem init** (allocs 0x40/0x70-byte objects, `0x68db60`, `0x696400`, `0x67e040`, `0x68c0c0`, `0x6895b0`, `0x7ec170`) |
+  | +0x18 | `0x007e93d0` | plugin/script setup: if neither `-noPlugins` (0x1413e28) nor `-safe` (0x1411b8c) -> `0x7e8810` |
+  | +0x1c | `0x007e7430` | **create the graphics device**: tries 640x480 (0x280/0x1e0); on failure `Could not create the Graphics Device.` 0x1413ac8 |
+  | +0x20 | `0x007eaae0` | shader/script config: `-dumpShaders` 0x14142a8, `-dumpShadersForPIX` 0x1414284 / `-pix` 0x141427c, `-dumpFragmentShaders` 0x1414254, `-dumpDirectShaders` 0x1414230, `-noScripts` 0x141421c, `-noMaterialScripts` 0x14141f8, `-noEffectScripts` 0x14141d8 |
+- Other manager getters used: `0x67dc90/0x67dcb0/0x67dcd0/0x67dce0/0x67dcf0/0x67dda0`, `0x6a17e0`
+  (a profiler/marker call), `0x951220`/`0x951230` (allocator pair), `0x5a7560`, `0x456230`.
+
+## The message pump
+
+The game uses **`PeekMessage`**, not `GetMessage` (only `PeekMessageA`/`PeekMessageW` are imported;
+IAT `0x13cc5f0`/`0x13cc62c`). The only caller of `PeekMessageA` is **`0x0084a050`**, a message pump
+that drains the queue (up to 0x400 messages), then does **mouse coalescing** (it merges consecutive
+`WM_MOUSEMOVE` 0x200 events and rewrites duplicate `WM_LBUTTONDBLCLK` 0x203 -> `WM_LBUTTONDOWN`
+0x201). `0x84a050` is referenced only as a vtable slot at `.rdata 0x0141cc98` (an input/window
+handler object), not called directly — so the main loop invokes it through that vtable.
+
 ## Still to trace (next steps, in order)
 
-1. **`0x007e76e0`** — the AppMode constructor: it sets the object's vtables
-   (`0x1413b50`, `0x1413b40`, `0x1413b3c`, `0x13eb384`, `0x13eb8b8`), zeroes its fields, sets a few
-   default floats (1.0 from `0x1453740`, 0.9 from `0x13ec490`, 0.4 from `0x13ec414`), constructs
-   sub-objects at `+0x88` (`0x7e7310`) and `+0xd0` (`0x936860`), and builds two string-keyed
-   members at `+0x138`/`+0x148` via `0x579a90`. **It zeroes `[+0x159]` — the same `useDevDirs` byte
-   the `-devDirs` handler sets** (`0x007e7f27`, VERIFY row 2). So the AppMode object **is** the
-   config object the devDirs/shipDirs logic operates on: this ties row 2 to the object created here.
-   Its full field map is the next thing to walk.
-2. The rest of **`0x00f47e90`** after `0x00f481be` — the main loop and the ordered subsystem init
-   (it references `0x0067dcd0`/`0x0067dc90` manager getters, `0x00fc1dd0`, `0x00b5fab0`,
-   `0x00b5e160`, `0x00b3d320`, `0x00685500`).
+1. **The main loop itself** — it is NOT in `run`; it is reached through a vtable and calls the pump
+   `0x84a050`. Find the object whose vtable contains `0x141cc98`, and its loop. This is the last
+   piece of "how the game runs".
+2. **AppMode field map** — the ctor `0x007e76e0` zeroes fields and builds sub-objects; map them
+   (it already ties `[+0x159]` = useDevDirs to VERIFY row 2).
 3. **Config / state text**: the game's `trigger` resources are text (we decode them already); find
    where the run path reads them (likely through the AppMode subsystem) and where SPUI is spawned.
 4. The named-object guard uses `Global\`; the beta PDB names (SP::/EA::) can label these once we
