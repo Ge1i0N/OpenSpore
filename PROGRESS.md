@@ -22,6 +22,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | solved formats exported | `raster`→BMP, `gmdl`→OBJ (+ its paired BMP + .mtl, textured) | `pkg:-unpack,all,<dir>,raster\|gmdl` |
 | **whole game exported** | **5,747 textures → BMP** + **6,979 models → OBJ**, all 57 pkgs, 0 failed | `pkg:-unpack,all,<dir>,raster` / `,gmdl` |
 | gmdl exact-parse rate | **6,979 / 11,041 (63%)** game-wide; parser validates bbox (5% rel), else raw | `gmdl::parse` bbox check |
+| model gallery | a spread of exported models rendered | `analysis/shots/model_gallery.png` |
 | headless unpack | same output, **no window/device**, 7.6 s | `-headless -exec pkg:-unpack,...` |
 | **gmdl mesh decoded** | positions reproduce the file bbox **exactly (err 0.0000)**, 4 variants | `python tools/gmdl_mesh.py --pkg <i>` |
 | **engine draws a real mesh** | 3765 verts / 6000 tris, fps 32.3 | `analysis/shots/mesh_engine.png` |

@@ -7,6 +7,11 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### Model gallery: a spread of exported models rendered
+Rendered a spread of exported gmdl models into one montage - `analysis/shots/model_gallery.png` shows
+a building, machinery, a plant, a vehicle and a spacecraft: real Spore geometry decoded from the
+shipped packages and exported as OBJ. (Built with `tools/render_obj.py` + a small tiling script.)
+
 ### Model <-> texture binding by instance id (100% match)
 The Loader now binds a model's OWN texture: a `raster` whose instance id equals the gmdl's instance
 id. Measured: **865 of 865** gmdl instances in `Spore_Content` have a matching raster instance, so
