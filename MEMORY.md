@@ -115,7 +115,15 @@ So: **`[configObj+0x159]` = useDevDirs (BYTE)**, `devDirs` sets it, `shipDirs` c
 Sibling keys: `dataDir` 0x01413cfc, `userDataDir` 0x01413c74. Path prefixes in the same function:
 `UserData/` `BaseData/` `Locale/` `Config/` `Data/` `./` `../UserData/` `BaseData`.
 
-`-w` (windowed) is **not yet located** — it is not among these keys. Open task, see VERIFY.md.
+`-w` (windowed) **located** (session 12): it is the device-creation function at
+`0x7e74a0..0x7e7637`, not the devDirs block. It looks up `f` (0x1413ab0) then `w` (0x1413ab4)
+through the same helper `0x92b570` and sets a windowed byte (`f`→0, `w`→1, so `w` wins because it
+is tested last); `r` (0x1413ac4) is parsed with `%dx%d` (0x1413ab8) into width/height. The sole
+`GetCommandLineA` consumer is `0x00e20b5a`, which converts the ANSI command line to UTF-16 via
+`0x93c510` (the arg helper compares UTF-16 names). `screenWindowed` 0x014111d0 is a **RenderWare
+device metric** (`{name,index}` table at 0x1411440, index 14), NOT a CLI flag — that was the trap.
+The census missed `w`/`f`/`r` only because it required names ≥2 chars; `tools/arg_vocab.py` now
+accepts 1-char names at a real helper call site, so the vocabulary is complete (60 names).
 
 ## DBPF package format (level 1: disasm of the oracle; level 2: 57 real files)
 
@@ -436,14 +444,18 @@ reachable in the **release** build too.
 ## Full arg vocabulary
 
 `analysis/arg_vocab.md`, produced mechanically by `tools/arg_vocab.py 0x92b570`: 76 call
-sites, 56 distinct names. Notable: `devDirs shipDirs state preload safe noVSync vSync noDev
+sites, **60 distinct names** (session 12; the earlier census dropped single-char names).
+Notable: `devDirs shipDirs state preload safe noVSync vSync noDev
 noPlugins noScripts noSound dumpShaders dumpShadersForPIX dumptelemetry multipleInstances
 writeableData userDataDir dataDir dataBaseDir locale baseGame ep1 demo gonzago flock mce mono
 stereo pix hostIP clientIP isHost jobPriority jobThreads nodefaultvox nosamplecache
 noBackground nofocus noDevEffects noEffectScripts noMaterialScripts showConfigAlerts silent
-verboseaudio 4.0 5.1 automation`.
+verboseaudio 4.0 5.1 automation` **and the device flags `w` (windowed), `f` (fullscreen),
+`r` (resolution `WxH`)**.
 Keys are stored **without** a leading dash; the dash is the shell-side convention.
-`-w` is absent from this list → our windowed flag is our own convention (VERIFY row 15).
+**Trap:** the original really does use single-letter flags (`w`/`f`/`r`), so a name-length
+filter of ≥2 silently loses them — `tools/arg_vocab.py` now takes `min_len=1` at a verified
+helper call site.
 
 ## Traps hit in session 3b (capture + fault tolerance)
 

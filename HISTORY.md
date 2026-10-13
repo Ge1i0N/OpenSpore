@@ -42,6 +42,23 @@ must not be trusted). Conclusion, recorded in MEMORY: **vertices are interleaved
 attributes, so the header bbox is a mesh summary and the attribute layout must come from the loader's
 disassembly. Byte-scanning cannot resolve it.
 
+### `-w` / `-f` / `-r` — VERIFY row 15 upgraded from DRAFT to DISASM-VERIFIED
+Row 15 had said "our `-w` is our own convention" and pointed at `screenWindowed` 0x014111d0. That was
+wrong: `screenWindowed` is a **RenderWare device metric** (it sits in a `{name,index}` table at
+0x1411440, index 14, next to `screenWidth`/`screenHeight`/`screenBPP`), not a command-line flag. The
+real handling is in the device-creation function `0x7e74a0..0x7e7637`: it fills a config struct with
+the 800×600 default (the known `push 0x320 / push 0x258`), overrides width/height if `r` (0x1413ac4)
+is present by parsing it with `%dx%d` (0x1413ab8, import 0x13cc4e0), then looks up `f` (0x1413ab0)
+and `w` (0x1413ab4) through the same arg helper `0x92b570` and sets a windowed byte — `f`→0, `w`→1,
+with `f` tested first so **`w` wins**. The sole `GetCommandLineA` consumer `0x00e20b5a` converts the
+ANSI command line to UTF-16 (`0x93c510`), which is why the arg helper compares UTF-16 names.
+
+Why the old census missed them: `tools/arg_vocab.py` required names ≥2 characters, so the
+single-letter flags `w`/`f`/`r` were silently dropped. It now takes `min_len=1` at a verified helper
+call site; the vocabulary grew from 56 to **60 names** and 72→76 decodable call sites.
+`cmdline.cpp` now implements `-f` and `-r WxH` (with `w` beating `f`), and all four cases were
+measured against the log (see below).
+
 Also this session: the model-manager globals' getter/setter pairs were located
 (`0x67dcd0..0x67df70` are one-line getters/setters for `0x15fd8b0..0x15fd8d0`), and the setter used
 by the rw4 handler (`0x67df40`, manager `0x15fd8c4`) is called from `0x7a71cb` / `0x7a7efa` — so the
@@ -55,6 +72,11 @@ Windowed regression: `-w -devDirs -capture hl.bmp -captureAfter 20 -quitAfter 35
 `window ... icon=embedded`, `device windowed 1280x720`, `font atlas ready`, `showing real asset
 vehiclepainticons~/be_basic_shake_05.png`, capture 3,686,454 bytes.
 gmdl stride test: the bbox-match search reported no candidate; recorded with the method.
+`-w`/`-f`/`-r` (headless, log `flags:`): `-f -r 1024x768` → `windowed=0 … 1024x768`;
+`-w -r 800x600` → `windowed=1 … 800x600`; `-f -w -r 640x480` → `windowed=1` (**w wins**);
+`-r=1920x1080` → `windowed=1 … 1920x1080`.
+`tools/arg_vocab.py 0x92b570 --out analysis/arg_vocab.md` → 76 call sites, 76 decodable,
+60 distinct names (now includes `w`, `f`, `r`).
 
 ---
 

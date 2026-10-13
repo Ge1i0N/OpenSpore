@@ -31,8 +31,13 @@ def out(s: str = "") -> None:
     sys.stdout.buffer.write((s + "\n").encode("ascii", "replace"))
 
 
-def decode(pe: PE, va: int) -> tuple[str, str] | None:
-    """Return (kind, text) if `va` looks like a string, else None."""
+def decode(pe: PE, va: int, min_len: int = 2) -> tuple[str, str] | None:
+    """Return (kind, text) if `va` looks like a string, else None.
+
+    `min_len` guards against noise: 2 for the general census, 1 only at a verified arg-helper
+    call site (the original has single-letter device flags - "w", "f", "r" - which a >=2
+    filter silently drops; see the device-creation function at 0x7e74a0).
+    """
     sec = pe.section_of(va)
     if sec is None or sec["name"] not in (".rdata", ".data", "CONST"):
         return None
@@ -45,8 +50,8 @@ def decode(pe: PE, va: int) -> tuple[str, str] | None:
         u = pe.wstr(va)
     except Exception:  # noqa: BLE001
         pass
-    a_ok = len(a) >= 2 and all(32 <= ord(c) < 127 for c in a)
-    u_ok = len(u) >= 2 and "\\" not in u and all(32 <= ord(c) < 127 for c in u)
+    a_ok = len(a) >= min_len and all(32 <= ord(c) < 127 for c in a)
+    u_ok = len(u) >= min_len and "\\" not in u and all(32 <= ord(c) < 127 for c in u)
     # Prefer whichever is longer/cleaner; a UTF-16 name reads as alternating NULs in ASCII.
     if u_ok and (not a_ok or len(u) > len(a)):
         return ("utf16", u)
@@ -85,7 +90,9 @@ def main() -> int:
             if j < 0 or blob[j] != 0x68:
                 continue
             imm = struct.unpack("<I", blob[j + 1 : j + 5])[0]
-            d = decode(pe, imm)
+            # min_len=1: the original has single-letter flags ("w", "f", "r"); they are only
+            # accepted here, at a real helper call site, so the noise stays out.
+            d = decode(pe, imm, min_len=1)
             if d:
                 found = (j, imm, d)
                 break
@@ -95,7 +102,7 @@ def main() -> int:
     names: Counter[str] = Counter()
     detail: list[tuple[int, int, str, str]] = []
     for site, imm in sites:
-        d = decode(pe, imm)
+        d = decode(pe, imm, min_len=1)
         if not d:
             continue
         kind, txt = d

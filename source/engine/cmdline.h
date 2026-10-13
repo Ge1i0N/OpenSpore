@@ -27,8 +27,9 @@ struct Args {
     std::vector<std::string> raw;          // every token, lowercased keys already split
     std::vector<std::pair<std::string, std::string>> kv;  // (key, value-or-"")
 
-    // well-known flags (vocabulary from analysis/arg_vocab.md)
-    bool windowed = true;        // -w  (PROMPT.md test arg; original's windowed default is verified below)
+    // well-known flags (vocabulary from analysis/arg_vocab.md; the short device flags -w/-f/-r
+    // come from the device-creation function at 0x7e74a0..0x7e7637, see cmdline.cpp)
+    bool windowed = true;        // -w windowed / -f fullscreen; -r <WxH> sets width/height
     bool dev_dirs = false;       // -devDirs
     bool ship_dirs = false;      // -shipDirs  (wins over devDirs, per 0x7e838e)
     bool no_dev = false;         // -noDev

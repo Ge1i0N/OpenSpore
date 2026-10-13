@@ -212,17 +212,17 @@ silent verboseaudio 4.0 5.1 automation …`).
 2. **`gmdl` (0x00E6BCE5, 11,041) is ALSO a mesh format** — per-variant discovery; every payload
    starts with dword `8` and contains `{0x1B684E2F,...}` groups (`0x1B684E2F` = rw4 id
    byte-swapped, so big-endian tags). Tools: `tools/gmdl*.py`.
-3. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle `-w`
-   (VERIFY row 15).
-4. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
-5. Wire loose directories (unpacked trees) into `fs` as a data source; a separate `OpenSpore.Cli`
+3. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
+4. Wire loose directories (unpacked trees) into `fs` as a data source; a separate `OpenSpore.Cli`
    binary would be tidier than `-headless`, but the capability already exists.
 
 Done and off the list: `.package` header + fixed-stride index (session 4: 57 files, 0 invalid,
 17,901 records, 0 violations), in-engine frame capture (✅ `GetBackBuffer` →
 `GetRenderTargetData` between `EndScene` and `Present`; `analysis/shots/loader_capture.png`
-and `loader_packages.png` show readable text), and the abort-recovery exercise
-(✅ 5 recoveries + storm exit).
+and `loader_packages.png` show readable text), the abort-recovery exercise
+(✅ 5 recoveries + storm exit), **`-w`/`-f`/`-r`** (session 12: row 15 DISASM-VERIFIED — the real
+handling is in the device fn `0x7e74a0..0x7e7637`; `w` beats `f`; `r` is `%dx%d`), and **headless
+mode** (session 12).
 
 ## Standing rules for whoever continues
 

@@ -31,7 +31,7 @@ no disasm yet) · `UNVERIFIED-DRAFT` (a drafted body, by definition not a revers
 | 12 | Crash stack walker capability | dbghelp imports + `0x007e…` | `Stack trace is:` 0x013f8cb0 | **DISASM-VERIFIED** (imports: SymInitialize/SymLoadModule64/SymGetSymFromAddr64/SymGetLineFromAddr64/SymSetOptions/UnDecorateSymbolName/SymCleanup) | `engine/diag.cpp` (produced a real symbolised stack live) |
 | 13 | Engine = RenderWare, statically linked, on D3D9 | — | `vb -<used> dumps information about the RenderWare vertex buffer free (or used) lists.` 0x0140a980 (and index-buffer twin 0x0140a9f0) | **DISASM-VERIFIED** (string) / plugin family **not started** | roadmap |
 | 14 | Single D3D9 import | IAT slot `0x013cc…` | `d3d9.dll!Direct3DCreate9` (the only d3d9 import) | **DISASM-VERIFIED** (import table) | `render/device.cpp` uses exactly `Direct3DCreate9` |
-| 15 | `-w` (windowed) handling | raw-argv parser at `0x00e20b5a` (sole `GetCommandLineA` consumer) | `screenWindowed` 0x014111d0 (**no** immediate .text ref) | **DRAFT** — our `-w` is our own convention | `cmdline.cpp` |
+| 15 | **`-w` / `-f` / `-r` device flags** (windowed / fullscreen / resolution) | device-creation fn `0x7e74a0..0x7e7637`: it looks up `f` (0x1413ab0) then `w` (0x1413ab4) via the arg helper and sets a windowed byte (`f`→0, `w`→1, so `w` wins), and parses `r` (0x1413ac4) with `sscanf`-style `%dx%d` (0x1413ab8, import 0x13cc4e0). Sole `GetCommandLineA` consumer `0x00e20b5a` → ANSI→UTF-16 `0x93c510` | `w` 0x1413ab4, `f` 0x1413ab0, `r` 0x1413ac4, `%dx%d` 0x1413ab8. (`screenWindowed` 0x014111d0 is a **RenderWare device metric**, not a CLI flag) | **DISASM-VERIFIED** | `cmdline.cpp` (`-w`/`-f`/`-r`; `w` beats `f`) |
 | 16 | Package/asset format | — | `package.big`, `Spore Baked Texture` 0x013ef048, `Created by Spore Editor` 0x013ef05c | **UNVERIFIED-DRAFT** | ⛔ blocked on assets |
 | 17 | Beta PDB module topology | — | `c:\BuildAgent\cm4-build312-spore\CMBuild\obj\Win32\debugrelease\SPGonzago\SPGonzagoPCH.obj` | **DISASM-VERIFIED** (ANSI in module streams) | `analysis/pdb_topology.md` (9 projects; `SPGonzago` 348 paths) |
 | 18 | **DBPF magic is an immediate, not a string** | `0x008d90d6` (`cmp dword [ecx],0x46504244`) | none — "DBPF" appears 0 times in `.rdata`/`.text` | **DISASM-VERIFIED** (`tools/find_imm.py --ascii DBPF` → 2 sites) | `tools/pkg_records.py` reads it from the files |
@@ -60,13 +60,13 @@ no disasm yet) · `UNVERIFIED-DRAFT` (a drafted body, by definition not a revers
    The extension is `.package`, not `.package.big` (user correction: `.big` is just EA's
    internal name for the archives).
 2. **RenderWare plugin-registration family** (row 13): from `0x0140a980`'s referrers outward.
-3. **Disassemble `0x00e20b5a`'s callee** to settle `-w` (row 15).
-4. Row 8 completion: walk the path-assembly block, then upgrade `fs.cpp` from interpretation
+3. Row 8 completion: walk the path-assembly block, then upgrade `fs.cpp` from interpretation
    to reversal.
-5. Extract `render/rhi.h` when the RW bridge starts (`IDEAS.md` §1).
+4. Extract `render/rhi.h` when the RW bridge starts (`IDEAS.md` §1).
 
-Done since this list was first written: **in-engine frame capture** and **the abort-resilience
-exercise** — both are in the matrix below with their measurements.
+Done since this list was first written: **in-engine frame capture**, the **abort-resilience
+exercise**, **`-w`/`-f`/`-r`** (row 15, DISASM-VERIFIED) and **headless mode** — all are in the
+matrix below with their measurements.
 
 ## Verification matrix for our own build (what "verified" means here)
 
@@ -75,6 +75,7 @@ exercise** — both are in the matrix below with their measurements.
 | Builds clean | `cmake --build build --config Debug` → `-> ...\OpenSpore.exe`, no `error C/LNK`, no `warning C` |
 | Boots | log shows `yardstick: 10/10 markers OK` |
 | Runs with `-w -devDirs` | log: `flags: windowed=1 devDirs=1 shipDirs=0 useDevDirs=1` |
+| `-w`/`-f`/`-r` match the original | log `flags:` for four cases: `-f -r 1024x768` → `windowed=0 … 1024x768`; `-w -r 800x600` → `windowed=1 … 800x600`; `-f -w -r 640x480` → `windowed=1` (**w wins**, as the disasm's test order dictates); `-r=1920x1080` → `windowed=1 … 1920x1080` |
 | shipDirs wins | log: `-devDirs -shipDirs` → `useDevDirs=0`, `search mode=SHIP, 3 paths` |
 | Window + icon exist | log: `window 010C0D18 'OpenSpore - Loader' … icon=embedded` |
 | Renderer initialised | log: `device windowed 1280x720 vsync=1 (desktop 1692x919 fmt=22)` |

@@ -1,8 +1,8 @@
 # Argument vocabulary via helper 0x0092b570
 - oracle: SporeApp.exe.unpacked.exe
 - call sites to the helper: 76
-- sites with a decodable name pushed: 72
-- distinct names: 56
+- sites with a decodable name pushed: 76
+- distinct names: 60
 
 ## Vocabulary (alphabetical)
 
@@ -24,12 +24,14 @@
 - `dumpShadersForPIX`  x1
 - `dumptelemetry`  x1
 - `ep1`  x1
+- `f`  x1
 - `flock`  x1
 - `gonzago`  x1
 - `hostIP`  x1
 - `isHost`  x1
 - `jobPriority`  x1
 - `jobThreads`  x1
+- `l`  x1
 - `locale`  x1
 - `mce`  x1
 - `mono`  x1
@@ -52,6 +54,7 @@
 - `pix`  x1
 - `pollenLogin`  x1
 - `preload`  x2
+- `r`  x1
 - `safe`  x3
 - `shipDirs`  x6
 - `showConfigAlerts`  x1
@@ -61,6 +64,7 @@
 - `userDataDir`  x1
 - `vSync`  x1
 - `verboseaudio`  x1
+- `w`  x1
 - `writeableData`  x1
 
 ## Call sites
@@ -74,6 +78,7 @@
 | 0x006964f7 | 0x013f8dc8 | utf16 | `devDirs` |
 | 0x00696511 | 0x013f8db4 | utf16 | `shipDirs` |
 | 0x00696719 | 0x01403e18 | utf16 | `locale` |
+| 0x0069674b | 0x01403e14 | ascii | `l` |
 | 0x00697bfa | 0x01408254 | utf16 | `noAsserts` |
 | 0x007cd8aa | 0x01411b8c | utf16 | `safe` |
 | 0x007cd8c9 | 0x01411b68 | utf16 | `showConfigAlerts` |
@@ -86,6 +91,9 @@
 | 0x007e6f68 | 0x01413a2c | utf16 | `flock` |
 | 0x007e70e8 | 0x014139d4 | utf16 | `vSync` |
 | 0x007e7111 | 0x014139c4 | utf16 | `noVSync` |
+| 0x007e758b | 0x01413ac4 | ascii | `r` |
+| 0x007e75e7 | 0x01413ab4 | ascii | `w` |
+| 0x007e75ff | 0x01413ab0 | ascii | `f` |
 | 0x007e7f3b | 0x013f8dc8 | utf16 | `devDirs` |
 | 0x007e7f50 | 0x013f8db4 | utf16 | `shipDirs` |
 | 0x007e7f7b | 0x01413cfc | utf16 | `dataDir` |

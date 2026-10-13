@@ -66,7 +66,8 @@ Args parse_tokens(const std::vector<std::string>& tokens) {
                 const std::string& nx = tokens[i + 1];
                 static const char* value_keys[] = {"state",  "preload",  "locale",     "dataDir",   "userDataDir",
                                                    "width",  "height",   "logLevel",   "dataBaseDir",
-                                                   "capture", "captureAfter", "exec", "execAfter", "quitAfter"};
+                                                   "capture", "captureAfter", "exec", "execAfter", "quitAfter",
+                                                   "r"};  // -r <WxH>, the original's resolution flag
                 for (const char* vk : value_keys) {
                     if (ci_eq(key, vk)) {
                         val = nx;
@@ -82,8 +83,26 @@ Args parse_tokens(const std::vector<std::string>& tokens) {
 
     // Well-known mapping. Keys are matched case-insensitively because the original's
     // vocabulary is camelCase but Windows shells mangle case habits.
-    a.windowed = a.has("w") || a.has("window") || a.has("windowed") || !a.has("fullscreen");
-    if (a.has("fullscreen")) a.windowed = false;
+    //
+    // Windowed/fullscreen/resolution are the original's own short flags, read straight from
+    // the device-creation function at 0x7e74a0..0x7e7637: it looks up "f" (0x1413ab0) and
+    // "w" (0x1413ab4) through the arg helper and sets a windowed byte (f -> 0, w -> 1), and
+    // parses "r" (0x1413ac4) with the format "%dx%d" (0x1413ab8). f is tested first, so w
+    // wins if both are present. Our loader defaults to windowed (a deliberate divergence:
+    // the original's default comes from the `screenWindowed` device metric, which we do not
+    // read yet).
+    a.windowed = true;
+    if (a.has("f") || a.has("fullscreen")) a.windowed = false;
+    if (a.has("w") || a.has("window") || a.has("windowed")) a.windowed = true;
+    if (a.has("r")) {
+        const std::string res = a.get("r");
+        size_t x = res.find_first_of("xX");
+        if (x != std::string::npos) {
+            int w = atoi(res.substr(0, x).c_str());
+            int h = atoi(res.substr(x + 1).c_str());
+            if (w > 0 && h > 0) { a.width = w; a.height = h; }
+        }
+    }
     a.dev_dirs = a.has("devdirs");
     a.ship_dirs = a.has("shipdirs");
     a.no_dev = a.has("nodev");
