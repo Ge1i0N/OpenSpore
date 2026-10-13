@@ -6,7 +6,7 @@
 > (functions we have actually reversed/named).
 
 **105,239** candidate function starts in `.text` (upper bound; see the tool's note) ·
-**41** functions reversed/named · **0.032%** coverage.
+**45** functions reversed/named · **0.036%** coverage.
 
 This is deliberately a HARD number, and it is small. It is not in tension with the feature
 map's high engine figure: the feature map measures the scope we chose (boot chain + asset
@@ -17,7 +17,7 @@ are barely touched. Both are true; together they are the honest picture.
 
 | area | count |
 |---|---|
-| startup | 18 |
+| startup | 22 |
 | rw4 | 11 |
 | packages | 9 |
 | core | 2 |
@@ -43,12 +43,16 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x007e40f2` | StateRegister | startup | state registration: hash(name) stored at [state+0x28], dup rejected |
 | `0x007e4f40` | StateVerbCtor | startup | the 'state' console verb (option table pushed as immediates) |
 | `0x007e6850` | AppModeInitSubsystems | startup | vtable+0x14; allocs subsystem objects (0x68db60/0x696400/0x67e040/0x68c0c0/0x6895b0/0x7ec170) |
+| `0x007e7160` | AppEventDispatch | startup | switches on hashed app event ids; 0xf62add branch retries 10x |
 | `0x007e7430` | AppModeCreateDevice | startup | vtable+0x1c; tries 640x480; 'Could not create the Graphics Device.' |
 | `0x007e74a0` | CreateDevice | render | reads -f/-w/-r; 800x600 default; error contract strings |
 | `0x007e76e0` | AppModeCtor | startup | ctor of the 496-byte app-mode/config object; zeroes +0x159 (useDevDirs) |
 | `0x007e8a00` | CreateAppMode | startup | alloc 0x1f0 bytes, ctor 0x7e76e0; the app-mode/state host |
 | `0x007e93d0` | AppModeSetupPlugins | startup | vtable+0x18; -noPlugins/-safe gate -> 0x7e8810 |
 | `0x007eaae0` | AppModeShaderConfig | startup | vtable+0x20; -dumpShaders/-pix/-noScripts/-noEffectScripts... |
+| `0x00849b20` | WindowCtor | startup | ctor of the window/input class (vtable 0x141cc10) |
+| `0x00849bf0` | WindowCreate | startup | RegisterClass/CreateWindowEx; HWND at [obj+0x70] |
+| `0x00849e80` | WindowDtor | startup | window class destructor |
 | `0x0084a050` | MessagePump | startup | the only PeekMessageA caller; drains queue + coalesces mouse; vtable slot 0x141cc98 |
 | `0x008d8bf0` | DbpfRead | packages | the byte reader read(buf,size) |
 | `0x008d8f70` | DbpfLoadHeader | packages | reads exactly 0x60 header bytes (cmp eax,0x60) |

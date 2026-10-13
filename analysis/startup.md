@@ -110,10 +110,20 @@ next attempt does not repeat them:
   So the pump's call site uses an offset/vtable we have not pinned, or the object's vtable base is
   not `0x141cc10`.
 
-The window/input class **does** exist and is pinned: its vtable is **`.rdata 0x141cc10`** (written by
-the code at `0x849b26` / `0x849e85`), it wraps mouse tracking (`TrackMouseEvent` string 0x141cbfc,
-`user32.dll` 0x141cbf0), and it holds the pump at `+0x88`. Finding its constructor's caller (which
-creates the object) and its loop method is the concrete next step.
+The window/input class is pinned down:
+- **vtable `.rdata 0x141cc10`**; **ctor `0x849b20`**, **Create `0x849bf0`** (RegisterClass/CreateWindowEx,
+  HWND stored at `[obj+0x70]`), **dtor `0x849e80`**; holds the **pump `0x84a050` at `+0x88`**; wraps
+  mouse tracking (`TrackMouseEvent` 0x141cbfc, `user32.dll` 0x141cbf0).
+- The window object is created in the AppMode setup function at **`0x7e6f21`** (`call 0x849b20`) and
+  stored at **`[AppMode+0x10]`**; that same function then calls `Window::Create` (`[win]->+0x04`),
+  sets window flags `0x2a`/`0x6a` (`-flock` 0x1413a2c ORs `0x80`), inits the renderer, reads
+  `-vSync` (0x14139d4) / `-noVSync` (0x14139c4), and on renderer failure shows
+  `Could not start the renderer.` (0x14139e0). It does **not** loop.
+- **`0x7e7160`** is the app **event dispatcher** (switches on hashed event ids 0x255abf5 / 0xf62add /
+  0x212d3e7 / 0xae1cfe73); the 0xf62add branch has a retry loop (10x, `Sleep(0xfa)`).
+
+The main loop that drives the pump is still not located; the remaining leads are the AppMode slots
+not yet read (`0x7e5f20`..`0x7e5f70`) and the caller of the setup function.
 
 ## Still to trace (next steps, in order)
 
