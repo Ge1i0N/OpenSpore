@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 81.8%** | **Overall: 75.1%** | done 176 / partial 25 / todo 50 (251 features)
+**Engine reversal: 82.2%** | **Overall: 75.5%** | done 180 / partial 25 / todo 50 (255 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **27%** | 3 | 6 | 13 |
+| formats | **38%** | 7 | 6 | 13 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **30%** | 2 | 2 | 6 |
@@ -285,9 +285,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 27%
+## formats — 38%
 
-*3 done · 6 partial · 13 todo*
+*7 done · 6 partial · 13 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -303,7 +303,11 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | sound (snr) | 29400 resources |
 | ⬜ | todo | soundProp | 19296 resources |
 | 🚧 | partial | spui layout | 524 screens (407 named); DESERIALIZER DOOR FOUND: factory 0x810870 + loader 0x810940 (type id 0x250FE9A2 confirmed in code); it is a UTF/XmlTokenReader TOKEN STREAM, so byte parsing was doomed |
-| ⬜ | todo | spui token alphabet | the next step, now narrow: 0x901680 read-token / 0x9016e0 peek / 0x900e10 error, 2048-byte buffer, flag bit &0x8 |
+| ✅ | done | spui token alphabet | NOT bit-packed: byte-packed records id(4)|code:u16|marker(==1)|payload, code stable per id (94.5% of high ids), sizes measured 9/11->4, 16->16 rectf, 17->8, 20->6, 19->array count, 18->string |
+| ✅ | done | spui schema (the dictionary) | 14 `xml` resources = the shipped Spore UI Designer project: 306 proxy ids (66 Class + 240 Property), 227 present in spui, 748/748 layouts carry them |
+| ✅ | done | spui windows | 22,384 windows extracted with real Area rects (618,183,802,209 / 49,6,161,23 / 0,0,40,26), WindowFlags, colors, fonts, across all 748 layouts |
+| ✅ | done | layout -> locale table | code 18 splits on 0xFFFF: 4,207 inline UTF-16 + 3,107 refs, of which 21/36 distinct are en-us locale TABLE instances (accidental rate 4.66e-08); 0x2B7A0311 = fnv1_lower(GalaxyGameEntry) in BOTH directions |
+| ⬜ | todo | spui full sequential parse | walk derails in 637/748 with 'id not in schema' - the designer XML lists only 227 of the ids the binaries use. Remaining work is VOCABULARY, not structure |
 | 🚧 | partial | gmsh | stable 24-byte header found (BE words + float runs); layout not derived |
 | 🚧 | partial | blockdata | vec3 array; first two = min/max bbox |
 | ⬜ | todo | bea | 2621 resources |

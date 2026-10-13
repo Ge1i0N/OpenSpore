@@ -93,6 +93,90 @@ enclosing block, a high id is global. Any decoder that treats the low band as gl
 confident garbage — which is precisely what my first word-aligned matcher did, reporting
 `0x00000003` as "Wrapping" 746 times.
 
+## CORRECTION to this file: the bit-packing claim was wrong about the mechanism
+
+Written earlier in this session and repeated in `MEMORY.md`/`RESUME.md`:
+
+> "1,441,987 of 1,911,484 hits are off-boundary, so the stream is not word-aligned, exactly as a token
+> stream predicts."
+
+That inference was **wrong**, and the audit-of-my-own-work instinct is what caught it. The aggregate
+mod-4 histogram was nearly uniform (24.56 / 24.73 / 25.58 / 25.13 %), which I read as bit packing. But
+uniformity is also what **byte-packed records whose sizes are not multiples of 4** produce, and when
+the test was redone per id, splitting ids by the number of zero bytes in their 4-byte pattern (padding
+satisfies 3-and-4-zero-byte patterns trivially, so the aggregate was worthless), the result was:
+
+```
+  zc=0  ids seen 215/247  hits 494,552   mod4: 24.2% 22.7% 28.8% 24.4%
+  zc=1  ids seen  18/38   hits  70,787   mod4: 25.5% 24.5% 25.6% 24.4%
+```
+
+Even the zero-free ids — which cannot arise from padding — sit uniformly across all four alignments.
+Combined with the measured record sizes (`tools/spui_read.py`: code 9/11 → 12-byte records, code 20 →
+**14**, code 18 → variable), the drift is fully explained: a 14-byte record moves the cursor off the
+4-byte grid by 2, and the offsets accumulate. **The stream is byte-packed, not bit-packed.** No bit
+cursor is needed to read the records; the reader needs the per-code sizes.
+
+The lesson is the same one this session keeps teaching, one level up: a distribution that matches a
+hypothesis is not evidence for it when other hypotheses predict the same distribution. The discriminating
+test here was per-id, not aggregate — and it was cheap.
+
+## The integration: a layout names its LOCALE TABLE, and the strings are the menu's own
+
+`tools/spui_table_ref.py`. Code 18 (`string` / `string_resource`) is **overloaded** into two forms,
+separated by a leading u16 of `0xFFFF`:
+
+```
+  'not inline' (leading u16 == 0xFFFF): 3,107 anchors, 36 distinct references
+  inline UTF-16 (leading u16 = length): 4,207 anchors, 70 distinct lengths
+     len=8 chars x1874 -> u32 0x006F0054 = UTF-16 "To"
+     len=5 chars x241  -> u32 0x00300033 = UTF-16 "30"
+```
+
+Of those 36 references, **21 are real en-us `locale` TABLE instances** — against an accidental rate of
+200/2^32 = 4.66e-08. And the tables they name are the game's UI text:
+
+| ref | anchors | the table's own first strings |
+|---|---|---|
+| `0xC0152A6D` | 846 | **Spore Guide** |
+| `0x2B7A0311` | 394 | **STATE = GalaxyGameEntry** → "Delete Game" |
+| `0xAD7B2086` | 309 | **Audio Settings** |
+| `0xF5E156F8` | 236 | Out of Range |
+| `0x7C6511A1` | 140 | **Sort By:** |
+| `0xC047E881` | 128 | Beat |
+| `0x2C978DA4` | 104 | **Create a Creature** |
+| `0xB7BCEF68` | 86 | Registration |
+| `0x40D7E685` | 42 | **OK** |
+| `0x8B96F855` | 41 | **Missions List** |
+| `0xA1C68F50` | 25 | Ban Content |
+| `0xDC351566` | 14 | City Legend |
+| `0x9A5ACF10` | 10 | Carnivore |
+
+So a `spui` layout does not carry a key into a string table — it carries **the identity of the table it
+draws its text from**, and the per-string keys are resolved at runtime. That closes the loop between
+three things this session reversed independently:
+
+```
+the STATE MACHINE            GalaxyGameEntry   -id 0x02ccda9c        (analysis/states.md)
+      |  fnv1_lower(state name)
+      v
+the LOCALIZED TEXT           table instance 0x2B7A0311 -> "Delete Game", ...  (text-locale.md)
+      ^
+      |  code-18 "not inline" reference
+the UI LAYOUT                748 spui, windows with Area rects + refs        (this file)
+```
+
+`0x2B7A0311` appearing in **both** directions is the confirmation: it is `fnv1_lower("GalaxyGameEntry")`
+(the four-state cross-check from earlier) AND a code-18 reference inside real layouts. The state whose
+name hashes to a table is the same state whose layouts reference that table.
+
+**What this means for the menu path, concretely:** we can now compose a real screen without solving the
+remaining format questions. From a layout we have window geometry (`Area`, 22,384 windows across 748
+layouts, all of them) and the table its strings live in; from `source/engine/text.cpp` we already
+resolve that table's keys to the game's own strings. The open items (the presence mask, the unknown
+schema ids that make a sequential walk derail in 637/748 files, why `Area`'s payload is 16 bytes but
+some records are 14) are no longer on the critical path for showing a menu — they are refinements.
+
 ## What is still not known (recorded, not hidden)
 
 * **The exact record framing.** Pitch is stable per id, but the value does not occupy the whole gap:
@@ -100,23 +184,31 @@ confident garbage — which is precisely what my first word-aligned matcher did,
   the stream stores **only the members that differ from their schema default** (the schema carries
   `default="0"`, `default="1"`, `default="false"`, …) plus presumably a presence mask. 10 members /
   10 bytes is suggestive of one byte per present member, but that is a hypothesis, not a measurement.
-* **The bit packing.** Off-boundary id hits (1,441,987 of 1,911,484) prove fields are not
-  byte-aligned in general, so a real reader must track a bit cursor. The reader is `0x9059c0`
-  (dispatches on a mode at `[this+0x1e0]`), fed by `0x9015e0` (refills an 8192-byte buffer, sets an
-  EOF flag at `+0x70`, error codes 1/2 at `+0x04`) — so the buffer straddling is real and a token can
-  cross the 8 KB window.
-* **Why `Area` (a rectf, 16 bytes) has pitch 6.** Either the four floats are quantized, or the value is
-  an index into a shared table. Unresolved, and it is the single most important open question because
-  `Area` is the geometry.
+* **The walk derails on unknown ids, not on bit packing.** A sequential walk reaches EOF cleanly in
+  **0/748** layouts and derails in 637 with "id not in schema": some record ids in the binaries are
+  absent from the shipped designer schema (only 227 of its 306 ids appear at all), so one gap spans two
+  records. Extending the schema is the real remaining job. The reader is `0x9059c0` (dispatches on a
+  mode at `[this+0x1e0]`), fed by `0x9015e0` (refills an 8192-byte buffer, sets an EOF flag at `+0x70`,
+  error codes 1/2 at `+0x04`) — a buffered byte reader, consistent with byte-packed records rather than
+  with a bit cursor.
+* **`Area` is RESOLVED, and this file's earlier note about it was stale.** The first measurement said
+  "pitch 6, unexplained"; the per-code measurement shows `Area` carries **code 16** and a **24-byte
+  record = id(4) + code/marker(4) + payload(16)**, i.e. exactly a `rectf`, and the payload decodes to
+  real UI coordinates — `(618, 183, 802, 209)`, `(49, 6, 161, 23)`, `(0, 0, 40, 26)` across 22,384
+  windows. The "6" was an artifact of pooling low, block-scoped ids with high ones.
 
 ## The next step, and why it is now narrow
 
-Do **not** try to read the bit reader cold. Instead:
+Do **not** try to read the buffered byte reader cold. Instead:
 
 1. Take one small layout, walk it with the schema as the dictionary, and for each id read the value
    width from the MEASURED pitch table (not from the type), emitting `(class, property, raw bytes)`.
 2. Cross-check the result against the schema's defaults and base classes: any member whose raw bytes
    are absent must equal its `default`, and that equation is what reveals the presence mask.
+3. Extend the schema, because that is what actually blocks a clean walk: 637 of 748 layouts derail on
+   an id the designer XML does not list, and only 227 of its 306 ids appear in the binaries. The
+   derailing ids are the next vocabulary to recover (the `spui` bytes themselves name them, and the
+   designer XML has 66 Class ids to go with 240 Property ids).
 3. Only then touch `0x9059c0`.
 
 That is a data-driven derivation with a built-in correctness check, which is how gmdl and raster were

@@ -43,36 +43,39 @@ group AND instance names. Result: 8,499 decoded bytes of plain ArgScript → **6
 entry `state Main -id 0` ("Spore Launch Screen") → `gotoState GalaxyGameEntry` (`-id 0x02ccda9c`). The
 five stages Cell → Creature → Tribe → Civ → Space are explicit data.
 
-**Next on the path — `spui` is UNBLOCKED, by DATA rather than by the bit reader.** The script names the
-door (`cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`), and following the VERB produced
-the loader cluster `0x810870`/`0x810940` — the loader does `cmp [eax+4], 0x250FE9A2`, so our `spui` type
-id is confirmed in code. Then a type histogram over all 150,945 resources found 14 resources of type
-`xml` (`0xCF6C21B8`) nobody had dumped: they are **the Spore UI Designer's own project files, shipped in
-the game** (70,032 B format definition + 37,425 B class catalogue + fonts + manifest). Harvesting their
-`proxy` attributes gives **306 ids (66 Class + 240 Property)**, and scanning the 748 `spui` for them:
-**748/748 contain schema ids, 227 of 306 appear, and every id carries a STABLE byte pitch**
-(`Image Outline` 14 B @100%, `ShadeColor` 12 B @100%, `BorderColor` 6 B @98%) — which is what makes it a
-format instead of noise. The window record is legible now: `WindowFlags`, `ControlID`, `CommandID`,
-**`Area` (rectf — the geometry a menu needs)**, `BackgroundColor`, `ShadeColor`, `TextFont`,
-`WinProcs`, `Children`, plus the layout's CLASS id (`SimpleLayout`, `Window`) whose base-chain the
-schema supplies. Detail + the three measurements: **`analysis/spui-schema.md`**.
-Second rule that generalizes: **the id space is HIERARCHICAL** — 58 of 602 properties have ids below
-`0x100` and those are **reused per struct** (`0x01` = `Size` in Outline Format, `TextStyle` elsewhere),
-exactly like the `locale` tables' per-table key space. Treating the low band as global yields confident
-garbage (my first matcher did).
-Still open, recorded not hidden: the presence mask (a 10-member / 40-byte struct occupies 10 bytes, so
-only non-default members serialize — hypothesis), the bit packing (1,441,987 of 1,911,484 hits are
-off-boundary), and why `Area` (16-byte rectf) has pitch 6. Reader `0x9059c0`, fed by `0x9015e0`
-(8192-byte buffer → a token can straddle the window). **Do not read the tokenizer cold: walk a small
-layout with the schema as dictionary and the MEASURED pitch as width; the schema's `default=` values
-are the built-in correctness check for the presence mask.**
+**Next on the path — `spui` is UNBLOCKED, and the menu is now reachable without more format work.**
 
-**Before accepting any "the data does not exist" conclusion, re-check WHERE you looked.** This session
-proved it twice, both times with our own engine silently reading nothing: the `locale` reader reported
-"no package" because `fs.cpp` searched `exe_dir/Locale/` instead of `Data/Locale/` (the original
-appends `'Locale/'` to a DATA ROOT — disasm `0x7e863c..0x7e8661`), and the state names were an
-instance-vs-group field confusion. Neither was a missing-data problem.
+Three results, all measured this session:
 
+1. **The door.** The state script names it: `cheat "uilayout -load E3LaunchScreen 0x027996d8
+   0x0279bf9e"`. Grepping the **verb** produced factory `0x00810870` (gated on tag `0x0510A95B`) and
+   loader `0x00810940`, which does `cmp [eax+4], 0x250FE9A2` — **our `spui` type id confirmed in code**.
+2. **The dictionary was shipped in the game.** 14 resources of type **`xml` (0xCF6C21B8)** are the Spore
+   UI Designer's own project files (70 KB format definition + 37 KB class catalogue). Their `proxy`
+   attributes give **306 ids**; 227 appear in the binaries and **748/748 layouts contain them**. A record
+   is `id(4) | code:u16 | marker:u16(==1) | payload`, the code is **stable per id** (94.5% of high ids),
+   and the payload size follows the code (9/11 -> 4, **16 -> 16 = `rectf`**, 17 -> 8, 20 -> 6,
+   19 -> array count, 18 -> string). **22,384 windows extracted with real geometry**: `Area` decodes to
+   `(618, 183, 802, 209)`, `(49, 6, 161, 23)`, `(0, 0, 40, 26)`, plus `WindowFlags`, colours, fonts.
+3. **A layout names its LOCALE TABLE.** Code 18 splits on a leading `0xFFFF` into 4,207 inline UTF-16
+   strings and 3,107 references — **21 of 36 distinct refs are real en-us locale table instances**
+   (accidental rate 4.66e-08): `0xC0152A6D` "Spore Guide", **`0x2B7A0311` = `fnv1_lower("GalaxyGameEntry")`**,
+   `0xAD7B2086` "Audio Settings", `0x7C6511A1` "Sort By:", `0x2C978DA4` "Create a Creature", `0x40D7E685`
+   "OK", `0x8B96F855` "Missions List". That links the **state machine**, the **localized text** and the
+   **UI layout** — three systems reversed independently — and it means we can compose a real screen now:
+   geometry from the layout, text from `source/engine/text.cpp`.
+
+**CORRECTION to my own earlier claim, recorded because it is the transferable part:** I had written that
+the off-boundary id hits proved `spui` is **bit-packed**. It is not — the stream is **byte-packed with
+record sizes that are not multiples of 4**, which drifts the cursor and produces the same uniform mod-4
+histogram. The zero-free ids (which padding cannot explain) are still uniform across alignments, so the
+bit-packing inference was unfounded. A distribution matching your hypothesis is not evidence for it.
+
+**So the remaining format work is vocabulary, not structure:** a sequential walk derails in 637/748
+files with "id not in schema" because the designer XML lists only 227 of the ids the binaries use.
+Detail + all measurements: **`analysis/spui-schema.md`**, `tools/spui_schema.py`, `spui_align.py`,
+`spui_shape.py`, `spui_records.py`, `spui_typecode.py`, `spui_read.py`, `spui_windows.py`,
+`spui_table_ref.py`.
 ## Audit of our own work (DONE, session 13)
 
 User request: use Ghidra to check **everything, starting from `Main`**, to see whether we started

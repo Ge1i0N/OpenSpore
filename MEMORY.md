@@ -527,34 +527,60 @@ tree ships lowercase `en-us`, `-locale` may be spelled any way).
 disassemble, not a fact to accept.** Two of our "the data does not exist" conclusions (locale text,
 and the state names still outstanding) are of this class.
 
-## The `spui` door: it is a TOKEN STREAM, and byte parsing was always doomed
+## The `spui` door: the format's DICTIONARY is shipped in the game, and it is BYTE-packed
 
-Full detail: **`analysis/spui-loading.md`**. The durable facts:
+Full measurement: **`analysis/spui-schema.md`**. The durable facts, INCLUDING A RETRACTION of what this
+file said earlier in the same session.
 
-* **The door is named by the DATA, not by the bytes.** The recovered state script contains
-  `cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`. Grepping for the VERB `uilayout`
-  produced the whole class cluster in one step. Grepping for the FORMAT (`spui`, layout names) had
-  produced nothing for sessions. **Search for the command, not the data, when the data is opaque.**
-* **Factory `0x00810870`**, gated on the resource-manager request tag **`0x0510A95B`**, allocates 0x24
-  under the tag `"App/SPUILayoutResource"` (`0x014183ac`).
-* **Loader `0x00810940`** does `cmp dword [eax+4], 0x250FE9A2` — **the `spui` type id confirmed in
-  code**, not inferred from `reg_type.txt` + the package index as before. It then builds the triple
-  `UI/UILayoutBinary/SharedPointer` (0x18), `UI/UILayoutBinary/MemoryStream` (0x24) and
-  `UI/cSPUILayoutResource/TokenIOContext` (0x38), all three class names present as strings.
-* **`TokenIOContext` ctor `0x00903330`** installs read/write callbacks `0x925e80` / `0x925eb0` (thin
-  thunks onto the MemoryStream vtable slots +0x08 / +0x0c) and a **2048-byte** buffer (`mov [edi],0x800`).
-* The reader family is UTFKernel's **`XML/TokenReader`** (`0x0143a450`, used at `0x00903100`, which
-  calls `0x901680` read-token / `0x9016e0` peek / `0x900e10` error and tests a token flag with
-  `and eax,0x8`).
-* **Therefore `spui` is a serialized token stream, not a struct with unknown field order.** That is why
-  the 273-byte sample never aligned to floats or u32s and why `b0 c1 ee 09` recurred like noise.
-  **There is no stride to find.** The next step is the token alphabet, from those three functions.
+* **The door is named by the DATA, not the bytes.** The recovered state script contains
+  `cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`. Grepping `.rdata` for the **verb**
+  produced the class cluster in one step, after grepping for the *format* had produced nothing for
+  sessions. **Search for the command, not the data, when the data is opaque.**
+* **Factory `0x00810870`** (gated on request tag `0x0510A95B`, alloc 0x24 tag
+  `"App/SPUILayoutResource"`) -> **loader `0x00810940`**, which does `cmp dword [eax+4], 0x250FE9A2` —
+  **the `spui` type id confirmed in CODE**, not inferred from `reg_type.txt` + the index. It builds
+  `UI/UILayoutBinary/SharedPointer` (0x18) + `.../MemoryStream` (0x24) +
+  `UI/cSPUILayoutResource/TokenIOContext` (0x38); the reader ctor is `0x00903330`, the family is
+  UTFKernel's **`XML/TokenReader`** (`0x014183c4`, `0x0143a450`, used at `0x00903100`).
+* **The schema was shipped all along.** A type histogram over all 150,945 resources found 14 resources
+  of type **`xml` (0xCF6C21B8)** nobody had ever dumped: the Spore UI Designer's own project files,
+  including a 70,032-byte format definition and a 37,425-byte class catalogue. Harvesting their `proxy`
+  attributes yields **306 ids (66 Class + 240 Property)**; 227 appear in the `spui` binaries, and
+  **748/748 layouts contain them**. There is no stride to guess because the names were in the data.
+* **A record is `id(4) | code:u16 | marker:u16(==1) | payload`.** The u16 is a **TYPE CODE, stable per
+  id** (94.5% of the high ids have exactly one value across the corpus), and the marker is 0x0001 in
+  98.4% of 1,098,129 anchors. Measured payload sizes: code 9/11 -> 4, **16 -> 16 (`rectf`)**, 17 -> 8
+  (`pointf`), 20 -> 6, 19 -> a u16 array count, 18 -> string.
+* **RETRACTION: the stream is BYTE-packed, NOT bit-packed.** This file previously said "1,441,987 of
+  1,911,484 id hits are off-boundary, so the stream is not word-aligned, exactly as a token stream
+  predicts". The aggregate mod-4 histogram (24.6/24.7/25.6/25.1%) is nearly uniform, and so is the
+  **zero-free** subset (215 ids, 494,552 hits: 24.2/22.7/28.8/24.4%) — which padding cannot explain, but
+  which **record sizes that are not multiples of 4** explain exactly (code 20 -> a 14-byte record
+  drifts the cursor by 2, and it accumulates). **A distribution that matches your hypothesis is not
+  evidence for it when other hypotheses predict the same distribution; the discriminating test was
+  per-id, and it was cheap.** No bit cursor is needed.
+* **`Area` is RESOLVED.** An earlier note here called its pitch 6 and left it as the most important open
+  question; that was an artifact of pooling block-scoped LOW ids with HIGH ones. `Area` carries code 16
+  and a 24-byte record = `rectf`, and it decodes to real UI coordinates across **22,384 windows**:
+  `(618, 183, 802, 209)`, `(49, 6, 161, 23)`, `(0, 0, 40, 26)`.
+* **THE INTEGRATION THAT CLOSES THE MENU PATH: a layout names its LOCALE TABLE.** Code 18 is
+  overloaded, split by a leading u16 of `0xFFFF`: 4,207 inline UTF-16 strings (`len=8 -> "To..."`) and
+  **3,107 references, of which 21 of 36 distinct values are real en-us `locale` TABLE INSTANCES**
+  (accidental rate 200/2^32 = 4.66e-08). The tables they name are the game's menu text:
+  `0xC0152A6D` "Spore Guide" x846, **`0x2B7A0311` = `fnv1_lower("GalaxyGameEntry")` x394**,
+  `0xAD7B2086` "Audio Settings" x309, `0x7C6511A1` "Sort By:" x140, `0x2C978DA4` "Create a Creature",
+  `0x40D7E685` "OK", `0x8B96F855` "Missions List". So a layout carries **the table it draws text from**,
+  not a per-string key. `0x2B7A0311` appearing in BOTH directions (as a state-name hash and as a layout
+  reference) is the confirmation, and it links the state machine, the localized text and the UI layout —
+  three systems reversed independently in one session.
+* **Still open, and it is not the bit format:** a sequential walk reaches EOF cleanly in **0/748**
+  layouts and derails in 637 with "id not in schema", because the designer XML lists only 227 of the ids
+  the binaries use. **Extending the schema is the remaining job**, and it is vocabulary, not structure.
 * **TRAP: a `.rdata` pointer is not always a vtable.** `0x903337` stores `0x0143a460` into `[esi]`
-  exactly where a ctor puts a vtable — but those bytes are the ASCII
-  `"UTF/XmlTokenReader/TokenIOContext/mAllocator"`. Reading it as a vtable would have invented a
-  fake 12-method class; reading it as a string named the reader family for us. **Try ASCII before
-  treating a stored pointer as a vtable.** (Same trap made `0x013ebcbc` / `0x01418398` in the factory
-  look like vtables; they are not, so the factory's real shape still needs one more read.)
+  exactly where a ctor puts a vtable — it is the ASCII `"UTF/XmlTokenReader/TokenIOContext/mAllocator"`.
+  As a vtable it would have invented a fake 12-method class; as a string it named the reader family.
+  Same shape made `0x013ebcbc` / `0x01418398` in the factory look like vtables. **Try ASCII before
+  treating a stored pointer as a vtable.**
 
 ## Ghidra is now part of the toolchain (session 13)
 
