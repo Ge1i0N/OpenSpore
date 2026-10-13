@@ -17,6 +17,15 @@ packages 91%, gmdl 85%, rw4 53%, render 79%, formats 10%, gameplay 0%, platform 
 embedded in `README.md`; PROMPT/RESUME/PROGRESS/IDEAS link to it. To grow it: edit the JSON, run
 `python tools/feature_map.py`.
 
+### A function map (the honest counterweight to the feature map)
+The feature map measures the scope we chose; it can look high. So `tools/functions.py` adds a HARD
+number: candidate function starts in the oracle's own `.text` (union of E8/E9 rel32 targets, .rdata/
+.data pointers into .text, and prologues `55 8B EC` / `8B FF`), versus the functions we have actually
+reversed (`analysis/functions_named.json`). Result: **105,239 candidates, 29 reversed, 0.021%**. The
+map now draws this as a second gauge. The **beta PDB is not the denominator**: it is a different link
+(0/12 addresses match — `analysis/build_identity.md`), so it can supply names only where function
+identity matches, not addresses. Recorded in `analysis/functions.md`.
+
 ### Our renderer now draws a decoded gmdl mesh
 The solved gmdl geometry (session 12) is now on OUR screen: `source/engine/gmdl.cpp` is the C++
 port of the parser, `source/render/mesh.cpp` uploads positions+indices, computes smooth normals and

@@ -132,7 +132,7 @@ def render_png(data: dict, out: Path) -> None:
         row_h = max(row_h, h)
     content_h = y + row_h
 
-    title_h = 146  # header block; content starts below the legend with a clear gap
+    title_h = 176  # header block (title + two gauges + legend); content starts with a clear gap
     img = Image.new("RGB", (WIDTH, MARGIN + title_h + content_h + MARGIN), BG)
     d = ImageDraw.Draw(img)
 
@@ -151,10 +151,25 @@ def render_png(data: dict, out: Path) -> None:
     bar_w = WIDTH - 2 * MARGIN
     d.rectangle([MARGIN, bar_y, MARGIN + bar_w, bar_y + 12], fill=(40, 45, 51))
     d.rectangle([MARGIN, bar_y, MARGIN + int(bar_w * overall / 100.0), bar_y + 12], fill=DONE)
+    d.text((MARGIN, bar_y - 15), "features (scope we chose)", font=f_small, fill=DIM)
 
-    # legend
+    # second gauge: how much of the oracle's CODE is reversed (a hard, small number)
+    fstats_path = ROOT / "analysis" / "functions_stats.json"
+    if fstats_path.exists():
+        fs = json.loads(fstats_path.read_text(encoding="utf-8"))
+        fy = bar_y + 30
+        d.rectangle([MARGIN, fy, MARGIN + bar_w, fy + 12], fill=(40, 45, 51))
+        wpx = int(bar_w * min(1.0, fs["coverage_pct"] / 100.0))
+        if fs["coverage_pct"] > 0:
+            wpx = max(wpx, 3)  # keep a visible sliver
+        d.rectangle([MARGIN, fy, MARGIN + wpx, fy + 12], fill=(90, 150, 220))
+        d.text((MARGIN, fy - 15), "functions of the oracle reversed", font=f_small, fill=DIM)
+        d.text((MARGIN + wpx + 8, fy), f"{fs['named']} / {fs['candidate_starts']:,} "
+               f"({fs['coverage_pct']:.3f}%)", font=f_small, fill=(150, 190, 240))
+
+    # legend (below both gauges)
     lx = MARGIN
-    ly = bar_y + 20
+    ly = bar_y + 62
     c = counts(feats)
     for st, col in (("done", DONE), ("partial", PARTIAL), ("todo", TODO)):
         d.rectangle([lx, ly, lx + 11, ly + 11], fill=col)

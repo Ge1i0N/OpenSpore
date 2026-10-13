@@ -436,6 +436,13 @@ are only ever compared to other ids, so our own `state -list`/`goto` kept workin
   header). Most CodeView docs put length first too — but confirm per-file, never assume.
 - `SPGonzago` as a project name ties the beta PDB to `Proto\GonzagoGL.exe`: "Gonzago" is the
   early Spore codename. So the prototype and the 2008 beta PDB are the same lineage.
+- **Consequence for a "function map" (session 13):** because the PDB is a different link (0/12
+  addresses match — `analysis/build_identity.md`), it can supply function NAMES only where identity
+  matches, never addresses. So the denominator for code coverage comes from the ORACLE itself:
+  `tools/functions.py` counts candidate starts in `.text` (E8/E9 rel32 targets + .rdata/.data
+  pointers into .text + prologues) = **105,239** (an upper bound), against the
+  `analysis/functions_named.json` list = **29** reversed → **0.021%**. This is the honest counterweight
+  to the (deliberately scoped) feature map; the map draws both.
 
 ## AppStateManager / game states (level 1: disasm of the oracle)
 

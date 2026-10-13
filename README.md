@@ -59,6 +59,23 @@ python tools/feature_map.py        # refresh analysis/shots/reverse_map.png AND 
 Add a feature (or flip a `status`) in the JSON and re-run; that is how the map grows with the
 project.
 
+### Function map (how much of the binary's CODE is reversed)
+
+The feature map above measures the **scope we chose** (boot chain + asset formats) and is high.
+The hard number is different: `tools/functions.py` counts candidate function starts in the
+oracle's own `.text` and how many we have actually reversed.
+
+| | |
+|---|---|
+| candidate function starts in `.text` (upper bound) | **105,239** |
+| functions reversed/named | **29** |
+| code coverage | **0.021%** |
+
+Text list: [`analysis/functions.md`](analysis/functions.md). The **beta PDB is a different link**
+(0/12 addresses match the GA target — `analysis/build_identity.md`), so its addresses are *not*
+usable for the oracle; it can only supply names where function identity matches, which is a
+separate, larger effort. That is why the denominator comes from the binary, not the PDB.
+
 ## Quick start
 
 ```powershell
