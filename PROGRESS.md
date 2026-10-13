@@ -48,6 +48,7 @@ Status legend: ✅ done+verified · 🚧 partial · ❌ not started · ⛔ block
 | Read a resource's bytes | ✅ | `pkg:-dump,0,3,res0.bin` → 1371 B out of `Data\Locale\cs-cz\NameGeneration.package` (type 0x024A0E52, RefPack) |
 | RefPack decode | ✅ **SOLVED** | `source/engine/refpack.cpp`; **30,000/30,000 real records decode to exactly `memSize`** (`tools/refpack.py --verify`). `pkg:-decode` writes the decoded bytes |
 | Decode a real asset | ✅ (session 6) | `pkg:-decode,0,0` → 312 B and `,0,2` → 10,191 B of Czech name-generation text (UTF-8, BOM), both exactly `memSize` |
+| Name a resource's type | ✅ (session 6b) | `typeids.inc` (450 ids, from the registry) + `pkg:-types`; `cs-cz/NameGeneration` = 13 x `trigger` + 1 x `prop` |
 | Resource type-id → name | 🚧 | ids are **not** FNV of names (0/6 tested); the answer is the registry lookup in `upstream/SporeMaster3/data/reg_type.txt` (593 lines). Top ids known: 0x01A510BB (98%), 0x2F4E681B=`rw4`, 0x024A0E52 (Czech lexicon) |
 | `group`/`unknown` semantics | ❌ | the bit-mask model names them but not their meaning |
 | RenderWare plugin registration family | ❌ | field guide §3; start from `vb -<used>` at 0x0140a980 |

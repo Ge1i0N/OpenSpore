@@ -5,9 +5,12 @@
 #include <cstdio>
 #include <cstdlib>  // abort(), for the deliberate fault-tolerance probe
 #include <cstring>
+#include <algorithm>
 #include <filesystem>
+#include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "engine/cmdline.h"
@@ -390,13 +393,49 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                           u32 n = (u32)atoi(c.args[3].c_str());
                           if (n >= pk.records().size()) return "pkg: record index out of range";
                           const auto& r = pk.records()[n];
+                          const char* tn = pkg::type_id_name(r.type());
                           char b[512];
                           _snprintf_s(
                               b, sizeof(b), _TRUNCATE,
-                              "rec[%u]: type=0x%08x inst=0x%08x off=0x%08x packed=%u mem=%u %s flags=0x%04x", n,
-                              r.type(), r.instance(), r.offset(), r.packed_size(), r.mem_size(),
-                              r.refpacked() ? "REFPACK" : "raw", r.flags());
+                              "rec[%u]: type=0x%08x%s%s inst=0x%08x off=0x%08x packed=%u mem=%u %s flags=0x%04x", n,
+                              r.type(), tn ? " (" : "", tn ? tn : "", r.instance(), r.offset(), r.packed_size(),
+                              r.mem_size(), r.refpacked() ? "REFPACK" : "raw", r.flags());
                           return b;
+                      }
+                      if (sub == "-types") {
+                          // What is actually inside a package, by name. Uses the generated
+                          // id->name table, so an unnamed id shows as a bare hex number
+                          // rather than a wrong name.
+                          if (c.args.size() < 3) return "pkg: -types needs a package index";
+                          int ti = atoi(c.args[2].c_str());
+                          std::string tpath;
+                          if (!resolve_idx(ti, tpath)) return "pkg: index out of range";
+                          pkg::Package tp;
+                          if (!tp.open(tpath)) return "pkg: cannot open " + tpath;
+                          std::map<u32, u32> counts;
+                          u64 bytes = 0, refpack = 0;
+                          for (const auto& r : tp.records()) {
+                              counts[r.type()]++;
+                              bytes += r.mem_size();
+                              if (r.refpacked()) ++refpack;
+                          }
+                          // sort by count desc
+                          std::vector<std::pair<u32, u32>> v(counts.begin(), counts.end());
+                          std::sort(v.begin(), v.end(), [](auto& a, auto& b) { return a.second > b.second; });
+                          char head[256];
+                          _snprintf_s(head, sizeof(head), _TRUNCATE, "%s: %zu records, %llu decoded bytes, %llu refpack",
+                                      std::filesystem::path(tpath).filename().string().c_str(), tp.records().size(),
+                                      (unsigned long long)bytes, (unsigned long long)refpack);
+                          std::string s2 = head;
+                          for (size_t k = 0; k < v.size() && k < 24; ++k) {
+                              const char* tn2 = pkg::type_id_name(v[k].first);
+                              char line[128];
+                              _snprintf_s(line, sizeof(line), _TRUNCATE, "\n  %-20s 0x%08x  x%u",
+                                          tn2 ? tn2 : "(unnamed)", v[k].first, v[k].second);
+                              s2 += line;
+                          }
+                          if (v.size() > 24) s2 += "\n  ... " + std::to_string(v.size() - 24) + " more types";
+                          return s2;
                       }
                       if (sub == "-dump") {
                           if (c.args.size() < 5) return "pkg: -dump needs <record> <outfile>";

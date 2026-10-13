@@ -5,6 +5,26 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ---
 
+## Session 6b — type ids get NAMES (the decoded data becomes readable)
+
+RefPack gave us bytes; this gives them meaning. Added `tools/gen_typeids.py`, which turns
+`upstream/SporeMaster3/data/reg_type.txt` into `source/engine/typeids.inc` (450 ids, sorted,
+binary-searched, 139 duplicate-id aliases skipped). Wired in:
+- `pkg:-rec` now prints `type=0x024a0e52 (trigger)` instead of a bare number;
+- new `pkg:-types <i>` prints what a package contains, by name, sorted by count.
+
+First real payload identified: `Data\Locale\cs-cz\NameGeneration.package` holds
+**13 x `trigger` (0x024A0E52)** plus **1 x `prop` (0x00B1B104)** — so the Czech given-name and
+toponym lists we decoded are `trigger` resources. That is the chain working end to end:
+DBPF index -> RefPack decode -> type name.
+
+Verified: clean build (0 errors, 0 warnings);
+`-exec pkg:-types,0` -> `NameGeneration.package: 14 records, 64320 decoded bytes, 13 refpack`
+followed by `trigger 0x024a0e52 x13` / `prop 0x00b1b104 x1`; `pkg:-rec` shows the name inline.
+(The registry is a lookup, not a hash — type ids are assigned, confirmed again here.)
+
+---
+
 ## Session 6 — 2026-10-13 morning: RefPack solved, first real game content decoded
 
 Started from: session 5 (57/57 indexes parsed, 150,945 records, but nothing decoded; RefPack

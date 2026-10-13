@@ -58,6 +58,7 @@
 #include <vector>
 
 #include "common.h"
+#include "engine/typeids.inc"  // generated id->name table (tools/gen_typeids.py)
 
 namespace os::pkg {
 
