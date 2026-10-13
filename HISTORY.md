@@ -7,6 +7,16 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### gmdl: the vertex stride is variable (vertex_bytes/vertex_count) - 3.4x more models
+Found and fixed the real bug behind the low parse rate: the vertex stride is NOT a constant 36, it is
+`vertex_bytes / vertex_count` and it varies with the declaration count N. Measured on the exact
+variants: **N=3 -> 24, N=4 -> 28, N=6 -> 36**, with **position = the first float3 at every stride**.
+Computing the stride instead of hardcoding 36 raised the exact-parse rate from **491 to 1,747** of
+4,209 in `Spore_Content` (x3.6) and game-wide from **1,776 to 6,066 OBJ** (x3.4), 0 failed. The
+remaining unparsed ones (N=5, and others) still have a layout we have not derived, and the bbox guard
+correctly rejects them. Rendered samples of the new variants are real, coherent geometry
+(`analysis/shots/gmdl_fixed_*.png`). Recorded in MEMORY.
+
 ### gmdl: the layout is a SUBSET, and the parser now validates (491/4209 exact)
 While quality-checking the OBJ export I found a real bug: the parser accepted gmdl variants whose
 attribute layout we have NOT derived, producing garbage meshes (one had 2 vertices and 13,162 faces).

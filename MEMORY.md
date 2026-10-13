@@ -379,18 +379,14 @@ byte offset 16** for the N=6 declaration (100% of vertices in [0,1] on three ind
 plus packed data). N=5 (`EP1_Content_02` rec[1]) lays the attributes out differently, which is what
 the declaration table is for. The rest needs the loader's disassembly.
 
-**IMPORTANT (session 13): the layout above is a SUBSET, not all gmdl.** The vertex-declaration
-count `decl_n` (read at `d+4` in the vertex-block header) is **3, 4, 5 or 6** across the game, not
-just 5/6: in `Spore_Content`, 4,209 gmdl give `{3:1179, 4:483, 5:3, 6:551}`. Only **491 of those
-4,209 (12%)** reproduce the header bbox with our position formula (`voff + 0x1C + (N-1)*12`,
-position = first float3, stride 36); the rest have a different attribute layout we have not derived
-(median bbox error 10.9, i.e. clearly wrong positions). So `gmdl` is **solved for one layout
-variant** (the four variants we hand-verified are all in it), not for all 11,041 resources. The
-parser now VALIDATES this: `gmdl::parse` computes the bbox of the extracted positions and returns
-`ok=false` unless it matches the header bbox (`err < 1e-3`) - so a bogus mesh is never reported as
-valid, and the unpacker falls back to raw bytes for the unhandled variants. Measured: with the check,
-`pkg:-unpack ...,gmdl` on Spore_Content writes 491 OBJ and 3,718 raw `.gmdl` (was 2,216 OBJ, many of
-them garbage).
+**IMPORTANT (session 13): the vertex stride is NOT constant - it is `vertex_bytes / vertex_count`,
+and it varies with the declaration count N.** Hardcoding 36 was a real bug. Measured on the exact
+variants: **N=3 -> stride 24, N=4 -> stride 28, N=6 -> stride 36**, and **position = the first float3
+at every stride**. With the stride computed, the exact-parse rate jumped: `Spore_Content` **491 ->
+1,747** of 4,209 (x3.6), game-wide **1,776 -> 6,066** OBJ. `decl_n` is 3/4/5/6 across the game
+(Spore_Content {3:1179, 4:483, 5:3, 6:551}); the remaining unparsed ones (N=5, and 2,462 in
+Spore_Content) have a layout we have not derived. UV is at offset 16 only when stride >= 24 (the N=6
+layout); for N=3/4 the UV offset differs (not yet derived).
 
 Tools: `tools/gmdl_mesh.py` (parse + validate bbox + export OBJ), `tools/gmdl_attribs.py` (per-
 channel statistics that identified the UV), `tools/render_obj.py` (OBJ -> PNG, no deps),

@@ -200,12 +200,12 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | u16 indices | validated in range |
 | ✅ | done | multi-submesh | shared vertex buffer |
 | ✅ | done | vertex blk header | 1,N,0,2,0,0x000C0000 |
-| ✅ | done | decl count N | 5 or 6 |
-| 🚧 | partial | decl entries | N=6 and N=5 lay out attrs differently |
+| ✅ | done | decl count N | 3/4/5/6; sets the stride (24/28/?/36) |
+| 🚧 | partial | decl entries | N=3/4/5/6 lay out attributes differently |
 | ✅ | done | vertex count | == max_index+1 |
 | ✅ | done | vertex bytes | == count*36 |
-| ✅ | done | stride 36 | 9 float slots (some packed) |
-| ✅ | done | position float3 | offset 0, verified vs bbox |
+| ✅ | done | variable stride | stride = vertex_bytes/vertex_count; N=3/4/6 -> 24/28/36 |
+| ✅ | done | position float3 | offset 0 at every stride; bbox exact on 1747/4209 |
 | ✅ | done | uv (N=6) | 2 floats at offset 16, in [0,1] 100% |
 | ✅ | done | textured mesh draw | mesh.cpp applies the raster texture via UVs (MODULATE) |
 | ✅ | done | bbox exact check | err 0.0000 on 4 variants |

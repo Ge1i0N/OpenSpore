@@ -8,7 +8,6 @@ namespace {
 
 constexpr u32 kFormatCode = 4;
 constexpr u32 kReserved = 16;
-constexpr u32 kVertexStride = 36;
 constexpr size_t kBboxBytes = 0x1C;  // 7 floats
 
 bool read_u32(const u8* d, size_t n, size_t off, u32& out) {
@@ -111,28 +110,39 @@ Mesh parse(const u8* data, size_t size) {
         m.why = "zero vertices";
         return m;
     }
-    if (vbytes != vcount * kVertexStride) {
-        // Not fatal for drawing (we trust the count), but worth recording.
-        m.why = "vertex_bytes != vertex_count*36";
+    // The vertex stride is NOT constant: it is vertex_bytes / vertex_count, and it varies with the
+    // declaration count N (measured exact variants: N=3 -> 24, N=4 -> 28, N=6 -> 36). Hardcoding 36
+    // was the bug that made 84% of gmdl fail; computing it tripled the exact-parse rate.
+    if (vbytes == 0 || vbytes % vcount != 0) {
+        m.why = "vertex_bytes not a multiple of vertex_count";
+        return m;
+    }
+    const u32 vstride = vbytes / vcount;
+    if (vstride < 12 || vstride > 64 || (vstride % 4) != 0) {
+        m.why = "implausible vertex stride";
+        return m;
     }
     const size_t vdata = d + vc_off + 8;
-    if (vdata + (size_t)vcount * kVertexStride > size) {
+    if (vdata + (size_t)vcount * vstride > size) {
         m.why = "vertex block does not fit";
         return m;
     }
 
-    // 5. positions = the first float3 of each 36-byte vertex; UV = 2 floats at offset 16 (N=6)
+    // 5. positions = the first float3 of each vertex; UV = 2 floats at offset 16 when the stride
+    //    is large enough (the N=6 layout), else zero.
     m.vertex_count = vcount;
     m.positions.resize((size_t)vcount * 3);
     m.uvs.resize((size_t)vcount * 2);
     for (u32 i = 0; i < vcount; ++i) {
-        const size_t off = vdata + (size_t)i * kVertexStride;
-        float x, y, z, u, v;
+        const size_t off = vdata + (size_t)i * vstride;
+        float x, y, z, u = 0.f, v = 0.f;
         read_f32(data, size, off + 0, x);
         read_f32(data, size, off + 4, y);
         read_f32(data, size, off + 8, z);
-        read_f32(data, size, off + 16, u);
-        read_f32(data, size, off + 20, v);
+        if (vstride >= 24) {
+            read_f32(data, size, off + 16, u);
+            read_f32(data, size, off + 20, v);
+        }
         m.positions[i * 3 + 0] = x;
         m.positions[i * 3 + 1] = y;
         m.positions[i * 3 + 2] = z;
