@@ -11,15 +11,16 @@
 A from-scratch reimplementation of **Spore: Galactic Adventures**, driven by disassembly of
 the shipped 32-bit binary rather than by wiki knowledge.
 
-![OpenSpore Loader: 150945 resources, a real Spore mesh drawn by the engine, a real Spore texture, and the inventory](analysis/shots/raster_engine.png)
+![OpenSpore Loader: the game inventory plus a 2x2 grid of four real Spore models, each with its own texture, drawn by our engine](analysis/shots/model_grid.png)
 
 That screenshot is not a mock-up: it is an in-engine capture of our own exe. The left side is the
 game's own inventory (**150,945 resources across 57 packages, 10.27 GB decoded, 112,155 names
 resolved**) read through the reversed index, RefPack and FNV-1 hashing. On the right, our renderer
-draws **real Spore content decoded from the shipped `.package` files**: a **`gmdl` mesh** (a
-creature, 3,765 vertices / 6,000 triangles, shaded and rotating) and the engine's **own `raster`
-texture format** (here a 512×512 DXT5). Earlier captures: `analysis/shots/mesh_engine.png`
-(with a `.png` texture) and `analysis/shots/hero_real_asset.png`.
+draws **four real Spore models decoded from the shipped `.package` files**, each with **its own
+texture** (a model's texture is the `raster` resource with the same instance id — 865/865 match):
+a creature, two `floraModels_*` plants and a second creature. Earlier captures:
+`analysis/shots/mesh_textured.png` (one textured model), `analysis/shots/raster_engine.png`
+(native texture + mesh), `analysis/shots/hero_real_asset.png`.
 
 ## Status
 

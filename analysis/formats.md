@@ -13,7 +13,7 @@ fields open · **TODO** = only the type id / count known.
 | `gmdl` | 0x00e6bce5 | 11,041 | **SOLVED** (positions) | stride 36, position = first float3, bbox exact; UV at offset 16; drawn by the engine |
 | `locale` | 0x024a0e52-ish | 2,944 | **SOLVED** | localized text; unpacked to files |
 | `trigger` | 0x024a0e52 | — | **PARTIAL** | text scripts; groups resolve to `properties`/`ConfigManager`/`SporeAppStates` |
-| `prop` | 0x00b1b104 | 30,645 | **PARTIAL** | big-endian `count` + `{key,type,count,size,data}` for the FIRST section; a SECOND section then diverges (keys `0x03xxxxxx`/`0x04xxxxxx`, 1-byte offset shift) — only ~3% of payloads walk exactly |
+| `prop` | 0x00b1b104 | 30,645 | **PARTIAL** | big-endian `count` + `{key,type,count,size,data}` for the FIRST section; a SECOND section then diverges (keys `0x03xxxxxx`/`0x04xxxxxx`, 1-byte offset shift). Addressed by **instance id**: the binary builds `{instance, 0xb1b104}` descriptors for 19 specific props at `.text 0xdd1f2f..` (ids `0xf0329031`, `0x128b5d9`, `0x210a32f5`, ...). Keys are NOT FNV-1-lower of `reg_file.txt` names |
 | `blockdata` | 0x5caa5e28 | 3,141 | **PARTIAL** | an array of `vec3` (size always a multiple of 12); the first two `vec3` are a **min/max bounding box** (verified min<=max on samples); the rest is open |
 | `gmsh` | 0x01c135da | 2,535 | **TODO** | a mesh-like payload: big-endian counts then float32 runs (looks like a generated mesh, cf. gmdl) |
 | `rw4` | 0x2f4e681b | 12,987 | **PARTIAL** | 28-byte header (template 0x014f6480); object table not reversed; the model manager is located but only registers (see MEMORY) |

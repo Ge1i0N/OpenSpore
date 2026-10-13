@@ -430,6 +430,10 @@ raster and draws it via `create_texture_bgra`, preferring it over the png path. 
 real raster 0x40642901/0x067a07e7.raster (512x512 DXT5)` and `analysis/shots/raster_engine.png`
 show the game's OWN texture format rendered by our renderer, next to the gmdl mesh.
 
+## README hero is the 2x2 model grid
+The README's hero image is now `analysis/shots/model_grid.png` (four real models, each textured) -
+the project's strongest showcase.
+
 ## Asset format status (all in `analysis/formats.md`)
 
 A per-type reference: `png`, `raster`, `gmdl`, `locale` are **SOLVED**; `trigger`, `prop`,
