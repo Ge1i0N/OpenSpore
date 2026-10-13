@@ -94,3 +94,25 @@ property name. (Our C++ reader resolves all three forms.)
 | `Support51Audio` | `0x063ab656` | bool | explicit |
 | `HasShownExportToolEULA` | `0x087c4363` | bool | explicit |
 
+## In the binary
+
+The config-language commands are registered by the function at **`0x007c85e7`**. It allocates
+a 16-byte command object per keyword and registers it through `[obj]->vtable+0x14` with
+`(name, handler)`. Each command has a handler vtable; the first method is the executor:
+
+| keyword | string | command vtable | executor |
+|---|---|---|---|
+| `setVariables` | 0x0141105c | 0x0141172c | `0x007c7f50` |
+| `setOption` | 0x01411030 | 0x01411744 | `0x007c8e90` |
+| `alert` | 0x01411028 | 0x0141175c | `0x007c8f00` |
+| `vendor` / `card` | 0x01411008 / 0x01411010 | 0x014116f0 | `0x007c90f0` |
+
+The keyword table is at `.data 0x153d1d8` (`cardVendor`, `cardName`, `isCardFound`,
+`cardConfig`, `setVariables`, `boolProp`, `intProp`, `floatProp`, `keyProp`, `option`,
+`setting`, `props`, `setOption`, `alert`, `setResolution`, `card`, `vendor`). So the loose
+`Config/*.txt` scripts are run by a small command interpreter with exactly this vocabulary.
+
+Our `source/engine/config.cpp` reads the same files but only records `property`/`set*`/
+`setOption` assignments (and skips conditionals). A faithful port would implement the command
+handlers above on top of our parser; that is future work.
+

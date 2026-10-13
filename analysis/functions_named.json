@@ -1,4 +1,9 @@
 {
+  "0x007c85e7": {"name": "ConfigCmdRegister", "area": "startup", "note": "registers the Config/*.txt language commands (setOption/alert/setVariables/vendor...)"},
+  "0x007c8e90": {"name": "CmdSetOption", "area": "startup", "note": "executor for the 'setOption' config command"},
+  "0x007c7f50": {"name": "CmdSetVariables", "area": "startup", "note": "executor for the 'setVariables' config command"},
+  "0x007c8f00": {"name": "CmdAlert", "area": "startup", "note": "executor for the 'alert' config command"},
+  "0x007c90f0": {"name": "CmdCardVendor", "area": "startup", "note": "executor for the 'card'/'vendor' config commands"},
   "0x008de4b0": {"name": "GetResourceManager", "area": "packages", "note": "returns the resource-manager singleton from global 0x1667aa0"},
   "0x00847780": {"name": "ResourceLoad", "area": "packages", "note": "load a resource via [mgr]->vtable+0x58 with a {group,type} descriptor"},
   "0x00686450": {"name": "ResourceFind", "area": "packages", "note": "resource query returning an index or 0xffffffff"},
