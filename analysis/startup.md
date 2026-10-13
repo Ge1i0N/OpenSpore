@@ -85,6 +85,10 @@ message loop; it initialises subsystems and dispatches through the AppMode objec
   | +0x20 | `0x007eaae0` | shader/script config: `-dumpShaders` 0x14142a8, `-dumpShadersForPIX` 0x1414284 / `-pix` 0x141427c, `-dumpFragmentShaders` 0x1414254, `-dumpDirectShaders` 0x1414230, `-noScripts` 0x141421c, `-noMaterialScripts` 0x14141f8, `-noEffectScripts` 0x14141d8 |
 - Other manager getters used: `0x67dc90/0x67dcb0/0x67dcd0/0x67dce0/0x67dcf0/0x67dda0`, `0x6a17e0`
   (a profiler/marker call), `0x951220`/`0x951230` (allocator pair), `0x5a7560`, `0x456230`.
+- **`run` loads the app's state list** at `0xf48505`: `[app+0x34]->vtable+0x1c` is called with the
+  group id **`0xd6396913` = `SporeAppStates`** (resolved via FNV-1-lower over `reg_file.txt`). So the
+  state machine's states come from a `trigger` resource of group `SporeAppStates` (see
+  `analysis/content-loading.md`).
 
 ## The main loop — FOUND: `0x008482f0` (window-class vtable `+0x84`)
 

@@ -1,4 +1,8 @@
 {
+  "0x008de4b0": {"name": "GetResourceManager", "area": "packages", "note": "returns the resource-manager singleton from global 0x1667aa0"},
+  "0x00847780": {"name": "ResourceLoad", "area": "packages", "note": "load a resource via [mgr]->vtable+0x58 with a {group,type} descriptor"},
+  "0x00686450": {"name": "ResourceFind", "area": "packages", "note": "resource query returning an index or 0xffffffff"},
+  "0x006a9f50": {"name": "LoadPropertiesConfig", "area": "startup", "note": "loads {group 'properties', trigger} at 0x6a9fb0"},
   "0x00f489e0": {"name": "WinMain", "area": "startup", "note": "thin wrapper: ctor 0x92c420 -> app_main -> dtor"},
   "0x00f48810": {"name": "AppMain", "area": "startup", "note": "real main: -multipleInstances guard (Global\\SporeEditorOrGame), allocs App, calls run"},
   "0x00f47e90": {"name": "AppRun", "area": "startup", "note": "reads -demo/-devDirs/-shipDirs/-baseGame; creates AppMode; runs"},

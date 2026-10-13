@@ -1,14 +1,14 @@
 {
   "oracle": "SporeApp.exe.unpacked.exe",
   "candidate_starts": 105239,
-  "named": 46,
-  "named_on_candidate": 39,
-  "coverage_pct": 0.0371,
+  "named": 50,
+  "named_on_candidate": 42,
+  "coverage_pct": 0.0399,
   "by_area": {
-    "startup": 23,
+    "packages": 12,
+    "startup": 24,
     "core": 2,
     "render": 1,
-    "packages": 9,
     "rw4": 11
   },
   "denominator_note": "candidate starts = union of E8/E9 rel32 targets in .text, .rdata/.data pointers into .text, and prologues (55 8B EC / 8B FF). An upper bound: a jump into a function body also counts."

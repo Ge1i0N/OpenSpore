@@ -6,7 +6,7 @@
 > (functions we have actually reversed/named).
 
 **105,239** candidate function starts in `.text` (upper bound; see the tool's note) ·
-**46** functions reversed/named · **0.037%** coverage.
+**50** functions reversed/named · **0.040%** coverage.
 
 This is deliberately a HARD number, and it is small. It is not in tension with the feature
 map's high engine figure: the feature map measures the scope we chose (boot chain + asset
@@ -17,9 +17,9 @@ are barely touched. Both are true; together they are the honest picture.
 
 | area | count |
 |---|---|
-| startup | 23 |
+| startup | 24 |
+| packages | 12 |
 | rw4 | 11 |
-| packages | 9 |
 | core | 2 |
 | render | 1 |
 
@@ -32,7 +32,9 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x0067dd20` | GetMgr8c4 | rw4 | getter for the model manager (0x15fd8c4) |
 | `0x0067dd30` | GetMgr8c8 | rw4 | getter for the second manager (0x15fd8c8) |
 | `0x0067df40` | SetMgr8c4 | rw4 | setter for the model manager; called from 0x7a71cb / 0x7a7efa |
+| `0x00686450` | ResourceFind | packages | resource query returning an index or 0xffffffff |
 | `0x00687bd0` | SetFsMode | startup | dev/ship dirs mode setup, called from AppRun |
+| `0x006a9f50` | LoadPropertiesConfig | startup | loads {group 'properties', trigger} at 0x6a9fb0 |
 | `0x006ad090` | TypeRegister | rw4 | hash-map insert keyed by type id |
 | `0x006b4eb0` | EarlyInit | startup | first call in AppRun; false -> bail |
 | `0x006c233d` | Rw4WriterCaller | rw4 | writer caller; pushes sentinel 0xcafed00d |
@@ -50,6 +52,7 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x007e8a00` | CreateAppMode | startup | alloc 0x1f0 bytes, ctor 0x7e76e0; the app-mode/state host |
 | `0x007e93d0` | AppModeSetupPlugins | startup | vtable+0x18; -noPlugins/-safe gate -> 0x7e8810 |
 | `0x007eaae0` | AppModeShaderConfig | startup | vtable+0x20; -dumpShaders/-pix/-noScripts/-noEffectScripts... |
+| `0x00847780` | ResourceLoad | packages | load a resource via [mgr]->vtable+0x58 with a {group,type} descriptor |
 | `0x008482f0` | MainLoop | startup | THE main loop (window vtable+0x84): PeekMessageW -> WM_QUIT -> dispatch -> TranslateMessage -> DispatchMessageW; called from run 0xf48405 |
 | `0x00849b20` | WindowCtor | startup | ctor of the window/input class (vtable 0x141cc10) |
 | `0x00849bf0` | WindowCreate | startup | RegisterClass/CreateWindowEx; HWND at [obj+0x70] |
@@ -60,6 +63,7 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x008d90b0` | DbpfValidateHeader | packages | DBPF header validator: magic/version/count/index-offset clauses |
 | `0x008d9a90` | DbpfLoadIndex | packages | index loader (vtable+0x90); kind mask parse |
 | `0x008da6f0` | DbpfResourceAccessor | packages | resource accessor (vtable+0x34) |
+| `0x008de4b0` | GetResourceManager | packages | returns the resource-manager singleton from global 0x1667aa0 |
 | `0x0092b570` | ArgLookup | startup | launch-key lookup helper (this,name,..) -> index or -1; skips a leading -/; used by 76 sites |
 | `0x0092c4e0` | RefPackReadBE | packages | big-endian size reader |
 | `0x0092c5b0` | RefPackLoop | packages | the RefPack command/copy loop |

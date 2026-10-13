@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 80.2%** | **Overall: 73.1%** | done 162 / partial 18 / todo 54 (234 features)
+**Engine reversal: 79.9%** | **Overall: 72.9%** | done 162 / partial 20 / todo 54 (236 features)
 
 **Legend**
 
@@ -24,7 +24,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | harness | **93%** | 13 | 0 | 1 |
 | startup | **95%** | 25 | 3 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
-| packages (DBPF) | **91%** | 30 | 2 | 2 |
+| packages (DBPF) | **89%** | 30 | 4 | 2 |
 | gmdl (meshes) | **90%** | 21 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **80%** | 20 | 0 | 5 |
@@ -134,9 +134,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## packages (DBPF) — 91%
+## packages (DBPF) — 89%
 
-*30 done · 2 partial · 2 todo*
+*30 done · 4 partial · 2 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -159,6 +159,8 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | compression field | 0xFFFF = RefPack |
 | ✅ | done | flags field | 0x0001 always |
 | ✅ | done | resource read | pkg:-dump/-rec/-hdr |
+| 🚧 | partial | resource manager | getter 0x8de4b0 (global 0x1667aa0); queries 0x686450/0x847780 |
+| 🚧 | partial | content loading (trigger) | trigger type 0x24a0e52; groups resolved: properties, ConfigManager, SporeAppStates |
 | ✅ | done | refpack signature | &0x1FFF == 0x10FB |
 | ✅ | done | refpack BE size | 3- or 4-byte |
 | ✅ | done | refpack loop | 0x0092c5b0 |
