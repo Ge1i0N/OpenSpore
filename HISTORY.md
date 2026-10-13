@@ -45,6 +45,24 @@ descriptor by self-consistency (format 4, stride 16, `index_bytes == 2*index_cou
 rather than assume an offset, and it now parses all four, including the two-sub-mesh file whose
 second sub-mesh indexes into the same vertex buffer (first index 24353).
 
+### gmdl meshes SOLVED — the stride is 36, and real Spore geometry came out
+The earlier "vertex layout ruled out" section above is superseded by this. Looking at FOUR variants
+side by side (instead of scanning one) exposed a **vertex-block header** after the indices, identical
+in all of them: `u32 1, u32 N, 0, 2, 0, 0x000C0000`, then `(N-1)` 12-byte declaration entries, then
+`u32 0, u32 vertex_count, u32 vertex_bytes`. `N` is 5 or 6; `vertex_count == max_index+1`; and
+`vertex_bytes == vertex_count * 36` — **36, not the descriptor's 16** (that field is a reserved code;
+chasing it as the stride was the trap). The vertex count field sits at `voff + 0x1C + (N-1)*12`
+(0x58 for N=6, 0x4C for N=5). Reading each vertex as nine floats with **position = the first float3**,
+the extracted positions reproduce the file's own header bbox **exactly, err 0.0000**, on all four:
+`Spore_Content` rec[12] (vc 3765), `EP1_Content_01` rec[0] (16551), `EP1_Content_02` rec[1] (28880,
+two sub-meshes), `EP1_Data` rec[579] (2357).
+
+Exported to OBJ and rendered with a tiny dependency-free software rasteriser
+(`tools/render_obj.py`): `analysis/shots/gmdl_pkg48.png` is a limb/organ, `gmdl_pkg52.png` a rounded
+creature with appendages, `gmdl_pkg54.png` a branching plant. That is **real Spore geometry, decoded
+from the shipped bytes**. Still open: what the six non-position floats mean (declared by N, not yet
+identified).
+
 ### gmdl vertex layout ruled out (a second disproven hypothesis, with the test that killed it)
 Last session established gmdl's header is not a fixed triple. This session tested the NEXT guess -
 that the vertex block is a plain array of vec3 with a fixed stride. The test is exact and uses the
@@ -89,6 +107,10 @@ gmdl descriptor: `python tools/gmdl_mesh.py --pkg 48/52/53/54` parses all four v
 self-consistent descriptor(s) (`Spore_Content` desc@0x68 18000 idx; `EP1_Content_01` desc@0x80 64752
 idx; `EP1_Content_02` **two** descriptors @0x2c/0x339b4; `EP1_Data` desc@0x38 8814 idx), with
 `submesh_count` at `bbox+0x1c` and the descriptor at `bbox+0x20` in every case.
+gmdl mesh SOLVED: `python tools/gmdl_mesh.py --pkg 48 --obj ...` → **bbox check OK (err 0.0000)** for
+all four (vc 3765/16551/28880/2357, stride 36, `vertex_bytes == vc*36`). Rendered via
+`python tools/render_obj.py <obj> <png>` → `analysis/shots/gmdl_pkg{48,52,54}.png` show a limb, a
+creature and a plant.
 `-w`/`-f`/`-r` (headless, log `flags:`): `-f -r 1024x768` → `windowed=0 … 1024x768`;
 `-w -r 800x600` → `windowed=1 … 800x600`; `-f -w -r 640x480` → `windowed=1` (**w wins**);
 `-r=1920x1080` → `windowed=1 … 1920x1080`.

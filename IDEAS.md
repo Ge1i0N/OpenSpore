@@ -201,14 +201,16 @@ The D3D9 backend stays the regression oracle: any GL output is diffed against it
     lesson restated: a fit on one file is not a format - test across many BEFORE claiming, which is
     exactly what `tools/gmdl_header_check.py` then did. gmdl needs per-variant discovery (watch for
     a variant tag; the first dword is 8 on every sample, so the discriminator is elsewhere).
-    **UPDATE (session 12): the real structure is now confirmed** — the "triple" is a genuine
-    sub-mesh descriptor `{format=4, index_count, stride=16, index_bytes=2*index_count}` but it sits
-    after a **variable** header + `u32 count` + `float32 bbox[7]` + `u32 submesh_count`, so its
-    offset moves per file (bbox@0x48/0x60/0x0c/0x18 in the four variants tested; the descriptor is
-    always at `bbox+0x20`). `tools/gmdl_mesh.py` now finds it by self-consistency instead of by
-    offset. The vertex attribute order is still open (a stride-16 read, at any of the three float
-    offsets, does not reproduce the bbox; ~10% of the block is non-finite), so that needs the
-    loader's disassembly.
+    **UPDATE (session 12): SOLVED.** The "triple" is a genuine sub-mesh descriptor `{format=4,
+    index_count, 16, index_bytes=2*index_count}` but it sits after a **variable** header + `u32
+    count` + `float32 bbox[7]` + `u32 submesh_count`, so its offset moves per file (the descriptor
+    is always at `bbox+0x20`). The real vertex stride is **36** (the descriptor's 16 is a reserved
+    code): after the indices comes a vertex-block header (`u32 1, u32 N, 0, 2, 0, 0x000C0000`,
+    `(N-1)` declaration entries, `u32 0, vertex_count, vertex_bytes`), then `float32[vc][9]` with
+    **position = the first float3**. Positions reproduce the file's own bbox **exactly (err 0.0000)**
+    on all four variants tested; `tools/gmdl_mesh.py` parses + exports OBJ and
+    `analysis/shots/gmdl_pkg{48,52,54}.png` are real Spore geometry. Open: the six non-position
+    floats' meaning (declared by N).
 
 ## 6. Open questions, precisely stated (so the next disasm run is aimed, not wandering)
 

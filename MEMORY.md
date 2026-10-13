@@ -312,50 +312,53 @@ Tooling: `tools/rw4.py` (validates + dumps the 28-byte header; stops there on pu
 the `+0x0c` flags, or whether `"454"` is a version or build tag from any third-party RW4
 description - find the reader in `.text` and read it like RefPack was.
 
-## GMDL (generated model) — sub-mesh descriptor CONFIRMED; vertex attribute layout still open
+## GMDL (generated model) — LAYOUT SOLVED (session 12); positions verified exactly
 
-`gmdl` (type 0x00E6BCE5, **11,041 resources**) is a baked mesh: payloads contain float32 data and
-u16 data, and every one starts with dword `8` (a version). It is more tractable than the rw4
-container. Two layout hypotheses are already disproven (fixed header triple 18/400; uniform vec3
-stride) — see `IDEAS.md` §5.
-
-**CONFIRMED structure (session 12, internally consistent on 4 different variants and matching the
-one fully-checked record).** After a variable header of `{tag, value}` groups comes:
+`gmdl` (type 0x00E6BCE5, **11,041 resources**) is a baked mesh. Two early hypotheses were
+disproven (fixed header triple 18/400; uniform vec3 stride) — see `IDEAS.md` §5. The layout below
+was then established and is exact: the extracted positions reproduce the file's own bounding box
+with **err 0.0000** on every variant tried.
 
 ```
-u32               count            (1 or 2; sits right before the bbox)
-float32 bbox[7]   minXYZ maxXYZ 1.0                (exactly 0x1c bytes)
-u32               submesh_count    (= 1 or 2)
+...variable header of {tag, value} groups...
+u32              count            (1 or 2)
+float32 bbox[7]  minXYZ maxXYZ 1.0
+u32              submesh_count    (1 or 2)
 repeat submesh_count times:
     u32  format        (= 4)
     u32  index_count
-    u32  stride        (= 16)
+    u32  reserved      (= 16)     <- NOT the vertex stride (that was the trap)
     u32  index_bytes   (== index_count * 2)
     u16  indices[index_count]
-... then the vertex attribute block ...
+u32  1
+u32  N                (vertex-declaration entry count: 5 or 6)
+u32  0
+u32  2
+u32  0
+u32  0x000C0000
+(N-1) x 12 bytes      vertex declaration
+u32  0
+u32  vertex_count     (== max_index + 1)
+u32  vertex_bytes     (== vertex_count * 36)
+float32 vertices[vertex_count][9]   ; stride 36 bytes; POSITION = the FIRST float3
 ```
 
-Verified offsets: `Spore_Content` rec[12] bbox@0x48 desc@0x68; `EP1_Content_01` rec[0] bbox@0x60
-desc@0x80; `EP1_Content_02` rec[1] bbox@0x0c submesh_count=**2** desc@0x2c; `EP1_Data` rec[579]
-bbox@0x18 desc@0x38. In every case `submesh_count` sits at `bbox+0x1c` and the descriptor at
-`bbox+0x20`. This is the descriptor that the earlier "fixed triple" hypothesis was groping for; it
-is real but **not at a fixed offset** (the variable header moves it).
+**Confirmed numbers** (four variants, all exact): `Spore_Content` rec[12] vc=3765 stride36
+err=0; `EP1_Content_01` rec[0] vc=16551; `EP1_Content_02` rec[1] vc=28880, **two sub-meshes** whose
+second indexes the same buffer (first index 24353); `EP1_Data` rec[579] vc=2357. The vertex block
+header's `vertex_count` field sits at `voff + 0x1C + (N-1)*12` (0x58 when N=6, 0x4C when N=5), and
+`vertex_bytes == vertex_count*36` follows it. The variable header + bbox moves the descriptor's
+offset per file, so the reader FINDS the descriptor by self-consistency, not by offset.
 
-What is still solid but not enough:
-- first dword = `8` on all 400 sampled records.
-- the header region contains repeated groups of the form
-  `{0x1B684E2F, <value>, 0x00616041}` - note `0x1B684E2F` is the **rw4 type id byte-swapped**
-  (`0x2F4E681B` in big-endian), consistent with RefPack's big-endian integers, so gmdl likely
-  carries big-endian tags.
-- **vertices are INTERLEAVED, not a plain vec3 array.** A stride search after the index block was
-  scored by matching the computed bounding box against the header bbox (an exactness test using the
-  file's own header) and found **no** consistent stride: reading the block as 12/16/20/24/28/32-byte
-  vertices never reproduces the header bbox. Combined with the descriptor's `stride = 16`, the
-  attribute order within a vertex (position first? or not?) is the next thing to reverse - from the
-  loader's disassembly, not from byte scanning.
+What is NOT done: the meaning of the six non-position floats in each 36-byte vertex (the
+declaration table says how many, not what they are). For N=6 the last two read as UVs in [0,1] on
+every sampled vertex; for N=5 they do not, and the middle three are not unit normals in either
+case. That is the remaining open question; it needs the loader's disassembly.
 
-Tools: `tools/gmdl.py` (locate/inspect), `tools/gmdl_mesh.py` (bbox + index validation on a file),
-`tools/gmdl_header_check.py` (the broad invariant test that killed the general claim).
+Tools: `tools/gmdl_mesh.py` (parse + validate bbox + export OBJ), `tools/render_obj.py` (OBJ -> PNG,
+no deps), `tools/gmdl.py` (locate/inspect), `tools/gmdl_header_check.py` (the broad invariant test
+that killed the first claim). Evidence: `analysis/meshes/gmdl_pkg{48,52,53,54}.obj`,
+`analysis/shots/gmdl_pkg{48,52,54}.png`.
 
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 

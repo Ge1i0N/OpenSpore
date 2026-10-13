@@ -35,6 +35,8 @@ so if consulted at all, read the source. Recorded: MEMORY.md "Upstream knowledge
 | **resources enumerated** | **150,945**, 10.27 GB, 90 types (86 named) | `inventory:` in the log |
 | **resources written to disk** | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
 | **headless unpack** | same result, no window/device, 7.6 s | `-headless -exec pkg:-unpack,...` |
+| **gmdl mesh decoded** | positions reproduce the file bbox **exactly (err 0.0000)** on 4 variants | `python tools/gmdl_mesh.py --pkg <i>` |
+| **real Spore geometry rendered** | limb / creature / plant | `analysis/shots/gmdl_pkg{48,52,54}.png` |
 | **real game asset rendered** | `vehiclepainticons~/be_basic_shake_05.png` (128×128) | `analysis/shots/hero_real_asset.png` |
 | **resource names resolved** | **112,155 / 150,945 (74.3%)** | `inventory:` / `pkg:-path` |
 | RW4 header | **confirmed** (28-byte template `0x014f6480` copied by `0x011e3f60`) | `python tools/rw4.py --pkg 45 --rec 1456` |
@@ -202,22 +204,20 @@ silent verboseaudio 4.0 5.1 automation …`).
 
 ## Next actions, in order
 
-1. **rw4/gmdl mesh parser** — the model subsystem's entry points are known: the rw4 handler
+1. **rw4 mesh parser** — the model subsystem's entry points are known: the rw4 handler
    `0x7633c0` (registered by `0x007635f0` -> `0x6ad090`) dispatches through manager singletons
    (getters `0x67dcd0..0x67df70`, globals `0x15fd8b0..`); the model-manager setter `0x67df40`
    (global `0x15fd8c4`) is called from `0x7a71cb` / `0x7a7efa`. **Follow that chain to the real
-   reader.** For gmdl two hypotheses are already disproven (fixed header triple 18/400; uniform
-   vec3 stride does not match the file's own bbox) — vertices are **interleaved**, so read the
-   loader; do not scan bytes.
-2. **`gmdl` (0x00E6BCE5, 11,041) is ALSO a mesh format** — the sub-mesh descriptor is now
-   CONFIRMED (`tools/gmdl_mesh.py` finds it by self-consistency): variable header → `u32 count` →
-   `float32 bbox[7]` → `u32 submesh_count` → per sub-mesh `{format=4, index_count, stride=16,
-   index_bytes=2*index_count}` + `u16 indices`. **Remaining: the vertex attribute order** (stride 16
-   is known, but a stride-16 read at any float offset does not reproduce the bbox and ~10% of the
-   block is non-finite → read the loader, do not scan bytes).
+   reader.** The magic is memcpy'd, so go by call graph, not by immediate search.
+2. **gmdl is DONE for positions** (session 12): stride 36, position = first float3, verified
+   exactly (err 0.0000) on four variants; `tools/gmdl_mesh.py` parses + exports OBJ, and
+   `analysis/shots/gmdl_pkg{48,52,54}.png` are real Spore geometry. **Remaining: identify the six
+   non-position floats per vertex** (declared by the vertex-declaration table's N) — read the loader.
 3. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
 4. Wire loose directories (unpacked trees) into `fs` as a data source; a separate `OpenSpore.Cli`
    binary would be tidier than `-headless`, but the capability already exists.
+5. Put the solved gmdl geometry on the engine's own screen (it already renders textures; drawing a
+   decoded mesh is the visible next step).
 
 Done and off the list: `.package` header + fixed-stride index (session 4: 57 files, 0 invalid,
 17,901 records, 0 violations), in-engine frame capture (✅ `GetBackBuffer` →
