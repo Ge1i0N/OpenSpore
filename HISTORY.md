@@ -7,6 +7,13 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### The Loader now cycles through several real models, each with its own texture
+Instead of showing one model, the Loader collects up to 12 real gmdl models that parse and have a
+matched texture, then cycles every 3 seconds (`loader_tick` -> `load_model`), swapping both the mesh
+and its paired texture. Measured over a 10 s run: `0x067b0fbc.gmdl`, `floraModels_LOD2~/FE_volcano1_Sp2`,
+`floraModels_LOD3~/FE_volcano1_Sp2`, ... - each with `flora_editorTextureDiffuse~/FE_...`. The capture
+`analysis/shots/model_cycle.png` shows a plant model with its correct flora texture. 10/10 markers.
+
 ### Model gallery: a spread of exported models rendered
 Rendered a spread of exported gmdl models into one montage - `analysis/shots/model_gallery.png` shows
 a building, machinery, a plant, a vehicle and a spacecraft: real Spore geometry decoded from the
