@@ -351,13 +351,16 @@ header's `vertex_count` field sits at `voff + 0x1C + (N-1)*12` (0x58 when N=6, 0
 offset per file, so the reader FINDS the descriptor by self-consistency, not by offset.
 
 What is NOT done: the meaning of the six non-position floats in each 36-byte vertex (the
-declaration table says how many, not what they are). For N=6 the last two read as UVs in [0,1] on
-every sampled vertex; for N=5 they do not, and the middle three are not unit normals in either
-case. That is the remaining open question; it needs the loader's disassembly.
+declaration table says how many, not what they are). Session 13 pinned down **UV = two floats at
+byte offset 16** for the N=6 declaration (100% of vertices in [0,1] on three independent variants,
+`tools/gmdl_attribs.py`); offset 12 is a zero dword and bytes 24-35 are still unidentified (a float
+plus packed data). N=5 (`EP1_Content_02` rec[1]) lays the attributes out differently, which is what
+the declaration table is for. The rest needs the loader's disassembly.
 
-Tools: `tools/gmdl_mesh.py` (parse + validate bbox + export OBJ), `tools/render_obj.py` (OBJ -> PNG,
-no deps), `tools/gmdl.py` (locate/inspect), `tools/gmdl_header_check.py` (the broad invariant test
-that killed the first claim). Evidence: `analysis/meshes/gmdl_pkg{48,52,53,54}.obj`,
+Tools: `tools/gmdl_mesh.py` (parse + validate bbox + export OBJ), `tools/gmdl_attribs.py` (per-
+channel statistics that identified the UV), `tools/render_obj.py` (OBJ -> PNG, no deps),
+`tools/gmdl.py` (locate/inspect), `tools/gmdl_header_check.py` (the broad invariant test that
+killed the first claim). Evidence: `analysis/meshes/gmdl_pkg{48,52,53,54}.obj`,
 `analysis/shots/gmdl_pkg{48,52,54}.png`.
 
 **The engine draws it** (session 13): `source/engine/gmdl.cpp` is the C++ port of the parser,

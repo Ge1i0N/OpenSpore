@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 78.5%** | **Overall: 70.0%** | done 143 / partial 11 / todo 58 (212 features)
+**Engine reversal: 79.1%** | **Overall: 70.7%** | done 144 / partial 13 / todo 56 (213 features)
 
 **Legend**
 
@@ -25,7 +25,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | startup | **96%** | 22 | 2 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
 | packages (DBPF) | **91%** | 30 | 2 | 2 |
-| gmdl (meshes) | **85%** | 20 | 1 | 3 |
+| gmdl (meshes) | **90%** | 21 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **79%** | 19 | 0 | 5 |
 | formats | **10%** | 2 | 0 | 18 |
@@ -172,9 +172,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## gmdl (meshes) — 85%
+## gmdl (meshes) — 90%
 
-*20 done · 1 partial · 3 todo*
+*21 done · 3 partial · 1 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -191,13 +191,14 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | multi-submesh | shared vertex buffer |
 | ✅ | done | vertex blk header | 1,N,0,2,0,0x000C0000 |
 | ✅ | done | decl count N | 5 or 6 |
-| ⬜ | todo | decl entries | meaning of 12-byte entries |
+| 🚧 | partial | decl entries | N=6 and N=5 lay out attrs differently |
 | ✅ | done | vertex count | == max_index+1 |
 | ✅ | done | vertex bytes | == count*36 |
-| ✅ | done | stride 36 | 9 floats |
-| ✅ | done | position float3 | first float3 |
+| ✅ | done | stride 36 | 9 float slots (some packed) |
+| ✅ | done | position float3 | offset 0, verified vs bbox |
+| ✅ | done | uv (N=6) | 2 floats at offset 16, in [0,1] 100% |
 | ✅ | done | bbox exact check | err 0.0000 on 4 variants |
-| ⬜ | todo | attrib semantics | 6 non-position floats |
+| 🚧 | partial | attrib semantics | uv found; normals/extra open |
 | 🚧 | partial | normals | computed from faces, not read |
 | ✅ | done | OBJ export | tools/gmdl_mesh.py --obj |
 | ✅ | done | engine draw | mesh.cpp, 3765 verts |

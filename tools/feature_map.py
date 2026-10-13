@@ -132,7 +132,7 @@ def render_png(data: dict, out: Path) -> None:
         row_h = max(row_h, h)
     content_h = y + row_h
 
-    title_h = 112
+    title_h = 146  # header block; content starts below the legend with a clear gap
     img = Image.new("RGB", (WIDTH, MARGIN + title_h + content_h + MARGIN), BG)
     d = ImageDraw.Draw(img)
 

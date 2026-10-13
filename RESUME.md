@@ -216,8 +216,8 @@ silent verboseaudio 4.0 5.1 automation …`).
 2. **gmdl is DONE for positions and now DRAWN** (sessions 12-13): stride 36, position = first
    float3, verified exactly (err 0.0000) on four variants; `tools/gmdl_mesh.py` parses + exports
    OBJ, `source/engine/gmdl.cpp` + `source/render/mesh.cpp` draw one on our own screen
-   (`analysis/shots/mesh_engine.png`). **Remaining: identify the six non-position floats per
-   vertex** (declared by the vertex-declaration table's N) - read the loader.
+   (`analysis/shots/mesh_engine.png`). Session 13 also found **UV = 2 floats at offset 16** for the
+   N=6 declaration. **Remaining: bytes 24-35 and the N=5 layout** - read the loader.
 3. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
 4. Wire loose directories (unpacked trees) into `fs` as a data source; a separate `OpenSpore.Cli`
    binary would be tidier than `-headless`, but the capability already exists.

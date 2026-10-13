@@ -51,6 +51,11 @@ markers, `fps=32.3`, capture 3,686,454 bytes → `analysis/shots/mesh_engine.png
 Headless (genuinely): `-headless -devDirs -exec pkg:-unpack,all,<dir>,locale -quitAfter 8` →
 `headless: no window`, `headless: no device`, `unpack: 57 pkgs, 2944 written, 0 failed, 27882571
 bytes`, 2,944 files on disk in 8.3 s.
+gmdl attributes: `python tools/gmdl_attribs.py --pkg 48/52/54` → channels 4,5 (byte offset 16) are
+in [0,1] on **100%** of vertices on all three N=6 variants → UV. Channel 3 is always 0; bytes 24-35
+are still open; N=5 lays out differently.
+Progress map: `python tools/feature_map.py` → `analysis/shots/reverse_map.png` +
+`analysis/features.md`, 212 features, engine 78.5%, overall 70.0%.
 
 ---
 
