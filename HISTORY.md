@@ -5,6 +5,59 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ---
 
+## Session 6 — 2026-10-13 morning: RefPack solved, first real game content decoded
+
+Started from: session 5 (57/57 indexes parsed, 150,945 records, but nothing decoded; RefPack
+explicitly UNVERIFIED).
+Ended with: **RefPack fully reversed from the instructions, verified on 30,000 real records,
+integrated in C++, and the first real Spore content decoded end-to-end.**
+
+### The two facts that solved it (both instruction-level, both easy to get wrong again)
+1. **Copy-loop count = register value + 1.** The copy loops test the counter BEFORE decrementing:
+   `mov eax,esi / dec esi / test eax,eax / jne` runs N+1 times for esi=N, while the *literal*
+   loops test after (`dec esi / test esi,esi / jne`) and run exactly N. So the copy lengths are
+   `+3/+4/+5`, not `+2/+3/+4`. My first port used the raw value and failed **250/250** streams;
+   with +1 it is exact on **30,000/30,000**. This is the kind of thing that looks right when you
+   read the code and is wrong when you run it - the exactness test is what caught it.
+2. **Two valid signatures.** The detector masks: `bswap(word) & 0x1FFF == 0x10FB`. Top bits are
+   flags, so `0x10FB` AND `0x50FB` pass. A strict `data[0]==0x10` check rejected 50 of the
+   first 20,000 real records, every one a `0x50FB`.
+(The header size is BIG-endian - the upstream doc's "little-endian" is wrong, third time that
+document misled us and the third time the disassembly corrected it.)
+
+### Added
+* `source/engine/refpack.h/.cpp` - the C++ decoder, with the instructions quoted inline.
+* `Package::read_resource_decoded()` - reads a record and decompresses it when the index says
+  RefPack; `out.size()` == `memSize` on success.
+* `pkg:-decode <pkg> <rec> <out>` console verb (reports bytes, mem/packed, % printable).
+* `tools/refpack.py` rewritten around the disassembly (no third-party table), with
+  `--verify` that decodes real records and requires an exact length match.
+* `tools/rp_trace.py` (per-command trace), `tools/rp_probe.py` (variant comparison),
+  `tools/rp_rules.py` (rule search), `tools/rp_brute.py` (enumeration) - the instrument set
+  used to localize the discrepancy rather than guess.
+
+### First real game content decoded
+`pkg:-decode,0,0` → 312 B, `pkg:-decode,0,2` → 10,191 B, both exactly `memSize`, from
+`Data\Locale\cs-cz\NameGeneration.package`: UTF-8 (BOM `EF BB BF`) Czech given names
+(`Ábel, Adam, Bára, Běla, Emil, Gábi, …`) and toponyms (`Abélard, Aberdeen, Adrásteia,
+Agamemnón, …`). The loader can now read the game's own text.
+
+### Measurements
+* RefPack: **30,000 records decoded exactly, 0 failures** (was: 0 decoded, decoder faulted).
+* Records indexed: 150,945 (unchanged); of them 98,407 are RefPack and now decodable.
+* Build: 0 errors, 0 warnings.
+
+### How this session was verified
+`cmake --build build --config Debug` → 0 errors, 0 warnings.
+`python tools/refpack.py --verify --limit 30000` → `records decoded successfully: 30,000`,
+`FAILED: 0`, `VERDICT: PASS`.
+`OpenSpore.exe -w -devDirs -exec pkg:-decode,0,0,dec0.bin -exec pkg:-decode,0,2,dec2.bin
+ -quitAfter 12` → `decoded 312 bytes (mem=312 packed=253 refpack=1, 94% printable)` and
+`decoded 10191 bytes (mem=10191 packed=6367 refpack=1, 89% printable)`, both files on disk with
+exactly those sizes, exit code 0, and their contents are the Czech lexicon above.
+
+---
+
 ## Session 5 — 2026-10-13 00:00: upstream RE knowledge adopted, tested, and two of our bugs fixed
 
 Started from: session 4 (57 packages opening, but only 31 with a parsed index; `sentinel` and

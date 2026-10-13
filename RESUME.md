@@ -1,16 +1,15 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 5).
+Last update: 2026-10-13 (session 6).
 
 ## One-line status
 
-**There is a booting executable that reads EA's shipped data end-to-end.**
-`build/bin/Debug/OpenSpore.exe` reaches 10/10 boot markers with `-w -devDirs`: window + icon,
-D3D9 device, font atlas, developer console, AppStateManager-analog, a Loader state that renders
-a progress bar — and **all 57 real `.package` files open AND index-parse, 0 rejected**
-(150,945 records). The first resource has been dumped through the reversed index. The
-RenderWare bridge has not started; RefPack is the next decode gap.
+**There is a booting executable that decodes real Spore content.** RefPack is solved and
+verified (30,000/30,000 real records decode to exactly `memSize`), all 57 `.package` files
+index-parse (150,945 records), and `pkg:-decode` writes actual game data — the first decoded
+assets are the Czech name/place lexicon. The RenderWare bridge has not started; that is the
+next big piece. `-w -devDirs` still boots 10/10 markers at ~33 fps.
 
 ## Upstream knowledge is now IN the repo (level 4, tested before use)
 
@@ -28,6 +27,8 @@ knowledge" and IDEAS.md §5 items 19-20 for the failures.
 | `N_verified` (DISASM-VERIFIED rows) | **15** of 21 | count `**DISASM-VERIFIED**` in `VERIFY.md` |
 | packages **index-parsed** | **57 / 57** (0 kind-unknown, 0 invalid) | `packages:` in the log |
 | records parsed | **150,945**, 0 invariant violations | `python tools/pkg_kinds.py` |
+| **RefPack decoded exactly** | **30,000 / 30,000**, 0 failures | `python tools/refpack.py --verify --limit 30000` |
+| game content decoded | 312 B + 10,191 B Czech text, == `memSize` | `pkg:-decode,0,0` / `,0,2` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower, as the original) | `-exec state:-list` |
 | fps | **33.4 / 31.2** | `fps=` in the log |
 | build warnings | **0** | `cmake --build build --config Debug` output |
@@ -181,36 +182,27 @@ silent verboseaudio 4.0 5.1 automation …`).
 
 ## Blocked / open
 
-1. **RefPack decoder** — the one thing between us and decoded game content. `tools/refpack.py`
-   is UNVERIFIED and faults on a real stream. Aimed route (IDEAS.md §6): disassemble
-   `0x0092c5b0..0x0092c77f` and derive the command table from the instructions; the header side
-   is already confirmed (`0x0092ccdc` tests bit `0x8000` to pick a 3- or 4-byte **big-endian**
-   length; `0x0092cd40` detects `bswap(word) & 0x1FFF == 0x10FB`; `0x0092c4e0` is the BE reader
-   with exactly one caller, `0x92cd05`). Do not transcribe a table from a doc again — the
-   upstream doc says LE and is wrong.
-2. **`group` / `unknown` semantics** — the bit-mask model names them but not their meaning; and
+1. **`group` / `unknown` semantics** — the bit-mask model names them but not their meaning; and
    why K=4 keeps `group` per-record while 6/7 hoist it.
-3. **Type-id → name** is now a *lookup*, not a puzzle: `upstream/SporeMaster3/data/reg_type.txt`
-   (593 lines) is the practical answer, since type ids are **not** FNV of their name
-   (0/6 tested — IDEAS.md §5.20). Our top ids: `0x01A510BB` (98% of the fixed records),
-   `0x2F4E681B` = `rw4` (12,987 records), `0x024A0E52` (the Czech lexicon we dumped).
-4. **RenderWare bridge** not started. **x64** switch exists in CMake, never compiled.
-5. `-w` semantics (VERIFY row 15) and the path-assembly block (row 8) are still DRAFT/PARTIAL.
+2. **Type-id → name** is a *lookup*, not a puzzle: `upstream/SporeMaster3/data/reg_type.txt`
+   (593 lines), since type ids are **not** FNV of their name (0/6 tested — IDEAS.md §5.20).
+   Our top ids: `0x01A510BB` (98% of the fixed records), `0x2F4E681B` = `rw4` (12,987 records),
+   `0x024A0E52` (the Czech lexicon we decoded).
+3. **RenderWare bridge** not started. **x64** switch exists in CMake, never compiled.
+4. `-w` semantics (VERIFY row 15) and the path-assembly block (row 8) are still DRAFT/PARTIAL.
 
 ## Next actions, in order
 
-1. **Disassemble `0x0092c5b0`** and finish RefPack from the instructions, then decode one real
-   resource end-to-end (`pkg:-dump` gains a `-decode` path). This is the shortest visible win:
-   it turns 150,945 indexed records into actual game bytes.
-2. **Name the top type ids** via `reg_type.txt` + `reg_file.txt` + `KeyMap.txt`, and show a
-   named resource on the Loader screen.
-3. **RenderWare plugin-registration family** (VERIFY row 13): start from `vb -<used>` at
+1. **Identify a decoded resource's type** and show real game content on the Loader screen
+   (we can already decode; next is to *use* it). `rw4` (0x2F4E681B) is the RenderWare resource
+   type - an obvious first target once the RW bridge starts.
+2. **RenderWare plugin-registration family** (VERIFY row 13): start from `vb -<used>` at
    `0x0140a980` (field guide §3: bridge `Rw*RegisterPlugin`/`*RegisterPluginStream`/
    `*GetPluginOffset`/`*SetStream{Always,Rights}CallBack` for every PLUGINBASE class; expect
    **no** RxPipeline equivalent).
-4. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle
+3. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle
    `-w` (row 15).
-5. Extract `render/rhi.h` **when the RW bridge starts**, not before (`IDEAS.md` §1).
+4. Extract `render/rhi.h` **when the RW bridge starts**, not before (`IDEAS.md` §1).
 
 Done and off the list: `.package` header + fixed-stride index (session 4: 57 files, 0 invalid,
 17,901 records, 0 violations), in-engine frame capture (✅ `GetBackBuffer` →

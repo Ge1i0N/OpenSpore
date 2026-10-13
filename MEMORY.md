@@ -177,6 +177,80 @@ header and matches the 4-byte magic `{0x7f,0x9d,0x88,0xec}` against the stream (
 compare against the dword at `0x01436b20`). All 57 shipped files pass the DBPF validator,
 so this path is dead for our data; recorded so nobody mistakes it for the main parser.
 
+## Traps hit in session 6 (RefPack; each one cost a round)
+
+1. **A copy loop that tests the counter BEFORE decrementing runs N+1 times.** The RefPack copy
+   loops are `mov eax,esi / dec esi / test eax,eax / jne` (e.g. `0x92c660`), so for a register
+   value of N they emit **N+1** bytes, while the *literal* loops (`dec esi / test esi,esi /
+   jne`, e.g. `0x92c752`) emit exactly N. The copy lengths are therefore `+3/+4/+5`, not
+   `+2/+3/+4`. My first port used the register value and failed **250/250** real streams. The
+   fix was found by requiring an exact length match, not by re-reading (I had re-read the
+   disasm twice and it still "looked" correct). Stand up an exactness test early, for any
+   decoder.
+2. **A masked signature test means the top bits are flags, not part of the magic.** RefPack's
+   detector is `bswap(word) & 0x1FFF == 0x10FB`, so `0x10FB` and `0x50FB` are both valid; a
+   strict `data[0]==0x10` check rejected 50 of the first 20,000 real records. Whenever the
+   original masks a constant, port the mask, not the constant.
+3. **Judge a function's identity by its callers, not by a nearby `int3`.** I first disassembled
+   from `0x92ccdc`, which is the *middle* of `0x92ccd0`; `tools/callers.py` gave the real entry
+   (the package path calls `0x92ccd0`, which in turn calls `0x92c5b0`), and that is what made
+   the header/loop split correct.
+4. **Third-party docs were wrong again, and again in the direction that would have broken us.**
+   SporeMaster3's `DBPF_FORMAT.md` says the RefPack size is little-endian; it is big-endian
+   (`10 FB 00 01 38` -> `0x000138` = 312 = that record's `memSize`). That is the third distinct
+   claim from that document set to be disproved by the disassembly. Its *code*
+   (`RefPack.cs`) is accurate where the prose is not - read the source, not the summary.
+5. **A PowerShell exit code read in a race with `WaitForExit` looks exactly like a crash.**
+   Again this session: `$p.ExitCode` returned `0xFFFFFFFF` while the log said `exit code=0`.
+   Always `[void]$p.WaitForExit(ms)` first, and believe the log.
+
+## RefPack (EA LZRef) — SOLVED, verified on 30,000 real records
+
+Decoded from the oracle's instructions; C++ in `source/engine/refpack.cpp`, Python in
+`tools/refpack.py`, wired in as `Package::read_resource_decoded` + the `pkg:-decode` verb.
+**Verification: 30,000/30,000 real `.package` records decode to EXACTLY the index's `memSize`,
+0 failures** (`python tools/refpack.py --verify --limit 30000`). A wrong table cannot hit an
+exact declared length 30,000 times.
+
+Chain (tools/callers.py): `0x008d8b3b` (package resource path) → detector `0x0092cd40` →
+header+`0x92ccd0` (codec vtable `0x0140a12c` slot +0x20) → command loop `0x0092c5b0`.
+BE reader `0x0092c4e0` (the only 1/2/3/4-byte reader; `shl 8 / add` per byte = big-endian).
+
+Header: 2 magic bytes, then a **3- or 4-byte BIG-endian** uncompressed size at +2, chosen by
+bit15 of the magic word. (The upstream SporeMaster3 doc says **little-endian** and is wrong.)
+
+Commands, control byte `c` (quoted from `0x0092c5b0`), `dist` is a byte distance back:
+| c | form | literals | copy len | distance |
+|---|---|---|---|---|
+| `<0x80` | 2-byte (+`b1`) | `c&3` | `((c>>2)&7)+3` | `((c&0x60)<<3)+b1+1` |
+| `<0xC0` | 3-byte (+`b0,b1`) | `b0>>6` | `(c&0x3F)+4` | `((b0&0x3F)<<8)+b1+1` |
+| `<0xE0` | 4-byte (+`b0,b1,b2`) | `c&3` | `((c&0x0C)<<6)+b2+5` | `((c&0x10)<<12)+(b0<<8)+b1+1` |
+| `<0xFC` | literal block | - | `((c&0x1F)<<2)+4` literals | - |
+| `>=0xFC` | tail | `c&3` | - (stop) | - |
+Copies are byte-at-a-time (matches may overlap → RLE semantics).
+
+**The `+1` is the whole story and cost a full round.** The *copy* loops test the counter
+BEFORE decrementing —
+```
+92c660: mov al,[edi] / mov [edx],al      ; copy one byte
+92c664: mov eax,esi                      ; save the pre-decrement value
+92c666: inc edx / inc edi / dec esi
+92c669: test eax,eax / jne 0x92c660      ; -> N+1 iterations for esi=N
+```
+— so the byte count is the computed value **plus one** (`+3/+4/+5` above, not `+2/+3/+4`).
+The *literal* loops test AFTER (`dec esi / test esi,esi / jne`, e.g. `0x92c752`) so they run
+exactly N. A first port that used the register value directly failed **250/250** sampled
+streams; with the +1 it is exact on 30,000/30,000.
+
+**Two valid signatures.** The detector masks: `bswap(word) & 0x1FFF == 0x10FB`. Top bits are
+flags, so `0x10FB` **and** `0x50FB` pass (0x50FB has bits 12 and 14 set). A strict
+`data[0]==0x10` check rejected 50 of the first 20,000 real records — every one a `0x50FB`.
+
+**First real game content ever decoded**: `pkg:-decode,0,0` and `,0,2` of
+`Data\Locale\cs-cz\NameGeneration.package` → 312 B and 10,191 B, both exactly `memSize`,
+UTF-8 (BOM `EF BB BF`) Czech given names (`Ábel, Adam, Bára, Běla, Emil …`) and toponyms
+(`Abélard, Aberdeen, Adrásteia, Agamemnón …`).
+
 ## Upstream knowledge: SporeMaster3 (authority #4 — hints, verified before use)
 
 `upstream/SporeMaster3/` (TRACKED, ~9.8 MB) holds a copy of another team's reverse-engineering

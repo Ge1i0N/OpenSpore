@@ -158,21 +158,32 @@ The D3D9 backend stays the regression oracle: any GL output is diffed against it
     (multiply before xor, `0x00932e8a`) and the registration site passes mode=1 = `tolower`
     (`0x007e40f2`). `Loader` was 0x69cdcb22, correct is 0xd7d04c04. Silent bug by design:
     ids only ever compare against other ids.
+22. **"The RefPack copy length equals the value the decoder computes into the register."**
+    Wrong by exactly one. The copy loops test the counter BEFORE decrementing
+    (`mov eax,esi / dec esi / test eax,eax / jne`), so they emit register+1 bytes; the literal
+    loops test AFTER and emit exactly the register. This failed **250/250** real streams before
+    the fix and **30,000/30,000** pass after it. The lesson is the method, not the +1: I
+    re-read the disassembly twice and it still looked correct - only an exactness test over
+    real data found it.
+23. **"A RefPack stream starts with the bytes `10 FB`."** It starts with a 16-bit word whose
+    low 13 bits are `0x10FB`; the top bits are flags, and the shipped packages contain both
+    `10 FB` and `50 FB`. A strict byte check rejected 50 of the first 20,000 real records.
+    Port the mask (`& 0x1FFF`), not the constant.
+24. **"SporeMaster3's `DBPF_FORMAT.md` is right that RefPack's size field is little-endian."**
+    It is big-endian (`10 FB 00 01 38` -> `0x000138` = 312 = that record's `memSize`). Third
+    disproved claim from that document set. Its C# source (`RefPack.cs`) is accurate where the
+    prose is not - read the source.
 
 ## 6. Open questions, precisely stated (so the next disasm run is aimed, not wandering)
 
-- **RefPack bit-level decoder.** Confirmed entry points in the oracle: `0x0092ccdc` (header:
-  swaps the magic word, tests bit `0x8000` to choose a 3- or 4-byte big-endian length, then
-  calls `0x0092c5b0`), `0x0092cd40` (detector: `bswap(word) & 0x1FFF == 0x10FB`),
-  `0x0092c4e0` (1/2/3/4-byte big-endian reader, only 1 caller: `0x92cd05`).
-  `tools/refpack.py` is **UNVERIFIED** and still faults on a real stream (offset 522 at
-  output length 20) because its command table was transcribed from the third-party doc
-  instead of from `0x0092c5b0`. Next move: disassemble `0x0092c5b0`..`0x0092c77f` and derive
-  the command table from the instructions. Do not patch the Python by guessing again.
+- **~~RefPack bit-level decoder.~~ SOLVED (session 6).** `source/engine/refpack.cpp` +
+  `tools/refpack.py`; 30,000/30,000 real records decode to exactly `memSize`. The two traps
+  that cost the round are recorded in MEMORY ("RefPack" section) and in the disproven list
+  below. Do not re-derive: the copy lengths are register+1, and `0x50FB` is a valid signature.
 - **What `group`/`unknown` mean**, and why kind 4 keeps `group` per-record while 6/7 differ.
 - **The original's `type`→name mapping**: `upstream/SporeMaster3/data/reg_type.txt` (593
   lines) is the practical answer, not a hash. Our top type ids: 0x01A510BB (98% of fixed
-  records), 0x2F4E681B (= `rw4`, 12,987 records), 0x024A0E52 (the Czech lexicon we dumped).
+  records), 0x2F4E681B (= `rw4`, 12,987 records), 0x024A0E52 (the Czech lexicon we decoded).
 
 1. **"The `FindTheUnencryptedDotText` binaries are the same build as the GA target."**
    Disproved by `analysis/build_identity.md`: 0/12 candidates match on CodeView GUID/age,

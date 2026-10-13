@@ -23,7 +23,8 @@ each one's index kind, record count and index offset.
 | Boots | **10/10** boot-chain markers with `-w -devDirs` |
 | Renders | D3D9 window + icon + font atlas + Loader state, **33 fps**, machine-captured |
 | Reads EA's data | **57/57 `.package` opened, 0 rejected**; 150,945 index records, 0 invariant violations |
-| First asset | dumped end-to-end: `pkg:-dump,0,3` → 1371 B RefPack → a Czech name-generation lexicon |
+| Decodes EA's data | **RefPack solved**: 30,000/30,000 real records decode to exactly `memSize` |
+| First real content | Czech name/place lexicon, decoded end-to-end via `pkg:-decode` (312 B + 10,191 B) |
 | Fault tolerance | proven: 5 aborts recovered inside the frame loop, 6th in 1 s → storm exit |
 | Crash diagnostics | live symbolised stacks (`file:line`) via our own dbghelp harness |
 | RenderWare bridge | **not started** — this is the next big piece |
@@ -59,7 +60,8 @@ must not depend on that):
 .\OpenSpore.exe -w -devDirs -exec state:-list                       # the reversed `state` verb
 .\OpenSpore.exe -w -devDirs -exec pkg:-hdr,0                        # header of package #0
 .\OpenSpore.exe -w -devDirs -exec pkg:-rec,0,3                      # one index record
-.\OpenSpore.exe -w -devDirs -exec pkg:-dump,0,3,res0.bin            # first real EA resource
+.\OpenSpore.exe -w -devDirs -exec pkg:-dump,0,3,res0.bin            # first real EA resource (packed)
+.\OpenSpore.exe -w -devDirs -exec pkg:-decode,0,2,dec.bin           # RefPack-decoded game text
 .\OpenSpore.exe -w -devDirs -capture out.bmp -captureAfter 20 -quitAfter 60
 .\OpenSpore.exe -w -devDirs -exec _abortNow:9 -quitAfter 80         # fault-tolerance test
 ```
@@ -157,18 +159,19 @@ Non-negotiables we hold ourselves to:
 
 ## Honest limits
 
-* **No RenderWare, no game content yet.** We can open and index the packages; we cannot decode
-  a mesh, a texture or a behaviour tree. The Loader screen is our own art.
-* **RefPack is not implemented.** `tools/refpack.py` is explicitly **unverified** and still
-  faults on a real stream, because its command table came from a third-party document instead
-  of from the original's decoder at `0x0092c5b0`. The verified route is written down in
-  `IDEAS.md` §6.
+* **No RenderWare, no meshes yet.** We can open, index and **decompress** any resource, but we
+  have not decoded a mesh, a texture or a behaviour tree. The `rw4` type (0x2F4E681B, 12,987
+  records) is the RenderWare container and is the next target. The Loader screen is our own art.
+* **RefPack is solved and verified** (30,000/30,000 real records decode to exactly `memSize`,
+  `tools/refpack.py --verify`), and `pkg:-decode` writes real game data. The first decoded
+  assets are the Czech name/place lexicon.
 * **`-w` is our own convention.** It is *not* in the original's argument vocabulary; we say so
   instead of pretending we reversed it (`VERIFY.md` row 15).
 * **x64 exists only as a CMake switch** and has never been compiled.
 * Third-party RE knowledge (`upstream/SporeMaster3/`) was **tested before being used**, and it
-  was wrong in two byte-level places (RefPack endianness, "type id = FNV(name)"). Both are
-  recorded in `MEMORY.md` and `IDEAS.md` §5 rather than quietly adopted.
+  was wrong in **three** places now (RefPack endianness, "type id = FNV(name)", and its prose
+  generally - though its *source code* was accurate where the summary was not). All recorded in
+  `MEMORY.md` and `IDEAS.md` §5 rather than quietly adopted.
 
 ## Licence / provenance
 

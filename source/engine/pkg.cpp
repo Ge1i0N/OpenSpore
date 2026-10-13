@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include "engine/log.h"
+#include "engine/refpack.h"
 
 namespace os::pkg {
 namespace {
@@ -204,15 +205,35 @@ void Package::close() {
 bool Package::read_resource(u32 record_index, std::vector<u8>& out_bytes) {
     if (!m_ok || !m_file || record_index >= m_records.size()) return false;
     const Record& r = m_records[record_index];
-    if (r.size() == 0) return false;
-    if ((u64)r.offset() + r.size() > m_hdr.file_size) return false;
-    out_bytes.resize(r.size());
+    if (r.packed_size() == 0) return false;
+    if ((u64)r.offset() + r.packed_size() > m_hdr.file_size) return false;
+    out_bytes.resize(r.packed_size());
     if (fseek(m_file, (long)r.offset(), SEEK_SET) != 0) return false;
-    size_t got = fread(out_bytes.data(), 1, r.size(), m_file);
-    if (got != r.size()) {
-        LOG_WARN("pkg", "%s: record %u short read %zu/%u", m_path.c_str(), record_index, got, r.size());
+    size_t got = fread(out_bytes.data(), 1, r.packed_size(), m_file);
+    if (got != r.packed_size()) {
+        LOG_WARN("pkg", "%s: record %u short read %zu/%u", m_path.c_str(), record_index, got, r.packed_size());
         return false;
     }
+    return true;
+}
+
+bool Package::read_resource_decoded(u32 record_index, std::vector<u8>& out_bytes) {
+    if (record_index >= m_records.size()) return false;
+    const Record& r = m_records[record_index];
+    std::vector<u8> packed;
+    if (!read_resource(record_index, packed)) return false;
+    if (!r.refpacked()) {
+        out_bytes = std::move(packed);  // stored raw; memSize == packedSize in this case
+        return true;
+    }
+    std::vector<u8> decoded;
+    u32 n = refpack::decode(packed.data(), (u32)packed.size(), r.mem_size(), decoded);
+    if (n == (u32)-1) {
+        LOG_WARN("pkg", "%s: record %u RefPack decode failed (packed=%u mem=%u)", m_path.c_str(), record_index,
+                 r.packed_size(), r.mem_size());
+        return false;
+    }
+    out_bytes = std::move(decoded);
     return true;
 }
 

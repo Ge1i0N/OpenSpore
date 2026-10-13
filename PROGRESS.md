@@ -12,6 +12,8 @@ Status legend: ✅ done+verified · 🚧 partial · ❌ not started · ⛔ block
 | boot markers OK | **10/10** | `yardstick:` in `OpenSpore.log` |
 | packages **index-parsed** | **57 / 57** (0 kind-unknown, 0 invalid) | `packages:` |
 | records parsed | **150,945**, 0 invariant violations | `python tools/pkg_kinds.py` |
+| **RefPack decoded exactly** | **30,000 / 30,000**, 0 failures | `python tools/refpack.py --verify --limit 30000` |
+| game content decoded | 312 B + 10,191 B Czech text, == `memSize` | `pkg:-decode,0,0` / `,0,2` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower) | `-exec state:-list` |
 | fps | **33.4 / 31.2** | `fps=` |
 | build warnings | **0** | `cmake --build` output |
@@ -44,7 +46,8 @@ Status legend: ✅ done+verified · 🚧 partial · ❌ not started · ⛔ block
 | Parse **all** indexes | ✅ (session 5) | the index's first dword is a **shared-field bit mask**, so `prefix = 4+4*popcount(K)`, `stride = 32-4*popcount(K)` → **57/57 files, 150,945 records, 0 violations** |
 | Split the former "sentinel" u32 | ✅ (session 5) | it is `compression:u16 + flags:u16`; 0xFFFF=RefPack (98,407 recs, payload starts `10 FB`, packed<mem), 0x0000=raw (52,538 recs, never `10 FB`, packed==mem) — verified by probing payload bytes |
 | Read a resource's bytes | ✅ | `pkg:-dump,0,3,res0.bin` → 1371 B out of `Data\Locale\cs-cz\NameGeneration.package` (type 0x024A0E52, RefPack) |
-| RefPack decode | ❌ | `tools/refpack.py` is **UNVERIFIED** and faults on a real stream; its table came from a third-party doc (which is also wrong about endianness). Aimed route in IDEAS.md §6: disasm `0x0092c5b0` |
+| RefPack decode | ✅ **SOLVED** | `source/engine/refpack.cpp`; **30,000/30,000 real records decode to exactly `memSize`** (`tools/refpack.py --verify`). `pkg:-decode` writes the decoded bytes |
+| Decode a real asset | ✅ (session 6) | `pkg:-decode,0,0` → 312 B and `,0,2` → 10,191 B of Czech name-generation text (UTF-8, BOM), both exactly `memSize` |
 | Resource type-id → name | 🚧 | ids are **not** FNV of names (0/6 tested); the answer is the registry lookup in `upstream/SporeMaster3/data/reg_type.txt` (593 lines). Top ids known: 0x01A510BB (98%), 0x2F4E681B=`rw4`, 0x024A0E52 (Czech lexicon) |
 | `group`/`unknown` semantics | ❌ | the bit-mask model names them but not their meaning |
 | RenderWare plugin registration family | ❌ | field guide §3; start from `vb -<used>` at 0x0140a980 |

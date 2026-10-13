@@ -40,12 +40,16 @@
 //                                                   0% of samples, packedSize == memSize
 // So 0x80000000 on the size word is a validity/used bit, and compression is what toggles.
 //
+// REFPACK: SOLVED and verified (was "not reversed" in the previous revision of this note).
+// `source/engine/refpack.cpp` decodes it, `Package::read_resource_decoded` wires it in, and
+// tools/refpack.py --verify decodes 30,000/30,000 real records to exactly memSize (0 fails).
+// Two instruction-level facts that cost real time and are easy to get wrong again:
+//   * the copy loops test their counter BEFORE decrementing (0x92c660), so the byte count is
+//     the register value PLUS ONE - using the raw value failed 250/250 sampled streams;
+//   * the signature test masks (& 0x1FFF) == 0x10FB, so 0x10FB and 0x50FB are BOTH valid
+//     (top bits are flags) - a strict data[0]==0x10 check rejected 50 of 20,000 records.
+//
 // STILL NOT REVERSED (do not pretend otherwise):
-//   * The RefPack bit-level decoder. Entry points found and confirmed in the oracle:
-//     0x0092ccdc (header: swaps the magic word, tests bit 0x8000 to choose a 3- or 4-byte
-//     big-endian length, then calls 0x0092c5b0), 0x0092cd40 (detector: bswap(word)&0x1FFF
-//     == 0x10FB). tools/refpack.py is UNVERIFIED and still faults on a real stream - its
-//     command table was transcribed from a third-party doc instead of that disassembly.
 //   * The `group`/`unknown` semantics, and why K=4 carries an extra word.
 //   * Type ids are NOT FNV of their name (see IDEAS.md): reg_type.txt pairs such as
 //     rw4=0x2f4e681b match no FNV variant (0/6 tested), so type ids are assigned, not hashed.
@@ -116,9 +120,13 @@ public:
     const std::vector<Record>& records() const { return m_records; }
 
     // Read a resource's PACKED bytes. Returns false if the record is out of range or the
-    // read fails; never asserts. RefPack payloads come back still compressed until
-    // tools/refpack.py is verified against the original's decoder (see header note).
+    // read fails; never asserts.
     bool read_resource(u32 record_index, std::vector<u8>& out_bytes);
+
+    // Read a resource and, when its index record says RefPack, decompress it (RefPack is
+    // fully solved: tools/refpack.py --verify passes 30,000/30,000 real records). On success
+    // out_bytes.size() == the record's memSize. Returns false and logs on any failure.
+    bool read_resource_decoded(u32 record_index, std::vector<u8>& out_bytes);
 
     std::string describe() const;  // one-line summary for the log and the loader screen
 

@@ -336,7 +336,7 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                       return "capture scheduled for the next frame -> " + p;
                   }});
     console::reg({"pkg", "Inspect a .package: list, header, records, or dump one resource.",
-                  "-list | -hdr <i> | -rec <i> <n> | -dump <i> <n> <out.bin>",
+                  "-list | -hdr <i> | -rec <i> <n> | -dump <i> <n> <out.bin> | -decode <i> <n> <out.bin>",
                   [](const console::CmdContext& c) -> std::string {
                       if (c.args.size() < 2) return "usage: pkg -list | -hdr <i> | -rec <i> <n> | -dump <i> <n> <file>";
                       const std::string& sub = c.args[1];
@@ -408,7 +408,34 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                           if (fopen_s(&fo, c.args[4].c_str(), "wb") != 0 || !fo) return "pkg: cannot write " + c.args[4];
                           fwrite(bytes.data(), 1, bytes.size(), fo);
                           fclose(fo);
-                          return "dumped " + std::to_string(bytes.size()) + " bytes -> " + c.args[4];
+                          return "dumped " + std::to_string(bytes.size()) + " packed bytes -> " + c.args[4];
+                      }
+                      if (sub == "-decode") {
+                          // The whole point of the RefPack work: this writes the DECODED
+                          // resource, whose size equals the index's memSize.
+                          if (c.args.size() < 5) return "pkg: -decode needs <record> <outfile>";
+                          u32 n = (u32)atoi(c.args[3].c_str());
+                          if (n >= pk.records().size()) return "pkg: record index out of range";
+                          const auto& r = pk.records()[n];
+                          std::vector<u8> bytes;
+                          if (!pk.read_resource_decoded(n, bytes))
+                              return "pkg: decode failed for record " + std::to_string(n);
+                          FILE* fo = nullptr;
+                          if (fopen_s(&fo, c.args[4].c_str(), "wb") != 0 || !fo) return "pkg: cannot write " + c.args[4];
+                          fwrite(bytes.data(), 1, bytes.size(), fo);
+                          fclose(fo);
+                          size_t printable = 0;
+                          for (size_t k = 0; k < bytes.size() && k < 256; ++k) {
+                              u8 b = bytes[k];
+                              if ((b >= 32 && b < 127) || b == 9 || b == 10 || b == 13) ++printable;
+                          }
+                          char b[256];
+                          _snprintf_s(b, sizeof(b), _TRUNCATE,
+                                      "decoded %zu bytes (mem=%u packed=%u refpack=%d, %.0f%% printable in first 256) -> %s",
+                                      bytes.size(), r.mem_size(), r.packed_size(), (int)r.refpacked(),
+                                      bytes.empty() ? 0.0 : 100.0 * printable / (double)std::min<size_t>(bytes.size(), 256),
+                                      c.args[4].c_str());
+                          return b;
                       }
                       return "pkg: unknown subcommand " + sub;
                   }});
