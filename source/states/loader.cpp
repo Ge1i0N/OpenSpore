@@ -65,6 +65,12 @@ struct Slot {
 };
 Slot g_slots[4];
 int g_slot_count = 0;
+// A real game UI background (a large `png` whose name looks like a backdrop/launch screen), shown
+// behind everything as the first step toward rendering the actual menu chrome.
+IDirect3DTexture9* g_ui_bg = nullptr;
+int g_ui_bg_w = 0, g_ui_bg_h = 0;
+std::string g_ui_bg_name;
+constexpr u32 kPngType = 0x2F7D0004;
 constexpr u32 kGmdlType = 0x00E6BCE5;
 constexpr u32 kRasterType = 0x2F4E681C;
 
@@ -109,6 +115,47 @@ bool load_slot(Slot& s, const std::string& pkgpath, u32 rec) {
     LOG_INFO("loader", "model slot: %s (%u verts, %u tris)%s", s.name.c_str(), s.verts, s.tris,
              s.tex ? " + texture" : " (no texture)");
     return true;
+}
+
+// Find and upload a real game UI backdrop: a large `png` whose name looks like a backdrop or launch
+// screen. This is the first piece of the real menu chrome on our renderer.
+void load_ui_bg() {
+    if (g_ui_bg) { g_ui_bg->Release(); g_ui_bg = nullptr; }
+    g_ui_bg_name.clear();
+    static const char* kWant[] = {"bckgd", "launchscreen", "newgameflow", "globalui"};
+    for (auto& sp : fs::search_paths()) {
+        if (g_ui_bg) break;
+        for (auto& p : pkg::find_packages(sp.dir.string())) {
+            if (g_ui_bg) break;
+            pkg::Package pk;
+            if (!pk.open(p)) continue;
+            for (u32 n = 0; n < pk.records().size(); ++n) {
+                if (pk.records()[n].type() != kPngType) continue;
+                std::string rname = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
+                                                          pk.records()[n].instance());
+                std::string low = rname;
+                for (auto& c : low) c = (char)std::tolower((unsigned char)c);
+                bool want = false;
+                for (const char* w : kWant) if (low.find(w) != std::string::npos) want = true;
+                if (!want) continue;
+                std::vector<u8> bytes, bgra;
+                if (!pk.read_resource_decoded(n, bytes)) continue;
+                if (bytes.size() < 200000) continue;  // backdrops are large
+                int w = 0, h = 0;
+                if (!image::decode_from_memory(bytes.data(), bytes.size(), bgra, w, h)) continue;
+                if (w < 256 || h < 128) continue;
+                IDirect3DTexture9* tex = render::device().create_texture_bgra(bgra.data(), w, h);
+                if (!tex) continue;
+                g_ui_bg = tex;
+                g_ui_bg_w = w;
+                g_ui_bg_h = h;
+                g_ui_bg_name = rname;
+                LOG_INFO("loader", "UI backdrop: %s (%dx%d, %zu bytes)", rname.c_str(), w, h, bytes.size());
+                break;
+            }
+        }
+    }
+    if (!g_ui_bg) LOG_WARN("loader", "no UI backdrop png found");
 }
 
 constexpr u32 kBg = 0xFF101418;      // dark slate
@@ -318,6 +365,9 @@ void loader_enter() {
     }
     if (!g_loader.tex) LOG_WARN("loader", "no drawable png found to display");
 
+    // Real UI chrome, first piece: a game backdrop drawn behind everything (step toward the menu).
+    if (have_dev) load_ui_bg();
+
     LOG_INFO("loader", "packages: %d index-parsed, %d kind-unknown, %d invalid", g_loader.pkgs_fixed,
              g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
 }
@@ -346,6 +396,13 @@ void loader_render() {
     if (!dev.begin_frame()) return;
     int w = dev.width(), h = dev.height();
     dev.clear(kBg);
+    // Real UI backdrop behind everything (the first piece of the game's own menu chrome). Drawn in
+    // its own overlay pass so the mesh grid and the text land on top of it.
+    if (g_ui_bg) {
+        ov.begin(w, h);
+        ov.image(0.f, 0.f, (float)w, (float)h, g_ui_bg, g_ui_bg_w, g_ui_bg_h, false);
+        ov.end();
+    }
     // The decoded gmdl meshes: draw up to four real Spore models in a 2x2 grid on the right side,
     // each with its own texture, before the 2D overlay (so the text sits on top). draw() saves and
     // restores the viewport itself.

@@ -15,6 +15,14 @@ name->id), `ConfigManager.txt` (211 assignments; `$variable` references are reso
 vendors, 616 cards`. The `cfg` verb exposes `-list/-props/-vars/-cards/<name>`. So the game's whole
 configuration surface is readable by our engine.
 
+### UI: the engine draws a real Spore UI atlas (first piece of the menu chrome)
+The Loader now loads a real UI backdrop - a large `png` whose name looks like UI chrome
+(`bckgd`/`launchscreen`/`newgameflow`/`globalui`) - and draws it behind everything (stretched),
+then the model grid and text on top. Measured: `graphics_atlas~/GlobalUICell-00.png` (512x512) - the
+game's own UI atlas (buttons, arrows, sliders, checkboxes, toggles). Capture:
+`analysis/shots/ui_backdrop.png`. This is our first step along the Main->playable path into UI; the
+next is the `spui` layout parser so real screens can be composed from these atlases.
+
 ### UI (SPUI): the menus are data-driven screens, and we have their names
 Disassembled the UI path: menus are `spui` resources (type 0x250fe9a2, **524 screens, 407 named** via
 FNV-1-lower over `reg_file.txt`) - including `TitleScreen`, `LaunchScreen`, `GameLaunchScreen`,

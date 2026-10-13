@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 81.0%** | **Overall: 74.0%** | done 168 / partial 22 / todo 52 (242 features)
+**Engine reversal: 81.1%** | **Overall: 74.1%** | done 168 / partial 24 / todo 51 (243 features)
 
 **Legend**
 
@@ -27,8 +27,8 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | packages (DBPF) | **90%** | 33 | 4 | 2 |
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
-| render | **80%** | 20 | 0 | 5 |
-| formats | **22%** | 2 | 5 | 13 |
+| render | **82%** | 20 | 1 | 4 |
+| formats | **24%** | 2 | 6 | 13 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **25%** | 2 | 1 | 7 |
@@ -244,9 +244,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## render — 80%
+## render — 82%
 
-*20 done · 0 partial · 5 todo*
+*20 done · 1 partial · 4 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -274,13 +274,13 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | RW device bridge | field guide 3 |
 | ⬜ | todo | RW state blocks |  |
 | ⬜ | todo | shaders |  |
-| ⬜ | todo | UI (UTFWin) | the game's widget stack |
+| 🚧 | partial | UI (UTFWin) | menus are spui resources (524; 407 named); classes + request site found |
 
 ---
 
-## formats — 22%
+## formats — 24%
 
-*2 done · 5 partial · 13 todo*
+*2 done · 6 partial · 13 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -295,6 +295,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | material |  |
 | ⬜ | todo | sound (snr) | 29400 resources |
 | ⬜ | todo | soundProp | 19296 resources |
+| 🚧 | partial | spui layout | 524 screens (407 named); layout parser not derived |
 | 🚧 | partial | gmsh | stable 24-byte header found (BE words + float runs); layout not derived |
 | 🚧 | partial | blockdata | vec3 array; first two = min/max bbox |
 | ⬜ | todo | bea | 2621 resources |
