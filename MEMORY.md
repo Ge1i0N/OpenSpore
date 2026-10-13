@@ -430,6 +430,17 @@ raster and draws it via `create_texture_bgra`, preferring it over the png path. 
 real raster 0x40642901/0x067a07e7.raster (512x512 DXT5)` and `analysis/shots/raster_engine.png`
 show the game's OWN texture format rendered by our renderer, next to the gmdl mesh.
 
+## UI (SPUI) — data-driven menus (session 13)
+
+The game's menus are NOT code: they are `spui` resources (type **0x250fe9a2**, **524 screens, 407
+named**). Name list: `analysis/spui_screens.txt`. Includes `TitleScreen`, `LaunchScreen`,
+`GameLaunchScreen`, `SporeTitleSeq`, `CSATitleScreen`, `GameSettings*`, `GlobalUIOptions-2`,
+`MessageBox`, `NetworkLoginDialog`, plus in-game HUDs. Related types: `layout_bin` 0x050f4731,
+`layout` 0xefbda3ff (only `spui` is present in our packages). A screen is requested by id via the
+resource manager: `0x0080fff0` builds `{spui, layout_bin, layout}` and calls `[mgr]->vtable+0x24`.
+The `UTFWin/cSPUI*Win` window classes (`.rdata 0x1416c40..`) are registered from the cluster
+`0x8009f0..0x800b60` (alloc + ctor + register by name/id). Full notes: `analysis/ui.md`.
+
 ## README hero is the 2x2 model grid
 The README's hero image is now `analysis/shots/model_grid.png` (four real models, each textured) -
 the project's strongest showcase.

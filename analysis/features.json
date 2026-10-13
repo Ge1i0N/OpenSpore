@@ -215,7 +215,7 @@
         {"name": "RW device bridge", "status": "todo", "note": "field guide 3"},
         {"name": "RW state blocks", "status": "todo", "note": ""},
         {"name": "shaders", "status": "todo", "note": ""},
-        {"name": "UI (UTFWin)", "status": "todo", "note": "the game's widget stack"}
+        {"name": "UI (UTFWin)", "status": "partial", "note": "menus are spui resources (524; 407 named); classes + request site found"}
       ]
     },
     {
@@ -232,6 +232,7 @@
         {"name": "material", "status": "todo", "note": ""},
         {"name": "sound (snr)", "status": "todo", "note": "29400 resources"},
         {"name": "soundProp", "status": "todo", "note": "19296 resources"},
+        {"name": "spui layout", "status": "partial", "note": "524 screens (407 named); layout parser not derived"},
         {"name": "gmsh", "status": "partial", "note": "stable 24-byte header found (BE words + float runs); layout not derived"},
         {"name": "blockdata", "status": "partial", "note": "vec3 array; first two = min/max bbox"},
         {"name": "bea", "status": "todo", "note": "2621 resources"},

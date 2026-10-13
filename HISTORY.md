@@ -15,6 +15,15 @@ name->id), `ConfigManager.txt` (211 assignments; `$variable` references are reso
 vendors, 616 cards`. The `cfg` verb exposes `-list/-props/-vars/-cards/<name>`. So the game's whole
 configuration surface is readable by our engine.
 
+### UI (SPUI): the menus are data-driven screens, and we have their names
+Disassembled the UI path: menus are `spui` resources (type 0x250fe9a2, **524 screens, 407 named** via
+FNV-1-lower over `reg_file.txt`) - including `TitleScreen`, `LaunchScreen`, `GameLaunchScreen`,
+`SporeTitleSeq`, `CSATitleScreen`, `GameSettings*`, `GlobalUIOptions-2`, `MessageBox`,
+`NetworkLoginDialog`. Related types `layout_bin` (0x050f4731) / `layout` (0xefbda3ff) are declared but
+only `spui` ships. A screen is requested by id via `0x0080fff0` ({spui,layout_bin,layout} ->
+`[mgr]->vtable+0x24`). The `UTFWin/cSPUI*Win` window classes (`.rdata 0x1416c40..`) are registered from
+the cluster `0x8009f0..0x800b60`. Full name list `analysis/spui_screens.txt`, notes `analysis/ui.md`.
+
 ### The Loader shows FOUR real models at once (2x2 grid, each textured)
 Instead of cycling one model, the Loader loads up to four real gmdl models with DISTINCT instance ids
 (so the grid shows four different models) and draws them in a 2x2 grid, each with its paired
