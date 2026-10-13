@@ -177,6 +177,20 @@ header and matches the 4-byte magic `{0x7f,0x9d,0x88,0xec}` against the stream (
 compare against the dword at `0x01436b20`). All 57 shipped files pass the DBPF validator,
 so this path is dead for our data; recorded so nobody mistakes it for the main parser.
 
+## Traps hit in session 8 (RW4; recorded so the reader is not searched for wrongly)
+
+1. **A format magic that is `memcpy`'d from a template is NOT findable as an inline immediate.**
+   RW4's 28-byte header lives at `.rdata 0x014f6480` and is copied wholesale
+   (`mov esi,0x14f6480 / rep movs`), so searching `.text` for the magic value or its bytes finds
+   **nothing** (verified: 0 hits for `0x34575289`, for `"w32\0"`, and for the marker dword - and
+   0 raw byte occurrences of `\x89RW4`/`w32\0` in `.text`). The reader therefore validates by
+   other means, and must be found by CALL GRAPH (from the writer `0x006c233d` or the resource
+   accessor `0x004021a0`), not by a magic search. Contrast RefPack, whose magic *is* an inline
+   immediate (`0x46504244` / `0x10FB`) and which `tools/find_imm.py` located in one run.
+2. **A distinctive sentinel can be writer-only.** `0xcafed00d` was a promising lead for the
+   reader, but it occurs exactly twice and both are inside the writer `0x006c233d`. Do not assume
+   a constant is shared between the read and write paths until both are seen.
+
 ## Traps hit in session 6 (RefPack; each one cost a round)
 
 1. **A copy loop that tests the counter BEFORE decrementing runs N+1 times.** The RefPack copy

@@ -47,6 +47,14 @@ reader: the reader compares via the template, so it must be found by call graph,
 `tools/callers.py 0x11e3f60` → 2 callers, one at `0x006c24b3` (the writer). Build unchanged
 (no engine code touched this session); tool run only.
 
+Reader search, so the next session does not repeat it: `tools/find_imm.py 0x34575289` and
+`--ascii w32` → 0 hits; raw byte search of `\x89RW4` / `w32\0` / the marker in `.text` → 0 hits;
+`tools/find_imm.py 0xcafed00d` → 2 hits, both inside the writer; `tools/callers.py 0x11e3f60` → 2
+callers; `tools/callers.py 0x004021a0` (the rw4 type accessor) → 3 callers, all in one function
+(`0x0040246b`). None of these is the stream reader, so the reader is reached another way - walk
+from the resource loader that dispatches on type `0x2F4E681B`, not from the magic. This is a
+**negative result worth keeping**: it rules out the obvious searches.
+
 ---
 
 ## Session 7 — 2026-10-13: the whole game enumerated and named
