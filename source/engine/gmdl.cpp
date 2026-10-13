@@ -1,5 +1,6 @@
 #include "engine/gmdl.h"
 
+#include <cmath>
 #include <cstring>
 
 namespace os::gmdl {
@@ -137,6 +138,27 @@ Mesh parse(const u8* data, size_t size) {
         m.positions[i * 3 + 2] = z;
         m.uvs[i * 2 + 0] = u;
         m.uvs[i * 2 + 1] = v;
+    }
+    // 6. VALIDATE: the extracted positions must reproduce the file's own bbox (the exactness test
+    // that solved gmdl). This rejects the gmdl variants whose vertex layout we have not derived, so
+    // a bogus mesh is never reported as ok (and the unpacker falls back to raw bytes for those).
+    float mn[3] = {m.positions[0], m.positions[1], m.positions[2]};
+    float mx[3] = {m.positions[0], m.positions[1], m.positions[2]};
+    for (u32 i = 1; i < vcount; ++i) {
+        for (int k = 0; k < 3; ++k) {
+            float v = m.positions[i * 3 + k];
+            if (v < mn[k]) mn[k] = v;
+            if (v > mx[k]) mx[k] = v;
+        }
+    }
+    float err = 0.f;
+    for (int k = 0; k < 3; ++k) {
+        err += std::abs(mn[k] - m.bbox_min[k]) + std::abs(mx[k] - m.bbox_max[k]);
+    }
+    if (err > 1e-3f) {
+        m.ok = false;
+        m.why = "positions do not reproduce the header bbox (layout not handled)";
+        return m;
     }
     m.ok = true;
     return m;

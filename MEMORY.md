@@ -379,6 +379,19 @@ byte offset 16** for the N=6 declaration (100% of vertices in [0,1] on three ind
 plus packed data). N=5 (`EP1_Content_02` rec[1]) lays the attributes out differently, which is what
 the declaration table is for. The rest needs the loader's disassembly.
 
+**IMPORTANT (session 13): the layout above is a SUBSET, not all gmdl.** The vertex-declaration
+count `decl_n` (read at `d+4` in the vertex-block header) is **3, 4, 5 or 6** across the game, not
+just 5/6: in `Spore_Content`, 4,209 gmdl give `{3:1179, 4:483, 5:3, 6:551}`. Only **491 of those
+4,209 (12%)** reproduce the header bbox with our position formula (`voff + 0x1C + (N-1)*12`,
+position = first float3, stride 36); the rest have a different attribute layout we have not derived
+(median bbox error 10.9, i.e. clearly wrong positions). So `gmdl` is **solved for one layout
+variant** (the four variants we hand-verified are all in it), not for all 11,041 resources. The
+parser now VALIDATES this: `gmdl::parse` computes the bbox of the extracted positions and returns
+`ok=false` unless it matches the header bbox (`err < 1e-3`) - so a bogus mesh is never reported as
+valid, and the unpacker falls back to raw bytes for the unhandled variants. Measured: with the check,
+`pkg:-unpack ...,gmdl` on Spore_Content writes 491 OBJ and 3,718 raw `.gmdl` (was 2,216 OBJ, many of
+them garbage).
+
 Tools: `tools/gmdl_mesh.py` (parse + validate bbox + export OBJ), `tools/gmdl_attribs.py` (per-
 channel statistics that identified the UV), `tools/render_obj.py` (OBJ -> PNG, no deps),
 `tools/gmdl.py` (locate/inspect), `tools/gmdl_header_check.py` (the broad invariant test that

@@ -7,6 +7,24 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### gmdl: the layout is a SUBSET, and the parser now validates (491/4209 exact)
+While quality-checking the OBJ export I found a real bug: the parser accepted gmdl variants whose
+attribute layout we have NOT derived, producing garbage meshes (one had 2 vertices and 13,162 faces).
+Root cause: our position formula (`voff + 0x1C + (N-1)*12`, stride 36, position = first float3) only
+fits ONE layout variant. The vertex-declaration count `decl_n` is **3, 4, 5 or 6** across the game
+(Spore_Content: {3:1179, 4:483, 5:3, 6:551}), and only **491 of 4,209** reproduce the file's own
+header bbox (median error 10.9 - clearly wrong for the rest). Fix: `gmdl::parse` now computes the
+bbox of the extracted positions and returns `ok=false` unless it matches the header bbox
+(`err < 1e-3`) - the exactness test that solved gmdl, applied as a guard. Measured: `pkg:-unpack
+...,gmdl` on Spore_Content now writes **491 OBJ + 3,718 raw .gmdl** (was 2,216 OBJ, many garbage).
+The Loader mesh is unaffected (10/10 markers, textured mesh still drawn). Recorded in MEMORY.
+
+### gmsh: reads as a vec3 triangle list, but not a simple array
+`gmsh` (0x01c135da, 2,535) has a stable 24-byte header on 2534/2535 payloads, then vec3 triples
+(positions). But `len % 12` is spread across every residue, so it is NOT `header + N*12` - there is
+variable-length data (index/attribute sections) after the floats. Loaded via the resource manager at
+`0x402301`. Layout not derived; recorded so the next attempt reads the reader.
+
 ### A progress map like the decomp/recomp projects
 `analysis/features.json` is the single source of truth for what is reversed/implemented/verified;
 `tools/feature_map.py` renders it to `analysis/shots/reverse_map.png` (a grid of green/amber/grey
@@ -73,10 +91,9 @@ Measured on `Spore_Content`: 2,770 BMP (e.g. `building_editorTextureDiffuse~/Ele
 0 failed. `gmdl` records whose layout our parser does not yet handle fall back to raw bytes - honest,
 and recorded.
 
-**Whole game (all 57 packages, 411 s):** `raster` -> **5,747 BMP**, `gmdl` -> **4,084 OBJ**, plus raw
-fallbacks (184 raster with an unhandled tag, 6,957 gmdl in a variant our parser rejects), **0
-failed** on both. So the game's own textures and generated models now come out as files any tool can
-open.
+**Whole game (all 57 packages):** `raster` -> **5,747 BMP**, `gmdl` -> **1,776 OBJ** (bbox-validated;
+the rest fall back to raw bytes), **0 failed** on both. An earlier run reported 4,084 OBJ, but that was
+BEFORE the bbox guard below - many were garbage meshes.
 
 ### Asset format survey: blockdata solved as a vec3/bbox array; gmsh is mesh-like
 Went looking for a tractable mass format. **`blockdata` (0x5caa5e28, 3,141)** is an array of `vec3`
