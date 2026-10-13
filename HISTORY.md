@@ -73,6 +73,15 @@ FNV-1-lower of the name, the rest explicitly assigned — so the file is authori
 "how does the game read its config/state text": loose `Config/*.txt` scripts plus `trigger`
 resources, via the resource manager. New: `analysis/content-loading.md`, `analysis/config-scripts.md`.
 
+**Wired into OUR engine:** `source/engine/config.cpp` reads `Config/Properties.txt` and
+`ConfigManager.txt` through the fs search paths at boot (log `[config] config: 63 properties, 83
+variables from Config/*.txt`), and a `cfg` console verb exposes it (`cfg -list|-props|-vars|<name>`).
+The option ids come in three forms — explicit hex, decimal, and `(hash(Name))` (whose inner name can
+differ from the property name, e.g. `AudioMasterVolume` -> `hash(mastervolume)` = `0xaded51d5`); the
+C++ reader resolves all three. Conditionals are recorded, not evaluated (they are hardware-dependent).
+Measured: `cfg AudioMasterVolume` -> `property 0xaded51d5 float`; `cfg -props` lists all 63; windowed
+run still 10/10 markers, raster + mesh drawn, fps 32, exit 0.
+
 ### The MAIN LOOP is found: 0x008482f0
 After ruling out run, every AppMode vtable slot, and a direct pump call, the loop was found by a
 different route: the engine imports **`TranslateMessage` (IAT 0x13cc5cc)** and **`DispatchMessageW`

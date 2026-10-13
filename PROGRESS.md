@@ -23,6 +23,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | **gmdl mesh decoded** | positions reproduce the file bbox **exactly (err 0.0000)**, 4 variants | `python tools/gmdl_mesh.py --pkg <i>` |
 | **engine draws a real mesh** | 3765 verts / 6000 tris, fps 32.3 | `analysis/shots/mesh_engine.png` |
 | **engine draws native raster** | `raster` DXT1/DXT5/raw decoded in C++ and drawn | `analysis/shots/raster_engine.png` |
+| **game config read** | `[config] 63 properties, 83 variables from Config/*.txt`; `cfg <name>` resolves | `cfg -props` / `cfg AudioMasterVolume` |
 | **real Spore geometry rendered** | limb / creature / plant | `analysis/shots/gmdl_pkg{48,52,54}.png` |
 | real game asset rendered | `vehiclepainticons~/be_basic_shake_05.png` (128×128) | `analysis/shots/hero_real_asset.png` |
 | resource names resolved | **112,155 / 150,945 (74.3%)** | `inventory:` in the log |

@@ -2,11 +2,13 @@
 
 Authority: the shipped files `Data/Config/*.txt` (and `DataEP1/Config/*.txt`) - loose text,
 not packaged. They are what the disassembly loads as the `properties` / `ConfigManager`
-configs (see `analysis/content-loading.md`).
+configs (see `analysis/content-loading.md`). OUR engine reads them too:
+`source/engine/config.cpp` parses both files and exposes them via the `cfg` console verb.
 
 ## Files
 
-- `Config/Properties.txt` - declares player options: `property <Name> <0xid> <type>`.
+- `Config/Properties.txt` - declares options as `property <Name> <0xid> [type]`.
+  `Data/Config/Properties.txt` has 63 (47 typed + 16 untyped); `DataEP1/Config/Properties.txt` adds 76 more.
 - `Config/ConfigManager.txt` - the rules/defaults script (per video card, CPU, sound).
 - `Config/VideoCards.txt` - video-card database.
 
@@ -14,13 +16,17 @@ configs (see `analysis/content-loading.md`).
 
 `set`, `seti`, `setb`, `setOption`, `boolProp`, `intProp`, `setResolution`, `setVariables`,
 `if` / `elseif` / `else` / `endif`, `trace`, `include`, `property`, `alert`. It is a small
-imperative scripting language (values, conditions, includes, alerts).
+imperative scripting language with `$`-variables (e.g. `$Medium`, `$resolutionTarget`) and
+hardware-conditional blocks. Our reader records assignments but does NOT evaluate the
+conditionals (they depend on the video card / CPU / sound card).
 
-## The option table (from Properties.txt)
+## The option table (from Data/Config/Properties.txt)
 
-`47` properties. Their ids are a MIX: `2` are FNV-1-lower hashes of the
-name, the rest are explicitly assigned (a contiguous block like `0x0461709d..0x046170a7`).
-So the file itself is the authoritative name->id table; do not assume a hash.
+`63` properties. Their ids come in THREE forms: 49 explicit (hex or decimal,
+including a contiguous block like `0x0461709d..0x046170a7`) and 14 `(hash(Name))` where
+the hashed name can DIFFER from the property name (e.g. `property AudioMasterVolume
+(hash(mastervolume))`). So the file is the authoritative name->id table; never just hash the
+property name. (Our C++ reader resolves all three forms.)
 
 | name | id | type | id source |
 |---|---|---|---|
@@ -33,10 +39,10 @@ So the file itself is the authoritative name->id table; do not assume a hash.
 | `OptionLighting` | `0x046170a6` | uint32 | explicit |
 | `OptionPlanetQuality` | `0x046170a7` | uint32 | explicit |
 | `OptionGameQuality` | `0x05c9482d` | uint32 | explicit |
-| `OptionDOF` | `0x4c0dd839` | uint32 | fnv1-lower |
+| `OptionDOF` | `0x4c0dd839` | uint32 | explicit |
 | `OptionPhotoRes` | `0x0473b8cb` | uint32 | explicit |
 | `OptionVideoRes` | `0x0473b8cc` | uint32 | explicit |
-| `OptionAudioPerformance` | `0x7d8ed666` | uint32 | fnv1-lower |
+| `OptionAudioPerformance` | `0x7d8ed666` | uint32 | explicit |
 | `OptionFullScreen` | `0x046170a2` | uint32 | explicit |
 | `OptionFitToScreen` | `0x046170a5` | uint32 | explicit |
 | `OptionDiskCacheSize` | `0x046170a4` | uint32 | explicit |
@@ -60,14 +66,30 @@ So the file itself is the authoritative name->id table; do not assume a hash.
 | `OptionTribeControls` | `0x0679b868` | uint32 | explicit |
 | `OptionCivControls` | `0x0679b873` | uint32 | explicit |
 | `OptionSpaceControls` | `0x0679b880` | uint32 | explicit |
+| `PrefsClearGraphicsCache` | `0x043f2ae3` | bool | hash(PrefsClearGraphicsCache) |
+| `AudioMasterVolume` | `0xaded51d5` | float | hash(mastervolume) |
+| `AudioSFXVolume` | `0x3af239c4` | float | hash(sfxvolume) |
+| `AudioMusicVolume` | `0x8bdd39ec` | float | hash(musicvolume) |
+| `AudioVOXVolume` | `0x09a0474a` | float | hash(voxvolume) |
+| `AudioSpeakerMode` | `0x49d4c74d` | uint32 | hash(speakermode) |
+| `AudioMuteAll` | `0x899eb157` | bool | hash(muteall) |
 | `UserName` | `0x040512ef` | string8 | explicit |
 | `Password` | `0x040512f4` | string8 | explicit |
 | `PlayOffline` | `0x040e3d98` | bool | explicit |
 | `PromptOnStartup` | `0x0440a514` | bool | explicit |
 | `YTUserName` | `0x05664bf5` | string8 | explicit |
 | `YTPassword` | `0x05664bf6` | string8 | explicit |
+| `ShaderPath` | `0x1a34e253` | int | hash(ShaderPath) |
+| `EffectsInstancing` | `0xdcd55da1` | bool | hash(effectsInstancing) |
+| `MRT` | `0x00000029` | bool | explicit |
 | `AlwaysFullscreen` | `0x05dd4647` | bool | explicit |
+| `RenderTargetCorrection` | `0x00000044` | bool | explicit |
+| `dropShadowQualityText` | `0xe30a842c` | int | hash(dropShadowQualityText) |
+| `dropShadowQualityImage` | `0xa5bbb508` | int | hash(dropShadowQualityImage) |
 | `NumFramesToBuffer` | `0x05c97448` | int | explicit |
+| `terrainGenerateBrushesPerFrame` | `0xd40905a7` | int | hash(terrainGenerateBrushesPerFrame) |
+| `terrainGenerateSingleStep` | `0x31989aaf` | bool | hash(terrainGenerateSingleStep) |
+| `terrainGenerateTimeLimit` | `0xab52b057` | int | hash(terrainGenerateTimeLimit) |
 | `MacSpecificText` | `0x061b67b6` | bool | explicit |
 | `Support51Audio` | `0x063ab656` | bool | explicit |
 | `HasShownExportToolEULA` | `0x087c4363` | bool | explicit |

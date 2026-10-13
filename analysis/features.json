@@ -114,6 +114,7 @@
         {"name": "resource read", "status": "done", "note": "pkg:-dump/-rec/-hdr"},
         {"name": "resource manager", "status": "partial", "note": "getter 0x8de4b0 (global 0x1667aa0); queries 0x686450/0x847780"},
         {"name": "content loading (trigger)", "status": "partial", "note": "trigger type 0x24a0e52; groups resolved: properties, ConfigManager, SporeAppStates"},
+        {"name": "config scripts read", "status": "done", "note": "source/engine/config.cpp reads Config/*.txt; cfg verb; ids hex/decimal/(hash)"},
         {"name": "refpack signature", "status": "done", "note": "&0x1FFF == 0x10FB"},
         {"name": "refpack BE size", "status": "done", "note": "3- or 4-byte"},
         {"name": "refpack loop", "status": "done", "note": "0x0092c5b0"},

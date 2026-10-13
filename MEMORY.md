@@ -404,13 +404,21 @@ The game's options/config are **loose text files**, not packaged resources:
 matches the resource groups the disassembly loads (`properties`, `ConfigManager` — see
 `analysis/content-loading.md`).
 
-- `Properties.txt` declares options as `property <Name> <0xid> <type>` — the game's own name->id
-  table (47 options). Their ids are a **mix**: only 2 are FNV-1-lower of the name (e.g.
-  `OptionDOF` 0x4c0dd839); the rest are explicitly assigned (a contiguous block
-  `0x0461709d..0x046170a7`). **Do not assume a hash for these ids; the file is authoritative.**
+- `Properties.txt` declares options as `property <Name> <id> [type]` — the game's own name->id
+  table. `Data/Config/Properties.txt` has **63** (DataEP1 adds 76). The id comes in **three forms**:
+  explicit hex (`0x04754439`), decimal (`41`), or **`(hash(Name))`** where the hashed name can DIFFER
+  from the property name (e.g. `property AudioMasterVolume (hash(mastervolume))`). 14 of the 63 use
+  `(hash(...))`. **Never just hash the property name**; the file is authoritative. Our C++ reader
+  (`source/engine/config.cpp`) resolves all three forms.
 - `ConfigManager.txt` is an imperative script with keywords `set/seti/setb/setOption/boolProp/
-  intProp/setResolution/setVariables/if/elseif/else/endif/trace/include/property/alert`.
+  intProp/setResolution/setVariables/if/elseif/else/endif/trace/include/property/alert` and
+  `$`-variables (`$Medium`, `$resolutionTarget`). Its blocks are hardware-conditional; our reader
+  records assignments but does NOT evaluate the conditionals (211 assignments, 198 conditional lines
+  in the shipped file).
 - Full table + language notes: `analysis/config-scripts.md`.
+- **Our engine reads it**: `source/engine/config.cpp` loads both files through the fs search paths at
+  boot (log line `[config] config: 63 properties, 83 variables from Config/*.txt`), and the `cfg`
+  console verb exposes it (`cfg -list`, `cfg -props`, `cfg -vars`, `cfg <name>`).
 
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 

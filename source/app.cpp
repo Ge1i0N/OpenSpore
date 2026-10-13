@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <cstdlib>  // abort(), for the deliberate fault-tolerance probe
+#include <cctype>
 #include <cstring>
 #include <algorithm>
 #include <filesystem>
@@ -14,6 +15,7 @@
 #include <vector>
 
 #include "engine/cmdline.h"
+#include "engine/config.h"
 #include "engine/console.h"
 #include "engine/diag.h"
 #include "engine/fs.h"
@@ -292,6 +294,11 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     fs::init(g_args, exe_dir);
     mark(3, true, fs::dump_search_list());
 
+    // 3b. the game's own config scripts (Config/*.txt). We read them through the same search
+    // paths, so this is the real shipped config, not a reimplementation of a format we guessed.
+    // (Its own LOG_INFO lines are the evidence; it must not add a boot marker.)
+    config::instance().load();
+
     // 4. window (skipped headless)
     if (g_args.headless) {
         mark(4, true, "headless: no window");
@@ -356,6 +363,41 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                       // Same deferral as the -capture launch key: poll() runs outside the scene.
                       render::device().request_capture(p.c_str());
                       return "capture scheduled for the next frame -> " + p;
+                  }});
+    console::reg({"cfg", "The game's own Config/*.txt: option table (Properties.txt) + vars (ConfigManager.txt).",
+                  "-list | -props | -vars | <name>",
+                  [](const console::CmdContext& c) -> std::string {
+                      auto& cfg = config::instance();
+                      if (c.args.size() < 2 || c.args[1] == "-list") return cfg.stats();
+                      if (c.args[1] == "-props") {
+                          std::string s = std::to_string(cfg.properties().size()) + " properties:\n";
+                          for (auto& p : cfg.properties()) {
+                              char b[128];
+                              _snprintf_s(b, sizeof(b), _TRUNCATE, "  %-28s 0x%08x %s",
+                                          p.name.c_str(), p.id, p.type.c_str());
+                              s += b; s += "\n";
+                          }
+                          return s;
+                      }
+                      if (c.args[1] == "-vars") {
+                          std::string s = std::to_string(cfg.vars().size()) + " variables:\n";
+                          for (auto& kv : cfg.vars()) s += "  " + kv.first + " = " + kv.second + "\n";
+                          return s;
+                      }
+                      std::string v = cfg.get(c.args[1]);
+                      if (!v.empty()) return c.args[1] + " = " + v;
+                      // also look the name up in the property table (Properties.txt)
+                      for (auto& p : cfg.properties()) {
+                          std::string pn = p.name;
+                          for (auto& ch : pn) ch = (char)std::tolower((unsigned char)ch);
+                          if (pn == c.args[1]) {
+                              char b[128];
+                              _snprintf_s(b, sizeof(b), _TRUNCATE, "%s = property 0x%08x %s",
+                                          p.name.c_str(), p.id, p.type.c_str());
+                              return b;
+                          }
+                      }
+                      return c.args[1] + " = <not set>";
                   }});
     console::reg({"pkg", "Inspect a .package: list, header, records, or dump one resource.",
                   "-list | -hdr <i> | -rec <i> <n> | -path <i> <n> | -types <i> | -unpack <i|all> <dir> [type] | -dump <i> <n> <out> | -decode <i> <n> <out>",
