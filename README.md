@@ -76,6 +76,45 @@ Text list: [`analysis/functions.md`](analysis/functions.md). The **beta PDB is a
 usable for the oracle; it can only supply names where function identity matches, which is a
 separate, larger effort. That is why the denominator comes from the binary, not the PDB.
 
+The PDB is still valuable as a **name** source — it is not stripped. `tools/pdb_symbols.py`
+harvests **136,433** unique function/method name paths and groups them by subsystem, which is the
+engine's own vocabulary (and what makes a disassembly readable):
+
+| subsystem (from the PDB) | functions |
+|---|---|
+| `SP` (the Spore engine) | 63,246 |
+| `EA` | 24,214 |
+| `eastl` | 9,874 |
+| `rw` (RenderWare) | 6,582 |
+| `nSPCreatureAnim` | 2,423 |
+| `nSPSkinner` | 1,561 |
+
+Full breakdown: [`analysis/pdb_symbols.md`](analysis/pdb_symbols.md).
+
+### Can we guess addresses from the PDB? Partially.
+
+A full "PDB name → oracle address" map is **not derivable**, for three verified reasons: there is no
+beta **binary** (only the PDB, so no code to fingerprint); no reference build matches the oracle (all
+`Also*` have different CodeView GUIDs); and the GA build is **/GR− (RTTI off)** with almost no assert
+function-name strings.
+
+What *does* work is a **string-reference guesser**: `tools/name_guess.py` attributes each `.rdata`
+string referenced by a `push imm32` / `mov r32, imm32` to its enclosing function, then matches
+distinctive strings to PDB name tokens (scored by string length, token rarity, and how many functions
+use the string). It yields **428 candidate address→name guesses, 120 HIGH-confidence**:
+
+| address | proposed name | driving string |
+|---|---|---|
+| `0x007f6160` | `SPUICreateAnimationTimerRamp` | `SPUICreateAnimationTimerRamp` |
+| `0x0089f060` | `EA::Allocator::StackAllocatorCoreAllocate` | `StackAllocatorCoreAllocate` |
+| `0x008457a4` | `EA::ArgScript::cParser::CommandExists` | `commandExists` |
+| `0x00a73e40` | `SP::EffectsManager` | `effectsManager` |
+| `0x00ea6710` | `SP::cPlanetModel::IsUnderWater` | `isunderwater` |
+| `0x01028cd5` | `SP::cCreatureModeStrategy::RunCinematic` | `runcinematic` |
+
+Every row is a **guess to check by disassembly**, not truth. Full list:
+[`analysis/name_guesses.md`](analysis/name_guesses.md).
+
 ## Quick start
 
 ```powershell

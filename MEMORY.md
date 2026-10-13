@@ -443,6 +443,23 @@ are only ever compared to other ids, so our own `state -list`/`goto` kept workin
   pointers into .text + prologues) = **105,239** (an upper bound), against the
   `analysis/functions_named.json` list = **29** reversed → **0.021%**. This is the honest counterweight
   to the (deliberately scoped) feature map; the map draws both.
+- **The PDB is NOT stripped:** it has no `/GLOBAL`/`/PUBLIC` streams, but it is full of MSVC-mangled
+  names — 194,027 unique, **136,433** unique function/method name paths (`tools/pdb_symbols.py` →
+  `analysis/pdb_names.txt`, `analysis/pdb_symbols.md`). Subsystems: SP 63,246, EA 24,214, eastl 9,874,
+  **rw 6,582** (RenderWare), nSPCreatureAnim 2,423, nSPSkinner 1,561.
+- **Address guesser: partial, NOT full.** A full "PDB name -> oracle address" map is impossible, and
+  the reasons are now verified, not assumed: (1) there is no beta BINARY, only the PDB, so there is no
+  code to fingerprint; (2) no reference build matches the oracle (all `Also*` have different CodeView
+  GUIDs); (3) the GA build is **/GR- (RTTI off)** — only 2 type-descriptor names exist — and it has
+  almost no assert function-name strings. What DOES work is a string-reference guesser:
+  `tools/name_guess.py` attributes each `.rdata` string referenced by a `push imm32`/`mov r32,imm32`
+  to its enclosing function, then matches distinctive strings to PDB name tokens (scored by string
+  length, token rarity, and how many functions use the string). Result: **428 candidate
+  address->name guesses, 120 HIGH-confidence** (e.g. `0x007f6160 SPUICreateAnimationTimerRamp`,
+  `0x0089f060 EA::Allocator::StackAllocatorCoreAllocate`, `0x008457a4
+  EA::ArgScript::cParser::CommandExists`, `0x00a73e40 SP::EffectsManager`,
+  `0x00ea6710 SP::cPlanetModel::IsUnderWater`). Every row is a GUESS to check by disassembly, not
+  truth. Output: `analysis/name_guesses.md`.
 
 ## AppStateManager / game states (level 1: disasm of the oracle)
 

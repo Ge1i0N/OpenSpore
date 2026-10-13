@@ -57,3 +57,36 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x00e20b5a` | RawArgvConsumer | startup | sole GetCommandLineA consumer |
 | `0x011e3f60` | Rw4HeaderCtor | rw4 | copies the 28-byte header template from .rdata 0x014f6480 |
 
+## The engine's shape, from the beta PDB (names only, not addresses)
+
+The beta PDB carries **136,433** unique function/method name paths. The
+PDB is a different link, so these are NAMES, not addresses — but they are the engine's own
+vocabulary and they say what the code is made of. Largest subsystems:
+
+| subsystem | functions |
+|---|---|
+| SP | 63,246 |
+| EA | 24,214 |
+| eastl | 9,874 |
+| rw | 6,582 |
+| nSPCreatureAnim | 2,423 |
+| nSPSkinner | 1,561 |
+| $0A | 571 |
+| ?A0x338626e6 | 509 |
+| M$0A | 318 |
+| UcSPVector3 | 288 |
+| ?A0xac92cca8 | 256 |
+| std | 233 |
+| ?A0xde8104ed | 228 |
+| ?A0x6378cbb7 | 222 |
+| ?A0xff79e854 | 219 |
+| ?A0x37152cb4 | 214 |
+
+Full breakdown: `analysis/pdb_symbols.md`.
+
+## Address guesses (partial)
+
+A full PDB-name→address map is not derivable (no beta binary, no matching reference build,
+RTTI off). `tools/name_guess.py` still produces a ranked GUESS list by matching strings an
+oracle function references against PDB name tokens — see `analysis/name_guesses.md`.
+

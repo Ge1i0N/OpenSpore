@@ -26,6 +26,31 @@ map now draws this as a second gauge. The **beta PDB is not the denominator**: i
 (0/12 addresses match — `analysis/build_identity.md`), so it can supply names only where function
 identity matches, not addresses. Recorded in `analysis/functions.md`.
 
+### The beta PDB is NOT stripped — 136k function names harvested
+The PDB has no standard `/GLOBAL`/`/PUBLIC` streams (which is why the earlier reader called it
+stripped), but it is full of **MSVC-mangled symbol names**: 194,027 unique mangled runs, **136,433**
+unique function/method name paths. `tools/pdb_symbols.py` reverses the `@`-separated path into
+`Namespace::Class::Method` and buckets by subsystem: **SP 63,246, EA 24,214, eastl 9,874, rw 6,582**
+(RenderWare!), `nSPCreatureAnim` 2,423, `nSPSkinner` 1,561. So a PDB function map IS possible — as a
+**name** inventory (addresses do not map). It is what makes the disassembly readable, and it tells us
+the scale of the RenderWare subsystem (`rw`: 6,582 functions). Output: `analysis/pdb_symbols.md` +
+`analysis/functions.md` (which now shows both the oracle count and this shape).
+
+### Can addresses be guessed from the PDB? Partially — and the limits are now proven
+The user asked whether a script could guess all addresses from the PDB. Answer: **a full map is
+impossible**, and the three reasons are verified, not assumed: (1) there is no beta **binary**, only
+the PDB, so there is no code to fingerprint; (2) no reference build matches the oracle (all `Also*`
+have different CodeView GUIDs); (3) the GA build is **/GR- (RTTI off)** — only 2 type-descriptor names
+exist — and assert function-name strings are absent. A PARTIAL guesser works and is built:
+`tools/name_guess.py` attributes each `.rdata` string referenced by `push imm32`/`mov r32,imm32` to
+its enclosing function, then matches distinctive strings to PDB name tokens. Result: **428 candidate
+address->name guesses, 120 HIGH-confidence** (e.g. `0x007f6160 SPUICreateAnimationTimerRamp`,
+`0x0089f060 EA::Allocator::StackAllocatorCoreAllocate`, `0x008457a4
+EA::ArgScript::cParser::CommandExists`, `0x00a73e40 SP::EffectsManager`, `0x00ea6710
+SP::cPlanetModel::IsUnderWater`). All rows are guesses to check by disassembly; output
+`analysis/name_guesses.md`. Also: `tools/pdb_symbols.py` shows the PDB is NOT stripped — 136,433
+unique function/method name paths (SP 63,246, EA 24,214, eastl 9,874, rw 6,582, nSPCreatureAnim 2,423).
+
 ### Our renderer now draws a decoded gmdl mesh
 The solved gmdl geometry (session 12) is now on OUR screen: `source/engine/gmdl.cpp` is the C++
 port of the parser, `source/render/mesh.cpp` uploads positions+indices, computes smooth normals and

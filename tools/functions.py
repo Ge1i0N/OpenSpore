@@ -135,6 +135,32 @@ def main() -> int:
         v = named[addr]
         lines.append(f"| `{addr}` | {v.get('name','?')} | {v.get('area','')} | {v.get('note','')} |")
     lines.append("")
+
+    # If the PDB symbol map exists, show the engine's SHAPE (names by subsystem) next to our count.
+    pdb = ROOT / "analysis" / "pdb_symbols.json"
+    if pdb.exists():
+        ps = json.loads(pdb.read_text(encoding="utf-8"))
+        lines += [
+            "## The engine's shape, from the beta PDB (names only, not addresses)",
+            "",
+            f"The beta PDB carries **{ps['unique_functions']:,}** unique function/method name paths. The",
+            "PDB is a different link, so these are NAMES, not addresses — but they are the engine's own",
+            "vocabulary and they say what the code is made of. Largest subsystems:",
+            "",
+            "| subsystem | functions |",
+            "|---|---|",
+        ]
+        for k, n in ps["namespaces"][:16]:
+            lines.append(f"| {k} | {n:,} |")
+        lines += ["", "Full breakdown: `analysis/pdb_symbols.md`.", ""]
+    lines += [
+        "## Address guesses (partial)",
+        "",
+        "A full PDB-name→address map is not derivable (no beta binary, no matching reference build,",
+        "RTTI off). `tools/name_guess.py` still produces a ranked GUESS list by matching strings an",
+        "oracle function references against PDB name tokens — see `analysis/name_guesses.md`.",
+        "",
+    ]
     (ROOT / "analysis" / "functions.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"\nwrote analysis/functions.md and analysis/functions_stats.json")
     return 0
