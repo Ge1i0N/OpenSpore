@@ -116,3 +116,10 @@ Our `source/engine/config.cpp` reads the same files but only records `property`/
 `setOption` assignments (and skips conditionals). A faithful port would implement the command
 handlers above on top of our parser; that is future work.
 
+### The `setOption` flow (why name->id matters)
+
+The `setOption <Name> <Value>` executor (`0x007c8e90`) resolves the option NAME to an id
+(`0x007c8c60`), reads the current value through `[this+0x4]->vtable+0xa0`, then applies the
+new value by id (`0x007c7b60`). So options are addressed BY ID, and the name->id table is
+`Properties.txt` - which is exactly why our reader keeps that table and never hashes the name.
+
