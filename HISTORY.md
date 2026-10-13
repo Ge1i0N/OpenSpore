@@ -57,6 +57,14 @@ guesses to check by disassembly; output `analysis/name_guesses.md`. Also: `tools
 shows the PDB is NOT stripped — 136,433 unique function/method name paths (SP 63,246, EA 24,214,
 eastl 9,874, rw 6,582, nSPCreatureAnim 2,423). The feature map gained a `tooling` category (89%).
 
+### Asset format survey: blockdata solved as a vec3/bbox array; gmsh is mesh-like
+Went looking for a tractable mass format. **`blockdata` (0x5caa5e28, 3,141)** is an array of `vec3`
+(every payload size is a multiple of 12 bytes) whose **first two `vec3` are a min/max bounding box**
+(`min <= max` verified on samples). **`gmsh` (0x01c135da, 2,535)** starts with big-endian-looking
+counts then float32 runs - mesh-like (cf. `gmdl`), layout not derived. Added `analysis/formats.md`, a
+per-type status table (png/raster/gmdl/locale SOLVED; trigger/prop/blockdata/rw4 PARTIAL; gmsh/audio/
+animation TODO).
+
 ### Content loading: the resource manager and the Config/*.txt scripts
 Found the layer above DBPF: the resource-manager getter `0x8de4b0` (global `0x1667aa0`) and two
 query entry points (`0x686450`, `0x847780`) taking a `{group, type}` descriptor. The game's configs

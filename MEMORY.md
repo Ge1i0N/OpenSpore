@@ -409,6 +409,12 @@ raster and draws it via `create_texture_bgra`, preferring it over the png path. 
 real raster 0x40642901/0x067a07e7.raster (512x512 DXT5)` and `analysis/shots/raster_engine.png`
 show the game's OWN texture format rendered by our renderer, next to the gmdl mesh.
 
+## Asset format status (all in `analysis/formats.md`)
+
+A per-type reference: `png`, `raster`, `gmdl`, `locale` are **SOLVED**; `trigger`, `prop`,
+`blockdata`, `rw4` are **PARTIAL**; `gmsh` (a mesh-like payload), audio, animation are TODO.
+`blockdata` (0x5caa5e28, 3,141) is an array of `vec3` whose first two are a **min/max bounding box**.
+
 ## Config scripts = loose text in Config/ (session 13)
 
 The game's options/config are **loose text files**, not packaged resources:

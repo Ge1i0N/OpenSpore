@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 80.0%** | **Overall: 73.0%** | done 163 / partial 20 / todo 54 (237 features)
+**Engine reversal: 80.5%** | **Overall: 73.4%** | done 163 / partial 22 / todo 52 (237 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **90%** | 21 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **80%** | 20 | 0 | 5 |
-| formats | **18%** | 2 | 3 | 15 |
+| formats | **22%** | 2 | 5 | 13 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **25%** | 2 | 1 | 7 |
@@ -273,9 +273,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 18%
+## formats — 22%
 
-*2 done · 3 partial · 15 todo*
+*2 done · 5 partial · 13 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -290,8 +290,8 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | material |  |
 | ⬜ | todo | sound (snr) | 29400 resources |
 | ⬜ | todo | soundProp | 19296 resources |
-| ⬜ | todo | gmsh | 2535 resources |
-| ⬜ | todo | blockdata | 3141 resources |
+| 🚧 | partial | gmsh | mesh-like: BE counts + float runs; layout not derived |
+| 🚧 | partial | blockdata | vec3 array; first two = min/max bbox |
 | ⬜ | todo | bea | 2621 resources |
 | ⬜ | todo | poll | 2590 resources |
 | ⬜ | todo | summary | 2590 resources |
