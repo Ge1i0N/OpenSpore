@@ -6,7 +6,7 @@
 > (functions we have actually reversed/named).
 
 **105,239** candidate function starts in `.text` (upper bound; see the tool's note) ·
-**45** functions reversed/named · **0.036%** coverage.
+**46** functions reversed/named · **0.037%** coverage.
 
 This is deliberately a HARD number, and it is small. It is not in tension with the feature
 map's high engine figure: the feature map measures the scope we chose (boot chain + asset
@@ -17,7 +17,7 @@ are barely touched. Both are true; together they are the honest picture.
 
 | area | count |
 |---|---|
-| startup | 22 |
+| startup | 23 |
 | rw4 | 11 |
 | packages | 9 |
 | core | 2 |
@@ -50,10 +50,11 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x007e8a00` | CreateAppMode | startup | alloc 0x1f0 bytes, ctor 0x7e76e0; the app-mode/state host |
 | `0x007e93d0` | AppModeSetupPlugins | startup | vtable+0x18; -noPlugins/-safe gate -> 0x7e8810 |
 | `0x007eaae0` | AppModeShaderConfig | startup | vtable+0x20; -dumpShaders/-pix/-noScripts/-noEffectScripts... |
+| `0x008482f0` | MainLoop | startup | THE main loop (window vtable+0x84): PeekMessageW -> WM_QUIT -> dispatch -> TranslateMessage -> DispatchMessageW; called from run 0xf48405 |
 | `0x00849b20` | WindowCtor | startup | ctor of the window/input class (vtable 0x141cc10) |
 | `0x00849bf0` | WindowCreate | startup | RegisterClass/CreateWindowEx; HWND at [obj+0x70] |
 | `0x00849e80` | WindowDtor | startup | window class destructor |
-| `0x0084a050` | MessagePump | startup | the only PeekMessageA caller; drains queue + coalesces mouse; vtable slot 0x141cc98 |
+| `0x0084a050` | MessagePumpA | startup | mouse/PeekMessageA pump; drains queue + coalesces mouse; window vtable+0x88 |
 | `0x008d8bf0` | DbpfRead | packages | the byte reader read(buf,size) |
 | `0x008d8f70` | DbpfLoadHeader | packages | reads exactly 0x60 header bytes (cmp eax,0x60) |
 | `0x008d90b0` | DbpfValidateHeader | packages | DBPF header validator: magic/version/count/index-offset clauses |

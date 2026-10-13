@@ -522,6 +522,17 @@ entry 0x011e11e1 -> 0x011e1588 (CRT init) -> 0x011e0f21 (__tmainCRTStartup)
 Do not assume the AppMode ctor's contents; `0x007e76e0` is the next thing to walk. The `trigger`
 resources are text and are read through this path (not yet located).
 
+**The main loop is `0x008482f0`** (window-class vtable `.rdata 0x141cc10` slot `+0x84`), called from
+`run` at `0xf48405` (`call [0x67dcb0()]->vtable+0x84`; `0x67dcb0` returns the window object from
+global `0x15fd89c`). It is a classic message loop: `mov edi, ds:0x13cc62c` (**PeekMessageW**) then
+`PeekMessageW(&msg,0,0,0,PM_REMOVE)` -> `cmp [msg.message],0x12` (WM_QUIT) -> dispatch to the window
+event handlers `[esi+0x5c/0x60/0x64]` -> `TranslateMessage` (IAT 0x13cc5cc) -> `DispatchMessageW`
+(IAT 0x13cc630) -> repeat until the queue is empty, return 1. **Trap:** the engine has TWO
+PeekMessage users — the main loop uses `PeekMessageW` via a register (`edi`), while the mouse helper
+`0x84a050` uses `PeekMessageA` directly (window slot `+0x88`). A search for direct callers of the
+pump therefore misses the loop; the `ff 15 <IAT>` search misses it too because the IAT load and the
+call are separated by `mov edi, [IAT]` + `call edi`.
+
 ## AppStateManager / game states (level 1: disasm of the oracle)
 
 The user remembered this as "типа режимы запуска, управлял в девбилде" — it is real, and it is

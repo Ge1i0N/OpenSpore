@@ -46,6 +46,7 @@
         {"name": "state manager", "status": "done", "note": "AppStateManager analog"},
         {"name": "state register", "status": "done", "note": "FNV-1 ids, dup rejected"},
         {"name": "startup chain traced", "status": "done", "note": "entry -> WinMain 0xf489e0 -> app_main 0xf48810 -> run 0xf47e90"},
+        {"name": "main loop located", "status": "done", "note": "0x8482f0: PeekMessageW/WM_QUIT/dispatch/Translate/DispatchMessageW"},
         {"name": "single-instance guard", "status": "done", "note": "Global\\SporeEditorOrGame; -multipleInstances bypasses"},
         {"name": "app-mode host", "status": "partial", "note": "CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked"},
         {"name": "state goto", "status": "done", "note": "transitions, no nesting"},

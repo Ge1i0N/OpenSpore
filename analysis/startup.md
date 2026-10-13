@@ -86,55 +86,64 @@ message loop; it initialises subsystems and dispatches through the AppMode objec
 - Other manager getters used: `0x67dc90/0x67dcb0/0x67dcd0/0x67dce0/0x67dcf0/0x67dda0`, `0x6a17e0`
   (a profiler/marker call), `0x951220`/`0x951230` (allocator pair), `0x5a7560`, `0x456230`.
 
-## The message pump
+## The main loop — FOUND: `0x008482f0` (window-class vtable `+0x84`)
 
-The game uses **`PeekMessage`**, not `GetMessage` (only `PeekMessageA`/`PeekMessageW` are imported;
-IAT `0x13cc5f0`/`0x13cc62c`). The only caller of `PeekMessageA` is **`0x0084a050`**, a message pump
-that drains the queue (up to 0x400 messages), then does **mouse coalescing** (it merges consecutive
-`WM_MOUSEMOVE` 0x200 events and rewrites duplicate `WM_LBUTTONDBLCLK` 0x203 -> `WM_LBUTTONDOWN`
-0x201). `0x84a050` is referenced only as a vtable slot at `.rdata 0x0141cc98`, not called directly.
+It is a method of the **window class** (vtable `.rdata 0x141cc10`, slot `+0x84` = `0x141cc94` ->
+`0x8482f0`), and `run` calls it at **`0xf48405`** (`call [0x67dcb0()]->vtable+0x84`, where
+`0x67dcb0` returns the window object from global `0x15fd89c`). The loop body (verified instruction by
+instruction):
 
-## The main loop — NOT yet located (negative findings kept)
+```
+8482f0  push ebp; mov ebp,esp; and esp,-8; sub esp,0x30; push ebx/ebp/esi/edi
+8482fc  mov esi, ecx                 ; this = window
+848300  test [esi+8], 0x8 ; if set, focus/activate handling (0xc8 ms sleep, SetForegroundWindow 0x13cc678)
+84833e  test [esi+8], 0x20 ; if clear -> return 1 (loop disabled)
+848348  mov edi, ds:0x13cc62c        ; edi = PeekMessageW
+84834e  PeekMessageW(&msg, 0, 0, 0, PM_REMOVE=1)   ; call edi
+84835a  test eax,eax ; je 0x84840a (no message -> return 1)
+LOOP:
+848362  cmp [msg.message], 0x12      ; WM_QUIT
+848367  je 0x848414                  ; -> return 0
+        ...build an app event {id 0x1ee100b / 0x1ee1001, msg} and dispatch it to the handlers at
+        [esi+0x5c]/[esi+0x60]/[esi+0x64] via their vtables (0x30 / 0x14 / direct)...
+8483e5  call TranslateMessage(&msg)  ; IAT 0x13cc5cc
+8483f0  call DispatchMessageW(&msg)  ; IAT 0x13cc630
+8483f6  PeekMessageW(&msg, 0, 0, 0, PM_REMOVE=1)   ; call edi
+848402  test eax,eax ; jne LOOP      ; more messages -> keep draining
+84840a  return 1
+848414  return 0                     ; (WM_QUIT path)
+```
 
-The main loop is the one piece still missing, and the following were CHECKED and ruled out, so the
-next attempt does not repeat them:
+So the engine's frame/event pump is: `PeekMessageW` -> (WM_QUIT check) -> dispatch to registered
+window-event handlers -> `TranslateMessage` -> `DispatchMessageW`, repeated until the queue is
+empty, then return 1 (the caller loops). `PM_REMOVE = 1`.
 
-- **Not in `run`**: `0x00f47e90` has no backward jump; it sets up and returns (see above).
-- **Not an AppMode vtable method**: every slot `run` uses is accounted for, and the rest are
-  lifecycle: `+0x14 0x7e6850` (subsystem init), `+0x18 0x7e93d0` (plugins), `+0x1c 0x7e7430`
-  (create device), `+0x20 0x7eaae0` (shader/script config), `+0x24 0x7e6520` (**shutdown**: destroys
-  `[+0x20]/[+0x40]/[+0x50]`), `+0x28 0x7e9520` (**shutdown 2**). None loops.
-- **The pump is not called directly** (`callers.py` finds 0 callers of `0x84a050`), and there is no
-  `call [reg+0x88]` (the pump's slot offset from the window vtable `0x141cc10`) in either the short
-  or the disp32 form — the few byte-pattern hits were false positives inside other instructions.
-  So the pump's call site uses an offset/vtable we have not pinned, or the object's vtable base is
-  not `0x141cc10`.
+Note there are **two** PeekMessage users: this main loop uses **`PeekMessageW`** (via `edi`), while
+the mouse-coalescing helper `0x84a050` uses **`PeekMessageA`** directly (IAT 0x13cc5f0). That is why
+a search for direct callers of the pump missed the loop: the loop calls `PeekMessageW` through a
+register, and `0x84a050` is a separate mouse helper reached via vtable slot `+0x88`.
 
-The window/input class is pinned down:
+## The window/input class
+
 - **vtable `.rdata 0x141cc10`**; **ctor `0x849b20`**, **Create `0x849bf0`** (RegisterClass/CreateWindowEx,
-  HWND stored at `[obj+0x70]`), **dtor `0x849e80`**; holds the **pump `0x84a050` at `+0x88`**; wraps
-  mouse tracking (`TrackMouseEvent` 0x141cbfc, `user32.dll` 0x141cbf0).
-- The window object is created in the AppMode setup function at **`0x7e6f21`** (`call 0x849b20`) and
-  stored at **`[AppMode+0x10]`**; that same function then calls `Window::Create` (`[win]->+0x04`),
-  sets window flags `0x2a`/`0x6a` (`-flock` 0x1413a2c ORs `0x80`), inits the renderer, reads
-  `-vSync` (0x14139d4) / `-noVSync` (0x14139c4), and on renderer failure shows
-  `Could not start the renderer.` (0x14139e0). It does **not** loop.
+  HWND stored at `[obj+0x70]`), **dtor `0x849e80`**.
+- **`+0x84` `0x8482f0` = the main loop**; **`+0x88` `0x84a050` = the mouse/PeekMessageA pump**.
+- wraps mouse tracking (`TrackMouseEvent` 0x141cbfc, `user32.dll` 0x141cbf0).
+- The window object is created in the AppMode setup function at **`0x7e6f21`** (`call 0x849b20`),
+  stored at **`[AppMode+0x10]`** and registered in global **`0x15fd89c`** (getter `0x67dcb0`); that
+  same function calls `Window::Create` (`[win]->+0x04`), sets window flags `0x2a`/`0x6a` (`-flock`
+  0x1413a2c ORs `0x80`), inits the renderer, reads `-vSync` (0x14139d4) / `-noVSync` (0x14139c4), and
+  on renderer failure shows `Could not start the renderer.` (0x14139e0).
 - **`0x7e7160`** is the app **event dispatcher** (switches on hashed event ids 0x255abf5 / 0xf62add /
   0x212d3e7 / 0xae1cfe73); the 0xf62add branch has a retry loop (10x, `Sleep(0xfa)`).
 
-The main loop that drives the pump is still not located; the remaining leads are the AppMode slots
-not yet read (`0x7e5f20`..`0x7e5f70`) and the caller of the setup function.
-
 ## Still to trace (next steps, in order)
 
-1. **The main loop** — create the window object (find the caller of the constructor that writes
-   vtable `0x141cc10`) and read its loop method; that is where the pump is called and the frame is
-   driven. This is the last piece of "how the game runs".
-2. **AppMode field map** — the ctor `0x007e76e0` zeroes fields and builds sub-objects; map them
+1. **AppMode field map** — the ctor `0x007e76e0` zeroes fields and builds sub-objects; map them
    (it already ties `[+0x159]` = useDevDirs to VERIFY row 2).
-3. **Config / state text**: the game's `trigger` resources are text (we decode them already); find
+2. **Config / state text**: the game's `trigger` resources are text (we decode them already); find
    where the run path reads them (likely through the AppMode subsystem) and where SPUI is spawned.
-4. The named-object guard uses `Global\`; the beta PDB names (SP::/EA::) can label these once we
+3. The named-object guard uses `Global\`; the beta PDB names (SP::/EA::) can label these once we
    match by identity (see `analysis/name_guesses.md`).
 
 ## Note on the beta PDB

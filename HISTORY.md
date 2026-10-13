@@ -57,6 +57,22 @@ guesses to check by disassembly; output `analysis/name_guesses.md`. Also: `tools
 shows the PDB is NOT stripped — 136,433 unique function/method name paths (SP 63,246, EA 24,214,
 eastl 9,874, rw 6,582, nSPCreatureAnim 2,423). The feature map gained a `tooling` category (89%).
 
+### The MAIN LOOP is found: 0x008482f0
+After ruling out run, every AppMode vtable slot, and a direct pump call, the loop was found by a
+different route: the engine imports **`TranslateMessage` (IAT 0x13cc5cc)** and **`DispatchMessageW`
+(IAT 0x13cc630)**, and both are called from ONE function — **`0x8482f0`** (window-class vtable
+`.rdata 0x141cc10`, slot **`+0x84`**). It is a classic message loop: `mov edi, ds:0x13cc62c`
+(**PeekMessageW**), then `PeekMessageW(&msg,0,0,0,PM_REMOVE)` -> `cmp [msg.message],0x12` (WM_QUIT) ->
+dispatch to the window event handlers `[esi+0x5c/0x60/0x64]` -> `TranslateMessage` ->
+`DispatchMessageW` -> repeat until the queue is empty. `run` calls it at **`0xf48405`**
+(`call [0x67dcb0()]->vtable+0x84`; `0x67dcb0` returns the window object from global `0x15fd89c`).
+
+Trap recorded: the engine has TWO PeekMessage users — the main loop uses `PeekMessageW` through a
+register (`edi`), the mouse helper `0x84a050` uses `PeekMessageA` directly (window slot `+0x88`).
+That is why a search for direct callers of the pump (and a `ff 15 <IAT>` search) both missed the
+loop. The window class is now fully pinned: ctor `0x849b20`, Create `0x849bf0`, main loop `+0x84`,
+mouse pump `+0x88`, dtor `0x849e80` (VERIFY rows 39-40).
+
 ### The original's startup chain, traced from the entry point
 The user asked how the game actually boots (the "start from main" approach). Traced it end to end:
 PE entry `0x011e11e1` -> CRT init -> `__tmainCRTStartup 0x011e0f21` -> **WinMain `0x00f489e0`** (the

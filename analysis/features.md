@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 80.1%** | **Overall: 73.0%** | done 161 / partial 18 / todo 54 (233 features)
+**Engine reversal: 80.2%** | **Overall: 73.1%** | done 162 / partial 18 / todo 54 (234 features)
 
 **Legend**
 
@@ -22,7 +22,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | category | progress | done | partial | todo |
 |---|:---:|:---:|:---:|:---:|
 | harness | **93%** | 13 | 0 | 1 |
-| startup | **94%** | 24 | 3 | 0 |
+| startup | **95%** | 25 | 3 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
 | packages (DBPF) | **91%** | 30 | 2 | 2 |
 | gmdl (meshes) | **90%** | 21 | 3 | 1 |
@@ -58,9 +58,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## startup — 94%
+## startup — 95%
 
-*24 done · 3 partial · 0 todo*
+*25 done · 3 partial · 0 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -85,6 +85,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | state manager | AppStateManager analog |
 | ✅ | done | state register | FNV-1 ids, dup rejected |
 | ✅ | done | startup chain traced | entry -> WinMain 0xf489e0 -> app_main 0xf48810 -> run 0xf47e90 |
+| ✅ | done | main loop located | 0x8482f0: PeekMessageW/WM_QUIT/dispatch/Translate/DispatchMessageW |
 | ✅ | done | single-instance guard | Global\SporeEditorOrGame; -multipleInstances bypasses |
 | 🚧 | partial | app-mode host | CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked |
 | ✅ | done | state goto | transitions, no nesting |
