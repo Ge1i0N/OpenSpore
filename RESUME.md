@@ -1,7 +1,7 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 12).
+Last update: 2026-10-13 (session 13).
 
 ## One-line status
 
@@ -36,6 +36,7 @@ so if consulted at all, read the source. Recorded: MEMORY.md "Upstream knowledge
 | **resources written to disk** | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
 | **headless unpack** | same result, no window/device, 7.6 s | `-headless -exec pkg:-unpack,...` |
 | **gmdl mesh decoded** | positions reproduce the file bbox **exactly (err 0.0000)** on 4 variants | `python tools/gmdl_mesh.py --pkg <i>` |
+| **engine draws a real mesh** | 3765 verts / 6000 tris, fps 32.3 | `analysis/shots/mesh_engine.png` |
 | **real Spore geometry rendered** | limb / creature / plant | `analysis/shots/gmdl_pkg{48,52,54}.png` |
 | **real game asset rendered** | `vehiclepainticons~/be_basic_shake_05.png` (128×128) | `analysis/shots/hero_real_asset.png` |
 | **resource names resolved** | **112,155 / 150,945 (74.3%)** | `inventory:` / `pkg:-path` |
@@ -209,10 +210,11 @@ silent verboseaudio 4.0 5.1 automation …`).
    (getters `0x67dcd0..0x67df70`, globals `0x15fd8b0..`); the model-manager setter `0x67df40`
    (global `0x15fd8c4`) is called from `0x7a71cb` / `0x7a7efa`. **Follow that chain to the real
    reader.** The magic is memcpy'd, so go by call graph, not by immediate search.
-2. **gmdl is DONE for positions** (session 12): stride 36, position = first float3, verified
-   exactly (err 0.0000) on four variants; `tools/gmdl_mesh.py` parses + exports OBJ, and
-   `analysis/shots/gmdl_pkg{48,52,54}.png` are real Spore geometry. **Remaining: identify the six
-   non-position floats per vertex** (declared by the vertex-declaration table's N) — read the loader.
+2. **gmdl is DONE for positions and now DRAWN** (sessions 12-13): stride 36, position = first
+   float3, verified exactly (err 0.0000) on four variants; `tools/gmdl_mesh.py` parses + exports
+   OBJ, `source/engine/gmdl.cpp` + `source/render/mesh.cpp` draw one on our own screen
+   (`analysis/shots/mesh_engine.png`). **Remaining: identify the six non-position floats per
+   vertex** (declared by the vertex-declaration table's N) - read the loader.
 3. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
 4. Wire loose directories (unpacked trees) into `fs` as a data source; a separate `OpenSpore.Cli`
    binary would be tidier than `-headless`, but the capability already exists.
@@ -224,8 +226,10 @@ Done and off the list: `.package` header + fixed-stride index (session 4: 57 fil
 `GetRenderTargetData` between `EndScene` and `Present`; `analysis/shots/loader_capture.png`
 and `loader_packages.png` show readable text), the abort-recovery exercise
 (✅ 5 recoveries + storm exit), **`-w`/`-f`/`-r`** (session 12: row 15 DISASM-VERIFIED — the real
-handling is in the device fn `0x7e74a0..0x7e7637`; `w` beats `f`; `r` is `%dx%d`), and **headless
-mode** (session 12).
+handling is in the device fn `0x7e74a0..0x7e7637`; `w` beats `f`; `r` is `%dx%d`), **headless
+mode** (session 12, genuinely windowless after the session-13 fix), **drawing a decoded gmdl mesh
+in the engine** (session 13), and the **first-argument bug** (session 13: `parse_command_line`
+dropped the first argument because `lpCmdLine` excludes the program name).
 
 ## Standing rules for whoever continues
 

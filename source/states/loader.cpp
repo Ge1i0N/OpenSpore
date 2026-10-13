@@ -12,11 +12,13 @@
 #include "engine/console.h"
 #include "engine/diag.h"
 #include "engine/fs.h"
+#include "engine/gmdl.h"
 #include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
 #include "render/device.h"
 #include "render/imgfile.h"
+#include "render/mesh.h"
 #include "render/overlay.h"
 
 namespace os::states {
@@ -48,6 +50,14 @@ struct Loader {
 
 Loader g_loader;
 Manager* g_mgr = nullptr;
+
+// The decoded mesh lives OUTSIDE Loader on purpose: Loader is reset by copy-assignment
+// (`g_loader = Loader{}`), which would copy a Mesh's raw D3D pointers and double-free them.
+render::Mesh g_mesh;
+std::string g_mesh_name;
+u32 g_mesh_tris = 0;
+u32 g_mesh_verts = 0;
+constexpr u32 kGmdlType = 0x00E6BCE5;
 
 constexpr u32 kBg = 0xFF101418;      // dark slate
 constexpr u32 kBar = 0xFF2A6E8F;
@@ -165,6 +175,42 @@ void loader_enter() {
         }
     }
     if (!g_loader.tex) LOG_WARN("loader", "no drawable png found to display");
+
+    // Decode one gmdl mesh and upload it, so the SOLVED geometry format is visible on our own
+    // screen - the same end-to-end proof the png gives for textures (DBPF -> RefPack -> decode
+    // -> GPU -> pixels). Skipped in headless mode (no device).
+    g_mesh.shutdown();
+    g_mesh_name.clear();
+    g_mesh_tris = g_mesh_verts = 0;
+    for (auto& sp : fs::search_paths()) {
+        if (g_mesh.ready() || !render::device().d3d()) break;
+        for (auto& p : pkg::find_packages(sp.dir.string())) {
+            if (g_mesh.ready()) break;
+            pkg::Package pk;
+            if (!pk.open(p)) continue;
+            for (u32 n = 0; n < pk.records().size(); ++n) {
+                if (pk.records()[n].type() != kGmdlType) continue;
+                std::vector<u8> bytes;
+                if (!pk.read_resource_decoded(n, bytes)) continue;
+                gmdl::Mesh m = gmdl::parse(bytes.data(), bytes.size());
+                if (!m.ok || m.indices.size() < 3) continue;
+                if (m.vertex_count < 256 || m.vertex_count > 120000) continue;  // skip tiny/huge
+                if (!g_mesh.create(render::device().d3d(), m.positions.data(), m.vertex_count,
+                                   m.indices.data(), (u32)m.indices.size()))
+                    continue;
+                g_mesh_name = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
+                                                    pk.records()[n].instance());
+                g_mesh_tris = g_mesh.triangle_count();
+                g_mesh_verts = m.vertex_count;
+                LOG_ONCE_INFO("loader", "showing real mesh %s (%u verts, %u tris) from %s",
+                              g_mesh_name.c_str(), g_mesh_verts, g_mesh_tris,
+                              std::filesystem::path(p).filename().string().c_str());
+                break;
+            }
+        }
+    }
+    if (!g_mesh.ready()) LOG_WARN("loader", "no drawable gmdl mesh found");
+
     LOG_INFO("loader", "packages: %d index-parsed, %d kind-unknown, %d invalid", g_loader.pkgs_fixed,
              g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
 }
@@ -193,6 +239,18 @@ void loader_render() {
     if (!dev.begin_frame()) return;
     int w = dev.width(), h = dev.height();
     dev.clear(kBg);
+    // The decoded gmdl mesh: draw it into its own viewport before the 2D overlay, so the text
+    // sits on top and the real geometry is visible on OUR renderer (the visual counterpart of
+    // the png proof). g_mesh.draw saves/restores the viewport itself.
+    int mesh_side = 0, mesh_x = 0, mesh_y = 0;
+    if (g_mesh.ready()) {
+        mesh_side = (w < h ? w : h) * 36 / 100;
+        if (mesh_side < 160) mesh_side = 160;
+        mesh_x = w - mesh_side - 24;
+        mesh_y = 24 + 40;
+        if (mesh_x < 8) mesh_x = 8;
+        g_mesh.draw(dev.d3d(), mesh_x, mesh_y, mesh_side, mesh_side, g_loader.elapsed * 0.6f);
+    }
     ov.begin(w, h);
 
     // Title + identity block: this is the "log the state, not the symptom" rule applied
@@ -205,6 +263,14 @@ void loader_render() {
     const float max_chars = (float)(w - (int)pad * 2) / 8.0f;  // 8 px = the Consolas advance here
     auto clip = [&](std::string s) {
         size_t n = (size_t)max_chars;
+        if (n < 4) n = 4;
+        if (s.size() > n) s = s.substr(0, n - 3) + "...";
+        return s;
+    };
+    // Clip a line drawn at x to the space that actually remains to its right (the mesh/asset
+    // captions sit near the right edge and used to run off the window).
+    auto clip_at = [&](float x, std::string s) {
+        size_t n = (size_t)(((float)w - x - pad) / 8.0f);
         if (n < 4) n = 4;
         if (s.size() > n) s = s.substr(0, n - 3) + "...";
         return s;
@@ -243,7 +309,12 @@ void loader_render() {
         float ix = (float)w - side - pad;
         float iy = (float)h - side - pad;
         ov.image(ix, iy, side, side, g_loader.tex, g_loader.tex_w, g_loader.tex_h);
-        ov.text_fmt(ix, iy - ov.font_height(), kAccent, "real asset: %s", g_loader.tex_name.c_str());
+        ov.text(ix, iy - ov.font_height(), kAccent, clip_at(ix, "real asset: " + g_loader.tex_name));
+    }
+    if (g_mesh.ready()) {
+        ov.text((float)mesh_x, (float)mesh_y + (float)mesh_side + 2.f, kAccent,
+                clip_at((float)mesh_x, "real mesh: " + g_mesh_name + " (" + std::to_string(g_mesh_verts)
+                                             + " verts, " + std::to_string(g_mesh_tris) + " tris)"));
     }
     y += ov.font_height() * 1.5f;
     // Global inventory: what the game actually contains, by name.

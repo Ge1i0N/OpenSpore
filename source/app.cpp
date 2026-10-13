@@ -276,8 +276,10 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     LOG_INFO("app", "build: %s, console=%s, MSVC %d", arch,
              GetConsoleWindow() ? "attached" : "none", _MSC_VER);
 
-    // 2. command line
-    g_args = parse_command_line(cmdline_wide ? cmdline_wide : GetCommandLineW());
+    // 2. command line. wWinMain's `cmdline_wide` is lpCmdLine (NO program name); the
+    // GetCommandLineW() fallback HAS it. Say which, or the first argument is dropped.
+    g_args = cmdline_wide ? parse_command_line(cmdline_wide, /*has_program_name=*/false)
+                          : parse_command_line(GetCommandLineW());
     mark(2, true, to_string(g_args));
     LOG_INFO("app", "flags: windowed=%d devDirs=%d shipDirs=%d useDevDirs=%d state='%s' preload='%s' %dx%d vsync=%d",
              (int)g_args.windowed, (int)g_args.dev_dirs, (int)g_args.ship_dirs, (int)g_args.use_dev_dirs(),

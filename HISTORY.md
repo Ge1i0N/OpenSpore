@@ -3,6 +3,47 @@
 Every entry ends with its verification. If a change has no measurable delta it is labelled
 **hypothesis**, per the output contract in `ai-brief-and-commands.md`.
 
+---
+
+## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed
+
+### Our renderer now draws a decoded gmdl mesh
+The solved gmdl geometry (session 12) is now on OUR screen: `source/engine/gmdl.cpp` is the C++
+port of the parser, `source/render/mesh.cpp` uploads positions+indices, computes smooth normals and
+draws them with a fixed-function orbit camera, and the Loader draws one mesh into its own viewport.
+No D3DX (the matrices are built by hand, since the DX SDK is not installed). Measured:
+`showing real mesh ...gmdl (3765 verts, 6000 tris) from Spore_Content.package`, and the in-engine
+capture `analysis/shots/mesh_engine.png` shows a real Spore creature - head, eyes and limbs -
+shaded and rotating, next to the real decoded texture and the full inventory. fps 32.3, exit 0.
+
+Two implementation notes that are easy to get wrong: the mesh lives OUTSIDE the `Loader` struct
+because Loader is reset by copy-assignment and would double-free the D3D pointers; and the mesh
+draw sets `COLOROP = SELECTARG1(DIFFUSE)` because its FVF has no texture coordinates and would
+otherwise modulate with whatever texture the overlay left bound.
+
+### A real bug: the FIRST command-line argument was silently dropped
+Chasing why `-headless` "did nothing" exposed a long-standing defect. `wWinMain` receives
+`lpCmdLine`, which **excludes** the program name, but `parse_command_line` erased the first token
+anyway - so the first argument was always lost. It hid because `-w` was always first and windowed
+is the default; the `-f`/`-r` tests had `-headless` first, so `-f` was actually the *second*
+argument and worked. Consequence: **session 12's "headless" run was not headless** - it created a
+window; the flag was the first argument and got dropped. Fixed with an explicit `has_program_name`
+parameter (false for lpCmdLine, true for `GetCommandLineW()`). Re-verified: `-headless -devDirs`
+now logs `headless: no window` / `headless: no device`, and a genuinely windowless unpack writes
+2,944 files / 27,882,571 bytes in 8.3 s. `-f -r 1024x768` as the *first* arguments now give
+`windowed=0 ... 1024x768`.
+
+### How this session was verified
+`cmake --build build --config Debug` → 0 errors, 0 warnings.
+Windowed: `-w -devDirs -capture mesh.bmp -captureAfter 45 -quitAfter 60` → exit 0, `cmdline: -w ...`
+(`-w` now parsed as the first argument), `showing real mesh ... (3765 verts, 6000 tris)`, 10/10
+markers, `fps=32.3`, capture 3,686,454 bytes → `analysis/shots/mesh_engine.png`.
+Headless (genuinely): `-headless -devDirs -exec pkg:-unpack,all,<dir>,locale -quitAfter 8` →
+`headless: no window`, `headless: no device`, `unpack: 57 pkgs, 2944 written, 0 failed, 27882571
+bytes`, 2,944 files on disk in 8.3 s.
+
+---
+
 ### RenderWare 4 (header confirmed, object table not reversed)
 Following the RW-4 finding from session 7, the header is now pinned down: a **28-byte template**
 at `.rdata 0x014f6480` (`\x89RW4` `w32\0` `\r\n\x1a\n` `00 20 04 00` `"454\0"` `"000\0"` + zero)
@@ -31,6 +72,11 @@ OpenSpore.exe -headless -devDirs -exec pkg:-unpack,all,<dir>,locale -quitAfter 8
 That is **bit-for-bit the same result as the windowed run** (2,944 files, 27,882,571 bytes), in
 7.6 s, with no window created. Windowed mode re-checked afterwards: window + device + atlas + the
 real asset still render, capture still 3,686,454 bytes, exit 0.
+
+> **CORRECTION (session 13).** This "headless" run was **not** headless: `-headless` was the first
+> argument and the command-line parser was dropping the first argument, so a window was created. The
+> flag and the parser were both fixed in session 13; the genuine windowless run is
+> `headless: no window` / `headless: no device`, 2,944 files in 8.3 s. See session 13 above.
 
 ### gmdl sub-mesh descriptor CONFIRMED (the "variable header" mystery solved)
 Session 11 disproved the fixed triple. This session found what the triple really is by looking at

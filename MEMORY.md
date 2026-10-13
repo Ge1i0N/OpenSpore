@@ -360,6 +360,10 @@ no deps), `tools/gmdl.py` (locate/inspect), `tools/gmdl_header_check.py` (the br
 that killed the first claim). Evidence: `analysis/meshes/gmdl_pkg{48,52,53,54}.obj`,
 `analysis/shots/gmdl_pkg{48,52,54}.png`.
 
+**The engine draws it** (session 13): `source/engine/gmdl.cpp` is the C++ port of the parser,
+`source/render/mesh.cpp` uploads positions+indices with smooth normals and a hand-built orbit
+camera, and the Loader draws one mesh into its own viewport. Evidence: `analysis/shots/mesh_engine.png`.
+
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 
 **Priority rule (user, repeated): disassembly first, always.** Third-party sources — docs,
@@ -475,6 +479,25 @@ Keys are stored **without** a leading dash; the dash is the shell-side conventio
 **Trap:** the original really does use single-letter flags (`w`/`f`/`r`), so a name-length
 filter of ≥2 silently loses them — `tools/arg_vocab.py` now takes `min_len=1` at a verified
 helper call site.
+
+## Traps hit in session 13 (mesh rendering + command line)
+
+1. **The FIRST command-line argument was silently dropped.** `wWinMain`'s `cmdline` is
+   `lpCmdLine`, which EXCLUDES the program name, but `parse_command_line` erased the first token
+   as if it were `argv[0]`. So `-headless -devDirs` lost `-headless` (and any leading flag). It hid
+   because `-w` was always first and windowed is the default, and because the `-f`/`-r` tests put
+   `-headless` first so `-f` was really the second argument. Fixed with an explicit
+   `has_program_name` parameter: `false` for lpCmdLine, `true` for `GetCommandLineW()`. If you add
+   a new entry point, keep that distinction. (Consequence: session 12's "headless" run was not
+   headless - recorded as a correction in HISTORY.)
+2. **Do not put D3D resource pointers inside `Loader`.** The state is reset by copy-assignment
+   (`g_loader = Loader{}`), which would copy a raw pointer and double-free it. The mesh and its
+   name live in file-scope statics instead.
+3. **An FVF with no texture coordinates must disable the texture stage**, or the mesh is modulated
+   by whatever texture the 2D overlay left bound: set `COLOROP = SELECTARG1(DIFFUSE)` and
+   `ALPHAOP = DISABLE` before `DrawIndexedPrimitive`, and `SetTexture(0, nullptr)`.
+4. **`D3DXVECTOR3` is a D3DX type** and D3DX is not available here (no June 2010 SDK). Use the
+   plain `D3DVECTOR` struct or your own math (the matrices in `render/mesh.cpp` are hand-built).
 
 ## Traps hit in session 3b (capture + fault tolerance)
 

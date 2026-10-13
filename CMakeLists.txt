@@ -116,9 +116,11 @@ set(OS_SOURCES
   source/engine/pkg.cpp
   source/engine/refpack.cpp
   source/engine/naming.cpp
+  source/engine/gmdl.cpp
   source/render/device.cpp
   source/render/overlay.cpp
   source/render/imgfile.cpp
+  source/render/mesh.cpp
   source/states/statemgr.cpp
   source/states/loader.cpp
 )

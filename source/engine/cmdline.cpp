@@ -143,7 +143,7 @@ Args parse_tokens(const std::vector<std::string>& tokens) {
     return a;
 }
 
-Args parse_command_line(const wchar_t* wide_cmdline) {
+Args parse_command_line(const wchar_t* wide_cmdline, bool has_program_name) {
     // CommandLineToArgvW semantics done by hand to stay dependency-light:
     // backslash-aware quote handling, same rules as MSVC's argv.
     std::vector<std::string> tokens;
@@ -196,7 +196,9 @@ Args parse_command_line(const wchar_t* wide_cmdline) {
         has_cur = true;
     }
     if (has_cur) tokens.push_back(cur);
-    if (!tokens.empty()) tokens.erase(tokens.begin());  // argv[0] = exe path
+    // Drop argv[0] ONLY when the string actually carries it (GetCommandLineW does; lpCmdLine
+    // does not). Erasing unconditionally dropped the first real argument.
+    if (has_program_name && !tokens.empty()) tokens.erase(tokens.begin());
     (void)bslashes;
     (void)s;
     return parse_tokens(tokens);

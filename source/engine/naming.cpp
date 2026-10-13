@@ -122,7 +122,7 @@ std::string resource_path(u32 type, u32 group, u32 instance) {
     } else if (in && tn) {
         _snprintf_s(b, sizeof(b), _TRUNCATE, "%s.%s", in, tn);
     } else {
-        _snprintf_s(b, sizeof(b), _TRUNCATE, "0x%08x/0x%08x%s", group, instance, tn ? tn : "");
+        _snprintf_s(b, sizeof(b), _TRUNCATE, "0x%08x/0x%08x.%s", group, instance, tn ? tn : "");
     }
     return b;
 }

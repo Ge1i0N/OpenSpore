@@ -81,7 +81,12 @@ struct Args {
 };
 
 // Parse a Win32 command line (or an explicit token list, used by tests).
-Args parse_command_line(const wchar_t* wide_cmdline);
+//
+// `has_program_name` matters: wWinMain's `cmdline` is lpCmdLine, which EXCLUDES the program
+// name, whereas GetCommandLineW() INCLUDES it. The old code always erased the first token, so
+// passing lpCmdLine silently dropped the FIRST argument (a leading `-w`/`-headless` vanished).
+// Pass false when the string has no program name.
+Args parse_command_line(const wchar_t* wide_cmdline, bool has_program_name = true);
 Args parse_tokens(const std::vector<std::string>& tokens);
 
 std::string to_string(const Args& a);  // one-line summary for the log

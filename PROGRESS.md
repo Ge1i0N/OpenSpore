@@ -17,6 +17,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | resources written to disk | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
 | headless unpack | same output, **no window/device**, 7.6 s | `-headless -exec pkg:-unpack,...` |
 | **gmdl mesh decoded** | positions reproduce the file bbox **exactly (err 0.0000)**, 4 variants | `python tools/gmdl_mesh.py --pkg <i>` |
+| **engine draws a real mesh** | 3765 verts / 6000 tris, fps 32.3 | `analysis/shots/mesh_engine.png` |
 | **real Spore geometry rendered** | limb / creature / plant | `analysis/shots/gmdl_pkg{48,52,54}.png` |
 | real game asset rendered | `vehiclepainticons~/be_basic_shake_05.png` (128×128) | `analysis/shots/hero_real_asset.png` |
 | resource names resolved | **112,155 / 150,945 (74.3%)** | `inventory:` in the log |
@@ -59,6 +60,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | Write the whole game to disk | ✅ (session 9) | `pkg:-unpack,all,<dir>,png` → **14,549 PNGs, 0 failed**, 254 MB; 200/200 sampled carry the PNG signature, and `analysis/shots/unpacked_png_sample.png` is a real UI atlas |
 | Render a real game asset | ✅ (session 10) | `imgfile.*` (GDI+ from memory) → `Device::create_texture_bgra` → `Overlay::image`; the Loader draws a real `png` resource (`analysis/shots/hero_real_asset.png`) |
 | Decode a real mesh | ✅ (session 12) | `tools/gmdl_mesh.py`: gmdl layout solved (stride 36, position = first float3); positions reproduce the header bbox **exactly (err 0.0000)** on 4 variants; exported to OBJ and rendered (`analysis/shots/gmdl_pkg{48,52,54}.png`) |
+| **Draw a decoded mesh in the engine** | ✅ (session 13) | `source/engine/gmdl.cpp` + `source/render/mesh.cpp`; Loader draws one gmdl into its own viewport; `analysis/shots/mesh_engine.png` shows a real Spore creature |
 | Name a resource's type | ✅ (session 6b) | `typeids.inc` (450 ids) + `pkg:-types`; `cs-cz/NameGeneration` = 13 x `trigger` + 1 x `prop` |
 | Name group/instance ids | ✅ (session 7) | `naming.*` loads the registries; **112,155 / 150,945 names resolved (74.3%)**; `pkg:-path` prints `LexiconPlanets_CS.trigger` |
 | Enumerate the whole game | ✅ (session 7) | `tools/resource_inventory.py`: **150,945 resources, 10.27 GB, 90 types (86 named)**; same on the Loader screen |
