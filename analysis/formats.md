@@ -13,7 +13,7 @@ fields open · **TODO** = only the type id / count known.
 | `gmdl` | 0x00e6bce5 | 11,041 | **SOLVED** (positions) | stride 36, position = first float3, bbox exact; UV at offset 16; drawn by the engine |
 | `locale` | 0x024a0e52-ish | 2,944 | **SOLVED** | localized text; unpacked to files |
 | `trigger` | 0x024a0e52 | — | **PARTIAL** | text scripts; groups resolve to `properties`/`ConfigManager`/`SporeAppStates` |
-| `prop` | 0x00b1b104 | 30,645 | **PARTIAL** | big-endian `count` + `{key,type,count,size,data}`; only ~3% walk exactly -> a 2nd variant exists |
+| `prop` | 0x00b1b104 | 30,645 | **PARTIAL** | big-endian `count` + `{key,type,count,size,data}` for the FIRST section; a SECOND section then diverges (keys `0x03xxxxxx`/`0x04xxxxxx`, 1-byte offset shift) — only ~3% of payloads walk exactly |
 | `blockdata` | 0x5caa5e28 | 3,141 | **PARTIAL** | an array of `vec3` (size always a multiple of 12); the first two `vec3` are a **min/max bounding box** (verified min<=max on samples); the rest is open |
 | `gmsh` | 0x01c135da | 2,535 | **TODO** | a mesh-like payload: big-endian counts then float32 runs (looks like a generated mesh, cf. gmdl) |
 | `rw4` | 0x2f4e681b | 12,987 | **PARTIAL** | 28-byte header (template 0x014f6480); object table not reversed; the model manager is located but only registers (see MEMORY) |
@@ -29,6 +29,24 @@ fields open · **TODO** = only the type id / count known.
 - The first two `vec3` are a **bounding box**: `min` then `max`, and `min <= max` componentwise on
   every sample checked (e.g. rec[21]: min(-0.100,-0.100,-0.100) max(0.100,0.100,0.100)).
 - The remaining `vec3`s' meaning is open (points? sub-boxes?). No header, no count — just `vec3`s.
+
+## `prop` (0x00b1b104, 30,645) — big-endian, two sections
+
+BIG-endian integers (like RefPack). `NameGeneration` rec[5] (365 B) begins with `u32 count = 11`,
+then entries. The **first section** parses cleanly as `{key, type, item_count, item_size, data}`:
+
+| off | key | type | count | size |
+|---|---|---|---|---|
+| 0x004 | 0x026efc89 | 0x0020009c | 3 | 12 |
+| 0x038 | 0x026efc90 | 0x0020009c | 3 | 12 |
+| 0x06c | 0x026efc92 | 0x0020009c | 1 | 12 |
+
+Each item is 12 bytes (`{u32 hash, u32 0, u32 0}`). After the third entry (0x88) the layout
+**diverges**: the following records have keys in `0x0302842a`, `0x03028839`, `0x042c9060`,
+`0x05527d05`, `0x1204a915`, … and the `type 0x0020009c / count 1 / size 12` pattern reappears but
+shifted by one byte, so a straight `{key,type,count,size}` walk overruns. Only **116 of 4,000**
+payloads walk exactly with the first-section rule — so there are (at least) two layouts, and the
+second one is not yet derived. `tools/prop.py` (walker + validator), `tools/prop_scan.py` (dump).
 
 ## `gmsh` (0x01c135da, 2,535) — first look
 
