@@ -1,15 +1,16 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 6).
+Last update: 2026-10-13 (session 6b).
 
 ## One-line status
 
-**There is a booting executable that decodes real Spore content.** RefPack is solved and
-verified (30,000/30,000 real records decode to exactly `memSize`), all 57 `.package` files
-index-parse (150,945 records), and `pkg:-decode` writes actual game data — the first decoded
-assets are the Czech name/place lexicon. The RenderWare bridge has not started; that is the
-next big piece. `-w -devDirs` still boots 10/10 markers at ~33 fps.
+**There is a booting executable that decodes real Spore content and names it.** RefPack is
+solved and verified (30,000/30,000 real records decode to exactly `memSize`), all 57 `.package`
+files index-parse (150,945 records), `pkg:-decode` writes actual game data, and type ids resolve
+to names (`pkg:-types` shows `cs-cz/NameGeneration` = 13 × `trigger` + 1 × `prop`). The
+RenderWare bridge has not started; that is the next big piece. `-w -devDirs` still boots 10/10
+markers at ~33 fps.
 
 ## Upstream knowledge is now IN the repo (level 4, tested before use)
 
@@ -29,6 +30,7 @@ knowledge" and IDEAS.md §5 items 19-20 for the failures.
 | records parsed | **150,945**, 0 invariant violations | `python tools/pkg_kinds.py` |
 | **RefPack decoded exactly** | **30,000 / 30,000**, 0 failures | `python tools/refpack.py --verify --limit 30000` |
 | game content decoded | 312 B + 10,191 B Czech text, == `memSize` | `pkg:-decode,0,0` / `,0,2` |
+| type names resolved | `trigger`/`prop` for cs-cz NameGeneration | `-exec pkg:-types,0` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower, as the original) | `-exec state:-list` |
 | fps | **33.4 / 31.2** | `fps=` in the log |
 | build warnings | **0** | `cmake --build build --config Debug` output |
