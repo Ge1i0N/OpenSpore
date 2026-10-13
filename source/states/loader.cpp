@@ -54,28 +54,23 @@ struct Loader {
 Loader g_loader;
 Manager* g_mgr = nullptr;
 
-// The decoded mesh lives OUTSIDE Loader on purpose: Loader is reset by copy-assignment
-// (`g_loader = Loader{}`), which would copy a Mesh's raw D3D pointers and double-free them.
-render::Mesh g_mesh;
-std::string g_mesh_name;
-u32 g_mesh_tris = 0;
-u32 g_mesh_verts = 0;
-u32 g_mesh_instance = 0;  // the model's instance id; its texture is the raster with the same id
+// The decoded meshes live OUTSIDE Loader on purpose: Loader is reset by copy-assignment
+// (`g_loader = Loader{}`), which would copy raw D3D pointers and double-free them.
+struct Slot {
+    render::Mesh mesh;
+    IDirect3DTexture9* tex = nullptr;
+    std::string name;
+    u32 tris = 0;
+    u32 verts = 0;
+};
+Slot g_slots[4];
+int g_slot_count = 0;
 constexpr u32 kGmdlType = 0x00E6BCE5;
 constexpr u32 kRasterType = 0x2F4E681C;
 
-// A short list of real models we can draw, cycled so the screen shows more than one.
-struct Candidate {
-    std::string pkg;
-    u32 rec;
-};
-std::vector<Candidate> g_models;
-size_t g_model_i = 0;
-float g_model_timer = 0.f;
-
-// Load one real gmdl model and its paired texture (same instance id) onto the GPU, replacing the
-// previous one. Returns false if the record or its texture cannot be used.
-bool load_model(const std::string& pkgpath, u32 rec) {
+// Load one real gmdl model and its paired texture (same instance id) into a slot. Returns false if
+// the record or the mesh cannot be used.
+bool load_slot(Slot& s, const std::string& pkgpath, u32 rec) {
     pkg::Package pk;
     if (!pk.open(pkgpath)) return false;
     std::vector<u8> bytes;
@@ -83,24 +78,20 @@ bool load_model(const std::string& pkgpath, u32 rec) {
     gmdl::Mesh m = gmdl::parse(bytes.data(), bytes.size());
     if (!m.ok || m.indices.size() < 3) return false;
     if (m.vertex_count < 256 || m.vertex_count > 120000) return false;
-    // create() frees any previous buffers itself, so a fresh mesh is always built.
-    if (!g_mesh.create(render::device().d3d(), m.positions.data(), m.uvs.data(), m.vertex_count,
+    if (!s.mesh.create(render::device().d3d(), m.positions.data(), m.uvs.data(), m.vertex_count,
                        m.indices.data(), (u32)m.indices.size()))
         return false;
     const auto& r = pk.records()[rec];
-    g_mesh_instance = r.instance();
-    g_mesh_name = naming::resource_path(r.type(), r.group(), r.instance());
-    g_mesh_tris = g_mesh.triangle_count();
-    g_mesh_verts = m.vertex_count;
+    const u32 inst = r.instance();
+    s.name = naming::resource_path(r.type(), r.group(), r.instance());
+    s.tris = s.mesh.triangle_count();
+    s.verts = m.vertex_count;
 
-    // paired texture
-    if (g_loader.tex) {
-        g_loader.tex->Release();
-        g_loader.tex = nullptr;
-    }
+    // paired texture: a `raster` with the same instance id
+    if (s.tex) { s.tex->Release(); s.tex = nullptr; }
     for (u32 n = 0; n < pk.records().size(); ++n) {
         if (pk.records()[n].type() != kRasterType) continue;
-        if (pk.records()[n].instance() != g_mesh_instance) continue;
+        if (pk.records()[n].instance() != inst) continue;
         std::string rname = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
                                                   pk.records()[n].instance());
         std::string low = rname;
@@ -112,17 +103,11 @@ bool load_model(const std::string& pkgpath, u32 rec) {
         if (!pk.read_resource_decoded(n, tb)) continue;
         raster::Texture rt = raster::decode(tb.data(), tb.size());
         if (!rt.ok || rt.width < 32 || rt.height < 32) continue;
-        IDirect3DTexture9* tex = render::device().create_texture_bgra(rt.bgra.data(), rt.width, rt.height);
-        if (!tex) continue;
-        g_loader.tex = tex;
-        g_loader.tex_w = rt.width;
-        g_loader.tex_h = rt.height;
-        g_loader.tex_name = rname;
-        g_loader.tex_format = "raster " + rt.format + " (model-matched)";
-        break;
+        s.tex = render::device().create_texture_bgra(rt.bgra.data(), rt.width, rt.height);
+        if (s.tex) break;
     }
-    LOG_INFO("loader", "model: %s (%u verts, %u tris) + %s", g_mesh_name.c_str(), g_mesh_verts,
-             g_mesh_tris, g_loader.tex ? g_loader.tex_name.c_str() : "(no texture)");
+    LOG_INFO("loader", "model slot: %s (%u verts, %u tris)%s", s.name.c_str(), s.verts, s.tris,
+             s.tex ? " + texture" : " (no texture)");
     return true;
 }
 
@@ -210,37 +195,43 @@ void loader_enter() {
                   (unsigned long long)g_loader.total_records, (unsigned long long)g_loader.total_bytes,
                   (unsigned long long)g_loader.resolved_instances, naming::stats().c_str());
 
-    // Collect real models we can draw (gmdl that parses, with a matched texture) and load the
-    // first; the tick cycles through them so the screen shows more than one real Spore model.
-    g_models.clear();
-    g_model_i = 0;
-    g_model_timer = 0.f;
-    g_mesh.shutdown();
-    g_mesh_name.clear();
-    g_mesh_tris = g_mesh_verts = g_mesh_instance = 0;
+    // Collect real models we can draw (gmdl that parses) and load the first FOUR into a 2x2 grid,
+    // each with its paired texture - a small gallery of real Spore content on our own renderer.
+    g_slot_count = 0;
+    for (auto& s : g_slots) { s.mesh.shutdown(); if (s.tex) { s.tex->Release(); s.tex = nullptr; } s.name.clear(); }
     const bool have_dev = render::device().d3d() != nullptr;
     if (have_dev) {
+        std::vector<std::tuple<std::string, u32, u32>> cands;  // (pkg, rec, instance)
         for (auto& sp : fs::search_paths()) {
-            if (g_models.size() >= 12) break;
+            if (cands.size() >= 48) break;
             for (auto& p : pkg::find_packages(sp.dir.string())) {
-                if (g_models.size() >= 12) break;
+                if (cands.size() >= 48) break;
                 pkg::Package pk;
                 if (!pk.open(p)) continue;
                 for (u32 n = 0; n < pk.records().size(); ++n) {
-                    if (g_models.size() >= 12) break;
+                    if (cands.size() >= 48) break;
                     if (pk.records()[n].type() != kGmdlType) continue;
                     std::vector<u8> bytes;
                     if (!pk.read_resource_decoded(n, bytes)) continue;
                     gmdl::Mesh m = gmdl::parse(bytes.data(), bytes.size());
                     if (!m.ok || m.indices.size() < 3) continue;
                     if (m.vertex_count < 256 || m.vertex_count > 120000) continue;
-                    g_models.push_back({p, n});
+                    cands.emplace_back(p, n, pk.records()[n].instance());
                 }
             }
         }
-        if (!g_models.empty()) load_model(g_models[0].pkg, g_models[0].rec);
+        // Load four with DISTINCT instance ids, so the grid shows four different models.
+        std::set<u32> used;
+        for (auto& c : cands) {
+            if (g_slot_count >= 4) break;
+            if (used.count(std::get<2>(c))) continue;
+            if (load_slot(g_slots[g_slot_count], std::get<0>(c), std::get<1>(c))) {
+                used.insert(std::get<2>(c));
+                ++g_slot_count;
+            }
+        }
     }
-    if (g_models.empty()) LOG_WARN("loader", "no drawable gmdl mesh found");
+    if (g_slot_count == 0) LOG_WARN("loader", "no drawable gmdl mesh found");
 
     // Put one real game image on screen. This is the pipeline's end: DBPF index -> RefPack ->
     // type/instance name -> decode -> D3D9 texture. Two decoders, native first:
@@ -335,15 +326,6 @@ void loader_exit() { LOG_INFO("loader", "exit Loader state after %u frames, %.2f
 
 void loader_tick(f32 dt) {
     g_loader.elapsed += dt;
-    // Cycle through the collected real models so the screen shows more than one.
-    if (g_models.size() > 1) {
-        g_model_timer += dt;
-        if (g_model_timer >= 3.f) {
-            g_model_timer = 0.f;
-            g_model_i = (g_model_i + 1) % g_models.size();
-            load_model(g_models[g_model_i].pkg, g_models[g_model_i].rec);
-        }
-    }
     if (g_loader.done) return;
     // Ramp to 1.0 over ~2.5s purely to demonstrate the loop is alive and vsync'd.
     g_loader.progress += dt / 2.5f;
@@ -364,18 +346,22 @@ void loader_render() {
     if (!dev.begin_frame()) return;
     int w = dev.width(), h = dev.height();
     dev.clear(kBg);
-    // The decoded gmdl mesh: draw it into its own viewport before the 2D overlay, so the text
-    // sits on top and the real geometry is visible on OUR renderer (the visual counterpart of
-    // the png proof). g_mesh.draw saves/restores the viewport itself.
-    int mesh_side = 0, mesh_x = 0, mesh_y = 0;
-    if (g_mesh.ready()) {
-        mesh_side = (w < h ? w : h) * 36 / 100;
-        if (mesh_side < 160) mesh_side = 160;
-        mesh_x = w - mesh_side - 24;
-        mesh_y = 24 + 40;
-        if (mesh_x < 8) mesh_x = 8;
-        g_mesh.draw(dev.d3d(), mesh_x, mesh_y, mesh_side, mesh_side, g_loader.elapsed * 0.6f,
-                    g_loader.tex);
+    // The decoded gmdl meshes: draw up to four real Spore models in a 2x2 grid on the right side,
+    // each with its own texture, before the 2D overlay (so the text sits on top). draw() saves and
+    // restores the viewport itself.
+    int cell = 0, gx = 0, gy = 0;
+    if (g_slot_count > 0) {
+        int region = (w < h ? w : h) * 70 / 100;
+        cell = region / 2;
+        if (cell < 120) cell = 120;
+        gx = w - region - 12;
+        gy = 44;
+        if (gx < 8) gx = 8;
+        for (int i = 0; i < g_slot_count; ++i) {
+            int cx = gx + (i % 2) * cell;
+            int cy = gy + (i / 2) * cell;
+            g_slots[i].mesh.draw(dev.d3d(), cx, cy, cell, cell, g_loader.elapsed * 0.6f, g_slots[i].tex);
+        }
     }
     ov.begin(w, h);
 
@@ -429,20 +415,19 @@ void loader_render() {
     y += ov.font_height();
     ov.text_fmt(pad, y, kDim, "console: type 'help', then 'state -list'");
     y += ov.font_height() * 1.5f;
-    // A real decoded Spore asset, drawn by our renderer.
-    if (g_loader.tex) {
-        float side = 300.f;
-        float ix = (float)w - side - pad;
-        float iy = (float)h - side - pad;
-        ov.image(ix, iy, side, side, g_loader.tex, g_loader.tex_w, g_loader.tex_h);
-        ov.text(ix, iy - ov.font_height(), kAccent,
-                clip_at(ix, "real " + (g_loader.tex_format.empty() ? std::string("asset") : g_loader.tex_format)
-                              + ": " + g_loader.tex_name));
-    }
-    if (g_mesh.ready()) {
-        ov.text((float)mesh_x, (float)mesh_y + (float)mesh_side + 2.f, kAccent,
-                clip_at((float)mesh_x, "real mesh: " + g_mesh_name + " (" + std::to_string(g_mesh_verts)
-                                             + " verts, " + std::to_string(g_mesh_tris) + " tris)"));
+    // Captions under each grid cell: the real model name and size, on OUR renderer. Clip to the
+    // cell width (a long name would otherwise spill into the neighbouring cell).
+    const size_t cell_chars = (size_t)((cell - 12) / 8);
+    auto clip_cell = [&](std::string s) {
+        size_t n = cell_chars < 8 ? 8 : cell_chars;
+        if (s.size() > n) s = s.substr(0, n - 3) + "...";
+        return s;
+    };
+    for (int i = 0; i < g_slot_count; ++i) {
+        float cx = (float)(gx + (i % 2) * cell);
+        float cy = (float)(gy + (i / 2) * cell + cell) + 2.f;
+        ov.text(cx, cy, kAccent,
+                clip_cell(g_slots[i].name + " (" + std::to_string(g_slots[i].verts) + "v)"));
     }
     y += ov.font_height() * 1.5f;
     // Global inventory: what the game actually contains, by name.

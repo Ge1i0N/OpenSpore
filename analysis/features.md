@@ -209,7 +209,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | uv (N=6) | 2 floats at offset 16, in [0,1] 100% |
 | ✅ | done | textured mesh draw | mesh.cpp applies the raster texture via UVs (MODULATE) |
 | ✅ | done | model<->texture binding | raster with the same instance id (865/865 match); Loader binds it |
-| ✅ | done | model cycling | Loader cycles up to 12 real models, each with its texture |
+| ✅ | done | model cycling | Loader draws a 2x2 grid of four real models, each with its texture |
 | ✅ | done | bbox exact check | err 0.0000 on 4 variants |
 | 🚧 | partial | attrib semantics | uv found; normals/extra open |
 | 🚧 | partial | normals | computed from faces, not read |

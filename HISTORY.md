@@ -15,6 +15,13 @@ name->id), `ConfigManager.txt` (211 assignments; `$variable` references are reso
 vendors, 616 cards`. The `cfg` verb exposes `-list/-props/-vars/-cards/<name>`. So the game's whole
 configuration surface is readable by our engine.
 
+### The Loader shows FOUR real models at once (2x2 grid, each textured)
+Instead of cycling one model, the Loader loads up to four real gmdl models with DISTINCT instance ids
+(so the grid shows four different models) and draws them in a 2x2 grid, each with its paired
+texture, with a caption. Captured: `analysis/shots/model_grid.png` - a pink creature,
+`floraModels_LOD2~/FE_volcano1_Sp2`, `floraModels_LOD3~/FE_volcano2_Mp2`, and a purple creature
+(`0x067b0e97`). 10/10 markers, fps 33, exit 0. The old single-model cycling is recorded above.
+
 ### The Loader now cycles through several real models, each with its own texture
 Instead of showing one model, the Loader collects up to 12 real gmdl models that parse and have a
 matched texture, then cycles every 3 seconds (`loader_tick` -> `load_model`), swapping both the mesh

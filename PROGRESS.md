@@ -29,6 +29,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | **engine draws a TEXTURED mesh** | real gmdl UVs + real raster texture, fps 32.7 | `analysis/shots/mesh_textured.png` |
 | **model↔texture by instance id** | **865/865** gmdl instances have a matching raster; Loader binds it | `analysis/shots/model_matched_texture.png` |
 | **engine cycles several models** | up to 12 real models, each with its own texture, every 3 s | `analysis/shots/model_cycle.png` |
+| **engine shows a model grid** | four real models at once (2x2), each textured | `analysis/shots/model_grid.png` |
 | **engine draws native raster** | `raster` DXT1/DXT5/raw decoded in C++ and drawn | `analysis/shots/raster_engine.png` |
 | **game config read** | `[config] 63 properties, 83 variables from Config/*.txt`; `cfg <name>` resolves | `cfg -props` / `cfg AudioMasterVolume` |
 | **real Spore geometry rendered** | limb / creature / plant | `analysis/shots/gmdl_pkg{48,52,54}.png` |
