@@ -65,8 +65,13 @@ Every one of 2,534/2,535 payloads begins with the same 24-byte prefix (big-endia
 
 So `gmsh` is a mesh format (like `gmdl`) with a fixed little-endian header followed by float32 data.
 The `+0x0c` code (8/5/6/7) and the fields after it are the discriminators (the same `8` recurs as the
-first dword in `gmdl`). Sizes range widely (480 B up to 56 KB), so it is real geometry. Full layout
-(vertex stride, index block) is NOT derived yet - it needs the reader, like `gmdl` did.
+first dword in `gmdl`). Sizes range widely (480 B up to 56 KB), so it is real geometry.
+
+After the 24-byte header the data reads as **`vec3` triples** (e.g. `Spore_Graphics` rec[509], 2288 B:
+`(-0.1132,-4.6955,0.1133)`, `(0.1132,-4.6955,0.1133)`, `(0.1473,-0.3592,0.1386)`, …) - i.e. a
+triangle list of positions, values in roughly [-4.7, 0.15]. The `+0x16` field is `0x000c` (12) on
+every sample, consistent with a 12-byte (3-float) element. A tail (index/attribute section) is likely
+but not yet pinned. Full layout is NOT derived - it needs the reader, like `gmdl` did.
 
 In the binary, `gmsh` (0x01c135da) is loaded through the resource manager at `0x00402301`
 (`mov [ebp+0xc], 0x1c135da` -> `call 0x67dc90` = the manager from global `0x15fd894`, then
