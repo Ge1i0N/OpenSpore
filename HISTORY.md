@@ -70,9 +70,13 @@ fps 32.7, exit 0, 10/10 markers.
 bytes: **`raster` -> BMP** (via `raster::decode`) and **`gmdl` -> OBJ** (via `gmdl::parse`).
 Measured on `Spore_Content`: 2,770 BMP (e.g. `building_editorTextureDiffuse~/Elevated Hall.bmp`,
 512x512 32bpp, `BM` signature) and 2,216 OBJ (e.g. `0x067c79d2.obj`, 29,345 verts / 47,016 tris),
-0 failed. `gmdl` records whose layout our parser does not yet handle fall back to raw bytes (1,993
-of 4,209 in that package) - honest, and recorded. So the game's own textures and models now come out
-as files any tool can open.
+0 failed. `gmdl` records whose layout our parser does not yet handle fall back to raw bytes - honest,
+and recorded.
+
+**Whole game (all 57 packages, 411 s):** `raster` -> **5,747 BMP**, `gmdl` -> **4,084 OBJ**, plus raw
+fallbacks (184 raster with an unhandled tag, 6,957 gmdl in a variant our parser rejects), **0
+failed** on both. So the game's own textures and generated models now come out as files any tool can
+open.
 
 ### Asset format survey: blockdata solved as a vec3/bbox array; gmsh is mesh-like
 Went looking for a tractable mass format. **`blockdata` (0x5caa5e28, 3,141)** is an array of `vec3`
