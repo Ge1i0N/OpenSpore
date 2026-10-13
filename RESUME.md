@@ -3,17 +3,46 @@
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
 Last update: 2026-10-13 (session 13).
 
+## METHOD RULE: go by Main, forward, to a playable build
+
+Disassembly is the first tool. The **path of work** is also fixed (user, session 13): **walk the
+original from the entry point (Main) forward**, rebuilding the boot/load chain in order, and at each
+step reverse **only as much as is needed to reach the next step**. Discover features/formats as we
+go; note the unfinished ones and keep moving (finish one early only if it is the smallest step that
+unblocks progress). The goal: the whole path from Main to a fully playable build with all features.
+Two "how done" axes, report both: how much of a format is reversed, and how far along Main->playable
+we are.
+
+## The Main -> playable path (where we stand)
+
+| step | status | evidence |
+|---|---|---|
+| entry `0x11e11e1` -> CRT -> `__tmainCRTStartup 0x11e0f21` | ✅ | `analysis/startup.md` |
+| WinMain `0xf489e0` -> app_main `0xf48810` -> run `0xf47e90` | ✅ | VERIFY 35-37 |
+| AppMode/config object `0x7e8a00` (vtbl `0x1413b50`) + its subsystems | ✅ | VERIFY 37-38 |
+| window class `0x849b20`, Create `0x849bf0`, **main loop `0x8482f0`** | ✅ | VERIFY 39-40 |
+| config: `Config/*.txt` (Properties/ConfigManager/VideoCards) | ✅ | `source/engine/config.cpp` |
+| content load: DBPF -> RefPack -> decode (`pkg:-*`) | ✅ | 150,945 resources |
+| draw real content: `gmdl` + `raster` mesh grid | ✅ | `analysis/shots/model_grid.png` |
+| resource manager `0x8de4b0`, `trigger` configs | 🚧 | `analysis/content-loading.md` |
+| **UI/menus: `spui` layouts (524 screens, 407 named)** | 🚧 next | `analysis/ui.md` |
+| states (`SporeAppStates` trigger), state machine | 🚧 | `analysis/startup.md` |
+| gameplay (sim, editors, stages) | ⬜ | feature map `gameplay` = 0% |
+
+**Next on the path:** the `spui` layout parser, so the Loader can show a real menu (title/launch
+screen) using the `png`/`raster` UI art and `locale` strings we already decode.
+
 ## One-line status
 
 **Our engine reads AND draws real Spore content.** The pipeline runs end to end: DBPF index →
-RefPack → type/instance naming → decode → D3D9 → pixels. It draws a **real decoded `.png`** and a
-**real decoded `gmdl` mesh** (a creature, 3,765 verts) on our own renderer —
-`analysis/shots/mesh_engine.png`. The game's inventory (150,945 resources, 10.27 GB, **112,155
-names**) is on screen. RefPack is solved (30,000/30,000); the unpacker writes real resources
-(14,549 PNGs + 2,944 locale, 0 failed); `gmdl` mesh geometry is **solved** (positions reproduce the
-file's own bbox exactly). Progress map: `analysis/shots/reverse_map.png` + `analysis/features.md`.
-The next big item is **RW4 = the models** (12,987 resources; header pinned down, object table not)
-and the **RenderWare bridge**.
+RefPack → type/instance naming → decode → D3D9 → pixels. It draws a **2x2 grid of four real Spore
+models, each with its own texture** (a model's texture is the `raster` with the same instance id,
+865/865 match) on our own renderer - `analysis/shots/model_grid.png`. The game's inventory (150,945
+resources, 10.27 GB, **112,155 names**) is on screen. RefPack is solved (30,000/30,000); the unpacker
+writes real resources (5,747 textures -> BMP, 6,979 models -> OBJ + their textures, 0 failed);
+`gmdl` position parsing is **solved** for 63% of the game (variable stride = vertex_bytes/count).
+Progress map: `analysis/shots/reverse_map.png` + `analysis/features.md`.
+
 
 ## Upstream knowledge is in the repo, but it is SECONDARY (level 4)
 
@@ -254,3 +283,7 @@ entry -> WinMain -> app_main -> run, `analysis/startup.md`).
 - No modal dialog may ever block the process. `early_neutralise()` is the first statement of
   `wWinMain` for exactly this reason; keep it there.
 - Commit messages end with how the change was verified. Rewrite this file before compaction.
+- **Go by Main, forward (session 13).** Disassembly first, and always advance along the original's
+  execution from the entry point: reverse only what is needed to reach the next step, note unfinished
+  formats and keep moving. The goal is Main -> a fully playable build. Keep the "Main -> playable"
+  table above honest.
