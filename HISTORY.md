@@ -107,11 +107,13 @@ fps 32.7, exit 0, 10/10 markers.
 
 ### The unpacker exports solved formats as standard files
 `pkg:-unpack` now converts the formats we solved into standard files instead of dumping their raw
-bytes: **`raster` -> BMP** (via `raster::decode`) and **`gmdl` -> OBJ** (via `gmdl::parse`).
-Measured on `Spore_Content`: 2,770 BMP (e.g. `building_editorTextureDiffuse~/Elevated Hall.bmp`,
-512x512 32bpp, `BM` signature) and 2,216 OBJ (e.g. `0x067c79d2.obj`, 29,345 verts / 47,016 tris),
-0 failed. `gmdl` records whose layout our parser does not yet handle fall back to raw bytes - honest,
-and recorded.
+bytes: **`raster` -> BMP** (via `raster::decode`) and **`gmdl` -> OBJ** (via `gmdl::parse`). Measured
+on `Spore_Content`: 2,770 BMP (e.g. `building_editorTextureDiffuse~/Elevated Hall.bmp`, 512x512 32bpp,
+`BM` signature) and OBJ models. Since a model's texture is the `raster` with the SAME instance id
+(865/865 match), the gmdl export now also writes the **paired `.bmp` + a `.mtl`** and references them
+(`mtllib`/`usemtl`/`map_Kd`) - so exported models are self-contained and textured: on Spore_Content,
+2,016 OBJ + 2,016 MTL + 2,016 BMP. `gmdl` records whose layout we have not derived fall back to raw
+bytes.
 
 **Whole game (all 57 packages):** `raster` -> **5,747 BMP**, `gmdl` -> **1,776 OBJ** (bbox-validated;
 the rest fall back to raw bytes), **0 failed** on both. An earlier run reported 4,084 OBJ, but that was

@@ -73,6 +73,33 @@ bool write_obj(const std::string& path, const gmdl::Mesh& m) {
     return true;
 }
 
+// OBJ that references a paired texture: writes mtllib/usemtl into the OBJ and a sibling .mtl.
+bool write_obj_textured(const std::string& objpath, const gmdl::Mesh& m, const std::string& texfile) {
+    FILE* f = nullptr;
+    if (fopen_s(&f, objpath.c_str(), "wb") != 0 || !f) return false;
+    std::filesystem::path op(objpath);
+    std::string stem = op.stem().string();
+    fprintf(f, "# gmdl: %u vertices, %zu indices\nmtllib %s.mtl\nusemtl tex\n",
+            m.vertex_count, m.indices.size(), stem.c_str());
+    for (u32 i = 0; i < m.vertex_count; ++i)
+        fprintf(f, "v %.6f %.6f %.6f\n", m.positions[i * 3], m.positions[i * 3 + 1], m.positions[i * 3 + 2]);
+    if (m.uvs.size() == (size_t)m.vertex_count * 2)
+        for (u32 i = 0; i < m.vertex_count; ++i)
+            fprintf(f, "vt %.6f %.6f\n", m.uvs[i * 2], m.uvs[i * 2 + 1]);
+    for (size_t i = 0; i + 2 < m.indices.size(); i += 3)
+        fprintf(f, "f %u/%u %u/%u %u/%u\n", m.indices[i] + 1, m.indices[i] + 1, m.indices[i + 1] + 1,
+                m.indices[i + 1] + 1, m.indices[i + 2] + 1, m.indices[i + 2] + 1);
+    fclose(f);
+    std::filesystem::path mp = op;
+    mp.replace_extension(".mtl");
+    FILE* mf = nullptr;
+    if (fopen_s(&mf, mp.string().c_str(), "wb") == 0 && mf) {
+        fprintf(mf, "newmtl tex\nKa 1 1 1\nKd 1 1 1\nKs 0 0 0\nd 1\nmap_Kd %s\n", texfile.c_str());
+        fclose(mf);
+    }
+    return true;
+}
+
 // ---------------------------------------------------------------- yardstick
 // Field guide §1: maintain ONE cheap numeric measure of "are we further along".
 // Here it is the count of boot-chain markers that reached OK. It is printed once per run
@@ -562,6 +589,12 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                               // the bare stem still collided; "cs-cz_Text" does not.
                               std::filesystem::path tp(target);
                               std::string pkgstem = tp.parent_path().filename().string() + "_" + tp.stem().string();
+                              // Pairing: a model's texture is the `raster` with the SAME instance id
+                              // (measured 865/865 in Spore_Content). Build the map once per package.
+                              std::map<u32, u32> raster_by_inst;
+                              for (u32 ri = 0; ri < up.records().size(); ++ri)
+                                  if (up.records()[ri].type() == 0x2F4E681C)
+                                      raster_by_inst[up.records()[ri].instance()] = ri;
                               for (u32 n = 0; n < up.records().size(); ++n) {
                                   const auto& r = up.records()[n];
                                   const char* tn = naming::type_name(r.type());
@@ -595,8 +628,24 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                                   } else if (r.type() == kGmdl) {
                                       gmdl::Mesh m = gmdl::parse(buf.data(), buf.size());
                                       if (m.ok) {
+                                          // Write the paired texture next to the OBJ and reference it.
+                                          std::string texfile;
+                                          auto it = raster_by_inst.find(r.instance());
+                                          if (it != raster_by_inst.end()) {
+                                              std::vector<u8> tbuf;
+                                              if (up.read_resource_decoded(it->second, tbuf)) {
+                                                  raster::Texture rt = raster::decode(tbuf.data(), tbuf.size());
+                                                  if (rt.ok) {
+                                                      std::filesystem::path bp = out;
+                                                      bp.replace_extension(".bmp");
+                                                      if (write_bmp_bgra(bp.string(), rt.width, rt.height, rt.bgra.data()))
+                                                          texfile = bp.filename().string();
+                                                  }
+                                              }
+                                          }
                                           out.replace_extension(".obj");
-                                          wrote = write_obj(out.string(), m);
+                                          wrote = texfile.empty() ? write_obj(out.string(), m)
+                                                                  : write_obj_textured(out.string(), m, texfile);
                                       }
                                   }
                                   if (wrote) {

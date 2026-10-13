@@ -164,8 +164,9 @@ exactly where the original looks for it. It is **not** in this repo — `refs/` 
 are gitignored; only our own evidence is committed.
 
 The unpacker (the PROMPT.md wish) writes the game's resources out under their real names, decoded.
-Solved formats come out as **standard files**: `raster` textures as `.bmp`, `gmdl` models as `.obj`;
-everything else is written as its decoded bytes.
+Solved formats come out as **standard files**: `raster` textures as `.bmp`, `gmdl` models as `.obj`
+**together with their paired `.bmp` texture and a `.mtl`** (a model's texture is the `raster` with
+the same instance id), so exported models open textured in any 3D tool.
 
 ```powershell
 # every resource of every package, filtered by type
