@@ -1,4 +1,8 @@
 {
+  "0x007ac4d0": {"name": "CreateModelManager", "area": "rw4", "note": "factory: alloc 0x148, ctor 0x7ac2a0; class vtable 0x140fb48; stored at global 0x15fd8c4"},
+  "0x007ac2a0": {"name": "ModelManagerCtor", "area": "rw4", "note": "ctor of the 328-byte model manager (vtable 0x140fb48)"},
+  "0x007ab050": {"name": "ModelManagerUnregister", "area": "rw4", "note": "vtable+0x70: mutex-guarded; calls 0x6b66f0 (hash-map erase) - NOT the parser"},
+  "0x007ab7f0": {"name": "ModelManagerRebuildMap", "area": "rw4", "note": "vtable+0x6c: rebuilds a map of objects by type (0x7aa7d0 = insert) - NOT the parser"},
   "0x007c85e7": {"name": "ConfigCmdRegister", "area": "startup", "note": "registers the Config/*.txt language commands (setOption/alert/setVariables/vendor...)"},
   "0x007c8e90": {"name": "CmdSetOption", "area": "startup", "note": "executor for the 'setOption' config command"},
   "0x007c7f50": {"name": "CmdSetVariables", "area": "startup", "note": "executor for the 'setVariables' config command"},

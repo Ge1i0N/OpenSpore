@@ -6,7 +6,7 @@
 > (functions we have actually reversed/named).
 
 **105,239** candidate function starts in `.text` (upper bound; see the tool's note) ·
-**55** functions reversed/named · **0.044%** coverage.
+**59** functions reversed/named · **0.048%** coverage.
 
 This is deliberately a HARD number, and it is small. It is not in tension with the feature
 map's high engine figure: the feature map measures the scope we chose (boot chain + asset
@@ -18,8 +18,8 @@ are barely touched. Both are true; together they are the honest picture.
 | area | count |
 |---|---|
 | startup | 29 |
+| rw4 | 15 |
 | packages | 12 |
-| rw4 | 11 |
 | core | 2 |
 | render | 1 |
 
@@ -42,6 +42,10 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x007635f0` | Rw4Register | rw4 | registers handler 0x7633c0 for type 0x2f4e681b |
 | `0x007a6bf8` | ModelMgrInstallA | rw4 | installs the model manager |
 | `0x007a7df4` | ModelMgrInstallB | rw4 | installs the model manager (second site) |
+| `0x007ab050` | ModelManagerUnregister | rw4 | vtable+0x70: mutex-guarded; calls 0x6b66f0 (hash-map erase) - NOT the parser |
+| `0x007ab7f0` | ModelManagerRebuildMap | rw4 | vtable+0x6c: rebuilds a map of objects by type (0x7aa7d0 = insert) - NOT the parser |
+| `0x007ac2a0` | ModelManagerCtor | rw4 | ctor of the 328-byte model manager (vtable 0x140fb48) |
+| `0x007ac4d0` | CreateModelManager | rw4 | factory: alloc 0x148, ctor 0x7ac2a0; class vtable 0x140fb48; stored at global 0x15fd8c4 |
 | `0x007c7f50` | CmdSetVariables | startup | executor for the 'setVariables' config command |
 | `0x007c85e7` | ConfigCmdRegister | startup | registers the Config/*.txt language commands (setOption/alert/setVariables/vendor...) |
 | `0x007c8e90` | CmdSetOption | startup | executor for the 'setOption' config command |

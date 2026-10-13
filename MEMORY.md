@@ -312,6 +312,18 @@ Tooling: `tools/rw4.py` (validates + dumps the 28-byte header; stops there on pu
 the `+0x0c` flags, or whether `"454"` is a version or build tag from any third-party RW4
 description - find the reader in `.text` and read it like RefPack was.
 
+**Session 13 progress (the model manager is located, but it REGISTERS, it does not parse).** The
+rw4 handler `0x7633c0` dispatches through two manager singletons; the first is global `0x15fd8c4`
+(getter `0x67dd20`, setter `0x67df40`). That object is created by the factory **`0x7ac4d0`** (alloc
+0x148) -> ctor **`0x7ac2a0`**, class vtable **`.rdata 0x140fb48`**. The handler calls its `+0x6c`
+(**`0x7ab7f0`**) and `+0x70` (**`0x7ab050`**) depending on a mode flag - but BOTH turned out to be
+**container operations, not a format parser**: `+0x6c` rebuilds a map by object type (`0x7aa7d0` is
+the map insert), and `+0x70` is a mutex-guarded wrapper that calls **`0x6b66f0`**, which is a hash-map
+**erase**. So the model manager registers/unregisters models in a map; the actual rw4 stream PARSING
+is NOT here. The other manager (`0x15fd8c8`, getter `0x67dd30`) is set from `0x7a88c0`/`0x76e680`.
+**Next: the parser is elsewhere** - follow the stream object (`0x7633c0`'s arg) rather than the
+manager, or find who reads the RW4 header template (`0x014f6480`) besides the ctor `0x011e3f60`.
+
 ## GMDL (generated model) — LAYOUT SOLVED (session 12); positions verified exactly
 
 `gmdl` (type 0x00E6BCE5, **11,041 resources**) is a baked mesh. Two early hypotheses were
