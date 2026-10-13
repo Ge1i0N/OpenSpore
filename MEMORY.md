@@ -367,6 +367,30 @@ killed the first claim). Evidence: `analysis/meshes/gmdl_pkg{48,52,53,54}.obj`,
 `source/render/mesh.cpp` uploads positions+indices with smooth normals and a hand-built orbit
 camera, and the Loader draws one mesh into its own viewport. Evidence: `analysis/shots/mesh_engine.png`.
 
+## RASTER (RenderWare texture) — header + DXT solved (session 13)
+
+`raster` = type **0x2f4e681c** (immediately after `rw4` 0x2f4e681b in the registry), **5,931
+resources**. Header derived from 1,200 decoded payloads (`tools/raster_scan.py`) and confirmed by a
+correct decode (`tools/raster_decode.py`):
+
+```
++0x00 u32 = 1            (version)
++0x04 u32 = dim          (h or w; every sampled texture is square)
++0x08 u32 = dim          (the other dimension)
++0x0c u32 = code         (10/9/6/7 - mip/quality code; meaning open)
++0x10 u32 = 8            (constant in every sample)
++0x14 char[4]            format tag: "DXT5" (704/1200), "DXT1" (122/1200), or u32 0x15 = raw BGRA
++0x18 u32 = base bytes   (== w*h for DXT5, w*h/2 for DXT1, w*h*4 for raw)
++0x1c ...                base-level pixels, then mip levels
+```
+
+Decoding the base level works: `Spore_Content` rec[125] is a 256x256 **DXT1 normal map**
+(`analysis/shots/raster_dxt1.png` — the classic purple/blue sculpted relief), which is a clear,
+correct decode. DXT5 (alpha atlases) and raw BGRA also decode. NOT done: the exact meaning of the
+`code` field, the mip-level count/offsets, and wiring it into the engine (the engine still draws the
+`png` path). Tools: `tools/raster_scan.py` (headers across many resources),
+`tools/raster_decode.py` (DXT1/DXT5/raw -> PNG).
+
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 
 **Priority rule (user, repeated): disassembly first, always.** Third-party sources — docs,

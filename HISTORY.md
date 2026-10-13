@@ -57,6 +57,16 @@ guesses to check by disassembly; output `analysis/name_guesses.md`. Also: `tools
 shows the PDB is NOT stripped — 136,433 unique function/method name paths (SP 63,246, EA 24,214,
 eastl 9,874, rw 6,582, nSPCreatureAnim 2,423). The feature map gained a `tooling` category (89%).
 
+### raster (RenderWare textures) — header solved, DXT decodes
+`raster` (type 0x2f4e681c, 5,931 resources) is the engine's texture format. A fast scan (each
+package read once) over 1,200 payloads gave a stable header: `{u32 1, u32 dim, u32 dim, u32 code,
+u32 8, char[4] tag, u32 base_bytes}`, where `tag` is `DXT5` (59%), `DXT1` (10%), or raw BGRA
+(0x15). `tools/raster_decode.py` decodes the base level: `Spore_Content` rec[125] is a 256x256
+**DXT1 normal map** (`analysis/shots/raster_dxt1.png` — the purple/blue sculpted relief), a clear,
+correct decode; DXT5 alpha atlases and raw BGRA also decode. Open: the `code` field's meaning, the
+mip layout, and engine integration. (The first scan attempt never finished because it re-read the
+whole package for every record; the rewrite reads each package once.)
+
 ### Our renderer now draws a decoded gmdl mesh
 The solved gmdl geometry (session 12) is now on OUR screen: `source/engine/gmdl.cpp` is the C++
 port of the parser, `source/render/mesh.cpp` uploads positions+indices, computes smooth normals and

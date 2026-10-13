@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 79.1%** | **Overall: 71.8%** | done 156 / partial 14 / todo 57 (227 features)
+**Engine reversal: 79.7%** | **Overall: 72.2%** | done 156 / partial 16 / todo 55 (227 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **90%** | 21 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **79%** | 19 | 0 | 5 |
-| formats | **10%** | 2 | 0 | 18 |
+| formats | **15%** | 2 | 2 | 16 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **89%** | 12 | 1 | 1 |
 | platform | **25%** | 2 | 1 | 7 |
@@ -265,17 +265,17 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 10%
+## formats — 15%
 
-*2 done · 0 partial · 18 todo*
+*2 done · 2 partial · 16 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
 | ✅ | done | png | 14549 decoded |
 | ✅ | done | locale text | Czech lexicon end-to-end |
 | ⬜ | todo | locale display | no game text on screen |
-| ⬜ | todo | raster | 5931 resources |
-| ⬜ | todo | dxt / bc | block-compressed textures |
+| 🚧 | partial | raster | header solved; DXT1/DXT5/raw decoded to PNG |
+| 🚧 | partial | dxt / bc | DXT1/DXT5 decode (raster_decode.py); not in the engine yet |
 | ⬜ | todo | tga |  |
 | ⬜ | todo | animation | 4997 resources |
 | ⬜ | todo | prop | 30645 resources |
