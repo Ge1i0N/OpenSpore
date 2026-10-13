@@ -459,7 +459,13 @@ are only ever compared to other ids, so our own `state -list`/`goto` kept workin
   `0x0089f060 EA::Allocator::StackAllocatorCoreAllocate`, `0x008457a4
   EA::ArgScript::cParser::CommandExists`, `0x00a73e40 SP::EffectsManager`,
   `0x00ea6710 SP::cPlanetModel::IsUnderWater`). Every row is a GUESS to check by disassembly, not
-  truth. Output: `analysis/name_guesses.md`.
+  truth. Refined (session 13): use STRICT function starts (prologues + `E8` targets only — .rdata/
+  .data pointers are often jump-table case labels and gave mid-function addresses); the push site is
+  reported; and two limits are documented — it keys on self-describing functions (so it barely
+  overlaps our hand-reversed workhorse routines: validation 0/29 by construction, not failure), and
+  when one string matches several PDB names it identifies the FAMILY reliably but the member shown is
+  arbitrary (`0x0092c540` pushes `Refpack` -> `EA::Refpack::*`). Coverage 220 / 48,243 strict starts =
+  0.46%. Output: `analysis/name_guesses.md`.
 
 ## AppStateManager / game states (level 1: disasm of the oracle)
 

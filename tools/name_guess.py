@@ -56,7 +56,12 @@ def build_token_index(names):
 
 
 def oracle_string_refs(pe, starts):
-    """Return (func_addr -> list of (string, string_va))."""
+    """Return (func_addr -> list of (string, string_va, push_va)).
+
+    `starts` should be a STRICT function-start set (prologues + E8 targets). Attribution uses the
+    nearest start <= the instruction, and the push address is reported so a human can look at the
+    exact site.
+    """
     text = pe.sections[".text"]
     t0 = text["va"]
     blob = pe.section_bytes(".text")
@@ -95,24 +100,46 @@ def oracle_string_refs(pe, starts):
             continue
         fn = enclosing(t0 + i)
         if fn is not None:
-            refs[fn].append((s, va))
+            refs[fn].append((s, va, t0 + i))
     return refs
+
+
+def strict_starts(pe):
+    """Function starts for the guesser: prologues + E8 call targets. Deliberately drops the
+    .rdata/.data pointer starts (jump tables point at case labels -> false starts)."""
+    text = pe.sections[".text"]
+    t0, t1 = text["va"], text["end_va"]
+    blob = pe.section_bytes(".text")
+    starts = set()
+    for i in range(len(blob) - 5):
+        if blob[i] == 0xE8:
+            rel = struct.unpack("<i", blob[i + 1 : i + 5])[0]
+            tgt = t0 + i + 5 + rel
+            if t0 <= tgt < t1:
+                starts.add(tgt)
+    for i in range(len(blob) - 3):
+        if blob[i] == 0x55 and blob[i + 1] == 0x8B and blob[i + 2] == 0xEC:
+            starts.add(t0 + i)
+        elif blob[i] == 0x8B and blob[i + 1] == 0xFF:
+            starts.add(t0 + i)
+    return starts
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--min-len", type=int, default=6)
-    ap.add_argument("--top", type=int, default=200)
+    ap.add_argument("--top", type=int, default=150)
+    ap.add_argument("--check", action="store_true",
+                    help="only cross-check the guesser against the names we reversed ourselves")
     a = ap.parse_args()
 
     from tools.pe import PE
-    from tools.functions import candidate_starts
 
     pe = PE()
-    starts = candidate_starts(pe)
+    starts = strict_starts(pe)
     names = load_pdb_names()
     tokidx = build_token_index(names)
-    print(f"# oracle {pe.path.name}: {len(starts):,} candidate functions")
+    print(f"# oracle {pe.path.name}: {len(starts):,} strict function starts (prologues + E8 targets)")
     print(f"# PDB names: {len(names):,}")
 
     refs = oracle_string_refs(pe, starts)
@@ -122,13 +149,13 @@ def main() -> int:
     # far better address guess than one used by twenty (e.g. "Pollinator").
     freq = Counter()
     for _fn, ss in refs.items():
-        for s in {s.lower() for s, _ in ss}:
+        for s in {s.lower() for s, _va, _p in ss}:
             freq[s] += 1
 
-    cands = []  # (score, tier, func_addr, string, pdb_name)
+    cands = []  # (score, tier, func_addr, string, push_va, pdb_name)
     for fn, ss in refs.items():
         seen = set()
-        for s, _va in ss:
+        for s, _va, push_va in ss:
             sl = s.lower()
             if len(s) < a.min_len:
                 continue
@@ -147,21 +174,48 @@ def main() -> int:
             score = len(s) * (50.0 / r) / f
             tier = "HIGH" if (f == 1 and r <= 10 and len(s) >= 8) else "med"
             for i in ids:
-                cands.append((score, tier, fn, s, names[i]))
+                cands.append((score, tier, fn, s, push_va, names[i]))
 
     cands.sort(key=lambda c: -c[0])
     # keep the best candidate per function
     best = {}
-    for score, tier, fn, s, nm in cands:
+    for score, tier, fn, s, push_va, nm in cands:
         if fn not in best:
-            best[fn] = (score, tier, s, nm)
+            best[fn] = (score, tier, s, push_va, nm)
 
     highs = sum(1 for v in best.values() if v[1] == "HIGH")
+    coverage = 100.0 * len(best) / len(starts) if starts else 0.0
     print(f"# candidate (address -> PDB name) guesses: {len(best):,}  (HIGH confidence: {highs})")
+    print(f"# coverage: {len(best):,} / {len(starts):,} candidate functions = {coverage:.2f}%")
+
+    # --- validation: does the guesser independently reproduce the names WE reversed? ---
+    import json as _json
+    named_path = ROOT / "analysis" / "functions_named.json"
+    named = _json.loads(named_path.read_text(encoding="utf-8")) if named_path.exists() else {}
+    valid, checked = [], 0
+    for k, v in named.items():
+        addr = int(k, 16)
+        checked += 1
+        if addr in best:
+            guess = best[addr][4]
+            ours = v.get("name", "")
+            # crude agreement: share a case-insensitive token of length >= 5
+            gt = {t.lower() for t in TOKEN.findall(guess)}
+            ot = {t.lower() for t in TOKEN.findall(ours)}
+            agree = bool(gt & ot)
+            valid.append((k, ours, guess, agree))
+    agree_n = sum(1 for *_, a in valid if a)
+    print(f"# validation vs our {checked} named functions: {len(valid)} got a guess, {agree_n} agree")
+
+    if a.check:
+        for k, ours, guess, agree in valid:
+            print(f"  {k}  ours={ours:<28} guess={guess:<50} {'AGREE' if agree else ''}")
+        return 0
+
     rows = sorted(best.items(), key=lambda kv: -kv[1][0])[: a.top]
-    print(f"{'address':>10}  {'tier':>4}  {'score':>7}  {'string':<30} name")
-    for fn, (score, tier, s, nm) in rows:
-        print(f"0x{fn:08x}  {tier:>4}  {score:7.1f}  {s[:30]:<30} {nm[:66]}")
+    print(f"{'address':>10}  {'push':>10}  {'tier':>4}  {'score':>7}  {'string':<28} name")
+    for fn, (score, tier, s, push_va, nm) in rows:
+        print(f"0x{fn:08x}  0x{push_va:08x}  {tier:>4}  {score:7.1f}  {s[:28]:<28} {nm[:60]}")
 
     # write the artifact
     lines = [
@@ -174,14 +228,37 @@ def main() -> int:
         "",
         f"- candidate functions: {len(starts):,}",
         f"- functions with string refs: {len(refs):,}",
-        f"- candidate matches: {len(best):,} (HIGH confidence: {highs})",
+        f"- candidate matches: {len(best):,} (HIGH confidence: {highs}) = **{coverage:.2f}%** coverage",
+        f"- validation: of our {checked} reversed/named functions, {len(valid)} got a guess and "
+        f"**{agree_n} agree** with our own name",
         "",
-        "| address | tier | score | driving string | proposed PDB name |",
-        "|---|---|---|---|---|",
+        "## How to read this (and its limits)",
+        "",
+        "- The guesser keys on **self-describing** functions: ones that push a string which is also a",
+        "  PDB name token (registrars, `GetName`, factories). Our hand-reversed functions are the",
+        "  *workhorse* routines (byte loops, decoders), so the two sets are largely disjoint by",
+        "  construction — the validation above is low **for that reason**, not because the method fails.",
+        "  Its value is COVERAGE (naming code we have not touched), not confirmation.",
+        "- When one string matches several PDB names (e.g. `Refpack` -> 15 `EA::Refpack::*` methods),",
+        "  the guess identifies the FAMILY reliably, but the specific member shown is arbitrary.",
+        "  Example: `0x0092c540` pushes `Refpack`; it is *an* `EA::Refpack` method, and the tool shows",
+        "  one of them — read the disassembly to pick the right one.",
+        "- The `push site` column is the exact instruction; the `address` column is the enclosing",
+        "  strict function start. For large functions the two are far apart, so a guess can name the",
+        "  function that *contains* the push rather than a small dedicated one.",
+        "",
+        "| address | push site | tier | score | driving string | proposed PDB name |",
+        "|---|---|---|---|---|---|",
     ]
-    for fn, (score, tier, s, nm) in rows:
-        lines.append(f"| `0x{fn:08x}` | {tier} | {score:.1f} | `{s}` | `{nm}` |")
+    for fn, (score, tier, s, push_va, nm) in rows:
+        lines.append(f"| `0x{fn:08x}` | `0x{push_va:08x}` | {tier} | {score:.1f} | `{s}` | `{nm}` |")
     lines.append("")
+    if valid:
+        lines += ["## Validation against names we reversed ourselves", "",
+                  "| address | our name | guesser's name | agree |", "|---|---|---|---|"]
+        for k, ours, guess, agree in sorted(valid):
+            lines.append(f"| `{k}` | {ours} | `{guess}` | {'yes' if agree else 'no'} |")
+        lines.append("")
     (ROOT / "analysis" / "name_guesses.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"\nwrote analysis/name_guesses.md ({len(rows)} rows)")
     return 0

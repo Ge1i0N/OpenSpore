@@ -5,55 +5,176 @@
 > A full address map is not derivable (no beta code, no matching reference build, RTTI off);
 > this is the strongest self-contained signal we have. Check the top rows by disassembly.
 
-- candidate functions: 105,239
-- functions with string refs: 7,168
-- candidate matches: 428 (HIGH confidence: 120)
+- candidate functions: 48,243
+- functions with string refs: 4,869
+- candidate matches: 220 (HIGH confidence: 39) = **0.46%** coverage
+- validation: of our 29 reversed/named functions, 0 got a guess and **0 agree** with our own name
 
-| address | tier | score | driving string | proposed PDB name |
-|---|---|---|---|---|
-| `0x007f6160` | HIGH | 1400.0 | `SPUICreateAnimationTimerRamp` | `SPUICreateAnimationTimerRamp` |
-| `0x0089f060` | HIGH | 1300.0 | `StackAllocatorCoreAllocate` | `EA::Allocator::StackAllocatorCoreAllocate` |
-| `0x013b5500` | HIGH | 900.0 | `hkBroadPhaseHandle` | `?0hkBroadPhaseHandle` |
-| `0x01334f10` | HIGH | 850.0 | `ManageBodyEffects` | `SP::ManageBodyEffects` |
-| `0x013b5bd0` | HIGH | 800.0 | `hkPackfileHeader` | `?0hkPackfileHeader` |
-| `0x013b3df0` | HIGH | 725.0 | `hkGenericConstraintDataScheme` | `?1hkGenericConstraintDataScheme` |
-| `0x00a73e40` | HIGH | 700.0 | `effectsManager` | `SP::EffectsManager` |
-| `0x008457a4` | HIGH | 650.0 | `commandExists` | `EA::ArgScript::cParser::CommandExists` |
-| `0x013b4180` | HIGH | 650.0 | `hkArrayAction` | `hkArrayAction::Members` |
-| `0x0064c620` | HIGH | 600.0 | `AssetBrowser` | `SP::AssetBrowser` |
-| `0x00ea6710` | HIGH | 600.0 | `isunderwater` | `SP::cPlanetModel::IsUnderWater` |
-| `0x01028cd5` | HIGH | 600.0 | `runcinematic` | `SP::cCreatureModeStrategy::RunCinematic` |
-| `0x00a54630` | HIGH | 550.0 | `startselect` | `EA::Audio::Eapd::Play::StartSelect` |
-| `0x013b3f10` | HIGH | 525.0 | `hkWorldMemoryWatchDog` | `hkWorldMemoryWatchDog::getMemoryUsed` |
-| `0x007c67f0` | HIGH | 500.0 | `renderType` | `?A0x5bd1c618::renderType` |
-| `0x01377a10` | HIGH | 500.0 | `distribute` | `nSPSkinner::cMetaballDistributor::Distribute` |
-| `0x013b4930` | HIGH | 475.0 | `hkShapeRayCastInput` | `?4hkShapeRayCastInput` |
-| `0x013b4d80` | HIGH | 466.7 | `hkCollidableCollidableFilter` | `?1hkCollidableCollidableFilter` |
-| `0x0112beb0` | HIGH | 450.0 | `hasVtable` | `hkClass::hasVtable` |
-| `0x013b4c60` | HIGH | 433.3 | `hkRayShapeCollectionFilter` | `?1hkRayShapeCollectionFilter` |
-| `0x013b5880` | HIGH | 416.7 | `hkSerializedDisplayMarker` | `?_7hkSerializedDisplayMarker` |
-| `0x00a18d10` | HIGH | 400.0 | `islooped` | `EA::Audio::Sound::IsLooped` |
-| `0x00a3efb0` | HIGH | 400.0 | `sendgame` | `SP::Audio::SendGame::Register` |
-| `0x00cf47c0` | HIGH | 400.0 | `GiveGift` | `SP::GiveGift` |
-| `0x00d18200` | HIGH | 400.0 | `DrawPath` | `DrawPath` |
-| `0x013b4ba0` | HIGH | 383.3 | `hkShapeCollectionFilter` | `?1hkShapeCollectionFilter` |
-| `0x013b4090` | HIGH | 362.5 | `hkLimitedForceConstraintMotor` | `?2hkLimitedForceConstraintMotor` |
-| `0x013b5850` | HIGH | 362.5 | `hkSerializedDisplayMarkerList` | `?2hkSerializedDisplayMarkerList` |
-| `0x0091d177` | med | 350.0 | `Exports` | `EA::UTFWinTools::SerCollection::Exports` |
-| `0x009238c0` | med | 350.0 | `Private` | `EA::Service::Private::DummyInterface::kIID` |
-| `0x00941b30` | med | 350.0 | `OPTIONS` | `rw::core::filesys::?0Options` |
-| `0x00a52540` | med | 350.0 | `powtodb` | `EA::Audio::Eapd::powtodb` |
-| `0x00a5d400` | med | 350.0 | `prepend` | `rw::SList::Prepend` |
-| `0x00a60a10` | med | 350.0 | `inrange` | `?A0x5569bb67::inRange` |
-| `0x00adabf0` | med | 350.0 | `objects` | `EA::UTFWinTools::SerCollection::Objects` |
-| `0x00b5d3d0` | med | 350.0 | `bgColor` | `EA::XHTML::Layout::ContainerItem::BgColor` |
-| `0x013b4120` | HIGH | 350.0 | `hkConstraintChainData` | `?1hkConstraintChainData` |
-| `0x013b4c90` | HIGH | 350.0 | `hkRayCollidableFilter` | `?_7hkRayCollidableFilter` |
-| `0x005cbb80` | HIGH | 300.0 | `GetDirectory` | `EA::IO::FilePath::GetDirectory` |
-| `0x0061b730` | med | 300.0 | `binary` | `std::H::?$_Iosb::binary` |
-| `0x00893ed0` | HIGH | 300.0 | `PolygonGlyph` | `EA::Text::?0PolygonGlyph` |
-| `0x00b1e000` | med | 300.0 | `CreatureGame` | `CreatureGame` |
-| `0x00b5dcd0` | med | 300.0 | `CreatureGame` | `CreatureGame` |
-| `0x00f4a370` | med | 300.0 | `global` | `hkRelocationInfo::?0Global` |
-| `0x01028b4b` | HIGH | 300.0 | `setarchetype` | `SP::cEmpire::SetArchetype` |
+## How to read this (and its limits)
+
+- The guesser keys on **self-describing** functions: ones that push a string which is also a
+  PDB name token (registrars, `GetName`, factories). Our hand-reversed functions are the
+  *workhorse* routines (byte loops, decoders), so the two sets are largely disjoint by
+  construction — the validation above is low **for that reason**, not because the method fails.
+  Its value is COVERAGE (naming code we have not touched), not confirmation.
+- When one string matches several PDB names (e.g. `Refpack` -> 15 `EA::Refpack::*` methods),
+  the guess identifies the FAMILY reliably, but the specific member shown is arbitrary.
+  Example: `0x0092c540` pushes `Refpack`; it is *an* `EA::Refpack` method, and the tool shows
+  one of them — read the disassembly to pick the right one.
+- The `push site` column is the exact instruction; the `address` column is the enclosing
+  strict function start. For large functions the two are far apart, so a guess can name the
+  function that *contains* the push rather than a small dedicated one.
+
+| address | push site | tier | score | driving string | proposed PDB name |
+|---|---|---|---|---|---|
+| `0x007f6160` | `0x007f617a` | HIGH | 1400.0 | `SPUICreateAnimationTimerRamp` | `SPUICreateAnimationTimerRamp` |
+| `0x0089f060` | `0x0089f0c2` | HIGH | 1300.0 | `StackAllocatorCoreAllocate` | `EA::Allocator::StackAllocatorCoreAllocate` |
+| `0x013b5300` | `0x013b5515` | HIGH | 900.0 | `hkBroadPhaseHandle` | `?0hkBroadPhaseHandle` |
+| `0x01333131` | `0x01334f66` | HIGH | 850.0 | `ManageBodyEffects` | `SP::ManageBodyEffects` |
+| `0x013b5aa0` | `0x013b5be5` | HIGH | 800.0 | `hkPackfileHeader` | `?0hkPackfileHeader` |
+| `0x013b3900` | `0x013b3e05` | HIGH | 725.0 | `hkGenericConstraintDataScheme` | `?1hkGenericConstraintDataScheme` |
+| `0x00a73c10` | `0x00a73e45` | HIGH | 700.0 | `effectsManager` | `SP::EffectsManager` |
+| `0x00845710` | `0x00845f88` | HIGH | 650.0 | `commandExists` | `EA::ArgScript::cParser::CommandExists` |
+| `0x0064c620` | `0x0064c71a` | HIGH | 600.0 | `AssetBrowser` | `SP::AssetBrowser` |
+| `0x00ea66b0` | `0x00ea6720` | HIGH | 600.0 | `isunderwater` | `SP::cPlanetModel::IsUnderWater` |
+| `0x01028655` | `0x010290f5` | HIGH | 600.0 | `runcinematic` | `SP::cCreatureModeStrategy::RunCinematic` |
+| `0x00a54630` | `0x00a547c2` | HIGH | 550.0 | `startselect` | `EA::Audio::Eapd::Play::StartSelect` |
+| `0x007c6640` | `0x007c6bce` | HIGH | 500.0 | `renderType` | `?A0x5bd1c618::renderType` |
+| `0x01376909` | `0x01377ab6` | HIGH | 500.0 | `distribute` | `nSPSkinner::cMetaballDistributor::Distribute` |
+| `0x013b4800` | `0x013b4945` | HIGH | 475.0 | `hkShapeRayCastInput` | `?4hkShapeRayCastInput` |
+| `0x0112beb0` | `0x0112beb2` | HIGH | 450.0 | `hasVtable` | `hkClass::hasVtable` |
+| `0x013b55d0` | `0x013b5898` | HIGH | 416.7 | `hkSerializedDisplayMarker` | `?_7hkSerializedDisplayMarker` |
+| `0x00a18d10` | `0x00a18ebc` | HIGH | 400.0 | `islooped` | `EA::Audio::Sound::IsLooped` |
+| `0x00a3efb0` | `0x00a3efb8` | HIGH | 400.0 | `sendgame` | `SP::Audio::SendGame::Register` |
+| `0x00cf4620` | `0x00cf4a6c` | HIGH | 400.0 | `GiveGift` | `SP::GiveGift` |
+| `0x00d18180` | `0x00d18340` | HIGH | 400.0 | `DrawPath` | `DrawPath` |
+| `0x0091cf80` | `0x0091d380` | med | 350.0 | `Exports` | `EA::UTFWinTools::SerCollection::Exports` |
+| `0x009238c0` | `0x009238c9` | med | 350.0 | `Private` | `EA::Service::Private::DummyInterface::kIID` |
+| `0x00941b30` | `0x00941b79` | med | 350.0 | `OPTIONS` | `rw::core::filesys::?0Options` |
+| `0x00a52540` | `0x00a52600` | med | 350.0 | `powtodb` | `EA::Audio::Eapd::powtodb` |
+| `0x00a5d400` | `0x00a5d4d7` | med | 350.0 | `prepend` | `rw::SList::Prepend` |
+| `0x00a60a10` | `0x00a60a5f` | med | 350.0 | `inrange` | `?A0x5569bb67::inRange` |
+| `0x00ad9440` | `0x00adac75` | med | 350.0 | `objects` | `EA::UTFWinTools::SerCollection::Objects` |
+| `0x00b5d330` | `0x00b5d40d` | med | 350.0 | `bgColor` | `EA::XHTML::Layout::ContainerItem::BgColor` |
+| `0x005cbb80` | `0x005cbd27` | HIGH | 300.0 | `GetDirectory` | `EA::IO::FilePath::GetDirectory` |
+| `0x0061b444` | `0x0061b803` | med | 300.0 | `binary` | `std::H::?$_Iosb::binary` |
+| `0x00893ebe` | `0x00893ff0` | HIGH | 300.0 | `PolygonGlyph` | `EA::Text::?0PolygonGlyph` |
+| `0x00b1e000` | `0x00b1e21f` | med | 300.0 | `CreatureGame` | `CreatureGame` |
+| `0x00b5dcd0` | `0x00b5de8c` | med | 300.0 | `CreatureGame` | `CreatureGame` |
+| `0x00f497f8` | `0x00f4a454` | med | 300.0 | `global` | `hkRelocationInfo::?0Global` |
+| `0x010498e8` | `0x010499bc` | med | 300.0 | `freeze` | `SP::?A0x8a43d504::cMorphDrawImpl::MeshCacheEntry::Freeze` |
+| `0x01052890` | `0x01052ce0` | HIGH | 260.0 | `cGenesisDeviceToolStrategy` | `SP::?0cGenesisDeviceToolStrategy` |
+| `0x01025820` | `0x01025e82` | HIGH | 250.0 | `setRelationship` | `SP::cSPUIRelationshipStrip::SetRelationship` |
+| `0x00a4cfc0` | `0x00a4cffa` | HIGH | 250.0 | `disconnect` | `EA::Audio::VoiceContainer::Disconnect` |
+| `0x01082690` | `0x010826f2` | HIGH | 250.0 | `Properties` | `EA::XHTML::Style::PropertyCollection::Properties` |
+| `0x00b0f1d0` | `0x00b0f349` | med | 225.0 | `direction` | `SP::AStarInternal::Direction` |
+| `0x00f4efd0` | `0x00f4f149` | med | 225.0 | `direction` | `SP::AStarInternal::Direction` |
+| `0x00963d70` | `0x00963db0` | HIGH | 220.0 | `ButtonDrawableStandard` | `EA::UTFWinControls::ButtonDrawableStandard::GetImageArea` |
+| `0x00ad7d70` | `0x00ad7d7e` | med | 212.5 | `switchToExitState` | `SP::cCinematicManager::SwitchToExitState` |
+| `0x00ad8f10` | `0x00ad8f73` | med | 212.5 | `switchToExitState` | `SP::cCinematicManager::SwitchToExitState` |
+| `0x00addad0` | `0x00addb9e` | med | 212.5 | `switchToExitState` | `SP::cCinematicManager::SwitchToExitState` |
+| `0x00adfce0` | `0x00adfea9` | med | 212.5 | `switchToExitState` | `SP::cCinematicManager::SwitchToExitState` |
+| `0x00535e40` | `0x00535f1b` | med | 200.0 | `modifier` | `nSPSkinner::cPaintVarEvalList::?0Modifier` |
+| `0x0053b950` | `0x0053ba2b` | med | 200.0 | `modifier` | `nSPSkinner::cPaintVarEvalList::?0Modifier` |
+| `0x007e4240` | `0x007e465f` | med | 200.0 | `softStop` | `?A0x654a2f3c::cCreatureModeFightScenario::SoftStop` |
+| `0x0098e900` | `0x0098f250` | HIGH | 200.0 | `TreeExpanderDrawable` | `EA::UTFWinControls::?_7TreeExpanderDrawable` |
+| `0x00adcb70` | `0x00adcd9c` | med | 200.0 | `softStop` | `?A0x654a2f3c::cCreatureModeFightScenario::SoftStop` |
+| `0x013ae5af` | `0x013b3602` | HIGH | 200.0 | `hkBaseObject` | `?_7hkBaseObject` |
+| `0x00963dc0` | `0x00963e00` | HIGH | 190.0 | `ButtonDrawableRadio` | `EA::UTFWinControls::ButtonDrawableRadio::GetImageArea` |
+| `0x008879be` | `0x00887b1c` | med | 175.0 | `Stretch` | `stretch` |
+| `0x00893870` | `0x00893a77` | med | 175.0 | `Stretch` | `stretch` |
+| `0x009166e0` | `0x0091674c` | med | 175.0 | `version` | `EA::ArgScript::cParser::Version` |
+| `0x00bae230` | `0x00bae3c3` | med | 175.0 | `current` | `EA::Text::Lexer::_W::?$CharStream::Current` |
+| `0x00e9ddae` | `0x00e9dea4` | med | 175.0 | `disable` | `rw::core::debug::Channel::Disable` |
+| `0x01023490` | `0x0102397f` | med | 175.0 | `disable` | `rw::core::debug::Channel::Disable` |
+| `0x0108360e` | `0x0108375e` | med | 175.0 | `Collide` | `hkDiscreteSimulation::collide` |
+| `0x007ffb70` | `0x008006f0` | med | 172.7 | `cSPUIBehaviorWinInterpolatorShadeColor` | `cSPUIBehaviorWinInterpolatorShadeColor::copy_from_value_from_window` |
+| `0x005d6c10` | `0x005d6db5` | med | 150.0 | `Assert` | `rw::audio::core::System::Assert` |
+| `0x00a60f30` | `0x00a60f52` | med | 150.0 | `toggle` | `SP::cUICard::Toggle` |
+| `0x007f61f0` | `0x007f620a` | med | 125.0 | `cSPUIBehaviorTimeFunctionSmoothRamp` | `?0cSPUIBehaviorTimeFunctionSmoothRamp` |
+| `0x00b24b9c` | `0x00b255ad` | HIGH | 125.0 | `cDeepSpaceProjectile` | `SP::?_7cDeepSpaceProjectile` |
+| `0x0052f390` | `0x0052f62c` | med | 116.7 | `inverse` | `rw::math::fpu::M$00::?$Inverse` |
+| `0x005361a0` | `0x00536239` | med | 100.0 | `scalePos` | `nSPCreatureAnim::ScalePos` |
+| `0x00536d40` | `0x00537044` | med | 100.0 | `scalePos` | `nSPCreatureAnim::ScalePos` |
+| `0x0053bda0` | `0x0053be39` | med | 100.0 | `scalePos` | `nSPCreatureAnim::ScalePos` |
+| `0x0053c950` | `0x0053cc54` | med | 100.0 | `scalePos` | `nSPCreatureAnim::ScalePos` |
+| `0x00812560` | `0x008128de` | med | 100.0 | `unload` | `EA::Text::OTF::Unload` |
+| `0x0091dbe0` | `0x0091dc8a` | HIGH | 100.0 | `BREAKPOINT` | `SP::Havok::BreakableConstraintListener::?5??constraintBrokenCallback::breakpoint` |
+| `0x00b5d500` | `0x00b5d52b` | med | 100.0 | `LoadGame` | `SP::cGamePersistenceManager::LoadGame` |
+| `0x0080a3c0` | `0x0080a493` | HIGH | 93.8 | `cDoModalWinProc` | `?A0xf037ab2d::?0cDoModalWinProc` |
+| `0x0097e6f0` | `0x0097e730` | HIGH | 90.0 | `ProportionalLayout` | `EA::UTFWinControls::ProportionalLayout::ApplyLayout` |
+| `0x00a4f100` | `0x00a4f24a` | med | 87.5 | `comment` | `EA::XHTML::DOM::?0Comment` |
+| `0x00b1c810` | `0x00b1cf79` | med | 87.5 | `Comment` | `EA::XHTML::DOM::?0Comment` |
+| `0x0096efc0` | `0x0096f070` | HIGH | 83.3 | `FadeEffect` | `EA::UTFWinControls::?1FadeEffect` |
+| `0x006aaa40` | `0x006aaba6` | HIGH | 80.0 | `property` | `EA::XHTML::Style::?1Property` |
+| `0x007f6290` | `0x007f62aa` | med | 75.0 | `cSPUIBehaviorTimeFunctionDampedPeriodic` | `cSPUIBehaviorTimeFunctionDampedPeriodic::CanExpire` |
+| `0x00a4c530` | `0x00a4c5a8` | med | 75.0 | `cancel` | `SP::cEditorBaker::Cancel` |
+| `0x01024ff0` | `0x010254f0` | med | 75.0 | `repair` | `SP::cCombatant::Repair` |
+| `0x0096ebf0` | `0x0096edc0` | med | 70.8 | `ExplicitNavigator` | `EA::UTFWinControls::ExplicitNavigator::GetSerializationInfo` |
+| `0x00980660` | `0x009806c0` | med | 70.8 | `RelativeNavigator` | `EA::UTFWinControls::?_7RelativeNavigator` |
+| `0x00b31c20` | `0x00b31d41` | med | 70.0 | `settime` | `hkMonitorStream::TimerCommand::setTime` |
+| `0x00d4ac40` | `0x00d4ad10` | med | 67.9 | `cNightPredatorEvent` | `SP::cNightPredatorEvent::AsInterface` |
+| `0x0102400e` | `0x0102418c` | HIGH | 66.7 | `complete` | `SP::cSPMission::Complete` |
+| `0x00b266f0` | `0x00b26730` | med | 61.5 | `cSavedGameHeader` | `SP::?0cSavedGameHeader` |
+| `0x00980e90` | `0x00980ed0` | med | 60.7 | `ScrollbarDrawable` | `EA::UTFWinControls::?_7ScrollbarDrawable` |
+| `0x00941bb0` | `0x00941bef` | med | 60.0 | `Accept` | `EA::Sockets::StreamSocket::Accept` |
+| `0x0097e7c0` | `0x0097e800` | HIGH | 60.0 | `SimpleLayout` | `EA::UTFWinControls::?_7SimpleLayout` |
+| `0x0102721e` | `0x010272d5` | med | 60.0 | `record` | `rw::core::arena::ArenaSectionExternalArenas::Record` |
+| `0x00673e8e` | `0x00673f82` | med | 58.3 | `replace` | `EA::UTFWinControls::WinTextEdit::Replace` |
+| `0x0067e440` | `0x0067e508` | med | 58.3 | `history` | `cSPUIDebugConsole::History` |
+| `0x0091e4e0` | `0x0091e61b` | med | 58.3 | `address` | `EA::Sockets::?0Address` |
+| `0x00a4bd20` | `0x00a4bde9` | med | 58.3 | `restore` | `Snd9::System::Restore` |
+| `0x00a50dd0` | `0x00a50e66` | med | 58.3 | `restore` | `Snd9::System::Restore` |
+| `0x00e4f530` | `0x00e4f630` | med | 54.5 | `CellSaveGame` | `SP::CellSaveGame::Release` |
+| `0x00b5bb40` | `0x00b5c4f0` | med | 53.8 | `cVehicleTicker` | `SP::?_7cVehicleTicker` |
+| `0x00985b60` | `0x00985ba0` | med | 53.6 | `SpinnerDrawable` | `EA::UTFWinControls::SpinnerDrawable::AddRef` |
+| `0x00967740` | `0x00967780` | med | 53.3 | `ComboBoxDrawable` | `EA::UTFWinControls::?1ComboBoxDrawable` |
+| `0x0091eaa0` | `0x0091eb11` | med | 50.0 | `ExceptionHandlerWin32` | `EA::Debug::?0ExceptionHandlerWin32` |
+| `0x0092c540` | `0x0092c5a0` | med | 50.0 | `Refpack` | `EA::Refpack::DeflateBuf` |
+| `0x00980070` | `0x009801b0` | med | 50.0 | `ModulateEffect` | `EA::UTFWinControls::?0ModulateEffect` |
+| `0x00980420` | `0x00980580` | med | 50.0 | `PerspectiveEffect` | `EA::UTFWinControls::?_7PerspectiveEffect` |
+| `0x009839f0` | `0x00983a30` | med | 50.0 | `SliderDrawable` | `EA::UTFWinControls::SliderDrawable::GetNaturalSize` |
+| `0x00f63150` | `0x00f63212` | med | 50.0 | `active` | `SP::cPerfWarnings::Active` |
+| `0x010835ee` | `0x010835fb` | med | 50.0 | `Active` | `SP::cPerfWarnings::Active` |
+| `0x00b24720` | `0x00b247b4` | med | 47.1 | `cMissionMakeAlly` | `SP::cMissionMakeAlly::SetSubstate` |
+| `0x00a5b590` | `0x00a5b598` | med | 43.8 | `trigger` | `SP::cSPPaletteItemUIOneClickPaint::Trigger` |
+| `0x00aa2f90` | `0x00aa30ee` | med | 43.8 | `trigger` | `SP::cSPPaletteItemUIOneClickPaint::Trigger` |
+| `0x00d14600` | `0x00d1493a` | med | 43.8 | `trigger` | `SP::cSPPaletteItemUIOneClickPaint::Trigger` |
+| `0x00f52b50` | `0x00f52cab` | med | 43.8 | `trigger` | `SP::cSPPaletteItemUIOneClickPaint::Trigger` |
+| `0x0097e3f0` | `0x0097e500` | med | 43.3 | `InflateEffect` | `EA::UTFWinControls::InflateEffect::kCLSID` |
+| `0x00b1f910` | `0x00b1fa70` | med | 40.5 | `cEventLogCommItem` | `SP::?1cEventLogCommItem` |
+| `0x009512c0` | `0x00951300` | med | 39.5 | `AnimationPath2D` | `EA::UTFWin::?0AnimationPath2D` |
+| `0x00a748cc` | `0x00a74bdd` | med | 39.3 | `CommandLine` | `EA::?0CommandLine` |
+| `0x007e1bb0` | `0x007e224d` | med | 38.9 | `Preload` | `?A0x353431e4::PreLoad` |
+| `0x008388a0` | `0x00838998` | med | 38.9 | `cstring` | `SP::cString::Load` |
+| `0x0096b260` | `0x0096b2a0` | med | 38.9 | `DialogDrawable` | `EA::UTFWinControls::DialogDrawable::kPropTable` |
+| `0x00a40e30` | `0x00a40e4a` | med | 37.5 | `trixie` | `SP::Audio::?0Trixie` |
+| `0x0096fe60` | `0x0096ff20` | med | 36.7 | `GlideEffect` | `EA::UTFWinControls::GlideEffect::AsIWinProc` |
+| `0x009671d0` | `0x00967290` | med | 36.1 | `CascadeEffect` | `EA::UTFWinControls::CascadeEffect::GetInterval` |
+| `0x00980b80` | `0x00980c00` | med | 35.3 | `RotateEffect` | `EA::UTFWinControls::RotateEffect::GetStateTargets` |
+| `0x010396a0` | `0x01039730` | med | 34.6 | `cNPCStore` | `SP::?_7cNPCStore` |
+| `0x0045c820` | `0x0045c911` | med | 33.3 | `position` | `EA::Text::Lexer::D::DV?$CharStream::?$TokenReader::Position` |
+| `0x00d14e50` | `0x00d14e89` | med | 33.3 | `position` | `EA::Text::Lexer::D::DV?$CharStream::?$TokenReader::Position` |
+| `0x01138d90` | `0x01138fa6` | med | 32.4 | `Snd9Service` | `rw::audio::core::Snd9Service::GetSize` |
+| `0x0096f29e` | `0x0096f310` | med | 29.5 | `FrameDrawable` | `EA::UTFWinControls::?_7FrameDrawable` |
+| `0x00aff4d0` | `0x00aff740` | med | 25.0 | `cTreeData` | `SP::cTreeData::GetPosition` |
+| `0x0097d0d0` | `0x0097d160` | med | 24.1 | `ImageDrawable` | `EA::UTFWinControls::ImageDrawable::AddRef` |
+| `0x01139400` | `0x01139668` | med | 24.1 | `SampleCapture` | `rw::audio::core::?_7SampleCapture` |
+| `0x00a4ccde` | `0x00a4cd4a` | med | 23.3 | `connect` | `EA::Sockets::StreamSocket::Connect` |
+| `0x01182b00` | `0x01182d1c` | med | 23.3 | `CONNECT` | `EA::Sockets::StreamSocket::Connect` |
+| `0x00a6ed20` | `0x00a6ee84` | med | 23.1 | `buffer` | `EA::Drawing::UVertex2D::?$Buffer::begin` |
+| `0x0113e840` | `0x0113e975` | med | 22.7 | `AiffWriter` | `rw::audio::core::AiffWriter::CreateInstance` |
+| `0x006a32c0` | `0x006a336c` | med | 22.6 | `CreateResource` | `EA::Audio::FactoryConfiguration::CreateResource` |
+| `0x00a59d30` | `0x00a59d38` | med | 21.4 | `symbol` | `EA::Audio::Eapd::Symbol::Reset` |
+| `0x00a67625` | `0x00a67688` | med | 21.4 | `symbol` | `EA::Audio::Eapd::Symbol::Reset` |
+| `0x009924c0` | `0x00992520` | med | 20.4 | `WatchWindow` | `EA::UTFWinControls::?0WatchWindow` |
+| `0x006a56c0` | `0x006a57a6` | med | 19.4 | `vector2` | `rw::math::vpu::?4Vector2` |
+| `0x00839880` | `0x0083990b` | med | 19.4 | `vector2` | `rw::math::vpu::?4Vector2` |
+| `0x00987920` | `0x00987a00` | med | 19.0 | `StdDrawable` | `EA::UTFWinControls::?0StdDrawable` |
+| `0x00619760` | `0x006198ff` | med | 18.8 | `TypeId` | `SP::Pollen::cYouTubeVideoUploadTransaction::TypeID` |
+| `0x00991e50` | `0x00991eb0` | med | 17.2 | `WatchGraph` | `EA::UTFWinControls::?0WatchGraph` |
+| `0x0058d1c0` | `0x0058da86` | med | 16.7 | `validate` | `EA::Text::Typesetter::Validate` |
+| `0x0113a030` | `0x0113a72a` | med | 16.7 | `ReverbModel1` | `rw::audio::core::ReverbModel1::ALLPASS_SPREAD_FACTOR` |
+| `0x0113bcd0` | `0x0113bf4c` | med | 16.2 | `PacketPlayer` | `rw::audio::core::?_7PacketPlayer` |
+| `0x00a62450` | `0x00a62565` | med | 16.1 | `normalize` | `EA::M::?$RectT::Normalize` |
 

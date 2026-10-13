@@ -252,6 +252,25 @@
       ]
     },
     {
+      "name": "tooling",
+      "features": [
+        {"name": "feature map", "status": "done", "note": "features.json -> PNG + md (this map)"},
+        {"name": "function map", "status": "done", "note": "oracle .text candidates vs our named"},
+        {"name": "PDB symbol map", "status": "done", "note": "136,433 names by subsystem"},
+        {"name": "address guesser", "status": "partial", "note": "220 guesses, 39 HIGH; families not members"},
+        {"name": "refpack verifier", "status": "done", "note": "30000/30000 to memSize"},
+        {"name": "arg census", "status": "done", "note": "76 sites, 60 names"},
+        {"name": "resource inventory", "status": "done", "note": "150945 resources, 90 types"},
+        {"name": "index validator", "status": "done", "note": "0 violations on 150945 records"},
+        {"name": "build identity", "status": "done", "note": "which reference build matches"},
+        {"name": "name resolver", "status": "done", "note": "112155/150945 names"},
+        {"name": "mesh exporter", "status": "done", "note": "gmdl -> OBJ + PNG render"},
+        {"name": "bmp->png capture", "status": "done", "note": "view in-engine frames"},
+        {"name": "call-graph / xref", "status": "done", "note": "callers.py, xref.py"},
+        {"name": "pdb type records", "status": "todo", "note": "struct/class layouts (level 1 for types)"}
+      ]
+    },
+    {
       "name": "platform",
       "features": [
         {"name": "x86 build", "status": "done", "note": "MSVC x86 Debug, 0 warnings"},

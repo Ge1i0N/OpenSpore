@@ -44,7 +44,7 @@ binary: [`VERIFY.md`](VERIFY.md).
 
 ## Progress map
 
-![OpenSpore reversal progress: engine 78.5%, overall 70.0%](analysis/shots/reverse_map.png)
+![OpenSpore reversal progress: engine 79.1%, overall 71.8%](analysis/shots/reverse_map.png)
 
 Green = reversed **and** implemented **and** verified, amber = partial, grey = not started. The
 same data as a text list (with a per-feature note and status) lives in
@@ -99,21 +99,25 @@ beta **binary** (only the PDB, so no code to fingerprint); no reference build ma
 function-name strings.
 
 What *does* work is a **string-reference guesser**: `tools/name_guess.py` attributes each `.rdata`
-string referenced by a `push imm32` / `mov r32, imm32` to its enclosing function, then matches
-distinctive strings to PDB name tokens (scored by string length, token rarity, and how many functions
-use the string). It yields **428 candidate address→name guesses, 120 HIGH-confidence**:
+string referenced by a `push imm32` / `mov r32, imm32` to its enclosing function (strict starts:
+prologues + `E8` targets), then matches distinctive strings to PDB name tokens (scored by string
+length, token rarity, and how many functions use the string). It yields **220 candidate
+address→name guesses, 39 HIGH-confidence**:
 
 | address | proposed name | driving string |
 |---|---|---|
 | `0x007f6160` | `SPUICreateAnimationTimerRamp` | `SPUICreateAnimationTimerRamp` |
 | `0x0089f060` | `EA::Allocator::StackAllocatorCoreAllocate` | `StackAllocatorCoreAllocate` |
-| `0x008457a4` | `EA::ArgScript::cParser::CommandExists` | `commandExists` |
-| `0x00a73e40` | `SP::EffectsManager` | `effectsManager` |
-| `0x00ea6710` | `SP::cPlanetModel::IsUnderWater` | `isunderwater` |
-| `0x01028cd5` | `SP::cCreatureModeStrategy::RunCinematic` | `runcinematic` |
+| `0x00845710` | `EA::ArgScript::cParser::CommandExists` | `commandExists` |
+| `0x00a73c10` | `SP::EffectsManager` | `effectsManager` |
+| `0x00ea66b0` | `SP::cPlanetModel::IsUnderWater` | `isunderwater` |
+| `0x01028655` | `SP::cCreatureModeStrategy::RunCinematic` | `runcinematic` |
 
-Every row is a **guess to check by disassembly**, not truth. Full list:
-[`analysis/name_guesses.md`](analysis/name_guesses.md).
+Every row is a **guess to check by disassembly**, not truth. Two honest limits: the guesser keys on
+**self-describing** functions (registrars, `GetName`, factories), so it does *not* overlap much with
+the workhorse routines we hand-reversed (byte loops, decoders); and when one string matches several
+PDB names (e.g. `Refpack` → 15 `EA::Refpack::*` methods) it identifies the **family** reliably but the
+specific member shown is arbitrary. Full list: [`analysis/name_guesses.md`](analysis/name_guesses.md).
 
 ## Quick start
 

@@ -43,13 +43,19 @@ the PDB, so there is no code to fingerprint; (2) no reference build matches the 
 have different CodeView GUIDs); (3) the GA build is **/GR- (RTTI off)** — only 2 type-descriptor names
 exist — and assert function-name strings are absent. A PARTIAL guesser works and is built:
 `tools/name_guess.py` attributes each `.rdata` string referenced by `push imm32`/`mov r32,imm32` to
-its enclosing function, then matches distinctive strings to PDB name tokens. Result: **428 candidate
-address->name guesses, 120 HIGH-confidence** (e.g. `0x007f6160 SPUICreateAnimationTimerRamp`,
-`0x0089f060 EA::Allocator::StackAllocatorCoreAllocate`, `0x008457a4
-EA::ArgScript::cParser::CommandExists`, `0x00a73e40 SP::EffectsManager`, `0x00ea6710
-SP::cPlanetModel::IsUnderWater`). All rows are guesses to check by disassembly; output
-`analysis/name_guesses.md`. Also: `tools/pdb_symbols.py` shows the PDB is NOT stripped — 136,433
-unique function/method name paths (SP 63,246, EA 24,214, eastl 9,874, rw 6,582, nSPCreatureAnim 2,423).
+its enclosing function, then matches distinctive strings to PDB name tokens. Result: **220 candidate
+address->name guesses, 39 HIGH-confidence** (e.g. `0x007f6160 SPUICreateAnimationTimerRamp`,
+`0x0089f060 EA::Allocator::StackAllocatorCoreAllocate`, `0x00845710
+EA::ArgScript::cParser::CommandExists`, `0x00a73c10 SP::EffectsManager`, `0x00ea66b0
+SP::cPlanetModel::IsUnderWater`). Refined this session: the guesser uses STRICT function starts
+(prologues + `E8` targets only — dropping .rdata/.data pointers, which are often jump-table case
+labels and produced mid-function addresses), reports the exact push site, and documents two honest
+limits: it keys on self-describing functions so it barely overlaps our hand-reversed workhorse
+routines, and when one string matches several PDB names it identifies the FAMILY reliably but the
+member shown is arbitrary (verified: `0x0092c540` pushes `Refpack` -> `EA::Refpack::*`). All rows are
+guesses to check by disassembly; output `analysis/name_guesses.md`. Also: `tools/pdb_symbols.py`
+shows the PDB is NOT stripped — 136,433 unique function/method name paths (SP 63,246, EA 24,214,
+eastl 9,874, rw 6,582, nSPCreatureAnim 2,423). The feature map gained a `tooling` category (89%).
 
 ### Our renderer now draws a decoded gmdl mesh
 The solved gmdl geometry (session 12) is now on OUR screen: `source/engine/gmdl.cpp` is the C++

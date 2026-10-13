@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 79.1%** | **Overall: 70.7%** | done 144 / partial 13 / todo 56 (213 features)
+**Engine reversal: 79.1%** | **Overall: 71.8%** | done 156 / partial 14 / todo 57 (227 features)
 
 **Legend**
 
@@ -30,6 +30,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | render | **79%** | 19 | 0 | 5 |
 | formats | **10%** | 2 | 0 | 18 |
 | gameplay | **0%** | 0 | 0 | 16 |
+| tooling | **89%** | 12 | 1 | 1 |
 | platform | **25%** | 2 | 1 | 7 |
 
 ---
@@ -315,6 +316,29 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | Sporepedia | pollen_metadata resources |
 | ⬜ | todo | achievements |  |
 | ⬜ | todo | scripts/mods |  |
+
+---
+
+## tooling — 89%
+
+*12 done · 1 partial · 1 todo*
+
+| | status | feature | notes |
+|:---:|---|---|---|
+| ✅ | done | feature map | features.json -> PNG + md (this map) |
+| ✅ | done | function map | oracle .text candidates vs our named |
+| ✅ | done | PDB symbol map | 136,433 names by subsystem |
+| 🚧 | partial | address guesser | 220 guesses, 39 HIGH; families not members |
+| ✅ | done | refpack verifier | 30000/30000 to memSize |
+| ✅ | done | arg census | 76 sites, 60 names |
+| ✅ | done | resource inventory | 150945 resources, 90 types |
+| ✅ | done | index validator | 0 violations on 150945 records |
+| ✅ | done | build identity | which reference build matches |
+| ✅ | done | name resolver | 112155/150945 names |
+| ✅ | done | mesh exporter | gmdl -> OBJ + PNG render |
+| ✅ | done | bmp->png capture | view in-engine frames |
+| ✅ | done | call-graph / xref | callers.py, xref.py |
+| ⬜ | todo | pdb type records | struct/class layouts (level 1 for types) |
 
 ---
 
