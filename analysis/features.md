@@ -161,7 +161,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | resource read | pkg:-dump/-rec/-hdr |
 | 🚧 | partial | resource manager | getter 0x8de4b0 (global 0x1667aa0); queries 0x686450/0x847780 |
 | 🚧 | partial | content loading (trigger) | trigger type 0x24a0e52; groups resolved: properties, ConfigManager, SporeAppStates |
-| ✅ | done | config scripts read | source/engine/config.cpp reads Config/*.txt; cfg verb; ids hex/decimal/(hash) |
+| ✅ | done | config scripts read | source/engine/config.cpp reads Config/*.txt (3 files); cfg verb; $vars resolved |
 | ✅ | done | refpack signature | &0x1FFF == 0x10FB |
 | ✅ | done | refpack BE size | 3- or 4-byte |
 | ✅ | done | refpack loop | 0x0092c5b0 |

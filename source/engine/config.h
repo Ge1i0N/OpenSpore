@@ -42,6 +42,11 @@ public:
     const std::string& source_properties() const { return m_src_props; }
     const std::string& source_manager() const { return m_src_mgr; }
     int conditional_lines_skipped() const { return m_cond_skipped; }
+    // VideoCards.txt: vendor id -> name, card id -> name.
+    size_t vendor_count() const { return m_vendors.size(); }
+    size_t card_count() const { return m_cards.size(); }
+    std::string card_name(u32 id) const;
+    std::string vendor_name(u32 id) const;
 
     // Look up a variable (case-insensitive name), or "" if absent.
     std::string get(const std::string& name) const;
@@ -53,6 +58,8 @@ private:
     bool m_loaded = false;
     std::vector<Property> m_props;
     std::map<std::string, std::string> m_vars;  // lowercased name -> value
+    std::map<u32, std::string> m_vendors;       // VideoCards.txt
+    std::map<u32, std::string> m_cards;
     std::string m_src_props, m_src_mgr;
     int m_cond_skipped = 0;
 };

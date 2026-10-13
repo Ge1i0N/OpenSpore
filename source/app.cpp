@@ -452,8 +452,13 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                       }
                       if (c.args[1] == "-vars") {
                           std::string s = std::to_string(cfg.vars().size()) + " variables:\n";
-                          for (auto& kv : cfg.vars()) s += "  " + kv.first + " = " + kv.second + "\n";
+                          for (auto& kv : cfg.vars()) s += "  " + kv.first + " = " + cfg.get(kv.first) + "\n";
                           return s;
+                      }
+                      if (c.args[1] == "-cards") {
+                          // VideoCards.txt summary: vendor/card tables (the game's hardware DB).
+                          return "VideoCards: " + std::to_string(cfg.vendor_count()) + " vendors, " +
+                                 std::to_string(cfg.card_count()) + " cards";
                       }
                       std::string v = cfg.get(c.args[1]);
                       if (!v.empty()) return c.args[1] + " = " + v;

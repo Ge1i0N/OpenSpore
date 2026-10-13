@@ -66,7 +66,16 @@ u32 parse_id(const std::string& tok) {
 
 std::string Config::get(const std::string& name) const {
     auto it = m_vars.find(lower(name));
-    return it == m_vars.end() ? std::string() : it->second;
+    if (it == m_vars.end()) return std::string();
+    // Resolve `$name` variable references (e.g. `setOption OptionVideoRes $Medium` where
+    // `set Medium 2`). Depth-limited so a cycle cannot hang; an unresolvable ref is left as-is.
+    std::string v = it->second;
+    for (int depth = 0; depth < 8 && !v.empty() && v[0] == '$'; ++depth) {
+        auto jt = m_vars.find(lower(v.substr(1)));
+        if (jt == m_vars.end()) break;
+        v = jt->second;
+    }
+    return v;
 }
 
 int Config::get_int(const std::string& name, int def) const {
@@ -82,8 +91,8 @@ int Config::get_int(const std::string& name, int def) const {
 std::string Config::stats() const {
     char b[192];
     _snprintf_s(b, sizeof(b), _TRUNCATE,
-                "config: %zu properties, %zu variables from Config/*.txt (%s)",
-                m_props.size(), m_vars.size(),
+                "config: %zu properties, %zu variables, %zu vendors, %zu cards from Config/*.txt (%s)",
+                m_props.size(), m_vars.size(), m_vendors.size(), m_cards.size(),
                 m_src_mgr.empty() ? (m_src_props.empty() ? "none found" : "Properties.txt only")
                                   : "Properties.txt + ConfigManager.txt");
     return b;
@@ -147,7 +156,47 @@ void Config::load() {
         LOG_WARN("config", "Config/ConfigManager.txt not found in the search paths");
     }
 
+    // 3. VideoCards.txt -> vendor/card id to name.
+    std::string wv;
+    auto vp = find_config("VideoCards.txt", wv);
+    if (!vp.empty()) {
+        std::ifstream f(vp);
+        std::string line;
+        auto strip_q = [](std::string s) {
+            if (s.size() >= 2 && s.front() == '"' && s.back() == '"') s = s.substr(1, s.size() - 2);
+            return s;
+        };
+        while (std::getline(f, line)) {
+            std::string body = strip_comment(line);
+            auto toks = tokenize(body);
+            if (toks.size() < 3) continue;
+            if (toks[0] == "vendor") {
+                m_vendors[(u32)std::strtoul(toks[2].c_str(), nullptr, 0)] = strip_q(toks[1]);
+            } else if (toks[0] == "card") {
+                // name is the rest of the line after the id (may contain spaces)
+                std::string rest = body.substr(body.find(toks[1]) + toks[1].size());
+                size_t a = rest.find('"'), b = rest.rfind('"');
+                std::string name = (a != std::string::npos && b > a) ? rest.substr(a + 1, b - a - 1) : rest;
+                while (!name.empty() && name.front() == ' ') name.erase(name.begin());
+                m_cards[(u32)std::strtoul(toks[1].c_str(), nullptr, 0)] = name;
+            }
+        }
+        LOG_INFO("config", "VideoCards.txt: %zu vendors, %zu cards (%s)", m_vendors.size(), m_cards.size(),
+                 wv.c_str());
+    } else {
+        LOG_WARN("config", "Config/VideoCards.txt not found in the search paths");
+    }
+
     LOG_INFO("config", "%s", stats().c_str());
+}
+
+std::string Config::card_name(u32 id) const {
+    auto it = m_cards.find(id);
+    return it == m_cards.end() ? std::string() : it->second;
+}
+std::string Config::vendor_name(u32 id) const {
+    auto it = m_vendors.find(id);
+    return it == m_vendors.end() ? std::string() : it->second;
 }
 
 Config& instance() { return g_config; }

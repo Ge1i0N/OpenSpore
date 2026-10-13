@@ -7,6 +7,14 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### Config scripts read end-to-end: three files, variables resolved
+`source/engine/config.cpp` now loads ALL THREE `Config/*.txt`: `Properties.txt` (63 option
+name->id), `ConfigManager.txt` (211 assignments; `$variable` references are resolved against the
+`set` table - e.g. `setOption OptionVideoRes $Medium` -> `2`, last assignment wins), and
+`VideoCards.txt` (**4 vendors, 616 cards**). Log: `[config] config: 63 properties, 83 variables, 4
+vendors, 616 cards`. The `cfg` verb exposes `-list/-props/-vars/-cards/<name>`. So the game's whole
+configuration surface is readable by our engine.
+
 ### The Loader now cycles through several real models, each with its own texture
 Instead of showing one model, the Loader collects up to 12 real gmdl models that parse and have a
 matched texture, then cycles every 3 seconds (`loader_tick` -> `load_model`), swapping both the mesh

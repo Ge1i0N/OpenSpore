@@ -453,11 +453,14 @@ matches the resource groups the disassembly loads (`properties`, `ConfigManager`
   intProp/setResolution/setVariables/if/elseif/else/endif/trace/include/property/alert` and
   `$`-variables (`$Medium`, `$resolutionTarget`). Its blocks are hardware-conditional; our reader
   records assignments but does NOT evaluate the conditionals (211 assignments, 198 conditional lines
-  in the shipped file).
+  in the shipped file). Values that reference a `$variable` are resolved against the `set` table
+  (e.g. `setOption OptionVideoRes $Medium` -> `2`; the LAST assignment wins).
+- `VideoCards.txt` maps `vendor "AMD" 0x1002` and `card 0x9442 "Radeon HD 4850"` — the game's
+  hardware database (**4 vendors, 616 cards**).
 - Full table + language notes: `analysis/config-scripts.md`.
-- **Our engine reads it**: `source/engine/config.cpp` loads both files through the fs search paths at
-  boot (log line `[config] config: 63 properties, 83 variables from Config/*.txt`), and the `cfg`
-  console verb exposes it (`cfg -list`, `cfg -props`, `cfg -vars`, `cfg <name>`).
+- **Our engine reads all three**: `source/engine/config.cpp` loads them through the fs search paths at
+  boot (log `[config] config: 63 properties, 83 variables, 4 vendors, 616 cards`), and the `cfg`
+  console verb exposes it (`cfg -list|-props|-vars|-cards|<name>`).
 
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 
