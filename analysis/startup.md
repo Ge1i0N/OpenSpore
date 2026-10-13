@@ -92,14 +92,34 @@ The game uses **`PeekMessage`**, not `GetMessage` (only `PeekMessageA`/`PeekMess
 IAT `0x13cc5f0`/`0x13cc62c`). The only caller of `PeekMessageA` is **`0x0084a050`**, a message pump
 that drains the queue (up to 0x400 messages), then does **mouse coalescing** (it merges consecutive
 `WM_MOUSEMOVE` 0x200 events and rewrites duplicate `WM_LBUTTONDBLCLK` 0x203 -> `WM_LBUTTONDOWN`
-0x201). `0x84a050` is referenced only as a vtable slot at `.rdata 0x0141cc98` (an input/window
-handler object), not called directly — so the main loop invokes it through that vtable.
+0x201). `0x84a050` is referenced only as a vtable slot at `.rdata 0x0141cc98`, not called directly.
+
+## The main loop — NOT yet located (negative findings kept)
+
+The main loop is the one piece still missing, and the following were CHECKED and ruled out, so the
+next attempt does not repeat them:
+
+- **Not in `run`**: `0x00f47e90` has no backward jump; it sets up and returns (see above).
+- **Not an AppMode vtable method**: every slot `run` uses is accounted for, and the rest are
+  lifecycle: `+0x14 0x7e6850` (subsystem init), `+0x18 0x7e93d0` (plugins), `+0x1c 0x7e7430`
+  (create device), `+0x20 0x7eaae0` (shader/script config), `+0x24 0x7e6520` (**shutdown**: destroys
+  `[+0x20]/[+0x40]/[+0x50]`), `+0x28 0x7e9520` (**shutdown 2**). None loops.
+- **The pump is not called directly** (`callers.py` finds 0 callers of `0x84a050`), and there is no
+  `call [reg+0x88]` (the pump's slot offset from the window vtable `0x141cc10`) in either the short
+  or the disp32 form — the few byte-pattern hits were false positives inside other instructions.
+  So the pump's call site uses an offset/vtable we have not pinned, or the object's vtable base is
+  not `0x141cc10`.
+
+The window/input class **does** exist and is pinned: its vtable is **`.rdata 0x141cc10`** (written by
+the code at `0x849b26` / `0x849e85`), it wraps mouse tracking (`TrackMouseEvent` string 0x141cbfc,
+`user32.dll` 0x141cbf0), and it holds the pump at `+0x88`. Finding its constructor's caller (which
+creates the object) and its loop method is the concrete next step.
 
 ## Still to trace (next steps, in order)
 
-1. **The main loop itself** — it is NOT in `run`; it is reached through a vtable and calls the pump
-   `0x84a050`. Find the object whose vtable contains `0x141cc98`, and its loop. This is the last
-   piece of "how the game runs".
+1. **The main loop** — create the window object (find the caller of the constructor that writes
+   vtable `0x141cc10`) and read its loop method; that is where the pump is called and the frame is
+   driven. This is the last piece of "how the game runs".
 2. **AppMode field map** — the ctor `0x007e76e0` zeroes fields and builds sub-objects; map them
    (it already ties `[+0x159]` = useDevDirs to VERIFY row 2).
 3. **Config / state text**: the game's `trigger` resources are text (we decode them already); find
