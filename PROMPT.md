@@ -1,3 +1,21 @@
+# PROMPT — the brief
+
+> This is the original brief, kept as written (it is the contract). Below it is a short
+> **current status** header so the file also works as an entry point; everything else lives in
+> the other `.md` files. This file may be edited like the rest.
+
+## Current status (auto-summarised, see the real files for detail)
+
+- **Progress map:** `analysis/shots/reverse_map.png` + the text list `analysis/features.md`
+  (generated from `analysis/features.json` by `tools/feature_map.py`).
+- **Reading and drawing real game data:** 57/57 `.package` opened, 150,945 resources, 10.27 GB,
+  112,155 names resolved, RefPack solved (30,000/30,000), unpacker writes real files, and the
+  engine draws a **real texture and a real `gmdl` mesh** on its own D3D9 renderer.
+- **Next big item:** `rw4` (the models, 12,987 resources) and the RenderWare bridge.
+- Read `RESUME.md` first, then `PROGRESS.md`, `VERIFY.md`, `MEMORY.md`, `IDEAS.md`, `HISTORY.md`.
+
+## The brief (verbatim)
+
 Короче нужно реверснуть Spore согласно документации в .md файлах и следовать им.
 
 Так же из полезного есть:

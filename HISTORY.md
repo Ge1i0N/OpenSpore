@@ -5,7 +5,17 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ---
 
-## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed
+## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
+
+### A progress map like the decomp/recomp projects
+`analysis/features.json` is the single source of truth for what is reversed/implemented/verified;
+`tools/feature_map.py` renders it to `analysis/shots/reverse_map.png` (a grid of green/amber/grey
+squares grouped by subsystem, with per-category percentages and an overall bar) **and** to the text
+list `analysis/features.md`. Both come from the same JSON, so they cannot drift apart. Current
+numbers: **212 features, engine 78.5%, overall 70.0%** (harness 93%, startup 96%, launch args 97%,
+packages 91%, gmdl 85%, rw4 53%, render 79%, formats 10%, gameplay 0%, platform 25%). The map is
+embedded in `README.md`; PROMPT/RESUME/PROGRESS/IDEAS link to it. To grow it: edit the JSON, run
+`python tools/feature_map.py`.
 
 ### Our renderer now draws a decoded gmdl mesh
 The solved gmdl geometry (session 12) is now on OUR screen: `source/engine/gmdl.cpp` is the C++

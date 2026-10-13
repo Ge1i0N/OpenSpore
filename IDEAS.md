@@ -5,6 +5,10 @@ Rules for this file (from `reimplementation-field-guide.md` §1):
   idea costs a week.
 - A stub is only acceptable here if its consumers and their guards are named.
 
+> **Feature map:** `analysis/shots/reverse_map.png` + `analysis/features.md` (text), generated
+> from `analysis/features.json` by `tools/feature_map.py`. When an idea here becomes a real,
+> tracked feature, move it into the JSON so the map stays honest.
+
 ---
 
 ## 1. Renderer abstraction: thin internal wrapper NOW, OpenGL backend LATER

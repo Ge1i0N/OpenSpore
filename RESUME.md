@@ -5,12 +5,15 @@ Last update: 2026-10-13 (session 13).
 
 ## One-line status
 
-**A real Spore asset now renders on our own engine.** The pipeline runs end to end: DBPF index →
-RefPack → type/instance naming → PNG decode (GDI+) → D3D9 texture → draw. See
-`analysis/shots/hero_real_asset.png`: half is the game's inventory (150,945 resources, 10.27 GB,
-**112,155 names**), half is a real decoded `.png` asset drawn by our renderer. RefPack is solved
-(30,000/30,000); the unpacker writes real resources (14,549 PNGs + 2,944 locale, 0 failed). The
-next big item is **RW4 = the models** (12,987 resources; header pinned down, object table not).
+**Our engine reads AND draws real Spore content.** The pipeline runs end to end: DBPF index →
+RefPack → type/instance naming → decode → D3D9 → pixels. It draws a **real decoded `.png`** and a
+**real decoded `gmdl` mesh** (a creature, 3,765 verts) on our own renderer —
+`analysis/shots/mesh_engine.png`. The game's inventory (150,945 resources, 10.27 GB, **112,155
+names**) is on screen. RefPack is solved (30,000/30,000); the unpacker writes real resources
+(14,549 PNGs + 2,944 locale, 0 failed); `gmdl` mesh geometry is **solved** (positions reproduce the
+file's own bbox exactly). Progress map: `analysis/shots/reverse_map.png` + `analysis/features.md`.
+The next big item is **RW4 = the models** (12,987 resources; header pinned down, object table not)
+and the **RenderWare bridge**.
 
 ## Upstream knowledge is in the repo, but it is SECONDARY (level 4)
 

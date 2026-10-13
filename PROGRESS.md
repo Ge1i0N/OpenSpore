@@ -2,6 +2,10 @@
 
 Status legend: ✅ done+verified · 🚧 partial · ❌ not started · ⛔ blocked (reason in RESUME.md)
 
+**Progress map:** `analysis/shots/reverse_map.png` (picture) and `analysis/features.md` (text
+list), both generated from `analysis/features.json` by `tools/feature_map.py`. That is the
+project-wide feature view; the tables below are the boot/load chain and the runtime yardsticks.
+
 ## Yardstick
 
 `N_verified` = rows in `VERIFY.md` at status `DISASM-VERIFIED`. Currently **21** of 30.
