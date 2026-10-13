@@ -179,6 +179,46 @@ def chk(func_facts, want, key, label, allow_partial=False):
     return FAIL, "missing %s of %s" % (", ".join(map(str, missing)), label)
 
 
+# Ghidra prints conditional jumps by their SEMANTIC name (JZ/JNZ/JCS/...), objdump by the historical
+# ALIAS (je/jne/jb/...). Our docs and regexes are written in objdump spelling, so a check like
+# `regex: "je"` FAILs against `JZ 0x007e40ea` even though it is the same instruction. Normalizing
+# Ghidra's canonical form back to the alias set before matching removes that whole class of false
+# FAIL. (Found by the audit: it was the ELEVENTH such invisible-API artifact, and unlike the others it
+# looked like a real refutation of a documented branch.)
+MNEMONIC_ALIAS = {
+    "JZ": "JE", "JNZ": "JNE", "JCS": "JB", "JAE": "JNB", "JBE": "JNA", "JA": "JNBE",
+    "JO": "JO", "JNO": "JNO", "JP": "JPE", "JNP": "JPO",
+    "SETZ": "SETE", "SETNZ": "SETNE", "SETCS": "SETB", "SETAE": "SETNB",
+    "CMOVZ": "CMOVE", "CMOVNZ": "CMOVNE", "CMOVL": "CMOVNGE", "CMOVG": "CMOVNLE",
+}
+
+
+def normalize_insns(text):
+    if not text:
+        return text
+    out = text
+    for ghidra, alias in MNEMONIC_ALIAS.items():
+        out = re.sub(r"\b%s\b" % ghidra, alias, out)
+    return out
+
+
+def in_body(f, addr_hex):
+    """True when Ghidra's function body actually COVERS `addr_hex`.
+
+    A discontinuous body means Ghidra never looked at the bytes in the hole, so an absence there is
+    not a refutation. See the export note on body_ranges.
+    """
+    ranges = f.get("body_ranges") or []
+    try:
+        a = norm_int(addr_hex)
+    except Exception:
+        return False
+    for lo, hi in ranges:
+        if norm_int(lo) <= a <= norm_int(hi):
+            return True
+    return False
+
+
 def verify_check(ev, ck):
     """Returns (verdict, evidence_string)."""
     kind = ck["kind"]
@@ -264,10 +304,17 @@ def verify_check(ev, ck):
     if kind == "insn_at":
         s = ev.facts.get("insns", {}).get(norm_addr(ck["addr"]))
         if s is None:
-            return UNKNOWN, "no instruction exported at %s" % ck["addr"]
-        if re.search(ck["regex"], s, re.I):
-            return PASS, "%s: %s" % (ck["addr"], s)
-        return FAIL, "%s is %r, we expected /%s/" % (ck["addr"], s, ck["regex"])
+            # Not "the claim is false" - Ghidra has NO instruction here, which for a gap inside a
+            # discontinuous function body means it never disassembled those bytes at all.
+            return UNKNOWN, ("no instruction at %s in Ghidra's listing (an undischarged gap - seed "
+                             "it with kind=code, see analysis/audit/seeds_rea.tsv)" % ck["addr"])
+        # Match against BOTH spellings: Ghidra's canonical mnemonic and the objdump alias our docs
+        # use. Testing only the raw string is what made `je` FAIL against `JZ`.
+        for cand in (s, normalize_insns(s)):
+            if re.search(ck["regex"], cand, re.I):
+                return PASS, "%s: %s" % (ck["addr"], s)
+        return FAIL, "%s is %r (normalized %r), we expected /%s/" % (
+            ck["addr"], s, normalize_insns(s), ck["regex"])
 
     if kind == "func_contains_insn":
         f = ev.fn(ck["fn"])
@@ -391,13 +438,37 @@ def verify_check(ev, ck):
                 else:
                     verdicts.append((FAIL if not ck.get("allow_partial") else PASS,
                                      "string at %s reads %r, claimed %r" % (a_, (got or "")[:40], s["text"])))
+        # A discontinuous body means Ghidra left bytes undisassembled, so a MISSING immediate is
+        # only a refutation if there is no hole it could be hiding in. Downgrade to UNKNOWN there -
+        # otherwise the auditor reports FAIL against a claim it never actually examined (this is
+        # exactly how the audit's 250/10 retry values "disappeared" from the event dispatcher).
+        def verdict_for(miss, label):
+            if not miss:
+                return None
+            if f.get("body_contiguous", True):
+                return FAIL, "%s missing: %s" % (label, ", ".join("0x%08x" % m for m in miss))
+            holes = []
+            ranges = f.get("body_ranges") or []
+            try:
+                pts = [(norm_int(lo), norm_int(hi)) for lo, hi in ranges]
+                pts.sort()
+                for (a0, a1), (b0, b1) in zip(pts, pts[1:]):
+                    if b0 > a1 + 1:
+                        holes.append("0x%08x..0x%08x (%d B)" % (a1 + 1, b0 - 1, b0 - a1 - 1))
+            except Exception:
+                pass
+            return UNKNOWN, ("%s absent from Ghidra's view, but its body has undischarged gaps [%s]; "
+                             "seed those with kind=code before treating this as a refutation"
+                             % (label, "; ".join(holes) or "unlisted"))
+
         if ck.get("pushes_imm"):
             want = [norm_int(x) for x in ck["pushes_imm"]]
             have = imm.get("PUSH", [])
             miss = [w for w in want if w not in have]
             if miss:
-                verdicts.append((FAIL if not ck.get("allow_partial") else PASS,
-                                 "no PUSH of %s" % ", ".join("0x%08x" % m for m in miss)))
+                v = verdict_for(miss, "no PUSH of")
+                if v is not None:
+                    verdicts.append((FAIL if ck.get("allow_partial") else v[0], v[1]))
             else:
                 verdicts.append((PASS, "push of %s present" % ", ".join("0x%08x" % w for w in want)))
         if ck.get("cmp_imm"):
@@ -405,8 +476,9 @@ def verify_check(ev, ck):
             have = imm.get("CMP", [])
             miss = [w for w in want if w not in have]
             if miss:
-                verdicts.append((FAIL if not ck.get("allow_partial") else PASS,
-                                 "no CMP of %s" % ", ".join("0x%08x" % m for m in miss)))
+                v = verdict_for(miss, "no CMP of")
+                if v is not None:
+                    verdicts.append((FAIL if not ck.get("allow_partial") else v[0], v[1]))
             else:
                 verdicts.append((PASS, "cmp of %s present" % ", ".join("0x%08x" % w for w in want)))
         if ck.get("uses_imm"):
@@ -416,8 +488,9 @@ def verify_check(ev, ck):
                 allimm.update(v)
             miss = [w for w in want if w not in allimm]
             if miss:
-                verdicts.append((FAIL, "immediate %s nowhere in the function" %
-                                 ", ".join("0x%08x" % m for m in miss)))
+                v = verdict_for(miss, "immediate")
+                if v is not None:
+                    verdicts.append(v)
             else:
                 verdicts.append((PASS, "immediates %s present" % ", ".join(
                     "0x%08x" % w for w in want)))

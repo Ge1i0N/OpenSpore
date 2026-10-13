@@ -22,15 +22,15 @@ undefined4 __thiscall FUN_00f47e90(int param_1,undefined4 param_2)
   int iStack_84;
   byte bStack_80;
   int *piStack_7c;
-  undefined2 *puStack_78;
-  undefined2 *puStack_74;
-  undefined2 *puStack_70;
-  undefined2 *puStack_6c;
-  undefined2 *puStack_68;
-  undefined2 *puStack_64;
-  undefined2 *puStack_5c;
-  undefined2 *puStack_58;
-  undefined2 *puStack_54;
+  undefined1 *puStack_78;
+  undefined1 *puStack_74;
+  undefined1 *puStack_70;
+  undefined1 *puStack_6c;
+  undefined1 *puStack_68;
+  undefined1 *puStack_64;
+  undefined1 *puStack_5c;
+  undefined1 *puStack_58;
+  undefined1 *puStack_54;
   
   cVar1 = SteamAPI_Init();
   if (cVar1 == '\0') {
@@ -76,12 +76,12 @@ undefined4 __thiscall FUN_00f47e90(int param_1,undefined4 param_2)
   piVar5 = (int *)&DAT_015b0834;
   (**(code **)(**(int **)(param_1 + 0x20) + 0x74))(&DAT_0148d748);
   piStack_7c = (int *)0x0;
-  puStack_78 = (undefined2 *)0x0;
-  puStack_74 = (undefined2 *)0x0;
+  puStack_78 = (undefined1 *)0x0;
+  puStack_74 = (undefined1 *)0x0;
   FUN_00579a90(L"My Spore Creations");
-  puStack_6c = (undefined2 *)0x0;
-  puStack_68 = (undefined2 *)0x0;
-  puStack_64 = (undefined2 *)0x0;
+  puStack_6c = (undefined1 *)0x0;
+  puStack_68 = (undefined1 *)0x0;
+  puStack_64 = (undefined1 *)0x0;
   FUN_00579a90(L"Spore");
   FUN_006abab0(L"HKEY_LOCAL_MACHINE\\Software\\Electronic Arts\\SPORE\\PlayerDir",&piStack_7c);
   FUN_006abab0(L"HKEY_LOCAL_MACHINE\\Software\\Electronic Arts\\SPORE\\AppDir",&puStack_6c);

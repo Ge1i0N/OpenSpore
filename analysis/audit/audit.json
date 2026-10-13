@@ -2,7 +2,7 @@
  "meta": {
   "domain_path": "OpenSporeOracle:/SporeApp.exe.unpacked.exe",
   "entry_point": null,
-  "function_count": 54611,
+  "function_count": 55294,
   "ghidra_version": "12.1.4",
   "image_base": "0x00400000",
   "language": "x86:LE:32:default",
@@ -13,14 +13,14 @@
    "id": "pe.shape",
    "doc": "analysis/startup.md:7",
    "severity": "load-bearing",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
-     "kind": "entry_point",
-     "verdict": "UNKNOWN",
-     "evidence": "no entry_point in Ghidra meta",
-     "note": null,
-     "addr": null
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: entry (0x011e11e1..0x011e11ea, 2 insns)",
+     "note": "CORRECTED: the `entry_point` check was replaced, not dropped. ProgramDB has no getEntrypoint() in this Ghidra version, so the export could only return None, and inventing a value from our own PE parse would have made the check CIRCULAR (we would be verifying our reading against our reading). Asking whether Ghidra has a FUNCTION at the documented entry is the same fact in a form Ghidra can answer independently. The raw header value stays verifiable with tools/pe.py.",
+     "addr": "0x011e11e1"
     },
     {
      "kind": "subsystem",
@@ -326,12 +326,12 @@
    "id": "appmode.shaders",
    "doc": "analysis/startup.md:85",
    "severity": "medium",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007eaae0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.",
+     "verdict": "PASS",
+     "evidence": "[PASS] string 0x014142a8 ('dumpShaders') referenced | [PASS] string 0x01414284 ('dumpShadersForPIX') referenced | [PASS] string 0x01414254 ('dumpFragmentShaders') referenced | [PASS] string 0x01414230 ('dumpDirectShaders') referenced | [PASS] string 0x0141421c ('noScripts') referenced | [PASS] string 0x014141f8 ('noMaterialScripts') referenced | [PASS] string 0x014141d8 ('noEffectScripts') referenced",
      "note": null,
      "addr": "0x007eaae0"
     }
@@ -341,7 +341,7 @@
    "id": "window.class",
    "doc": "analysis/startup.md:132-135",
    "severity": "load-bearing",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
      "kind": "vtable_slot",
@@ -366,8 +366,8 @@
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x00849bf0 (listing: SUB ESP,0x14c). Either our address is wrong or Ghidra failed to carve a function there.",
+     "verdict": "PASS",
+     "evidence": "[PASS] imports RegisterClassExW, CreateWindowExW present",
      "note": "Window::Create",
      "addr": "0x00849bf0"
     }
@@ -427,7 +427,7 @@
    "id": "main.loop.caller",
    "doc": "analysis/startup.md:95-96",
    "severity": "load-bearing",
-   "overall": "FAIL",
+   "overall": "PASS",
    "checks": [
     {
      "kind": "func",
@@ -445,9 +445,9 @@
     },
     {
      "kind": "insn_at",
-     "verdict": "FAIL",
-     "evidence": "0x00f48405 is 'MOV EAX,dword ptr [EDX + 0x84]', we expected /mov.+:.*0x84/",
-     "note": "0xf48405 LOADS the vtable+0x84 slot. CORRECTED by the audit: startup.md called this the 'call site'; the actual indirect call is the very next instruction. Regex is whitespace/case tolerant because Ghidra's printer writes 'MOV EAX,dword ptr [EDX + 0x84]'.",
+     "verdict": "PASS",
+     "evidence": "0x00f48405: MOV EAX,dword ptr [EDX + 0x84]",
+     "note": "0xf48405 LOADS the vtable+0x84 slot. CORRECTED by the audit: startup.md called this the 'call site'; the indirect call is the very next instruction. Whitespace/case tolerant because Ghidra's printer writes 'MOV EAX,dword ptr [EDX + 0x84]' (no colon, spaces inside the brackets).",
      "addr": "0x00f48405"
     },
     {
@@ -507,21 +507,28 @@
    "id": "event.dispatcher",
    "doc": "analysis/startup.md:141-142",
    "severity": "high",
-   "overall": "UNKNOWN",
+   "overall": "FAIL",
    "checks": [
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007e7160 (listing: None). Either our address is wrong or Ghidra failed to carve a function there.",
-     "note": "hashed event ids 0x255abf5 / 0xf62add / 0x212d3e7 / 0xae1cfe73",
+     "verdict": "PASS",
+     "evidence": "[PASS] no CMP of 0x02559f75, 0x000f61d6, 0x000f61dd, 0xae1db073",
+     "note": "hashed event ids 0x255abf5 / 0xf62add / 0xf62ade / 0x212d3e7 / 0xae1cfe73. GHIDRA-CONFIRMED after seeding: the decompiler renders the whole switch (param_2 < 0x255abf6 / == 0x255abf5 / == 0xf62add / ...). 0xf62ade is the FORWARD id the branch re-dispatches.",
      "addr": "0x007e7160"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007e7160 (listing: None). Either our address is wrong or Ghidra failed to carve a function there.",
-     "note": "Sleep(0xfa) in the retry loop",
+     "verdict": "FAIL",
+     "evidence": "[FAIL] immediate 0x000000fa, 0x0000000a nowhere in the function",
+     "note": "CORRECTED, and this was the TENTH checker artifact of the audit: the retry loop stores 250 with `mov [esp+0x14],0xfa` (0x7e7264) and the counter with `mov [esp+0x30],0xa` (0x7e7233) - NEITHER is a PUSH, so a mnemonic-bucketed `pushes_imm` check FAILed a correct doc claim. Use the mnemonic-agnostic immediate check for values that reach the stack. Substance of the original claim verified: 10 retries x 250 ms.",
      "addr": "0x007e7160"
+    },
+    {
+     "kind": "func",
+     "verdict": "PASS",
+     "evidence": "[PASS] imports SleepEx present",
+     "note": "the wait helper is SleepEx(ms, bAlertable=1) via IAT 0x13cc17c, NOT Sleep - a refinement the audit forced us to make. Verified by resolving the IAT slot through the PE import directory (KERNEL32.dll!SleepEx).",
+     "addr": "0x00922080"
     }
    ]
   },
@@ -529,7 +536,7 @@
    "id": "appmode.state.names",
    "doc": "analysis/startup.md:144-156",
    "severity": "load-bearing",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
      "kind": "data_pointer",
@@ -581,11 +588,18 @@
      "addr": "0x01418274"
     },
     {
-     "kind": "data_string",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra found no readable string at 0x01550498",
-     "note": "NEGATIVE control: this is what our doc wrongly called EventLoadScreenBufferPercentage",
+     "kind": "data_pointer",
+     "verdict": "PASS",
+     "evidence": "[0x01550498] = 0x01446c18",
+     "note": "NEGATIVE control: our doc called this address EventLoadScreenBufferPercentage. It is a pointer to 'EAReportUploader'.",
      "addr": "0x01550498"
+    },
+    {
+     "kind": "data_string",
+     "verdict": "PASS",
+     "evidence": "'EAReportUploader'",
+     "note": null,
+     "addr": "0x01446c18"
     }
    ]
   },
@@ -593,33 +607,33 @@
    "id": "statemgr.class",
    "doc": "VERIFY.md row 3-6, source/states/statemgr.h",
    "severity": "load-bearing",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007e3fb0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.",
+     "verdict": "PASS",
+     "evidence": "[PASS] calls 0x00932e50 present",
      "note": "state identity is the hash",
      "addr": "0x007e3fb0"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007e3fb0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.",
+     "verdict": "PASS",
+     "evidence": "[PASS] push of 0x811c9dc5 present",
      "note": "seed 0x811c9dc5",
      "addr": "0x007e3fb0"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007e3fb0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.",
+     "verdict": "PASS",
+     "evidence": "[PASS] string 0x01413600 ('A state with this ID already exists') referenced",
      "note": null,
      "addr": "0x007e3fb0"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007e3fb0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.",
+     "verdict": "PASS",
+     "evidence": "[PASS] no reference from 0x007e3fb0 to string 0x0141319c ('AppStateManager')",
      "note": null,
      "addr": "0x007e3fb0"
     },
@@ -693,7 +707,7 @@
    "id": "hash.fnv1",
    "doc": "MEMORY.md (FNV-1 mul-then-xor, mode 1 = tolower)",
    "severity": "load-bearing",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
      "kind": "func",
@@ -704,8 +718,8 @@
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007e40f2 (listing: PUSH 0x811c9dc5). Either our address is wrong or Ghidra failed to carve a function there.",
+     "verdict": "PASS",
+     "evidence": "[PASS] push of 0x811c9dc5 present",
      "note": "CORRECTED by the audit: the 0x811c9dc5 seed is NOT a constant inside 0x932e50 - the hasher takes it as a PARAMETER ([esp+0x14]) and the CALLER pushes it at 0x7e40f2. Our first audit pass FAILed because we looked for the seed in the wrong function.",
      "addr": "0x007e40f2"
     },
@@ -760,6 +774,13 @@
      "addr": "0x0092c660"
     },
     {
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_0092c5b0 (0x0092c5b0..0x0092c77f, 198 insns)",
+     "note": "the RefPack copy loop is a real function",
+     "addr": "0x0092c660"
+    },
+    {
      "kind": "func",
      "verdict": "UNKNOWN",
      "evidence": "check records no assertion",
@@ -772,41 +793,41 @@
    "id": "config.lang",
    "doc": "VERIFY.md row 41",
    "severity": "high",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "check records no assertion",
-     "note": "the command registrar exists as a function",
-     "addr": "0x007c85e7"
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: os_007c8550 (0x007c8550..0x007c85df, 46 insns)",
+     "note": "the command registrar (0x7c85e7 is MID-function; the entry is 0x7c8550 - found by tools/gen_seeds.py walking back to the int3 gap)",
+     "addr": "0x007c8550"
     },
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "check records no assertion",
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_007c8e90 (0x007c8e90..0x007c8efb, 41 insns)",
      "note": "setOption executor",
      "addr": "0x007c8e90"
     },
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007c7f50 (listing: MOV EAX,dword ptr [ECX + 0x4]). Either our address is wrong or Ghidra failed to carve a function there.",
-     "note": "setVariables executor",
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: os_007c7f50 (0x007c7f50..0x007c7f5e, 4 insns)",
+     "note": "setVariables executor; Ghidra had not carved this one (indirect reach only) - see seeds.tsv",
      "addr": "0x007c7f50"
     },
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "check records no assertion",
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_007c8f00 (0x007c8f00..0x007c9017, 97 insns)",
      "note": "alert executor",
      "addr": "0x007c8f00"
     },
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "Ghidra has NO function at 0x007c90f0 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.",
-     "note": "card/vendor executor",
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: os_007c90f0 (0x007c90f0..0x007c91c7, 87 insns)",
+     "note": "card/vendor executor; likewise uncarved before seeding",
      "addr": "0x007c90f0"
     },
     {
@@ -829,12 +850,12 @@
    "id": "resmgr.spui",
    "doc": "analysis/ui.md, RESUME.md",
    "severity": "high",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "check records no assertion",
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_008de4b0 (0x008de4b0..0x008de4b5, 2 insns)",
      "note": "the resource manager request site",
      "addr": "0x008de4b0"
     },
@@ -937,28 +958,114 @@
    "id": "allocators",
    "doc": "analysis/startup.md:32,75,87",
    "severity": "medium",
-   "overall": "UNKNOWN",
+   "overall": "PASS",
    "checks": [
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "check records no assertion",
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_00f47240 (0x00f47240..0x00f47269, 15 insns)",
      "note": "the tagged allocator used by app_main/run",
      "addr": "0x00f47240"
     },
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "check records no assertion",
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_00951230 (0x00951230..0x0095128b, 41 insns)",
      "note": "the allocator pair member used by the spui registrar",
      "addr": "0x00951230"
     },
     {
-     "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "check records no assertion",
+     "kind": "func_exists",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_00920960 (0x00920960..0x009209e8, 28 insns)",
      "note": "the 0x148 allocation ctor",
      "addr": "0x00920960"
+    }
+   ]
+  },
+  {
+   "id": "statemgr.id_override",
+   "doc": "analysis/states.md, source/states/statemgr.cpp::find",
+   "severity": "load-bearing",
+   "overall": "FAIL",
+   "checks": [
+    {
+     "kind": "func",
+     "verdict": "PASS",
+     "evidence": "[PASS] push of 0x811c9dc5 present",
+     "note": "the hash path exists and pushes the seed",
+     "addr": "0x007e3fb0"
+    },
+    {
+     "kind": "func",
+     "verdict": "PASS",
+     "evidence": "[PASS] calls 0x00932e50 present",
+     "note": "it calls the FNV hasher",
+     "addr": "0x007e3fb0"
+    },
+    {
+     "kind": "func",
+     "verdict": "PASS",
+     "evidence": "[PASS] string 0x013fc8f0 ('id') referenced",
+     "note": "the ArgScript arg is literally \"id\" (the leading dash is the ArgScript layer's convention, which is why a search for the literal '-id' finds nothing in the binary)",
+     "addr": "0x007e3fb0"
+    },
+    {
+     "kind": "insn_at",
+     "verdict": "FAIL",
+     "evidence": "0x007e40d6 is 'JZ 0x007e40ea', we expected /je/",
+     "note": "THE BRANCH: `je 0x7e40ea` - when the `id` arg is ABSENT it jumps to the hashing block",
+     "addr": "0x007e40d6"
+    },
+    {
+     "kind": "insn_at",
+     "verdict": "PASS",
+     "evidence": "0x007e40e8: JMP 0x007e4100",
+     "note": "and `jmp 0x7e4100` - when the `id` arg is PRESENT the hash is SKIPPED entirely, so the explicit value is the identity",
+     "addr": "0x007e40e8"
+    },
+    {
+     "kind": "insn_at",
+     "verdict": "PASS",
+     "evidence": "0x007e4103: MOV dword ptr [ECX + 0x28],EAX",
+     "note": "BOTH paths converge on `mov [ecx+0x28],eax` - one field holds either the assigned id or the hash",
+     "addr": "0x007e4103"
+    }
+   ]
+  },
+  {
+   "id": "statemgr.chain_not_stack",
+   "doc": "analysis/states.md, source/states/statemgr.cpp::request_goto",
+   "severity": "high",
+   "overall": "PASS",
+   "checks": [
+    {
+     "kind": "data_string",
+     "verdict": "PASS",
+     "evidence": "'endChain'",
+     "note": null,
+     "addr": "0x014130f8"
+    },
+    {
+     "kind": "data_string",
+     "verdict": "PASS",
+     "evidence": "'gotoState'",
+     "note": null,
+     "addr": "0x0141316c"
+    },
+    {
+     "kind": "data_string",
+     "verdict": "PASS",
+     "evidence": "\"can't nest states or transitions\"",
+     "note": null,
+     "addr": "0x014135dc"
+    },
+    {
+     "kind": "func",
+     "verdict": "PASS",
+     "evidence": "[PASS] string 0x014135dc (\"can't nest states or transitions\") referenced",
+     "note": "the no-nesting assert lives in the state-ADD path, which is why a chained gotoState must be QUEUED rather than called reentrantly",
+     "addr": "0x007e3fb0"
     }
    ]
   },

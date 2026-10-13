@@ -55,7 +55,9 @@ def main():
     rows = read_seeds(seeds_path)
     say("seeds: %d from %s" % (len(rows), seeds_path))
     funcs = [r for r in rows if r[1] == "function"]
+    codes = [r for r in rows if r[1] == "code"]
     say("function seeds: %d (applied highest address first, like REA does)" % len(funcs))
+    say("code seeds:     %d (the holes inside already-carved bodies)" % len(codes))
 
     import pyghidra
     pyghidra.start(verbose=False)
@@ -84,6 +86,7 @@ def main():
 
         tx = prog.startTransaction("OpenSpore seed")
         applied = skipped = failed = 0
+        code_applied = code_skipped = 0
         try:
             for hexaddr, kind, name in sorted(funcs, key=lambda r: -int(r[0], 16)):
                 addr = AF.getAddress("%08x" % (int(hexaddr, 16) & 0xFFFFFFFF))
@@ -113,31 +116,68 @@ def main():
                 except Exception as exc:
                     failed += 1
                     say("  ! %s: %s" % (hexaddr, exc))
+
+            # ---- code seeds: fill the HOLES inside an already-carved body -------------------
+            # Two walls stop the walk and they are NOT the same thing:
+            #   * a decoded INSTRUCTION inside a real function -> genuine territory, stop;
+            #   * a defined DATUM -> Ghidra merely TYPED the bytes. The hole exists precisely because
+            #     the MSVC alignment padding `8d 49 00` became `?? 8Dh ?? 49h ?? 00h`, so treating a
+            #     datum as a stop condition can never fill anything. It must be CLEARED and the walk
+            #     continued. That was the first version's bug: it reported all 7 holes "already clear"
+            #     and filled none of them, because every hole starts at exactly such a mis-typed datum.
+            for hexaddr, kind, name in codes:
+                addr = AF.getAddress("%08x" % (int(hexaddr, 16) & 0xFFFFFFFF))
+                n_new = 0
+                n_cleared = 0
+                stop = "step budget"
+                for _ in range(4000):
+                    if FM.getFunctionContaining(addr) is not None:
+                        stop = "reached a carved function"
+                        break
+                    ins = LISTING.getInstructionAt(addr)
+                    if ins is not None:
+                        stop = "reached a decoded instruction"
+                        break
+                    do = LISTING.getDataAt(addr)
+                    if do is not None:
+                        try:
+                            api.clearCodeUnits(addr, do.getMaxAddress(), False)
+                            n_cleared += 1
+                        except Exception as exc:
+                            stop = "clear failed: %s" % exc
+                            break
+                        continue
+                    try:
+                        api.disassemble(addr)
+                    except Exception as exc:
+                        stop = "disassemble failed: %s" % exc
+                        break
+                    ins = LISTING.getInstructionAt(addr)
+                    if ins is None:
+                        stop = "disassemble produced nothing"
+                        break
+                    n_new += 1
+                    addr = ins.getMaxAddress().next()
+                if n_new:
+                    code_applied += 1
+                    say("  ~ %s: +%d instructions, %d data items cleared (stopped: %s)" %
+                        (hexaddr, n_new, n_cleared, stop))
+                else:
+                    code_skipped += 1
+                    say("  ! %s: filled nothing (%s)" % (hexaddr, stop))
         finally:
             prog.endTransaction(tx, True)
 
-        say("applied %d, already-carved %d, failed %d" % (applied, skipped, failed))
+        say("applied %d, already-carved %d, failed %d; code holes filled %d, blocked %d"
+            % (applied, skipped, failed, code_applied, code_skipped))
 
-        # Re-run analysis so the new code gets references, imports and function boundaries - without
-        # it the exported facts would list no calls and every check would FAIL spuriously.
-        if applied:
-            say("re-analyzing (this is the long part; the project is persistent afterwards)...")
-            # GhidraProgramUtilities has no analyzeProgram() in this version. The pair that works is
-            # FlatProgramAPI.analyzeAll(program) + markProgramAnalyzed, which is exactly what
-            # pyghidra's own _analyze_program does; without the bundle-host reference the analyzer
-            # refuses to run from a script context.
-            # analyzeAll needs a transaction in this context. Without one every analyzer worker dies
-            # with db.NoTransactionException (the first run here), because FlatProgramAPI only opens
-            # its own transaction for the mutations IT makes, not for the analyzer services it drives.
-            from ghidra.app.script import GhidraScriptUtil
-            GhidraScriptUtil.acquireBundleHostReference()
-            tax = prog.startTransaction("OpenSpore re-analyze")
-            try:
-                api.analyzeAll(prog)
-                GhidraProgramUtilities.markProgramAnalyzed(prog)
-            finally:
-                prog.endTransaction(tax, True)
-                GhidraScriptUtil.releaseBundleHostReference()
+        # Deliberately NO analysis here. Two attempts at driving it from a script both failed, and the
+        # second is the informative one: analyzeAll dispatches analyzer workers across a ConcurrentQ,
+        # and one Ghidra transaction is not visible to those threads, so every worker died with
+        # db.NoTransactionException at DBHandle.checkTransaction. Ghidra's own headless pipeline owns
+        # that transaction correctly, so analysis is a SEPARATE pass - run afterwards:
+        #     analyzeHeadless.bat <projDir> <projName> -process SporeApp.exe.unpacked.exe
+        # which re-analyzes the changed locations and saves. This script only creates and saves.
 
         # GhidraFile.save takes a TaskMonitor only; the change comment lives on the transaction.
         df.save(mon)

@@ -137,6 +137,72 @@ is precisely the ambiguity the `spui` reader has to settle. `E3LaunchScreen` is 
 can look up in the package indexes. That is a much better door into the layout format than guessing
 field order from bytes.
 
+## The `-id` semantics, SETTLED BY DISASSEMBLY (it changes how a state is addressed)
+
+The state-add method is `0x007e3fb0`, and its branch structure answers the question our engine had to
+get right before `-state:<Name>` could work at all:
+
+```
+7e40c5  push 1 / push "id" (0x013fc8f0) / call 0x838410   ; the ArgScript arg lookup
+7e40d6  je  0x7e40ea                ; `id` ABSENT  -> take the hashing path
+7e40d8  ... mov edx,[edx+0xa0] / call edx ; `id` PRESENT -> read the assigned value
+7e40e8  jmp 0x7e4100                ;             and SKIP the hash entirely
+7e40ea  push 1 / push 0x811c9dc5 / push name / call 0x932e50   ; fnv1_lower(name)
+7e4103  mov [ecx+0x28], eax         ; BOTH paths store into the SAME field: the state's identity
+7e4112  lea ecx,[eax+0xb8] / call 0x645e40      ; insert into the map keyed by THAT id
+7e4132  cmp ecx,[eax+edx*4] / je ...            ; duplicate-id probe
+7e413b  push 0x1413600                          ; "A state with this ID already exists"
+```
+
+Three consequences, all now implemented in `source/states/statemgr.cpp`:
+
+1. **`-id` REPLACES the identity.** It is not a parallel field: one dword at `[state+0x28]` holds
+   either the assigned number or the name hash, and the `[state+0xb8]` map is keyed by it. So the 19
+   explicit-id states are addressed by their number and 41 others by `fnv1_lower(name)`.
+2. **A state name cannot be resolved by hashing it.** Our `Manager::find()` used to do exactly that
+   (mirroring `reg()`), which made every explicit-id state unreachable by name — including `Main`
+   (`-id 0`) and all 13 editors. That contradicted the shipped script's own header ("you can run with
+   `-state:<stateName>`"), so the original must resolve names as **strings**; `find()` now compares
+   names with the engine's own tolower folding. Verified: `-state:Main` boots
+   `Main [0x00000000]` → `gotoState GalaxyGameEntry` → `GalaxyGameEntry [0x02ccda9c]`.
+3. **The arg is literally `"id"`, not `"-id"`.** A search for the ASCII `-id` finds only unrelated
+   strings (`inter-ideograph`, the *effect* command's `-id <n:int>` spec at `0x01456d10`, TLS cipher
+   names). The leading dash is the **ArgScript layer's** convention; the engine asks for `id`. That is
+   why the first attempt to confirm this by string search appeared to fail.
+
+The script's comment — "assign manual IDs just so I can fill in the UI layout stuff more easily" — now
+reads precisely: the assigned ids are what the **UI layouts and the editor-switch messages** address a
+state by, which is why the id namespace, not the name namespace, is the one `spui` will reference.
+
+## Transitions are a CHAIN, not a stack
+
+`endChain` (`0x014130f8`) sits in the same .rdata cluster as `entry`/`exit`/`onExit`/`transition`, and
+`Main`'s body is a bare `gotoState` with no `entry` block — so a state's transition fires as part of
+entering it. But the state-ADD path asserts `can't nest states or transitions` (`0x014135dc`, at
+`0x7e3fd7`), which means a chained `gotoState` must **not** re-enter the switch. Our engine models that
+as `Manager::request_goto()`: the chain link queues, and `goto_name()` drains the queue after the
+transition completes, with a 32-hop cap so a script cycle logs instead of hanging the boot. (Measured:
+the shipped table has no cycle — all 60 states walk to a terminus.)
+
+## Cross-system confirmation: four states OWN their text
+
+`fnv1_lower(state_name)` equals a real en-us `locale` **table instance** for exactly four states:
+
+| state | hash = table instance |
+|---|---|
+| `GalaxyGameEntry` | `0x2B7A0311` |
+| `SpaceGame` | `0x2DB6DAD3` |
+| `CreatureGame` | `0xAD56080C` |
+| `TribeGame` | `0xF71FA311` |
+
+Control: of 125,272 registry names, 193 hash to any of the 200 table instances, so the expected
+accidental rate across 60 states is ~0.09 hits — not 4. Those four are the four stages the player
+actually sees text in, and each stage's strings are filed under the hash of its STATE NAME.
+
+This one measurement corroborates five independent things at once: the FNV-1 multiply-first direction,
+the tolower folding, the instance-id naming rule, the recovered state names, and the locale table
+indexing. It is the strongest single confirmation in the project.
+
 ## Lessons (why this mattered more than the state list)
 
 1. **"The data does not exist" is a hypothesis, not a result.** We had recorded the missing state

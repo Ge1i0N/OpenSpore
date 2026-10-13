@@ -119,6 +119,7 @@ set(OS_SOURCES
   source/engine/gmdl.cpp
   source/engine/raster.cpp
   source/engine/config.cpp
+  source/engine/appstates.cpp
   source/engine/text.cpp
   source/render/device.cpp
   source/render/overlay.cpp

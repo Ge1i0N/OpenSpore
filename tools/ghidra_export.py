@@ -220,6 +220,18 @@ def function_facts(address):
     out["body_end"] = hx(body.getMaxAddress())
     out["size"] = int(body.getNumAddresses())
     out["entry"] = hx(fn.getEntryPoint())
+    # THE BODY IS NOT ALWAYS CONTIGUOUS, and that changes what an absence means. Measured on the
+    # event dispatcher (0x7e7160): the body is [[0x7e7160,0x7e71c4] [0x7e72bf,0x7e7300]] - a 185-byte
+    # HOLE in the middle that Ghidra never disassembled (it stops at the MSVC alignment padding
+    # `8d 49 00`, which it left typed as data). So "this immediate is not in Ghidra's view" is only a
+    # REFUTATION when the body covers the address; inside a gap it is "Ghidra did not look".
+    # Exporting the ranges lets the auditor make that distinction instead of manufacturing FAILs.
+    try:
+        out["body_ranges"] = [[hx(r.getMinAddress()), hx(r.getMaxAddress())]
+                              for r in body.getAddressRanges()]
+    except Exception:
+        out["body_ranges"] = [[out["body_start"], out["body_end"]]]
+    out["body_contiguous"] = len(out["body_ranges"]) <= 1
     try:
         out["calling_convention"] = str(fn.getCallingConvention().getName())
     except Exception:

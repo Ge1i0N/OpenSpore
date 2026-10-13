@@ -10,7 +10,7 @@
       "doc": "analysis/startup.md:7",
       "severity": "load-bearing",
       "checks": [
-        {"kind": "entry_point", "expect": "0x011e11e1"},
+        {"kind": "func_exists", "addr": "0x011e11e1", "note": "CORRECTED: the `entry_point` check was replaced, not dropped. ProgramDB has no getEntrypoint() in this Ghidra version, so the export could only return None, and inventing a value from our own PE parse would have made the check CIRCULAR (we would be verifying our reading against our reading). Asking whether Ghidra has a FUNCTION at the documented entry is the same fact in a form Ghidra can answer independently. The raw header value stays verifiable with tools/pe.py."},
         {"kind": "subsystem", "expect": 2},
         {"kind": "image_base", "expect": "0x00400000"},
         {"kind": "section_executable", "name": ".text"}
@@ -221,8 +221,9 @@
       "doc": "analysis/startup.md:141-142",
       "severity": "high",
       "checks": [
-        {"kind": "func", "addr": "0x007e7160", "cmp_imm": [39165813, 1008093, 34788327, 2921181299], "note": "hashed event ids 0x255abf5 / 0xf62add / 0x212d3e7 / 0xae1cfe73", "allow_partial": true},
-        {"kind": "func", "addr": "0x007e7160", "pushes_imm": [250], "note": "Sleep(0xfa) in the retry loop"}
+        {"kind": "func", "addr": "0x007e7160", "cmp_imm": [39165813, 1008086, 1008093, 34788327, 2921181299], "note": "hashed event ids 0x255abf5 / 0xf62add / 0xf62ade / 0x212d3e7 / 0xae1cfe73. GHIDRA-CONFIRMED after seeding: the decompiler renders the whole switch (param_2 < 0x255abf6 / == 0x255abf5 / == 0xf62add / ...). 0xf62ade is the FORWARD id the branch re-dispatches.", "allow_partial": true},
+        {"kind": "func", "addr": "0x007e7160", "uses_imm": [250, 10], "note": "CORRECTED, and this was the TENTH checker artifact of the audit: the retry loop stores 250 with `mov [esp+0x14],0xfa` (0x7e7264) and the counter with `mov [esp+0x30],0xa` (0x7e7233) - NEITHER is a PUSH, so a mnemonic-bucketed `pushes_imm` check FAILed a correct doc claim. Use the mnemonic-agnostic immediate check for values that reach the stack. Substance of the original claim verified: 10 retries x 250 ms."},
+        {"kind": "func", "addr": "0x00922080", "calls_import": ["SleepEx"], "note": "the wait helper is SleepEx(ms, bAlertable=1) via IAT 0x13cc17c, NOT Sleep - a refinement the audit forced us to make. Verified by resolving the IAT slot through the PE import directory (KERNEL32.dll!SleepEx)."}
       ]
     },
     {
@@ -300,6 +301,7 @@
       "severity": "load-bearing",
       "checks": [
         {"kind": "func", "addr": "0x0092c660", "cmp_imm": [8187], "note": "TRAP: (& 0x1FFF) == 0x10FB, so 0x10FB and 0x50FB are both valid signatures", "allow_partial": true},
+        {"kind": "func_exists", "addr": "0x0092c660", "note": "the RefPack copy loop is a real function"},
         {"kind": "func", "addr": "0x0092c660", "has_insn": "inc", "note": "TRAP: counters are test-before-decrement, so the byte count is reg+1"}
       ]
     },
@@ -322,7 +324,7 @@
       "doc": "analysis/ui.md, RESUME.md",
       "severity": "high",
       "checks": [
-        {"kind": "func", "addr": "0x008de4b0", "note": "the resource manager request site"},
+        {"kind": "func_exists", "addr": "0x008de4b0", "note": "the resource manager request site"},
         {"kind": "func", "addr": "0x0080fff0", "calls": ["0x008de4b0"], "note": "the UI layout request"},
         {"kind": "func", "addr": "0x0080fff0", "pushes_imm": ["0x0510a95b"], "note": "id 0x510a95b (written as hex: an earlier revision put a hand-computed decimal here and it was wrong)"},
         {"kind": "vtable_slot", "vtable": "0x01413260", "slot": 36, "expect": "0x007e19e0", "note": "+0x24 used by the spui request path", "allow_partial": true}
@@ -356,9 +358,39 @@
       "doc": "analysis/startup.md:32,75,87",
       "severity": "medium",
       "checks": [
-        {"kind": "func", "addr": "0x00f47240", "note": "the tagged allocator used by app_main/run"},
-        {"kind": "func", "addr": "0x00951230", "note": "the allocator pair member used by the spui registrar"},
-        {"kind": "func", "addr": "0x00920960", "note": "the 0x148 allocation ctor"}
+        {"kind": "func_exists", "addr": "0x00f47240", "note": "the tagged allocator used by app_main/run"},
+        {"kind": "func_exists", "addr": "0x00951230", "note": "the allocator pair member used by the spui registrar"},
+        {"kind": "func_exists", "addr": "0x00920960", "note": "the 0x148 allocation ctor"}
+      ]
+    },
+    {
+      "id": "statemgr.id_override",
+      "doc": "analysis/states.md, source/states/statemgr.cpp::find",
+      "severity": "load-bearing",
+      "note": "The finding that made -state:<Name> work for the 19 explicit-id states. Our engine used to resolve a state name by hashing it (fnv1_lower), which is the original's rule ONLY when the script gives no `-id`: with explicit ids present, hashing makes every one of those states unreachable by name, contradicting the shipped script's own header. This claim pins the branch that decides it.",
+      "checks": [
+        {"kind": "func", "addr": "0x007e3fb0", "pushes_imm": ["0x811c9dc5"], "note": "the hash path exists and pushes the seed"},
+        {"kind": "func", "addr": "0x007e3fb0", "calls": ["0x00932e50"], "note": "it calls the FNV hasher"},
+        {"kind": "func", "addr": "0x007e3fb0", "refs_string": [
+          {"addr": "0x013fc8f0", "text": "id"}
+        ], "note": "the ArgScript arg is literally \"id\" (the leading dash is the ArgScript layer's convention, which is why a search for the literal '-id' finds nothing in the binary)"},
+        {"kind": "insn_at", "addr": "0x007e40d6", "regex": "je", "note": "THE BRANCH: `je 0x7e40ea` - when the `id` arg is ABSENT it jumps to the hashing block"},
+        {"kind": "insn_at", "addr": "0x007e40e8", "regex": "jmp", "note": "and `jmp 0x7e4100` - when the `id` arg is PRESENT the hash is SKIPPED entirely, so the explicit value is the identity"},
+        {"kind": "insn_at", "addr": "0x007e4103", "regex": "mov.*0x28", "note": "BOTH paths converge on `mov [ecx+0x28],eax` - one field holds either the assigned id or the hash"}
+      ]
+    },
+    {
+      "id": "statemgr.chain_not_stack",
+      "doc": "analysis/states.md, source/states/statemgr.cpp::request_goto",
+      "severity": "high",
+      "note": "Transitions form a CHAIN, not a stack, so a state's entry block may name the next state (which is exactly how `Main -> GalaxyGameEntry` works in the shipped script). The .rdata cluster is the evidence: endChain sits beside entry/exit/onExit.",
+      "checks": [
+        {"kind": "data_string", "addr": "0x014130f8", "text": "endChain"},
+        {"kind": "data_string", "addr": "0x0141316c", "text": "gotoState"},
+        {"kind": "data_string", "addr": "0x014135dc", "text": "can't nest states or transitions"},
+        {"kind": "func", "addr": "0x007e3fb0", "refs_string": [
+          {"addr": "0x014135dc", "text": "can't nest states or transitions"}
+        ], "note": "the no-nesting assert lives in the state-ADD path, which is why a chained gotoState must be QUEUED rather than called reentrantly"}
       ]
     },
     {

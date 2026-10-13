@@ -51,7 +51,14 @@ namespace os::states {
 
 struct State {
     std::string name;
-    u32 id = 0;  // FNV-1a of name, as the original stores at [state+0x28]
+    u32 id = 0;  // FNV-1 (multiply-then-xor) of the name, as the original stores at [state+0x28]
+    // The game's state script ASSIGNS ids explicitly for the states the UI addresses by number
+    // (`state CreatureEditor -id 0x022d9e01`), and the script's own comment says why: "assign manual
+    // IDs just so I can fill in the UI layout stuff more easily". Measured: 0 of the 19 explicit ids
+    // in SporeAppStates equal fnv1_lower(name), so an explicit id must be TAKEN FROM THE FILE and
+    // never recomputed - the same rule Properties.txt's `(hash(Name))` form taught us.
+    bool has_explicit_id = false;
+    u32 explicit_id = 0;
     std::function<void()> on_enter;
     std::function<void()> on_exit;
     std::function<void(f32 dt)> on_tick;
@@ -68,6 +75,12 @@ public:
     // Switch state. Refuses to recurse: "can't nest states or transitions".
     bool goto_name(const std::string& name);
 
+    // The chain link. The original's transitions form a CHAIN, not a stack (`endChain` 0x014130f8 sits
+    // beside `entry`/`exit`/`onExit`), so a state's entry block may name the next state - but it must
+    // not call goto_name reentrantly, which the no-nesting assert forbids. Queue it instead; the
+    // pending list drains at the end of the current transition.
+    void request_goto(const std::string& name);
+
     // The `state` console verb's four options.
     bool next();
     bool prev();
@@ -76,7 +89,14 @@ public:
     std::string list() const;        // '  %-40.40s [0x%08x]' per state
     std::string current_name() const { return m_current ? m_current->name : std::string(); }
     u32 current_id() const { return m_current ? m_current->id : 0; }
+    // The current state itself, or null. The frame path needs this to tell "a state that renders"
+    // from "a game state whose behaviour is an unimplemented mode" (see app.cpp's placeholder).
+    const State* current() const { return m_current; }
     State* find(const std::string& name);
+    // The id-keyed lookup. DISASM-SETTLED: an explicit `-id` REPLACES the name hash as the identity
+    // (0x7e40d6 branches around the hash), so 19 of the game's 60 states are only addressable by
+    // their assigned number - which is what the UI layouts and switch-editor messages use.
+    State* find_by_id(u32 id);
     const std::vector<State*>& states() const { return m_all; }
 
     void tick(f32 dt);
@@ -89,6 +109,10 @@ private:
     std::vector<State*> m_all;        // same pointers, kept for iteration stability
     State* m_current = nullptr;
     bool m_in_transition = false;     // the anti-nesting guard
+    // The transition chain: names queued by request_goto(), drained after the current transition.
+    // m_chain_depth bounds a script cycle so bad data cannot hang the boot.
+    std::vector<std::string> m_pending;
+    int m_chain_depth = 0;
 };
 
 Manager& manager();

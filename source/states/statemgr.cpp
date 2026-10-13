@@ -1,6 +1,7 @@
 #include "states/statemgr.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <cstring>
 
@@ -21,7 +22,9 @@ std::string fmt_current(const State* s) {
 }  // namespace
 
 bool Manager::reg(State st) {
-    st.id = fnv1_lower(st.name.c_str());  // FNV-1 + tolower, the original's arg3=1
+    // An explicit `-id` from the game's script wins verbatim; only auto states are hashed. Recomputing
+    // an explicit id would silently renumber the states the UI addresses by number.
+    st.id = st.has_explicit_id ? st.explicit_id : fnv1_lower(st.name.c_str());
     for (auto* e : m_all) {
         if (e->id == st.id) {
             // Original: push "A state with this ID already exists" (0x01413600) and assert.
@@ -38,7 +41,34 @@ bool Manager::reg(State st) {
 }
 
 State* Manager::find(const std::string& name) {
-    u32 id = fnv1_lower(name.c_str());  // must match reg(): FNV-1 + tolower
+    // DISASM-SETTLED (session 13, the state-add at 0x7e3fb0):
+    //   7e40c5  push 1 / push "id" (0x013fc8f0) / call 0x838410   ; the ArgScript arg lookup
+    //   7e40d6  je  0x7e40ea                                      ; `id` ABSENT -> hash the name
+    //   7e40e8  jmp 0x7e4100                                      ; `id` PRESENT -> skip the hash
+    //   7e4103  mov [ecx+0x28], eax                               ; BOTH are stored in [state+0x28]
+    // So an explicit `-id` REPLACES the identity, and 19 of the game's 60 states carry one (`Main`
+    // is -id 0). Hashing the name here would therefore make every explicit-id state unreachable by
+    // name - which contradicts the shipped script's own header ("you can run with -state:<stateName>").
+    // The original must resolve names as STRINGS, so we do too. The tolower folding matches the
+    // engine's own case rule (the hash's mode arg 1), so `-state:creatureeditor` behaves as in-game.
+    for (auto* e : m_all) {
+        if (e->name.size() != name.size()) continue;
+        bool same = true;
+        for (size_t i = 0; i < name.size(); ++i) {
+            if (std::tolower((unsigned char)e->name[i]) != std::tolower((unsigned char)name[i])) {
+                same = false;
+                break;
+            }
+        }
+        if (same) return e;
+    }
+    return nullptr;
+}
+
+State* Manager::find_by_id(u32 id) {
+    // The [state+0xb8] map the original inserts into is keyed by THIS id, which is what messages and
+    // the UI layouts address a state by - hence the script's "assign manual IDs just so I can fill in
+    // the UI layout stuff more easily".
     for (auto* e : m_all) {
         if (e->id == id) return e;
     }
@@ -71,7 +101,31 @@ bool Manager::goto_name(const std::string& name) {
     LOG_INFO("state", "-> %s [0x%08x]", target->name.c_str(), target->id);
     if (target->on_enter) target->on_enter();
     m_in_transition = false;
+    // Fire the chain this transition queued. The original's transitions are a CHAIN, not a stack
+    // (`endChain` 0x014130f8 sits beside `entry`/`exit`/`onExit` in the same .rdata cluster), so a
+    // state's entry block CAN name the next state - it just must not re-enter goto_name directly,
+    // which is what the assert above guards. request_goto() is the chain link.
+    while (!m_pending.empty()) {
+        std::string nxt = m_pending.front();
+        m_pending.erase(m_pending.begin());
+        if (++m_chain_depth > 32) {
+            // A script cycle (state A -> B -> A). Refuse rather than hang: the shipped table has no
+            // such cycle today (verified by walking all 60 states), so this only fires on bad data.
+            LOG_ERROR("state", "state chain deeper than 32 hops, stopping at '%s'", nxt.c_str());
+            m_pending.clear();
+            break;
+        }
+        goto_name(nxt);
+    }
+    m_chain_depth = 0;
     return true;
+}
+
+void Manager::request_goto(const std::string& name) {
+    // The chain link: queue a transition to fire after the current one completes. Queued, not
+    // executed, so it can never trip the no-nesting assert.
+    LOG_DEBUG("state", "chain: queued gotoState '%s' (depth %d)", name.c_str(), m_chain_depth + 1);
+    m_pending.push_back(name);
 }
 
 bool Manager::next() {

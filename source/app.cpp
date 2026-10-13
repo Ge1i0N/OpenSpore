@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <map>
 #include <set>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,6 +25,7 @@
 #include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
+#include "engine/appstates.h"
 #include "engine/text.h"
 #include "render/device.h"
 #include "render/overlay.h"
@@ -297,6 +299,60 @@ void frame_body(void* p) {
     if (g_args.headless) return;  // no window/device: tick and render need neither, so skip both
     states::manager().tick(fc->dt);
     states::manager().render();
+    // A state with no renderer must still PRESENT A FRAME. The original's mode decides a state's
+    // CONTENT, not whether the device pumps; without this, booting into any of the 60 game states
+    // (whose behaviour is an unimplemented `mode`) draws nothing, so the deferred -capture is never
+    // serviced and the frame loop silently produces no pixels. Draw the honest placeholder instead:
+    // the real state name, its real id, its description, and exactly what could not be executed.
+    if (const auto* st = states::manager().current()) {
+        if (!st->on_render) {
+            render::Device& dev = render::device();
+            if (!dev.d3d()) return;
+            if (!dev.begin_frame()) return;
+            const int w = dev.width(), h = dev.height();
+            dev.clear(0xFF07090C);
+            render::overlay().begin(w, h);
+            render::overlay().text_fmt(48.f, 44.f, 0xFFFFE8A0, "%s", st->name.c_str());
+            char idbuf[64];
+            _snprintf_s(idbuf, sizeof(idbuf), _TRUNCATE, "state id 0x%08X%s", st->id,
+                        st->has_explicit_id ? "  (assigned by the game's script, not a hash)"
+                                            : "  (FNV-1 of the name)");
+            render::overlay().text_fmt(48.f, 74.f, 0xFF9FB4C4, "%s", idbuf);
+            const auto* gs = appstates::instance().find(st->name);
+            float y = 104.f;
+            if (gs && !gs->description.empty()) {
+                render::overlay().text_fmt(48.f, y, 0xFFC8D8E4, "description: \"%s\"",
+                                           gs->description.c_str());
+                y += 22.f;
+            }
+            if (gs && !gs->mode.empty()) {
+                render::overlay().text_fmt(48.f, y, 0xFFE0A878, "mode %s  -- NOT EXECUTED",
+                                           gs->mode.c_str());
+                y += 22.f;
+                render::overlay().text_fmt(48.f, y, 0xFF8494A4,
+                                           "(the engine's mode table is the next step after `spui`)");
+                y += 30.f;
+            }
+            if (gs) {
+                for (const auto& nxt : gs->goto_state) {
+                    render::overlay().text_fmt(48.f, y, 0xFF9FD0A0, "gotoState %s", nxt.c_str());
+                    y += 22.f;
+                }
+                for (const auto& a : gs->entry) {
+                    if (a.verb == "mode" || a.verb == "gotoState") continue;
+                    render::overlay().text_fmt(48.f, y, 0xFFB4A0B4, "%s %s", a.verb.c_str(),
+                                               a.raw.c_str());
+                    y += 20.f;
+                    if (y > (float)h - 90.f) break;
+                }
+            }
+            render::overlay().text_fmt(48.f, (float)h - 44.f, 0xFF707C88,
+                                       "no renderer for this state: the frame is a placeholder so "
+                                       "capture/quit stay uniform");
+            render::overlay().end();
+            dev.end_frame();
+        }
+    }
 }
 
 void pump_messages() {
@@ -377,6 +433,11 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     // (fs.cpp already put Locale/<lang> on the search path); en-us is the default.
     text::instance().load(g_args.locale.empty() ? "en-us" : g_args.locale);
 
+    // 3d. the game's OWN state table, from the SporeAppStates trigger resource. This is the data we
+    // recorded as missing for three sessions (it is an INSTANCE id, not a group). Its own LOG lines are
+    // the evidence; it must not add a boot marker.
+    appstates::instance().load();
+
     // 4. window (skipped headless)
     if (g_args.headless) {
         mark(4, true, "headless: no window");
@@ -432,6 +493,9 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     states::install_console_command(states::manager());
     states::install_loader(states::manager());
     states::install_title(states::manager());
+    // The game's 60 states, with their real ids, into our state manager, so `-state:Main` and
+    // `-state:TribalAccessoriesEditor` resolve against the shipped table rather than only ours.
+    appstates::install(states::manager());
 
     // Capture + fault-tolerance probes. `capture` is unconditional (it is the only way to
     // get machine evidence of a rendered frame); `_abortNow` is dev-only by the '_' rule.
@@ -570,6 +634,99 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                       char nb[24];
                       _snprintf_s(nb, sizeof(nb), _TRUNCATE, "0x%08X", key);
                       return std::string(nb) + " = " + text::to_display_ascii(v);
+                  }});
+    console::reg({"gamestates", "The game's OWN state table (the SporeAppStates trigger resource).",
+                  "-list | -entry | -modes | <name>",
+                  [](const console::CmdContext& c) -> std::string {
+                      auto& tb = appstates::instance();
+                      if (!tb.loaded()) return "game state table not loaded (no SporeAppStates trigger)";
+                      if (c.args.size() < 2 || c.args[1] == "-list") {
+                          std::string s = tb.stats() + "\n";
+                          for (const auto& gs : tb.states()) {
+                              char b[200];
+                              std::snprintf(b, sizeof(b), "  %-32s 0x%08X%s  mode=%-18s goto=%s",
+                                            gs.name.c_str(), gs.id,
+                                            gs.has_explicit_id ? " (explicit)" : "        ",
+                                            gs.mode.empty() ? "-" : gs.mode.c_str(),
+                                            gs.goto_state.empty() ? "-" :
+                                                [&] {
+                                                    std::string j;
+                                                    for (size_t i = 0; i < gs.goto_state.size(); ++i) {
+                                                        if (i) j += ",";
+                                                        j += gs.goto_state[i];
+                                                    }
+                                                    return j;
+                                                }().c_str());
+                              s += b;
+                              s += "\n";
+                          }
+                          return s;
+                      }
+                      if (c.args[1] == "-entry") {
+                          std::string n = tb.entry_state();
+                          const auto* gs = tb.find(n);
+                          std::string s = "entry state: " + n;
+                          if (gs) {
+                              s += gs->has_explicit_id ? " (explicit -id 0)" : " (by name)";
+                              s += ", description: \"" + gs->description + "\"";
+                              // Walk the chain the way the original would, so the boot path is visible.
+                              std::string cur = n;
+                              for (int hop = 0; hop < 16; ++hop) {
+                                  const auto* p = tb.find(cur);
+                                  if (!p || p->goto_state.empty()) break;
+                                  cur = p->goto_state.front();
+                                  const auto* nx = tb.find(cur);
+                                  s += "\n  -> " + cur + (nx && !nx->mode.empty()
+                                                               ? " (mode " + nx->mode + ")"
+                                                               : " (no such state!)");
+                                  if (!nx) break;
+                                  if (nx->goto_state.empty()) break;
+                              }
+                          }
+                          return s;
+                      }
+                      if (c.args[1] == "-modes") {
+                          std::vector<std::string> modes;
+                          for (const auto& gs : tb.states()) {
+                              if (gs.mode.empty()) continue;
+                              if (std::find(modes.begin(), modes.end(), gs.mode) == modes.end()) {
+                                  modes.push_back(gs.mode);
+                              }
+                          }
+                          std::sort(modes.begin(), modes.end());
+                          std::string s = std::to_string(modes.size()) + " distinct modes:\n";
+                          for (const auto& m : modes) {
+                              s += "  " + m + "  <-";
+                              for (const auto& gs : tb.states()) {
+                                  if (gs.mode == m) s += " " + gs.name;
+                              }
+                              s += "\n";
+                          }
+                          return s;
+                      }
+                      const auto* gs = tb.find(c.args[1]);
+                      if (!gs) {
+                          // The original's `state` verb takes a name; match case-insensitively the way
+                          // its FNV-1 + tolower id computation does.
+                          std::string want = c.args[1];
+                          for (auto& ch : want) ch = (char)std::tolower((unsigned char)ch);
+                          for (const auto& s : tb.states()) {
+                              std::string have = s.name;
+                              for (auto& ch : have) ch = (char)std::tolower((unsigned char)ch);
+                              if (have == want) { gs = &s; break; }
+                          }
+                      }
+                      if (!gs) return "no game state named '" + c.args[1] + "'";
+                      std::ostringstream out;
+                      out << "state " << gs->name << " id=0x" << std::hex << std::uppercase
+                          << gs->id << std::dec << std::nouppercase
+                          << (gs->has_explicit_id ? " (explicit)" : " (hashed)") << "\n";
+                      if (!gs->description.empty()) out << "  description: \"" << gs->description << "\"\n";
+                      if (!gs->mode.empty()) out << "  mode: " << gs->mode << "\n";
+                      for (const auto& g : gs->goto_state) out << "  gotoState " << g << "\n";
+                      for (const auto& a : gs->entry) out << "  entry: " << a.verb << " " << a.raw << "\n";
+                      for (const auto& a : gs->exit) out << "  exit:  " << a.verb << " " << a.raw << "\n";
+                      return out.str();
                   }});
     console::reg({"pkg", "Inspect a .package: list, header, records, or dump one resource.",
                   "-list | -hdr <i> | -rec <i> <n> | -path <i> <n> | -types <i> | -unpack <i|all> <dir> [type] | -dump <i> <n> <out> | -decode <i> <n> <out>",

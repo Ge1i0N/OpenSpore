@@ -27,8 +27,7 @@ void FUN_007ab7f0(void)
       local_44[0] = 0;
       local_44[1] = 0;
       local_44[2] = 0;
-      _eh_vector_constructor_iterator_
-                (local_44 + 6,8,4,(_func_void_void_ptr *)&LAB_006c0fd0,FUN_00c2e640);
+      _eh_vector_constructor_iterator_(local_44 + 6,8,4,FUN_006c0fd0,FUN_00c2e640);
       local_44[6] = 0;
       local_44[7] = 1;
       local_4._0_1_ = 1;

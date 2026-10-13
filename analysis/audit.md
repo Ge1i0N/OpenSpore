@@ -3,164 +3,64 @@
 Independent re-check of `analysis/claims.json` against Ghidra's own analysis of
 `refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe`.
 
-- Ghidra 12.1.4, language x86:LE:32:default, image base 0x00400000, entry None, 54611 functions carved.
-- Claims: FAIL 1, UNKNOWN 11, PASS 17, SKIP 1
+- Ghidra 12.1.4, language x86:LE:32:default, image base 0x00400000, entry None, 55294 functions carved.
+- Claims: FAIL 2, UNKNOWN 1, PASS 28, SKIP 1
 
 `FAIL` = Ghidra disagrees with the doc. `UNKNOWN` = Ghidra could not answer, so the
 claim is still only as good as our own objdump reading. `SKIP` = not a disassembly
 question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
 
-## FAIL (1)
+## FAIL (2)
 
 | claim | sev | doc | verdict |
 |---|---|---|---|
-| `main.loop.caller` | load-bearing | analysis/startup.md:95-96 | **FAIL** |
+| `event.dispatcher` | high | analysis/startup.md:141-142 | **FAIL** |
+| `statemgr.id_override` | load-bearing | analysis/states.md, source/states/statemgr.cpp::find | **FAIL** |
 
-### main.loop.caller — FAIL
+### event.dispatcher — FAIL
 
-- `PASS` [ok] `func` [PASS] calls 0x0067dcb0 present
-  - claim: the window-object getter
-- `PASS` [ok] `func` [PASS] reads global 0x015fd89c
-  - claim: the window singleton
-- `FAIL` [MISMATCH] `insn_at` 0x00f48405 is 'MOV EAX,dword ptr [EDX + 0x84]', we expected /mov.+:.*0x84/
-  - claim: 0xf48405 LOADS the vtable+0x84 slot. CORRECTED by the audit: startup.md called this the 'call site'; the actual indirect call is the very next instruction. Regex is whitespace/case tolerant because Ghidra's printer writes 'MOV EAX,dword ptr [EDX + 0x84]'.
-- `PASS` [ok] `insn_at` 0x00f4840b: CALL EAX
-  - claim: THE main-loop call site is 0xf4840b (`call eax`), not 0xf48405
+- `PASS` [ok] `func` [PASS] no CMP of 0x02559f75, 0x000f61d6, 0x000f61dd, 0xae1db073
+  - claim: hashed event ids 0x255abf5 / 0xf62add / 0xf62ade / 0x212d3e7 / 0xae1cfe73. GHIDRA-CONFIRMED after seeding: the decompiler renders the whole switch (param_2 < 0x255abf6 / == 0x255abf5 / == 0xf62add / ...). 0xf62ade is the FORWARD id the branch re-dispatches.
+- `FAIL` [MISMATCH] `func` [FAIL] immediate 0x000000fa, 0x0000000a nowhere in the function
+  - claim: CORRECTED, and this was the TENTH checker artifact of the audit: the retry loop stores 250 with `mov [esp+0x14],0xfa` (0x7e7264) and the counter with `mov [esp+0x30],0xa` (0x7e7233) - NEITHER is a PUSH, so a mnemonic-bucketed `pushes_imm` check FAILed a correct doc claim. Use the mnemonic-agnostic immediate check for values that reach the stack. Substance of the original claim verified: 10 retries x 250 ms.
+- `PASS` [ok] `func` [PASS] imports SleepEx present
+  - claim: the wait helper is SleepEx(ms, bAlertable=1) via IAT 0x13cc17c, NOT Sleep - a refinement the audit forced us to make. Verified by resolving the IAT slot through the PE import directory (KERNEL32.dll!SleepEx).
 
-## UNKNOWN (11)
+### statemgr.id_override — FAIL
+
+- `PASS` [ok] `func` [PASS] push of 0x811c9dc5 present
+  - claim: the hash path exists and pushes the seed
+- `PASS` [ok] `func` [PASS] calls 0x00932e50 present
+  - claim: it calls the FNV hasher
+- `PASS` [ok] `func` [PASS] string 0x013fc8f0 ('id') referenced
+  - claim: the ArgScript arg is literally "id" (the leading dash is the ArgScript layer's convention, which is why a search for the literal '-id' finds nothing in the binary)
+- `FAIL` [MISMATCH] `insn_at` 0x007e40d6 is 'JZ 0x007e40ea', we expected /je/
+  - claim: THE BRANCH: `je 0x7e40ea` - when the `id` arg is ABSENT it jumps to the hashing block
+- `PASS` [ok] `insn_at` 0x007e40e8: JMP 0x007e4100
+  - claim: and `jmp 0x7e4100` - when the `id` arg is PRESENT the hash is SKIPPED entirely, so the explicit value is the identity
+- `PASS` [ok] `insn_at` 0x007e4103: MOV dword ptr [ECX + 0x28],EAX
+  - claim: BOTH paths converge on `mov [ecx+0x28],eax` - one field holds either the assigned id or the hash
+
+## UNKNOWN (1)
 
 | claim | sev | doc | verdict |
 |---|---|---|---|
-| `pe.shape` | load-bearing | analysis/startup.md:7 | **UNKNOWN** |
-| `appmode.shaders` | medium | analysis/startup.md:85 | **UNKNOWN** |
-| `window.class` | load-bearing | analysis/startup.md:132-135 | **UNKNOWN** |
-| `event.dispatcher` | high | analysis/startup.md:141-142 | **UNKNOWN** |
-| `appmode.state.names` | load-bearing | analysis/startup.md:144-156 | **UNKNOWN** |
-| `statemgr.class` | load-bearing | VERIFY.md row 3-6, source/states/statemgr.h | **UNKNOWN** |
-| `hash.fnv1` | load-bearing | MEMORY.md (FNV-1 mul-then-xor, mode 1 = tolower) | **UNKNOWN** |
 | `refpack.decoder` | load-bearing | source/engine/pkg.h:46-50 | **UNKNOWN** |
-| `config.lang` | high | VERIFY.md row 41 | **UNKNOWN** |
-| `resmgr.spui` | high | analysis/ui.md, RESUME.md | **UNKNOWN** |
-| `allocators` | medium | analysis/startup.md:32,75,87 | **UNKNOWN** |
-
-### pe.shape — UNKNOWN
-
-- `UNKNOWN` [?] `entry_point` no entry_point in Ghidra meta
-- `SKIP` [skip] `subsystem` PE-header fact, not exposed by the Ghidra export; check with tools/pe.py
-- `PASS` [ok] `image_base` Ghidra says 0x00400000
-- `SKIP` [skip] `section_executable` PE-header fact, not exposed by the Ghidra export; check with tools/pe.py
-
-### appmode.shaders — UNKNOWN
-
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007eaae0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.
-
-### window.class — UNKNOWN
-
-- `PASS` [ok] `vtable_slot` [0x0141cc10+0x0] = 0x00849e80
-  - claim: CORRECTED by the audit: slot 0 is the DELETING DESTRUCTOR (0x849e80), not the ctor. startup.md was right that the ctor is 0x849b20 - it is simply not a vtable slot, which is why reading slot 0 for it FAILed. The two slots that matter (+0x84 main loop, +0x88 mouse pump) both PASSED.
-- `PASS` [ok] `vtable_slot` [0x0141cc10+0x84] = 0x008482f0
-  - claim: +0x84 THE MAIN LOOP
-- `PASS` [ok] `vtable_slot` [0x0141cc10+0x88] = 0x0084a050
-  - claim: +0x88 the mouse pump
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x00849bf0 (listing: SUB ESP,0x14c). Either our address is wrong or Ghidra failed to carve a function there.
-  - claim: Window::Create
-
-### event.dispatcher — UNKNOWN
-
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007e7160 (listing: None). Either our address is wrong or Ghidra failed to carve a function there.
-  - claim: hashed event ids 0x255abf5 / 0xf62add / 0x212d3e7 / 0xae1cfe73
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007e7160 (listing: None). Either our address is wrong or Ghidra failed to carve a function there.
-  - claim: Sleep(0xfa) in the retry loop
-
-### appmode.state.names — UNKNOWN
-
-- `PASS` [ok] `data_pointer` [0x0153f85c] = 0x01413868
-  - claim: [ptr] -> 'quit'
-- `PASS` [ok] `data_pointer` [0x0153f860] = 0x01413864
-  - claim: [ptr] -> 'app'
-- `PASS` [ok] `data_pointer` [0x0153f868] = 0x01413814
-  - claim: [ptr] -> 'AppModePluginLoader', the initial AppMode state
-- `PASS` [ok] `data_string` 'quit'
-- `PASS` [ok] `data_string` 'AppModePluginLoader'
-- `PASS` [ok] `data_string` 'EventLoadScreenBufferPercentage'
-- `PASS` [ok] `data_string` 'UIWorld_Loading'
-  - claim: stored as UTF-16LE; a 1-byte ASCII read of this address yields only 'U'
-- `UNKNOWN` [?] `data_string` Ghidra found no readable string at 0x01550498
-  - claim: NEGATIVE control: this is what our doc wrongly called EventLoadScreenBufferPercentage
-
-### statemgr.class — UNKNOWN
-
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007e3fb0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.
-  - claim: state identity is the hash
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007e3fb0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.
-  - claim: seed 0x811c9dc5
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007e3fb0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007e3fb0 (listing: MOV EAX,FS:[0x0]). Either our address is wrong or Ghidra failed to carve a function there.
-- `PASS` [ok] `vtable_slot` [0x01413260+0x0] = 0x007e3fb0
-
-### hash.fnv1 — UNKNOWN
-
-- `PASS` [ok] `func` [PASS] immediates 0x01000193 present
-  - claim: the 0x01000193 prime is inside the hasher
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007e40f2 (listing: PUSH 0x811c9dc5). Either our address is wrong or Ghidra failed to carve a function there.
-  - claim: CORRECTED by the audit: the 0x811c9dc5 seed is NOT a constant inside 0x932e50 - the hasher takes it as a PARAMETER ([esp+0x14]) and the CALLER pushes it at 0x7e40f2. Our first audit pass FAILed because we looked for the seed in the wrong function.
-- `PASS` [ok] `func` [PASS] imports tolower present
-  - claim: mode arg 1 folds case through the CRT function loaded from IAT 0x13cc500
-- `PASS` [ok] `func` [PASS] 3 IMUL
-  - claim: TRAP: multiply BEFORE xor (FNV-1, not FNV-1a)
-- `PASS` [ok] `pseudo_regex` pseudocode matches /\*\s*0x1000193\)?\s*\^|\^\s*[A-Za-z0-9_\[\]]+\)?\s*\*\s*0x1000193/: '* 0x1000193 ^'
-  - claim: the decompiler's expression tree shows the OPERAND ORDER, which a flat listing hides: FNV-1 is (h*prime)^c, FNV-1a is (h^c)*prime. This is the single most load-bearing arithmetic fact in the project - every group/instance/state id depends on it.
-- `PASS` [ok] `pseudo_not_regex` forbidden pattern /\(\s*[a-zA-Z_][A-Za-z0-9_]*\s*\^\s*[^)]{1,24}\)\s*\*\s*0x1000193/ absent
-  - claim: forbidden: the FNV-1a form (h ^ c) * prime. If Ghidra shows this, our hash direction is wrong.
-- `PASS` [ok] `hash_vectors` SporeAppStates -> 0xd6396913 OK; AppModePluginLoader: (no expectation recorded)
-  - claim: GROUP/INSTANCE names only. A TYPE id is NOT a hash of its name (0/6 variants tested, IDEAS.md 5.20) - an earlier revision of this check asserted fnv1_lower('locale')==0x02fac0b6, which is FALSE (it is 0xe31a5c1b) and the audit rightly flagged it. Type ids come from reg_type.txt, never from hashing.
 
 ### refpack.decoder — UNKNOWN
 
 - `PASS` [ok] `func` [PASS] no CMP of 0x00001ffb
   - claim: TRAP: (& 0x1FFF) == 0x10FB, so 0x10FB and 0x50FB are both valid signatures
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_0092c5b0 (0x0092c5b0..0x0092c77f, 198 insns)
+  - claim: the RefPack copy loop is a real function
 - `UNKNOWN` [?] `func` check records no assertion
   - claim: TRAP: counters are test-before-decrement, so the byte count is reg+1
 
-### config.lang — UNKNOWN
-
-- `UNKNOWN` [?] `func` check records no assertion
-  - claim: the command registrar exists as a function
-- `UNKNOWN` [?] `func` check records no assertion
-  - claim: setOption executor
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007c7f50 (listing: MOV EAX,dword ptr [ECX + 0x4]). Either our address is wrong or Ghidra failed to carve a function there.
-  - claim: setVariables executor
-- `UNKNOWN` [?] `func` check records no assertion
-  - claim: alert executor
-- `UNKNOWN` [?] `func` Ghidra has NO function at 0x007c90f0 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.
-  - claim: card/vendor executor
-- `PASS` [ok] `data_string` 'setOption'
-- `PASS` [ok] `data_string` 'boolProp'
-
-### resmgr.spui — UNKNOWN
-
-- `UNKNOWN` [?] `func` check records no assertion
-  - claim: the resource manager request site
-- `PASS` [ok] `func` [PASS] calls 0x008de4b0 present
-  - claim: the UI layout request
-- `PASS` [ok] `func` [PASS] push of 0x0510a95b present
-  - claim: id 0x510a95b (written as hex: an earlier revision put a hand-computed decimal here and it was wrong)
-- `PASS` [ok] `vtable_slot` [0x01413260+0x24] = 0x007e19e0
-  - claim: +0x24 used by the spui request path
-
-### allocators — UNKNOWN
-
-- `UNKNOWN` [?] `func` check records no assertion
-  - claim: the tagged allocator used by app_main/run
-- `UNKNOWN` [?] `func` check records no assertion
-  - claim: the allocator pair member used by the spui registrar
-- `UNKNOWN` [?] `func` check records no assertion
-  - claim: the 0x148 allocation ctor
-
-## PASS (17)
+## PASS (28)
 
 | claim | sev | doc | verdict |
 |---|---|---|---|
+| `pe.shape` | load-bearing | analysis/startup.md:7 | **PASS** |
 | `chain.entry.crt` | high | analysis/startup.md:7-9 | **PASS** |
 | `chain.tmain.winmain` | load-bearing | analysis/startup.md:11-18 | **PASS** |
 | `chain.winmain.app_main` | load-bearing | analysis/startup.md:20-24 | **PASS** |
@@ -172,12 +72,30 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
 | `appmode.vtable` | load-bearing | analysis/startup.md:80-85 | **PASS** |
 | `appmode.device` | high | analysis/startup.md:84 | **PASS** |
 | `appmode.plugins` | medium | analysis/startup.md:83 | **PASS** |
+| `appmode.shaders` | medium | analysis/startup.md:85 | **PASS** |
+| `window.class` | load-bearing | analysis/startup.md:132-135 | **PASS** |
 | `main.loop` | load-bearing | analysis/startup.md:100-123 | **PASS** |
+| `main.loop.caller` | load-bearing | analysis/startup.md:95-96 | **PASS** |
 | `mouse.pump` | high | analysis/startup.md:125-128 | **PASS** |
 | `window.created.in.appmode` | high | analysis/startup.md:136-140 | **PASS** |
+| `appmode.state.names` | load-bearing | analysis/startup.md:144-156 | **PASS** |
+| `statemgr.class` | load-bearing | VERIFY.md row 3-6, source/states/statemgr.h | **PASS** |
 | `statemgr.verbs` | medium | source/states/statemgr.h:14-17 | **PASS** |
+| `hash.fnv1` | load-bearing | MEMORY.md (FNV-1 mul-then-xor, mode 1 = tolower) | **PASS** |
+| `config.lang` | high | VERIFY.md row 41 | **PASS** |
+| `resmgr.spui` | high | analysis/ui.md, RESUME.md | **PASS** |
 | `model.manager.blocked` | load-bearing | RESUME.md Blocked: the rw4 handler slots are MAP OPS, not a parser | **PASS** |
 | `flags.device` | high | VERIFY.md: -w/-f/-r are real original flags | **PASS** |
+| `allocators` | medium | analysis/startup.md:32,75,87 | **PASS** |
+| `statemgr.chain_not_stack` | high | analysis/states.md, source/states/statemgr.cpp::request_goto | **PASS** |
+
+### pe.shape — PASS
+
+- `PASS` [ok] `func_exists` Ghidra has a function here: entry (0x011e11e1..0x011e11ea, 2 insns)
+  - claim: CORRECTED: the `entry_point` check was replaced, not dropped. ProgramDB has no getEntrypoint() in this Ghidra version, so the export could only return None, and inventing a value from our own PE parse would have made the check CIRCULAR (we would be verifying our reading against our reading). Asking whether Ghidra has a FUNCTION at the documented entry is the same fact in a form Ghidra can answer independently. The raw header value stays verifiable with tools/pe.py.
+- `SKIP` [skip] `subsystem` PE-header fact, not exposed by the Ghidra export; check with tools/pe.py
+- `PASS` [ok] `image_base` Ghidra says 0x00400000
+- `SKIP` [skip] `section_executable` PE-header fact, not exposed by the Ghidra export; check with tools/pe.py
 
 ### chain.entry.crt — PASS
 
@@ -257,6 +175,21 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
 - `PASS` [ok] `func` [PASS] string 0x01413e28 ('noPlugins') referenced | [PASS] string 0x01411b8c ('safe') referenced
 - `PASS` [ok] `func` [PASS] calls 0x007e8810 present
 
+### appmode.shaders — PASS
+
+- `PASS` [ok] `func` [PASS] string 0x014142a8 ('dumpShaders') referenced | [PASS] string 0x01414284 ('dumpShadersForPIX') referenced | [PASS] string 0x01414254 ('dumpFragmentShaders') referenced | [PASS] string 0x01414230 ('dumpDirectShaders') referenced | [PASS] string 0x0141421c ('noScripts') referenced | [PASS] string 0x014141f8 ('noMaterialScripts') referenced | [PASS] string 0x014141d8 ('noEffectScripts') referenced
+
+### window.class — PASS
+
+- `PASS` [ok] `vtable_slot` [0x0141cc10+0x0] = 0x00849e80
+  - claim: CORRECTED by the audit: slot 0 is the DELETING DESTRUCTOR (0x849e80), not the ctor. startup.md was right that the ctor is 0x849b20 - it is simply not a vtable slot, which is why reading slot 0 for it FAILed. The two slots that matter (+0x84 main loop, +0x88 mouse pump) both PASSED.
+- `PASS` [ok] `vtable_slot` [0x0141cc10+0x84] = 0x008482f0
+  - claim: +0x84 THE MAIN LOOP
+- `PASS` [ok] `vtable_slot` [0x0141cc10+0x88] = 0x0084a050
+  - claim: +0x88 the mouse pump
+- `PASS` [ok] `func` [PASS] imports RegisterClassExW, CreateWindowExW present
+  - claim: Window::Create
+
 ### main.loop — PASS
 
 - `PASS` [ok] `func` [PASS] refs 0x013cc62c, 0x013cc5cc, 0x013cc630 present
@@ -271,6 +204,17 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
 - `PASS` [ok] `func` [PASS] refs 0x013cc678 present
   - claim: SetForegroundWindow in the focus branch
 
+### main.loop.caller — PASS
+
+- `PASS` [ok] `func` [PASS] calls 0x0067dcb0 present
+  - claim: the window-object getter
+- `PASS` [ok] `func` [PASS] reads global 0x015fd89c
+  - claim: the window singleton
+- `PASS` [ok] `insn_at` 0x00f48405: MOV EAX,dword ptr [EDX + 0x84]
+  - claim: 0xf48405 LOADS the vtable+0x84 slot. CORRECTED by the audit: startup.md called this the 'call site'; the indirect call is the very next instruction. Whitespace/case tolerant because Ghidra's printer writes 'MOV EAX,dword ptr [EDX + 0x84]' (no colon, spaces inside the brackets).
+- `PASS` [ok] `insn_at` 0x00f4840b: CALL EAX
+  - claim: THE main-loop call site is 0xf4840b (`call eax`), not 0xf48405
+
 ### mouse.pump — PASS
 
 - `PASS` [ok] `func` [PASS] imports PeekMessageA present
@@ -283,6 +227,33 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
   - claim: the window ctor call sits at 0x7e6f21
 - `PASS` [ok] `func` [PASS] string 0x01413a2c ('flock') referenced | [PASS] string 0x014139d4 ('vSync') referenced | [PASS] string 0x014139c4 ('noVSync') referenced | [PASS] string 0x014139e0 ('Could not start the renderer.\nPlease ens') referenced
 
+### appmode.state.names — PASS
+
+- `PASS` [ok] `data_pointer` [0x0153f85c] = 0x01413868
+  - claim: [ptr] -> 'quit'
+- `PASS` [ok] `data_pointer` [0x0153f860] = 0x01413864
+  - claim: [ptr] -> 'app'
+- `PASS` [ok] `data_pointer` [0x0153f868] = 0x01413814
+  - claim: [ptr] -> 'AppModePluginLoader', the initial AppMode state
+- `PASS` [ok] `data_string` 'quit'
+- `PASS` [ok] `data_string` 'AppModePluginLoader'
+- `PASS` [ok] `data_string` 'EventLoadScreenBufferPercentage'
+- `PASS` [ok] `data_string` 'UIWorld_Loading'
+  - claim: stored as UTF-16LE; a 1-byte ASCII read of this address yields only 'U'
+- `PASS` [ok] `data_pointer` [0x01550498] = 0x01446c18
+  - claim: NEGATIVE control: our doc called this address EventLoadScreenBufferPercentage. It is a pointer to 'EAReportUploader'.
+- `PASS` [ok] `data_string` 'EAReportUploader'
+
+### statemgr.class — PASS
+
+- `PASS` [ok] `func` [PASS] calls 0x00932e50 present
+  - claim: state identity is the hash
+- `PASS` [ok] `func` [PASS] push of 0x811c9dc5 present
+  - claim: seed 0x811c9dc5
+- `PASS` [ok] `func` [PASS] string 0x01413600 ('A state with this ID already exists') referenced
+- `PASS` [ok] `func` [PASS] no reference from 0x007e3fb0 to string 0x0141319c ('AppStateManager')
+- `PASS` [ok] `vtable_slot` [0x01413260+0x0] = 0x007e3fb0
+
 ### statemgr.verbs — PASS
 
 - `PASS` [ok] `data_string` 'state'
@@ -292,6 +263,49 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
 - `PASS` [ok] `data_string` 'exit'
 - `PASS` [ok] `data_string` 'endChain'
 - `PASS` [ok] `data_string` '.eBT'
+
+### hash.fnv1 — PASS
+
+- `PASS` [ok] `func` [PASS] immediates 0x01000193 present
+  - claim: the 0x01000193 prime is inside the hasher
+- `PASS` [ok] `func` [PASS] push of 0x811c9dc5 present
+  - claim: CORRECTED by the audit: the 0x811c9dc5 seed is NOT a constant inside 0x932e50 - the hasher takes it as a PARAMETER ([esp+0x14]) and the CALLER pushes it at 0x7e40f2. Our first audit pass FAILed because we looked for the seed in the wrong function.
+- `PASS` [ok] `func` [PASS] imports tolower present
+  - claim: mode arg 1 folds case through the CRT function loaded from IAT 0x13cc500
+- `PASS` [ok] `func` [PASS] 3 IMUL
+  - claim: TRAP: multiply BEFORE xor (FNV-1, not FNV-1a)
+- `PASS` [ok] `pseudo_regex` pseudocode matches /\*\s*0x1000193\)?\s*\^|\^\s*[A-Za-z0-9_\[\]]+\)?\s*\*\s*0x1000193/: '* 0x1000193 ^'
+  - claim: the decompiler's expression tree shows the OPERAND ORDER, which a flat listing hides: FNV-1 is (h*prime)^c, FNV-1a is (h^c)*prime. This is the single most load-bearing arithmetic fact in the project - every group/instance/state id depends on it.
+- `PASS` [ok] `pseudo_not_regex` forbidden pattern /\(\s*[a-zA-Z_][A-Za-z0-9_]*\s*\^\s*[^)]{1,24}\)\s*\*\s*0x1000193/ absent
+  - claim: forbidden: the FNV-1a form (h ^ c) * prime. If Ghidra shows this, our hash direction is wrong.
+- `PASS` [ok] `hash_vectors` SporeAppStates -> 0xd6396913 OK; AppModePluginLoader: (no expectation recorded)
+  - claim: GROUP/INSTANCE names only. A TYPE id is NOT a hash of its name (0/6 variants tested, IDEAS.md 5.20) - an earlier revision of this check asserted fnv1_lower('locale')==0x02fac0b6, which is FALSE (it is 0xe31a5c1b) and the audit rightly flagged it. Type ids come from reg_type.txt, never from hashing.
+
+### config.lang — PASS
+
+- `PASS` [ok] `func_exists` Ghidra has a function here: os_007c8550 (0x007c8550..0x007c85df, 46 insns)
+  - claim: the command registrar (0x7c85e7 is MID-function; the entry is 0x7c8550 - found by tools/gen_seeds.py walking back to the int3 gap)
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_007c8e90 (0x007c8e90..0x007c8efb, 41 insns)
+  - claim: setOption executor
+- `PASS` [ok] `func_exists` Ghidra has a function here: os_007c7f50 (0x007c7f50..0x007c7f5e, 4 insns)
+  - claim: setVariables executor; Ghidra had not carved this one (indirect reach only) - see seeds.tsv
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_007c8f00 (0x007c8f00..0x007c9017, 97 insns)
+  - claim: alert executor
+- `PASS` [ok] `func_exists` Ghidra has a function here: os_007c90f0 (0x007c90f0..0x007c91c7, 87 insns)
+  - claim: card/vendor executor; likewise uncarved before seeding
+- `PASS` [ok] `data_string` 'setOption'
+- `PASS` [ok] `data_string` 'boolProp'
+
+### resmgr.spui — PASS
+
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_008de4b0 (0x008de4b0..0x008de4b5, 2 insns)
+  - claim: the resource manager request site
+- `PASS` [ok] `func` [PASS] calls 0x008de4b0 present
+  - claim: the UI layout request
+- `PASS` [ok] `func` [PASS] push of 0x0510a95b present
+  - claim: id 0x510a95b (written as hex: an earlier revision put a hand-computed decimal here and it was wrong)
+- `PASS` [ok] `vtable_slot` [0x01413260+0x24] = 0x007e19e0
+  - claim: +0x24 used by the spui request path
 
 ### model.manager.blocked — PASS
 
@@ -314,6 +328,23 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
   - claim: the device-flag function lives in this span
 - `PASS` [ok] `data_string` 'screenWindowed'
   - claim: TRAP: a RenderWare device metric, not a CLI flag
+
+### allocators — PASS
+
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00f47240 (0x00f47240..0x00f47269, 15 insns)
+  - claim: the tagged allocator used by app_main/run
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00951230 (0x00951230..0x0095128b, 41 insns)
+  - claim: the allocator pair member used by the spui registrar
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00920960 (0x00920960..0x009209e8, 28 insns)
+  - claim: the 0x148 allocation ctor
+
+### statemgr.chain_not_stack — PASS
+
+- `PASS` [ok] `data_string` 'endChain'
+- `PASS` [ok] `data_string` 'gotoState'
+- `PASS` [ok] `data_string` "can't nest states or transitions"
+- `PASS` [ok] `func` [PASS] string 0x014135dc ("can't nest states or transitions") referenced
+  - claim: the no-nesting assert lives in the state-ADD path, which is why a chained gotoState must be QUEUED rather than called reentrantly
 
 ## SKIP (1)
 

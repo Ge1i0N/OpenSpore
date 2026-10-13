@@ -22,8 +22,8 @@ undefined4 __fastcall FUN_007e7430(int param_1)
   int local_19c;
   int *piStack_198;
   wchar_t *pwStack_194;
-  undefined2 *puStack_190;
-  undefined2 *puStack_18c;
+  undefined1 *puStack_190;
+  undefined1 *puStack_18c;
   undefined4 uStack_10;
   undefined4 uStack_c;
   undefined1 *puStack_8;
@@ -54,7 +54,7 @@ undefined4 __fastcall FUN_007e7430(int param_1)
       FUN_00407190(uVar2,0x38d0a09,&uStack_1bc);
       FUN_00410330(uVar2,0x46c0c15,&iStack_1b4);
       FUN_00410330(uVar2,0x46c0c16,&iStack_1b0);
-      pwStack_194 = &DAT_01667bac;
+      pwStack_194 = (wchar_t *)&DAT_01667bac;
       puStack_190 = &DAT_01667bac;
       puStack_18c = &DAT_01667bae;
       puStack_8 = (undefined1 *)0x0;
