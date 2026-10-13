@@ -48,9 +48,27 @@ shifted by one byte, so a straight `{key,type,count,size}` walk overruns. Only *
 payloads walk exactly with the first-section rule — so there are (at least) two layouts, and the
 second one is not yet derived. `tools/prop.py` (walker + validator), `tools/prop_scan.py` (dump).
 
-## `gmsh` (0x01c135da, 2,535) — first look
+## `gmsh` (0x01c135da, 2,535) — stable header found
 
-`PatchData.package` rec[206] (39,722 B) starts:
-`00 00 00 01 | 00 00 00 01 | 00 04 00 00 | 00 08 | 01 00 | 03 00 00 00 | 03 ae 00 0c` then float32
-runs (`-0.0386, -0.0791, -0.0382, +0.0137, …`). The big-endian-looking leading dwords and the float
-runs suggest a generated mesh (like `gmdl`); its layout is NOT derived yet.
+Every one of 2,534/2,535 payloads begins with the same 24-byte prefix (big-endian-looking words):
+
+```
++0x00  u32 = 1
++0x04  u32 = 1
++0x08  u32 = 0x00040000
++0x0c  u16 = 8 (also 5/6/7)      ; a version/format code
++0x0e  u16 = 0x0100
++0x10  u32 = 0x03000000
++0x14  u16 varies ; +0x16 u16 = 0x000c (12)   ; ends with 0x000c = 12
++0x18  ...  float32 runs (positions; e.g. -0.0386, -0.0791, -0.0382, +0.0137, ...)
+```
+
+So `gmsh` is a mesh format (like `gmdl`) with a fixed little-endian header followed by float32 data.
+The `+0x0c` code (8/5/6/7) and the fields after it are the discriminators (the same `8` recurs as the
+first dword in `gmdl`). Sizes range widely (480 B up to 56 KB), so it is real geometry. Full layout
+(vertex stride, index block) is NOT derived yet - it needs the reader, like `gmdl` did.
+
+In the binary, `gmsh` (0x01c135da) is loaded through the resource manager at `0x00402301`
+(`mov [ebp+0xc], 0x1c135da` -> `call 0x67dc90` = the manager from global `0x15fd894`, then
+`[mgr]->vtable+0x14`), the same "load resource by type" path as `trigger`.
+

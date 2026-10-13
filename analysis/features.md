@@ -292,7 +292,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | material |  |
 | ⬜ | todo | sound (snr) | 29400 resources |
 | ⬜ | todo | soundProp | 19296 resources |
-| 🚧 | partial | gmsh | mesh-like: BE counts + float runs; layout not derived |
+| 🚧 | partial | gmsh | stable 24-byte header found (BE words + float runs); layout not derived |
 | 🚧 | partial | blockdata | vec3 array; first two = min/max bbox |
 | ⬜ | todo | bea | 2621 resources |
 | ⬜ | todo | poll | 2590 resources |
