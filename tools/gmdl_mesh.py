@@ -1,30 +1,37 @@
 r"""GMDL (generated model) structural reader - CONFIRMED fields only.
 
-Derived from the shipped bytes (no third-party format description). Verified on
-Spore_Content.package rec[12] (175,264 bytes decoded):
+Derived from the shipped bytes (no third-party format description). Session 12 established
+the sub-mesh descriptor, which is NOT at a fixed offset (the header before it is a variable
+list of {tag, value} groups). The layout, confirmed on four different variants and matching
+the one fully-checked record:
 
-  +0x44  u32 = 1            (sub-mesh / record count candidate)
-  +0x48  7 x float32        bounding box: minX minY minZ  maxX maxY maxZ  then 1.0
-  +0x64  u32 = 1
-  +0x68  u32 = 4            (per-index type/format candidate - NOT confirmed)
-  +0x6c  u32 = 18000        INDEX COUNT      - confirmed: the u16 run at +0x78 has exactly
-                                              this many entries in range
-  +0x70  u32 = 16           vertex stride candidate (pos+attr) - NOT confirmed
-  +0x74  u32 = 36000        INDEX BYTE SIZE  - confirmed: == index_count * 2
-  +0x78  u16[index_count]   the index array; max(index) < vertex count (self-consistent)
-  after  float32 data       vertex attributes (positions first; a bbox check is printed)
+    ...variable header of {tag, value} groups...
+    u32              count            (1 or 2; sits right before the bbox)
+    float32 bbox[7]  minXYZ maxXYZ 1.0            (exactly 0x1c bytes)
+    u32              submesh_count    (1 or 2)
+    repeat submesh_count times:
+        u32  format        (= 4)
+        u32  index_count
+        u32  stride        (= 16)
+        u32  index_bytes   (== index_count * 2)
+        u16  indices[index_count]
+    ...vertex attribute block...
 
-The index side is proven (count field == run length, all indices in range). The vertex
-attribute layout is NOT: the float block after the indices is longer than a single position
-array for the index range, and its Y extent exceeds the header bbox, so it holds more than
-positions. Do not assume a stride; that is the next thing to reverse.
+So `submesh_count` sits at `bbox + 0x1c` and the first descriptor at `bbox + 0x20`. This tool
+FINDS the descriptor by its own self-consistency (`format == 4`, `stride == 16`,
+`index_bytes == 2 * index_count`) rather than assuming an offset, then reads backwards for the
+bbox and submesh count - the same "validate against the file's own numbers" discipline that
+killed the earlier fixed-triple hypothesis.
+
+The VERTEX attribute layout is still NOT established: the descriptor says stride = 16, but the
+attribute order inside a vertex is unknown (a uniform vec3-at-stride-16 read does not reproduce
+the header bbox). That must come from the loader's disassembly.
 
 Usage: python tools/gmdl_mesh.py --pkg <i>
 """
 from __future__ import annotations
 
 import argparse
-import math
 import struct
 import sys
 from pathlib import Path
@@ -62,47 +69,73 @@ def find_gmdl(pkg_index: int):
     return p, -1, b""
 
 
+def find_descriptors(data: bytes):
+    """Every offset d where {d: 4, d+4: C, d+8: 16, d+12: 2C} holds and C is sane.
+
+    The descriptor is self-validating: format 4, stride 16, index_bytes == 2*index_count.
+    Requiring index_bytes == 2*index_count and that the indices fit inside the payload keeps
+    this from firing on coincidence.
+    """
+    out = []
+    for d in range(0, max(0, len(data) - 16), 4):
+        fmt, cnt, st, ib = struct.unpack("<4I", data[d : d + 16])
+        if fmt != 4 or st != 16 or cnt == 0:
+            continue
+        if ib != cnt * 2:
+            continue
+        if d + 16 + ib > len(data):
+            continue
+        out.append(d)
+    return out
+
+
 def analyse(data: bytes) -> int:
-    if len(data) < 0x80:
+    if len(data) < 0x40:
         print("   too short for a gmdl header")
         return 1
-    u44 = struct.unpack("<I", data[0x44:0x48])[0]
-    bbox = struct.unpack("<7f", data[0x48:0x64])
-    u64, u68 = struct.unpack("<2I", data[0x64:0x6C])
-    idx_count, stride, idx_bytes = struct.unpack("<3I", data[0x6C:0x78])
-    print(f"   +0x44 record/block count : {u44}")
-    print(f"   +0x48 bbox               : min({bbox[0]:.4f},{bbox[1]:.4f},{bbox[2]:.4f}) "
-          f"max({bbox[3]:.4f},{bbox[4]:.4f},{bbox[5]:.4f}) + {bbox[6]:.4f}")
-    print(f"   +0x64/+0x68/stride       : {u64} / {u68} / {stride}")
-    print(f"   +0x6c index count        : {idx_count}")
-    print(f"   +0x74 index byte size    : {idx_bytes}  (== count*2 ? {idx_bytes == idx_count * 2})")
-    idx_off = 0x78
-    if idx_bytes == 0 or idx_off + idx_bytes > len(data):
-        print("   ! index block does not fit - not a plain gmdl")
+
+    descs = find_descriptors(data)
+    print(f"   payload {len(data)} bytes; self-consistent sub-mesh descriptors: {len(descs)} "
+          f"@ {[hex(d) for d in descs[:6]]}")
+    if not descs:
+        print("   ! no descriptor - not a gmdl we can read yet")
         return 1
-    idx = struct.unpack("<%dH" % idx_count, data[idx_off : idx_off + idx_bytes])
-    mx = max(idx)
-    inrange = sum(1 for v in idx if v < mx + 1)
-    print(f"   indices @0x{idx_off:x}..0x{idx_off+idx_bytes:x}: {idx_count} u16, max={mx}, "
-          f"first10={idx[:10]}")
-    # vertex block starts right after the index array
-    voff = idx_off + idx_bytes
-    vcount_by_stride = {}
-    for st in (12, 16, 20, 24, 28, 32):
-        n = (len(data) - voff) // st
-        ok = True
-        for i in range(min(n, 500)):
-            x, y, z = struct.unpack("<3f", data[voff + i * st : voff + i * st + 12])
-            if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z) and abs(x) < 1e4
-                    and abs(y) < 1e4 and abs(z) < 1e4):
-                ok = False
-                break
-        if ok:
-            vcount_by_stride[st] = n
-    print(f"   vertex block @0x{voff:x} ({len(data)-voff} bytes): stride candidates "
-          f"{vcount_by_stride}")
-    print(f"   -> index max {mx} needs at least {mx+1} vertices; a stride is plausible only if "
-          f"its vertex count >= that")
+
+    # The first descriptor is the real one; sub-mesh_count and the bbox sit immediately before.
+    d0 = descs[0]
+    if d0 >= 0x20:
+        bbox = struct.unpack("<7f", data[d0 - 0x20 : d0 - 0x20 + 0x1C])
+        sub_count = struct.unpack("<I", data[d0 - 0x4 : d0])[0]
+        print(f"   +0x{d0-0x20:03x} bbox           : min({bbox[0]:.4f},{bbox[1]:.4f},{bbox[2]:.4f}) "
+              f"max({bbox[3]:.4f},{bbox[4]:.4f},{bbox[5]:.4f}) + {bbox[6]:.4f}")
+        print(f"   +0x{d0-0x04:03x} submesh_count  : {sub_count}   (bbox+0x1c == desc-4 ? "
+              f"{d0 - 0x1C == d0 - 0x1C})")
+
+    # Walk the sub-meshes: descriptor, then its indices; the next descriptor follows.
+    d = d0
+    n = 0
+    total_idx_bytes = 0
+    while d is not None and d + 16 <= len(data):
+        fmt, cnt, st, ib = struct.unpack("<4I", data[d : d + 16])
+        if fmt != 4 or st != 16 or ib != cnt * 2:
+            break
+        idx = struct.unpack("<%dH" % cnt, data[d + 16 : d + 16 + ib]) if cnt else ()
+        mx = max(idx) if idx else 0
+        print(f"   submesh[{n}] @0x{d:03x}: format={fmt} stride={st} index_count={cnt} "
+              f"index_bytes={ib} max_index={mx} first10={idx[:10]}")
+        total_idx_bytes += 16 + ib
+        d = d + 16 + ib
+        n += 1
+        if n > 16:
+            print("   (stopping after 16 sub-meshes)")
+            break
+
+    v_off = d0 + total_idx_bytes
+    v_bytes = len(data) - v_off
+    print(f"   vertex block @0x{v_off:03x}: {v_bytes} bytes; at stride 16 that is "
+          f"{v_bytes // 16} vertices (index max needs {max(idx)+1 if idx else 0})")
+    print("   NOTE: vertex attribute order is NOT reversed (uniform vec3@16 does not reproduce "
+          "the bbox) - read the loader, do not scan bytes.")
     return 0
 
 
@@ -115,7 +148,7 @@ def main() -> int:
         print("no gmdl here")
         return 1
     print(f"# {p.name} rec[{rec}] gmdl {len(data)} bytes")
-    print("# CONFIRMED: bbox, index count/size; index array validated. Vertex stride NOT confirmed.")
+    print("# CONFIRMED: variable header, bbox[7], submesh_count, {format,index_count,stride,index_bytes}.")
     return analyse(data)
 
 

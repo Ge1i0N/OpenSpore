@@ -32,6 +32,19 @@ That is **bit-for-bit the same result as the windowed run** (2,944 files, 27,882
 7.6 s, with no window created. Windowed mode re-checked afterwards: window + device + atlas + the
 real asset still render, capture still 3,686,454 bytes, exit 0.
 
+### gmdl sub-mesh descriptor CONFIRMED (the "variable header" mystery solved)
+Session 11 disproved the fixed triple. This session found what the triple really is by looking at
+**four different variants side by side** instead of one: a genuine sub-mesh descriptor
+`{format=4, index_count, stride=16, index_bytes=2*index_count}`, but it sits after a **variable**
+header, a `u32 count` and a `float32 bbox[7]`, plus a `u32 submesh_count`. So its offset moves per
+file. Measured: `Spore_Content` rec[12] bbox@0x48 desc@0x68; `EP1_Content_01` rec[0] bbox@0x60
+desc@0x80; `EP1_Content_02` rec[1] bbox@0x0c, **submesh_count=2**, desc@0x2c (and a second descriptor
+at 0x339b4); `EP1_Data` rec[579] bbox@0x18 desc@0x38. In every case `submesh_count` is at
+`bbox+0x1c` and the descriptor at `bbox+0x20`. `tools/gmdl_mesh.py` was rewritten to FIND the
+descriptor by self-consistency (format 4, stride 16, `index_bytes == 2*index_count`, indices fit)
+rather than assume an offset, and it now parses all four, including the two-sub-mesh file whose
+second sub-mesh indexes into the same vertex buffer (first index 24353).
+
 ### gmdl vertex layout ruled out (a second disproven hypothesis, with the test that killed it)
 Last session established gmdl's header is not a fixed triple. This session tested the NEXT guess -
 that the vertex block is a plain array of vec3 with a fixed stride. The test is exact and uses the
@@ -72,6 +85,10 @@ Windowed regression: `-w -devDirs -capture hl.bmp -captureAfter 20 -quitAfter 35
 `window ... icon=embedded`, `device windowed 1280x720`, `font atlas ready`, `showing real asset
 vehiclepainticons~/be_basic_shake_05.png`, capture 3,686,454 bytes.
 gmdl stride test: the bbox-match search reported no candidate; recorded with the method.
+gmdl descriptor: `python tools/gmdl_mesh.py --pkg 48/52/53/54` parses all four variants, finding the
+self-consistent descriptor(s) (`Spore_Content` desc@0x68 18000 idx; `EP1_Content_01` desc@0x80 64752
+idx; `EP1_Content_02` **two** descriptors @0x2c/0x339b4; `EP1_Data` desc@0x38 8814 idx), with
+`submesh_count` at `bbox+0x1c` and the descriptor at `bbox+0x20` in every case.
 `-w`/`-f`/`-r` (headless, log `flags:`): `-f -r 1024x768` → `windowed=0 … 1024x768`;
 `-w -r 800x600` → `windowed=1 … 800x600`; `-f -w -r 640x480` → `windowed=1` (**w wins**);
 `-r=1920x1080` → `windowed=1 … 1920x1080`.

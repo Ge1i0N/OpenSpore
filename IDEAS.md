@@ -201,6 +201,14 @@ The D3D9 backend stays the regression oracle: any GL output is diffed against it
     lesson restated: a fit on one file is not a format - test across many BEFORE claiming, which is
     exactly what `tools/gmdl_header_check.py` then did. gmdl needs per-variant discovery (watch for
     a variant tag; the first dword is 8 on every sample, so the discriminator is elsewhere).
+    **UPDATE (session 12): the real structure is now confirmed** — the "triple" is a genuine
+    sub-mesh descriptor `{format=4, index_count, stride=16, index_bytes=2*index_count}` but it sits
+    after a **variable** header + `u32 count` + `float32 bbox[7]` + `u32 submesh_count`, so its
+    offset moves per file (bbox@0x48/0x60/0x0c/0x18 in the four variants tested; the descriptor is
+    always at `bbox+0x20`). `tools/gmdl_mesh.py` now finds it by self-consistency instead of by
+    offset. The vertex attribute order is still open (a stride-16 read, at any of the three float
+    offsets, does not reproduce the bbox; ~10% of the block is non-finite), so that needs the
+    loader's disassembly.
 
 ## 6. Open questions, precisely stated (so the next disasm run is aimed, not wandering)
 

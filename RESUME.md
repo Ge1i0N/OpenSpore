@@ -209,9 +209,12 @@ silent verboseaudio 4.0 5.1 automation …`).
    reader.** For gmdl two hypotheses are already disproven (fixed header triple 18/400; uniform
    vec3 stride does not match the file's own bbox) — vertices are **interleaved**, so read the
    loader; do not scan bytes.
-2. **`gmdl` (0x00E6BCE5, 11,041) is ALSO a mesh format** — per-variant discovery; every payload
-   starts with dword `8` and contains `{0x1B684E2F,...}` groups (`0x1B684E2F` = rw4 id
-   byte-swapped, so big-endian tags). Tools: `tools/gmdl*.py`.
+2. **`gmdl` (0x00E6BCE5, 11,041) is ALSO a mesh format** — the sub-mesh descriptor is now
+   CONFIRMED (`tools/gmdl_mesh.py` finds it by self-consistency): variable header → `u32 count` →
+   `float32 bbox[7]` → `u32 submesh_count` → per sub-mesh `{format=4, index_count, stride=16,
+   index_bytes=2*index_count}` + `u16 indices`. **Remaining: the vertex attribute order** (stride 16
+   is known, but a stride-16 read at any float offset does not reproduce the bbox and ~10% of the
+   block is non-finite → read the loader, do not scan bytes).
 3. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
 4. Wire loose directories (unpacked trees) into `fs` as a data source; a separate `OpenSpore.Cli`
    binary would be tidier than `-headless`, but the capability already exists.

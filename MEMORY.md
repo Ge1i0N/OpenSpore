@@ -312,31 +312,47 @@ Tooling: `tools/rw4.py` (validates + dumps the 28-byte header; stops there on pu
 the `+0x0c` flags, or whether `"454"` is a version or build tag from any third-party RW4
 description - find the reader in `.text` and read it like RefPack was.
 
-## GMDL (generated model) — partial structure, layout NOT established
+## GMDL (generated model) — sub-mesh descriptor CONFIRMED; vertex attribute layout still open
 
 `gmdl` (type 0x00E6BCE5, **11,041 resources**) is a baked mesh: payloads contain float32 data and
 u16 data, and every one starts with dword `8` (a version). It is more tractable than the rw4
-container and is worth pursuing, but **its header layout is NOT established** - see the disproven
-item in `IDEAS.md` §5, where a triple that fit one file failed on 400.
+container. Two layout hypotheses are already disproven (fixed header triple 18/400; uniform vec3
+stride) — see `IDEAS.md` §5.
 
-What is solid (from the bytes, cross-checked on many records):
+**CONFIRMED structure (session 12, internally consistent on 4 different variants and matching the
+one fully-checked record).** After a variable header of `{tag, value}` groups comes:
+
+```
+u32               count            (1 or 2; sits right before the bbox)
+float32 bbox[7]   minXYZ maxXYZ 1.0                (exactly 0x1c bytes)
+u32               submesh_count    (= 1 or 2)
+repeat submesh_count times:
+    u32  format        (= 4)
+    u32  index_count
+    u32  stride        (= 16)
+    u32  index_bytes   (== index_count * 2)
+    u16  indices[index_count]
+... then the vertex attribute block ...
+```
+
+Verified offsets: `Spore_Content` rec[12] bbox@0x48 desc@0x68; `EP1_Content_01` rec[0] bbox@0x60
+desc@0x80; `EP1_Content_02` rec[1] bbox@0x0c submesh_count=**2** desc@0x2c; `EP1_Data` rec[579]
+bbox@0x18 desc@0x38. In every case `submesh_count` sits at `bbox+0x1c` and the descriptor at
+`bbox+0x20`. This is the descriptor that the earlier "fixed triple" hypothesis was groping for; it
+is real but **not at a fixed offset** (the variable header moves it).
+
+What is still solid but not enough:
 - first dword = `8` on all 400 sampled records.
-- payloads mix float32 runs and u16 runs; the region after a small header holds a u16 array whose
-  values are small and monotonic-ish (looks like triangle indices: `0 1 2 3 1 0 1 4 2 0 ...`).
 - the header region contains repeated groups of the form
   `{0x1B684E2F, <value>, 0x00616041}` - note `0x1B684E2F` is the **rw4 type id byte-swapped**
   (`0x2F4E681B` in big-endian), consistent with RefPack's big-endian integers, so gmdl likely
   carries big-endian tags.
-- `Spore_Content.package` rec[12] (175,264 B) has a header bbox in float32 at `+0x48`
-  (`min(-0.4785,-0.4343,0.0000) max(0.4785,0.2700,0.9840) 1.0`), an index field at `+0x6c` = 18,000
-  and a u16 array at `+0x78` with exactly 18,000 in-range entries (max 3,764). That is a genuine
-  structure - but it is **one variant**, not the format (see disproven item).
 - **vertices are INTERLEAVED, not a plain vec3 array.** A stride search after the index block was
   scored by matching the computed bounding box against the header bbox (an exactness test using the
   file's own header) and found **no** consistent stride: reading the block as 12/16/20/24/28/32-byte
-  vertices never reproduces the header bbox, because the block mixes positions with other attributes
-  (normals/UVs/u16s) that break a uniform float run. So the header bbox is a **summary of the whole
-  mesh**, and the attribute layout must come from the loader's disassembly, not from scanning bytes.
+  vertices never reproduces the header bbox. Combined with the descriptor's `stride = 16`, the
+  attribute order within a vertex (position first? or not?) is the next thing to reverse - from the
+  loader's disassembly, not from byte scanning.
 
 Tools: `tools/gmdl.py` (locate/inspect), `tools/gmdl_mesh.py` (bbox + index validation on a file),
 `tools/gmdl_header_check.py` (the broad invariant test that killed the general claim).
