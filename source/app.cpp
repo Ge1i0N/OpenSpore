@@ -26,6 +26,7 @@
 #include "engine/naming.h"
 #include "engine/pkg.h"
 #include "engine/appstates.h"
+#include "engine/spui.h"
 #include "engine/text.h"
 #include "render/device.h"
 #include "render/overlay.h"
@@ -438,6 +439,10 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     // the evidence; it must not add a boot marker.
     appstates::instance().load();
 
+    // 3e. the game's UI LAYOUTS (`spui`), read with the schema that the shipped designer XML supplies.
+    // Anchor-driven, so it does not depend on the ids the designer XML omits (analysis/spui-schema.md).
+    spui::instance().load();
+
     // 4. window (skipped headless)
     if (g_args.headless) {
         mark(4, true, "headless: no window");
@@ -634,6 +639,65 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                       char nb[24];
                       _snprintf_s(nb, sizeof(nb), _TRUNCATE, "0x%08X", key);
                       return std::string(nb) + " = " + text::to_display_ascii(v);
+                  }});
+    console::reg({"spui", "The game's UI layouts, read with the shipped designer schema.",
+                  "-list | -screen | -win <i>",
+                  [](const console::CmdContext& c) -> std::string {
+                      auto& rd = spui::instance();
+                      if (!rd.loaded()) return "spui not loaded";
+                      if (c.args.size() < 2 || c.args[1] == "-list") {
+                          std::string s = rd.stats() + "\n";
+                          size_t i = 0;
+                          for (const auto& L : rd.layouts()) {
+                              size_t a = 0;
+                              for (const auto& w : L.windows) a += w.has_area;
+                              char b[192];
+                              std::snprintf(b, sizeof(b), "  [%2zu] %-28s rec[%-6u] 0x%08X  %4zu win "
+                                            "(%zu with Area, %zu/%zu anchors)",
+                                            i, L.package.c_str(), L.record, L.instance,
+                                            L.windows.size(), a, L.recognized, L.anchors);
+                              s += b; s += "\n";
+                              if (++i >= 24) { s += "  ...\n"; break; }
+                          }
+                          return s;
+                      }
+                      const spui::Layout* L = rd.best_screen();
+                      if (c.args[1] == "-win" && c.args.size() >= 3) {
+                          size_t want = (size_t)std::strtoul(c.args[2].c_str(), nullptr, 10);
+                          size_t i = 0;
+                          for (const auto& lw : rd.layouts()) {
+                              if (i++ != want) continue;
+                              L = &lw;
+                              break;
+                          }
+                      }
+                      if (!L) return "no layout parsed";
+                      std::ostringstream o;
+                      o << "layout " << L->name() << "\n";
+                      size_t n = 0;
+                      for (const auto& w : L->windows) {
+                          o << "  win @" << w.offset << " ctl=0x" << std::hex << w.control_id
+                            << std::dec << " flags=0x" << std::hex << w.flags << std::dec;
+                          if (w.has_area) {
+                              char b[110];
+                              std::snprintf(b, sizeof(b), " ltrb=(%.4g, %.4g, %.4g, %.4g) = %.4gx%.4g",
+                                            w.area.left, w.area.top, w.area.right, w.area.bottom,
+                                            w.area.w(), w.area.h());
+                              o << b;
+                          } else {
+                              o << " area=<none>";
+                          }
+                          if (w.caption_is_ref) {
+                              char b[64];
+                              std::snprintf(b, sizeof(b), " text-table 0x%08X", w.caption_table);
+                              o << b;
+                          } else if (!w.caption.empty()) {
+                              o << " caption=\"" << w.caption << "\"";
+                          }
+                          o << "\n";
+                          if (++n >= 40) { o << "  ...\n"; break; }
+                      }
+                      return o.str();
                   }});
     console::reg({"gamestates", "The game's OWN state table (the SporeAppStates trigger resource).",
                   "-list | -entry | -modes | <name>",

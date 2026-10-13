@@ -20,7 +20,8 @@ and (4) for the variable ones, finds how the payload declares its own length.
 """
 import sys, os, re, struct, glob
 from collections import Counter, defaultdict
-sys.path.insert(0, r"E:\_DPT_Projects_E\_Harness\OpenSpore")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
 from tools.gmdl import all_packages
 from tools.pkg_kinds import HDR, KINDS, OFF_ALT, OFF_COUNT, OFF_IOFF
 from tools.refpack import decode
@@ -197,6 +198,23 @@ for (v, a), ss in sorted(samples.items(), key=lambda kv: -len(kv[1])):
 print("  TOTALS over all variable (id, code) pairs:")
 for kk, cc in tally.most_common():
     print("     %-30s %d" % (kk, cc))
+
+# Emit the measured id -> code map for tools/gen_spui_schema.py, so the C++ reader carries the
+# MEASURED code rather than a guess. Majority vote per id; a tie is recorded as the winner plus the
+# agreement fraction so a consumer can see how solid it is.
+import json as _json
+out = {}
+for v, c in codes.items():
+    if not c:
+        continue
+    a, n = c.most_common(1)[0]
+    out[str(v)] = {"code": a, "count": n, "agree": n / float(sum(c.values())),
+                   "alternatives": len(c)}
+p = os.path.join(ROOT, "analysis", "audit", "spui_codes.json")
+os.makedirs(os.path.dirname(p), exist_ok=True)
+with open(p, "w", encoding="utf-8") as f:
+    _json.dump(out, f, indent=1, sort_keys=True)
+print("wrote %s (%d ids)" % (p, len(out)))
 
 # ---- 5. judge a variable record by eye ----------------------------------------------------
 print()

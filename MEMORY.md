@@ -559,10 +559,27 @@ file said earlier in the same session.
   drifts the cursor by 2, and it accumulates). **A distribution that matches your hypothesis is not
   evidence for it when other hypotheses predict the same distribution; the discriminating test was
   per-id, and it was cheap.** No bit cursor is needed.
-* **`Area` is RESOLVED.** An earlier note here called its pitch 6 and left it as the most important open
-  question; that was an artifact of pooling block-scoped LOW ids with HIGH ones. `Area` carries code 16
-  and a 24-byte record = `rectf`, and it decodes to real UI coordinates across **22,384 windows**:
-  `(618, 183, 802, 209)`, `(49, 6, 161, 23)`, `(0, 0, 40, 26)`.
+* **`Area` is RESOLVED, and it is LTRB, not x/y/w/h.** An earlier note here called its pitch 6 and left
+  it as the most important open question; that was an artifact of pooling block-scoped LOW ids with HIGH
+  ones. `Area` carries code 16 and a 24-byte record = `rectf` of four floats. The four floats are
+  **LEFT, TOP, RIGHT, BOTTOM** (a corner pair, like a Win32 RECT): `(168, -10, 192, 14)` is a 24x24 icon
+  and `(0, 3, 181, 5)` is a 181x2 bar, neither of which an x/y/w/h reading can produce. **The
+  confirmation is quantitative, not aesthetic** - switching to LTRB raised the usable-area count from
+  7,838 to **9,547** of 11,465 windows, because x/y/w/h rejects any rect whose "h" is a bottom
+  coordinate below "y" or absurdly small. Negative left/top are legitimate (off-screen anchors for
+  slide-in animation).
+* **The alphas in a layout are MEANINGFUL - do not force them opaque.** Our first render ORed
+  `0xFF000000` into `BackgroundColor` and the screen became opaque grey slabs hiding the art: the
+  shipped values are `0x007F7F7F` (fully transparent grey) and `0xFFFFFFFF` (opaque white). Use the
+  ARGB as stored, and outline the box so a transparent window is still visible as the designer's rect.
+* **WE DRAW A REAL SCREEN NOW.** `source/engine/spui.{h,cpp}` + the generated
+  `source/engine/spui_schema.inc` (`tools/gen_spui_schema.py`, same pattern as `typeids.inc`), driven by
+  `title_render()`: 400 layouts, 11,465 windows, 9,547 with a usable Area, 472,291 records read, real
+  captions from the layout itself - "Create a New Game", "color picker", "Selected Color" - over the
+  real UI atlas. `analysis/shots/spui_real.png`, VERIFY row 48.
+  The reader is **anchor-driven, not sequential**, on purpose: a sequential walk derails in 637/748
+  files on ids the designer XML omits, but every anchor whose id IS known can be read exactly without
+  interpreting the bytes between two anchors. Unfinished vocabulary must not block finished structure.
 * **THE INTEGRATION THAT CLOSES THE MENU PATH: a layout names its LOCALE TABLE.** Code 18 is
   overloaded, split by a leading u16 of `0xFFFF`: 4,207 inline UTF-16 strings (`len=8 -> "To..."`) and
   **3,107 references, of which 21 of 36 distinct values are real en-us `locale` TABLE INSTANCES**
@@ -576,6 +593,9 @@ file said earlier in the same session.
 * **Still open, and it is not the bit format:** a sequential walk reaches EOF cleanly in **0/748**
   layouts and derails in 637 with "id not in schema", because the designer XML lists only 227 of the ids
   the binaries use. **Extending the schema is the remaining job**, and it is vocabulary, not structure.
+  Two further items are open and are NOT blocking: `Reader::load(limit)` currently caps at 400 of the
+  748 layouts, and `Window::caption_table` (the locale table a layout names) is not yet resolved through
+  `engine/text.cpp`, so only the INLINE captions reach the screen today.
 * **TRAP: a `.rdata` pointer is not always a vtable.** `0x903337` stores `0x0143a460` into `[esi]`
   exactly where a ctor puts a vtable — it is the ASCII `"UTF/XmlTokenReader/TokenIOContext/mAllocator"`.
   As a vtable it would have invented a fake 12-method class; as a string it named the reader family.

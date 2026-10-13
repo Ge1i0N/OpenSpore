@@ -1,0 +1,1172 @@
+{
+ "1": {
+  "agree": 0.6321449704142011,
+  "alternatives": 16,
+  "code": 9,
+  "count": 42733
+ },
+ "10": {
+  "agree": 0.7969762015865609,
+  "alternatives": 2,
+  "code": 9,
+  "count": 42698
+ },
+ "11": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 10877
+ },
+ "12": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 17,
+  "count": 10877
+ },
+ "13": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 17,
+  "count": 10877
+ },
+ "1321318616": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 24565,
+  "count": 65
+ },
+ "1328218112": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 2868
+ },
+ "1328218113": {
+  "agree": 0.9926778242677824,
+  "alternatives": 2,
+  "code": 9,
+  "count": 2847
+ },
+ "1328218114": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 2847
+ },
+ "1328218115": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 2847
+ },
+ "1328218116": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 2847
+ },
+ "1328218117": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 2847
+ },
+ "1328283648": {
+  "agree": 0.5950184501845018,
+  "alternatives": 3,
+  "code": 11,
+  "count": 645
+ },
+ "1328283649": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 16
+ },
+ "1328283904": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 506
+ },
+ "1328283905": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 506
+ },
+ "1328283906": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 506
+ },
+ "1328283907": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 506
+ },
+ "1328283920": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 48
+ },
+ "1329351206": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 5898
+ },
+ "1329351207": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 6299
+ },
+ "1329351208": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 6027
+ },
+ "1329351209": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 6027
+ },
+ "1329351210": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 6027
+ },
+ "1329351211": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 6027
+ },
+ "17232203": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 24565,
+  "count": 3
+ },
+ "1866726605": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 2475
+ },
+ "1866726606": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 2475
+ },
+ "2": {
+  "agree": 0.7164827424278,
+  "alternatives": 3,
+  "code": 9,
+  "count": 42721
+ },
+ "252414835": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 24565,
+  "count": 1
+ },
+ "255510366": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 212
+ },
+ "255590413": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 8145
+ },
+ "255655936": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 7,
+  "count": 7919
+ },
+ "267458352": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 145
+ },
+ "267458354": {
+  "agree": 0.993103448275862,
+  "alternatives": 2,
+  "code": 20,
+  "count": 144
+ },
+ "267458355": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 145
+ },
+ "267458356": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 145
+ },
+ "267458357": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 145
+ },
+ "267458358": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 145
+ },
+ "267458359": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 145
+ },
+ "267458360": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 145
+ },
+ "267458361": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 145
+ },
+ "267458362": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 145
+ },
+ "267458363": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 145
+ },
+ "267458364": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 145
+ },
+ "2941843409": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 2
+ },
+ "2941843411": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 25
+ },
+ "2941843413": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 25
+ },
+ "2941843414": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 25
+ },
+ "2941843415": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 24
+ },
+ "3": {
+  "agree": 0.7775810524482628,
+  "alternatives": 28,
+  "code": 9,
+  "count": 53580
+ },
+ "34105885": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 19
+ },
+ "37285000": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 10
+ },
+ "38935290": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 740
+ },
+ "38935291": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 2,
+  "count": 740
+ },
+ "39038189": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 3518
+ },
+ "39038233": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 2,
+  "count": 3518
+ },
+ "39038348": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 3
+ },
+ "39038349": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 3
+ },
+ "39104850": {
+  "agree": 0.9223990903922683,
+  "alternatives": 2,
+  "code": 11,
+  "count": 3245
+ },
+ "39104851": {
+  "agree": 0.9223990903922683,
+  "alternatives": 2,
+  "code": 11,
+  "count": 3245
+ },
+ "39112187": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 3518
+ },
+ "39112188": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 3518
+ },
+ "39185144": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 3755
+ },
+ "39185145": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 2,
+  "count": 3755
+ },
+ "39185146": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 3755
+ },
+ "4": {
+  "agree": 0.8413907381028518,
+  "alternatives": 3,
+  "code": 11,
+  "count": 57886
+ },
+ "4005670912": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 22112
+ },
+ "4005670913": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 22384
+ },
+ "4005670914": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 22112
+ },
+ "4005670916": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 22112
+ },
+ "4005670917": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 16,
+  "count": 22384
+ },
+ "4005670918": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 17107
+ },
+ "4005670919": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 14913
+ },
+ "4005670922": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 3578
+ },
+ "4005670923": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1880
+ },
+ "4005670924": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 8582
+ },
+ "4005670926": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 22112
+ },
+ "4005675009": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 9
+ },
+ "4005675010": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 9
+ },
+ "4005675011": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 9
+ },
+ "4005675012": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 9
+ },
+ "4005675013": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 9
+ },
+ "4005675014": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 9
+ },
+ "4005675015": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 9
+ },
+ "4005675016": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 9
+ },
+ "4005679104": {
+  "agree": 0.9939485627836612,
+  "alternatives": 2,
+  "code": 11,
+  "count": 657
+ },
+ "4005679105": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 5018
+ },
+ "4005679106": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 5014
+ },
+ "4005679107": {
+  "agree": 0.8689668927004388,
+  "alternatives": 2,
+  "code": 9,
+  "count": 4357
+ },
+ "4005679108": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 5014
+ },
+ "4005679109": {
+  "agree": 0.8689668927004388,
+  "alternatives": 2,
+  "code": 9,
+  "count": 4357
+ },
+ "4005679110": {
+  "agree": 0.8696606786427146,
+  "alternatives": 2,
+  "code": 20,
+  "count": 4357
+ },
+ "4005679111": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 655
+ },
+ "4005679112": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 655
+ },
+ "4005679113": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 655
+ },
+ "4005679114": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 17,
+  "count": 4357
+ },
+ "4005683201": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 50
+ },
+ "4005683202": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 50
+ },
+ "4005683203": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 50
+ },
+ "4005683204": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 50
+ },
+ "4005687297": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 11
+ },
+ "4005687298": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 11
+ },
+ "4005687299": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 11
+ },
+ "4005687300": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 11
+ },
+ "4005687301": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 11
+ },
+ "4005687302": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 11
+ },
+ "4005732353": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 12
+ },
+ "4005732354": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 12
+ },
+ "4005732355": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 12
+ },
+ "4005732356": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 12
+ },
+ "4005732357": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 2
+ },
+ "4005732358": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 12
+ },
+ "4005732359": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 12
+ },
+ "4005732360": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 12
+ },
+ "4005732361": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 12
+ },
+ "4005732362": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 12
+ },
+ "4005732363": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 12
+ },
+ "4005732364": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 12
+ },
+ "4005736448": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 35
+ },
+ "4005736449": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 35
+ },
+ "4005736453": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 35
+ },
+ "4005736457": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 35
+ },
+ "4005736458": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 35
+ },
+ "4005736459": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 35
+ },
+ "4005736460": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 35
+ },
+ "4005736461": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 35
+ },
+ "4005736462": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 35
+ },
+ "4005736463": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 35
+ },
+ "4005736464": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 35
+ },
+ "4008698563": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 24565,
+  "count": 4
+ },
+ "4013686794": {
+  "agree": 0.9510742643624475,
+  "alternatives": 2,
+  "code": 9,
+  "count": 8145
+ },
+ "4013686795": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 17,
+  "count": 8145
+ },
+ "4013686796": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 8145
+ },
+ "40478793": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 3518
+ },
+ "40478795": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 3518
+ },
+ "40479001": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 3498
+ },
+ "40479003": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 11,
+  "count": 3498
+ },
+ "40481158": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 3498
+ },
+ "40501931": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 2,
+  "count": 3498
+ },
+ "45922578": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 2,
+  "count": 2
+ },
+ "45940068": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 2,
+  "count": 249
+ },
+ "45940069": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 2,
+  "count": 249
+ },
+ "45940070": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 5,
+  "count": 249
+ },
+ "46265031": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 86
+ },
+ "46265034": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 86
+ },
+ "46265044": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 2,
+  "count": 86
+ },
+ "5": {
+  "agree": 0.796436899542953,
+  "alternatives": 3,
+  "code": 11,
+  "count": 42693
+ },
+ "51183616": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 26
+ },
+ "53697554": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 7703
+ },
+ "53697555": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 7703
+ },
+ "53697556": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 7703
+ },
+ "53697557": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 7703
+ },
+ "53697601": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 3755
+ },
+ "53697602": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 3755
+ },
+ "53697603": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 3755
+ },
+ "53697604": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 3755
+ },
+ "53713234": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 3755
+ },
+ "54320155": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 740
+ },
+ "54320162": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 740
+ },
+ "54320372": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 740
+ },
+ "54493057": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 430
+ },
+ "54493065": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 430
+ },
+ "54493068": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 430
+ },
+ "54652768": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 740
+ },
+ "54653591": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 430
+ },
+ "58019187": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 1821
+ },
+ "58019188": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 1821
+ },
+ "58019189": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 1722
+ },
+ "58019190": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 17,
+  "count": 1821
+ },
+ "6": {
+  "agree": 0.796436899542953,
+  "alternatives": 3,
+  "code": 11,
+  "count": 42693
+ },
+ "60451302": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 20,
+  "count": 20944
+ },
+ "60453404": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 24565,
+  "count": 1
+ },
+ "7": {
+  "agree": 0.7965111940298507,
+  "alternatives": 3,
+  "code": 11,
+  "count": 42693
+ },
+ "792912290": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 6
+ },
+ "792912291": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 6
+ },
+ "797310976": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 16
+ },
+ "797310977": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 16
+ },
+ "797376512": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 16
+ },
+ "79788053": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 23
+ },
+ "8": {
+  "agree": 0.7969572521933919,
+  "alternatives": 2,
+  "code": 11,
+  "count": 42693
+ },
+ "80324717": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 23
+ },
+ "80324718": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 23
+ },
+ "81598989": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 1819
+ },
+ "82553427": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 18,
+  "count": 7
+ },
+ "82563716": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 9,
+  "count": 1819
+ },
+ "88084640": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1891
+ },
+ "88084641": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1891
+ },
+ "88084642": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1891
+ },
+ "88084643": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1891
+ },
+ "88084644": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1891
+ },
+ "88084645": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1891
+ },
+ "88084646": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1891
+ },
+ "88084647": {
+  "agree": 1.0,
+  "alternatives": 1,
+  "code": 19,
+  "count": 1891
+ },
+ "9": {
+  "agree": 0.7969572521933919,
+  "alternatives": 2,
+  "code": 11,
+  "count": 42693
+ }
+}

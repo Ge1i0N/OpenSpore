@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 82.2%** | **Overall: 75.5%** | done 180 / partial 25 / todo 50 (255 features)
+**Engine reversal: 81.6%** | **Overall: 75.1%** | done 182 / partial 25 / todo 52 (259 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **38%** | 7 | 6 | 13 |
+| formats | **40%** | 9 | 6 | 15 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **30%** | 2 | 2 | 6 |
@@ -285,9 +285,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 38%
+## formats — 40%
 
-*7 done · 6 partial · 13 todo*
+*9 done · 6 partial · 15 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -305,7 +305,11 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | 🚧 | partial | spui layout | 524 screens (407 named); DESERIALIZER DOOR FOUND: factory 0x810870 + loader 0x810940 (type id 0x250FE9A2 confirmed in code); it is a UTF/XmlTokenReader TOKEN STREAM, so byte parsing was doomed |
 | ✅ | done | spui token alphabet | NOT bit-packed: byte-packed records id(4)|code:u16|marker(==1)|payload, code stable per id (94.5% of high ids), sizes measured 9/11->4, 16->16 rectf, 17->8, 20->6, 19->array count, 18->string |
 | ✅ | done | spui schema (the dictionary) | 14 `xml` resources = the shipped Spore UI Designer project: 306 proxy ids (66 Class + 240 Property), 227 present in spui, 748/748 layouts carry them |
-| ✅ | done | spui windows | 22,384 windows extracted with real Area rects (618,183,802,209 / 49,6,161,23 / 0,0,40,26), WindowFlags, colors, fonts, across all 748 layouts |
+| ✅ | done | spui windows | engine/spui.cpp: 400 layouts, 11,465 windows, 9,547 with a usable Area, 472,291 records; Area is LEFT,TOP,RIGHT,BOTTOM (the LTRB reading raised usable areas 7,838 -> 9,547) |
+| ✅ | done | spui drawn on screen | Title renders the real layout at real coordinates with the game's own captions (Create a New Game / color picker / Selected Color) over the real UI atlas |
+| ✅ | done | spui alphas | the shipped ARGB is meaningful (0x007F7F7F transparent); forcing alpha opaque turned the screen into slabs - use as stored + outline |
+| ⬜ | todo | spui all 748 layouts | Reader::load caps at 400 |
+| ⬜ | todo | layout table -> text | Window::caption_table names a locale table but is not yet resolved through engine/text.cpp, so only inline captions show |
 | ✅ | done | layout -> locale table | code 18 splits on 0xFFFF: 4,207 inline UTF-16 + 3,107 refs, of which 21/36 distinct are en-us locale TABLE instances (accidental rate 4.66e-08); 0x2B7A0311 = fnv1_lower(GalaxyGameEntry) in BOTH directions |
 | ⬜ | todo | spui full sequential parse | walk derails in 637/748 with 'id not in schema' - the designer XML lists only 227 of the ids the binaries use. Remaining work is VOCABULARY, not structure |
 | 🚧 | partial | gmsh | stable 24-byte header found (BE words + float runs); layout not derived |

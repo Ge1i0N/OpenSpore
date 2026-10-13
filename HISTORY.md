@@ -7,7 +7,33 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
-### THE SPUI DOOR: `spui` is a TOKEN STREAM, so byte parsing was always doomed
+### WE DRAW A REAL SPORE UI SCREEN NOW: 9,547 windows at the game's own coordinates, with its own captions
+`source/engine/spui.{h,cpp}` + the generated `source/engine/spui_schema.inc`
+(`tools/gen_spui_schema.py`, the same pattern as `typeids.inc`: the registry is DATA, so the table is
+generated from the shipped files and never hand-typed). `title_render()` draws it.
+Measured: **400 layouts, 11,465 windows, 9,547 with a usable Area, 472,291 records read, 306 schema
+ids**, and the captions come out of the layout itself: **"Create a New Game"**, **"color picker"**,
+**"Selected Color"**, "Pick A Star For Your New Game" with slots "1".."5" beside it — over the real UI
+atlas (`analysis/shots/spui_real.png`). This is the goal the user set for the Loader ("чтобы Лоадер
+умел грузить меню"), reached from the game's data rather than from invented chrome.
+Two facts the render itself corrected:
+* **`Area` is LEFT, TOP, RIGHT, BOTTOM, not x/y/w/h.** `(168,-10,192,14)` is a 24x24 icon and
+  `(0,3,181,5)` a 181x2 bar; an x/y/w/h reading cannot produce either. The confirmation is
+  quantitative, not aesthetic: switching to LTRB raised the usable-area count from 7,838 to **9,547**,
+  because x/y/w/h rejects every rect whose "h" is really a bottom coordinate. Negative left/top are
+  legitimate (off-screen anchors for slide-in animation), so a validity test that discards them is
+  wrong twice over.
+* **The alphas in a layout are meaningful — do not force them opaque.** The first render ORed
+  `0xFF000000` into `BackgroundColor` and the screen became opaque grey slabs burying the art: the
+  shipped values are `0x007F7F7F` (fully transparent grey) and `0xFFFFFFFF` (opaque white). Use the
+  ARGB as stored and outline the box, so a transparent window still reads as the rect the designer placed.
+The reader is **anchor-driven, not sequential**, deliberately: a sequential walk derails in 637/748
+files on ids the designer XML omits, but every anchor whose id IS known can be read exactly without
+interpreting the bytes between two anchors. **Unfinished vocabulary must not block finished structure.**
+
+### THE SPUI DOOR: the format's dictionary was shipped in the game (`spui` is a RECORD stream, not a token stream)
+**Heading corrected in-pass: this session first concluded `spui` was a bit-packed TOKEN STREAM, and that
+was wrong about the mechanism.** It is byte-packed RECORDS. See the RETRACTION below.
 Found by following the DATA rather than the bytes: the recovered state script names the command —
 `cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`. Grepping `.rdata` for the **verb**
 `uilayout` produced the whole class cluster in one step, after grepping for the *format* had produced

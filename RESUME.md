@@ -26,7 +26,7 @@ we are.
 | draw real content: `gmdl` + `raster` mesh grid | ✅ | `analysis/shots/model_grid.png` |
 | resource manager `0x8de4b0`, `trigger` configs | 🚧 | `analysis/content-loading.md` |
 | **localized text: `locale` tables (18,441 entries, 10,246 keys)** | ✅ | `source/engine/text.cpp`, `analysis/text-locale.md` |
-| **UI/menus: `spui` layouts (524 screens, 407 named)** | 🚧 **door FOUND** | `analysis/spui-loading.md` — the deserializer is `0x810870`/`0x810940`, and `spui` is a **token stream** (`UTF/XmlTokenReader`), not a fixed struct: that is why byte parsing failed |
+| **UI/menus: `spui` layouts READ and DRAWN** | ✅ | `source/engine/spui.cpp`, `analysis/spui-schema.md`, `analysis/shots/spui_real.png` — 400 layouts, 11,465 windows, 9,547 with a usable Area, real captions ("Create a New Game", "color picker") |
 | states: mechanism + a real `Title` state that transitions to `Loader` | ✅ | `source/states/title.cpp`, `analysis/shots/title_state.png` |
 | **states: the game's own state machine (60 states, 17 modes)** | ✅ **RECOVERED FROM DATA** | `analysis/states.md`, `analysis/scripts/SporeAppStates.txt` |
 | **states: the game's table DRIVES our engine** | ✅ | `-state:Main` → `Main [0x0]` → `GalaxyGameEntry [0x02ccda9c]`; `source/engine/appstates.cpp` |
@@ -43,39 +43,30 @@ group AND instance names. Result: 8,499 decoded bytes of plain ArgScript → **6
 entry `state Main -id 0` ("Spore Launch Screen") → `gotoState GalaxyGameEntry` (`-id 0x02ccda9c`). The
 five stages Cell → Creature → Tribe → Civ → Space are explicit data.
 
-**Next on the path — `spui` is UNBLOCKED, and the menu is now reachable without more format work.**
+**Built this session, and it was the visible goal:** the Loader/Title screen composes a REAL layout.
+`source/engine/spui.{h,cpp}` + the generated `source/engine/spui_schema.inc` (from
+`tools/gen_spui_schema.py`, same pattern as `typeids.inc`), driven by `title_render()`. Verified:
+400 layouts, 11,465 windows, 9,547 with a usable Area, 472,291 records, real captions on screen.
 
-Three results, all measured this session:
+**Next on the path, in order:**
+1. **Raise the layout limit and cover all 748** (`Reader::load(limit)` currently caps at 400).
+2. **Extend the schema vocabulary.** A sequential walk still derails in 637/748 files with "id not in
+   schema" because the designer XML lists only 227 of the ids the binaries use. The reader is
+   anchor-driven so it does not block on this, but a clean sequential parse needs the missing names —
+   and the derailing ids are visible in the bytes, so this is bookkeeping, not discovery.
+3. **Resolve the code-18 table reference to text.** We know a layout names its locale TABLE
+   (21 of 36 distinct refs, accidental rate 4.66e-08); wiring `Window::caption_table` through
+   `engine/text.cpp` gives every widget its real string instead of only the inline ones.
+4. **The presence mask** (a 10-member / 40-byte struct occupies 10 bytes, so only non-default members
+   serialize — still a hypothesis).
+5. Then the `mode` table, which is what the 60 states actually ask for (`mode GalaxyGameEntry` is
+   logged as NOT EXECUTED today).
 
-1. **The door.** The state script names it: `cheat "uilayout -load E3LaunchScreen 0x027996d8
-   0x0279bf9e"`. Grepping the **verb** produced factory `0x00810870` (gated on tag `0x0510A95B`) and
-   loader `0x00810940`, which does `cmp [eax+4], 0x250FE9A2` — **our `spui` type id confirmed in code**.
-2. **The dictionary was shipped in the game.** 14 resources of type **`xml` (0xCF6C21B8)** are the Spore
-   UI Designer's own project files (70 KB format definition + 37 KB class catalogue). Their `proxy`
-   attributes give **306 ids**; 227 appear in the binaries and **748/748 layouts contain them**. A record
-   is `id(4) | code:u16 | marker:u16(==1) | payload`, the code is **stable per id** (94.5% of high ids),
-   and the payload size follows the code (9/11 -> 4, **16 -> 16 = `rectf`**, 17 -> 8, 20 -> 6,
-   19 -> array count, 18 -> string). **22,384 windows extracted with real geometry**: `Area` decodes to
-   `(618, 183, 802, 209)`, `(49, 6, 161, 23)`, `(0, 0, 40, 26)`, plus `WindowFlags`, colours, fonts.
-3. **A layout names its LOCALE TABLE.** Code 18 splits on a leading `0xFFFF` into 4,207 inline UTF-16
-   strings and 3,107 references — **21 of 36 distinct refs are real en-us locale table instances**
-   (accidental rate 4.66e-08): `0xC0152A6D` "Spore Guide", **`0x2B7A0311` = `fnv1_lower("GalaxyGameEntry")`**,
-   `0xAD7B2086` "Audio Settings", `0x7C6511A1` "Sort By:", `0x2C978DA4` "Create a Creature", `0x40D7E685`
-   "OK", `0x8B96F855` "Missions List". That links the **state machine**, the **localized text** and the
-   **UI layout** — three systems reversed independently — and it means we can compose a real screen now:
-   geometry from the layout, text from `source/engine/text.cpp`.
-
-**CORRECTION to my own earlier claim, recorded because it is the transferable part:** I had written that
-the off-boundary id hits proved `spui` is **bit-packed**. It is not — the stream is **byte-packed with
-record sizes that are not multiples of 4**, which drifts the cursor and produces the same uniform mod-4
-histogram. The zero-free ids (which padding cannot explain) are still uniform across alignments, so the
-bit-packing inference was unfounded. A distribution matching your hypothesis is not evidence for it.
-
-**So the remaining format work is vocabulary, not structure:** a sequential walk derails in 637/748
-files with "id not in schema" because the designer XML lists only 227 of the ids the binaries use.
-Detail + all measurements: **`analysis/spui-schema.md`**, `tools/spui_schema.py`, `spui_align.py`,
-`spui_shape.py`, `spui_records.py`, `spui_typecode.py`, `spui_read.py`, `spui_windows.py`,
-`spui_table_ref.py`.
+**Correction recorded, because it is the transferable part:** this session first concluded from a
+uniform mod-4 histogram that `spui` is **bit-packed**. It is not — it is **byte-packed with record
+sizes that are not multiples of 4**, which drifts the cursor and produces the same histogram. The
+per-id test (zero-free patterns, which padding cannot explain) killed the claim. A distribution that
+matches your hypothesis is not evidence for it.
 ## Audit of our own work (DONE, session 13)
 
 User request: use Ghidra to check **everything, starting from `Main`**, to see whether we started
@@ -102,16 +93,17 @@ Toolchain decision + the Windows junction trap that cost three imports: **`analy
 
 ## One-line status
 
-**Our engine reads AND draws real Spore content.** The pipeline runs end to end: DBPF index →
-RefPack → type/instance naming → decode → D3D9 → pixels. It draws a **2x2 grid of four real Spore
-models, each with its own texture** (a model's texture is the `raster` with the same instance id,
-865/865 match) on our own renderer - `analysis/shots/model_grid.png`. The game's inventory (150,945
-resources, 10.27 GB, **112,155 names**) is on screen. RefPack is solved (30,000/30,000); the unpacker
-writes real resources (5,747 textures -> BMP, 6,979 models -> OBJ + their textures, 0 failed);
-`gmdl` position parsing is **solved** for 63% of the game (variable stride = vertex_bytes/count).
-Progress map: `analysis/shots/reverse_map.png` + `analysis/features.md`.
+**Our engine now draws a REAL Spore UI screen.** `source/engine/spui.cpp` reads the `spui` layouts with
+the dictionary that EA's own UI designer shipped inside the game (14 `xml` resources, 306 `proxy` ids),
+and the Title state renders the game's windows at the game's own coordinates with the game's own
+captions — "Create a New Game", "color picker", "Selected Color" — over the real UI atlas
+(`analysis/shots/spui_real.png`). Measured: 400 layouts, 11,465 windows, 9,547 with a usable Area,
+472,291 records read, 306 schema ids.
 
-
+The pipeline is now end-to-end on THREE independent data tracks, all from the shipped packages:
+DBPF → RefPack → type/instance naming → `gmdl`+`raster` (a 2x2 model grid), `locale` (18,441 strings,
+and the table a layout points at), `trigger` (the 60-state machine, which `-state:Main` now walks),
+and `spui` + the designer `xml` (window geometry and captions).
 ## Upstream knowledge is in the repo, but it is SECONDARY (level 4)
 
 **Disassembly is always the first tool; everything else is a fallback.** `upstream/SporeMaster3/`

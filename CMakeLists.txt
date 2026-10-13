@@ -120,6 +120,7 @@ set(OS_SOURCES
   source/engine/raster.cpp
   source/engine/config.cpp
   source/engine/appstates.cpp
+  source/engine/spui.cpp
   source/engine/text.cpp
   source/render/device.cpp
   source/render/overlay.cpp

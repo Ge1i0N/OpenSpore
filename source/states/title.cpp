@@ -1,5 +1,6 @@
 #include "states/statemgr.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -8,6 +9,7 @@
 #include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
+#include "engine/spui.h"
 #include "engine/text.h"
 #include "render/device.h"
 #include "render/imgfile.h"
@@ -94,10 +96,67 @@ void title_render() {
     ov.begin(w, h);
     if (g_bg) ov.image(0.f, 0.f, (float)w, (float)h, g_bg, g_bg_w, g_bg_h, false);
 
-    // The menu labels are the GAME'S OWN strings, pulled from the `locale` tables by name. This is
-    // the point of the exercise: not "we invented a menu" but "the game's text reaches our screen".
-    // The keys are recorded so the line can be re-derived from the key alone (see engine/text.h for
-    // why a lookup by label is needed: the low key space is per-table and therefore ambiguous).
+    // THE REAL LAYOUT. The game's own UI designer schema (shipped as 14 `xml` resources) lets us read
+    // the `spui` layouts, so this draws the game's windows at the game's own coordinates with the
+    // game's own captions - not a menu we invented. The layout is scaled from its design resolution
+    // to the viewport so it is visible at any window size.
+    const auto* lay = os::spui::instance().best_screen();
+    if (lay) {
+        // Design resolution: the widest right/bottom seen among usable rects, rounded up to a
+        // conventional UI size. Measured rather than assumed, so the scale is honest.
+        float maxr = 0.f, maxb = 0.f;
+        for (const auto& win : lay->windows) {
+            if (!win.has_area) continue;
+            maxr = std::max(maxr, win.area.right);
+            maxb = std::max(maxb, win.area.bottom);
+        }
+        const float sx = maxr > 1.f ? (float)w / maxr : 1.f;
+        const float sy = maxb > 1.f ? (float)h / maxb : 1.f;
+        char head[160];
+        std::snprintf(head, sizeof(head), "real spui layout: %s  scaled x%.3f / x%.3f",
+                      lay->name().c_str(), sx, sy);
+        ov.text_fmt(48.f, 22.f, 0xFF8FB8D8, "%s", head);
+        size_t drawn = 0;
+        for (const auto& win : lay->windows) {
+            if (!win.has_area) continue;
+            const float x = win.area.left * sx, y = win.area.top * sy;
+            const float bw = win.area.w() * sx, bh = win.area.h() * sy;
+            if (x + bw < 0.f || y + bh < 0.f || x > (float)w || y > (float)h) continue;
+            // The window's own colour, used AS STORED including its alpha. Forcing alpha to 0xFF here
+            // (which an earlier revision did) turned the layout into opaque slabs: the shipped values
+            // carry meaningful transparency (BackgroundColor 0x007F7F7F is a fully transparent gray,
+            // ShadeColor 0xFFFFFFFF is opaque white). Transparency is part of the data.
+            const u32 bg = win.bg_color;
+            const f32 x2 = x + bw, y2 = y + bh;
+            if ((bg >> 24) != 0) ov.rect(x, y, bw, bh, bg);
+            // Always outline, so a transparent window is still visible as the box the designer placed.
+            const u32 edge = (win.shade_color >> 24) != 0 ? (win.shade_color & 0xFFFFFFu) | 0x90000000u
+                                                          : 0x70A8C8E0u;
+            ov.rect(x, y, bw, 1.f, edge);
+            ov.rect(x, y2 - 1.f, bw, 1.f, edge);
+            ov.rect(x, y, 1.f, bh, edge);
+            ov.rect(x2 - 1.f, y, 1.f, bh, edge);
+            if (!win.caption.empty()) {
+                std::string cap = os::text::to_display_ascii(win.caption);
+                if (cap.size() > 44) cap = cap.substr(0, 44) + "...";
+                if (bw >= 24.f && bh >= 10.f) {
+                    ov.text_fmt(x + 3.f, y + bh * 0.5f - 7.f, 0xFFF4F8FC, "%s", cap.c_str());
+                }
+            }
+            if (++drawn >= 260) break;
+        }
+        char foot[180];
+        std::snprintf(foot, sizeof(foot),
+                      "%zu windows drawn from %zu records; captions are the game's own strings",
+                      drawn, lay->anchors);
+        ov.text_fmt(48.f, (float)h - 62.f, 0xFF90A8B8, "%s", foot);
+        ov.end();
+        dev.end_frame();
+        return;
+    }
+
+    // Fallback: no layout parsed (missing packages), so show the state-machine menu we resolve from
+    // the locale tables instead of nothing.
     auto& tx = os::text::instance();
     float pad = 60.f;
     ov.text_fmt(pad, pad, 0xFFFFE8A0, "OpenSpore");
