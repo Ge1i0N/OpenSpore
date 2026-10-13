@@ -156,6 +156,7 @@
         {"name": "stride 36", "status": "done", "note": "9 float slots (some packed)"},
         {"name": "position float3", "status": "done", "note": "offset 0, verified vs bbox"},
         {"name": "uv (N=6)", "status": "done", "note": "2 floats at offset 16, in [0,1] 100%"},
+        {"name": "textured mesh draw", "status": "done", "note": "mesh.cpp applies the raster texture via UVs (MODULATE)"},
         {"name": "bbox exact check", "status": "done", "note": "err 0.0000 on 4 variants"},
         {"name": "attrib semantics", "status": "partial", "note": "uv found; normals/extra open"},
         {"name": "normals", "status": "partial", "note": "computed from faces, not read"},

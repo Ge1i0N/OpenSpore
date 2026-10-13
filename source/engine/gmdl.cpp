@@ -120,18 +120,23 @@ Mesh parse(const u8* data, size_t size) {
         return m;
     }
 
-    // 5. positions = the first float3 of each 36-byte vertex
+    // 5. positions = the first float3 of each 36-byte vertex; UV = 2 floats at offset 16 (N=6)
     m.vertex_count = vcount;
     m.positions.resize((size_t)vcount * 3);
+    m.uvs.resize((size_t)vcount * 2);
     for (u32 i = 0; i < vcount; ++i) {
         const size_t off = vdata + (size_t)i * kVertexStride;
-        float x, y, z;
+        float x, y, z, u, v;
         read_f32(data, size, off + 0, x);
         read_f32(data, size, off + 4, y);
         read_f32(data, size, off + 8, z);
+        read_f32(data, size, off + 16, u);
+        read_f32(data, size, off + 20, v);
         m.positions[i * 3 + 0] = x;
         m.positions[i * 3 + 1] = y;
         m.positions[i * 3 + 2] = z;
+        m.uvs[i * 2 + 0] = u;
+        m.uvs[i * 2 + 1] = v;
     }
     m.ok = true;
     return m;

@@ -57,6 +57,14 @@ guesses to check by disassembly; output `analysis/name_guesses.md`. Also: `tools
 shows the PDB is NOT stripped — 136,433 unique function/method name paths (SP 63,246, EA 24,214,
 eastl 9,874, rw 6,582, nSPCreatureAnim 2,423). The feature map gained a `tooling` category (89%).
 
+### The mesh is now TEXTURED (real UVs + real texture)
+`gmdl.cpp` now also reads the vertex UV (2 floats at offset 16, the N=6 layout), `render/mesh.cpp`
+carries UVs in its FVF and applies a bound texture (MODULATE with the fixed-function lighting), and
+the Loader passes the decoded `raster` texture to the mesh draw. Result: `analysis/shots/mesh_textured.png`
+shows the Spore creature **textured** with the game's own `raster` (its green/purple palette), next to
+the texture itself - real geometry AND real texture, both decoded from the packages, on our renderer.
+fps 32.7, exit 0, 10/10 markers.
+
 ### The unpacker exports solved formats as standard files
 `pkg:-unpack` now converts the formats we solved into standard files instead of dumping their raw
 bytes: **`raster` -> BMP** (via `raster::decode`) and **`gmdl` -> OBJ** (via `gmdl::parse`).

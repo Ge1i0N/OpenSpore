@@ -251,7 +251,7 @@ void loader_enter() {
                 gmdl::Mesh m = gmdl::parse(bytes.data(), bytes.size());
                 if (!m.ok || m.indices.size() < 3) continue;
                 if (m.vertex_count < 256 || m.vertex_count > 120000) continue;  // skip tiny/huge
-                if (!g_mesh.create(render::device().d3d(), m.positions.data(), m.vertex_count,
+                if (!g_mesh.create(render::device().d3d(), m.positions.data(), m.uvs.data(), m.vertex_count,
                                    m.indices.data(), (u32)m.indices.size()))
                     continue;
                 g_mesh_name = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
@@ -305,7 +305,8 @@ void loader_render() {
         mesh_x = w - mesh_side - 24;
         mesh_y = 24 + 40;
         if (mesh_x < 8) mesh_x = 8;
-        g_mesh.draw(dev.d3d(), mesh_x, mesh_y, mesh_side, mesh_side, g_loader.elapsed * 0.6f);
+        g_mesh.draw(dev.d3d(), mesh_x, mesh_y, mesh_side, mesh_side, g_loader.elapsed * 0.6f,
+                    g_loader.tex);
     }
     ov.begin(w, h);
 

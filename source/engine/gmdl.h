@@ -32,6 +32,7 @@ struct Mesh {
     u32 submesh_count = 0;
     u32 vertex_count = 0;
     std::vector<float> positions;  // 3 floats per vertex
+    std::vector<float> uvs;        // 2 floats per vertex (offset 16 in the 36-byte vertex, N=6)
     std::vector<u16> indices;      // all sub-meshes concatenated (they share one vertex buffer)
 };
 

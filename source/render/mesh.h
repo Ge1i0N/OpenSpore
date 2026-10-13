@@ -19,14 +19,17 @@ public:
     ~Mesh();
     void shutdown();
 
-    // Positions are 3 floats/vertex; indices are u16 into that array (shared across sub-meshes,
-    // as gmdl stores them). Returns false and logs on any failure; never asserts.
-    bool create(IDirect3DDevice9* dev, const float* positions, u32 vertex_count, const u16* indices,
-                u32 index_count);
+    // Positions are 3 floats/vertex, uvs are 2 floats/vertex (may be null), indices are u16 into
+    // that array (shared across sub-meshes, as gmdl stores them). Returns false and logs on any
+    // failure; never asserts.
+    bool create(IDirect3DDevice9* dev, const float* positions, const float* uvs, u32 vertex_count,
+                const u16* indices, u32 index_count);
 
     // Draw inside `viewport`, spinning the model about the world Z axis (Spore models are Z-up).
-    // `angle` is in radians. Saves and restores the device viewport.
-    void draw(IDirect3DDevice9* dev, int vx, int vy, int vw, int vh, float angle);
+    // `angle` is in radians. If `tex` is non-null it is applied (UVs are used); otherwise the mesh
+    // is drawn flat-shaded. Saves and restores the device viewport.
+    void draw(IDirect3DDevice9* dev, int vx, int vy, int vw, int vh, float angle,
+              IDirect3DTexture9* tex = nullptr);
 
     u32 vertex_count() const { return m_vertex_count; }
     u32 index_count() const { return m_index_count; }

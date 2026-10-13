@@ -75,8 +75,9 @@ Mat4 perspective_fov_lh(float fov_y, float aspect, float zn, float zf) {
 struct Vtx {
     float x, y, z;
     float nx, ny, nz;
+    float u, v;
 };
-constexpr DWORD kFVF = D3DFVF_XYZ | D3DFVF_NORMAL;
+constexpr DWORD kFVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1;
 
 }  // namespace
 
@@ -88,8 +89,8 @@ void Mesh::shutdown() {
     m_vertex_count = m_index_count = 0;
 }
 
-bool Mesh::create(IDirect3DDevice9* dev, const float* positions, u32 vertex_count, const u16* indices,
-                  u32 index_count) {
+bool Mesh::create(IDirect3DDevice9* dev, const float* positions, const float* uvs, u32 vertex_count,
+                  const u16* indices, u32 index_count) {
     shutdown();
     if (!dev || !positions || !indices || vertex_count == 0 || index_count < 3) {
         LOG_WARN("mesh", "create: bad input (vc=%u ic=%u)", vertex_count, index_count);
@@ -139,7 +140,8 @@ bool Mesh::create(IDirect3DDevice9* dev, const float* positions, u32 vertex_coun
         float nx = normals[i * 3 + 0], ny = normals[i * 3 + 1], nz = normals[i * 3 + 2];
         float nl = std::sqrt(nx * nx + ny * ny + nz * nz);
         if (nl < 1e-9f) { nx = 0; ny = 0; nz = 1; } else { nx /= nl; ny /= nl; nz /= nl; }
-        verts[i] = {positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2], nx, ny, nz};
+        verts[i] = {positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2], nx, ny, nz,
+                    uvs ? uvs[i * 2 + 0] : 0.f, uvs ? uvs[i * 2 + 1] : 0.f};
     }
 
     HRESULT hr = dev->CreateVertexBuffer((UINT)(verts.size() * sizeof(Vtx)), D3DUSAGE_WRITEONLY, kFVF,
@@ -180,7 +182,8 @@ bool Mesh::create(IDirect3DDevice9* dev, const float* positions, u32 vertex_coun
     return true;
 }
 
-void Mesh::draw(IDirect3DDevice9* dev, int vx, int vy, int vw, int vh, float angle) {
+void Mesh::draw(IDirect3DDevice9* dev, int vx, int vy, int vw, int vh, float angle,
+                IDirect3DTexture9* tex) {
     if (!dev || !ready() || vw < 8 || vh < 8) return;
 
     D3DVIEWPORT9 saved{};
@@ -225,12 +228,23 @@ void Mesh::draw(IDirect3DDevice9* dev, int vx, int vy, int vw, int vh, float ang
     dev->SetStreamSource(0, m_vb, 0, sizeof(Vtx));
     dev->SetIndices(m_ib);
     dev->SetFVF(kFVF);
-    // The FVF has no texture coordinates; make sure a texture left bound by the overlay cannot
-    // tint the mesh (default COLOROP is MODULATE with the texture).
-    dev->SetTexture(0, nullptr);
-    dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-    dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
-    dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+    // If a texture is supplied, MODULATE it with the diffuse colour (and keep the fixed-function
+    // lighting on the diffuse). Otherwise bind nothing and take the diffuse alone, so a texture left
+    // bound by the 2D overlay cannot tint the mesh.
+    if (tex) {
+        dev->SetTexture(0, tex);
+        dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+        dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+        dev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+        dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+        dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+        dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+    } else {
+        dev->SetTexture(0, nullptr);
+        dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+        dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
+        dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+    }
     dev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, m_vertex_count, 0, m_index_count / 3);
     dev->LightEnable(0, FALSE);
 

@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 80.7%** | **Overall: 73.6%** | done 165 / partial 22 / todo 52 (239 features)
+**Engine reversal: 80.8%** | **Overall: 73.8%** | done 166 / partial 22 / todo 52 (240 features)
 
 **Legend**
 
@@ -25,7 +25,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | startup | **95%** | 25 | 3 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
 | packages (DBPF) | **90%** | 33 | 4 | 2 |
-| gmdl (meshes) | **90%** | 21 | 3 | 1 |
+| gmdl (meshes) | **90%** | 22 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **80%** | 20 | 0 | 5 |
 | formats | **22%** | 2 | 5 | 13 |
@@ -184,7 +184,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ## gmdl (meshes) — 90%
 
-*21 done · 3 partial · 1 todo*
+*22 done · 3 partial · 1 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -207,6 +207,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | stride 36 | 9 float slots (some packed) |
 | ✅ | done | position float3 | offset 0, verified vs bbox |
 | ✅ | done | uv (N=6) | 2 floats at offset 16, in [0,1] 100% |
+| ✅ | done | textured mesh draw | mesh.cpp applies the raster texture via UVs (MODULATE) |
 | ✅ | done | bbox exact check | err 0.0000 on 4 variants |
 | 🚧 | partial | attrib semantics | uv found; normals/extra open |
 | 🚧 | partial | normals | computed from faces, not read |
