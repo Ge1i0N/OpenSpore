@@ -304,6 +304,29 @@ Tooling: `tools/rw4.py` (validates + dumps the 28-byte header; stops there on pu
 the `+0x0c` flags, or whether `"454"` is a version or build tag from any third-party RW4
 description - find the reader in `.text` and read it like RefPack was.
 
+## GMDL (generated model) — partial structure, layout NOT established
+
+`gmdl` (type 0x00E6BCE5, **11,041 resources**) is a baked mesh: payloads contain float32 data and
+u16 data, and every one starts with dword `8` (a version). It is more tractable than the rw4
+container and is worth pursuing, but **its header layout is NOT established** - see the disproven
+item in `IDEAS.md` §5, where a triple that fit one file failed on 400.
+
+What is solid (from the bytes, cross-checked on many records):
+- first dword = `8` on all 400 sampled records.
+- payloads mix float32 runs and u16 runs; the region after a small header holds a u16 array whose
+  values are small and monotonic-ish (looks like triangle indices: `0 1 2 3 1 0 1 4 2 0 ...`).
+- the header region contains repeated groups of the form
+  `{0x1B684E2F, <value>, 0x00616041}` - note `0x1B684E2F` is the **rw4 type id byte-swapped**
+  (`0x2F4E681B` in big-endian), consistent with RefPack's big-endian integers, so gmdl likely
+  carries big-endian tags.
+- `Spore_Content.package` rec[12] (175,264 B) has a header bbox in float32 at `+0x48`
+  (`min(-0.4785,-0.4343,0.0000) max(0.4785,0.2700,0.9840) 1.0`), an index field at `+0x6c` = 18,000
+  and a u16 array at `+0x78` with exactly 18,000 in-range entries (max 3,764). That is a genuine
+  structure - but it is **one variant**, not the format (see disproven item).
+
+Tools: `tools/gmdl.py` (locate/inspect), `tools/gmdl_mesh.py` (bbox + index validation on a file),
+`tools/gmdl_header_check.py` (the broad invariant test that killed the general claim).
+
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 
 **Priority rule (user, repeated): disassembly first, always.** Third-party sources — docs,

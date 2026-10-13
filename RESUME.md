@@ -1,7 +1,7 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 10).
+Last update: 2026-10-13 (session 11).
 
 ## One-line status
 
@@ -210,18 +210,19 @@ silent verboseaudio 4.0 5.1 automation …`).
    11,041 gmdl + 5,931 raster + 4,997 animation resources).
 2. **Use decoded content** on the Loader (we can decode, name AND unpack it; next is to *render*
    or parse it). The unpacker already emits `locale` text and `png` images under real names.
-3. **`rw4` reader** — the header is pinned down (28-byte template at `0x014f6480`, copied by
-   `0x011e3f60`; sentinel `0xcafed00d`; `tools/rw4.py` validates+dumps it). Still open: the
-   object/chunk table after the header, the `+0x0c` flags, and whether `"454"` is a version or
-   build tag. The magic is **memcpy'd from the template, not compared inline**, so a raw
-   immediate search finds no reader — find it by call graph from `0x006c233d`/`0x004021a0`, and
-   read it instruction by instruction like RefPack. **This is the big one** (12,987 rw4 +
-   11,041 gmdl + 5,931 raster + 4,997 animation resources).
-4. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle `-w`
+3. **`rw4` reader (models)** — header pinned (28-byte template at `0x014f6480` copied by
+   `0x011e3f60`; sentinel `0xcafed00d`; `tools/rw4.py`). Model-type registration found:
+   `0x007635f0` -> handler `0x7633c0` + type `0x2f4e681b` -> registrar `0x6ad090`; the handler only
+   dispatches through manager virtuals, so the parser is deeper. The magic is **memcpy'd from the
+   template, not compared inline**, so a raw immediate search finds no reader — go by call graph.
+4. **`gmdl` (0x00E6BCE5, 11,041) is ALSO a mesh format** and looked simpler, but its header layout
+   is **not** the triple it appeared to be (fit 18/400 — see IDEAS §5.25). Needs per-variant
+   discovery; note every payload starts with dword `8` and contains `{0x1B684E2F,...}` groups
+   (`0x1B684E2F` = rw4 id byte-swapped, so big-endian tags). Tools: `tools/gmdl*.py`.
+5. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle `-w`
    (VERIFY row 15).
-5. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
-6. An offline CLI unpacker is possible now that `pkg:-unpack` exists (headless, no window); the
-   in-game verb already covers the wishlist item.
+6. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
+7. An offline CLI unpacker is possible now that `pkg:-unpack` exists (headless, no window).
 
 Done and off the list: `.package` header + fixed-stride index (session 4: 57 files, 0 invalid,
 17,901 records, 0 violations), in-engine frame capture (✅ `GetBackBuffer` →

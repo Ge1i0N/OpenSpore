@@ -17,6 +17,49 @@ confirmed, its body is not.
 
 ---
 
+## Session 11 — 2026-10-13: rw4 = models; gmdl explored and a single-file fit disproven
+
+Two things: identified what the model resources are, and tested a hypothesis honestly into the
+ground.
+
+### rw4 = models (meshes)
+User confirmation, and it matches the data: 12,987 `rw4` + 11,041 `gmdl` are the geometry the game
+draws. The registration is now pinned: `0x007635f0` pushes handler `0x7633c0` + type `0x2f4e681b`
+into the register function `0x6ad090` (a hash-map insert keyed by type). The handler itself only
+dispatches through manager singletons (getters at `0x67dd20`/`0x67dd30` returning globals
+`0x15fd8c4`/`0x15fd8c8`), so the actual mesh parser is further in - a virtual-dispatch chain, next
+session's work. New tool `tools/dump_u32.py` reads those registration tables.
+
+### gmdl explored — and a clean-looking find disproven
+`gmdl` (0x00E6BCE5) looked far more tractable than rw4: payloads visibly contain float32 vertex
+data and u16 index runs. On `Spore_Content.package` rec[12] the structure was *beautiful*: a float
+bounding box at `+0x48`, `+0x6c = 18,000`, `+0x74 = 36,000 = 2*18,000`, and a u16 array at `+0x78`
+with exactly 18,000 entries all in range (max 3,764). It looked like the format.
+
+**It is not.** `tools/gmdl_header_check.py` tested the invariant across 400 sampled gmdl resources:
+it holds in **18 (4.5%)**. The three fields take wildly different values elsewhere (`+0x70` is 16 in
+the fitting cases but `0x1B684E2F`, 1,245,202, 1,376,276, ... in others), so `+0x6C` is a variable
+**tagged** structure, not a fixed triple. Recorded as IDEAS §5.25 with the numbers.
+
+This is the method working as intended: the same broad-consistency test that validated RefPack
+(30,000/30,000) is what refuted this claim (18/400) before it reached the codebase. A fit on one
+file is not a format.
+
+Still solid from the exploration: every gmdl starts with dword `8`; payloads mix float32 and u16
+data; and the header contains repeated `{0x1B684E2F, <value>, 0x00616041}` groups, where
+`0x1B684E2F` is the **rw4 type id byte-swapped** - consistent with RefPack's big-endian integers,
+so gmdl likely carries big-endian tags.
+
+### How this session was verified
+`python tools/gmdl_mesh.py --pkg 48` → the bbox, `index count 18000`, `index byte size 36000
+(== count*2 ? True)`, `indices @0x78..0x8d18: 18000 u16, max=3764` (a real structure on ONE file).
+`python tools/gmdl_header_check.py --limit 300` → `+0x74 == 2 * +0x6c : 13 (4.3%)`, and across 400
+sampled records 18 fit - the disproof.
+`tools/dump_u32.py` + `tools/find_imm.py 0x2f4e681b` → the model-type registration at `0x007635f0`
+-> `0x6ad090`. Build unchanged (tools only).
+
+---
+
 ## Session 10 — 2026-10-13: a real Spore asset rendered by our own engine
 
 The pipeline now ends in pixels. `source/render/imgfile.*` decodes a PNG **from memory** via GDI+

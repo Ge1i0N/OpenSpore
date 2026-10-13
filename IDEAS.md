@@ -190,6 +190,15 @@ The D3D9 backend stays the regression oracle: any GL output is diffed against it
     It is big-endian (`10 FB 00 01 38` -> `0x000138` = 312 = that record's `memSize`). Third
     disproved claim from that document set. Its C# source (`RefPack.cs`) is accurate where the
     prose is not - read the source.
+25. **"The gmdl header is `+0x6c = index count, +0x74 = index bytes`, with `+0x74 == 2*+0x6c`."**
+    **Not the format.** It fit one file perfectly (`Spore_Content.package` rec[12]: 18,000 u16
+    indices at +0x78, all in range, `36000 == 2*18000`), but across 400 sampled gmdl resources the
+    invariant holds in only **18 (4.5%)**, and the three fields take wildly different values -
+    `+0x70` alone is 16 in the fitting cases but `0x1B684E2F`, 1,245,202, 1,376,276, ... in others.
+    So the region at +0x6C is a **variable tagged structure**, not a fixed triple. This is the
+    lesson restated: a fit on one file is not a format - test across many BEFORE claiming, which is
+    exactly what `tools/gmdl_header_check.py` then did. gmdl needs per-variant discovery (watch for
+    a variant tag; the first dword is 8 on every sample, so the discriminator is elsewhere).
 
 ## 6. Open questions, precisely stated (so the next disasm run is aimed, not wandering)
 
