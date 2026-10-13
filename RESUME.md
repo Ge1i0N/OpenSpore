@@ -40,6 +40,7 @@ so if consulted at all, read the source. Recorded: MEMORY.md "Upstream knowledge
 | **headless unpack** | same result, no window/device, 7.6 s | `-headless -exec pkg:-unpack,...` |
 | **gmdl mesh decoded** | positions reproduce the file bbox **exactly (err 0.0000)** on 4 variants | `python tools/gmdl_mesh.py --pkg <i>` |
 | **engine draws a real mesh** | 3765 verts / 6000 tris, fps 32.3 | `analysis/shots/mesh_engine.png` |
+| **engine draws native raster** | `raster` DXT1/DXT5/raw decoded in C++ and drawn | `analysis/shots/raster_engine.png` |
 | **real Spore geometry rendered** | limb / creature / plant | `analysis/shots/gmdl_pkg{48,52,54}.png` |
 | **feature map** | 212 features, engine 79.1%, overall 70.7% | `python tools/feature_map.py` → `analysis/shots/reverse_map.png` |
 | **function coverage (code)** | **29 / 105,239 (0.021%)** | `python tools/functions.py` → `analysis/functions.md` |

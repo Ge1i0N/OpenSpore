@@ -117,6 +117,7 @@ set(OS_SOURCES
   source/engine/refpack.cpp
   source/engine/naming.cpp
   source/engine/gmdl.cpp
+  source/engine/raster.cpp
   source/render/device.cpp
   source/render/overlay.cpp
   source/render/imgfile.cpp

@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 79.7%** | **Overall: 72.2%** | done 156 / partial 16 / todo 55 (227 features)
+**Engine reversal: 79.8%** | **Overall: 72.4%** | done 157 / partial 16 / todo 55 (228 features)
 
 **Legend**
 
@@ -27,7 +27,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | packages (DBPF) | **91%** | 30 | 2 | 2 |
 | gmdl (meshes) | **90%** | 21 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
-| render | **79%** | 19 | 0 | 5 |
+| render | **80%** | 20 | 0 | 5 |
 | formats | **15%** | 2 | 2 | 16 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **89%** | 12 | 1 | 1 |
@@ -232,9 +232,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## render — 79%
+## render — 80%
 
-*19 done · 0 partial · 5 todo*
+*20 done · 0 partial · 5 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -252,6 +252,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | image quad | aspect fit |
 | ✅ | done | texture upload | create_texture_bgra |
 | ✅ | done | png decode | GDI+ from memory |
+| ✅ | done | raster native draw | engine decodes raster DXT1/DXT5/raw and draws it |
 | ✅ | done | mesh VB/IB | managed buffers |
 | ✅ | done | mesh normals | smooth, per-vertex |
 | ✅ | done | orbit camera | hand-built matrices |

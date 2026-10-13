@@ -193,6 +193,7 @@
         {"name": "image quad", "status": "done", "note": "aspect fit"},
         {"name": "texture upload", "status": "done", "note": "create_texture_bgra"},
         {"name": "png decode", "status": "done", "note": "GDI+ from memory"},
+        {"name": "raster native draw", "status": "done", "note": "engine decodes raster DXT1/DXT5/raw and draws it"},
         {"name": "mesh VB/IB", "status": "done", "note": "managed buffers"},
         {"name": "mesh normals", "status": "done", "note": "smooth, per-vertex"},
         {"name": "orbit camera", "status": "done", "note": "hand-built matrices"},

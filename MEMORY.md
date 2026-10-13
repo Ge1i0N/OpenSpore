@@ -385,11 +385,17 @@ correct decode (`tools/raster_decode.py`):
 ```
 
 Decoding the base level works: `Spore_Content` rec[125] is a 256x256 **DXT1 normal map**
-(`analysis/shots/raster_dxt1.png` — the classic purple/blue sculpted relief), which is a clear,
-correct decode. DXT5 (alpha atlases) and raw BGRA also decode. NOT done: the exact meaning of the
-`code` field, the mip-level count/offsets, and wiring it into the engine (the engine still draws the
-`png` path). Tools: `tools/raster_scan.py` (headers across many resources),
+(`analysis/shots/raster_dxt1.png` - the classic purple/blue sculpted relief), which is a clear,
+correct decode. DXT5 (alpha atlases) and raw BGRA also decode. Note: this game stores **normal maps
+uncompressed** (`raw`, tag byte 0x15), which is why a demo texture picker skips `raw` to find a
+colour/diffuse DXT texture. NOT done: the exact meaning of the `code` field, the mip-level
+count/offsets. Tools: `tools/raster_scan.py` (headers across many resources),
 `tools/raster_decode.py` (DXT1/DXT5/raw -> PNG).
+
+**In the engine (session 13):** `source/engine/raster.cpp` is the C++ port; the Loader decodes a
+raster and draws it via `create_texture_bgra`, preferring it over the png path. Measured: `showing
+real raster 0x40642901/0x067a07e7.raster (512x512 DXT5)` and `analysis/shots/raster_engine.png`
+show the game's OWN texture format rendered by our renderer, next to the gmdl mesh.
 
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 

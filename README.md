@@ -4,21 +4,22 @@
 > в `.md` и по дизассемблеру оригинального бинарника. Сейчас это **Proof of Concept, который
 > уже читает и РИСУЕТ настоящие данные игры**: грузится окно с иконкой, рендерится Loader-состояние,
 > вскрываются **все 57 реальных `.package`** (≈5.7 ГБ данных EA) без единого отказа, а на своём
-> D3D9-рендере выводятся **настоящая текстура и настоящая 3D-модель Spore** (формат `gmdl` разобран,
-> позиции сходятся с bbox файла точно). Движок (RenderWare/`rw4`) ещё не тронут. Дальше — по документам.
+> D3D9-рендере выводятся **настоящая 3D-модель Spore** (`gmdl`, позиции сходятся с bbox файла точно)
+> и **собственный формат текстур движка** (`raster`: DXT1/DXT5/raw). Движок (RenderWare/`rw4`) ещё
+> не тронут. Дальше — по документам.
 
 A from-scratch reimplementation of **Spore: Galactic Adventures**, driven by disassembly of
 the shipped 32-bit binary rather than by wiki knowledge.
 
-![OpenSpore Loader: 150945 resources, a real Spore mesh drawn by the engine, a real Spore texture, and the inventory](analysis/shots/mesh_engine.png)
+![OpenSpore Loader: 150945 resources, a real Spore mesh drawn by the engine, a real Spore texture, and the inventory](analysis/shots/raster_engine.png)
 
 That screenshot is not a mock-up: it is an in-engine capture of our own exe. The left side is the
 game's own inventory (**150,945 resources across 57 packages, 10.27 GB decoded, 112,155 names
 resolved**) read through the reversed index, RefPack and FNV-1 hashing. On the right, our renderer
-draws **real Spore content decoded from the shipped `.package` files**: a **gmdl mesh** (a creature,
-3,765 vertices / 6,000 triangles, shaded and rotating) and a **`.png` texture**
-(`vehiclepainticons~/be_basic_shake_05.png`). The older capture without the mesh is
-`analysis/shots/hero_real_asset.png`.
+draws **real Spore content decoded from the shipped `.package` files**: a **`gmdl` mesh** (a
+creature, 3,765 vertices / 6,000 triangles, shaded and rotating) and the engine's **own `raster`
+texture format** (here a 512×512 DXT5). Earlier captures: `analysis/shots/mesh_engine.png`
+(with a `.png` texture) and `analysis/shots/hero_real_asset.png`.
 
 ## Status
 
@@ -31,7 +32,7 @@ draws **real Spore content decoded from the shipped `.package` files**: a **gmdl
 | Decodes EA's data | **RefPack solved**: 30,000/30,000 real records decode to exactly `memSize` |
 | Names EA's data | **112,155 / 150,945 resource names resolved** (type + group + instance) |
 | Writes EA's data | **unpacker**: 2,944 locale + 14,549 png files written under real names, 0 failed |
-| **Renders EA's data** | a real decoded `.png` **and a real decoded `gmdl` mesh** (creature, 3,765 verts) drawn on our own D3D9 renderer (see the screenshot) |
+| **Renders EA's data** | a real decoded `.png` **and a real decoded `gmdl` mesh** (creature, 3,765 verts) **and the engine's own `raster` texture format** (DXT1/DXT5/raw) drawn on our own D3D9 renderer (see the screenshot) |
 | `gmdl` (meshes) | **solved** — stride 36, position = first float3; positions reproduce the file's own bbox exactly (err 0.0000) on 4 variants (11,041 resources) |
 | `rw4` (models) | header pinned down; object table not reversed (12,987 resources) |
 | First real content | Czech name/place lexicon, decoded end-to-end (`LexiconPlanets_CS.trigger`) |

@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <cctype>
 #include <algorithm>
 #include <filesystem>
 #include <map>
@@ -16,6 +17,7 @@
 #include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
+#include "engine/raster.h"
 #include "render/device.h"
 #include "render/imgfile.h"
 #include "render/mesh.h"
@@ -46,6 +48,7 @@ struct Loader {
     IDirect3DTexture9* tex = nullptr;
     int tex_w = 0, tex_h = 0;
     std::string tex_name;
+    std::string tex_format;  // "raster DXT1" etc., or "png"
 };
 
 Loader g_loader;
@@ -144,8 +147,60 @@ void loader_enter() {
                   (unsigned long long)g_loader.resolved_instances, naming::stats().c_str());
 
     // Put one real game image on screen. This is the pipeline's end: DBPF index -> RefPack ->
-    // type/instance name -> PNG decode -> D3D9 texture. Any png that decodes to a sane size wins.
+    // type/instance name -> decode -> D3D9 texture. Two decoders, native first:
+    //   1. `raster` (0x2f4e681c) - the engine's OWN texture format (DXT1/DXT5/raw). Preferred.
+    //   2. `png`    - a decoded image resource, via GDI+.
     // Skipped in headless mode (no device to upload to).
+    constexpr u32 kRasterType = 0x2F4E681C;
+    for (auto& sp : fs::search_paths()) {
+        if (g_loader.tex || !render::device().d3d()) break;
+        for (auto& p : pkg::find_packages(sp.dir.string())) {
+            if (g_loader.tex) break;
+            pkg::Package pk;
+            if (!pk.open(p)) continue;
+            for (u32 n = 0; n < pk.records().size(); ++n) {
+                if (pk.records()[n].type() != kRasterType) continue;
+                std::vector<u8> bytes;
+                if (!pk.read_resource_decoded(n, bytes)) continue;
+                raster::Texture rt = raster::decode(bytes.data(), bytes.size());
+                if (!rt.ok) continue;
+                if (rt.width < 128 || rt.height < 128 || rt.width > 2048 || rt.height > 2048) continue;
+                // Normal maps in this game are stored UNCOMPRESSED (raw BGRA), so skip raw here and
+                // prefer a DXT-compressed (colour/diffuse) texture for the demo.
+                if (rt.format == "raw") continue;
+                // Prefer a visually DENSE texture: many rasters are sparse decal atlases on a
+                // transparent background (they decode correctly but look like nothing). Sample the
+                // alpha and skip textures that are mostly transparent, so the demo shows real art.
+                size_t opaque = 0, sampled = 0;
+                for (size_t i = 3; i < rt.bgra.size(); i += 4 * 37) {
+                    if (rt.bgra[i] > 16) ++opaque;
+                    ++sampled;
+                }
+                if (sampled && opaque * 100 / sampled < 35) continue;
+                // Also skip non-albedo maps (normal/specular/mask) - they decode fine but a normal
+                // map just looks like flat purple. Prefer a diffuse texture for the demo.
+                std::string rname = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
+                                                          pk.records()[n].instance());
+                std::string low = rname;
+                for (auto& c : low) c = (char)std::tolower((unsigned char)c);
+                if (low.find("normal") != std::string::npos || low.find("specular") != std::string::npos
+                    || low.find("_mask") != std::string::npos)
+                    continue;
+                IDirect3DTexture9* tex = render::device().create_texture_bgra(rt.bgra.data(), rt.width, rt.height);
+                if (!tex) continue;
+                g_loader.tex = tex;
+                g_loader.tex_w = rt.width;
+                g_loader.tex_h = rt.height;
+                g_loader.tex_name = rname;
+                g_loader.tex_format = "raster " + rt.format;
+                LOG_ONCE_INFO("loader", "showing real raster %s (%dx%d %s, %zu decoded bytes) from %s",
+                              g_loader.tex_name.c_str(), rt.width, rt.height, rt.format.c_str(), bytes.size(),
+                              std::filesystem::path(p).filename().string().c_str());
+                break;
+            }
+        }
+    }
+    // Fall back to a png if no raster was usable.
     for (auto& sp : fs::search_paths()) {
         if (g_loader.tex || !render::device().d3d()) break;
         for (auto& p : pkg::find_packages(sp.dir.string())) {
@@ -165,6 +220,7 @@ void loader_enter() {
                 g_loader.tex = tex;
                 g_loader.tex_w = w;
                 g_loader.tex_h = h;
+                g_loader.tex_format = "png";
                 g_loader.tex_name = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
                                                           pk.records()[n].instance());
                 LOG_ONCE_INFO("loader", "showing real asset %s (%dx%d, %zu decoded bytes) from %s",
@@ -309,7 +365,9 @@ void loader_render() {
         float ix = (float)w - side - pad;
         float iy = (float)h - side - pad;
         ov.image(ix, iy, side, side, g_loader.tex, g_loader.tex_w, g_loader.tex_h);
-        ov.text(ix, iy - ov.font_height(), kAccent, clip_at(ix, "real asset: " + g_loader.tex_name));
+        ov.text(ix, iy - ov.font_height(), kAccent,
+                clip_at(ix, "real " + (g_loader.tex_format.empty() ? std::string("asset") : g_loader.tex_format)
+                              + ": " + g_loader.tex_name));
     }
     if (g_mesh.ready()) {
         ov.text((float)mesh_x, (float)mesh_y + (float)mesh_side + 2.f, kAccent,
