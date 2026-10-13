@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 79.8%** | **Overall: 72.4%** | done 157 / partial 16 / todo 55 (228 features)
+**Engine reversal: 80.1%** | **Overall: 73.0%** | done 161 / partial 18 / todo 54 (233 features)
 
 **Legend**
 
@@ -22,15 +22,15 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | category | progress | done | partial | todo |
 |---|:---:|:---:|:---:|:---:|
 | harness | **93%** | 13 | 0 | 1 |
-| startup | **96%** | 22 | 2 | 0 |
+| startup | **94%** | 24 | 3 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
 | packages (DBPF) | **91%** | 30 | 2 | 2 |
 | gmdl (meshes) | **90%** | 21 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **80%** | 20 | 0 | 5 |
-| formats | **15%** | 2 | 2 | 16 |
+| formats | **18%** | 2 | 3 | 15 |
 | gameplay | **0%** | 0 | 0 | 16 |
-| tooling | **89%** | 12 | 1 | 1 |
+| tooling | **91%** | 14 | 1 | 1 |
 | platform | **25%** | 2 | 1 | 7 |
 
 ---
@@ -58,9 +58,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## startup — 96%
+## startup — 94%
 
-*22 done · 2 partial · 0 todo*
+*24 done · 3 partial · 0 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -84,6 +84,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | font atlas | GDI rasterised, 95 glyphs |
 | ✅ | done | state manager | AppStateManager analog |
 | ✅ | done | state register | FNV-1 ids, dup rejected |
+| ✅ | done | startup chain traced | entry -> WinMain 0xf489e0 -> app_main 0xf48810 -> run 0xf47e90 |
+| ✅ | done | single-instance guard | Global\SporeEditorOrGame; -multipleInstances bypasses |
+| 🚧 | partial | app-mode host | CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked |
 | ✅ | done | state goto | transitions, no nesting |
 | 🚧 | partial | startup -state | key known; goto via vtable |
 | ✅ | done | boot markers | 10/10 |
@@ -266,9 +269,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 15%
+## formats — 18%
 
-*2 done · 2 partial · 16 todo*
+*2 done · 3 partial · 15 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -279,7 +282,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | 🚧 | partial | dxt / bc | DXT1/DXT5 decode (raster_decode.py); not in the engine yet |
 | ⬜ | todo | tga |  |
 | ⬜ | todo | animation | 4997 resources |
-| ⬜ | todo | prop | 30645 resources |
+| 🚧 | partial | prop | structure found (BE count + {key,type,count,size}); 2nd variant open |
 | ⬜ | todo | material |  |
 | ⬜ | todo | sound (snr) | 29400 resources |
 | ⬜ | todo | soundProp | 19296 resources |
@@ -320,9 +323,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## tooling — 89%
+## tooling — 91%
 
-*12 done · 1 partial · 1 todo*
+*14 done · 1 partial · 1 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -331,6 +334,8 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | PDB symbol map | 136,433 names by subsystem |
 | 🚧 | partial | address guesser | 220 guesses, 39 HIGH; families not members |
 | ✅ | done | refpack verifier | 30000/30000 to memSize |
+| ✅ | done | startup map | analysis/startup.md: entry->WinMain->app_main->run |
+| ✅ | done | prop scanner | prop_scan.py + prop.py (partial) |
 | ✅ | done | arg census | 76 sites, 60 names |
 | ✅ | done | resource inventory | 150945 resources, 90 types |
 | ✅ | done | index validator | 0 violations on 150945 records |

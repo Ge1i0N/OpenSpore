@@ -57,6 +57,19 @@ guesses to check by disassembly; output `analysis/name_guesses.md`. Also: `tools
 shows the PDB is NOT stripped — 136,433 unique function/method name paths (SP 63,246, EA 24,214,
 eastl 9,874, rw 6,582, nSPCreatureAnim 2,423). The feature map gained a `tooling` category (89%).
 
+### The original's startup chain, traced from the entry point
+The user asked how the game actually boots (the "start from main" approach). Traced it end to end:
+PE entry `0x011e11e1` -> CRT init -> `__tmainCRTStartup 0x011e0f21` -> **WinMain `0x00f489e0`** (the
+call at `0x11e105c`, hInstance 0x400000) -> **app_main `0x00f48810`** -> **run `0x00f47e90`**.
+app_main reads `-multipleInstances` and otherwise enforces one instance with a named object
+`Global\SporeEditorOrGame` (`Another instance of the game is already running`), then allocates the
+App object and calls run. run does an early-init check, reads `-demo`, allocates a 328-byte App
+object, sets the **filesystem mode from `-devDirs`/`-shipDirs`** (`0x687bd0`), creates the app-mode /
+state-manager host via **CreateAppMode `0x007e8a00`** (496-byte object, ctor `0x007e76e0`) into
+`[app+0x20]`, reads `-baseGame`, and enters the subsystem setup + main loop. Full doc:
+`analysis/startup.md`; VERIFY rows 35-37. Next: walk the AppMode ctor `0x007e76e0` and the rest of
+run, then find where the (text) `trigger` resources and SPUI are loaded.
+
 ### raster (RenderWare textures) — header solved, DXT decodes, and the ENGINE draws it
 `raster` (type 0x2f4e681c, 5,931 resources) is the engine's texture format. A fast scan (each
 package read once) over 1,200 payloads gave a stable header: `{u32 1, u32 dim, u32 dim, u32 code,

@@ -497,6 +497,31 @@ are only ever compared to other ids, so our own `state -list`/`goto` kept workin
   arbitrary (`0x0092c540` pushes `Refpack` -> `EA::Refpack::*`). Coverage 220 / 48,243 strict starts =
   0.46%. Output: `analysis/name_guesses.md`.
 
+## Startup chain (level 1: disasm of the oracle) — full doc in analysis/startup.md
+
+Traced from the PE entry point (session 13). The chain is:
+
+```
+entry 0x011e11e1 -> 0x011e1588 (CRT init) -> 0x011e0f21 (__tmainCRTStartup)
+  -> WinMain 0x00f489e0  (called at 0x11e105c with hInstance 0x400000)
+  -> app_main 0x00f48810
+  -> run 0x00f47e90
+```
+
+- **WinMain `0x00f489e0`** is a thin wrapper: ctor `0x92c420(nShowCmd)` -> `app_main` -> dtor.
+- **app_main `0x00f48810`**: reads `multipleInstances` (0x0148da14); if absent, a named object
+  `Global\SporeEditorOrGame` (0x0148d9f8) enforces one instance (`Another instance of the game is
+  already running` 0x0148d9c8, return -1); allocates the App object (0x48 bytes, tag `App`
+  0x013ebc48) and calls `run`.
+- **run `0x00f47e90`**: `0x6b4eb0` early-init check; reads `-demo` (0x01413db0); allocates a
+  328-byte App object; sets the filesystem mode from `-devDirs` 0x013f8dc8 / `-shipDirs` 0x013f8db4
+  via `0x687bd0`; **CreateAppMode `0x007e8a00`** (alloc 0x1f0 = 496 bytes, tag `App`, ctor
+  `0x007e76e0`) -> `[app+0x20]`; then subsystem setup and the main loop (vtable through `[app+0x20]`);
+  reads `-baseGame` (0x014081a8) later.
+
+Do not assume the AppMode ctor's contents; `0x007e76e0` is the next thing to walk. The `trigger`
+resources are text and are read through this path (not yet located).
+
 ## AppStateManager / game states (level 1: disasm of the oracle)
 
 The user remembered this as "типа режимы запуска, управлял в девбилде" — it is real, and it is

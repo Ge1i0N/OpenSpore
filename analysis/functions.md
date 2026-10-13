@@ -6,7 +6,7 @@
 > (functions we have actually reversed/named).
 
 **105,239** candidate function starts in `.text` (upper bound; see the tool's note) ·
-**29** functions reversed/named · **0.021%** coverage.
+**36** functions reversed/named · **0.028%** coverage.
 
 This is deliberately a HARD number, and it is small. It is not in tension with the feature
 map's high engine figure: the feature map measures the scope we chose (boot chain + asset
@@ -17,9 +17,9 @@ are barely touched. Both are true; together they are the honest picture.
 
 | area | count |
 |---|---|
+| startup | 13 |
 | rw4 | 11 |
 | packages | 9 |
-| startup | 6 |
 | core | 2 |
 | render | 1 |
 
@@ -32,7 +32,9 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x0067dd20` | GetMgr8c4 | rw4 | getter for the model manager (0x15fd8c4) |
 | `0x0067dd30` | GetMgr8c8 | rw4 | getter for the second manager (0x15fd8c8) |
 | `0x0067df40` | SetMgr8c4 | rw4 | setter for the model manager; called from 0x7a71cb / 0x7a7efa |
+| `0x00687bd0` | SetFsMode | startup | dev/ship dirs mode setup, called from AppRun |
 | `0x006ad090` | TypeRegister | rw4 | hash-map insert keyed by type id |
+| `0x006b4eb0` | EarlyInit | startup | first call in AppRun; false -> bail |
 | `0x006c233d` | Rw4WriterCaller | rw4 | writer caller; pushes sentinel 0xcafed00d |
 | `0x007633c0` | Rw4Handler | rw4 | dispatches load/save through two manager singletons |
 | `0x007635f0` | Rw4Register | rw4 | registers handler 0x7633c0 for type 0x2f4e681b |
@@ -41,6 +43,8 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x007e40f2` | StateRegister | startup | state registration: hash(name) stored at [state+0x28], dup rejected |
 | `0x007e4f40` | StateVerbCtor | startup | the 'state' console verb (option table pushed as immediates) |
 | `0x007e74a0` | CreateDevice | render | reads -f/-w/-r; 800x600 default; error contract strings |
+| `0x007e76e0` | AppModeCtor | startup | constructor of the 496-byte app-mode object |
+| `0x007e8a00` | CreateAppMode | startup | alloc 0x1f0 bytes, ctor 0x7e76e0; the app-mode/state host |
 | `0x008d8bf0` | DbpfRead | packages | the byte reader read(buf,size) |
 | `0x008d8f70` | DbpfLoadHeader | packages | reads exactly 0x60 header bytes (cmp eax,0x60) |
 | `0x008d90b0` | DbpfValidateHeader | packages | DBPF header validator: magic/version/count/index-offset clauses |
@@ -55,6 +59,9 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x0093a6f0` | Rw4CompareHelper | rw4 | helper called by 0x763410 with (buf,?,len) |
 | `0x0093c510` | AnsiToWide | startup | converts the ANSI command line to UTF-16 for the arg helper |
 | `0x00e20b5a` | RawArgvConsumer | startup | sole GetCommandLineA consumer |
+| `0x00f47e90` | AppRun | startup | reads -demo/-devDirs/-shipDirs/-baseGame; creates AppMode; runs |
+| `0x00f48810` | AppMain | startup | real main: -multipleInstances guard (Global\SporeEditorOrGame), allocs App, calls run |
+| `0x00f489e0` | WinMain | startup | thin wrapper: ctor 0x92c420 -> app_main -> dtor |
 | `0x011e3f60` | Rw4HeaderCtor | rw4 | copies the 28-byte header template from .rdata 0x014f6480 |
 
 ## The engine's shape, from the beta PDB (names only, not addresses)

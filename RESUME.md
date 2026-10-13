@@ -211,21 +211,23 @@ silent verboseaudio 4.0 5.1 automation …`).
 
 ## Next actions, in order
 
-1. **rw4 mesh parser** — the model subsystem's entry points are known: the rw4 handler
+1. **Startup chain (session 13)** — entry -> **WinMain `0x00f489e0`** -> **app_main `0x00f48810`**
+   -> **run `0x00f47e90`** is traced (`analysis/startup.md`, VERIFY rows 35-37). Next: walk the
+   **AppMode ctor `0x007e76e0`** (created by `0x007e8a00`, stored at `[app+0x20]`) and the rest of
+   `run` after `0x00f481be`, then find where the (text) `trigger` resources and SPUI are loaded.
+2. **rw4 mesh parser** — the model subsystem's entry points are known: the rw4 handler
    `0x7633c0` (registered by `0x007635f0` -> `0x6ad090`) dispatches through manager singletons
    (getters `0x67dcd0..0x67df70`, globals `0x15fd8b0..`); the model-manager setter `0x67df40`
    (global `0x15fd8c4`) is called from `0x7a71cb` / `0x7a7efa`. **Follow that chain to the real
    reader.** The magic is memcpy'd, so go by call graph, not by immediate search.
-2. **gmdl is DONE for positions and now DRAWN** (sessions 12-13): stride 36, position = first
-   float3, verified exactly (err 0.0000) on four variants; `tools/gmdl_mesh.py` parses + exports
-   OBJ, `source/engine/gmdl.cpp` + `source/render/mesh.cpp` draw one on our own screen
-   (`analysis/shots/mesh_engine.png`). Session 13 also found **UV = 2 floats at offset 16** for the
-   N=6 declaration. **Remaining: bytes 24-35 and the N=5 layout** - read the loader.
-3. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
-4. Wire loose directories (unpacked trees) into `fs` as a data source; a separate `OpenSpore.Cli`
+3. **gmdl is DONE for positions and DRAWN** (sessions 12-13): stride 36, position = first float3,
+   verified exactly (err 0.0000) on four variants; `source/engine/gmdl.cpp` + `source/render/mesh.cpp`
+   draw one on our own screen. UV = 2 floats at offset 16 (N=6). **Remaining: bytes 24-35, the N=5
+   layout, and the `prop` second variant** (its `{key,type,count,size,data}` walk consumed exactly
+   only 116/4000).
+4. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
+5. Wire loose directories (unpacked trees) into `fs` as a data source; a separate `OpenSpore.Cli`
    binary would be tidier than `-headless`, but the capability already exists.
-5. Put the solved gmdl geometry on the engine's own screen (it already renders textures; drawing a
-   decoded mesh is the visible next step).
 
 Done and off the list: `.package` header + fixed-stride index (session 4: 57 files, 0 invalid,
 17,901 records, 0 violations), in-engine frame capture (✅ `GetBackBuffer` →
@@ -234,8 +236,10 @@ and `loader_packages.png` show readable text), the abort-recovery exercise
 (✅ 5 recoveries + storm exit), **`-w`/`-f`/`-r`** (session 12: row 15 DISASM-VERIFIED — the real
 handling is in the device fn `0x7e74a0..0x7e7637`; `w` beats `f`; `r` is `%dx%d`), **headless
 mode** (session 12, genuinely windowless after the session-13 fix), **drawing a decoded gmdl mesh
-in the engine** (session 13), and the **first-argument bug** (session 13: `parse_command_line`
-dropped the first argument because `lpCmdLine` excludes the program name).
+in the engine** (session 13), the **first-argument bug** (session 13: `parse_command_line`
+dropped the first argument because `lpCmdLine` excludes the program name), **`raster` textures
+decoded AND drawn by the engine** (session 13), and the **startup chain traced** (session 13:
+entry -> WinMain -> app_main -> run, `analysis/startup.md`).
 
 ## Standing rules for whoever continues
 

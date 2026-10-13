@@ -1,4 +1,11 @@
 {
+  "0x00f489e0": {"name": "WinMain", "area": "startup", "note": "thin wrapper: ctor 0x92c420 -> app_main -> dtor"},
+  "0x00f48810": {"name": "AppMain", "area": "startup", "note": "real main: -multipleInstances guard (Global\\SporeEditorOrGame), allocs App, calls run"},
+  "0x00f47e90": {"name": "AppRun", "area": "startup", "note": "reads -demo/-devDirs/-shipDirs/-baseGame; creates AppMode; runs"},
+  "0x007e8a00": {"name": "CreateAppMode", "area": "startup", "note": "alloc 0x1f0 bytes, ctor 0x7e76e0; the app-mode/state host"},
+  "0x007e76e0": {"name": "AppModeCtor", "area": "startup", "note": "constructor of the 496-byte app-mode object"},
+  "0x00687bd0": {"name": "SetFsMode", "area": "startup", "note": "dev/ship dirs mode setup, called from AppRun"},
+  "0x006b4eb0": {"name": "EarlyInit", "area": "startup", "note": "first call in AppRun; false -> bail"},
   "0x0092b570": {"name": "ArgLookup", "area": "startup", "note": "launch-key lookup helper (this,name,..) -> index or -1; skips a leading -/; used by 76 sites"},
   "0x00932e50": {"name": "HashName", "area": "core", "note": "FNV-1 (mul-then-xor) with a case-fold mode arg; state/instance ids"},
   "0x0093c510": {"name": "AnsiToWide", "area": "startup", "note": "converts the ANSI command line to UTF-16 for the arg helper"},
