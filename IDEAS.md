@@ -181,6 +181,11 @@ The D3D9 backend stays the regression oracle: any GL output is diffed against it
   that cost the round are recorded in MEMORY ("RefPack" section) and in the disproven list
   below. Do not re-derive: the copy lengths are register+1, and `0x50FB` is a valid signature.
 - **What `group`/`unknown` mean**, and why kind 4 keeps `group` per-record while 6/7 differ.
+- **RenderWare 4 stream format** — see the MEMORY section "RenderWare 4". The rw4 payloads
+  begin `0x34575289 "w32\0" 0d 0a 1a 0a` + version "454", then a table-driven structure. The
+  reader/writer must be found in `.text` and read like RefPack was. `tools/rw_scan.py` locates
+  and dumps them. This gates meshes, materials, textures and animation (12,987 + 11,041 `gmdl`
+  + 5,931 `raster` + 4,997 `animation` resources).
 - **The original's `type`→name mapping**: `upstream/SporeMaster3/data/reg_type.txt` (593
   lines) is the practical answer, not a hash. Our top type ids: 0x01A510BB (98% of fixed
   records), 0x2F4E681B (= `rw4`, 12,987 records), 0x024A0E52 (the Czech lexicon we decoded).
