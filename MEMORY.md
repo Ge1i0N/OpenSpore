@@ -251,7 +251,14 @@ flags, so `0x10FB` **and** `0x50FB` pass (0x50FB has bits 12 and 14 set). A stri
 UTF-8 (BOM `EF BB BF`) Czech given names (`Ábel, Adam, Bára, Běla, Emil …`) and toponyms
 (`Abélard, Aberdeen, Adrásteia, Agamemnón …`).
 
-## Upstream knowledge: SporeMaster3 (authority #4 — hints, verified before use)
+## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
+
+**Priority rule (user, repeated): disassembly first, always.** Third-party sources — docs,
+another team's reimplementation, even their *source code* — are **not a first port of call**.
+They are only consulted when the disassembly is unclear, and even then only as a hint that is
+immediately tested against the oracle (level 1) or our shipped data (level 2). Its C# source
+did prove accurate where its prose was not, so *if* it is consulted, read the source rather
+than the summaries — but that is a fallback, not a workflow.
 
 `upstream/SporeMaster3/` (TRACKED, ~9.8 MB) holds a copy of another team's reverse-engineering
 of the same game: 21 format docs + `reg_type/reg_file/reg_property/reg_simulator` +

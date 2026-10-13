@@ -37,11 +37,21 @@ HDR = 0x60
 OFF_COUNT, OFF_ISIZE, OFF_IOFF, OFF_ALT = 0x24, 0x2C, 0x40, 0x28
 
 # kind -> (prefix, stride, field table)
+# kind -> (prefix, stride, field table)
+# Field order in a full record is type, group, unknown, instance, offset, packedSize, memSize,
+# flags; a field is OMITTED from the record when its bit is set in the kind mask, and its value
+# then lives once in the prefix. So:
+#   kind 4 (bit2): type,group,instance per record  -> words: typeid, group, instance, offset, size, usize, sentinel
+#   kind 6 (bits1,2): type + instance per record   -> words: typeid, instance, offset, size, usize, sentinel
+#   kind 7 (bits0,1,2): only instance + rest       -> words: instance, offset, size, usize, sentinel
+# The kind-7 labelling used to say typeid=0, which is wrong and made the inventory read the
+# instance as the type (caught while resolving names).
 KINDS = {
-    4: (8, 28, dict(typeid=0, maybe_float=1, instance=2, offset=3, size=4, usize=5, sentinel=6)),
+    4: (8, 28, dict(typeid=0, group=1, instance=2, offset=3, size=4, usize=5, sentinel=6)),
     6: (12, 24, dict(typeid=0, instance=1, offset=2, size=3, usize=4, sentinel=5)),
-    7: (16, 20, dict(typeid=0, offset=1, size=2, usize=3, sentinel=4)),
+    7: (16, 20, dict(instance=0, offset=1, size=2, usize=3, sentinel=4)),
 }
+
 
 
 def out(s: str = "") -> None:
@@ -90,7 +100,8 @@ def main() -> int:
             recs += 1
             off, szraw = w[fld["offset"]], w[fld["size"]]
             sz = szraw & 0x7FFFFFFF
-            typeids[w[fld["typeid"]]] += 1
+            if "typeid" in fld:
+                typeids[w[fld["typeid"]]] += 1
             if szraw >> 31 != 1:
                 bad_sent += 1
             if off >= use or off + sz > use:

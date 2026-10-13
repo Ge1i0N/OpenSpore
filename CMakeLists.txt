@@ -115,6 +115,7 @@ set(OS_SOURCES
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
+  source/engine/naming.cpp
   source/render/device.cpp
   source/render/overlay.cpp
   source/states/statemgr.cpp

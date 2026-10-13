@@ -9,11 +9,12 @@
 A from-scratch reimplementation of **Spore: Galactic Adventures**, driven by disassembly of
 the shipped 32-bit binary rather than by wiki knowledge.
 
-![OpenSpore Loader reading 57 real EA packages](analysis/shots/hero.png)
+![OpenSpore Loader reading EA's data: 150945 resources, 10.27 GB decoded, 112155 named](analysis/shots/hero_inventory.png)
 
-That screenshot is not a mock-up: it is an in-engine capture (`-capture hero.bmp`) of our own
-exe enumerating and validating every real `.package` in the game's own search paths, printing
-each one's index kind, record count and index offset.
+That screenshot is not a mock-up: it is an in-engine capture of our own exe reading the game's
+shipped data, listing **150,945 resources across 57 packages, 10.27 GB decoded, 112,155
+resource names resolved** — by type, through the reversed index, RefPack and the game's own
+FNV-1 hashing.
 
 ## Status
 
@@ -22,9 +23,10 @@ each one's index kind, record count and index offset.
 | Builds | MSVC x86 Debug, 0 errors, 0 warnings |
 | Boots | **10/10** boot-chain markers with `-w -devDirs` |
 | Renders | D3D9 window + icon + font atlas + Loader state, **33 fps**, machine-captured |
-| Reads EA's data | **57/57 `.package` opened, 0 rejected**; 150,945 index records, 0 invariant violations |
+| Reads EA's data | **57/57 `.package` opened, 0 rejected**; 150,945 resources, 10.27 GB, 0 invariant violations |
 | Decodes EA's data | **RefPack solved**: 30,000/30,000 real records decode to exactly `memSize` |
-| First real content | Czech name/place lexicon, decoded end-to-end via `pkg:-decode` (312 B + 10,191 B) |
+| Names EA's data | **112,155 / 150,945 resource names resolved** (type + group + instance) |
+| First real content | Czech name/place lexicon, decoded end-to-end (`LexiconPlanets_CS.trigger`) |
 | Fault tolerance | proven: 5 aborts recovered inside the frame loop, 6th in 1 s → storm exit |
 | Crash diagnostics | live symbolised stacks (`file:line`) via our own dbghelp harness |
 | RenderWare bridge | **not started** — this is the next big piece |

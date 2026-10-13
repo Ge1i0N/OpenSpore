@@ -81,8 +81,20 @@ struct Record {
     // Field positions depend on the kind; the Package stores them so records stay flat.
     u32 i_type = 0, i_group = 0, i_unknown = 0, i_instance = 0, i_offset = 0, i_size = 0, i_usize = 0, i_flags = 0;
     bool has_group = false, has_unknown = false, has_instance = false;
+    // When a field is SHARED (masked out of the record by the kind), its value lives once in
+    // the index prefix, not in the record. `type()` must fall back to that value: for kind 7
+    // there is no type word at all, word[0] is the instance, so reading raw[i_type] would have
+    // returned the instance and printed a wrong type name.
+    bool type_shared = false;
+    u32 shared_type = 0;
+    bool group_shared = false;
+    u32 shared_group = 0;
+    bool unknown_shared = false;
+    u32 shared_unknown = 0;
 
-    u32 type() const { return raw[i_type]; }
+    u32 type() const { return type_shared ? shared_type : raw[i_type]; }
+    u32 group() const { return group_shared ? shared_group : (has_group ? raw[i_group] : 0); }
+    u32 unknown() const { return unknown_shared ? shared_unknown : (has_unknown ? raw[i_unknown] : 0); }
     u32 instance() const { return has_instance ? raw[i_instance] : 0; }
     u32 offset() const { return raw[i_offset]; }
     u32 packed_size() const { return raw[i_size] & 0x7FFFFFFFu; }

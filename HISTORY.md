@@ -5,6 +5,73 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ---
 
+## Session 7 — 2026-10-13: the whole game enumerated and named
+
+Started from: session 6b (RefPack decoded, type ids named).
+Ended with: **a global inventory of the entire game — 150,945 resources, 10.27 GB decoded,
+112,155 resource names resolved** — shown on the Loader screen, plus a real bug fixed in kind-7
+type reading.
+
+### The result
+`python tools/resource_inventory.py` and the in-engine `inventory` readout both report:
+```
+150,945 resources across 57 packages, 10.27 GB decoded
+instance names resolved: 112,155/150,945 (74.3%)
+distinct types: 90; named: 86; unnamed ids: 4
+```
+Top types by count: `prop 30,645 · snr 29,400 · soundProp 19,286 · png 14,549 · rw4 12,987 ·
+gmdl 11,041 · raster 5,931 · animation 4,997 · blockdata 3,141 · locale 2,944 · bem 2,621 ·
+pollen_metadata 2,598 · summary 2,590 · gmsh 2,535`. That is the shape of the whole game, from
+its own indexes, with no wiki involved.
+
+### How names resolve (and what that proves)
+Group/instance ids are 32-bit hashes; they resolve because the game's hash is **FNV-1 with
+tolower** — the same function identified by disassembly at `0x00932e50` and used for state ids.
+Verified on cs-cz NameGeneration: **14/14** instance ids resolve (`LexiconPeople_CS`,
+`LexiconCities_CS`, `LexiconPlanets_CS`, ...). This is the second independent confirmation of the
+FNV variant, now on the resource side rather than the state side.
+
+Added `source/engine/naming.*`: loads `reg_file.txt`/`reg_type.txt` at runtime (walks up from
+cwd, so the built exe finds the repo copy), never guesses — an unknown id stays hex. New verb
+`pkg:-path <pkg> <rec>` prints `group/instance.type` (e.g. `LexiconPlanets_CS.trigger`), and
+`pkg:-rec` shows the instance name inline.
+
+### A real bug found and fixed
+`kind` 7 masks out BOTH `type` and `group`, so a kind-7 record's word[0] is the **instance**, not
+the type. Our `Record::type()` read `raw[i_type]` unconditionally, so for every kind-7 package
+(type ~2,900+2,590+... of them) `pkg:-types` printed names computed from the *instance* value -
+wrong names, silently. Now `type()`/`group()`/`unknown()` fall back to the index prefix when the
+field is shared. Same correction applied to `tools/pkg_kinds.py` (kind 7's dict no longer claims
+a `typeid` word at 0). This is exactly the class of bug the field guide warns about: a wrong
+field interpreted confidently produces plausible-looking output.
+
+### Measurements
+* Resources enumerated: 150,945 (each verified against `offset+packedSize <= index_offset`).
+* Decoded bytes: 10,273,231,284 (10.27 GB) - the sum of every record's `memSize`.
+* Names resolved: 112,155 (74.3%). Unresolved stay as hex ids; 4 type ids are still unnamed.
+* fps: 33.3 with the inventory on screen.
+* Build: 0 errors, 0 warnings.
+
+### How this session was verified
+`cmake --build build --config Debug` → 0 errors, 0 warnings.
+`python tools/resource_inventory.py --top 32` → the table above.
+`OpenSpore.exe -w -devDirs -capture hero2.bmp -captureAfter 30 -quitAfter 50` →
+`inventory: 150945 resources, 10273231284 decoded bytes, 112155 instances named`,
+`packages: 57 index-parsed, 0 kind-unknown, 0 invalid`, `fps=33.3`, exit code 0;
+`analysis/shots/hero_inventory.png` shows the inventory on the Loader screen.
+`-exec pkg:-path,0,2` → `LexiconPlanets_CS.trigger`; `-exec pkg:-rec,0,2` →
+`type=0x024a0e52 (trigger) inst=0x35e6c1a9 (LexiconPlanets_CS)`.
+
+### RenderWare 4 (started, not finished)
+The rw4 resources (0x2F4E681B, 12,987 of them) are **RenderWare 4**, not the RW 3.x chunk model
+the field guide's §3 playbook assumes: a decoded rw4 payload starts `89 52 57 34 77 33 32 00
+0d 0a 1a 0a` ("\x89RW4w32\r\n\x1a\n") with version `454`. There is an embedded source path
+`\Spore\SporeEP1ML\Core\RenderWare\platform\src\graphics\core\device\target\dx9\rwgdrvgraph.cpp`,
+and the only RW text in the binary is a `vb` console command. So RW4 needs its own format work
+(its stream reader), which is the next large item; `tools/rw_scan.py` is in place to walk it.
+
+---
+
 ## Session 6b — type ids get NAMES (the decoded data becomes readable)
 
 RefPack gave us bytes; this gives them meaning. Added `tools/gen_typeids.py`, which turns

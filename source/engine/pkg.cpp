@@ -173,6 +173,12 @@ bool Package::open(const std::string& path) {
         r.has_group = ki.has_group;
         r.has_unknown = ki.has_unknown;
         r.has_instance = ki.has_instance;
+        r.type_shared = !ki.has_type;
+        r.shared_type = m_shared.type;
+        r.group_shared = !ki.has_group;
+        r.shared_group = m_shared.group;
+        r.unknown_shared = !ki.has_unknown;
+        r.shared_unknown = m_shared.unknown;
         for (u32 x = 0; x < ki.nwords; ++x) r.raw[x] = le32(p + x * 4);
     }
     // Enforce the validator's invariant per record, so a corrupt index cannot make a later

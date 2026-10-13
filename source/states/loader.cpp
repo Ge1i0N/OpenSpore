@@ -2,7 +2,9 @@
 
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 #include <filesystem>
+#include <map>
 #include <set>
 #include <string>
 #include <utility>
@@ -11,6 +13,7 @@
 #include "engine/diag.h"
 #include "engine/fs.h"
 #include "engine/log.h"
+#include "engine/naming.h"
 #include "engine/pkg.h"
 #include "render/device.h"
 #include "render/overlay.h"
@@ -32,6 +35,9 @@ struct Loader {
     // Real packages, discovered through the reversed search paths (not hardcoded).
     std::vector<std::pair<std::string, std::string>> pkg_lines;  // (name, describe())
     u32 pkgs_fixed = 0, pkgs_varwidth = 0, pkgs_invalid = 0;
+    // Global inventory across every package: type -> count, and how many ids resolved.
+    std::vector<std::pair<std::string, u32>> top_types;
+    u64 total_records = 0, resolved_instances = 0, total_bytes = 0;
 };
 
 Loader g_loader;
@@ -75,6 +81,7 @@ void loader_enter() {
     // (tools/pkg_records.py over the same tree) reports - two independent paths to the
     // same number, which is the confirmation we want rather than a log that merely looks right.
     std::set<std::string> seen;
+    std::map<u32, u32> type_counts;
     for (auto& sp : fs::search_paths()) {
         auto found = pkg::find_packages(sp.dir.string());
         if (found.empty()) continue;
@@ -91,25 +98,34 @@ void loader_enter() {
                 g_loader.pkg_lines.emplace_back(name, "INVALID: " + pk.why());
                 continue;
             }
-            if (pk.index_parsed()) {
-                ++g_loader.pkgs_fixed;
-                g_loader.pkg_lines.emplace_back(
-                    name, "kind=" + std::to_string(pk.kind()) + " count=" + std::to_string(pk.header().count) +
-                          " recs, idx=0x" +
-                          [&] {
-                              char b[16];
-                              _snprintf_s(b, sizeof(b), _TRUNCATE, "%x", pk.header().index_offset);
-                              return std::string(b);
-                          }());
-            } else {
-                ++g_loader.pkgs_varwidth;
-                g_loader.pkg_lines.emplace_back(name, "KIND-UNKNOWN (kind=" + std::to_string(pk.kind()) + ")");
+            if (pk.index_parsed()) ++g_loader.pkgs_fixed;
+            else ++g_loader.pkgs_varwidth;
+            for (const auto& r : pk.records()) {
+                type_counts[r.type()]++;
+                ++g_loader.total_records;
+                g_loader.total_bytes += r.mem_size();
+                if (naming::instance_name(r.instance())) ++g_loader.resolved_instances;
             }
+            g_loader.pkg_lines.emplace_back(
+                name, "kind=" + std::to_string(pk.kind()) + " count=" + std::to_string(pk.header().count) + " recs");
             // LOG_ONCE: 109 packages share this call site, and the per-site ledger would
             // hide 100 of them ("x9, further repeats suppressed").
             LOG_ONCE_INFO("loader", "%s", pk.describe().c_str());
         }
     }
+    // Global inventory: which resource types exist in the whole game, named.
+    std::vector<std::pair<u32, u32>> tv(type_counts.begin(), type_counts.end());
+    std::sort(tv.begin(), tv.end(), [](auto& a, auto& b) { return a.second > b.second; });
+    for (size_t i = 0; i < tv.size() && i < 14; ++i) {
+        const char* tn = naming::type_name(tv[i].first);
+        if (!tn) tn = pkg::type_id_name(tv[i].first);
+        char line[48];
+        _snprintf_s(line, sizeof(line), _TRUNCATE, "%-16s", tn ? tn : "(unnamed)");
+        g_loader.top_types.emplace_back(line, tv[i].second);
+    }
+    LOG_ONCE_INFO("loader", "inventory: %llu resources, %llu decoded bytes, %llu instances named (%s)",
+                  (unsigned long long)g_loader.total_records, (unsigned long long)g_loader.total_bytes,
+                  (unsigned long long)g_loader.resolved_instances, naming::stats().c_str());
     LOG_INFO("loader", "packages: %d index-parsed, %d kind-unknown, %d invalid", g_loader.pkgs_fixed,
              g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
 }
@@ -182,12 +198,13 @@ void loader_render() {
     y += ov.font_height();
     ov.text_fmt(pad, y, kDim, "console: type 'help', then 'state -list'");
     y += ov.font_height() * 1.5f;
-    // Real packages, read from EA's shipped data through the reversed header.
-    ov.text_fmt(pad, y, kAccent, "packages: %d parsed, %d kind-unknown, %d invalid", g_loader.pkgs_fixed,
-                g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
+    // Global inventory: what the game actually contains, by name.
+    ov.text_fmt(pad, y, kAccent, "inventory: %llu resources, %.2f GB decoded, %llu named",
+                (unsigned long long)g_loader.total_records, (double)g_loader.total_bytes / 1e9,
+                (unsigned long long)g_loader.resolved_instances);
     y += ov.font_height();
-    for (size_t i = 0; i < g_loader.pkg_lines.size() && y < (float)h - ov.font_height(); ++i) {
-        ov.text_fmt(pad, y, kDim, "  %s", clip(g_loader.pkg_lines[i].first + "  " + g_loader.pkg_lines[i].second).c_str());
+    for (size_t i = 0; i < g_loader.top_types.size() && y < (float)h - ov.font_height(); ++i) {
+        ov.text_fmt(pad, y, kDim, "  %s %7u", g_loader.top_types[i].first.c_str(), g_loader.top_types[i].second);
         y += ov.font_height();
     }
 

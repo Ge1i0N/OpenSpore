@@ -18,6 +18,7 @@
 #include "engine/diag.h"
 #include "engine/fs.h"
 #include "engine/log.h"
+#include "engine/naming.h"
 #include "engine/pkg.h"
 #include "render/device.h"
 #include "render/overlay.h"
@@ -256,6 +257,12 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     log::init("OpenSpore.log", log::Level::Trace, log::Level::Debug);
     mark(0, true, "harness up before the log existed");
     mark(1, true, "file=OpenSpore.log console=" + console_how);
+    // Name resolution (id -> name) is data, loaded once. Failure is not fatal: every name
+    // falls back to hex rather than to a guess.
+    {
+        u32 n = naming::load();
+        LOG_INFO("app", "naming registry loaded (%u names)", n);
+    }
 
     LOG_INFO("app", "=== OpenSpore boot (GA reimplementation) ===");
     // Preprocessor directives are not allowed inside a macro argument list (that is what
@@ -339,7 +346,7 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                       return "capture scheduled for the next frame -> " + p;
                   }});
     console::reg({"pkg", "Inspect a .package: list, header, records, or dump one resource.",
-                  "-list | -hdr <i> | -rec <i> <n> | -dump <i> <n> <out.bin> | -decode <i> <n> <out.bin>",
+                  "-list | -hdr <i> | -rec <i> <n> | -path <i> <n> | -types <i> | -dump <i> <n> <out> | -decode <i> <n> <out>",
                   [](const console::CmdContext& c) -> std::string {
                       if (c.args.size() < 2) return "usage: pkg -list | -hdr <i> | -rec <i> <n> | -dump <i> <n> <file>";
                       const std::string& sub = c.args[1];
@@ -393,14 +400,23 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                           u32 n = (u32)atoi(c.args[3].c_str());
                           if (n >= pk.records().size()) return "pkg: record index out of range";
                           const auto& r = pk.records()[n];
-                          const char* tn = pkg::type_id_name(r.type());
+                          const char* tn = naming::type_name(r.type());
+                          if (!tn) tn = pkg::type_id_name(r.type());
+                          const char* in = naming::instance_name(r.instance());
                           char b[512];
                           _snprintf_s(
                               b, sizeof(b), _TRUNCATE,
-                              "rec[%u]: type=0x%08x%s%s inst=0x%08x off=0x%08x packed=%u mem=%u %s flags=0x%04x", n,
-                              r.type(), tn ? " (" : "", tn ? tn : "", r.instance(), r.offset(), r.packed_size(),
-                              r.mem_size(), r.refpacked() ? "REFPACK" : "raw", r.flags());
+                              "rec[%u]: type=0x%08x%s%s inst=0x%08x%s%s off=0x%08x packed=%u mem=%u %s flags=0x%04x", n,
+                              r.type(), tn ? " (" : "", tn ? tn : "", r.instance(), in ? " (" : "", in ? in : "",
+                              r.offset(), r.packed_size(), r.mem_size(), r.refpacked() ? "REFPACK" : "raw", r.flags());
                           return b;
+                      }
+                      if (sub == "-path") {
+                          if (c.args.size() < 4) return "pkg: -path needs a record number";
+                          u32 n = (u32)atoi(c.args[3].c_str());
+                          if (n >= pk.records().size()) return "pkg: record index out of range";
+                          const auto& r = pk.records()[n];
+                          return naming::resource_path(r.type(), r.group(), r.instance());
                       }
                       if (sub == "-types") {
                           // What is actually inside a package, by name. Uses the generated
@@ -428,7 +444,8 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                                       (unsigned long long)bytes, (unsigned long long)refpack);
                           std::string s2 = head;
                           for (size_t k = 0; k < v.size() && k < 24; ++k) {
-                              const char* tn2 = pkg::type_id_name(v[k].first);
+                              const char* tn2 = naming::type_name(v[k].first);
+                              if (!tn2) tn2 = pkg::type_id_name(v[k].first);
                               char line[128];
                               _snprintf_s(line, sizeof(line), _TRUNCATE, "\n  %-20s 0x%08x  x%u",
                                           tn2 ? tn2 : "(unnamed)", v[k].first, v[k].second);

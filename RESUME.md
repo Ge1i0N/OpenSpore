@@ -1,24 +1,25 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 6b).
+Last update: 2026-10-13 (session 7).
 
 ## One-line status
 
-**There is a booting executable that decodes real Spore content and names it.** RefPack is
-solved and verified (30,000/30,000 real records decode to exactly `memSize`), all 57 `.package`
-files index-parse (150,945 records), `pkg:-decode` writes actual game data, and type ids resolve
-to names (`pkg:-types` shows `cs-cz/NameGeneration` = 13 × `trigger` + 1 × `prop`). The
-RenderWare bridge has not started; that is the next big piece. `-w -devDirs` still boots 10/10
-markers at ~33 fps.
+**The whole game is enumerated and largely named.** 150,945 resources across 57 packages,
+10.27 GB decoded, **112,155 resource names resolved** (type + group + instance), RefPack solved
+(30,000/30,000 records decode to exactly `memSize`), and the inventory is on the Loader screen.
+The next big item is **RenderWare 4** (NOT RW 3.x — the rw4 streams begin `\x89RW4w32`, version
+`454`, so the field guide's §3 RW-3.7 playbook does not apply as written). `-w -devDirs` still
+boots 10/10 markers at ~33 fps.
 
-## Upstream knowledge is now IN the repo (level 4, tested before use)
+## Upstream knowledge is in the repo, but it is SECONDARY (level 4)
 
-`upstream/SporeMaster3/` (tracked, ~9.8 MB): another team's RE docs (21 files), the type/group
-registries, `resources.csv` (6,005 resource rows) and the beta `KeyMap.txt`. It fixed two of our
-bugs and was itself found wrong in two byte-level places. **Never adopt a claim from it without
-testing it against the oracle (level 1) or our 57 packages (level 2)** — see MEMORY.md "Upstream
-knowledge" and IDEAS.md §5 items 19-20 for the failures.
+**Disassembly is always the first tool; everything else is a fallback.** `upstream/SporeMaster3/`
+(tracked, ~9.8 MB: 21 RE docs, the registries, `resources.csv`, beta `KeyMap.txt`) is another
+team's work — consult it only when the disassembly is unclear, and test every claim against the
+oracle (level 1) or our 57 packages (level 2) before relying on it. It fixed two of our bugs and
+was itself wrong in **three** documented places; its C# source is right where its prose is wrong,
+so if consulted at all, read the source. Recorded: MEMORY.md "Upstream knowledge", IDEAS.md §5.
 
 ## Yardsticks (report both after every run)
 
@@ -31,6 +32,8 @@ knowledge" and IDEAS.md §5 items 19-20 for the failures.
 | **RefPack decoded exactly** | **30,000 / 30,000**, 0 failures | `python tools/refpack.py --verify --limit 30000` |
 | game content decoded | 312 B + 10,191 B Czech text, == `memSize` | `pkg:-decode,0,0` / `,0,2` |
 | type names resolved | `trigger`/`prop` for cs-cz NameGeneration | `-exec pkg:-types,0` |
+| **resources enumerated** | **150,945**, 10.27 GB, 90 types (86 named) | `inventory:` in the log |
+| **resource names resolved** | **112,155 / 150,945 (74.3%)** | `inventory:` / `pkg:-path` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower, as the original) | `-exec state:-list` |
 | fps | **33.4 / 31.2** | `fps=` in the log |
 | build warnings | **0** | `cmake --build build --config Debug` output |
@@ -195,16 +198,18 @@ silent verboseaudio 4.0 5.1 automation …`).
 
 ## Next actions, in order
 
-1. **Identify a decoded resource's type** and show real game content on the Loader screen
-   (we can already decode; next is to *use* it). `rw4` (0x2F4E681B) is the RenderWare resource
-   type - an obvious first target once the RW bridge starts.
-2. **RenderWare plugin-registration family** (VERIFY row 13): start from `vb -<used>` at
-   `0x0140a980` (field guide §3: bridge `Rw*RegisterPlugin`/`*RegisterPluginStream`/
-   `*GetPluginOffset`/`*SetStream{Always,Rights}CallBack` for every PLUGINBASE class; expect
-   **no** RxPipeline equivalent).
+1. **RenderWare 4 stream format** — 12,987 `rw4` resources (0x2F4E681B) are RW4, not RW 3.x:
+   a decoded payload starts `89 52 57 34 77 33 32 00 0d 0a 1a 0a` ("\x89RW4w32\r\n\x1a\n") with
+   version `454`. There is an embedded source path
+   `\Spore\SporeEP1ML\Core\RenderWare\platform\src\graphics\core\device\target\dx9\rwgdrvgraph.cpp`.
+   `tools/rw_scan.py` is in place to walk it. **This is the big one** - the field guide's §3
+   assumptions (RW 3.7 chunk ids, librw as a drop-in) must be re-checked against the actual bytes.
+2. **Show decoded game content** on the Loader (we can decode and name it; next is to *use* it).
+   `png` (14,549) and `locale` (2,944) are the cheapest visible wins.
 3. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle
-   `-w` (row 15).
-4. Extract `render/rhi.h` **when the RW bridge starts**, not before (`IDEAS.md` §1).
+   `-w` (VERIFY row 15).
+4. Extract `render/rhi.h` **when a renderer bridge actually starts**, not before (`IDEAS.md` §1).
+5. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
 
 Done and off the list: `.package` header + fixed-stride index (session 4: 57 files, 0 invalid,
 17,901 records, 0 violations), in-engine frame capture (✅ `GetBackBuffer` →
