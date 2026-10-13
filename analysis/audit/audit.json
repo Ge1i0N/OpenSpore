@@ -507,19 +507,19 @@
    "id": "event.dispatcher",
    "doc": "analysis/startup.md:141-142",
    "severity": "high",
-   "overall": "FAIL",
+   "overall": "UNKNOWN",
    "checks": [
     {
      "kind": "func",
-     "verdict": "PASS",
-     "evidence": "[PASS] no CMP of 0x02559f75, 0x000f61d6, 0x000f61dd, 0xae1db073",
+     "verdict": "UNKNOWN",
+     "evidence": "[UNKNOWN] no CMP of absent from Ghidra's view, but its body has undischarged gaps [0x007e71c5..0x007e72be (250 B)]; seed those with kind=code before treating this as a refutation",
      "note": "hashed event ids 0x255abf5 / 0xf62add / 0xf62ade / 0x212d3e7 / 0xae1cfe73. GHIDRA-CONFIRMED after seeding: the decompiler renders the whole switch (param_2 < 0x255abf6 / == 0x255abf5 / == 0xf62add / ...). 0xf62ade is the FORWARD id the branch re-dispatches.",
      "addr": "0x007e7160"
     },
     {
      "kind": "func",
-     "verdict": "FAIL",
-     "evidence": "[FAIL] immediate 0x000000fa, 0x0000000a nowhere in the function",
+     "verdict": "UNKNOWN",
+     "evidence": "[UNKNOWN] immediate absent from Ghidra's view, but its body has undischarged gaps [0x007e71c5..0x007e72be (250 B)]; seed those with kind=code before treating this as a refutation",
      "note": "CORRECTED, and this was the TENTH checker artifact of the audit: the retry loop stores 250 with `mov [esp+0x14],0xfa` (0x7e7264) and the counter with `mov [esp+0x30],0xa` (0x7e7233) - NEITHER is a PUSH, so a mnemonic-bucketed `pushes_imm` check FAILed a correct doc claim. Use the mnemonic-agnostic immediate check for values that reach the stack. Substance of the original claim verified: 10 retries x 250 ms.",
      "addr": "0x007e7160"
     },
@@ -768,8 +768,8 @@
    "checks": [
     {
      "kind": "func",
-     "verdict": "PASS",
-     "evidence": "[PASS] no CMP of 0x00001ffb",
+     "verdict": "UNKNOWN",
+     "evidence": "[UNKNOWN] no CMP of absent from Ghidra's view, but its body has undischarged gaps [0x0092c62d..0x0092c62f (3 B); 0x0092c6ed..0x0092c6ef (3 B)]; seed those with kind=code before treating this as a refutation",
      "note": "TRAP: (& 0x1FFF) == 0x10FB, so 0x10FB and 0x50FB are both valid signatures",
      "addr": "0x0092c660"
     },
@@ -987,7 +987,7 @@
    "id": "statemgr.id_override",
    "doc": "analysis/states.md, source/states/statemgr.cpp::find",
    "severity": "load-bearing",
-   "overall": "FAIL",
+   "overall": "PASS",
    "checks": [
     {
      "kind": "func",
@@ -1012,8 +1012,8 @@
     },
     {
      "kind": "insn_at",
-     "verdict": "FAIL",
-     "evidence": "0x007e40d6 is 'JZ 0x007e40ea', we expected /je/",
+     "verdict": "PASS",
+     "evidence": "0x007e40d6: JZ 0x007e40ea",
      "note": "THE BRANCH: `je 0x7e40ea` - when the `id` arg is ABSENT it jumps to the hashing block",
      "addr": "0x007e40d6"
     },
@@ -1066,6 +1066,112 @@
      "evidence": "[PASS] string 0x014135dc (\"can't nest states or transitions\") referenced",
      "note": "the no-nesting assert lives in the state-ADD path, which is why a chained gotoState must be QUEUED rather than called reentrantly",
      "addr": "0x007e3fb0"
+    }
+   ]
+  },
+  {
+   "id": "spui.loading_path",
+   "doc": "analysis/spui-loading.md",
+   "severity": "load-bearing",
+   "overall": "UNKNOWN",
+   "checks": [
+    {
+     "kind": "func_exists",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00810870 not in the export",
+     "note": "the cSPUILayoutResource factory",
+     "addr": "0x00810870"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00810870 not in the export",
+     "note": "gated on the resource-manager request tag",
+     "addr": "0x00810870"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00810870 not in the export",
+     "note": "the allocation tag names the class",
+     "addr": "0x00810870"
+    },
+    {
+     "kind": "func_exists",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00810940 not in the export",
+     "note": "the layout loader",
+     "addr": "0x00810940"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00810940 not in the export",
+     "note": "<<< THE POINT: the loader compares the resource's type word against 0x250FE9A2, so the spui type id is confirmed in code, not inferred from reg_type.txt + the index",
+     "addr": "0x00810940"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00810940 not in the export",
+     "note": "the same request tag gates the loader too",
+     "addr": "0x00810940"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00810940 not in the export",
+     "note": "the three named classes of the reader triple",
+     "addr": "0x00810940"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00810940 not in the export",
+     "note": "TokenIOContext 0x38, MemoryStream 0x24, SharedPointer 0x18 - the object sizes, so our engine's model has known extents",
+     "addr": "0x00810940"
+    },
+    {
+     "kind": "func_exists",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00903330 not in the export",
+     "note": "the TokenIOContext constructor",
+     "addr": "0x00903330"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00903330 not in the export",
+     "note": "TRAP-AND-PAYOFF: 0x143a460 is stored into [esi] exactly where a vtable goes, but it is an ASCII STRING. Reading it as a vtable would have invented a fake 12-method class; reading it as a string names the reader family - XML/TokenReader.",
+     "addr": "0x00903330"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00903330 not in the export",
+     "note": "the read/write callbacks the token reader installs over the MemoryStream",
+     "addr": "0x00903330"
+    },
+    {
+     "kind": "func_exists",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00903100 not in the export",
+     "note": "the XML/TokenReader user",
+     "addr": "0x00903100"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00903100 not in the export",
+     "note": "the reader's own name",
+     "addr": "0x00903100"
+    },
+    {
+     "kind": "func",
+     "verdict": "UNKNOWN",
+     "evidence": "function 0x00903100 not in the export",
+     "note": "THE NEXT STEP: the token reader's core. Recovering its token alphabet is what turns spui from a bit-packed mystery into a parsed layout.",
+     "addr": "0x00903100"
     }
    ]
   },

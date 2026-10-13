@@ -585,7 +585,7 @@ def verify():
     lines.append("- Ghidra %s, language %s, image base %s, entry %s, %s functions carved."
                  % (m.get("ghidra_version"), m.get("language"), m.get("image_base"),
                     m.get("entry_point"), m.get("function_count")))
-    lines.append("- Claims: %s" % ", ".join("%s %d" % (k, tally[k])
+    lines.append("- Claims: %s" % ", ".join("%s %d" % (k, tally.get(k, 0))
                                             for k in ("FAIL", "UNKNOWN", "PASS", "SKIP")))
     lines.append("")
     lines.append("`FAIL` = Ghidra disagrees with the doc. `UNKNOWN` = Ghidra could not answer, so the")

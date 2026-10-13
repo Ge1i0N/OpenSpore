@@ -4,59 +4,70 @@ Independent re-check of `analysis/claims.json` against Ghidra's own analysis of
 `refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe`.
 
 - Ghidra 12.1.4, language x86:LE:32:default, image base 0x00400000, entry None, 55294 functions carved.
-- Claims: FAIL 2, UNKNOWN 1, PASS 28, SKIP 1
+- Claims: FAIL 0, UNKNOWN 3, PASS 29, SKIP 1
 
 `FAIL` = Ghidra disagrees with the doc. `UNKNOWN` = Ghidra could not answer, so the
 claim is still only as good as our own objdump reading. `SKIP` = not a disassembly
 question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
 
-## FAIL (2)
+## UNKNOWN (3)
 
 | claim | sev | doc | verdict |
 |---|---|---|---|
-| `event.dispatcher` | high | analysis/startup.md:141-142 | **FAIL** |
-| `statemgr.id_override` | load-bearing | analysis/states.md, source/states/statemgr.cpp::find | **FAIL** |
+| `event.dispatcher` | high | analysis/startup.md:141-142 | **UNKNOWN** |
+| `refpack.decoder` | load-bearing | source/engine/pkg.h:46-50 | **UNKNOWN** |
+| `spui.loading_path` | load-bearing | analysis/spui-loading.md | **UNKNOWN** |
 
-### event.dispatcher — FAIL
+### event.dispatcher — UNKNOWN
 
-- `PASS` [ok] `func` [PASS] no CMP of 0x02559f75, 0x000f61d6, 0x000f61dd, 0xae1db073
+- `UNKNOWN` [?] `func` [UNKNOWN] no CMP of absent from Ghidra's view, but its body has undischarged gaps [0x007e71c5..0x007e72be (250 B)]; seed those with kind=code before treating this as a refutation
   - claim: hashed event ids 0x255abf5 / 0xf62add / 0xf62ade / 0x212d3e7 / 0xae1cfe73. GHIDRA-CONFIRMED after seeding: the decompiler renders the whole switch (param_2 < 0x255abf6 / == 0x255abf5 / == 0xf62add / ...). 0xf62ade is the FORWARD id the branch re-dispatches.
-- `FAIL` [MISMATCH] `func` [FAIL] immediate 0x000000fa, 0x0000000a nowhere in the function
+- `UNKNOWN` [?] `func` [UNKNOWN] immediate absent from Ghidra's view, but its body has undischarged gaps [0x007e71c5..0x007e72be (250 B)]; seed those with kind=code before treating this as a refutation
   - claim: CORRECTED, and this was the TENTH checker artifact of the audit: the retry loop stores 250 with `mov [esp+0x14],0xfa` (0x7e7264) and the counter with `mov [esp+0x30],0xa` (0x7e7233) - NEITHER is a PUSH, so a mnemonic-bucketed `pushes_imm` check FAILed a correct doc claim. Use the mnemonic-agnostic immediate check for values that reach the stack. Substance of the original claim verified: 10 retries x 250 ms.
 - `PASS` [ok] `func` [PASS] imports SleepEx present
   - claim: the wait helper is SleepEx(ms, bAlertable=1) via IAT 0x13cc17c, NOT Sleep - a refinement the audit forced us to make. Verified by resolving the IAT slot through the PE import directory (KERNEL32.dll!SleepEx).
 
-### statemgr.id_override — FAIL
-
-- `PASS` [ok] `func` [PASS] push of 0x811c9dc5 present
-  - claim: the hash path exists and pushes the seed
-- `PASS` [ok] `func` [PASS] calls 0x00932e50 present
-  - claim: it calls the FNV hasher
-- `PASS` [ok] `func` [PASS] string 0x013fc8f0 ('id') referenced
-  - claim: the ArgScript arg is literally "id" (the leading dash is the ArgScript layer's convention, which is why a search for the literal '-id' finds nothing in the binary)
-- `FAIL` [MISMATCH] `insn_at` 0x007e40d6 is 'JZ 0x007e40ea', we expected /je/
-  - claim: THE BRANCH: `je 0x7e40ea` - when the `id` arg is ABSENT it jumps to the hashing block
-- `PASS` [ok] `insn_at` 0x007e40e8: JMP 0x007e4100
-  - claim: and `jmp 0x7e4100` - when the `id` arg is PRESENT the hash is SKIPPED entirely, so the explicit value is the identity
-- `PASS` [ok] `insn_at` 0x007e4103: MOV dword ptr [ECX + 0x28],EAX
-  - claim: BOTH paths converge on `mov [ecx+0x28],eax` - one field holds either the assigned id or the hash
-
-## UNKNOWN (1)
-
-| claim | sev | doc | verdict |
-|---|---|---|---|
-| `refpack.decoder` | load-bearing | source/engine/pkg.h:46-50 | **UNKNOWN** |
-
 ### refpack.decoder — UNKNOWN
 
-- `PASS` [ok] `func` [PASS] no CMP of 0x00001ffb
+- `UNKNOWN` [?] `func` [UNKNOWN] no CMP of absent from Ghidra's view, but its body has undischarged gaps [0x0092c62d..0x0092c62f (3 B); 0x0092c6ed..0x0092c6ef (3 B)]; seed those with kind=code before treating this as a refutation
   - claim: TRAP: (& 0x1FFF) == 0x10FB, so 0x10FB and 0x50FB are both valid signatures
 - `PASS` [ok] `func_exists` Ghidra has a function here: FUN_0092c5b0 (0x0092c5b0..0x0092c77f, 198 insns)
   - claim: the RefPack copy loop is a real function
 - `UNKNOWN` [?] `func` check records no assertion
   - claim: TRAP: counters are test-before-decrement, so the byte count is reg+1
 
-## PASS (28)
+### spui.loading_path — UNKNOWN
+
+- `UNKNOWN` [?] `func_exists` function 0x00810870 not in the export
+  - claim: the cSPUILayoutResource factory
+- `UNKNOWN` [?] `func` function 0x00810870 not in the export
+  - claim: gated on the resource-manager request tag
+- `UNKNOWN` [?] `func` function 0x00810870 not in the export
+  - claim: the allocation tag names the class
+- `UNKNOWN` [?] `func_exists` function 0x00810940 not in the export
+  - claim: the layout loader
+- `UNKNOWN` [?] `func` function 0x00810940 not in the export
+  - claim: <<< THE POINT: the loader compares the resource's type word against 0x250FE9A2, so the spui type id is confirmed in code, not inferred from reg_type.txt + the index
+- `UNKNOWN` [?] `func` function 0x00810940 not in the export
+  - claim: the same request tag gates the loader too
+- `UNKNOWN` [?] `func` function 0x00810940 not in the export
+  - claim: the three named classes of the reader triple
+- `UNKNOWN` [?] `func` function 0x00810940 not in the export
+  - claim: TokenIOContext 0x38, MemoryStream 0x24, SharedPointer 0x18 - the object sizes, so our engine's model has known extents
+- `UNKNOWN` [?] `func_exists` function 0x00903330 not in the export
+  - claim: the TokenIOContext constructor
+- `UNKNOWN` [?] `func` function 0x00903330 not in the export
+  - claim: TRAP-AND-PAYOFF: 0x143a460 is stored into [esi] exactly where a vtable goes, but it is an ASCII STRING. Reading it as a vtable would have invented a fake 12-method class; reading it as a string names the reader family - XML/TokenReader.
+- `UNKNOWN` [?] `func` function 0x00903330 not in the export
+  - claim: the read/write callbacks the token reader installs over the MemoryStream
+- `UNKNOWN` [?] `func_exists` function 0x00903100 not in the export
+  - claim: the XML/TokenReader user
+- `UNKNOWN` [?] `func` function 0x00903100 not in the export
+  - claim: the reader's own name
+- `UNKNOWN` [?] `func` function 0x00903100 not in the export
+  - claim: THE NEXT STEP: the token reader's core. Recovering its token alphabet is what turns spui from a bit-packed mystery into a parsed layout.
+
+## PASS (29)
 
 | claim | sev | doc | verdict |
 |---|---|---|---|
@@ -87,6 +98,7 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
 | `model.manager.blocked` | load-bearing | RESUME.md Blocked: the rw4 handler slots are MAP OPS, not a parser | **PASS** |
 | `flags.device` | high | VERIFY.md: -w/-f/-r are real original flags | **PASS** |
 | `allocators` | medium | analysis/startup.md:32,75,87 | **PASS** |
+| `statemgr.id_override` | load-bearing | analysis/states.md, source/states/statemgr.cpp::find | **PASS** |
 | `statemgr.chain_not_stack` | high | analysis/states.md, source/states/statemgr.cpp::request_goto | **PASS** |
 
 ### pe.shape — PASS
@@ -337,6 +349,21 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
   - claim: the allocator pair member used by the spui registrar
 - `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00920960 (0x00920960..0x009209e8, 28 insns)
   - claim: the 0x148 allocation ctor
+
+### statemgr.id_override — PASS
+
+- `PASS` [ok] `func` [PASS] push of 0x811c9dc5 present
+  - claim: the hash path exists and pushes the seed
+- `PASS` [ok] `func` [PASS] calls 0x00932e50 present
+  - claim: it calls the FNV hasher
+- `PASS` [ok] `func` [PASS] string 0x013fc8f0 ('id') referenced
+  - claim: the ArgScript arg is literally "id" (the leading dash is the ArgScript layer's convention, which is why a search for the literal '-id' finds nothing in the binary)
+- `PASS` [ok] `insn_at` 0x007e40d6: JZ 0x007e40ea
+  - claim: THE BRANCH: `je 0x7e40ea` - when the `id` arg is ABSENT it jumps to the hashing block
+- `PASS` [ok] `insn_at` 0x007e40e8: JMP 0x007e4100
+  - claim: and `jmp 0x7e4100` - when the `id` arg is PRESENT the hash is SKIPPED entirely, so the explicit value is the identity
+- `PASS` [ok] `insn_at` 0x007e4103: MOV dword ptr [ECX + 0x28],EAX
+  - claim: BOTH paths converge on `mov [ecx+0x28],eax` - one field holds either the assigned id or the hash
 
 ### statemgr.chain_not_stack — PASS
 

@@ -527,6 +527,35 @@ tree ships lowercase `en-us`, `-locale` may be spelled any way).
 disassemble, not a fact to accept.** Two of our "the data does not exist" conclusions (locale text,
 and the state names still outstanding) are of this class.
 
+## The `spui` door: it is a TOKEN STREAM, and byte parsing was always doomed
+
+Full detail: **`analysis/spui-loading.md`**. The durable facts:
+
+* **The door is named by the DATA, not by the bytes.** The recovered state script contains
+  `cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`. Grepping for the VERB `uilayout`
+  produced the whole class cluster in one step. Grepping for the FORMAT (`spui`, layout names) had
+  produced nothing for sessions. **Search for the command, not the data, when the data is opaque.**
+* **Factory `0x00810870`**, gated on the resource-manager request tag **`0x0510A95B`**, allocates 0x24
+  under the tag `"App/SPUILayoutResource"` (`0x014183ac`).
+* **Loader `0x00810940`** does `cmp dword [eax+4], 0x250FE9A2` — **the `spui` type id confirmed in
+  code**, not inferred from `reg_type.txt` + the package index as before. It then builds the triple
+  `UI/UILayoutBinary/SharedPointer` (0x18), `UI/UILayoutBinary/MemoryStream` (0x24) and
+  `UI/cSPUILayoutResource/TokenIOContext` (0x38), all three class names present as strings.
+* **`TokenIOContext` ctor `0x00903330`** installs read/write callbacks `0x925e80` / `0x925eb0` (thin
+  thunks onto the MemoryStream vtable slots +0x08 / +0x0c) and a **2048-byte** buffer (`mov [edi],0x800`).
+* The reader family is UTFKernel's **`XML/TokenReader`** (`0x0143a450`, used at `0x00903100`, which
+  calls `0x901680` read-token / `0x9016e0` peek / `0x900e10` error and tests a token flag with
+  `and eax,0x8`).
+* **Therefore `spui` is a serialized token stream, not a struct with unknown field order.** That is why
+  the 273-byte sample never aligned to floats or u32s and why `b0 c1 ee 09` recurred like noise.
+  **There is no stride to find.** The next step is the token alphabet, from those three functions.
+* **TRAP: a `.rdata` pointer is not always a vtable.** `0x903337` stores `0x0143a460` into `[esi]`
+  exactly where a ctor puts a vtable — but those bytes are the ASCII
+  `"UTF/XmlTokenReader/TokenIOContext/mAllocator"`. Reading it as a vtable would have invented a
+  fake 12-method class; reading it as a string named the reader family for us. **Try ASCII before
+  treating a stored pointer as a vtable.** (Same trap made `0x013ebcbc` / `0x01418398` in the factory
+  look like vtables; they are not, so the factory's real shape still needs one more read.)
+
 ## Ghidra is now part of the toolchain (session 13)
 
 The oracle is imported into the Ghidra project `refs/ghidra/proj/OpenSporeOracle` (gitignored — it
@@ -611,6 +640,72 @@ invisible-API artifacts (`Memory.getInt(addr, True)` is **big-endian**, not "una
 `JArray("b")` raises `ClassNotFoundException` — it needs the `JByte` **class**; regexes written against
 objdump spelling cannot match Ghidra's `MOV EAX,dword ptr [EDX + 0x84]`), and each produced a
 confident-looking wrong answer.
+
+### The trajectory after seeding, and the wall MEASURED
+
+| stage | PASS | FAIL | UNKNOWN | SKIP |
+|---|---|---|---|---|
+| first run (unseeded project) | 13 | 10 | 6 | 1 |
+| after fixing my checker's byte order / strings / regexes | 17 | 1 | 11 | 1 |
+| after seeding the 7 vtable-only functions + re-analysis | **29** | **0** | 3 | 1 |
+
+Seeding the seven functions cascaded to **+683 carved functions** (54,611 → 54,618 → 55,294). That
+number IS the vtable-only wall, measured rather than asserted: seven entry points let the analyzers
+reach 683 more functions they could not see before. **Not one boot-chain reading was wrong.**
+
+### TWO more checker artifacts (the class of mistake keeps paying)
+
+1. **Ghidra prints conditionals by SEMANTIC name, objdump by the historical ALIAS.** Our docs say `je`;
+   Ghidra says `JZ`. Same instruction, and a `/je/` regex FAILed against it. The auditor now matches
+   both spellings (`normalize_insns` in `tools/ghidra_audit.py`).
+2. **A function body is not always contiguous, so an ABSENCE is only evidence when the tool actually
+   examined that ground.** The event dispatcher's body came back as
+   `[[0x7e7160,0x7e71c4] [0x7e72bf,0x7e7300]]` — a **250-byte hole** in the middle Ghidra never
+   disassembled, because it stops at the MSVC alignment padding `8d 49 00` and types those bytes as
+   data. Our documented retry values (`mov [esp+0x30],0xa` at `0x7e7233`, `mov [esp+0x14],0xfa` at
+   `0x7e7264`) live INSIDE that hole, so "immediate nowhere in the function" described Ghidra's
+   coverage, not the binary. The export now carries `body_ranges`/`body_contiguous`, and the auditor
+   downgrades such a miss to UNKNOWN **naming the gap** instead of claiming a refutation.
+
+`tools/gen_seeds.py` derives `code` seeds for every detected gap (7 found: the event dispatcher, the
+RefPack decoder, the mouse pump, `__tmainCRTStartup`, a model-manager handler). Three walls in the
+filler were mine, and all three are the same shape — **a plausible API that does not exist**:
+
+* `clearCodeUnits` is on **neither** `FlatProgramAPI` **nor** `ProgramDB`; it is the app command
+  `ghidra.app.cmd.disassemble.ClearCodeUnitsCmd`.
+* Stopping the walk at any defined datum can never fill anything, because **every hole BEGINS at exactly
+  such a mis-typed datum** — the datum is the cause, not a boundary.
+* `getFunctionContaining()` reports the enclosing function for an address inside the hole, so it is
+  useless as a stop test. The gap is bounded by the body ranges, so the next DECODED INSTRUCTION is
+  the real edge.
+
+Also: **a gap may not be a gap.** `0x7e71c5` (the dispatcher's 250-byte hole start) holds a DECODED
+instruction that lies outside `0x7e7160`'s body ranges — Ghidra carved the middle region as a separate
+function or left it unaffiliated. So those bytes are analyzed; they just do not belong to the function
+my claims cite, which is why `uses_imm` on `0x7e7160` cannot see them. **The fix was not seeding: it is
+that an audit must cite the function that actually owns the bytes.** Re-deriving the gap set from
+CURRENT facts (never replaying a saved `seeds.tsv`) is what exposed this.
+
+And one doc correction it forced: the retry wait helper `0x922080` is **`SleepEx(ms, bAlertable=1)`**
+via IAT `0x13cc17c`, not `Sleep` (resolved through the PE import directory), and the branch
+re-dispatches event id `0xf62ade`. `startup.md`'s "Sleep(0xfa)" was wrong in detail and right in
+substance (10 retries × 250 ms) — the audit is what forced the precision.
+
+## Ghidra API surfaces that do NOT exist in 12.1.4 (each one cost a round)
+
+`ProgramDB.getEntrypoint()` · `Listing.getListing()` / `FunctionManager.getFunctionManager()` /
+`ReferenceManager.getReferenceManager()` as statics (they are instance methods on `Program`;
+`getSymbolTable().getReferenceManager()` does not exist either) · `GhidraFile.getPath()` ·
+`GhidraFile.save(String, TaskMonitor)` (it is `save(TaskMonitor)`) · `DecompInterface.setAutoUpdate()` ·
+`DataDB.isString()` (use `getValue()`, and fall through to a raw read when the value is not a string —
+`0x013ebc48` is typed as the integer `0x41` while its bytes are literally `"App"`) ·
+`GhidraProgramUtilities.analyzeProgram()` · `FlatProgramAPI.createFunction(Address, String, SourceType)`
+(two args only) · `clearCodeUnits` on `FlatProgramAPI` or `ProgramDB` (it is `ClearCodeUnitsCmd`) ·
+`MemoryMapDB.getRange()` · `Address.getBytes(int)` · `Memory.getInt(Address, boolean)` where the boolean
+is **bigEndIndexOrder, not alignment** · `JArray("b")` (needs the `JByte` CLASS) ·
+`analyzeAll` requires an enclosing transaction or every analyzer worker dies with
+`db.NoTransactionException` — and even then the worker threads cannot see a script's transaction, so
+**drive analysis with `analyzeHeadless -process`, not from a script.**
 
 ## TRAP: scoop's `current` is a JUNCTION, and REA refuses it (session 13)
 

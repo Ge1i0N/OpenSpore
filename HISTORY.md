@@ -7,7 +7,119 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
-### The audit from WinMain forward: did we start reversing correctly? YES (17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP)
+### THE SPUI DOOR: `spui` is a TOKEN STREAM, so byte parsing was always doomed
+Found by following the DATA rather than the bytes: the recovered state script names the command —
+`cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`. Grepping `.rdata` for the **verb**
+`uilayout` produced the whole class cluster in one step, after grepping for the *format* had produced
+nothing for sessions.
+Chain: factory **`0x00810870`** (gated on request tag `0x0510A95B`, alloc 0x24 under the tag
+`"App/SPUILayoutResource"`) → loader **`0x00810940`**, which does
+`cmp dword [eax+4], 0x250FE9A2` — **our `spui` type id confirmed in CODE**, not inferred from
+`reg_type.txt` + the package index as before — and builds the triple
+`UI/UILayoutBinary/SharedPointer` (0x18) + `UI/UILayoutBinary/MemoryStream` (0x24) +
+`UI/cSPUILayoutResource/TokenIOContext` (0x38), all three class names present as literal strings →
+reader ctor **`0x00903330`**, which installs read/write callbacks `0x925e80`/`0x925eb0` (thin thunks
+onto the MemoryStream vtable +0x08/+0x0c) and a **2048-byte** buffer (`mov [edi],0x800`) → the family
+is UTFKernel's **`XML/TokenReader`** (`0x0143a450`, used at `0x00903100`, which calls `0x901680`
+read-token / `0x9016e0` peek / `0x900e10` error and tests a token flag with `and eax,0x8`).
+**Consequence: the 273-byte `spui` sample never aligned to floats or u32s, and `b0 c1 ee 09` recurred
+like noise, because those bytes are a token stream (the binary counterpart of an XML layout), not a
+struct with unknown field order. There is no stride to find.** So: stop parsing bytes; recover the
+token alphabet from those three functions first, then decode one small `spui` and check it against the
+407 named screens in `analysis/spui_screens.txt`. The next step is now narrow instead of open-ended.
+`analysis/spui-loading.md`, VERIFY rows 46-47, `analysis/claims.json` (`spui.loading_path`, 15 checks).
+**TRAP discovered on the way (row 47): a `.rdata` pointer is not always a vtable.** `0x903337` stores
+`0x0143a460` into `[esi]` exactly where a ctor stores a vtable — but those bytes are the ASCII
+`"UTF/XmlTokenReader/TokenIOContext/mAllocator"`. Read as a vtable it would have invented a fake
+12-method class; read as a string it named the reader family for us. The same shape made
+`0x013ebcbc`/`0x01418398` in the factory look like vtables (they are not). **Try ASCII before treating
+a stored pointer as a vtable.**
+
+### The audit, finished: 29 PASS / 0 FAIL / 3 UNKNOWN / 1 SKIP, and the wall MEASURED
+Trajectory: 13 PASS / 10 FAIL (first run) → 17 / 1 (after fixing my checker) → **29 / 0** after seeding
+the 7 vtable-only functions and re-analyzing. Seeding those seven entries cascaded to **+683 carved
+functions** (54,611 → 54,618 → 55,294): that number IS the vtable-only wall, measured rather than
+asserted. **Not one boot-chain reading was wrong.**
+Two more checker artifacts, both the same class as the first nine:
+(1) **Ghidra prints conditionals by SEMANTIC name, objdump by the historical ALIAS** — our docs say
+`je`, Ghidra says `JZ`; a `/je/` regex FAILed against the identical instruction. The auditor now
+matches both spellings (`normalize_insns`).
+(2) **A function body is not always contiguous, so an ABSENCE is only evidence when the tool actually
+examined that ground.** The event dispatcher's body came back as
+`[[0x7e7160,0x7e71c4] [0x7e72bf,0x7e7300]]` — a **250-byte hole** Ghidra never disassembled because it
+stops at the MSVC padding `8d 49 00` and types those bytes as data — and our documented retry values
+(`mov [esp+0x30],0xa` at `0x7e7233`, `mov [esp+0x14],0xfa` at `0x7e7264`) live inside it. So
+"immediate nowhere in the function" described Ghidra's coverage, not the binary. The export now carries
+`body_ranges`/`body_contiguous`, and the auditor downgrades such a miss to UNKNOWN **naming the gap**
+instead of claiming a refutation; `tools/gen_seeds.py` derives `code` seeds for every gap (7 found: the
+dispatcher, the RefPack decoder, the mouse pump, `__tmainCRTStartup`, a model-manager handler).
+Three walls in the filler were mine, all the same shape — a plausible API that does not exist:
+`clearCodeUnits` is on neither `FlatProgramAPI` nor `ProgramDB` (it is
+`ghidra.app.cmd.disassemble.ClearCodeUnitsCmd`); stopping the walk at any defined datum can never fill
+anything, because **every hole BEGINS at exactly such a mis-typed datum** (the datum is the cause, not
+a boundary); and `getFunctionContaining()` reports the enclosing function for an address inside the
+hole, so it is useless as a stop test — the next DECODED INSTRUCTION is the real edge.
+And a fourth, subtler one, caught only by re-deriving the gaps from CURRENT facts instead of replaying
+a saved file: the seed walk reported `0x7e71c5: reached a decoded instruction` and I first read that as
+"the re-analysis closed the hole by itself". It did not. `0x7e71c5` holds an instruction that is
+**outside** `0x7e7160`'s body ranges, i.e. Ghidra carved that middle region as a SEPARATE function (or
+left it unaffiliated). So the dispatcher's bytes ARE disassembled — they just do not belong to the
+function my claims cite, which is why `uses_imm` on `0x7e7160` cannot see them. The fix is therefore
+**not** seeding at all: it is that the audit must cite both halves (or the gap owner) before calling an
+absence a refutation. Re-deriving gaps from live facts is what exposed this; a saved seed file would
+have had me seeding holes that were never holes.
+Doc correction the audit forced while it was at it: the retry wait helper `0x922080` is
+**`SleepEx(ms, bAlertable=1)`** via IAT `0x13cc17c`, not `Sleep` (resolved through the PE import
+directory), and the branch re-dispatches event id `0xf62ade`. `startup.md`'s "Sleep(0xfa)" was wrong in
+detail and right in substance (10 retries × 250 ms).
+Process lesson of the hour: I ran three of these pipelines **in the background simultaneously** and
+they fought over the Ghidra project lock, each reporting `LockException` while a *sibling* held it — and
+one of them I had already misdiagnosed as a stale lock and cleared. **Serialize the jobs that share one
+project**, and wait for the owner to exit (identify by command line, not by process name) instead of
+killing it.
+
+### The `-id` semantics, settled: an explicit id REPLACES the name hash, so names resolve as STRINGS
+The state-add `0x7e3fb0` branches on whether the ArgScript arg is present:
+`7e40c5 push 1/"id"(0x013fc8f0)/call 0x838410` → `7e40d6 je 0x7e40ea` (ABSENT → hash the name) vs
+`7e40e8 jmp 0x7e4100` (PRESENT → skip the hash entirely), and **both** converge on
+`7e4103 mov [ecx+0x28], eax`, then insert into the `[state+0xb8]` map keyed by that id. So `-id` is not
+a parallel field: 19 of the 60 states are addressed by their assigned number and 41 by
+`fnv1_lower(name)`.
+Our `Manager::find()` had been resolving a name by HASHING it, which made every explicit-id state
+unreachable by name — including `Main` (`-id 0`) and all 13 editors — and that contradicted the shipped
+script's own header ("you can run with `-state:<stateName>`"). `find()` now compares names as strings
+with the engine's own tolower folding, and `find_by_id()` was added for the id namespace the UI layouts
+and editor messages actually use. Verified: `-state:Main` → `Main [0x00000000]` → `gotoState
+GalaxyGameEntry` → `GalaxyGameEntry [0x02ccda9c]`; `-state:tribalaccessorieseditor` (all lowercase) →
+`TribalAccessoriesEditor [0x022d9e06]`.
+Sub-trap: the arg is literally `"id"`, **not** `"-id"` — a search for the ASCII `-id` finds only
+`inter-ideograph`, the *effect* command's `-id <n:int>` spec at `0x01456d10`, and TLS cipher names. The
+leading dash is the ArgScript layer's convention, which is why the first attempt to confirm this by
+string search appeared to fail.
+Transitions are a **CHAIN, not a stack**: `endChain` (0x014130f8) sits in the same .rdata cluster as
+`entry`/`exit`/`onExit`, and `Main`'s body is a bare `gotoState` with no entry block, so a transition
+fires while ENTERING a state — but the state-add asserts `can't nest states or transitions`
+(0x014135dc at 0x7e3fd7), so a chained `gotoState` must not re-enter the switch. That is
+`Manager::request_goto()`: it queues, `goto_name()` drains after the transition, with a 32-hop cap so a
+script cycle logs instead of hanging the boot. Measured: the shipped table has no cycle.
+Cross-system confirmation, the strongest single measurement in the project: `fnv1_lower(state_name)`
+equals a real en-us `locale` **table instance** for exactly four states — `GalaxyGameEntry 0x2B7A0311`,
+`SpaceGame 0x2DB6DAD3`, `CreatureGame 0xAD56080C`, `TribeGame 0xF71FA311`. Control: 193 of 125,272
+registry names hash to any of the 200 table instances, so the expected accidental rate over 60 states is
+~0.09 hits, not 4. One measurement corroborates five independent things at once: the FNV-1
+multiply-first direction, the tolower folding, the instance-id naming rule, the recovered state names,
+and the locale table indexing.
+
+### A state with no renderer must still present a FRAME
+Booting into any game state drew nothing: those states' behaviour is an unimplemented `mode`, so no
+`on_render` ran, so the device never presented, so the deferred `-capture` was never serviced — and the
+frame loop exited 0 having produced zero pixels. The original's mode decides a state's CONTENT, not
+whether the pump runs, so `app.cpp` now draws an honest placeholder for a renderer-less state: the real
+name, the real id with whether it was assigned or hashed, the description, the unexecuted mode, the
+`gotoState` edges and the entry actions verbatim (`analysis/shots/state_main.png`). Fixing this also
+unblocked `-capture` for every future state, which is the only way we get machine evidence of a frame.
+
+### The audit's FIRST run: did we start reversing correctly? YES (17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP)
 User request: "проверить вообще всё (начиная с мейна), чтобы понимать, всё ли правильно начали
 реверсить". Made checkable rather than eyeballed: **`analysis/claims.json`** = 30 claims / 104 checks,
 every address assertion from `analysis/startup.md`, `VERIFY.md` 35–41, `MEMORY.md` and

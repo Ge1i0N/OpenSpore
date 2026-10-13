@@ -26,11 +26,13 @@ we are.
 | draw real content: `gmdl` + `raster` mesh grid | ✅ | `analysis/shots/model_grid.png` |
 | resource manager `0x8de4b0`, `trigger` configs | 🚧 | `analysis/content-loading.md` |
 | **localized text: `locale` tables (18,441 entries, 10,246 keys)** | ✅ | `source/engine/text.cpp`, `analysis/text-locale.md` |
-| **UI/menus: `spui` layouts (524 screens, 407 named)** | 🚧 next | `analysis/ui.md` |
+| **UI/menus: `spui` layouts (524 screens, 407 named)** | 🚧 **door FOUND** | `analysis/spui-loading.md` — the deserializer is `0x810870`/`0x810940`, and `spui` is a **token stream** (`UTF/XmlTokenReader`), not a fixed struct: that is why byte parsing failed |
 | states: mechanism + a real `Title` state that transitions to `Loader` | ✅ | `source/states/title.cpp`, `analysis/shots/title_state.png` |
 | **states: the game's own state machine (60 states, 17 modes)** | ✅ **RECOVERED FROM DATA** | `analysis/states.md`, `analysis/scripts/SporeAppStates.txt` |
+| **states: the game's table DRIVES our engine** | ✅ | `-state:Main` → `Main [0x0]` → `GalaxyGameEntry [0x02ccda9c]`; `source/engine/appstates.cpp` |
+| states: `-id` semantics (explicit id REPLACES the name hash; names resolve as STRINGS) | ✅ | disasm `0x7e40d6`/`0x7e40e8`/`0x7e4103`; `analysis/states.md` |
 | launch key `-state:Name` (colon, as the original) | ✅ | `cmdline.cpp`; the shipped script's header confirms it **including the colon** |
-| **audit of our own reversal, from WinMain forward** | ✅ **17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP** | `analysis/audit-review.md`, `analysis/claims.json` |
+| **audit of our own reversal, from WinMain forward** | ✅ **29 PASS / 0 FAIL / 3 UNKNOWN / 1 SKIP** | `analysis/audit-review.md`, `analysis/claims.json` (33 claims / 131 checks) |
 | gameplay (sim, editors, stages) | ⬜ | feature map `gameplay` = 0% |
 
 **The state machine was DATA ALL ALONG, and I had it wrong for three sessions.** `RESUME.md` said the

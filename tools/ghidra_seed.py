@@ -64,6 +64,7 @@ def main():
     from pyghidra import open_project
     from java.lang import Object
     from ghidra.program.flatapi import FlatProgramAPI
+    from ghidra.app.cmd.disassemble import ClearCodeUnitsCmd
     from ghidra.program.model.symbol import SourceType
     from ghidra.program.util import GhidraProgramUtilities
 
@@ -131,17 +132,26 @@ def main():
                 n_cleared = 0
                 stop = "step budget"
                 for _ in range(4000):
-                    if FM.getFunctionContaining(addr) is not None:
-                        stop = "reached a carved function"
-                        break
                     ins = LISTING.getInstructionAt(addr)
                     if ins is not None:
+                        # The gap is bounded by definition (it sits between two body ranges), so the
+                        # next decoded instruction IS the far edge. Do NOT consult
+                        # getFunctionContaining() as a stop condition: it reports the enclosing
+                        # function for an address in the hole (its body test is coarse), which made
+                        # the first hole "already carved" and stopped the walk instantly.
                         stop = "reached a decoded instruction"
                         break
                     do = LISTING.getDataAt(addr)
                     if do is not None:
                         try:
-                            api.clearCodeUnits(addr, do.getMaxAddress(), False)
+                            # clearCodeUnits is NOT a method on FlatProgramAPI or on ProgramDB in this
+                            # Ghidra version (both raised, and that cost two rounds). It lives on the
+                            # app command ghidra.app.cmd.disassemble.ClearCodeUnitsCmd, which is the
+                            # same thing the GUI's "clear" action runs.
+                            cmd = ClearCodeUnitsCmd(addr, do.getMaxAddress(), False)
+                            if not cmd.applyTo(prog, mon):
+                                stop = "clear rejected: %s" % cmd.getStatusMsg()
+                                break
                             n_cleared += 1
                         except Exception as exc:
                             stop = "clear failed: %s" % exc

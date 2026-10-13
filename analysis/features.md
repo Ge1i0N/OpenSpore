@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 82.2%** | **Overall: 75.4%** | done 176 / partial 25 / todo 49 (250 features)
+**Engine reversal: 81.8%** | **Overall: 75.1%** | done 176 / partial 25 / todo 50 (251 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **29%** | 3 | 6 | 12 |
+| formats | **27%** | 3 | 6 | 13 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **30%** | 2 | 2 | 6 |
@@ -285,9 +285,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 29%
+## formats — 27%
 
-*3 done · 6 partial · 12 todo*
+*3 done · 6 partial · 13 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -302,7 +302,8 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | material |  |
 | ⬜ | todo | sound (snr) | 29400 resources |
 | ⬜ | todo | soundProp | 19296 resources |
-| 🚧 | partial | spui layout | 524 screens (407 named); layout parser not derived |
+| 🚧 | partial | spui layout | 524 screens (407 named); DESERIALIZER DOOR FOUND: factory 0x810870 + loader 0x810940 (type id 0x250FE9A2 confirmed in code); it is a UTF/XmlTokenReader TOKEN STREAM, so byte parsing was doomed |
+| ⬜ | todo | spui token alphabet | the next step, now narrow: 0x901680 read-token / 0x9016e0 peek / 0x900e10 error, 2048-byte buffer, flag bit &0x8 |
 | 🚧 | partial | gmsh | stable 24-byte header found (BE words + float runs); layout not derived |
 | 🚧 | partial | blockdata | vec3 array; first two = min/max bbox |
 | ⬜ | todo | bea | 2621 resources |
