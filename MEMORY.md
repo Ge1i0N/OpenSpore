@@ -654,7 +654,10 @@ stereo pix hostIP clientIP isHost jobPriority jobThreads nodefaultvox nosampleca
 noBackground nofocus noDevEffects noEffectScripts noMaterialScripts showConfigAlerts silent
 verboseaudio 4.0 5.1 automation` **and the device flags `w` (windowed), `f` (fullscreen),
 `r` (resolution `WxH`)**.
-Keys are stored **without** a leading dash; the dash is the shell-side convention.
+Keys are stored **without** a leading dash; the dash is the shell-side convention. The key/value
+separator in the original is a **COLON**: states are launched as `-state:SpaceAccessoriesEditor`
+(and generally `-key:value`). Our parser accepts both `:` and `=` (splitting on whichever comes
+first, so a Windows path in a value keeps its colons).
 **Trap:** the original really does use single-letter flags (`w`/`f`/`r`), so a name-length
 filter of ≥2 silently loses them — `tools/arg_vocab.py` now takes `min_len=1` at a verified
 helper call site.

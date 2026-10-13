@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 81.1%** | **Overall: 74.1%** | done 168 / partial 24 / todo 51 (243 features)
+**Engine reversal: 81.4%** | **Overall: 74.4%** | done 170 / partial 23 / todo 51 (244 features)
 
 **Legend**
 
@@ -22,7 +22,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | category | progress | done | partial | todo |
 |---|:---:|:---:|:---:|:---:|
 | harness | **93%** | 13 | 0 | 1 |
-| startup | **95%** | 25 | 3 | 0 |
+| startup | **97%** | 27 | 2 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
 | packages (DBPF) | **90%** | 33 | 4 | 2 |
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
@@ -58,9 +58,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## startup — 95%
+## startup — 97%
 
-*25 done · 3 partial · 0 todo*
+*27 done · 2 partial · 0 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -83,13 +83,14 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | resize | WM_SIZE -> Reset |
 | ✅ | done | font atlas | GDI rasterised, 95 glyphs |
 | ✅ | done | state manager | AppStateManager analog |
+| ✅ | done | Title UI state | a Title state (real UI atlas bg) auto->Loader; demonstrates transitions |
 | ✅ | done | state register | FNV-1 ids, dup rejected |
 | ✅ | done | startup chain traced | entry -> WinMain 0xf489e0 -> app_main 0xf48810 -> run 0xf47e90 |
 | ✅ | done | main loop located | 0x8482f0: PeekMessageW/WM_QUIT/dispatch/Translate/DispatchMessageW |
 | ✅ | done | single-instance guard | Global\SporeEditorOrGame; -multipleInstances bypasses |
 | 🚧 | partial | app-mode host | CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked |
 | ✅ | done | state goto | transitions, no nesting |
-| 🚧 | partial | startup -state | key known; goto via vtable |
+| ✅ | done | startup -state | colon form -state:Name works; original uses -state:SpaceAccessoriesEditor |
 | ✅ | done | boot markers | 10/10 |
 | ✅ | done | clean shutdown | -quitAfter / WM_CLOSE |
 

@@ -424,6 +424,7 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     console::init(dev);
     states::install_console_command(states::manager());
     states::install_loader(states::manager());
+    states::install_title(states::manager());
 
     // Capture + fault-tolerance probes. `capture` is unconditional (it is the only way to
     // get machine evidence of a rendered frame); `_abortNow` is dev-only by the '_' rule.

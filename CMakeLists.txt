@@ -125,6 +125,7 @@ set(OS_SOURCES
   source/render/mesh.cpp
   source/states/statemgr.cpp
   source/states/loader.cpp
+  source/states/title.cpp
 )
 
 add_executable(OpenSpore WIN32 ${OS_SOURCES} ${OS_RC_FILE})

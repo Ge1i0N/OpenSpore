@@ -15,6 +15,19 @@ name->id), `ConfigManager.txt` (211 assignments; `$variable` references are reso
 vendors, 616 cards`. The `cfg` verb exposes `-list/-props/-vars/-cards/<name>`. So the game's whole
 configuration surface is readable by our engine.
 
+### States: a real `Title` state, and the original's `-state:Name` colon form
+The user's detail: in Spore states are launched as `-state:SpaceAccessoriesEditor` (COLON, not `=`).
+Our parser now splits on whichever of `:`/`=` comes first (so a Windows path in a value keeps its
+colons) - `-state:Title` verified to work. Measured: `cmdline: -w -devdirs -state=Title`,
+`registered 'Loader' id=0xd7d04c04`, `registered 'Title' id=0xdce0e62d`, `-> Title`,
+`[10/10] state.goto OK current='Title'`, fps 34, exit 0.
+`source/states/title.cpp` adds the first UI state: it loads a real `png` UI atlas as its backdrop
+(`graphics_atlas~/GlobalUICell-00.png`, 512x512), draws a menu list over it, and **auto-transitions
+to Loader after 4 s** - a real state-machine transition on our renderer
+(`analysis/shots/title_state.png`). The state names are NOT the `spui` screen names (checked: the
+`spui` list has `ScenarioEditMode*`/`PlayMode_Panels`, no `*AccessoriesEditor`), so the state set
+remains data we have not located (`SporeAppStates`/`appmodes` groups are absent from our packages).
+
 ### UI: the engine draws a real Spore UI atlas (first piece of the menu chrome)
 The Loader now loads a real UI backdrop - a large `png` whose name looks like UI chrome
 (`bckgd`/`launchscreen`/`newgameflow`/`globalui`) - and draws it behind everything (stretched),

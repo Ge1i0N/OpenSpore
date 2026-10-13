@@ -55,10 +55,18 @@ Args parse_tokens(const std::vector<std::string>& tokens) {
         }
         std::string body = strip_dash(tok);
         std::string key, val;
+        // The original uses a COLON for key:value (e.g. `-state:SpaceAccessoriesEditor`); we also
+        // accept `=`. Split on whichever comes FIRST, so a Windows path in the value
+        // (`-exec:pkg:-unpack,all,C:\dump`) keeps its colons.
         size_t eq = body.find('=');
-        if (eq != std::string::npos) {
-            key = body.substr(0, eq);
-            val = body.substr(eq + 1);
+        size_t co = body.find(':');
+        size_t sep = std::string::npos;
+        if (eq != std::string::npos && co != std::string::npos) sep = std::min(eq, co);
+        else if (eq != std::string::npos) sep = eq;
+        else sep = co;
+        if (sep != std::string::npos) {
+            key = body.substr(0, sep);
+            val = body.substr(sep + 1);
         } else {
             key = body;
             // "-state Loader" style: the next token is the value iff it is not another flag

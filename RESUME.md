@@ -26,11 +26,14 @@ we are.
 | draw real content: `gmdl` + `raster` mesh grid | ✅ | `analysis/shots/model_grid.png` |
 | resource manager `0x8de4b0`, `trigger` configs | 🚧 | `analysis/content-loading.md` |
 | **UI/menus: `spui` layouts (524 screens, 407 named)** | 🚧 next | `analysis/ui.md` |
-| states (`SporeAppStates` trigger), state machine | 🚧 | `analysis/startup.md` |
+| states: mechanism + a real `Title` state that transitions to `Loader` | ✅ | `source/states/title.cpp`, `analysis/shots/title_state.png` |
+| states: the game's own state NAMES (data) | ⬜ | `SporeAppStates`/`appmodes` groups absent from our packages |
+| launch key `-state:Name` (colon, as the original) | ✅ | `cmdline.cpp`; `-state:Title` verified |
 | gameplay (sim, editors, stages) | ⬜ | feature map `gameplay` = 0% |
 
-**Next on the path:** the `spui` layout parser, so the Loader can show a real menu (title/launch
-screen) using the `png`/`raster` UI art and `locale` strings we already decode.
+**Next on the path:** the `spui` layout parser, so the Loader can compose a REAL screen (title/launch)
+from the UI atlas + `locale` strings we already decode, instead of drawing the whole atlas as a
+backdrop. After that: the state names (data) so `-state:SpaceAccessoriesEditor`-style launches work.
 
 ## One-line status
 

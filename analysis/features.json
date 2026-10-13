@@ -44,13 +44,14 @@
         {"name": "resize", "status": "done", "note": "WM_SIZE -> Reset"},
         {"name": "font atlas", "status": "done", "note": "GDI rasterised, 95 glyphs"},
         {"name": "state manager", "status": "done", "note": "AppStateManager analog"},
+        {"name": "Title UI state", "status": "done", "note": "a Title state (real UI atlas bg) auto->Loader; demonstrates transitions"},
         {"name": "state register", "status": "done", "note": "FNV-1 ids, dup rejected"},
         {"name": "startup chain traced", "status": "done", "note": "entry -> WinMain 0xf489e0 -> app_main 0xf48810 -> run 0xf47e90"},
         {"name": "main loop located", "status": "done", "note": "0x8482f0: PeekMessageW/WM_QUIT/dispatch/Translate/DispatchMessageW"},
         {"name": "single-instance guard", "status": "done", "note": "Global\\SporeEditorOrGame; -multipleInstances bypasses"},
         {"name": "app-mode host", "status": "partial", "note": "CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked"},
         {"name": "state goto", "status": "done", "note": "transitions, no nesting"},
-        {"name": "startup -state", "status": "partial", "note": "key known; goto via vtable"},
+        {"name": "startup -state", "status": "done", "note": "colon form -state:Name works; original uses -state:SpaceAccessoriesEditor"},
         {"name": "boot markers", "status": "done", "note": "10/10"},
         {"name": "clean shutdown", "status": "done", "note": "-quitAfter / WM_CLOSE"}
       ]

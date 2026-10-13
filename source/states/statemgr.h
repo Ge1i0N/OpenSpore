@@ -101,4 +101,7 @@ void install_console_command(Manager& mgr);
 // AppModePluginLoader / UIWorld_Loading family.
 void install_loader(Manager& mgr);
 
+// A first UI state (see states/title.cpp): the title screen, which auto-transitions to Loader.
+void install_title(Manager& mgr);
+
 }  // namespace os::states
