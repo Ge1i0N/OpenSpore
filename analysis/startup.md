@@ -66,8 +66,14 @@ run  0x00f47e90
 
 ## Still to trace (next steps, in order)
 
-1. **`0x007e76e0`** — the AppMode constructor: what subsystems it builds (this is where the loading
-   screen / config / state setup lives).
+1. **`0x007e76e0`** — the AppMode constructor: it sets the object's vtables
+   (`0x1413b50`, `0x1413b40`, `0x1413b3c`, `0x13eb384`, `0x13eb8b8`), zeroes its fields, sets a few
+   default floats (1.0 from `0x1453740`, 0.9 from `0x13ec490`, 0.4 from `0x13ec414`), constructs
+   sub-objects at `+0x88` (`0x7e7310`) and `+0xd0` (`0x936860`), and builds two string-keyed
+   members at `+0x138`/`+0x148` via `0x579a90`. **It zeroes `[+0x159]` — the same `useDevDirs` byte
+   the `-devDirs` handler sets** (`0x007e7f27`, VERIFY row 2). So the AppMode object **is** the
+   config object the devDirs/shipDirs logic operates on: this ties row 2 to the object created here.
+   Its full field map is the next thing to walk.
 2. The rest of **`0x00f47e90`** after `0x00f481be` — the main loop and the ordered subsystem init
    (it references `0x0067dcd0`/`0x0067dc90` manager getters, `0x00fc1dd0`, `0x00b5fab0`,
    `0x00b5e160`, `0x00b3d320`, `0x00685500`).

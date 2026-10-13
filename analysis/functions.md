@@ -43,7 +43,7 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x007e40f2` | StateRegister | startup | state registration: hash(name) stored at [state+0x28], dup rejected |
 | `0x007e4f40` | StateVerbCtor | startup | the 'state' console verb (option table pushed as immediates) |
 | `0x007e74a0` | CreateDevice | render | reads -f/-w/-r; 800x600 default; error contract strings |
-| `0x007e76e0` | AppModeCtor | startup | constructor of the 496-byte app-mode object |
+| `0x007e76e0` | AppModeCtor | startup | ctor of the 496-byte app-mode/config object; zeroes +0x159 (useDevDirs) |
 | `0x007e8a00` | CreateAppMode | startup | alloc 0x1f0 bytes, ctor 0x7e76e0; the app-mode/state host |
 | `0x008d8bf0` | DbpfRead | packages | the byte reader read(buf,size) |
 | `0x008d8f70` | DbpfLoadHeader | packages | reads exactly 0x60 header bytes (cmp eax,0x60) |
