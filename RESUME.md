@@ -28,30 +28,55 @@ we are.
 | **localized text: `locale` tables (18,441 entries, 10,246 keys)** | ✅ | `source/engine/text.cpp`, `analysis/text-locale.md` |
 | **UI/menus: `spui` layouts (524 screens, 407 named)** | 🚧 next | `analysis/ui.md` |
 | states: mechanism + a real `Title` state that transitions to `Loader` | ✅ | `source/states/title.cpp`, `analysis/shots/title_state.png` |
-| states: the game's own state NAMES (data) | ⬜ suspect | `SporeAppStates`/`appmodes` absent from the 57 packages we scan — **see the locale trap below before accepting this** |
-| launch key `-state:Name` (colon, as the original) | ✅ | `cmdline.cpp`; `-state:Title` verified |
+| **states: the game's own state machine (60 states, 17 modes)** | ✅ **RECOVERED FROM DATA** | `analysis/states.md`, `analysis/scripts/SporeAppStates.txt` |
+| launch key `-state:Name` (colon, as the original) | ✅ | `cmdline.cpp`; the shipped script's header confirms it **including the colon** |
+| **audit of our own reversal, from WinMain forward** | ✅ **17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP** | `analysis/audit-review.md`, `analysis/claims.json` |
 | gameplay (sim, editors, stages) | ⬜ | feature map `gameplay` = 0% |
 
-**Next on the path:** the `spui` layout parser, so the Title screen can compose a REAL layout from the
-UI atlas + the `locale` strings we now decode, instead of stretching the whole atlas as a backdrop.
-Reach it through the window-class registrar cluster `0x8009f0..0x800b60` (alloc `0x951230`).
+**The state machine was DATA ALL ALONG, and I had it wrong for three sessions.** `RESUME.md` said the
+state names were "data we do not have" because `SporeAppStates` (`0xD6396913`) appeared nowhere as a
+resource GROUP. It is an **INSTANCE** id in group 0 — I had probed one of a DBPF record's three id
+fields. The fix was not a cleverer guess but enumeration: dump all 303 `trigger` resources with their
+group AND instance names. Result: 8,499 decoded bytes of plain ArgScript → **60 states, 17 modes**,
+entry `state Main -id 0` ("Spore Launch Screen") → `gotoState GalaxyGameEntry` (`-id 0x02ccda9c`). The
+five stages Cell → Creature → Tribe → Civ → Space are explicit data.
 
-**Before accepting any "the data does not exist" conclusion, re-check the search path.** This session
-proved the point twice: our `locale` reader reported "no package" purely because `fs.cpp` looked in
-`exe_dir/Locale/` instead of `Data/Locale/` (the original appends `'Locale/'` to a DATA ROOT —
-disasm `0x7e863c..0x7e8661`). The state-name row above is still unverified by that standard.
+**Next on the path:** the script names the door into `spui` directly —
+`cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`. So the SPUI entry point is the
+**`uilayout`** verb with `-load <name> <id1> <id2>`; follow it to the layout deserializer, then let the
+Title screen compose a REAL layout from the UI atlas + the `locale` strings we now decode. Seed Ghidra
+first (`analysis/audit/seeds_rea.tsv` → `REA_GHIDRA_SEED_FILE`) — the same vtable-only wall is behind
+rw4/prop.
 
-## Audit of our own work (in progress, session 13)
+**Before accepting any "the data does not exist" conclusion, re-check WHERE you looked.** This session
+proved it twice, both times with our own engine silently reading nothing: the `locale` reader reported
+"no package" because `fs.cpp` searched `exe_dir/Locale/` instead of `Data/Locale/` (the original
+appends `'Locale/'` to a DATA ROOT — disasm `0x7e863c..0x7e8661`), and the state names were an
+instance-vs-group field confusion. Neither was a missing-data problem.
+
+## Audit of our own work (DONE, session 13)
 
 User request: use Ghidra to check **everything, starting from `Main`**, to see whether we started
-reversing correctly at all. Done so far: the whole claim surface is now machine-checkable in
-`analysis/claims.json` — **30 claims / 98 checks**, each citing the doc line it came from, its
-severity, and whether our C++ is load-bearing on it. `tools/ghidra_audit.py` +
-`tools/ghidra_export.py` (PyGhidra; Ghidra 12 dropped embedded Jython) diff our claims against
-Ghidra's own analysis of the oracle. Verdicts are PASS/FAIL/**UNKNOWN**/**SKIP**, and the two rules
-that keep it honest: UNKNOWN is not PASS, and data-derived claims (SKIP) are recorded rather than
-dropped, so the audit states what it does NOT cover. The full-binary import + analysis is running;
-`analysis/audit.md` is the output once the export completes.
+reversing correctly at all. **Answer: yes.** `analysis/claims.json` makes the whole claim surface
+machine-checkable — **30 claims / 104 checks**, each citing the doc line it came from, its severity, and
+whether our C++ is load-bearing on it. `tools/ghidra_audit.py` (request/verify) +
+`tools/ghidra_export.py` (PyGhidra; Ghidra 12 dropped embedded Jython) diff it against Ghidra's own
+analysis of the oracle. Verdicts: **PASS 17, FAIL 1, UNKNOWN 11, SKIP 1.** The first run said FAIL 10,
+and **nine of those ten were bugs in my checker, not in our reversal** — read
+`analysis/audit-review.md` for the three invisible-API artifacts behind them
+(`Memory.getInt(addr, TRUE)` is **big-endian**, `JArray("b")` needs the `JByte` **class**, and objdump-
+spelled regexes cannot match Ghidra's printer). The one real correction: the main-loop call site is
+`0xf4840b`, not `0xf48405` (`0xf48405` only LOADS the vtable slot) — and that load-then-indirect-call
+split is the shape of every virtual dispatch here, which is why the loop was hard to find.
+
+**The structural finding:** seven cited addresses have **no function at all** in Ghidra's 54,611-function
+inventory, because they are reachable **only through a vtable**; six open with the MSVC SEH prologue
+`mov eax,fs:0x0`, which Ghidra left typed as data. This reframes the rw4/spui/prop blockers — the
+recorded "handler slots are map ops" claim was *confirmed* (`direct_callers == 0` PASSED), but the real
+wall is that auto-analysis cannot see vtable-only functions. Fix: seeding.
+
+Toolchain decision + the Windows junction trap that cost three imports: **`analysis/toolchain-rea.md`**,
+`analysis/text-locale.md`.
 
 ## One-line status
 

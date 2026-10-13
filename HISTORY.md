@@ -7,6 +7,112 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### The audit from WinMain forward: did we start reversing correctly? YES (17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP)
+User request: "проверить вообще всё (начиная с мейна), чтобы понимать, всё ли правильно начали
+реверсить". Made checkable rather than eyeballed: **`analysis/claims.json`** = 30 claims / 104 checks,
+every address assertion from `analysis/startup.md`, `VERIFY.md` 35–41, `MEMORY.md` and
+`source/states/statemgr.h`, each citing its doc line + severity + whether our C++ is load-bearing on it.
+Bridge: `tools/ghidra_audit.py` (request/verify) + `tools/ghidra_export.py` (PyGhidra driver, because
+**Ghidra 12 removed embedded Jython** — `-postScript *.py` fails outright) + `tools/gen_seeds.py` +
+`tools/ghidra_seed.py`. Ghidra 12.1.4 analyzed the oracle in 1,197 s and carved 54,611 functions.
+Verdict: **PASS 17, FAIL 1, UNKNOWN 11, SKIP 1**. The whole load-bearing chain PASSED independently:
+entry → CRT → `__tmainCRTStartup` → WinMain `0xf489e0` → app_main `0xf48810` → run `0xf47e90` → AppMode
+`0x7e8a00` → main loop `0x8482f0`, including both self-written TRAP notes in NEGATIVE form (the W-vs-A
+`PeekMessage` split; `screenWindowed` being a RenderWare metric).
+**The first run reported FAIL 10, and NINE were bugs in MY CHECKER, not in our reversal.** Reading the
+evidence instead of acting on the verdict is what caught that. `analysis/audit-review.md`.
+
+### The one real doc error: the main-loop call site is 0xf4840b, not 0xf48405
+`startup.md` cited `0xf48405` as the call into the loop. It only LOADS the vtable slot; the call is the
+next instruction: `f48405 mov eax,[edx+0x84]` / `f4840b call eax`. That split is the shape of EVERY
+virtual dispatch in this binary, and it is precisely why the main loop was hard to find — a text search
+for `call [reg+0x84]` matches nothing. Pinned by two `insn_at` checks so it cannot regress. Also
+corrected: window vtable `0x141cc10` **slot 0 is the deleting destructor `0x849e80`** (the ctor
+`0x849b20` is real but is not a vtable slot — my category error); `.data 0x153f858..` is a table of
+**pointers** into `.rdata`; the FNV seed `0x811c9dc5` is a **parameter pushed by the caller** at
+`0x7e40f2` (the hasher holds only the prime); `EventLoadScreenBufferPercentage` is at `0x0148227c`
+(`0x01550498` is `EAReportUploader` — kept as a negative control); `UIWorld_Loading` is **UTF-16LE** at
+`0x01418274`.
+
+### THE STRUCTURAL FINDING: Ghidra cannot see vtable-only functions (this reframes rw4/spui/prop)
+Seven cited addresses had **no function at all** in Ghidra's inventory: `0x7e3fb0` (statemgr add-state),
+`0x7e7160` (event dispatcher), `0x7eaae0` (AppMode +0x20), `0x849bf0` (Window::Create), `0x7c7f50` /
+`0x7c90f0` (config executors), `0x7e40f2` (mid-function). `tools/gen_seeds.py` walked each back to the
+preceding `int3` gap and proved **six are real entries** — never reached because they are callable ONLY
+through a vtable, and six of seven open with the MSVC SEH prologue `mov eax,fs:0x0`, which Ghidra left
+typed as data (`0x7e7160` became the datum `?? 64h`) while the listing shows all three of our documented
+hashed event ids in plain sight (`cmp eax,0x255abf5` / `0xf62add` / `0x212d3e7`). The recorded rw4
+finding was **confirmed** by the audit (`direct_callers == 0` PASSED outright); the deeper reason we
+kept failing is now named, and the fix is seeding in both toolchains
+(`analysis/audit/seeds.tsv` = 21 candidates; `analysis/audit/seeds_rea.tsv` = the 7 uncarved ones only,
+because a seed overlapping an already-decoded instruction fails).
+
+### Three invisible-API artifacts, i.e. how a checker manufactures confident wrong answers
+(1) **`Memory.getInt(addr, TRUE)` is BIG-ENDIAN**, not "ignore alignment" — it reversed every vtable
+word and produced six bogus FAILs (`0x007e6850` came back as `0x50687e00`, the same four bytes
+permuted). (2) **`JArray("b")` raises `ClassNotFoundException('b')`** — the element type must be the
+`JByte` CLASS; the swallowed exception made four perfectly good strings report "no readable string".
+(3) **regexes written in objdump's spelling cannot match Ghidra's printer** (`MOV EAX,dword ptr
+[EDX + 0x84]`). Also hit: `ProgramDB` has no `getEntrypoint()`; `Listing`/`FunctionManager`/
+`ReferenceManager` are instance methods on `Program`, not statics; `GhidraFile` has no `getPath()`;
+`DecompInterface` has no `setAutoUpdate()`; `DataDB` has no `isString()` (so every string was silently
+dropped); `GhidraProgramUtilities` has no `analyzeProgram()`; `FlatProgramAPI.createFunction` takes only
+`(Address, String)`; `GhidraFile.save` only `(TaskMonitor)`; and **`analyzeAll` needs an enclosing
+transaction** or every analyzer worker dies with `db.NoTransactionException`.
+
+### The state machine was DATA ALL ALONG — I had it wrong for three sessions
+`RESUME.md`/`MEMORY.md` recorded the game's state names as "data we do not have", because `SporeAppStates`
+(`0xD6396913`) appeared nowhere as a resource GROUP. **It is an INSTANCE id in group 0** — I had probed
+one of a DBPF record's three id fields. The fix was not a cleverer guess but enumeration: dump all 303
+`trigger` resources with their group AND instance names. That immediately surfaced `SporeAppStates`,
+`CSAAppStates`, `Startup`, `UIMachineScenarioMode`, `TriggerConfigScenarioMode`, `OptionProperties`,
+`ConfigManager` — several of which we had also written off.
+`analysis/scripts/SporeAppStates.txt` = 8,499 decoded bytes of plain ArgScript, extracted verbatim
+(also `Startup.txt` 15,269 B, `UIMachineScenarioMode.txt`, `TriggerConfigScenarioMode.txt`). Recovered:
+**60 states, 17 modes**. Entry `state Main -id 0` description "Spore Launch Screen" → `gotoState
+GalaxyGameEntry` (`-id 0x02ccda9c`); `-demo` enters `Demo`, `-preload` enters `Preload`. The five stages
+Cell → Creature → Tribe → Civ → Space are explicit data, each with `FromLaunchScreen`/`FromLoadGame`/
+`FromLevelEditor` entry and inter-stage messages (`kMessageCellToCreatureTransition 0x02A4f8f0`). 13
+editors share `mode Editors` and switch by `kMessageSwitchEditor 0x022d308b` + `(hash(<Setup>))`. `-id`
+is EXPLICITLY assigned for UI-addressed states (the script's own comment: "assign manual IDs just so I
+can fill in the UI layout stuff more easily") — same rule as `Properties.txt`: take the id from the
+file, never hash it. The user's `-state:SpaceAccessoriesEditor` is confirmed by the shipped header
+**INCLUDING THE COLON**; the exact state is `TribalAccessoriesEditor -id 0x022d9e06`, and
+`SpaceAccessoriesEditorSetup` is the setup RESOURCE. `analysis/states.md`.
+It also names the door into `spui`: `cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"` — the
+SPUI entry point is the **`uilayout`** verb with `-load <name> <id1> <id2>`.
+
+### TRAP: scoop's `current` is a JUNCTION and REA refuses it (three imports lost)
+`C:\Users\DartPower\scoop\apps\ghidra\current` is `<JUNCTION>` (`ReparsePoint`). REA's Windows native
+admission opens every path component **without following a reparse point** and rejects the request:
+`Reparse path component is unsupported (tag 2684354563) … Ghidra target snapshot failed admission`.
+`GHIDRA_INSTALL_DIR` must be the real versioned dir `…\apps\ghidra\12.1.4-20260921`. The trap is that
+**`rea doctor --provider ghidra` reports `healthy: true` with the junction path** — doctor validates the
+installation, while path admission happens later, at operation time. Also required for this binary:
+`REA_GHIDRA_STARTUP_TIMEOUT_MS` far above the 330,000 ms default (our import took 1,197 s) and
+`GHIDRA_HEADLESS_MAXMEM` above the 2G default; the MCP client's per-call timeout is a SEPARATE deadline.
+
+### Two process mistakes of mine, recorded because they are the transferable part
+(1) I **killed REA's working JVM**. A `java` process was alive while our own seed run had crashed; I
+assumed it was a leftover holding the project lock and stopped it — it was the REA import, 15 minutes
+in. **Identify a process by its command line before killing it** (`Get-CimInstance Win32_Process
+-Filter "Name='java.exe'"`, match the project path), not by its name. (2) I **hand-rolled what REA
+already provides**: I wrote `tools/ghidra_seed.py` against the raw PyGhidra API and hit four signature
+walls, when REA exposes the identical capability as the documented `REA_GHIDRA_SEED_FILE`. **Check
+whether the tool has a first-class option before implementing the feature underneath it.**
+
+### Toolchain: REA is PRIMARY, our PyGhidra bridge is the persistent-project fallback
+REA 6.4.0 installed globally and registered as an MCP server for OpenCode
+(`C:\Users\DartPower\.config\opencode\opencode.json`, with a `.rea.backup` snapshot setup took first);
+`rea doctor --provider ghidra --json` → healthy (Ghidra 12.1.4, native `decompile.exe` win_x86_64, JDK
+21, Windows native authority). Primary because its evidence contract is stricter than what I would
+write: `facet_availability` per facet, and the rule that **"an empty call list with partial or unknown
+coverage is not proof that the function has no calls"** — exactly the shape of our
+`direct_callers == 0` claim. The bridge stays for two measured reasons: REA uses an ephemeral
+`-readOnly -deleteProject` session per run and **cannot accumulate** seeds/annotations (~20 min
+re-import each time) while our project retains them; and 104 checks in one batch pass is an audit, not
+an investigation. `analysis/toolchain-rea.md`.
+
 ### Localized text: the game's own strings reach our Title screen
 `source/engine/text.cpp` parses the `locale` resources (type `0x02FAC0B6`). Format measured on the
 shipped bytes: UTF-8 **with BOM**, records separated by **CRLF**, grammar `0x<8hex> [~markup~] <text>`.

@@ -612,6 +612,34 @@ invisible-API artifacts (`Memory.getInt(addr, True)` is **big-endian**, not "una
 objdump spelling cannot match Ghidra's `MOV EAX,dword ptr [EDX + 0x84]`), and each produced a
 confident-looking wrong answer.
 
+## TRAP: scoop's `current` is a JUNCTION, and REA refuses it (session 13)
+
+`C:\Users\DartPower\scoop\apps\ghidra\current` is `<JUNCTION>` → `ReparsePoint` in its attributes. REA's
+Windows native admission **opens every path component without following a reparse point** and rejects
+the whole request (`windows-ghidra-p0.md`: "Mounted-folder entries that expose reparse tags fail
+component admission"). So `GHIDRA_INSTALL_DIR` must be the **real versioned directory**:
+
+```
+C:\Users\DartPower\scoop\apps\ghidra\12.1.4-20260921
+```
+
+The trap is that **`rea doctor --provider ghidra` reports `healthy: true` with the junction path** —
+doctor validates the *installation*, while path admission happens later, at operation time. Three
+imports failed before this was found, and the failure text is easy to misread as a target problem:
+
+```
+failure_cause: "Reparse path component is unsupported (tag 2684354563)
+                [C:\Users\DartPower\scoop\apps\ghidra\current] (Win32 50)"
+failure_message: "Ghidra target snapshot failed admission"
+```
+
+Two more Windows-only requirements learned in the same run: the target must also live on a **fixed
+local NTFS** volume with no reparse component, and `REA_GHIDRA_STARTUP_TIMEOUT_MS` must be raised for
+this binary (our own headless import of the 25 MB `.text` took **1,197 s** against a 330,000 ms
+default; the MCP client's per-call timeout is a SEPARATE deadline that can fire first).
+
+Full toolchain note: **`analysis/toolchain-rea.md`**.
+
 ## Toolchain: REA is PRIMARY, our PyGhidra bridge is the persistent-project fallback
 
 * **REA 6.4.0** — installed globally via npm, registered as an MCP server in
@@ -778,14 +806,24 @@ call are separated by `mov edi, [IAT]` + `call edi`.
 The user remembered this as "типа режимы запуска, управлял в девбилде" — it is real, and it is
 reachable in the **release** build too.
 
-- **State identity = FNV-1a 32 of the name**, stored at `[state+0x28]`:
+- **State identity = FNV-1 (NOT FNV-1a) 32 of the name**, stored at `[state+0x28]`:
   ```
   7e40f2: push 0x811c9dc5 / push eax(name) / call 0x932e50   ; hash
   7e4103: mov [ecx+0x28], eax                                ; store as the ID
   7e4132: cmp ecx,[eax+edx*4]                                ; duplicate-ID probe
   7e413b: push 0x1413600                                     ; "A state with this ID already exists"
   ```
-  So `fnv1a`/`fnv1a_upper` in `source/common.h` is the engine's own primitive, not our choice.
+  **FNV-1, i.e. multiply THEN xor — the direction matters and this heading used to say FNV-1a.**
+  The hasher's own loop is unambiguous:
+  ```
+  932e8a: imul edi,edi,0x1000193    ; h = h * prime     FIRST
+  932e90: xor  edi,eax              ; h = h ^ c         SECOND
+  ```
+  The Ghidra audit (session 13) confirmed both the direction (`pseudo_regex` matched `* 0x1000193 ^`)
+  and the absence of the FNV-1a form (`pseudo_not_regex` on `(h ^ c) * prime` PASSED). Note also that
+  **the seed `0x811c9dc5` is a PARAMETER pushed by the caller** at `0x7e40f2`; the hasher reads it from
+  `[esp+0x14]` and contains only the prime. Our `fnv1_lower` in `source/common.h` implements this
+  primitive; every group/instance/state id in the project depends on the multiply-first direction.
 - **No nesting**: `can't nest states or transitions` 0x014135dc (refs 0x7e35ce, 0x7e3fde).
   Transitions are a chain, not a stack; per-state callbacks `entry`/`exit`/`onExit`
   (0x01413180 / 0x01413178 / 0x01413624), `transition` 0x01413188, `endChain` 0x014130f8,

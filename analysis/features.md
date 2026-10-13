@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 81.4%** | **Overall: 74.4%** | done 170 / partial 23 / todo 51 (244 features)
+**Engine reversal: 82.2%** | **Overall: 75.4%** | done 176 / partial 25 / todo 49 (250 features)
 
 **Legend**
 
@@ -22,16 +22,16 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | category | progress | done | partial | todo |
 |---|:---:|:---:|:---:|:---:|
 | harness | **93%** | 13 | 0 | 1 |
-| startup | **97%** | 27 | 2 | 0 |
+| startup | **96%** | 32 | 3 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
 | packages (DBPF) | **90%** | 33 | 4 | 2 |
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **24%** | 2 | 6 | 13 |
+| formats | **29%** | 3 | 6 | 12 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
-| platform | **25%** | 2 | 1 | 7 |
+| platform | **30%** | 2 | 2 | 6 |
 
 ---
 
@@ -58,9 +58,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## startup — 97%
+## startup — 96%
 
-*27 done · 2 partial · 0 todo*
+*32 done · 3 partial · 0 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -90,7 +90,13 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | single-instance guard | Global\SporeEditorOrGame; -multipleInstances bypasses |
 | 🚧 | partial | app-mode host | CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked |
 | ✅ | done | state goto | transitions, no nesting |
-| ✅ | done | startup -state | colon form -state:Name works; original uses -state:SpaceAccessoriesEditor |
+| ✅ | done | startup -state | colon form -state:Name works; confirmed by the shipped script's own header |
+| ✅ | done | game state machine (DATA) | SporeAppStates trigger recovered: 8,499 B ArgScript, 60 states / 17 modes, entry Main -id 0 -> GalaxyGameEntry |
+| ✅ | done | stage progression (DATA) | Cell -> Creature -> Tribe -> Civ -> Space, each with FromLaunchScreen/FromLoadGame/FromLevelEditor |
+| ✅ | done | editor set (DATA) | 13 editors share mode Editors; switch by kMessageSwitchEditor 0x22d308b + hash(Setup) |
+| ✅ | done | uilayout verb located | the spui door: uilayout -load <name> <id1> <id2> (E3LaunchScreen 0x027996d8 0x0279bf9e) |
+| ✅ | done | reversal audit (Ghidra/REA) | 30 claims / 104 checks from WinMain forward: 17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP; 9 of 10 first-run FAILs were checker bugs |
+| 🚧 | partial | vtable-only function wall | 7 cited addresses uncarved by Ghidra; 6 proven real entries; fix = seeding (seeds.tsv), not more searching |
 | ✅ | done | boot markers | 10/10 |
 | ✅ | done | clean shutdown | -quitAfter / WM_CLOSE |
 
@@ -279,15 +285,15 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 24%
+## formats — 29%
 
-*2 done · 6 partial · 13 todo*
+*3 done · 6 partial · 12 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
 | ✅ | done | png | 14549 decoded |
 | ✅ | done | locale text | Czech lexicon end-to-end |
-| ⬜ | todo | locale display | no game text on screen |
+| ✅ | done | locale display | the game's own labels on our Title screen (New Game 0x05B08767, Options 0x00010009, Exit 0x045BEDD8) + the txt verb |
 | 🚧 | partial | raster | header solved; DXT1/DXT5/raw decoded to PNG |
 | 🚧 | partial | dxt / bc | DXT1/DXT5 decode (raster_decode.py); not in the engine yet |
 | ⬜ | todo | tga |  |
@@ -359,9 +365,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## platform — 25%
+## platform — 30%
 
-*2 done · 1 partial · 7 todo*
+*2 done · 2 partial · 6 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -372,7 +378,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | 🚧 | partial | standalone CLI | -headless works |
 | ⬜ | todo | installer/packaging |  |
 | ⬜ | todo | config file |  |
-| ⬜ | todo | localization | locale packages decoded only |
+| 🚧 | partial | localization | en-us locale tables parsed (18,441 entries) and displayed; per-table key space enforced; other 14 langs unparsed |
 | ✅ | done | crash reporting | dbghelp stacks |
 | ⬜ | todo | reproducible build |  |
 

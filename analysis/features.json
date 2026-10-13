@@ -51,7 +51,13 @@
         {"name": "single-instance guard", "status": "done", "note": "Global\\SporeEditorOrGame; -multipleInstances bypasses"},
         {"name": "app-mode host", "status": "partial", "note": "CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked"},
         {"name": "state goto", "status": "done", "note": "transitions, no nesting"},
-        {"name": "startup -state", "status": "done", "note": "colon form -state:Name works; original uses -state:SpaceAccessoriesEditor"},
+        {"name": "startup -state", "status": "done", "note": "colon form -state:Name works; confirmed by the shipped script's own header"},
+        {"name": "game state machine (DATA)", "status": "done", "note": "SporeAppStates trigger recovered: 8,499 B ArgScript, 60 states / 17 modes, entry Main -id 0 -> GalaxyGameEntry"},
+        {"name": "stage progression (DATA)", "status": "done", "note": "Cell -> Creature -> Tribe -> Civ -> Space, each with FromLaunchScreen/FromLoadGame/FromLevelEditor"},
+        {"name": "editor set (DATA)", "status": "done", "note": "13 editors share mode Editors; switch by kMessageSwitchEditor 0x22d308b + hash(Setup)"},
+        {"name": "uilayout verb located", "status": "done", "note": "the spui door: uilayout -load <name> <id1> <id2> (E3LaunchScreen 0x027996d8 0x0279bf9e)"},
+        {"name": "reversal audit (Ghidra/REA)", "status": "done", "note": "30 claims / 104 checks from WinMain forward: 17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP; 9 of 10 first-run FAILs were checker bugs"},
+        {"name": "vtable-only function wall", "status": "partial", "note": "7 cited addresses uncarved by Ghidra; 6 proven real entries; fix = seeding (seeds.tsv), not more searching"},
         {"name": "boot markers", "status": "done", "note": "10/10"},
         {"name": "clean shutdown", "status": "done", "note": "-quitAfter / WM_CLOSE"}
       ]
@@ -224,7 +230,7 @@
       "features": [
         {"name": "png", "status": "done", "note": "14549 decoded"},
         {"name": "locale text", "status": "done", "note": "Czech lexicon end-to-end"},
-        {"name": "locale display", "status": "todo", "note": "no game text on screen"},
+        {"name": "locale display", "status": "done", "note": "the game's own labels on our Title screen (New Game 0x05B08767, Options 0x00010009, Exit 0x045BEDD8) + the txt verb"},
         {"name": "raster", "status": "partial", "note": "header solved; DXT1/DXT5/raw decoded to PNG"},
         {"name": "dxt / bc", "status": "partial", "note": "DXT1/DXT5 decode (raster_decode.py); not in the engine yet"},
         {"name": "tga", "status": "todo", "note": ""},
@@ -297,7 +303,7 @@
         {"name": "standalone CLI", "status": "partial", "note": "-headless works"},
         {"name": "installer/packaging", "status": "todo", "note": ""},
         {"name": "config file", "status": "todo", "note": ""},
-        {"name": "localization", "status": "todo", "note": "locale packages decoded only"},
+        {"name": "localization", "status": "partial", "note": "en-us locale tables parsed (18,441 entries) and displayed; per-table key space enforced; other 14 langs unparsed"},
         {"name": "crash reporting", "status": "done", "note": "dbghelp stacks"},
         {"name": "reproducible build", "status": "todo", "note": ""}
       ]

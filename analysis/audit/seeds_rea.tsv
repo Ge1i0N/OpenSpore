@@ -1,0 +1,13 @@
+# Ghidra function seeds for the 7 addresses OpenSpore cites that Ghidra auto-analysis
+# never carved: reachable only through a vtable, and 6 of 7 open with the MSVC SEH
+# prologue mov eax,fs:0x0 (Ghidra left those bytes typed as data). Derived by
+# tools/gen_seeds.py, which walked each back to the preceding int3 gap to prove they
+# are real entries. Already-carved addresses are OMITTED on purpose: per REA's docs a
+# seed that overlaps an instruction Ghidra already decoded fails.
+0x00849bf0	function	os_spore_00849bf0
+0x007eaae0	function	os_spore_007eaae0
+0x007e7160	function	os_spore_007e7160
+0x007e3fb0	function	os_spore_007e3fb0
+0x007c90f0	function	os_spore_007c90f0
+0x007c8550	function	os_spore_007c8550
+0x007c7f50	function	os_spore_007c7f50
