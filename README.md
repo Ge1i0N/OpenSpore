@@ -43,9 +43,30 @@ texture format** (here a 512×512 DXT5). Earlier captures: `analysis/shots/mesh_
 Full, current numbers: [`PROGRESS.md`](PROGRESS.md) · what is actually verified against the
 binary: [`VERIFY.md`](VERIFY.md).
 
+## How the original boots (reversed from the entry point)
+
+Full trace with addresses and instructions: [`analysis/startup.md`](analysis/startup.md).
+
+```
+PE entry 0x011e11e1 -> CRT init -> __tmainCRTStartup 0x011e0f21
+  -> WinMain 0x00f489e0 -> app_main 0x00f48810 -> run 0x00f47e90
+       app_main: -multipleInstances guard (named object Global\SporeEditorOrGame)
+       run:      -demo/-devDirs/-shipDirs/-baseGame/-automation/-mouse/-hostIP/-clientIP/-isHost
+                 creates the AppMode/config object (0x7e8a00, vtable 0x1413b50)
+                 calls its vtable: init subsystems, plugins, create device, shader config
+                 creates the window (0x849b20) and the renderer
+  -> MAIN LOOP 0x008482f0  (window vtable +0x84)
+       PeekMessageW -> WM_QUIT check -> dispatch to window handlers
+         -> TranslateMessage -> DispatchMessageW -> repeat
+```
+
+The game's AppMode starts in the state **`AppModePluginLoader`** and drives a state machine
+(`app`, `quit`, `UIWorld_Loading`, `EventLoadScreenBufferPercentage`). The **mouse/input pump** is
+`0x84a050` (the only `PeekMessageA` user; window vtable `+0x88`).
+
 ## Progress map
 
-![OpenSpore reversal progress: engine 79.1%, overall 71.8%](analysis/shots/reverse_map.png)
+![OpenSpore reversal progress: engine 80.2%, overall 73.1%](analysis/shots/reverse_map.png)
 
 Green = reversed **and** implemented **and** verified, amber = partial, grey = not started. The
 same data as a text list (with a per-feature note and status) lives in

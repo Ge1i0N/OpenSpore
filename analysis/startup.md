@@ -137,6 +137,24 @@ register, and `0x84a050` is a separate mouse helper reached via vtable slot `+0x
 - **`0x7e7160`** is the app **event dispatcher** (switches on hashed event ids 0x255abf5 / 0xf62add /
   0x212d3e7 / 0xae1cfe73); the 0xf62add branch has a retry loop (10x, `Sleep(0xfa)`).
 
+## AppMode state / event names (from `.data 0x153f858..0x153f868`)
+
+The AppMode object drives a state machine; its name pointers live in `.data`:
+
+| address | string | note |
+|---|---|---|
+| `0x153f858` | `f` | (single char) |
+| `0x153f85c` | `quit` | an AppMode event/state |
+| `0x153f860` | `app` | an AppMode event/state |
+| `0x153f864` | `Copyright (c) 2006, Electronic Arts. All` | banner |
+| `0x153f868` | `AppModePluginLoader` | the **initial** AppMode state |
+| `0x1544cec` | `UIWorld_Loading` | the loading-screen world/state |
+| `0x1550498` | `EventLoadScreenBufferPercentage` | loading-progress event |
+
+So the app starts in **`AppModePluginLoader`** and drives a state machine whose other names are
+`app`, `quit`, `UIWorld_Loading`. This is the AppStateManager family we reversed (VERIFY rows 3-6);
+the state-name set is DATA (scripts), which is why we own the mechanism and ship our own `Loader`.
+
 ## Still to trace (next steps, in order)
 
 1. **AppMode field map** — the ctor `0x007e76e0` zeroes fields and builds sub-objects; map them
