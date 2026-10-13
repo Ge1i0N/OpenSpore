@@ -29,6 +29,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower) | `-exec state:-list` |
 | fps | **33.3** | `fps=` |
 | build warnings | **0** | `cmake --build` output |
+| **function coverage (code)** | **29 / 105,239 (0.021%)** | `python tools/functions.py` |
 
 ## Boot chain (our executable)
 
