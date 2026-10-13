@@ -324,6 +324,16 @@ is NOT here. The other manager (`0x15fd8c8`, getter `0x67dd30`) is set from `0x7
 **Next: the parser is elsewhere** - follow the stream object (`0x7633c0`'s arg) rather than the
 manager, or find who reads the RW4 header template (`0x014f6480`) besides the ctor `0x011e3f60`.
 
+**The RW4 registration surface (session 13).** rw4 (0x2f4e681b) is registered in TWO places:
+`0x007635f0` (via the hash-map registrar `0x6ad090`) and `0x00764290` (via a different registrar
+`0x6ae000`, a vector insert). The second site also registers two MORE handlers - `0x763ec0` for RW
+id `0x20003` and `0x763d80` for RW id `0x2000b` - and registers the `raster` type (`0x2f4e681c`) with
+the model manager (`0x67dc90` -> global `0x15fd894`) via `[mgr]->vtable+0x24` at `0x7642d4`. So the
+RW4 plugin surface is: handler `0x7633c0` (rw4 container), `0x763ec0`/`0x763d80` (RW object types),
+plus the raster registration. `0x763d80` caches objects via the model manager (keys from globals
+`0x16304d4`/`0x16304c8`, 12 bytes each) into globals `0x16303f8`/`0x16303fc`; `0x763ec0` is an id-list
+lookup. Neither is the mesh parser, but the surface is now mapped.
+
 ## GMDL (generated model) — LAYOUT SOLVED (session 12); positions verified exactly
 
 `gmdl` (type 0x00E6BCE5, **11,041 resources**) is a baked mesh. Two early hypotheses were

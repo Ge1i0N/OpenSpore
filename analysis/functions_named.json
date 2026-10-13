@@ -46,6 +46,8 @@
   "0x0092cd40": {"name": "RefPackDetect", "area": "packages", "note": "signature detector, masks & 0x1FFF == 0x10FB"},
   "0x0092c4e0": {"name": "RefPackReadBE", "area": "packages", "note": "big-endian size reader"},
   "0x007635f0": {"name": "Rw4Register", "area": "rw4", "note": "registers handler 0x7633c0 for type 0x2f4e681b"},
+  "0x00764290": {"name": "Rw4Register2", "area": "rw4", "note": "2nd registration via 0x6ae000 (vector); also RW ids 0x20003->0x763ec0, 0x2000b->0x763d80, and raster with the manager"},
+  "0x006ae000": {"name": "Registrar2", "area": "rw4", "note": "vector-insert registrar (registry 0x152f79c), unlike 0x6ad090's hash map"},
   "0x007633c0": {"name": "Rw4Handler", "area": "rw4", "note": "dispatches load/save through two manager singletons"},
   "0x006ad090": {"name": "TypeRegister", "area": "rw4", "note": "hash-map insert keyed by type id"},
   "0x011e3f60": {"name": "Rw4HeaderCtor", "area": "rw4", "note": "copies the 28-byte header template from .rdata 0x014f6480"},

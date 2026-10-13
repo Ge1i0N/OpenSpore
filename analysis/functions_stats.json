@@ -1,11 +1,11 @@
 {
   "oracle": "SporeApp.exe.unpacked.exe",
   "candidate_starts": 105239,
-  "named": 59,
-  "named_on_candidate": 50,
-  "coverage_pct": 0.0475,
+  "named": 61,
+  "named_on_candidate": 52,
+  "coverage_pct": 0.0494,
   "by_area": {
-    "rw4": 15,
+    "rw4": 17,
     "startup": 29,
     "packages": 12,
     "core": 2,

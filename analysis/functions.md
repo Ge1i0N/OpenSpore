@@ -6,7 +6,7 @@
 > (functions we have actually reversed/named).
 
 **105,239** candidate function starts in `.text` (upper bound; see the tool's note) ·
-**59** functions reversed/named · **0.048%** coverage.
+**61** functions reversed/named · **0.049%** coverage.
 
 This is deliberately a HARD number, and it is small. It is not in tension with the feature
 map's high engine figure: the feature map measures the scope we chose (boot chain + asset
@@ -18,7 +18,7 @@ are barely touched. Both are true; together they are the honest picture.
 | area | count |
 |---|---|
 | startup | 29 |
-| rw4 | 15 |
+| rw4 | 17 |
 | packages | 12 |
 | core | 2 |
 | render | 1 |
@@ -36,10 +36,12 @@ are barely touched. Both are true; together they are the honest picture.
 | `0x00687bd0` | SetFsMode | startup | dev/ship dirs mode setup, called from AppRun |
 | `0x006a9f50` | LoadPropertiesConfig | startup | loads {group 'properties', trigger} at 0x6a9fb0 |
 | `0x006ad090` | TypeRegister | rw4 | hash-map insert keyed by type id |
+| `0x006ae000` | Registrar2 | rw4 | vector-insert registrar (registry 0x152f79c), unlike 0x6ad090's hash map |
 | `0x006b4eb0` | EarlyInit | startup | first call in AppRun; false -> bail |
 | `0x006c233d` | Rw4WriterCaller | rw4 | writer caller; pushes sentinel 0xcafed00d |
 | `0x007633c0` | Rw4Handler | rw4 | dispatches load/save through two manager singletons |
 | `0x007635f0` | Rw4Register | rw4 | registers handler 0x7633c0 for type 0x2f4e681b |
+| `0x00764290` | Rw4Register2 | rw4 | 2nd registration via 0x6ae000 (vector); also RW ids 0x20003->0x763ec0, 0x2000b->0x763d80, and raster with the manager |
 | `0x007a6bf8` | ModelMgrInstallA | rw4 | installs the model manager |
 | `0x007a7df4` | ModelMgrInstallB | rw4 | installs the model manager (second site) |
 | `0x007ab050` | ModelManagerUnregister | rw4 | vtable+0x70: mutex-guarded; calls 0x6b66f0 (hash-map erase) - NOT the parser |
