@@ -251,31 +251,40 @@ flags, so `0x10FB` **and** `0x50FB` pass (0x50FB has bits 12 and 14 set). A stri
 UTF-8 (BOM `EF BB BF`) Czech given names (`Ábel, Adam, Bára, Běla, Emil …`) and toponyms
 (`Abélard, Aberdeen, Adrásteia, Agamemnón …`).
 
-## RenderWare 4 (the next large subsystem) — observed facts, not yet reversed
+## RenderWare 4 (the next large subsystem) — header CONFIRMED, object table not reversed
 
 The `rw4` resources (0x2F4E681B, 12,987 of them) are **RenderWare 4**, and the field guide's §3
-playbook (RW 3.7 chunk ids, librw as a drop-in) does **not** apply as written. What the bytes
-say, read from a decoded 396-byte record in `PatchData.package` (rec 1456):
+playbook (RW 3.7 chunk ids, librw as a drop-in) does **not** apply as written.
 
+**A 28-byte header template is copied verbatim by the constructor at `0x011e3f60`** (quoted):
 ```
-0000  89 52 57 34 77 33 32 00   . R W 4 | w 3 2 NUL      magic 0x34575289 + "w32\0"
-0008  0d 0a 1a 0a               DOS/NL marker (EA's usual end-of-header marker)
-000c  00 20 04 00               4 bytes of flags/sizes
-0010  34 35 34 00               "454\0"  -- version/build string
-0014  30 30 30 00               "000\0"
-0018..                       tables of (count, offset) pairs, then per-object records
+11e3f72: mov  ecx,0x7
+11e3f77: mov  esi,0x14f6480
+11e3f7e: rep  movs DWORD PTR es:[edi],DWORD PTR ds:[esi]   ; 7 dwords = 28 bytes
 ```
-So: a 12-byte magic block (`0x34575289`, `"w32\0"`, `0d 0a 1a 0a`), then a header whose visible
-strings say **"454"**. The rest is a table-driven structure with plausible 32-bit counts and
-offsets (e.g. 324 / 152 / 372 / 24 appear at 0x30/0x34/0x40/0x50), not RW 3.x `type/size/version`
-chunks. There is no `rwID_*`, `Rw*` or `Rp*` string anywhere in the binary; the only RW text is a
-`vb` console help string, and the one embedded source path is
-`\Spore\SporeEP1ML\Core\RenderWare\platform\src\graphics\core\device\target\dx9\rwgdrvgraph.cpp`.
+The template at `.rdata 0x014f6480` (verified by dumping it):
+| +0x00 | 0x34575289 | `"\x89RW4"` |
+| +0x04 | 0x00323377 | `"w32\0"` |
+| +0x08 | 0x0a1a0a0d | `"\r\n\x1a\n"` (EA end-of-header marker) |
+| +0x0c | 0x00042000 | flags (meaning NOT reversed) |
+| +0x10 | 0x00343534 | `"454\0"` |
+| +0x14 | 0x00303030 | `"000\0"` |
+| +0x18 | 0x00000000 | |
 
-Tooling in place: `tools/rw_scan.py` (locate rw4 resources, decode, hexdump, attempt a chunk
-walk). **Status: not reversed.** The writer/reader for this format must be found in `.text` and
-read instruction by instruction, like RefPack was - do not import RW 3.7 assumptions or a
-third-party RW4 description without testing against these bytes first.
+After copying the template the constructor fills, in order: `[obj+0x1c]`, `[obj+0x20]`,
+`[obj+0x24]=0`, `[obj+0x30]` (a computed 4-byte-aligned stream size), `[obj+0x34]`, `[obj+0x38]=self`,
+`[obj+0x44..0x63]` (8 dwords from a sub-call), `[obj+0x64..0x83]` (8 dwords), `[obj+0x84..0x93]`
+(4 dwords from the caller's array), `[obj+0x94]`.
+
+The caller that **writes** an rw4 stream (`0x006c233d` → `call 0x11e3f60` at `0x006c24b3`) pushes
+the sentinel `0xcafed00d`. The rw4 type id is passed to a resource accessor at `0x004021b3`.
+
+Tooling: `tools/rw4.py` (validates + dumps the 28-byte header; stops there on purpose),
+`tools/rw_scan.py` (locate/decode/dump rw4 resources).
+
+**Status: header confirmed, object table NOT reversed.** Do not fill in the object/chunk layout,
+the `+0x0c` flags, or whether `"454"` is a version or build tag from any third-party RW4
+description - find the reader in `.text` and read it like RefPack was.
 
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 

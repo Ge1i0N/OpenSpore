@@ -3,6 +3,50 @@
 Every entry ends with its verification. If a change has no measurable delta it is labelled
 **hypothesis**, per the output contract in `ai-brief-and-commands.md`.
 
+### RenderWare 4 (header confirmed, object table not reversed)
+Following the RW-4 finding from session 7, the header is now pinned down: a **28-byte template**
+at `.rdata 0x014f6480` (`\x89RW4` `w32\0` `\r\n\x1a\n` `00 20 04 00` `"454\0"` `"000\0"` + zero)
+is copied verbatim by the constructor at `0x011e3f60` (`mov ecx,7 / mov esi,0x14f6480 / rep movs`).
+The writer caller (`0x006c24b3`) pushes the sentinel `0xcafed00d`. Added `tools/rw4.py`, which
+validates and dumps that header and stops there on purpose.
+
+Still NOT reversed: the object/chunk table after the header, the `+0x0c` flags, and whether
+`"454"` is a version or a build tag. Recorded as VERIFY rows 31-32 with row 32 explicitly
+"NOT REVERSED" so nothing is assumed. This is the honest boundary: the format's surface is
+confirmed, its body is not.
+
+---
+
+## Session 8 — 2026-10-13: RW4 header pinned down (object table still open)
+
+Continues the RW4 work from session 7. The header is now proven, not observed:
+- A **28-byte template** at `.rdata 0x014f6480` is copied verbatim by the constructor at
+  `0x011e3f60`: `mov ecx,7 / mov esi,0x14f6480 / rep movs DWORD PTR es:[edi],DWORD PTR ds:[esi]`.
+  Fields: `+0x00` `0x34575289` ("\x89RW4"), `+0x04` `"w32\0"`, `+0x08` `0x0A1A0A0D` ("\r\n\x1a\n"),
+  `+0x0c` `0x00042000`, `+0x10` `"454\0"`, `+0x14` `"000\0"`, `+0x18` zero.
+- The constructor then fills `[obj+0x1c/0x20/0x24/0x30/0x34/0x38]` and three sub-arrays at
+  `0x44` (8 dwords), `0x64` (8 dwords), `0x84` (4 dwords).
+- The **writer** caller is `0x006c233d` (calls the constructor at `0x006c24b3`) and pushes the
+  sentinel `0xcafed00d`.
+- The rw4 type id `0x2F4E681B` reaches a resource accessor at `0x004021b3`.
+
+Added `tools/rw4.py`: validates + dumps that 28-byte header for any decoded rw4 resource, and
+stops there on purpose. Verified on `PatchData.package` rec 1456 → `valid RW4 header`,
+`platform 'w32'`, `version '454'`, `flags_0c 0x00042000`.
+
+**Explicitly NOT reversed** (VERIFY row 32, marked so nothing is assumed): the object/chunk table
+after the header, the `+0x0c` flags, and whether `"454"` is a version or a build tag. The reader
+that parses these streams has not been located; the next move is to find it in `.text` and read it
+instruction by instruction, the way RefPack was done - not to import a third-party RW4 description.
+
+### How this session was verified
+`python tools/rw4.py --pkg 45 --rec 1456` → `VERDICT: valid RW4 header` with the fields above.
+`tools/find_imm.py 0x34575289` → 0 raw occurrences of the magic as an immediate (it is copied by
+memcpy from the template, not compared inline - which is *why* a raw immediate search finds no
+reader: the reader compares via the template, so it must be found by call graph, not by magic).
+`tools/callers.py 0x11e3f60` → 2 callers, one at `0x006c24b3` (the writer). Build unchanged
+(no engine code touched this session); tool run only.
+
 ---
 
 ## Session 7 — 2026-10-13: the whole game enumerated and named

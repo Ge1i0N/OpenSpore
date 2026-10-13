@@ -1,7 +1,7 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 7).
+Last update: 2026-10-13 (session 8).
 
 ## One-line status
 
@@ -34,6 +34,7 @@ so if consulted at all, read the source. Recorded: MEMORY.md "Upstream knowledge
 | type names resolved | `trigger`/`prop` for cs-cz NameGeneration | `-exec pkg:-types,0` |
 | **resources enumerated** | **150,945**, 10.27 GB, 90 types (86 named) | `inventory:` in the log |
 | **resource names resolved** | **112,155 / 150,945 (74.3%)** | `inventory:` / `pkg:-path` |
+| RW4 header | **confirmed** (28-byte template `0x014f6480` copied by `0x011e3f60`) | `python tools/rw4.py --pkg 45 --rec 1456` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower, as the original) | `-exec state:-list` |
 | fps | **33.4 / 31.2** | `fps=` in the log |
 | build warnings | **0** | `cmake --build build --config Debug` output |
@@ -198,12 +199,13 @@ silent verboseaudio 4.0 5.1 automation …`).
 
 ## Next actions, in order
 
-1. **RenderWare 4 stream format** — 12,987 `rw4` resources (0x2F4E681B) are RW4, not RW 3.x:
-   a decoded payload starts `89 52 57 34 77 33 32 00 0d 0a 1a 0a` ("\x89RW4w32\r\n\x1a\n") with
-   version `454`. There is an embedded source path
-   `\Spore\SporeEP1ML\Core\RenderWare\platform\src\graphics\core\device\target\dx9\rwgdrvgraph.cpp`.
-   `tools/rw_scan.py` is in place to walk it. **This is the big one** - the field guide's §3
-   assumptions (RW 3.7 chunk ids, librw as a drop-in) must be re-checked against the actual bytes.
+1. **RW4 reader** — the header is pinned down (28-byte template at `0x014f6480`, copied by
+   `0x011e3f60`; sentinel `0xcafed00d`; `tools/rw4.py` validates+dumps it). Still open: the
+   object/chunk table after the header, the `+0x0c` flags, and whether `"454"` is a version or
+   build tag. The magic is **memcpy'd from the template, not compared inline**, so a raw
+   immediate search finds no reader — find it by call graph from `0x006c233d`/`0x004021b3`, and
+   read it instruction by instruction like RefPack. **This is the big one** (12,987 rw4 +
+   11,041 gmdl + 5,931 raster + 4,997 animation resources).
 2. **Show decoded game content** on the Loader (we can decode and name it; next is to *use* it).
    `png` (14,549) and `locale` (2,944) are the cheapest visible wins.
 3. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle
