@@ -31,7 +31,7 @@ texture format** (here a 512×512 DXT5). Earlier captures: `analysis/shots/mesh_
 | Reads EA's data | **57/57 `.package` opened, 0 rejected**; 150,945 resources, 10.27 GB, 0 invariant violations |
 | Decodes EA's data | **RefPack solved**: 30,000/30,000 real records decode to exactly `memSize` |
 | Names EA's data | **112,155 / 150,945 resource names resolved** (type + group + instance) |
-| Writes EA's data | **unpacker**: 2,944 locale + 14,549 png files written under real names, 0 failed; solved formats export as **BMP/OBJ** (whole game: 5,747 textures + 6,066 models, 0 failed) |
+| Writes EA's data | **unpacker**: 2,944 locale + 14,549 png files written under real names, 0 failed; solved formats export as **BMP/OBJ** (whole game: 5,747 textures + 6,979 models, 0 failed) |
 | **Renders EA's data** | a real decoded `.png` **and a real decoded `gmdl` mesh** (creature, 3,765 verts) **and the engine's own `raster` texture format** (DXT1/DXT5/raw) drawn on our own D3D9 renderer (see the screenshot) |
 | `gmdl` (meshes) | **solved** — variable stride (vertex_bytes/count; N=3/4/6 -> 24/28/36), position = first float3; **55% of the game parses** (bbox-validated) |
 | **Model + texture** | a model's texture is the `raster` with the **same instance id** (865/865 match); the engine binds it |

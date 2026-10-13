@@ -383,10 +383,12 @@ the declaration table is for. The rest needs the loader's disassembly.
 and it varies with the declaration count N.** Hardcoding 36 was a real bug. Measured on the exact
 variants: **N=3 -> stride 24, N=4 -> stride 28, N=6 -> stride 36**, and **position = the first float3
 at every stride**. With the stride computed, the exact-parse rate jumped: `Spore_Content` **491 ->
-1,747** of 4,209 (x3.6), game-wide **1,776 -> 6,066** OBJ. `decl_n` is 3/4/5/6 across the game
-(Spore_Content {3:1179, 4:483, 5:3, 6:551}); the remaining unparsed ones (N=5, and 2,462 in
-Spore_Content) have a layout we have not derived. UV is at offset 16 only when stride >= 24 (the N=6
-layout); for N=3/4 the UV offset differs (not yet derived).
+1,747** of 4,209 (x3.6), game-wide **1,776 -> 6,066** OBJ. The bbox validation uses a **relative**
+tolerance (5% of the bbox diagonal - the header bbox is a rounded summary), which raised it further to
+**Spore_Content 2,016** and game-wide **6,979 OBJ (63%)**. `decl_n` is 3/4/5/6 across the game
+(Spore_Content {3:1179, 4:483, 5:3, 6:551}); the remaining unparsed ones have errors of 7-16 (>100% of
+the diagonal) - a genuinely different layout, not a rounding issue (a block-start shift search always
+found shift 0 best). UV is at offset 16 only when stride >= 24 (the N=6 layout).
 
 Tools: `tools/gmdl_mesh.py` (parse + validate bbox + export OBJ), `tools/gmdl_attribs.py` (per-
 channel statistics that identified the UV), `tools/render_obj.py` (OBJ -> PNG, no deps),

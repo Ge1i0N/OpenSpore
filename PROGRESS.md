@@ -20,8 +20,8 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | resources enumerated | **150,945**, 10.27 GB, 90 types (86 named) | `python tools/resource_inventory.py` |
 | resources written to disk | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
 | solved formats exported | `raster`→BMP, `gmdl`→OBJ (2,770 BMP + 2,216 OBJ from Spore_Content) | `pkg:-unpack,all,<dir>,raster\|gmdl` |
-| **whole game exported** | **5,747 textures → BMP** + **6,066 models → OBJ**, all 57 pkgs, 0 failed | `pkg:-unpack,all,<dir>,raster` / `,gmdl` |
-| gmdl exact-parse rate | **6,066 / 11,041 (55%)** game-wide; parser validates bbox, else raw | `gmdl::parse` bbox check |
+| **whole game exported** | **5,747 textures → BMP** + **6,979 models → OBJ**, all 57 pkgs, 0 failed | `pkg:-unpack,all,<dir>,raster` / `,gmdl` |
+| gmdl exact-parse rate | **6,979 / 11,041 (63%)** game-wide; parser validates bbox (5% rel), else raw | `gmdl::parse` bbox check |
 | headless unpack | same output, **no window/device**, 7.6 s | `-headless -exec pkg:-unpack,...` |
 | **gmdl mesh decoded** | positions reproduce the file bbox **exactly (err 0.0000)**, 4 variants | `python tools/gmdl_mesh.py --pkg <i>` |
 | **engine draws a real mesh** | 3765 verts / 6000 tris, fps 32.3 | `analysis/shots/mesh_engine.png` |

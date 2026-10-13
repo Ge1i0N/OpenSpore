@@ -23,9 +23,11 @@ Found and fixed the real bug behind the low parse rate: the vertex stride is NOT
 variants: **N=3 -> 24, N=4 -> 28, N=6 -> 36**, with **position = the first float3 at every stride**.
 Computing the stride instead of hardcoding 36 raised the exact-parse rate from **491 to 1,747** of
 4,209 in `Spore_Content` (x3.6) and game-wide from **1,776 to 6,066 OBJ** (x3.4), 0 failed. The
-remaining unparsed ones (N=5, and others) still have a layout we have not derived, and the bbox guard
-correctly rejects them. Rendered samples of the new variants are real, coherent geometry
-(`analysis/shots/gmdl_fixed_*.png`). Recorded in MEMORY.
+validation tolerance was then made RELATIVE (5% of the bbox diagonal - the header bbox is a rounded
+summary), lifting `Spore_Content` 1,747 -> **2,016** and game-wide 6,066 -> **6,979 OBJ (63%)**. A
+block-start shift search (0..40 bytes) always found shift 0 best, so the block start was already
+right; the remaining rejects have errors of 7-16 (a genuinely different layout). Rendered samples of
+the new variants are real, coherent geometry (`analysis/shots/gmdl_fixed_*.png`). Recorded in MEMORY.
 
 ### gmdl: the layout is a SUBSET, and the parser now validates (491/4209 exact)
 While quality-checking the OBJ export I found a real bug: the parser accepted gmdl variants whose

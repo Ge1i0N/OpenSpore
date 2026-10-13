@@ -150,8 +150,9 @@ Mesh parse(const u8* data, size_t size) {
         m.uvs[i * 2 + 1] = v;
     }
     // 6. VALIDATE: the extracted positions must reproduce the file's own bbox (the exactness test
-    // that solved gmdl). This rejects the gmdl variants whose vertex layout we have not derived, so
-    // a bogus mesh is never reported as ok (and the unpacker falls back to raw bytes for those).
+    // that solved gmdl). The header bbox is a rounded summary, so the tolerance is RELATIVE to the
+    // bbox size (5% of the diagonal): that accepts the correct-but-rounded variants while still
+    // rejecting the ones with a completely different layout (whose error is >100% of the diagonal).
     float mn[3] = {m.positions[0], m.positions[1], m.positions[2]};
     float mx[3] = {m.positions[0], m.positions[1], m.positions[2]};
     for (u32 i = 1; i < vcount; ++i) {
@@ -165,7 +166,11 @@ Mesh parse(const u8* data, size_t size) {
     for (int k = 0; k < 3; ++k) {
         err += std::abs(mn[k] - m.bbox_min[k]) + std::abs(mx[k] - m.bbox_max[k]);
     }
-    if (err > 1e-3f) {
+    float dx = m.bbox_max[0] - m.bbox_min[0], dy = m.bbox_max[1] - m.bbox_min[1],
+          dz = m.bbox_max[2] - m.bbox_min[2];
+    float diag = std::sqrt(dx * dx + dy * dy + dz * dz);
+    float tol = diag > 1e-6f ? 0.05f * diag : 1e-3f;
+    if (err > tol) {
         m.ok = false;
         m.why = "positions do not reproduce the header bbox (layout not handled)";
         return m;
