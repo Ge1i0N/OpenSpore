@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<Project name="Spore">
+	<Import file="SporeUIDesigner2ProjectCommon.xml"/>
+	<Import file="SporeUIDesigner2ProjectCustom.xml"/>
+	<Import file="SporeUIDesigner2ResourceManConfig.xml"/>
+	<TextStyles config="SporeUITextStyles.css"/>
+</Project>

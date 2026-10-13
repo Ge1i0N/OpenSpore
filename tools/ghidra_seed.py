@@ -64,7 +64,15 @@ def main():
     from pyghidra import open_project
     from java.lang import Object
     from ghidra.program.flatapi import FlatProgramAPI
-    from ghidra.app.cmd.disassemble import ClearCodeUnitsCmd
+    try:
+        from ghidra.app.cmd.disassemble import ClearCodeUnitsCmd
+    except Exception:
+        # This class path is wrong for Ghidra 12.1.4 (the import raised
+        # ClassNotFoundException, which aborted the whole run before ANY seed was applied). The gap
+        # filler is a second-order nicety now that the spui schema gave us the format's dictionary,
+        # so degrade to "no gap filling" instead of dying, and say so loudly.
+        ClearCodeUnitsCmd = None
+        say("! ClearCodeUnitsCmd unavailable: code-hole filling is disabled this run")
     from ghidra.program.model.symbol import SourceType
     from ghidra.program.util import GhidraProgramUtilities
 
@@ -143,6 +151,9 @@ def main():
                         break
                     do = LISTING.getDataAt(addr)
                     if do is not None:
+                        if ClearCodeUnitsCmd is None:
+                            stop = "no ClearCodeUnitsCmd (gap filling disabled)"
+                            break
                         try:
                             # clearCodeUnits is NOT a method on FlatProgramAPI or on ProgramDB in this
                             # Ghidra version (both raised, and that cost two rounds). It lives on the

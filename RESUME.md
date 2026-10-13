@@ -43,12 +43,29 @@ group AND instance names. Result: 8,499 decoded bytes of plain ArgScript → **6
 entry `state Main -id 0` ("Spore Launch Screen") → `gotoState GalaxyGameEntry` (`-id 0x02ccda9c`). The
 five stages Cell → Creature → Tribe → Civ → Space are explicit data.
 
-**Next on the path:** the script names the door into `spui` directly —
-`cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`. So the SPUI entry point is the
-**`uilayout`** verb with `-load <name> <id1> <id2>`; follow it to the layout deserializer, then let the
-Title screen compose a REAL layout from the UI atlas + the `locale` strings we now decode. Seed Ghidra
-first (`analysis/audit/seeds_rea.tsv` → `REA_GHIDRA_SEED_FILE`) — the same vtable-only wall is behind
-rw4/prop.
+**Next on the path — `spui` is UNBLOCKED, by DATA rather than by the bit reader.** The script names the
+door (`cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`), and following the VERB produced
+the loader cluster `0x810870`/`0x810940` — the loader does `cmp [eax+4], 0x250FE9A2`, so our `spui` type
+id is confirmed in code. Then a type histogram over all 150,945 resources found 14 resources of type
+`xml` (`0xCF6C21B8`) nobody had dumped: they are **the Spore UI Designer's own project files, shipped in
+the game** (70,032 B format definition + 37,425 B class catalogue + fonts + manifest). Harvesting their
+`proxy` attributes gives **306 ids (66 Class + 240 Property)**, and scanning the 748 `spui` for them:
+**748/748 contain schema ids, 227 of 306 appear, and every id carries a STABLE byte pitch**
+(`Image Outline` 14 B @100%, `ShadeColor` 12 B @100%, `BorderColor` 6 B @98%) — which is what makes it a
+format instead of noise. The window record is legible now: `WindowFlags`, `ControlID`, `CommandID`,
+**`Area` (rectf — the geometry a menu needs)**, `BackgroundColor`, `ShadeColor`, `TextFont`,
+`WinProcs`, `Children`, plus the layout's CLASS id (`SimpleLayout`, `Window`) whose base-chain the
+schema supplies. Detail + the three measurements: **`analysis/spui-schema.md`**.
+Second rule that generalizes: **the id space is HIERARCHICAL** — 58 of 602 properties have ids below
+`0x100` and those are **reused per struct** (`0x01` = `Size` in Outline Format, `TextStyle` elsewhere),
+exactly like the `locale` tables' per-table key space. Treating the low band as global yields confident
+garbage (my first matcher did).
+Still open, recorded not hidden: the presence mask (a 10-member / 40-byte struct occupies 10 bytes, so
+only non-default members serialize — hypothesis), the bit packing (1,441,987 of 1,911,484 hits are
+off-boundary), and why `Area` (16-byte rectf) has pitch 6. Reader `0x9059c0`, fed by `0x9015e0`
+(8192-byte buffer → a token can straddle the window). **Do not read the tokenizer cold: walk a small
+layout with the schema as dictionary and the MEASURED pitch as width; the schema's `default=` values
+are the built-in correctness check for the presence mask.**
 
 **Before accepting any "the data does not exist" conclusion, re-check WHERE you looked.** This session
 proved it twice, both times with our own engine silently reading nothing: the `locale` reader reported

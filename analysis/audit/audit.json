@@ -1073,103 +1073,103 @@
    "id": "spui.loading_path",
    "doc": "analysis/spui-loading.md",
    "severity": "load-bearing",
-   "overall": "UNKNOWN",
+   "overall": "FAIL",
    "checks": [
     {
      "kind": "func_exists",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00810870 not in the export",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_00810870 (0x00810870..0x0081093f, 83 insns)",
      "note": "the cSPUILayoutResource factory",
      "addr": "0x00810870"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00810870 not in the export",
+     "verdict": "PASS",
+     "evidence": "[PASS] cmp of 0x0510a95b present",
      "note": "gated on the resource-manager request tag",
      "addr": "0x00810870"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00810870 not in the export",
+     "verdict": "PASS",
+     "evidence": "[PASS] string 0x014183ac ('App/SPUILayoutResource') referenced",
      "note": "the allocation tag names the class",
      "addr": "0x00810870"
     },
     {
      "kind": "func_exists",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00810940 not in the export",
+     "verdict": "FAIL",
+     "evidence": "Ghidra has NO function at 0x00810940 (listing: PUSH ECX)",
      "note": "the layout loader",
      "addr": "0x00810940"
     },
     {
      "kind": "func",
      "verdict": "UNKNOWN",
-     "evidence": "function 0x00810940 not in the export",
+     "evidence": "Ghidra has NO function at 0x00810940 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.",
      "note": "<<< THE POINT: the loader compares the resource's type word against 0x250FE9A2, so the spui type id is confirmed in code, not inferred from reg_type.txt + the index",
      "addr": "0x00810940"
     },
     {
      "kind": "func",
      "verdict": "UNKNOWN",
-     "evidence": "function 0x00810940 not in the export",
+     "evidence": "Ghidra has NO function at 0x00810940 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.",
      "note": "the same request tag gates the loader too",
      "addr": "0x00810940"
     },
     {
      "kind": "func",
      "verdict": "UNKNOWN",
-     "evidence": "function 0x00810940 not in the export",
+     "evidence": "Ghidra has NO function at 0x00810940 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.",
      "note": "the three named classes of the reader triple",
      "addr": "0x00810940"
     },
     {
      "kind": "func",
      "verdict": "UNKNOWN",
-     "evidence": "function 0x00810940 not in the export",
+     "evidence": "Ghidra has NO function at 0x00810940 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.",
      "note": "TokenIOContext 0x38, MemoryStream 0x24, SharedPointer 0x18 - the object sizes, so our engine's model has known extents",
      "addr": "0x00810940"
     },
     {
      "kind": "func_exists",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00903330 not in the export",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_00903330 (0x00903330..0x0090339c, 34 insns)",
      "note": "the TokenIOContext constructor",
      "addr": "0x00903330"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00903330 not in the export",
+     "verdict": "PASS",
+     "evidence": "[PASS] string 0x0143a460 ('UTF/XmlTokenReader/TokenIOContext/mAlloc') referenced",
      "note": "TRAP-AND-PAYOFF: 0x143a460 is stored into [esi] exactly where a vtable goes, but it is an ASCII STRING. Reading it as a vtable would have invented a fake 12-method class; reading it as a string names the reader family - XML/TokenReader.",
      "addr": "0x00903330"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00903330 not in the export",
+     "verdict": "FAIL",
+     "evidence": "[FAIL] direct calls missing: 0x00925e80, 0x00925eb0 (has 4 calls)",
      "note": "the read/write callbacks the token reader installs over the MemoryStream",
      "addr": "0x00903330"
     },
     {
      "kind": "func_exists",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00903100 not in the export",
+     "verdict": "PASS",
+     "evidence": "Ghidra has a function here: FUN_00902fd0 (0x00902fd0..0x00903232, 207 insns)",
      "note": "the XML/TokenReader user",
      "addr": "0x00903100"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00903100 not in the export",
+     "verdict": "PASS",
+     "evidence": "[PASS] string 0x0143a450 ('XML/TokenReader') referenced",
      "note": "the reader's own name",
      "addr": "0x00903100"
     },
     {
      "kind": "func",
-     "verdict": "UNKNOWN",
-     "evidence": "function 0x00903100 not in the export",
+     "verdict": "PASS",
+     "evidence": "[PASS] calls 0x00901680, 0x009016e0, 0x00900e10 present",
      "note": "THE NEXT STEP: the token reader's core. Recovering its token alphabet is what turns spui from a bit-packed mystery into a parsed layout.",
      "addr": "0x00903100"
     }

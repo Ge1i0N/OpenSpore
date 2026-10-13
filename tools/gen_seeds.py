@@ -25,7 +25,11 @@ for s in pe._sec_list:
 assert TEXT
 
 CITED = [
-    ("0x007e3fb0", "statemgr add-state (vtable+0x00)"),
+    ("0x00810870", "the spui layout FACTORY (cmp tag 0x510a95b)"),
+    ("0x00810940", "the spui layout LOADER (cmp type 0x250fe9a2)"),
+    ("0x00903330", "the TokenIOContext ctor"),
+    ("0x00903100", "the XML/TokenReader user"),
+    ("0x007e3fb0", "statemgr add-state (vtable +0x00)"),
     ("0x007e7160", "app event dispatcher"),
     ("0x007eaae0", "AppMode +0x20 shader/script config"),
     ("0x00849bf0", "Window::Create"),

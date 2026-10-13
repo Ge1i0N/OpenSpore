@@ -4,19 +4,55 @@ Independent re-check of `analysis/claims.json` against Ghidra's own analysis of
 `refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe`.
 
 - Ghidra 12.1.4, language x86:LE:32:default, image base 0x00400000, entry None, 55294 functions carved.
-- Claims: FAIL 0, UNKNOWN 3, PASS 29, SKIP 1
+- Claims: FAIL 1, UNKNOWN 2, PASS 29, SKIP 1
 
 `FAIL` = Ghidra disagrees with the doc. `UNKNOWN` = Ghidra could not answer, so the
 claim is still only as good as our own objdump reading. `SKIP` = not a disassembly
 question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
 
-## UNKNOWN (3)
+## FAIL (1)
+
+| claim | sev | doc | verdict |
+|---|---|---|---|
+| `spui.loading_path` | load-bearing | analysis/spui-loading.md | **FAIL** |
+
+### spui.loading_path — FAIL
+
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00810870 (0x00810870..0x0081093f, 83 insns)
+  - claim: the cSPUILayoutResource factory
+- `PASS` [ok] `func` [PASS] cmp of 0x0510a95b present
+  - claim: gated on the resource-manager request tag
+- `PASS` [ok] `func` [PASS] string 0x014183ac ('App/SPUILayoutResource') referenced
+  - claim: the allocation tag names the class
+- `FAIL` [MISMATCH] `func_exists` Ghidra has NO function at 0x00810940 (listing: PUSH ECX)
+  - claim: the layout loader
+- `UNKNOWN` [?] `func` Ghidra has NO function at 0x00810940 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.
+  - claim: <<< THE POINT: the loader compares the resource's type word against 0x250FE9A2, so the spui type id is confirmed in code, not inferred from reg_type.txt + the index
+- `UNKNOWN` [?] `func` Ghidra has NO function at 0x00810940 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.
+  - claim: the same request tag gates the loader too
+- `UNKNOWN` [?] `func` Ghidra has NO function at 0x00810940 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.
+  - claim: the three named classes of the reader triple
+- `UNKNOWN` [?] `func` Ghidra has NO function at 0x00810940 (listing: PUSH ECX). Either our address is wrong or Ghidra failed to carve a function there.
+  - claim: TokenIOContext 0x38, MemoryStream 0x24, SharedPointer 0x18 - the object sizes, so our engine's model has known extents
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00903330 (0x00903330..0x0090339c, 34 insns)
+  - claim: the TokenIOContext constructor
+- `PASS` [ok] `func` [PASS] string 0x0143a460 ('UTF/XmlTokenReader/TokenIOContext/mAlloc') referenced
+  - claim: TRAP-AND-PAYOFF: 0x143a460 is stored into [esi] exactly where a vtable goes, but it is an ASCII STRING. Reading it as a vtable would have invented a fake 12-method class; reading it as a string names the reader family - XML/TokenReader.
+- `FAIL` [MISMATCH] `func` [FAIL] direct calls missing: 0x00925e80, 0x00925eb0 (has 4 calls)
+  - claim: the read/write callbacks the token reader installs over the MemoryStream
+- `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00902fd0 (0x00902fd0..0x00903232, 207 insns)
+  - claim: the XML/TokenReader user
+- `PASS` [ok] `func` [PASS] string 0x0143a450 ('XML/TokenReader') referenced
+  - claim: the reader's own name
+- `PASS` [ok] `func` [PASS] calls 0x00901680, 0x009016e0, 0x00900e10 present
+  - claim: THE NEXT STEP: the token reader's core. Recovering its token alphabet is what turns spui from a bit-packed mystery into a parsed layout.
+
+## UNKNOWN (2)
 
 | claim | sev | doc | verdict |
 |---|---|---|---|
 | `event.dispatcher` | high | analysis/startup.md:141-142 | **UNKNOWN** |
 | `refpack.decoder` | load-bearing | source/engine/pkg.h:46-50 | **UNKNOWN** |
-| `spui.loading_path` | load-bearing | analysis/spui-loading.md | **UNKNOWN** |
 
 ### event.dispatcher — UNKNOWN
 
@@ -35,37 +71,6 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
   - claim: the RefPack copy loop is a real function
 - `UNKNOWN` [?] `func` check records no assertion
   - claim: TRAP: counters are test-before-decrement, so the byte count is reg+1
-
-### spui.loading_path — UNKNOWN
-
-- `UNKNOWN` [?] `func_exists` function 0x00810870 not in the export
-  - claim: the cSPUILayoutResource factory
-- `UNKNOWN` [?] `func` function 0x00810870 not in the export
-  - claim: gated on the resource-manager request tag
-- `UNKNOWN` [?] `func` function 0x00810870 not in the export
-  - claim: the allocation tag names the class
-- `UNKNOWN` [?] `func_exists` function 0x00810940 not in the export
-  - claim: the layout loader
-- `UNKNOWN` [?] `func` function 0x00810940 not in the export
-  - claim: <<< THE POINT: the loader compares the resource's type word against 0x250FE9A2, so the spui type id is confirmed in code, not inferred from reg_type.txt + the index
-- `UNKNOWN` [?] `func` function 0x00810940 not in the export
-  - claim: the same request tag gates the loader too
-- `UNKNOWN` [?] `func` function 0x00810940 not in the export
-  - claim: the three named classes of the reader triple
-- `UNKNOWN` [?] `func` function 0x00810940 not in the export
-  - claim: TokenIOContext 0x38, MemoryStream 0x24, SharedPointer 0x18 - the object sizes, so our engine's model has known extents
-- `UNKNOWN` [?] `func_exists` function 0x00903330 not in the export
-  - claim: the TokenIOContext constructor
-- `UNKNOWN` [?] `func` function 0x00903330 not in the export
-  - claim: TRAP-AND-PAYOFF: 0x143a460 is stored into [esi] exactly where a vtable goes, but it is an ASCII STRING. Reading it as a vtable would have invented a fake 12-method class; reading it as a string names the reader family - XML/TokenReader.
-- `UNKNOWN` [?] `func` function 0x00903330 not in the export
-  - claim: the read/write callbacks the token reader installs over the MemoryStream
-- `UNKNOWN` [?] `func_exists` function 0x00903100 not in the export
-  - claim: the XML/TokenReader user
-- `UNKNOWN` [?] `func` function 0x00903100 not in the export
-  - claim: the reader's own name
-- `UNKNOWN` [?] `func` function 0x00903100 not in the export
-  - claim: THE NEXT STEP: the token reader's core. Recovering its token alphabet is what turns spui from a bit-packed mystery into a parsed layout.
 
 ## PASS (29)
 

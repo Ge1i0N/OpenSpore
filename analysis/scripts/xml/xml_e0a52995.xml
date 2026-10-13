@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project name="Spore">
+    <!-- 
+        Graphics resource configuration 
+    -->
+    <ResourcePlugin type="UTFConnector" dir="">
+        <Option name="ControlFiles" value="SporeUIDesigner2ResourceManConfig.cfg"/>
+        <Factory class="UTFConnector.ImageFactory">
+            <RecordType format="jpeg"  typeid="0x2f7d0002"/>
+            <RecordType format="png"   typeid="0x2f7d0004"/>
+            <RecordType format="bmp"   typeid="0x2f7d0005"/>
+            <RecordType format="targa" typeid="0x2f7d0006"/>
+            <RecordType format="gif"   typeid="0x2f7d0007"/>
+        </Factory>
+        <Factory class="UTFConnector.StringFactory">
+            <RecordType format="text"  typeid="0x02fac0b6"/>
+        </Factory>
+    </ResourcePlugin>
+
+    <!--
+        Text resource configuration. 
+    -->
+    <ResourcePlugin type="SporeTextResourceProvider" dir="..\Locale">
+	</ResourcePlugin>
+    <!-- 
+        Declare the supported locales. 
+    -->
+	<ResourceViewSet name="Locale">
+		<View name="English US" value="en-us" default="true" />
+		<View name="English UK" value="en-gb" />
+        <View name="Czech" value="cs-cz" />
+		<View name="Danish" value="da-dk" />
+		<View name="German" value="de-de" />
+		<View name="Greek" value="el-gr" />
+		<View name="Spanish" value="es-es" />
+		<View name="Finnish" value="fi-fi" />
+		<View name="French" value="fr-fr" />
+		<View name="Hungarian" value="hu-hu" />
+		<View name="Italian" value="it-it" />
+		<View name="Japanese" value="ja-jp" />
+		<View name="Korean" value="ko-kr" />
+		<View name="Dutch" value="nl-nl" />
+		<View name="Norwegian" value="no-no" />
+		<View name="Polish" value="pl-pl" />
+		<View name="Portuguese" value="pt-pt" />
+		<View name="Portuguese Brazil" value="pt-br" />
+		<View name="Russian" value="ru-ru" />
+		<View name="Swedish" value="sv-se" />
+		<View name="Thai" value="th-th" />
+		<View name="Chinese Simplified" value="zh-cn" />
+		<View name="Chinese Traditional" value="zh-tw" />
+	</ResourceViewSet>
+</Project>
