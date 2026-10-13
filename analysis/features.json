@@ -125,6 +125,8 @@
         {"name": "scan dedupe", "status": "done", "note": "canonical path"},
         {"name": "unpack by type", "status": "done", "note": "pkg:-unpack ... <type>"},
         {"name": "unpack by name", "status": "done", "note": "real resource names"},
+        {"name": "export raster->BMP", "status": "done", "note": "pkg:-unpack ...,raster writes decoded BMP"},
+        {"name": "export gmdl->OBJ", "status": "done", "note": "pkg:-unpack ...,gmdl writes OBJ; ~53% parse, rest raw"},
         {"name": "type registry", "status": "partial", "note": "86/90 named"},
         {"name": "instance naming", "status": "done", "note": "FNV-1+lower 112155/150945"},
         {"name": "resource_path", "status": "done", "note": "group/instance.type"},

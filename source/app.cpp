@@ -17,6 +17,8 @@
 #include "engine/cmdline.h"
 #include "engine/config.h"
 #include "engine/console.h"
+#include "engine/gmdl.h"
+#include "engine/raster.h"
 #include "engine/diag.h"
 #include "engine/fs.h"
 #include "engine/log.h"
@@ -28,6 +30,48 @@
 
 namespace os::app {
 namespace {
+
+// ---------------------------------------------------------------- asset writers
+// For the unpacker: turn a decoded `raster` into a BMP and a `gmdl` into an OBJ, so the game's
+// own textures and models come out as standard files. BMP (not PNG) keeps this dependency-free;
+// BGRA rows go out bottom-up exactly like our frame capture.
+
+bool write_bmp_bgra(const std::string& path, int w, int h, const u8* bgra) {
+    if (w <= 0 || h <= 0 || !bgra) return false;
+    FILE* f = nullptr;
+    if (fopen_s(&f, path.c_str(), "wb") != 0 || !f) return false;
+    const u32 px = (u32)w * (u32)h, img = px * 4, file_size = 54 + img;
+    u8 hdr[54];
+    memset(hdr, 0, sizeof(hdr));
+    hdr[0] = 'B'; hdr[1] = 'M';
+    memcpy(hdr + 2, &file_size, 4);
+    const u32 off = 54;
+    memcpy(hdr + 10, &off, 4);
+    const u32 hs = 40;
+    memcpy(hdr + 14, &hs, 4);
+    memcpy(hdr + 18, &w, 4);
+    memcpy(hdr + 22, &h, 4);
+    hdr[26] = 1; hdr[28] = 32;
+    memcpy(hdr + 34, &img, 4);
+    const u32 ppm = 2835;
+    memcpy(hdr + 38, &ppm, 4); memcpy(hdr + 42, &ppm, 4);
+    fwrite(hdr, 1, 54, f);
+    for (int y = h - 1; y >= 0; --y) fwrite(bgra + (size_t)y * w * 4, 1, (size_t)w * 4, f);
+    fclose(f);
+    return true;
+}
+
+bool write_obj(const std::string& path, const gmdl::Mesh& m) {
+    FILE* f = nullptr;
+    if (fopen_s(&f, path.c_str(), "wb") != 0 || !f) return false;
+    fprintf(f, "# gmdl: %u vertices, %zu indices\n", m.vertex_count, m.indices.size());
+    for (u32 i = 0; i < m.vertex_count; ++i)
+        fprintf(f, "v %.6f %.6f %.6f\n", m.positions[i * 3], m.positions[i * 3 + 1], m.positions[i * 3 + 2]);
+    for (size_t i = 0; i + 2 < m.indices.size(); i += 3)
+        fprintf(f, "f %u %u %u\n", m.indices[i] + 1, m.indices[i + 1] + 1, m.indices[i + 2] + 1);
+    fclose(f);
+    return true;
+}
 
 // ---------------------------------------------------------------- yardstick
 // Field guide §1: maintain ONE cheap numeric measure of "are we further along".
@@ -536,6 +580,28 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                                   std::filesystem::create_directories(out.parent_path(), uec);
                                   if (!up.read_resource_decoded(n, buf)) {
                                       ++failed;
+                                      continue;
+                                  }
+                                  // Solved formats get converted to standard files: `raster` -> BMP,
+                                  // `gmdl` -> OBJ. Everything else is written as its decoded bytes.
+                                  constexpr u32 kRaster = 0x2F4E681C, kGmdl = 0x00E6BCE5;
+                                  bool wrote = false;
+                                  if (r.type() == kRaster) {
+                                      raster::Texture rt = raster::decode(buf.data(), buf.size());
+                                      if (rt.ok) {
+                                          out.replace_extension(".bmp");
+                                          wrote = write_bmp_bgra(out.string(), rt.width, rt.height, rt.bgra.data());
+                                      }
+                                  } else if (r.type() == kGmdl) {
+                                      gmdl::Mesh m = gmdl::parse(buf.data(), buf.size());
+                                      if (m.ok) {
+                                          out.replace_extension(".obj");
+                                          wrote = write_obj(out.string(), m);
+                                      }
+                                  }
+                                  if (wrote) {
+                                      ++written;
+                                      bytes += buf.size();
                                       continue;
                                   }
                                   FILE* fo = nullptr;

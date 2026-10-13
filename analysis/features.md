@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 80.5%** | **Overall: 73.4%** | done 163 / partial 22 / todo 52 (237 features)
+**Engine reversal: 80.7%** | **Overall: 73.6%** | done 165 / partial 22 / todo 52 (239 features)
 
 **Legend**
 
@@ -24,7 +24,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | harness | **93%** | 13 | 0 | 1 |
 | startup | **95%** | 25 | 3 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
-| packages (DBPF) | **89%** | 31 | 4 | 2 |
+| packages (DBPF) | **90%** | 33 | 4 | 2 |
 | gmdl (meshes) | **90%** | 21 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **80%** | 20 | 0 | 5 |
@@ -134,9 +134,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## packages (DBPF) — 89%
+## packages (DBPF) — 90%
 
-*31 done · 4 partial · 2 todo*
+*33 done · 4 partial · 2 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -172,6 +172,8 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | scan dedupe | canonical path |
 | ✅ | done | unpack by type | pkg:-unpack ... <type> |
 | ✅ | done | unpack by name | real resource names |
+| ✅ | done | export raster->BMP | pkg:-unpack ...,raster writes decoded BMP |
+| ✅ | done | export gmdl->OBJ | pkg:-unpack ...,gmdl writes OBJ; ~53% parse, rest raw |
 | 🚧 | partial | type registry | 86/90 named |
 | ✅ | done | instance naming | FNV-1+lower 112155/150945 |
 | ✅ | done | resource_path | group/instance.type |

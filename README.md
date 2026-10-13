@@ -161,12 +161,16 @@ Game data goes in `build/bin/Debug/Data/` (base game) and `DataEP1/` (Galactic A
 exactly where the original looks for it. It is **not** in this repo — `refs/` and the assets
 are gitignored; only our own evidence is committed.
 
-The unpacker (the PROMPT.md wish) writes the game's resources out under their real names, decoded:
+The unpacker (the PROMPT.md wish) writes the game's resources out under their real names, decoded.
+Solved formats come out as **standard files**: `raster` textures as `.bmp`, `gmdl` models as `.obj`;
+everything else is written as its decoded bytes.
 
 ```powershell
 # every resource of every package, filtered by type
 .\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,locale   # all localized text
 .\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,png      # 14,549 real PNGs
+.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,raster   # textures -> BMP (DXT decoded)
+.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,gmdl     # models -> OBJ
 
 # the same, with NO window and NO D3D9 device (no display / CI / a server):
 .\OpenSpore.exe -headless -devDirs -exec pkg:-unpack,all,C:\dump,png -quitAfter 8

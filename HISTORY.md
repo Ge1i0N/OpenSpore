@@ -57,6 +57,15 @@ guesses to check by disassembly; output `analysis/name_guesses.md`. Also: `tools
 shows the PDB is NOT stripped — 136,433 unique function/method name paths (SP 63,246, EA 24,214,
 eastl 9,874, rw 6,582, nSPCreatureAnim 2,423). The feature map gained a `tooling` category (89%).
 
+### The unpacker exports solved formats as standard files
+`pkg:-unpack` now converts the formats we solved into standard files instead of dumping their raw
+bytes: **`raster` -> BMP** (via `raster::decode`) and **`gmdl` -> OBJ** (via `gmdl::parse`).
+Measured on `Spore_Content`: 2,770 BMP (e.g. `building_editorTextureDiffuse~/Elevated Hall.bmp`,
+512x512 32bpp, `BM` signature) and 2,216 OBJ (e.g. `0x067c79d2.obj`, 29,345 verts / 47,016 tris),
+0 failed. `gmdl` records whose layout our parser does not yet handle fall back to raw bytes (1,993
+of 4,209 in that package) - honest, and recorded. So the game's own textures and models now come out
+as files any tool can open.
+
 ### Asset format survey: blockdata solved as a vec3/bbox array; gmsh is mesh-like
 Went looking for a tractable mass format. **`blockdata` (0x5caa5e28, 3,141)** is an array of `vec3`
 (every payload size is a multiple of 12 bytes) whose **first two `vec3` are a min/max bounding box**
