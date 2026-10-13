@@ -64,7 +64,15 @@ The unpacker (the PROMPT.md wish) writes the game's resources out under their re
 # every resource of every package, filtered by type
 .\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,locale   # all localized text
 .\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,png      # 14,549 real PNGs
+
+# the same, with NO window and NO D3D9 device (no display / CI / a server):
+.\OpenSpore.exe -headless -devDirs -exec pkg:-unpack,all,C:\dump,png -quitAfter 8
 ```
+
+`-headless` (alias `-noWindow`) skips the window, the device and the font atlas but keeps everything
+else (logging, the harness, the search paths, the naming registry, the console). The unpack above
+produces **bit-for-bit the same output as the windowed run** (2,944 files for `locale`), so the
+unpacker is usable as a standalone tool.
 
 Unattended / scripting hooks we added for testing. Arguments use `name:arg,args` so **no shell
 quoting is involved** (PowerShell mangles `"-abortNow 9"` into `"._abortNow 9\`, and a harness

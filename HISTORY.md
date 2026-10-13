@@ -17,6 +17,47 @@ confirmed, its body is not.
 
 ---
 
+## Session 12 — 2026-10-13: headless mode (unpacker without a window); gmdl vertex layout ruled out
+
+### Headless mode (finishes the unpacker wishlist item)
+`-headless` (aliases `-noWindow`) skips the window, the D3D9 device and the font atlas, but runs
+everything else: logging, the harness, the search paths, the naming registry, the console, and the
+Loader state's package scan. Console commands still execute, so the inspector and unpacker work on a
+machine with no display (or in CI). Measured:
+```
+OpenSpore.exe -headless -devDirs -exec pkg:-unpack,all,<dir>,locale -quitAfter 8
+  -> 57 pkgs, 2944 written, 148001 skipped, 0 failed, 27,882,571 bytes  (2944 files on disk)
+```
+That is **bit-for-bit the same result as the windowed run** (2,944 files, 27,882,571 bytes), in
+7.6 s, with no window created. Windowed mode re-checked afterwards: window + device + atlas + the
+real asset still render, capture still 3,686,454 bytes, exit 0.
+
+### gmdl vertex layout ruled out (a second disproven hypothesis, with the test that killed it)
+Last session established gmdl's header is not a fixed triple. This session tested the NEXT guess -
+that the vertex block is a plain array of vec3 with a fixed stride. The test is exact and uses the
+file's own header: read the block as N-byte vertices and compare the computed bounding box with the
+header bbox at `+0x48`. Result: **no stride matches** (12/16/20/24/28/32 all fail; the Z range alone
+coincidentally lines up at stride 12, which is exactly the kind of single-field coincidence that
+must not be trusted). Conclusion, recorded in MEMORY: **vertices are interleaved** with other
+attributes, so the header bbox is a mesh summary and the attribute layout must come from the loader's
+disassembly. Byte-scanning cannot resolve it.
+
+Also this session: the model-manager globals' getter/setter pairs were located
+(`0x67dcd0..0x67df70` are one-line getters/setters for `0x15fd8b0..0x15fd8d0`), and the setter used
+by the rw4 handler (`0x67df40`, manager `0x15fd8c4`) is called from `0x7a71cb` / `0x7a7efa` — so the
+model subsystem's entry points are known and the parser is reachable from there next time.
+
+### How this session was verified
+`cmake --build build --config Debug` → 0 errors, 0 warnings.
+Headless: `OpenSpore.exe -headless -devDirs -exec pkg:-unpack,all,<dir>,locale -quitAfter 8` →
+exit 0, `unpack: 57 pkgs, 2944 written, 0 failed, 27882571 bytes`, 2,944 files on disk.
+Windowed regression: `-w -devDirs -capture hl.bmp -captureAfter 20 -quitAfter 35` → exit 0,
+`window ... icon=embedded`, `device windowed 1280x720`, `font atlas ready`, `showing real asset
+vehiclepainticons~/be_basic_shake_05.png`, capture 3,686,454 bytes.
+gmdl stride test: the bbox-match search reported no candidate; recorded with the method.
+
+---
+
 ## Session 11 — 2026-10-13: rw4 = models; gmdl explored and a single-file fit disproven
 
 Two things: identified what the model resources are, and tested a hypothesis honestly into the

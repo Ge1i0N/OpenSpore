@@ -220,6 +220,7 @@ void frame_body(void* p) {
         void (*volatile fp)() = abort;
         fp();
     }
+    if (g_args.headless) return;  // no window/device: tick and render need neither, so skip both
     states::manager().tick(fc->dt);
     states::manager().render();
 }
@@ -289,40 +290,49 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     fs::init(g_args, exe_dir);
     mark(3, true, fs::dump_search_list());
 
-    // 4. window
-    if (!create_window(inst, g_args.width, g_args.height, g_args.windowed, L"OpenSpore - Loader")) {
+    // 4. window (skipped headless)
+    if (g_args.headless) {
+        mark(4, true, "headless: no window");
+    } else if (!create_window(inst, g_args.width, g_args.height, g_args.windowed, L"OpenSpore - Loader")) {
         mark(4, false, "CreateWindow failed");
         print_chain();
         log::shutdown();
         return 3;
+    } else {
+        mark(4, true);
     }
-    mark(4, true);
 
-    // 5. renderer. Error strings mirror the original's own contract (see device.h header).
+    // 5. renderer (skipped headless). Error strings mirror the original's own contract.
     render::Config rcfg;
     rcfg.windowed = g_args.windowed;
     rcfg.width = g_args.width;
     rcfg.height = g_args.height;
     rcfg.vsync = !g_args.no_vsync;
     std::string err;
-    if (!render::device().init(g_hwnd, rcfg, err)) {
+    if (g_args.headless) {
+        mark(5, true, "headless: no device");
+    } else if (!render::device().init(g_hwnd, rcfg, err)) {
         mark(5, false, err);
         LOG_FATAL("app", "Could not start the renderer. (%s)", err.c_str());  // 0x014139e0
         print_chain();
         log::shutdown();
         return 4;
+    } else {
+        mark(5, true,
+             "device " + std::to_string(render::device().width()) + "x" + std::to_string(render::device().height()));
     }
-    mark(5, true,
-         "device " + std::to_string(render::device().width()) + "x" + std::to_string(render::device().height()));
 
-    // 6. font atlas
-    if (!render::overlay().init(render::device().d3d())) {
+    // 6. font atlas (skipped headless)
+    if (g_args.headless) {
+        mark(6, true, "headless: no atlas");
+    } else if (!render::overlay().init(render::device().d3d())) {
         mark(6, false, "atlas");
         print_chain();
         log::shutdown();
         return 5;
+    } else {
+        mark(6, true);
     }
-    mark(6, true);
 
     // 7. console + dev commands. PROMPT.md: developer commands available in Debug builds;
     // the original also ships `state` in release, so the state verb is unconditional.

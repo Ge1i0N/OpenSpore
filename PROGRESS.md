@@ -15,6 +15,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | **RefPack decoded exactly** | **30,000 / 30,000**, 0 failures | `python tools/refpack.py --verify --limit 30000` |
 | resources enumerated | **150,945**, 10.27 GB, 90 types (86 named) | `python tools/resource_inventory.py` |
 | resources written to disk | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
+| headless unpack | same output, **no window/device**, 7.6 s | `-headless -exec pkg:-unpack,...` |
 | real game asset rendered | `vehiclepainticons~/be_basic_shake_05.png` (128×128) | `analysis/shots/hero_real_asset.png` |
 | resource names resolved | **112,155 / 150,945 (74.3%)** | `inventory:` in the log |
 | game content decoded | 312 B + 10,191 B Czech text, == `memSize` | `pkg:-decode,0,0` / `,0,2` |
@@ -59,6 +60,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | Name group/instance ids | ✅ (session 7) | `naming.*` loads the registries; **112,155 / 150,945 names resolved (74.3%)**; `pkg:-path` prints `LexiconPlanets_CS.trigger` |
 | Enumerate the whole game | ✅ (session 7) | `tools/resource_inventory.py`: **150,945 resources, 10.27 GB, 90 types (86 named)**; same on the Loader screen |
 | Write resources to disk by name | ✅ (session 9) | `pkg:-unpack <i\|all> <dir> [type]`: **2,944 locale + 14,549 png written, 0 failed**, real files (PNG signature verified 200/200) |
+| Unpack with no window | ✅ (session 12) | `-headless` skips window/device/atlas (marks 4–6 report `headless: no …`); identical unpack (2,944 files, 27,882,571 bytes, 0 failed) in 7.6 s |
 | Resource type-id → name | 🚧 | ids are **not** FNV of names (0/6 tested); the answer is the registry lookup in `upstream/SporeMaster3/data/reg_type.txt` (593 lines). Top ids known: 0x01A510BB (98%), 0x2F4E681B=`rw4`, 0x024A0E52 (Czech lexicon) |
 | `group`/`unknown` semantics | ❌ | the bit-mask model names them but not their meaning |
 | RenderWare plugin registration family | ❌ | field guide §3; start from `vb -<used>` at 0x0140a980 |

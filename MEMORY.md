@@ -323,6 +323,12 @@ What is solid (from the bytes, cross-checked on many records):
   (`min(-0.4785,-0.4343,0.0000) max(0.4785,0.2700,0.9840) 1.0`), an index field at `+0x6c` = 18,000
   and a u16 array at `+0x78` with exactly 18,000 in-range entries (max 3,764). That is a genuine
   structure - but it is **one variant**, not the format (see disproven item).
+- **vertices are INTERLEAVED, not a plain vec3 array.** A stride search after the index block was
+  scored by matching the computed bounding box against the header bbox (an exactness test using the
+  file's own header) and found **no** consistent stride: reading the block as 12/16/20/24/28/32-byte
+  vertices never reproduces the header bbox, because the block mixes positions with other attributes
+  (normals/UVs/u16s) that break a uniform float run. So the header bbox is a **summary of the whole
+  mesh**, and the attribute layout must come from the loader's disassembly, not from scanning bytes.
 
 Tools: `tools/gmdl.py` (locate/inspect), `tools/gmdl_mesh.py` (bbox + index validation on a file),
 `tools/gmdl_header_check.py` (the broad invariant test that killed the general claim).

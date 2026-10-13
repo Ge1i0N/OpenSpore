@@ -64,6 +64,11 @@ struct Args {
     int exec_after = 5;
     int quit_after_frames = 0;  // -quitAfter <n>; 0 = never
 
+    // -headless: no window, no D3D9 device, no font atlas. Console commands still run, so the
+    // unpacker/inspector work on a machine with no display (or in CI). This is what makes the
+    // standalone-unpacker wishlist item a real tool rather than a GUI side effect.
+    bool headless = false;
+
     // Effective devDirs decision, exactly the original's precedence:
     // devDirs sets it, shipDirs afterwards clears it, so shipDirs wins.
     bool use_dev_dirs() const { return dev_dirs && !ship_dirs; }

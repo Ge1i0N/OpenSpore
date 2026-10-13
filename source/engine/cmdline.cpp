@@ -118,6 +118,7 @@ Args parse_tokens(const std::vector<std::string>& tokens) {
     if (a.has("execafter")) a.exec_after = atoi(a.get("execafter").c_str());
     if (a.exec_after < 1) a.exec_after = 1;
     if (a.has("quitafter")) a.quit_after_frames = atoi(a.get("quitafter").c_str());
+    a.headless = a.has("headless") || a.has("noWindow") || a.has("nowindow");
     if (a.width <= 0) a.width = 1280;
     if (a.height <= 0) a.height = 720;
     return a;

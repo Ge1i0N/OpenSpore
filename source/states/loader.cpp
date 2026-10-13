@@ -135,8 +135,9 @@ void loader_enter() {
 
     // Put one real game image on screen. This is the pipeline's end: DBPF index -> RefPack ->
     // type/instance name -> PNG decode -> D3D9 texture. Any png that decodes to a sane size wins.
+    // Skipped in headless mode (no device to upload to).
     for (auto& sp : fs::search_paths()) {
-        if (g_loader.tex) break;
+        if (g_loader.tex || !render::device().d3d()) break;
         for (auto& p : pkg::find_packages(sp.dir.string())) {
             if (g_loader.tex) break;
             pkg::Package pk;
