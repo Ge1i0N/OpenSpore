@@ -7,6 +7,60 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### Localized text: the game's own strings reach our Title screen
+`source/engine/text.cpp` parses the `locale` resources (type `0x02FAC0B6`). Format measured on the
+shipped bytes: UTF-8 **with BOM**, records separated by **CRLF**, grammar `0x<8hex> [~markup~] <text>`.
+en-us: 200 resources → **197 parse, 18,441 entries, 10,246 distinct keys, 684 ambiguous, 5,434
+comment lines, 17 continuations, 0 unterminated markup tokens**.
+The load-bearing finding is that **the key space is per table**: 0 of 200 tables repeat a key
+internally, but across tables the low band collides (36.2% ambiguous below `0x1000`, 0.5–0.7% above
+`0x10000`). So `get()` REFUSES an ambiguous key rather than returning whichever table was parsed
+first; `txt 0x00000011` prints the collision set and asks for a table instance. UI labels live in the
+high band, which is why the menu works at all. `analysis/text-locale.md`.
+The Title screen now resolves its five rows by LABEL (`find_label`) and prints label + key on screen:
+`New Game 0x05B08767`, `Load 0x0045B9EB`, `Options 0x00010009`, `Credits 0x0473EF30`,
+`Exit 0x045BEDD8` (`analysis/shots/title_state.png`). `Load Game` does not exist as a string — the
+game says `Load` — so the screen falls back through candidates instead of inventing a label.
+New `txt` console verb: `-list | -label <text> | -ambig | <0xKEY> | <tableINST> <0xKEY>`.
+Verified: headless boot exit 0, `locale 'en-US': 197/200 tables parsed (3 no-grammar, 0 decode
+failures), 18441 entries, 10246 distinct keys, 684 ambiguous`; `txt:0x05B08767 -> New Game`;
+`txt:0x045BEDD8 -> Exit`; `txt -label Options -> 8 hit(s)`; `txt:0x00000011 ->` refused as ambiguous.
+Build: 0 warnings (two C4840/C4477 from a ternary feeding `std::string` to `%s` were fixed).
+
+### TRAP found and corrected by disassembly: the locale search path was dead
+The first `text.cpp` run logged "no Locale/en-US package" — and the cause was OURS, not the data.
+`fs.cpp` added `exe_dir/Locale/<lang>`, which matches nothing on disk (the shipped layout is
+`Data/Locale/<lang>/`). The oracle settles how the original builds the path: at
+`0x7e863c..0x7e8661` it loads the wide key `'Locale/'` (`0x01413cc4`), walks it to its NUL, and
+**appends** it to a base-path object (`call 0x429760`), then appends the language — so `Locale/`
+hangs off a DATA ROOT, not off the executable directory. The same cluster treats `'BaseData/'`
+(`0x01413cb0`) / `'UserData/'` (`0x01413c8c`) identically (the VERIFY row 2 tie). `fs::init` now
+attaches `Locale/<lang>` to every data root, case-insensitively.
+**This is the session's most transferable lesson: a search path that yields "no data" is itself a bug
+to disassemble, not a fact to accept.** Two of our "the data does not exist" conclusions (locale text,
+and the still-outstanding state names) are of this class.
+
+### Ghidra joined the toolchain, to audit every claim we have made
+User request: check everything, starting from `Main`, to see whether we started reversing correctly at
+all. Rather than eyeball Ghidra output, the whole claim surface was made machine-checkable:
+`analysis/claims.json` records **30 claims / 98 checks** (every address assertion from
+`analysis/startup.md`, `VERIFY.md` rows 35–41, `MEMORY.md` and `source/states/statemgr.h`, each with
+the doc line it came from and a severity). `tools/ghidra_audit.py` turns that into a request,
+`tools/ghidra_export.py` (PyGhidra) extracts Ghidra's OWN facts + pseudocode, and `verify` diffs them.
+Verdicts are PASS/FAIL/UNKNOWN/SKIP with two hard rules: **UNKNOWN is not PASS** and **SKIP is not
+PASS**, so the audit can never quietly bless a claim Ghidra could not answer. Data-derived claims (the
+gmdl stride, measured on 11,041 resources) are recorded as SKIP rather than dropped, so the audit
+states what it does NOT cover. Immediates are bucketed BY MNEMONIC so `pushes_imm: 640` cannot be
+satisfied by an unrelated `cmp`. New `pseudo_regex`/`pseudo_not_regex` check kinds exist for ORDERING
+claims — the FNV-1-vs-1a direction (`(h*prime)^c` vs `(h^c)*prime`) is invisible in a flat listing and
+obvious in a decompiler's expression tree, and it is the single most load-bearing arithmetic fact in
+the project (every group/instance/state id depends on it).
+Setup facts that cost a round: Ghidra 12 **removed embedded Jython**, so `-postScript *.py` fails with
+"Ghidra was not started with PyGhidra"; and **`-analysisTimeoutPerFile 0` means time out IMMEDIATELY**,
+not "no limit" — the first run analyzed nothing and still exited 0, which looked like success.
+Ghidra 12.1.4 installed via scoop; its 543 MB download failed twice under scoop's downloader and
+completed under `aria2c` into scoop's cache. Project + venv live under gitignored `refs/ghidra/`.
+
 ### Config scripts read end-to-end: three files, variables resolved
 `source/engine/config.cpp` now loads ALL THREE `Config/*.txt`: `Properties.txt` (63 option
 name->id), `ConfigManager.txt` (211 assignments; `$variable` references are resolved against the

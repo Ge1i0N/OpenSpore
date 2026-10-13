@@ -477,6 +477,166 @@ matches the resource groups the disassembly loads (`properties`, `ConfigManager`
   boot (log `[config] config: 63 properties, 83 variables, 4 vendors, 616 cards`), and the `cfg`
   console verb exposes it (`cfg -list|-props|-vars|-cards|<name>`).
 
+## Localized text (`locale`, type 0x02FAC0B6) — SOLVED, session 13
+
+Full detail: `analysis/text-locale.md`. The durable facts:
+
+* **Format**: UTF-8 **with BOM** (`ef bb bf`), records separated by **CRLF**, grammar
+  `0x<8 hex> [~markup~] <text>` — an optional `~...~` token right after the key. 0 unterminated
+  tokens in 18,439 key lines. `#` lines are comments (5,434); 17 of 31,209 lines are text
+  continuations (a record's value may wrap).
+* **Scale**: 2,944 locale resources over 15 languages. en-us: 200 resources → **197 parse,
+  18,441 entries / 10,246 distinct keys / 684 ambiguous / 53 non-ASCII texts**.
+* **THE RULE — the key space is PER TABLE.** Within one locale resource a key appears at most once
+  (0 of 200 en-us tables repeat one). Across tables the low band collides:
+  `<0x1000` → **36.2% ambiguous**, `0x1000..0xFFFF` → 1.9%, `>=0x10000` → 0.5–0.7%. So `0x00000011`
+  means different things in different tables, while `0x05B08767` ("New Game") is effectively global.
+  **`get()` refuses an ambiguous key instead of guessing** — the same discipline as `naming`. A
+  wrong string in a menu is worse than no string.
+  Consequence for the menu path: **UI labels live in the high (unique) band; guide/tutorial text
+  lives in the low per-table band** — which is also how a `spui` layout can reference a key without
+  naming its table.
+* UI label keys arrive in **contiguous runs** (`0x045BEDD1 Save`, `…D4 Cancel`, `…D8 Exit`,
+  `…D9 Quit`): an allocated group, not a hash spread. Hint for `spui` later — a widget likely
+  stores base key + small index.
+* Real labels recovered: `New Game 0x05B08767`, `Load 0x0045B9EB`, `Options 0x00010009`,
+  `Settings 0x00001611`, `Credits 0x0473EF30`, `Exit 0x045BEDD8`, `Quit 0x045BEDD9`,
+  `Save 0x045BEDD1`, `Cancel 0x045BEDD4`, `Back 0x05B08747`, `Ok 0x06162C25`, `Play 0x05B08733`,
+  `Creator 0x058B5C13`, `Spaceship 0x0630D565`, `Upload 0x0549366D`, `Help 0x045FFE89`.
+  **`Load Game` does NOT exist as a string** (the game says `Load`) — never invent a label.
+* One record (instance `0x04DC2F94`, 1,644 keys) opens with the game's own prose: `# WARNING: This
+  is an assembled content string table. It is auto-generated.` So some tables are tool output.
+* `source/engine/text.cpp` + the `txt` console verb (`txt -list | -label <text> | -ambig |
+  <0xKEY> | <tableINST> <0xKEY>`). `to_display_ascii()` folds UTF-8 to our ASCII-only GDI font
+  atlas, one `?` per unknown code point (never a per-byte burst) — a display shim, not a
+  transliteration.
+
+## TRAP: the locale search path (corrected BY DISASSEMBLY, session 13)
+
+`fs.cpp` used to add **`exe_dir/Locale/<lang>`**, which matches NOTHING on disk. The shipped layout
+is `Data/Locale/<lang>/`, so the text reader was silently starved and logged "no Locale package"
+while 200 tables sat right there. The original settles it: at `0x7e863c..0x7e8661` it loads the wide
+key `'Locale/'` (`0x01413cc4`), walks it to its NUL (`0x7e8641..0x7e864e`), and **appends** it to a
+base-path object (`call 0x429760`), then appends the language — so `Locale/` hangs off a **DATA
+ROOT**, not off the executable directory. The same cluster treats `'BaseData/'` (`0x01413cb0`) and
+`'UserData/'` (`0x01413c8c`) identically, which is the tie back to VERIFY row 2. `fs::init` now
+attaches `Locale/<lang>` to every data root (`Data`, `BaseData`), matched case-insensitively (the
+tree ships lowercase `en-us`, `-locale` may be spelled any way).
+
+**Lesson worth more than the fix: a search path that yields "no data" is itself a bug to
+disassemble, not a fact to accept.** Two of our "the data does not exist" conclusions (locale text,
+and the state names still outstanding) are of this class.
+
+## Ghidra is now part of the toolchain (session 13)
+
+The oracle is imported into the Ghidra project `refs/ghidra/proj/OpenSporeOracle` (gitignored — it
+is 543 MB of tool, not content). The bridge is OURS, not an upstream wrapper:
+
+* `tools/ghidra_audit.py request` → `analysis/audit/request.json` (walks `analysis/claims.json`)
+* `tools/ghidra_export.py` (PyGhidra, CPython 3.11 in `refs/ghidra/venv`) → `analysis/audit/facts.json`
+  plus `analysis/audit/pseudo/0x*.c`
+* `tools/ghidra_audit.py verify` → `analysis/audit.md` + `analysis/audit/audit.json`
+
+Verdicts are **PASS / FAIL / UNKNOWN / SKIP**. The two rules that matter: **UNKNOWN is not PASS**
+(Ghidra could not answer → the claim is still only as good as our own objdump reading) and **SKIP is
+not PASS** (data-derived claims, e.g. the gmdl stride measured on 11,041 resources, cannot be settled
+by a decompiler at all). Ghidra's pseudocode is a lossy reconstruction — on MSVC x86 `/GR-` with SEH
+it can produce plausible-but-wrong C — so a FAIL means "re-read the disassembly", never "the doc is
+wrong" by itself. Checking ORDERING claims (FNV-1 multiplies before it xors) is where a decompiler
+is genuinely stronger than a flat listing, hence the `pseudo_regex` / `pseudo_not_regex` check kinds.
+
+Two setup facts that cost a round each: Ghidra 12 **removed embedded Jython**, so a `-postScript
+*.py` fails with "Ghidra was not started with PyGhidra" — run the export through PyGhidra instead;
+and **`-analysisTimeoutPerFile 0` means "time out immediately", not "no limit"** — the first run
+analyzed nothing and still exited 0, which looked like success.
+
+## The Ghidra/REA audit (session 13) — did we start reversing correctly? YES
+
+Full reading: **`analysis/audit-review.md`**. Machine output: `analysis/audit.md` (regenerated by
+`tools/ghidra_audit.py verify`). The ledger that made it checkable: **`analysis/claims.json`**, 30
+claims / 104 checks, every address assertion we have ever written down, each citing its doc line,
+severity, and whether our C++ is load-bearing on it.
+
+Verdict: **PASS 17, FAIL 1, UNKNOWN 11, SKIP 1.** The first run said FAIL 10; **nine of those ten were
+bugs in my own checker, not in our reversal.** The whole load-bearing startup chain — entry →
+CRT → `__tmainCRTStartup` → WinMain `0xf489e0` → app_main `0xf48810` → run `0xf47e90` → AppMode
+`0x7e8a00` → main loop `0x8482f0` — PASSED, including both of our self-written TRAP notes (the
+W-vs-A `PeekMessage` split, and `screenWindowed` being a RenderWare metric).
+
+**The one real doc error found:** `startup.md` cited `0xf48405` as the call site into the main loop.
+It is `0xf4840b`; `0xf48405` only LOADS the vtable slot:
+
+```
+f48405  mov eax,[edx+0x84]    ; LOAD slot          <-- what we cited
+f4840b  call eax              ; THE CALL
+```
+
+That split is the shape of **every** virtual dispatch in this binary, and it is precisely why the main
+loop was hard to find: a search for `call [reg+0x84]` matches nothing.
+
+**The structural finding, and the most useful result of the audit.** Seven cited addresses had **no
+function at all** in Ghidra's 54,611-function inventory: `0x7e3fb0` (statemgr add-state),
+`0x7e7160` (event dispatcher), `0x7eaae0` (AppMode +0x20), `0x849bf0` (Window::Create),
+`0x7c7f50` / `0x7c90f0` (config executors), `0x7e40f2` (mid-function). `tools/gen_seeds.py` walked each
+back to the preceding `int3` gap and proved six ARE real entries — **Ghidra never reached them because
+they are callable only through a vtable**, and six of the seven start with the MSVC SEH prologue
+`mov eax,fs:0x0`, which Ghidra left typed as data. At `0x7e7160` it produced the datum `?? 64h` while
+the objdump listing shows all three of our documented hashed event ids sitting in plain sight
+(`cmp eax,0x255abf5` / `0xf62add` / `0x212d3e7`).
+
+**This reframes our blockers.** rw4/spui/prop were recorded as "the handler slots are map ops, follow
+the stream object" — the audit *confirmed* that (the `direct_callers == 0` check PASSED outright). But
+the deeper reason we kept failing is now named: **the interesting functions here are vtable-only, so
+neither auto-analysis nor a text search for `call` will find them.** The fix is seeding, in both
+toolchains: `analysis/audit/seeds.tsv` (21 entries) → our `tools/ghidra_seed.py`, and the same file is
+what `REA_GHIDRA_SEED_FILE` wants.
+
+Corrections applied to the docs as a result (beyond the call site above):
+
+* Window vtable `0x141cc10` **slot 0 is the deleting destructor `0x849e80`**, not the ctor. The ctor
+  `0x849b20` is real but is **not a vtable slot** — a category error on my part, not a wrong address.
+* `.data 0x153f858..` is a table of **pointers into `.rdata`**, not of strings.
+* The FNV seed `0x811c9dc5` is a **parameter pushed by the caller** at `0x7e40f2`; the hasher
+  `0x932e50` reads it from `[esp+0x14]` and contains only the prime `0x01000193`.
+* `EventLoadScreenBufferPercentage` is at `0x0148227c` (only `.text` ref: `0x01373538`). The previously
+  cited `0x01550498` is a pointer to **`EAReportUploader`**. Kept as an explicit negative control.
+* `UIWorld_Loading` is **UTF-16LE** at `0x01418274`; there is no ASCII copy anywhere.
+* `fnv1_lower("locale")` is `0xe31a5c1b`, **not** the type id `0x02fac0b6`. This re-confirms the
+  existing rule (type ids are assigned, never hashed) — I had violated it in a check I wrote that same
+  session, and the audit caught it.
+
+**The transferable lesson: a FAIL from a tool is a hypothesis about the tool as much as about the
+code.** Read the evidence; never act on the verdict alone. Three of my nine checker bugs were
+invisible-API artifacts (`Memory.getInt(addr, True)` is **big-endian**, not "unaligned OK";
+`JArray("b")` raises `ClassNotFoundException` — it needs the `JByte` **class**; regexes written against
+objdump spelling cannot match Ghidra's `MOV EAX,dword ptr [EDX + 0x84]`), and each produced a
+confident-looking wrong answer.
+
+## Toolchain: REA is PRIMARY, our PyGhidra bridge is the persistent-project fallback
+
+* **REA 6.4.0** — installed globally via npm, registered as an MCP server in
+  `C:\Users\DartPower\.config\opencode\opencode.json` (`rea doctor --provider ghidra --json` →
+  `healthy: true`: Ghidra 12.1.4, native `decompile.exe` for win_x86_64, JDK 21 64-bit, Windows native
+  authority verified). 170 tools, reachable as `tools.rea.*`. Use it for interactive investigation:
+  `open_binary` → `analyze_function` / `procedure_pseudo_code` / `xrefs` / `find_xrefs_to_name` /
+  `trace_call_path` / `get_call_graph` / `list_unknowns`. Its evidence contract reports
+  `facet_availability` per facet and states that **"an empty call list with partial or unknown coverage
+  is not proof that the function has no calls"** — exactly the discipline our
+  `direct_callers == 0` claim needed.
+* **Our bridge** (`tools/ghidra_export.py` + `ghidra_audit.py` + `ghidra_seed.py`, venv at
+  `refs/ghidra/venv`) exists because **REA uses an ephemeral `-readOnly -deleteProject` session per run
+  and cannot accumulate** seeds, names or comments across invocations — every session re-imports and
+  re-analyzes (~20 min for this 25 MB `.text`). Our persistent project at `refs/ghidra/proj/
+  OpenSporeOracle` retains them, which is what makes seeding cheap. Also: our bridge is what turns
+  the whole claim ledger into a batch verdict in one pass, which is an audit, not an investigation.
+* Two settings that matter at this target size, both from REA's own docs:
+  **`REA_GHIDRA_STARTUP_TIMEOUT_MS`** must be raised well above the 330,000 ms default, and
+  **`GHIDRA_HEADLESS_MAXMEM`** defaults to `2G`. The MCP client's per-call timeout is a SEPARATE
+  deadline and can fire first.
+* Ghidra 12 **removed embedded Jython**, so `-postScript *.py` fails outright ("Ghidra was not started
+  with PyGhidra"). REA is right about this and works around it with packaged Java scripts; ours runs
+  under real CPython + JPype from the wheels inside the Ghidra distribution.
+
 ## Upstream knowledge: SporeMaster3 (secondary — do NOT start here)
 
 **Priority rule (user, repeated): disassembly first, always.** Third-party sources — docs,

@@ -1,5 +1,6 @@
 #include "states/statemgr.h"
 
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -7,6 +8,7 @@
 #include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
+#include "engine/text.h"
 #include "render/device.h"
 #include "render/imgfile.h"
 #include "render/overlay.h"
@@ -23,6 +25,7 @@ int g_bg_w = 0, g_bg_h = 0;
 std::string g_bg_name;
 f32 g_t = 0.f;
 bool g_left = false;
+size_t g_sel = 0;  // the highlighted row; input is not wired to widgets yet (see title_render)
 
 void title_enter() {
     g_t = 0.f;
@@ -91,18 +94,57 @@ void title_render() {
     ov.begin(w, h);
     if (g_bg) ov.image(0.f, 0.f, (float)w, (float)h, g_bg, g_bg_w, g_bg_h, false);
 
-    // A title-screen frame over the art. The menu items are placeholders for the real `spui`
-    // layout we have not parsed yet (analysis/ui.md) - clearly labelled as such.
+    // The menu labels are the GAME'S OWN strings, pulled from the `locale` tables by name. This is
+    // the point of the exercise: not "we invented a menu" but "the game's text reaches our screen".
+    // The keys are recorded so the line can be re-derived from the key alone (see engine/text.h for
+    // why a lookup by label is needed: the low key space is per-table and therefore ambiguous).
+    auto& tx = os::text::instance();
     float pad = 60.f;
     ov.text_fmt(pad, pad, 0xFFFFE8A0, "OpenSpore");
-    ov.text_fmt(pad, pad + 26.f, 0xFFB0C4D0, "title screen (state machine) - real Spore UI atlas bg");
+    std::string src = tx.loaded() ? tx.stats() : std::string("locale text not loaded");
+    ov.text_fmt(pad, pad + 26.f, 0xFFB0C4D0, "%s", src.c_str());
+
+    struct Item { const char* label; u32 key; };
+    const Item items[] = {
+        {"New Game", 0}, {"Load Game", 0}, {"Options", 0}, {"Credits", 0}, {"Exit", 0},
+    };
+    // Resolve each label to its globally-unique key, so we can print key + text together and prove
+    // where the string came from. "Load Game" does not exist as one string in the tables (the game
+    // uses "Load"), so fall back through candidates instead of inventing a label.
+    static const char* kFallback[][2] = {
+        {"New Game"}, {"Load", "Load Game"}, {"Options", "Settings"}, {"Credits"}, {"Exit", "Quit"},
+    };
     float y = (float)h * 0.45f;
-    const char* items[] = {"New Game", "Load Game", "Settings", "Exit"};
-    for (const char* it : items) {
-        ov.text_fmt(pad, y, 0xFFE8F0F4, "  %s", it);
+    for (size_t i = 0; i < sizeof(items) / sizeof(items[0]); ++i) {
+        std::string shown;
+        u32 key = 0;
+        for (const char** p = kFallback[i]; *p; ++p) {
+            auto hits = tx.find_label(*p);
+            if (hits.empty()) continue;
+            // Prefer an unambiguous key: an ambiguous one could render someone else's string.
+            for (const auto& hh : hits) {
+                if (tx.ambiguous(hh.key)) continue;
+                std::string v = tx.get(hh.key);
+                if (v.empty()) continue;
+                shown = os::text::to_display_ascii(v);
+                key = hh.key;
+                break;
+            }
+            if (!shown.empty()) break;
+        }
+        if (shown.empty()) shown = std::string("[") + items[i].label + "] (no locale string)";
+        char bullet = (i == g_sel) ? '>' : ' ';
+        ov.text_fmt(pad, y, i == g_sel ? 0xFFFFFFA0 : 0xFFE8F0F4, "%c %s", bullet, shown.c_str());
+        if (key) {
+            char kb[32];
+            _snprintf_s(kb, sizeof(kb), _TRUNCATE, "0x%08X", key);
+            ov.text_fmt(pad + 300.f, y, 0xFF8894A0, "%s", kb);
+        }
         y += 22.f;
     }
-    ov.text_fmt(pad, (float)h - pad, 0xFF909AA0, "state: Title   (auto -> Loader in %.1fs)", 4.f - g_t);
+    ov.text_fmt(pad, (float)h - pad, 0xFF909AA0,
+                "state: Title   (auto -> Loader in %.1fs)   arrows/enter are not wired: the widget "
+                "geometry lives in `spui`, which is unparsed", 4.f - g_t);
     ov.end();
     dev.end_frame();
 }

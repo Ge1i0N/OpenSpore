@@ -62,12 +62,43 @@ void init(const Args& args, const std::filesystem::path& exe_dir) {
         if (std::filesystem::is_directory(p, ec) || dev) g_paths.push_back({p, tag});
     };
 
+    // The locale directory. DISASM-CORRECTED (session 13): this used to be exe_dir/Locale/<lang>,
+    // which matched nothing on disk and silently starved the localized-text reader. The original
+    // APPENDS the wide 'Locale/' key (0x01413cc4) to a base path object and then appends the
+    // language (0x7e863c..0x7e8661), and the shipped layout is Data/Locale/<lang>/{Text,UI,
+    // NameGeneration}.package - so the base is a DATA ROOT, not the executable directory.
+    // We therefore hang Locale/<lang> off every data root we know about.
+    const std::string lang_wide = [&] {
+        std::string s;
+        std::filesystem::path p(args.locale.empty() ? "en-us" : args.locale);
+        for (wchar_t c : p.filename().wstring()) s.push_back(c < 128 ? (char)c : '?');
+        for (auto& c : s) c = (char)std::tolower((unsigned char)c);
+        return s;
+    }();
+    auto add_locale = [&](const std::filesystem::path& base) {
+        std::filesystem::path loc = base / "Locale";
+        std::error_code ec2;
+        if (!std::filesystem::is_directory(loc, ec2)) return;
+        // Case-insensitive match of the directory name: the shipped tree uses lowercase 'en-us'
+        // while -locale may be spelled any way.
+        for (const auto& e : std::filesystem::directory_iterator(loc, ec2)) {
+            if (!e.is_directory()) continue;
+            std::string leaf = e.path().filename().string();
+            for (auto& c : leaf) c = (char)std::tolower((unsigned char)c);
+            if (leaf == lang_wide) {
+                g_paths.push_back({e.path(), "Locale"});
+                LOG_INFO("fs", "locale path: %s", e.path().string().c_str());
+                return;
+            }
+        }
+    };
+
     if (dev) {
         // Dev mode: loose dev directories take priority, exactly the point of -devDirs.
         add(exe_dir / kData, "Data");
         add(exe_dir / kBaseData, "BaseData");
-        std::filesystem::path loc = exe_dir / kLocale / (args.locale.empty() ? "en-US" : args.locale);
-        add(loc, "Locale");
+        add_locale(exe_dir / kData);
+        add_locale(exe_dir / kBaseData);
         add(exe_dir / kConfig, "Config");
         add(user_data, "UserData");
         add(exe_dir, "cwd");
@@ -76,8 +107,8 @@ void init(const Args& args, const std::filesystem::path& exe_dir) {
         add(user_data, "UserData");
         add(exe_dir / kData, "Data");
         add(exe_dir / kBaseData, "BaseData");
-        std::filesystem::path loc = exe_dir / kLocale / (args.locale.empty() ? "en-US" : args.locale);
-        add(loc, "Locale");
+        add_locale(exe_dir / kData);
+        add_locale(exe_dir / kBaseData);
         add(exe_dir / kConfig, "Config");
         add(exe_dir, "cwd");
     }

@@ -24,6 +24,7 @@
 #include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
+#include "engine/text.h"
 #include "render/device.h"
 #include "render/overlay.h"
 #include "states/statemgr.h"
@@ -370,6 +371,12 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     // (Its own LOG_INFO lines are the evidence; it must not add a boot marker.)
     config::instance().load();
 
+    // 3c. the game's localized text (`locale` resources under Locale/<lang>). Same reasoning as the
+    // config scripts: the strings a menu needs are shipped data we can read today, so the Title
+    // screen can show the game's own labels instead of our prose. `-locale` selects the language
+    // (fs.cpp already put Locale/<lang> on the search path); en-us is the default.
+    text::instance().load(g_args.locale.empty() ? "en-us" : g_args.locale);
+
     // 4. window (skipped headless)
     if (g_args.headless) {
         mark(4, true, "headless: no window");
@@ -475,6 +482,94 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                           }
                       }
                       return c.args[1] + " = <not set>";
+                  }});
+    console::reg({"txt", "The game's localized text (locale resources under Locale/<lang>).",
+                  "-list | -label <text> | -ambig | <0xKEY> | <tableINST> <0xKEY>",
+                  [](const console::CmdContext& c) -> std::string {
+                      auto& tx = text::instance();
+                      if (!tx.loaded()) return "locale text not loaded (no Locale/<lang> package?)";
+                      if (c.args.size() < 2 || c.args[1] == "-list") return tx.stats();
+                      if (c.args[1] == "-ambig") {
+                          std::string s = std::to_string(tx.ambiguous_keys()) +
+                                          " keys are ambiguous across tables (get() refuses them):\n";
+                          size_t n = 0;
+                          for (const auto& e : tx.entries()) {
+                              if (!tx.ambiguous(e.key)) continue;
+                              char b[160];
+                              _snprintf_s(b, sizeof(b), _TRUNCATE, "  0x%08X table 0x%08X  %s",
+                                          e.key, e.table,
+                                          text::to_display_ascii(e.text).substr(0, 60).c_str());
+                              s += b;
+                              s += "\n";
+                              if (++n >= 40) { s += "  ...\n"; break; }
+                          }
+                          return s;
+                      }
+                      if (c.args[1] == "-label") {
+                          std::string want;
+                          for (size_t i = 2; i < c.args.size(); ++i) {
+                              if (i > 2) want += " ";
+                              want += c.args[i];
+                          }
+                          auto hits = tx.find_label(want);
+                          if (hits.empty()) return "no locale entry labelled '" + want + "'";
+                          std::string s = std::to_string(hits.size()) + " hit(s) for '" + want + "':\n";
+                          for (const auto& h : hits) {
+                              // Bind to a named string before .c_str(): a ternary whose branches are
+                              // `const char*` and `std::string` decays to std::string, and passing a
+                              // non-trivial class through a variadic %s is C4840/C4477.
+                              std::string tag = h.markup.empty() ? std::string()
+                                                                 : ("  [~" + h.markup + "~]");
+                              char b[160];
+                              _snprintf_s(b, sizeof(b), _TRUNCATE, "  0x%08X  table 0x%08X  %s%s",
+                                          h.key, h.table, text::to_display_ascii(h.text).c_str(),
+                                          tag.c_str());
+                              s += b;
+                              s += "\n";
+                          }
+                          return s;
+                      }
+                      // -label <text> | <0xKEY> | <tableINST> <0xKEY>
+                      if (c.args.size() >= 4) {
+                          u32 table = (u32)std::strtoul(c.args[2].c_str(), nullptr, 0);
+                          u32 key = (u32)std::strtoul(c.args[3].c_str(), nullptr, 0);
+                          std::string v = tx.get(table, key);
+                          if (v.empty()) {
+                              char nb[40];
+                              _snprintf_s(nb, sizeof(nb), _TRUNCATE, "no key 0x%08X in table 0x%08X",
+                                          key, table);
+                              return nb;
+                          }
+                          return v + "  ->  " + text::to_display_ascii(v);
+                      }
+                      u32 key = (u32)std::strtoul(c.args[1].c_str(), nullptr, 0);
+                      if (tx.ambiguous(key)) {
+                          std::string s = "0x" + [&] {
+                              char b[16];
+                              _snprintf_s(b, sizeof(b), _TRUNCATE, "%08X", key);
+                              return std::string(b);
+                          }() +
+                                          " is ambiguous across tables (the key space is per-table); "
+                                          "pass a table instance:\n";
+                          for (const auto& e : tx.entries()) {
+                              if (e.key != key) continue;
+                              s += "  table 0x" + [&] {
+                                  char b[16];
+                                  _snprintf_s(b, sizeof(b), _TRUNCATE, "%08X", e.table);
+                                  return std::string(b);
+                              }() + "  " + text::to_display_ascii(e.text) + "\n";
+                          }
+                          return s;
+                      }
+                      std::string v = tx.get(key);
+                      if (v.empty()) {
+                          char nb[24];
+                          _snprintf_s(nb, sizeof(nb), _TRUNCATE, "no locale key 0x%08X", key);
+                          return nb;
+                      }
+                      char nb[24];
+                      _snprintf_s(nb, sizeof(nb), _TRUNCATE, "0x%08X", key);
+                      return std::string(nb) + " = " + text::to_display_ascii(v);
                   }});
     console::reg({"pkg", "Inspect a .package: list, header, records, or dump one resource.",
                   "-list | -hdr <i> | -rec <i> <n> | -path <i> <n> | -types <i> | -unpack <i|all> <dir> [type] | -dump <i> <n> <out> | -decode <i> <n> <out>",

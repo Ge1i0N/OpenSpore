@@ -1,0 +1,374 @@
+{
+  "_purpose": "Machine-checkable ledger of every claim this project has made about SporeApp.exe, so an INDEPENDENT decompiler (Ghidra) can confirm or refute them. This is the audit requested in session 13: 'verify everything, starting from Main, to see whether we started reversing correctly at all'.",
+  "_rule": "Every claim cites the doc line it came from. A check PASSES only if Ghidra's own analysis says so. UNKNOWN means Ghidra could not answer (no function there, no decompilation) - it is NOT a pass. Severity 'load-bearing' means our C++ reimplementation is built on it.",
+  "_binary": "refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe",
+  "_oracle_warning": "NEVER point this at the encrypted retail SporeApp.exe. Ghidra would confidently analyze 105k functions of ciphertext and produce plausible, wholesale-wrong results.",
+  "image_base": "0x00400000",
+  "claims": [
+    {
+      "id": "pe.shape",
+      "doc": "analysis/startup.md:7",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "entry_point", "expect": "0x011e11e1"},
+        {"kind": "subsystem", "expect": 2},
+        {"kind": "image_base", "expect": "0x00400000"},
+        {"kind": "section_executable", "name": ".text"}
+      ]
+    },
+    {
+      "id": "chain.entry.crt",
+      "doc": "analysis/startup.md:7-9",
+      "severity": "high",
+      "checks": [
+        {"kind": "func", "addr": "0x011e11e1", "calls": ["0x011e1588"], "note": "entry calls _security_init_cookie"},
+        {"kind": "func", "addr": "0x011e11e1", "flows_to": ["0x011e0f21"], "note": "entry jumps to __tmainCRTStartup"}
+      ]
+    },
+    {
+      "id": "chain.tmain.winmain",
+      "doc": "analysis/startup.md:11-18",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x011e0f21", "calls_import": ["GetStartupInfoA"]},
+        {"kind": "func", "addr": "0x011e0f21", "calls": ["0x00f489e0"], "note": "the WinMain call"},
+        {"kind": "func", "addr": "0x011e0f21", "pushes_imm": ["0x00400000"], "note": "hInstance == image base"}
+      ]
+    },
+    {
+      "id": "chain.winmain.app_main",
+      "doc": "analysis/startup.md:20-24",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x00f489e0", "calls": ["0x00f48810"], "note": "the real main"},
+        {"kind": "func", "addr": "0x00f489e0", "calls": ["0x0092c420", "0x005d74e0"]},
+        {"kind": "func", "addr": "0x00f489e0", "stack_cleanup": 16, "note": "ret 0x10 => stdcall, 4 args"}
+      ]
+    },
+    {
+      "id": "guard.single_instance",
+      "doc": "analysis/startup.md:26-30",
+      "severity": "high",
+      "checks": [
+        {"kind": "func", "addr": "0x00f48810", "calls": ["0x00f47e90"], "note": "run"},
+        {"kind": "func", "addr": "0x00f48810", "calls": ["0x0092b570"], "note": "the arg lookup"},
+        {"kind": "func", "addr": "0x00f48810", "refs_string": [
+          {"addr": "0x0148da14", "text": "multipleInstances"},
+          {"addr": "0x0148d9f8", "text": "Global\\SporeEditorOrGame"},
+          {"addr": "0x0148d9c8", "text": "Another instance of the game is already running"},
+          {"addr": "0x0140a5d8", "text": "Spore"},
+          {"addr": "0x013ebc48", "text": "App"}
+        ]}
+      ]
+    },
+    {
+      "id": "run.extent",
+      "doc": "analysis/startup.md:69",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x00f47e90", "range_contains": "0x00f4880a", "note": "run is ONE function spanning to 0xf4880a"},
+        {"kind": "func", "addr": "0x00f47e90", "stack_cleanup": 4}
+      ]
+    },
+    {
+      "id": "run.args",
+      "doc": "analysis/startup.md:72-74",
+      "severity": "high",
+      "note": "The claim is that ALL nine of these arg names are referenced from inside run.",
+      "checks": [
+        {"kind": "func", "addr": "0x00f47e90", "refs_string": [
+          {"addr": "0x01413db0", "text": "demo"},
+          {"addr": "0x013f8dc8", "text": "devDirs"},
+          {"addr": "0x013f8db4", "text": "shipDirs"},
+          {"addr": "0x014081a8", "text": "baseGame"},
+          {"addr": "0x0148d898", "text": "automation"},
+          {"addr": "0x0148d88c", "text": "mouse"},
+          {"addr": "0x0148d870", "text": "hostIP"},
+          {"addr": "0x0148d85c", "text": "clientIP"},
+          {"addr": "0x0148d84c", "text": "isHost"}
+        ]}
+      ]
+    },
+    {
+      "id": "run.fsmode",
+      "doc": "analysis/startup.md:43,60-61",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x00f47e90", "calls": ["0x00687bd0"], "note": "dev/ship filesystem mode chooser"},
+        {"kind": "func", "addr": "0x00f47e90", "calls": ["0x006b4eb0", "0x0081d530", "0x008055e0"]}
+      ]
+    },
+    {
+      "id": "appmode.created",
+      "doc": "analysis/startup.md:44-45,77-78",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x00f47e90", "calls": ["0x007e8a00"], "note": "CreateAppMode"},
+        {"kind": "func", "addr": "0x007e8a00", "pushes_imm": [496], "note": "alloc 0x1f0 = 496 bytes"},
+        {"kind": "func", "addr": "0x007e8a00", "calls": ["0x007e76e0"], "note": "the AppMode ctor"}
+      ]
+    },
+    {
+      "id": "appmode.vtable",
+      "doc": "analysis/startup.md:80-85",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "vtable_slot", "vtable": "0x01413b50", "slot": 20, "expect": "0x007e6850", "note": "+0x14 subsystem init"},
+        {"kind": "vtable_slot", "vtable": "0x01413b50", "slot": 24, "expect": "0x007e93d0", "note": "+0x18 plugins"},
+        {"kind": "vtable_slot", "vtable": "0x01413b50", "slot": 28, "expect": "0x007e7430", "note": "+0x1c create the graphics device"},
+        {"kind": "vtable_slot", "vtable": "0x01413b50", "slot": 32, "expect": "0x007eaae0", "note": "+0x20 shader/script config"}
+      ]
+    },
+    {
+      "id": "appmode.device",
+      "doc": "analysis/startup.md:84",
+      "severity": "high",
+      "checks": [
+        {"kind": "func", "addr": "0x007e7430", "pushes_imm": [640, 480], "note": "tries 640x480 first"},
+        {"kind": "func", "addr": "0x007e7430", "refs_string": [
+          {"addr": "0x01413ac8", "text": "Could not create the Graphics Device"}
+        ]}
+      ]
+    },
+    {
+      "id": "appmode.plugins",
+      "doc": "analysis/startup.md:83",
+      "severity": "medium",
+      "checks": [
+        {"kind": "func", "addr": "0x007e93d0", "refs_string": [
+          {"addr": "0x01413e28", "text": "noPlugins"},
+          {"addr": "0x01411b8c", "text": "safe"}
+        ]},
+        {"kind": "func", "addr": "0x007e93d0", "calls": ["0x007e8810"]}
+      ]
+    },
+    {
+      "id": "appmode.shaders",
+      "doc": "analysis/startup.md:85",
+      "severity": "medium",
+      "checks": [
+        {"kind": "func", "addr": "0x007eaae0", "refs_string": [
+          {"addr": "0x014142a8", "text": "dumpShaders"},
+          {"addr": "0x01414284", "text": "dumpShadersForPIX"},
+          {"addr": "0x01414254", "text": "dumpFragmentShaders"},
+          {"addr": "0x01414230", "text": "dumpDirectShaders"},
+          {"addr": "0x0141421c", "text": "noScripts"},
+          {"addr": "0x014141f8", "text": "noMaterialScripts"},
+          {"addr": "0x014141d8", "text": "noEffectScripts"}
+        ]}
+      ]
+    },
+    {
+      "id": "window.class",
+      "doc": "analysis/startup.md:132-135",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "vtable_slot", "vtable": "0x0141cc10", "slot": 0, "expect": "0x00849e80", "note": "CORRECTED by the audit: slot 0 is the DELETING DESTRUCTOR (0x849e80), not the ctor. startup.md was right that the ctor is 0x849b20 - it is simply not a vtable slot, which is why reading slot 0 for it FAILed. The two slots that matter (+0x84 main loop, +0x88 mouse pump) both PASSED."},
+        {"kind": "vtable_slot", "vtable": "0x0141cc10", "slot": 132, "expect": "0x008482f0", "note": "+0x84 THE MAIN LOOP"},
+        {"kind": "vtable_slot", "vtable": "0x0141cc10", "slot": 136, "expect": "0x0084a050", "note": "+0x88 the mouse pump"},
+        {"kind": "func", "addr": "0x00849bf0", "calls_import": ["RegisterClassExW", "CreateWindowExW"], "note": "Window::Create", "allow_partial": true}
+      ]
+    },
+    {
+      "id": "main.loop",
+      "doc": "analysis/startup.md:100-123",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x008482f0", "refs_addr": ["0x013cc62c", "0x013cc5cc", "0x013cc630"], "note": "PeekMessageW / TranslateMessage / DispatchMessageW IAT slots"},
+        {"kind": "func", "addr": "0x008482f0", "calls_import": ["PeekMessageW", "TranslateMessage", "DispatchMessageW"]},
+        {"kind": "func", "addr": "0x008482f0", "calls_import_not": ["PeekMessageA"], "note": "TRAP: the loop is the W variant; the A variant is the separate mouse pump"},
+        {"kind": "func", "addr": "0x008482f0", "cmp_imm": [18], "note": "cmp [msg.message],0x12 == WM_QUIT"},
+        {"kind": "func", "addr": "0x008482f0", "pushes_imm": [1], "note": "PM_REMOVE == 1"},
+        {"kind": "func", "addr": "0x008482f0", "refs_addr": ["0x013cc678"], "note": "SetForegroundWindow in the focus branch"}
+      ]
+    },
+    {
+      "id": "main.loop.caller",
+      "doc": "analysis/startup.md:95-96",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x00f47e90", "calls": ["0x0067dcb0"], "note": "the window-object getter"},
+        {"kind": "func", "addr": "0x0067dcb0", "reads_global": "0x015fd89c", "note": "the window singleton"},
+        {"kind": "insn_at", "addr": "0x00f48405", "regex": "mov.*0x84", "note": "0xf48405 LOADS the vtable+0x84 slot. CORRECTED by the audit: startup.md called this the 'call site'; the indirect call is the very next instruction. Whitespace/case tolerant because Ghidra's printer writes 'MOV EAX,dword ptr [EDX + 0x84]' (no colon, spaces inside the brackets)."},
+        {"kind": "insn_at", "addr": "0x00f4840b", "regex": "^call\\s+eax", "note": "THE main-loop call site is 0xf4840b (`call eax`), not 0xf48405"}
+      ]
+    },
+    {
+      "id": "mouse.pump",
+      "doc": "analysis/startup.md:125-128",
+      "severity": "high",
+      "checks": [
+        {"kind": "func", "addr": "0x0084a050", "calls_import": ["PeekMessageA"], "note": "TRAP: direct A-variant call, IAT 0x13cc5f0 - this is why the loop was missed"},
+        {"kind": "func", "addr": "0x0084a050", "refs_addr": ["0x013cc5f0"]}
+      ]
+    },
+    {
+      "id": "window.created.in.appmode",
+      "doc": "analysis/startup.md:136-140",
+      "severity": "high",
+      "checks": [
+        {"kind": "func_contains_insn", "fn": "0x007e6f20", "addr": "0x007e6f21", "regex": "call.*0x00849b20", "note": "the window ctor call sits at 0x7e6f21"},
+        {"kind": "func", "addr": "0x007e6f20", "refs_string": [
+          {"addr": "0x01413a2c", "text": "flock"},
+          {"addr": "0x014139d4", "text": "vSync"},
+          {"addr": "0x014139c4", "text": "noVSync"},
+          {"addr": "0x014139e0", "text": "Could not start the renderer"}
+        ], "allow_partial": true}
+      ]
+    },
+    {
+      "id": "event.dispatcher",
+      "doc": "analysis/startup.md:141-142",
+      "severity": "high",
+      "checks": [
+        {"kind": "func", "addr": "0x007e7160", "cmp_imm": [39165813, 1008093, 34788327, 2921181299], "note": "hashed event ids 0x255abf5 / 0xf62add / 0x212d3e7 / 0xae1cfe73", "allow_partial": true},
+        {"kind": "func", "addr": "0x007e7160", "pushes_imm": [250], "note": "Sleep(0xfa) in the retry loop"}
+      ]
+    },
+    {
+      "id": "appmode.state.names",
+      "doc": "analysis/startup.md:144-156",
+      "severity": "load-bearing",
+      "note": "CORRECTED BY THE FIRST AUDIT PASS. startup.md presented `.data 0x153f858..` as a table of STRINGS; it is a table of POINTERS into .rdata. The names themselves were right. Also: UIWorld_Loading is a UTF-16 string (0x01418274), and EventLoadScreenBufferPercentage lives at 0x0148227c - the address we originally cited (0x01550498) points at 'EAReportUploader' instead. Checks below assert the corrected facts, so a PASS here means the doc now matches the bytes.",
+      "checks": [
+        {"kind": "data_pointer", "addr": "0x0153f85c", "expect": "0x01413868", "note": "[ptr] -> 'quit'"},
+        {"kind": "data_pointer", "addr": "0x0153f860", "expect": "0x01413864", "note": "[ptr] -> 'app'"},
+        {"kind": "data_pointer", "addr": "0x0153f868", "expect": "0x01413814", "note": "[ptr] -> 'AppModePluginLoader', the initial AppMode state"},
+        {"kind": "data_string", "addr": "0x01413868", "text": "quit"},
+        {"kind": "data_string", "addr": "0x01413814", "text": "AppModePluginLoader"},
+        {"kind": "data_string", "addr": "0x0148227c", "text": "EventLoadScreenBufferPercentage"},
+        {"kind": "data_string", "addr": "0x01418274", "text": "UIWorld_Loading", "note": "stored as UTF-16LE; a 1-byte ASCII read of this address yields only 'U'"},
+        {"kind": "data_pointer", "addr": "0x01550498", "expect": "0x01446c18", "note": "NEGATIVE control: our doc called this address EventLoadScreenBufferPercentage. It is a pointer to 'EAReportUploader'."},
+        {"kind": "data_string", "addr": "0x01446c18", "text": "EAReportUploader"}
+      ]
+    },
+    {
+      "id": "statemgr.class",
+      "doc": "VERIFY.md row 3-6, source/states/statemgr.h",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x007e3fb0", "calls": ["0x00932e50"], "note": "state identity is the hash"},
+        {"kind": "func", "addr": "0x007e3fb0", "pushes_imm": [2166136261], "note": "seed 0x811c9dc5"},
+        {"kind": "func", "addr": "0x007e3fb0", "refs_string": [
+          {"addr": "0x01413600", "text": "A state with this ID already exists"}
+        ]},
+        {"kind": "func", "addr": "0x007e3fb0", "refs_string": [
+          {"addr": "0x0141319c", "text": "AppStateManager"}
+        ], "allow_partial": true},
+        {"kind": "vtable_slot", "vtable": "0x01413260", "slot": 0, "expect": "0x007e3fb0"}
+      ]
+    },
+    {
+      "id": "statemgr.verbs",
+      "doc": "source/states/statemgr.h:14-17",
+      "severity": "medium",
+      "checks": [
+        {"kind": "data_string", "addr": "0x01413194", "text": "state"},
+        {"kind": "data_string", "addr": "0x0141316c", "text": "gotoState"},
+        {"kind": "data_string", "addr": "0x01413188", "text": "transition"},
+        {"kind": "data_string", "addr": "0x01413180", "text": "entry"},
+        {"kind": "data_string", "addr": "0x01413178", "text": "exit"},
+        {"kind": "data_string", "addr": "0x014130f8", "text": "endChain"},
+        {"kind": "data_string", "addr": "0x014131bd", "text": ".eBT"}
+      ]
+    },
+    {
+      "id": "hash.fnv1",
+      "doc": "MEMORY.md (FNV-1 mul-then-xor, mode 1 = tolower)",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x00932e50", "uses_imm": [16777619], "note": "the 0x01000193 prime is inside the hasher"},
+        {"kind": "func", "addr": "0x007e40f2", "pushes_imm": ["0x811c9dc5"], "note": "CORRECTED by the audit: the 0x811c9dc5 seed is NOT a constant inside 0x932e50 - the hasher takes it as a PARAMETER ([esp+0x14]) and the CALLER pushes it at 0x7e40f2. Our first audit pass FAILed because we looked for the seed in the wrong function."},
+        {"kind": "func", "addr": "0x00932e50", "calls_import": ["tolower"], "allow_partial": true, "note": "mode arg 1 folds case through the CRT function loaded from IAT 0x13cc500"},
+        {"kind": "func", "addr": "0x00932e50", "has_imul": true, "note": "TRAP: multiply BEFORE xor (FNV-1, not FNV-1a)"},
+        {"kind": "pseudo_regex", "addr": "0x00932e50",
+         "regex": "\\*\\s*0x1000193\\)?\\s*\\^|\\^\\s*[A-Za-z0-9_\\[\\]]+\\)?\\s*\\*\\s*0x1000193",
+         "note": "the decompiler's expression tree shows the OPERAND ORDER, which a flat listing hides: FNV-1 is (h*prime)^c, FNV-1a is (h^c)*prime. This is the single most load-bearing arithmetic fact in the project - every group/instance/state id depends on it."},
+        {"kind": "pseudo_not_regex", "addr": "0x00932e50",
+         "regex": "\\(\\s*[a-zA-Z_][A-Za-z0-9_]*\\s*\\^\\s*[^)]{1,24}\\)\\s*\\*\\s*0x1000193",
+         "note": "forbidden: the FNV-1a form (h ^ c) * prime. If Ghidra shows this, our hash direction is wrong."},
+        {"kind": "hash_vectors", "algo": "fnv1_lower", "cases": [
+          {"text": "SporeAppStates", "expect": "0xd6396913"},
+          {"text": "AppModePluginLoader", "expect": null}
+        ],
+         "note": "GROUP/INSTANCE names only. A TYPE id is NOT a hash of its name (0/6 variants tested, IDEAS.md 5.20) - an earlier revision of this check asserted fnv1_lower('locale')==0x02fac0b6, which is FALSE (it is 0xe31a5c1b) and the audit rightly flagged it. Type ids come from reg_type.txt, never from hashing."}
+      ]
+    },
+    {
+      "id": "refpack.decoder",
+      "doc": "source/engine/pkg.h:46-50",
+      "severity": "load-bearing",
+      "checks": [
+        {"kind": "func", "addr": "0x0092c660", "cmp_imm": [8187], "note": "TRAP: (& 0x1FFF) == 0x10FB, so 0x10FB and 0x50FB are both valid signatures", "allow_partial": true},
+        {"kind": "func", "addr": "0x0092c660", "has_insn": "inc", "note": "TRAP: counters are test-before-decrement, so the byte count is reg+1"}
+      ]
+    },
+    {
+      "id": "config.lang",
+      "doc": "VERIFY.md row 41",
+      "severity": "high",
+      "checks": [
+        {"kind": "func_exists", "addr": "0x007c8550", "note": "the command registrar (0x7c85e7 is MID-function; the entry is 0x7c8550 - found by tools/gen_seeds.py walking back to the int3 gap)"},
+        {"kind": "func_exists", "addr": "0x007c8e90", "note": "setOption executor"},
+        {"kind": "func_exists", "addr": "0x007c7f50", "note": "setVariables executor; Ghidra had not carved this one (indirect reach only) - see seeds.tsv"},
+        {"kind": "func_exists", "addr": "0x007c8f00", "note": "alert executor"},
+        {"kind": "func_exists", "addr": "0x007c90f0", "note": "card/vendor executor; likewise uncarved before seeding"},
+        {"kind": "data_string", "addr": "0x01411030", "text": "setOption", "allow_partial": true},
+        {"kind": "data_string", "addr": "0x01409f28", "text": "boolProp", "allow_partial": true}
+      ]
+    },
+    {
+      "id": "resmgr.spui",
+      "doc": "analysis/ui.md, RESUME.md",
+      "severity": "high",
+      "checks": [
+        {"kind": "func", "addr": "0x008de4b0", "note": "the resource manager request site"},
+        {"kind": "func", "addr": "0x0080fff0", "calls": ["0x008de4b0"], "note": "the UI layout request"},
+        {"kind": "func", "addr": "0x0080fff0", "pushes_imm": ["0x0510a95b"], "note": "id 0x510a95b (written as hex: an earlier revision put a hand-computed decimal here and it was wrong)"},
+        {"kind": "vtable_slot", "vtable": "0x01413260", "slot": 36, "expect": "0x007e19e0", "note": "+0x24 used by the spui request path", "allow_partial": true}
+      ]
+    },
+    {
+      "id": "model.manager.blocked",
+      "doc": "RESUME.md Blocked: the rw4 handler slots are MAP OPS, not a parser",
+      "severity": "load-bearing",
+      "note": "This is the negative claim that blocked the rw4 work. If Ghidra disagrees, the blocker is fake and the mesh path unblocks immediately.",
+      "checks": [
+        {"kind": "func", "addr": "0x007ac4d0", "calls": ["0x007ac2a0"], "note": "factory -> ctor"},
+        {"kind": "vtable_slot", "vtable": "0x0140fb48", "slot": 108, "expect": "0x007ab7f0", "note": "+0x6c"},
+        {"kind": "vtable_slot", "vtable": "0x0140fb48", "slot": 112, "expect": "0x007ab050", "note": "+0x70"},
+        {"kind": "func", "addr": "0x007ab7f0", "calls": ["0x007aa7d0"], "note": "TRAP: it is a map INSERT, not a parser"},
+        {"kind": "func", "addr": "0x007ab050", "calls": ["0x006b66f0"], "note": "TRAP: it is a map ERASE, not a parser"},
+        {"kind": "direct_callers", "addr": "0x006ac3e7", "expect_count": 0, "note": "TRAP: the registry dispatcher has ZERO direct callers - follow the stream object instead"}
+      ]
+    },
+    {
+      "id": "flags.device",
+      "doc": "VERIFY.md: -w/-f/-r are real original flags",
+      "severity": "high",
+      "checks": [
+        {"kind": "func_in_range", "range": ["0x007e74a0", "0x007e7637"], "note": "the device-flag function lives in this span"},
+        {"kind": "data_string", "addr": "0x014111d0", "text": "screenWindowed", "allow_partial": true, "note": "TRAP: a RenderWare device metric, not a CLI flag"}
+      ]
+    },
+    {
+      "id": "allocators",
+      "doc": "analysis/startup.md:32,75,87",
+      "severity": "medium",
+      "checks": [
+        {"kind": "func", "addr": "0x00f47240", "note": "the tagged allocator used by app_main/run"},
+        {"kind": "func", "addr": "0x00951230", "note": "the allocator pair member used by the spui registrar"},
+        {"kind": "func", "addr": "0x00920960", "note": "the 0x148 allocation ctor"}
+      ]
+    },
+    {
+      "id": "gmdl.stride",
+      "doc": "MEMORY.md gmdl: stride = vertex_bytes / vertex_count",
+      "severity": "load-bearing",
+      "note": "A DATA claim, not a disasm claim; recorded so the audit says explicitly which claims Ghidra cannot settle, instead of silently passing them.",
+      "checks": [
+        {"kind": "not_disasm_verifiable", "reason": "settled by measuring 11,041 real gmdl resources (6,979 parse), not by code. The trap it corrects: descriptor field 16 is a reserved code, not the stride."}
+      ]
+    }
+  ]
+}

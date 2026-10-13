@@ -25,15 +25,33 @@ we are.
 | content load: DBPF -> RefPack -> decode (`pkg:-*`) | ✅ | 150,945 resources |
 | draw real content: `gmdl` + `raster` mesh grid | ✅ | `analysis/shots/model_grid.png` |
 | resource manager `0x8de4b0`, `trigger` configs | 🚧 | `analysis/content-loading.md` |
+| **localized text: `locale` tables (18,441 entries, 10,246 keys)** | ✅ | `source/engine/text.cpp`, `analysis/text-locale.md` |
 | **UI/menus: `spui` layouts (524 screens, 407 named)** | 🚧 next | `analysis/ui.md` |
 | states: mechanism + a real `Title` state that transitions to `Loader` | ✅ | `source/states/title.cpp`, `analysis/shots/title_state.png` |
-| states: the game's own state NAMES (data) | ⬜ | `SporeAppStates`/`appmodes` groups absent from our packages |
+| states: the game's own state NAMES (data) | ⬜ suspect | `SporeAppStates`/`appmodes` absent from the 57 packages we scan — **see the locale trap below before accepting this** |
 | launch key `-state:Name` (colon, as the original) | ✅ | `cmdline.cpp`; `-state:Title` verified |
 | gameplay (sim, editors, stages) | ⬜ | feature map `gameplay` = 0% |
 
-**Next on the path:** the `spui` layout parser, so the Loader can compose a REAL screen (title/launch)
-from the UI atlas + `locale` strings we already decode, instead of drawing the whole atlas as a
-backdrop. After that: the state names (data) so `-state:SpaceAccessoriesEditor`-style launches work.
+**Next on the path:** the `spui` layout parser, so the Title screen can compose a REAL layout from the
+UI atlas + the `locale` strings we now decode, instead of stretching the whole atlas as a backdrop.
+Reach it through the window-class registrar cluster `0x8009f0..0x800b60` (alloc `0x951230`).
+
+**Before accepting any "the data does not exist" conclusion, re-check the search path.** This session
+proved the point twice: our `locale` reader reported "no package" purely because `fs.cpp` looked in
+`exe_dir/Locale/` instead of `Data/Locale/` (the original appends `'Locale/'` to a DATA ROOT —
+disasm `0x7e863c..0x7e8661`). The state-name row above is still unverified by that standard.
+
+## Audit of our own work (in progress, session 13)
+
+User request: use Ghidra to check **everything, starting from `Main`**, to see whether we started
+reversing correctly at all. Done so far: the whole claim surface is now machine-checkable in
+`analysis/claims.json` — **30 claims / 98 checks**, each citing the doc line it came from, its
+severity, and whether our C++ is load-bearing on it. `tools/ghidra_audit.py` +
+`tools/ghidra_export.py` (PyGhidra; Ghidra 12 dropped embedded Jython) diff our claims against
+Ghidra's own analysis of the oracle. Verdicts are PASS/FAIL/**UNKNOWN**/**SKIP**, and the two rules
+that keep it honest: UNKNOWN is not PASS, and data-derived claims (SKIP) are recorded rather than
+dropped, so the audit states what it does NOT cover. The full-binary import + analysis is running;
+`analysis/audit.md` is the output once the export completes.
 
 ## One-line status
 

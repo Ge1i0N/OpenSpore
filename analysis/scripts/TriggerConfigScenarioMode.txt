@@ -1,0 +1,71 @@
+//###########################
+// Avatar based movement for scenario play mode
+//   the creature game camera trigger id's are found in SPCreatureInputStrategy.h.
+//  Note that the tribe camera remaps several basic camera trigger id's, 
+//  so this same file does not work for edit mode.
+
+// avatar related
+#define kActJump         0x00000007
+#define kActSprint       0x00000008
+#define kActSneak        0x00000009
+#define kActBlock        0x00000019
+#define kActAction       0x00000016
+#define kActAutorun      0x93cf382f
+#define kActDropAllItems 0x00000021
+
+#define kActTargetNearest  0x051893ad
+#define kActUntarget       0x00000015
+#define kActToggleVerbTray 0xf3ce0149
+
+// camera related
+#define kActCameraRotateLeft  0x00000010
+#define kActCameraRotateRight 0x00000011
+#define kActCameraZoomIn      0x00000012
+#define kActCameraZoomOut     0x00000013
+#define kActCameraReset       0x00000014
+#define kActCameraPitchPan    0x00000018
+#define kActCameraControl     0x00000020
+
+#define kActDebugLocomotion 0x99999992
+
+[all]
+//### Keyboard triggers ###
+// movement is handled in TriggerConfigWASD or French variant
+
+// control 0x10 and alt 0x12, meant to modify movement keys
+any 0x10 = kActSprint  
+any 0x12 = kActSneak
+any space = kActJump
+
+any f = kActToggleVerbTray
+
+any r = kActAutorun
+any k = kActDropAllItems
+
+// camera
+any , = kActCameraRotateLeft
+any . = kActCameraRotateRight
+any = = kActCameraZoomIn
+any + = kActCameraZoomIn
+any numpad+ = kActCameraZoomIn
+any - = kActCameraZoomOut
+any numpad- = kActCameraZoomOut
+any / = kActCameraReset
+
+any b = kActBlock
+
+// Target nearest creature
+any Tab = kActTargetNearest
+
+// this fires when the settings dialog is brought up
+norepeat escape = kActUntarget
+
+// ##### mouse triggers ######  
+// TODO: don't tie mouse to trigger sys
+any mouse_button_left = kActAction
+any mouse_button_middle = kActCameraPitchPan
+any mouse_button_right = kActCameraControl
+
+// ##### debug triggers ######
+control l = kActDebugLocomotion
+

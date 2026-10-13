@@ -93,9 +93,25 @@ message loop; it initialises subsystems and dispatches through the AppMode objec
 ## The main loop — FOUND: `0x008482f0` (window-class vtable `+0x84`)
 
 It is a method of the **window class** (vtable `.rdata 0x141cc10`, slot `+0x84` = `0x141cc94` ->
-`0x8482f0`), and `run` calls it at **`0xf48405`** (`call [0x67dcb0()]->vtable+0x84`, where
-`0x67dcb0` returns the window object from global `0x15fd89c`). The loop body (verified instruction by
-instruction):
+`0x8482f0`), and `run` reaches it at **`0xf4840b`** (`call eax`, where
+`eax = [[0x67dcb0()]->vtable + 0x84]`; `0x67dcb0` returns the window object from global `0x15fd89c`).
+
+**CORRECTED by the Ghidra audit (session 13).** This doc previously said the call site was
+`0xf48405`. It is not — that address only LOADS the slot, and the call is the very next instruction:
+
+```
+f48401  mov edx,[eax]         ; the window object's vtable
+f48403  mov ecx,eax           ; this = the window object
+f48405  mov eax,[edx+0x84]    ; LOAD slot +0x84        <-- what we used to cite
+f4840b  call eax              ; THE CALL SITE
+```
+
+This is not pedantry: it is the shape of every virtual dispatch in this binary, and it is *why* the
+main loop was hard to find. A text search for `call [reg+0x84]` matches nothing here, because the
+loader split it into a `mov` and an indirect `call`. Pin the difference with the two `insn_at` checks
+in `analysis/claims.json` (`main.loop.caller`).
+
+The loop body (verified instruction by instruction):
 
 ```
 8482f0  push ebp; mov ebp,esp; and esp,-8; sub esp,0x30; push ebx/ebp/esi/edi
@@ -131,6 +147,12 @@ register, and `0x84a050` is a separate mouse helper reached via vtable slot `+0x
 
 - **vtable `.rdata 0x141cc10`**; **ctor `0x849b20`**, **Create `0x849bf0`** (RegisterClass/CreateWindowEx,
   HWND stored at `[obj+0x70]`), **dtor `0x849e80`**.
+- **CORRECTED by the Ghidra audit**: vtable **slot 0 is `0x849e80`, the deleting destructor** — not the
+  ctor. The ctor `0x849b20` is real (the audit PASSED the check that it is called from `0x7e6f21`) but
+  it is **not a vtable slot**, so trying to prove it by reading slot 0 was a category error. Slots
+  `+0x84` (`0x8482f0`, the main loop) and `+0x88` (`0x84a050`, the mouse pump) both verified as claimed.
+- **`0x849bf0` (Window::Create) is one of the seven addresses Ghidra's auto-analysis never carved** —
+  it is reachable only through the vtable. It is now seeded (`analysis/audit/seeds.tsv`).
 - **`+0x84` `0x8482f0` = the main loop**; **`+0x88` `0x84a050` = the mouse/PeekMessageA pump**.
 - wraps mouse tracking (`TrackMouseEvent` 0x141cbfc, `user32.dll` 0x141cbf0).
 - The window object is created in the AppMode setup function at **`0x7e6f21`** (`call 0x849b20`),
@@ -143,21 +165,38 @@ register, and `0x84a050` is a separate mouse helper reached via vtable slot `+0x
 
 ## AppMode state / event names (from `.data 0x153f858..0x153f868`)
 
-The AppMode object drives a state machine; its name pointers live in `.data`:
+The AppMode object drives a state machine; **`.data 0x153f858..` is a table of POINTERS into
+`.rdata`**, not a table of strings. (CORRECTED by the Ghidra audit, session 13: this doc previously
+presented the `.data` addresses as if the names lived there, and an audit check that read them as
+strings failed. The names themselves were right.)
 
-| address | string | note |
-|---|---|---|
-| `0x153f858` | `f` | (single char) |
-| `0x153f85c` | `quit` | an AppMode event/state |
-| `0x153f860` | `app` | an AppMode event/state |
-| `0x153f864` | `Copyright (c) 2006, Electronic Arts. All` | banner |
-| `0x153f868` | `AppModePluginLoader` | the **initial** AppMode state |
-| `0x1544cec` | `UIWorld_Loading` | the loading-screen world/state |
-| `0x1550498` | `EventLoadScreenBufferPercentage` | loading-progress event |
+| `.data` slot | points at | string there | note |
+|---|---|---|---|
+| `0x153f858` | `0x1413870` | `f` | (single char) |
+| `0x153f85c` | `0x1413868` | `quit` | an AppMode event/state |
+| `0x153f860` | `0x1413864` | `app` | an AppMode event/state |
+| `0x153f864` | `0x1413828` | `Copyright (c) 2006, Electronic Arts. All` | banner |
+| `0x153f868` | `0x1413814` | **`AppModePluginLoader`** | the **initial** AppMode state |
+
+Two names this doc previously attributed to `.data` slots were at the wrong address:
+
+* **`UIWorld_Loading`** is stored **UTF-16LE** at `.rdata 0x01418274` (bytes `55 00 49 00 57 00 ...`).
+  A 1-byte ASCII read of it yields only `U`, which is exactly how the audit caught this. The pointer
+  to it is at `[0x1544cec]`. There is **no** ASCII `UIWorld_Loading` anywhere in the binary.
+* **`EventLoadScreenBufferPercentage`** is at `.rdata 0x0148227c`, and the only `.text` reference to
+  it is `0x01373538`. The address previously cited here (`0x1550498`) is a pointer to
+  **`EAReportUploader`** (`0x01446c18`) — a different subsystem entirely. `analysis/claims.json`
+  keeps this as an explicit NEGATIVE control so the mix-up cannot silently return.
 
 So the app starts in **`AppModePluginLoader`** and drives a state machine whose other names are
-`app`, `quit`, `UIWorld_Loading`. This is the AppStateManager family we reversed (VERIFY rows 3-6);
-the state-name set is DATA (scripts), which is why we own the mechanism and ship our own `Loader`.
+`app`, `quit`, `UIWorld_Loading`. This is the AppStateManager family we reversed (VERIFY rows 3-6).
+
+**And the state SET is data we DO have** — session 13 initially recorded it as missing, which was
+wrong in two ways at once (the `Locale/` search-path class of error, and probing only the `group`
+field of a DBPF record that has three id fields). The full recovered machine is in
+**`analysis/states.md`**: `SporeAppStates` is a `trigger` resource with **instance** id
+`0xD6396913`, 8,499 decoded bytes of plain ArgScript, giving **60 states and 17 modes**, entry state
+`Main -id 0` ("Spore Launch Screen") -> `GalaxyGameEntry`.
 
 ## Still to trace (next steps, in order)
 

@@ -1,0 +1,390 @@
+log "SporeApp" info "Running start up commands..."
+
+
+###############################################################
+# Log setup
+#
+
+#
+# logger options:
+#    -addFileReporter <name:string> <path:string>
+#       Add a reporter that writes to the given file under the given name
+#    -addDebugReporter <name:string>
+#       Add a reporter that writes to debug output
+#    -addDialogReporter <name:string>
+#       Add a reporter that writes to a dialog box
+#    -globalLevel <level>
+#       Set default log level for entire system
+#    [<reporter:string>]
+#       Either act on the given reporter, or list the current set of reporters
+#      -level <level>
+#         Set the default output level on the reporter.
+#      -groupLevel <group:string> <level>
+#         Set the output level for the given group on the reporter. (You can specify more than one -groupLevel option.)
+#      -format <format1> ...
+#         Specify one or more additional display options. Choices: none timeStamp deltaTimeStamp date group level
+#        -location <level>
+#           Optional addition to -format: at this level or above, the location of the original log statement will be logged.
+#
+
+# Debug output
+logger AppDebugger -groupLevel LocationFilter none
+logger AppDebugger -groupLevel Model none
+logger AppDebugger -groupLevel MemDump none
+logger AppDebugger -groupLevel SwarmResource none
+logger AppDebugger -groupLevel TGA none
+logger AppDebugger -groupLevel PNG none
+logger AppDebugger -groupLevel TerrainSphere none
+logger AppDebugger -groupLevel EffectsResources none
+logger AppDebugger -groupLevel Production none
+
+# App console output (the cheat console)
+logger AppConsole -groupLevel Mesh info # useful to see mesh dumps in console
+logger AppConsole -groupLevel Profiler info # want non-engineers to see this
+logger AppConsole -groupLevel Production none
+logger AppConsole -groupLevel StatusLines all
+logger AppConsole -groupLevel ModelWorld info
+logger AppConsole -groupLevel JobManager info
+logger AppConsole -grouplevel CheatReport info
+
+# Asserts
+logger -addFileReporter Asserts asserts.log
+logger Asserts -groupLevel Assert error
+logger Asserts -groupLevel Assert info
+
+# Production log -- errors for artists
+logger -addFileReporter ProductionLog productionLog.txt
+logger ProductionLog -groupLevel Production all
+logger ProductionLog -groupLevel SwarmResource debug
+logger ProductionLog -groupLevel EffectsResources debug
+logger ProductionLog -groupLevel TGA debug
+logger ProductionLog -groupLevel PNG debug
+logger ProductionLog -groupLevel OTDB error
+logger ProductionLog -groupLevel ArgScript warn
+
+# Tuning log -- errors for game tuning.
+logger -addFileReporter TuningLog tuningLog.txt
+logger TuningLog -groupLevel PropertyManager warn
+
+# Add a log file for rw messages
+logger -addFileReporter Renderware renderware.log
+logger Renderware -groupLevel Renderware info
+
+# Pollinator stuff
+logger -addFileReporter HTTP httpLog.txt
+logger HTTP -groupLevel HTTPClient all
+logger HTTP -groupLevel HTTPClientDetail all
+logger HTTP -groupLevel UTFSocket all
+logger AppDebugger -groupLevel HTTPClient none
+logger AppDebugger -groupLevel HTTPClientDetail none
+logger AppDebugger -groupLevel UTFSocket none
+
+# OTDB
+logger -addFileReporter OTDBLog otdbLog.txt
+logger OTDBLog -groupLevel OTDB all
+logger AppDebugger -groupLevel OTDB none
+
+# MVJ stuff
+logger -addFileReporter MVJ MVJ_XHTML.txt
+logger MVJ -groupLevel XHTML debug
+
+# Baking
+logger -addFileReporter BakerLog baker.log
+logger BakerLog -groupLevel Baker info
+logger AppConsole -groupLevel Baker warn
+logger AppDebugger -groupLevel Baker warn
+
+logger -addFileReporter BakeAutomationLog bake-automation.log
+logger BakeAutomationLog -groupLevel BakeAutoLog all
+
+
+# Load log -- specially formatted to have timestamp info, so
+# we can see where delays are.
+logger -addFileReporter LoadFileLog loadLog.txt
+logger LoadFileLog -groupLevel SporeLoad all
+logger LoadFileLog -format timeStampMs level
+
+# Stellar Validation log -- specially formatted to have timestamp info, so
+# we can see where delays are.
+logger -addFileReporter ValidateLog ValidateLog.txt -append 
+logger ValidateLog -groupLevel ValidateDB all
+logger ValidateLog -format timeStampMs level
+
+# Memory log
+logger -addFileReporter MemoryLog memoryLog.txt
+logger MemoryLog -groupLevel MemProfile all
+logger MemoryLog -groupLevel MemDump debug
+
+# GATT Test log -- timestamp logging for automated testing
+logger -addFileReporter TestFileLog autotest.log
+logger TestFileLog -groupLevel AutoTest all
+logger TestFileLog -format timeStamp level
+
+# For running/tracking lots of planet/creature construction effects.
+logger -addFileReporter OfflineEffectsLog offlineEffectsLog.txt
+logger OfflineEffectsLog -groupLevel OfflineEffects all
+logger -addFileReporter EffectsTestBedLog EffectsTestBedLog.txt
+logger EffectsTestBedLog -groupLevel TestBed all
+
+# For Planet Load tracking
+logger -addFileReporter PlanetTestLog PlanetTestLog.txt
+logger PlanetTestLog -groupLevel PlanetTestLog all
+
+# For tracking effect performance.
+logger -addFileReporter EffectsLog effectsLog.txt
+logger EffectsLog -groupLevel EffectsLog all
+
+# Animation log
+logger -addFileReporter AnimationLogFile animationLog.txt
+logger AnimationLogFile -groupLevel AnimationLog info
+logger AppConsole -groupLevel AnimationLog none
+logger AppDebugger -groupLevel AnimationLog none
+
+# CreatureBase Animation log
+logger -addFileReporter CreatureBaseLogFile creatureBaseLog.txt
+logger CreatureBaseLogFile -groupLevel CreatureBaseLog info
+logger AppConsole -groupLevel CreatureBaseLog none
+logger AppDebugger -groupLevel CreatureBaseLog none
+
+# AvatarAnimation log
+logger -addFileReporter AvatarAnimationLog avatarAnimationLog.txt
+logger AvatarAnimationLog -groupLevel AvatarAnimation info
+logger AppConsole -groupLevel AvatarAnimation none
+logger AppDebugger -groupLevel AvatarAnimation none
+
+# Audio log
+logger -addFileReporter AudioLog AudioLog.txt
+logger -addFileReporter AudioErrors AudioErrors.txt
+logger AudioLog -groupLevel audio all
+logger AudioErrors -groupLevel audio error
+logger AppConsole -groupLevel audio none
+logger AppDebugger -groupLevel audio none
+
+# AudioPerf log
+logger -addFileReporter AudioPerfLog AudioPerfLog.txt
+logger AudioPerfLog -groupLevel audioperf all
+logger AppConsole -groupLevel audioperf none
+logger AppDebugger -groupLevel audioperf none
+
+# Voice log
+logger -addFileReporter VoiceLog VoiceLog.txt
+logger VoiceLog -groupLevel voice all
+logger AppConsole -groupLevel voice none
+logger AppDebugger -groupLevel voice none
+
+# Eapd log
+logger -addFileReporter EapdLog EapdLog.txt
+logger EapdLog -groupLevel eapd all
+logger AppConsole -groupLevel eapd none
+logger AppDebugger -groupLevel eapd none
+
+# BehaviorTree log
+logger -addFileReporter BehaviorTreeLog BehaviorTreeLog.txt
+logger BehaviorTreeLog -groupLevel BehaviorTree info
+logger AppConsole -groupLevel BehaviorTree none
+logger AppDebugger -groupLevel BehaviorTree none
+
+# BehaviorTreeError log
+logger -addFileReporter BehaviorTreeErrorLog BehaviorTreeErrorLog.txt
+logger BehaviorTreeErrorLog -groupLevel BehaviorTreeError info
+logger AppConsole -groupLevel BehaviorTreeError none
+#logger AppDebugger -groupLevel BehaviorTreeError none
+
+# BehaviorTreeStats log
+logger -addFileReporter BehaviorTreeStatsLog BehaviorTreeStatsLog.txt
+logger BehaviorTreeStatsLog -groupLevel BehaviorTreeStats info
+logger AppConsole -groupLevel BehaviorTreeStats none
+logger AppDebugger -groupLevel BehaviorTreeStats none
+
+# WatchWindow log
+logger -addFileReporter WatchWindowLog WatchWindowLog.txt
+logger WatchWindowLog -groupLevel WatchWindow info
+logger AppConsole -groupLevel WatchWindow none
+logger AppDebugger -groupLevel WatchWindow none
+
+# UIBrowser log
+logger -addFileReporter UIBrowserLog UIBrowserLog.txt
+logger UIBrowserLog -groupLevel UIBrowser info
+logger AppConsole -groupLevel UIBrowser none
+logger AppDebugger -groupLevel UIBrowser none
+
+# SPUI log
+logger -addFileReporter SPUILog SPUILog.txt
+logger SPUILog -groupLevel SPUI all
+
+# Flocking log
+logger -addFileReporter FlockingLog FlockingLog.txt
+logger FlockingLog -groupLevel Flocking info
+logger AppConsole -groupLevel Flocking none
+#logger AppDebugger -groupLevel Flocking none
+
+# Creature Effects Log
+logger -addFileReporter CreatureEffects CreatureEffectsLog.txt
+logger CreatureEffects -groupLevel CreatureEffects info
+logger AppConsole -groupLevel CreatureEffects none
+#logger AppDebugger -groupLevel CreatureEffects none
+
+# Game Simulator Log
+logger -addFileReporter Simulator SimulatorLog.txt
+logger Simulator -groupLevel Simulator all
+
+# Game Input Log
+logger -addFileReporter GonzagoInput GonzagoInput.txt
+logger GonzagoInput -groupLevel GonzagoInput all
+
+# City wall validator
+logger -addFileReporter CityWallLog cityWallLog.txt
+logger CityWallLog -groupLevel CityWalls all
+logger CityWallLog -format timeStampMs level
+
+# LevelGen log
+logger -addFileReporter LevelGenFileLog levelGenLog.txt
+logger LevelGenFileLog -groupLevel LevelGen all
+logger LevelGenFileLog -format timeStampMs level
+logger AppConsole -groupLevel LevelGen none
+logger AppDebugger -groupLevel LevelGen none
+
+# ResourceLoad log
+logger -addFileReporter ResourceLoadLog resourceLoadLog.txt
+logger ResourceLoadLog -groupLevel ResourceLoad all
+logger ResourceLoadLog -format timeStampMs level
+logger AppConsole -groupLevel ResourceLoad none
+logger AppDebugger -groupLevel ResourceLoad none
+
+# CinematicManager
+logger -addFileReporter CinematicManagerLog cinematicsLog.txt
+logger CinematicManagerLog -groupLevel CinematicManager all
+logger AppTitleBar -groupLevel CinematicManager all
+logger AppConsole -groupLevel CinematicManager none
+
+# Loading Status
+logger AppTitleBar -groupLevel LoadingStatus all
+#logger AppConsole -groupLevel LoadingStatus none
+#logger AppDebugger -groupLevel LoadingStatus none
+
+# Terrain Effect Test log
+logger -addFileReporter TEScriptTestCheatLog testTerrainEffectsLog.txt
+logger TEScriptTestCheatLog -groupLevel TEScriptTestCheat all
+
+# Planet Test Bed log
+logger -addFileReporter TEPlanetTestBedLog planetTestBedLog.txt
+logger TEPlanetTestBedLog -groupLevel TEPlanetTestBed all
+
+# Content Validation log
+logger -addFileReporter ContentValidationLog contentValidationLog.txt
+logger ContentValidationLog -groupLevel Validation all
+
+# Server Event System log
+logger -addFileReporter ServerEventSystem EventSystemLog.txt
+logger ServerEventSystem -groupLevel EventSystem all
+logger ServerEventSystem -groupLevel Achievements all
+logger AppDebugger -groupLevel EventSystem none
+logger AppConsole -groupLevel EventSystem none
+
+# Enable load placeholders in dev build
+prop modelMeshLOD0 ui_spore_loadpill -list @cell_editorModel!Template
+prop modelMeshLOD1 ui_spore_loadpill -list @cell_editorModel!Template
+prop modelMeshLOD2 ui_spore_loadpill -list @cell_editorModel!Template
+
+prop modelMeshLOD0 ui_spore_loadpill -list @creature_editorModel!Template
+prop modelMeshLOD1 ui_spore_loadpill -list @creature_editorModel!Template
+prop modelMeshLOD2 ui_spore_loadpill -list @creature_editorModel!Template
+prop modelMeshLOD3 ui_spore_loadpill -list @creature_editorModel!Template
+
+prop modelMeshLOD0 ui_spore_loadpill -list @building_editorModel!Template
+prop modelMeshLOD1 ui_spore_loadpill -list @building_editorModel!Template
+prop modelMeshLOD2 ui_spore_loadpill -list @building_editorModel!Template
+prop modelMeshLOD3 ui_spore_loadpill -list @building_editorModel!Template
+
+prop modelMeshLOD0 ui_spore_loadpill -list @vehicle_editorModel!Template
+prop modelMeshLOD1 ui_spore_loadpill -list @vehicle_editorModel!Template
+prop modelMeshLOD2 ui_spore_loadpill -list @vehicle_editorModel!Template
+prop modelMeshLOD3 ui_spore_loadpill -list @vehicle_editorModel!Template
+
+prop modelMeshLOD0 ui_spore_loadpill -list @ufo_editorModel!Template
+prop modelMeshLOD1 ui_spore_loadpill -list @ufo_editorModel!Template
+prop modelMeshLOD2 ui_spore_loadpill -list @ufo_editorModel!Template
+prop modelMeshLOD3 ui_spore_loadpill -list @ufo_editorModel!Template
+
+prop modelMeshLOD0 ui_spore_loadpill -list @flora_editorModel!Template
+prop modelMeshLOD1 ui_spore_loadpill -list @flora_editorModel!Template
+prop modelMeshLOD2 ui_spore_loadpill -list @flora_editorModel!Template
+prop modelMeshLOD3 ui_spore_loadpill -list @flora_editorModel!Template
+
+# Useful macros/aliases
+
+define showTH()
+   renderer -showTexture Terrain_HeightPlain_0
+   renderer -showTexture Terrain_HeightPlain_1
+   renderer -showTexture Terrain_HeightPlain_2
+   renderer -showTexture Terrain_HeightPlain_3
+   renderer -showTexture Terrain_HeightPlain_4
+   renderer -showTexture Terrain_HeightPlain_5
+enddef
+
+define showTRT()
+   renderer -showTexture Terrain_Synth_0
+   renderer -showTexture Terrain_Height_0
+   renderer -showTexture Terrain_Normal_0
+   renderer -showTexture Terrain_Control_0
+enddef
+
+define showCreatureRTTs()
+   renderer -showTexture SplatterRTT
+   renderer -showTexture AORTT
+   renderer -showTexture ShadowRTT
+   renderer -showTexture ShadowBlurTexture
+enddef
+
+define showShadowMaps()
+   renderer -showtexture @system_rendertarget!ShadowBasisMap0_0
+   renderer -showtexture @system_rendertarget!ShadowBasisMap0_1
+   renderer -showtexture @system_rendertarget!ShadowBasisMap1_0
+   #renderer -showtexture @system_rendertarget!ShadowBasisMap1_1
+   renderer -showtexture @system_rendertarget!ShadowMap0
+enddef
+
+# turn on/off all log file reporters 
+#  note that asserts.log and config.log are not affected by this
+# put create logFiles(off) into LocalStartup.txt
+define logFiles(val)
+    logger HTTP -enable &{val}
+    logger ProductionLog -enable &{val}
+    logger TuningLog -enable &{val}
+    logger Renderware -enable &{val}
+    logger OTDBLog -enable &{val}
+    logger MVJ -enable &{val}
+    logger BakerLog -enable &{val}
+    logger LoadFileLog -enable &{val}
+    logger ValidateLog -enable &{val}
+    logger MemoryLog -enable &{val}
+    logger TestFileLog -enable &{val}
+    logger OfflineEffectsLog -enable &{val}
+    logger PlanetTestLog -enable &{val}
+    logger EffectsLog -enable &{val}
+    logger AnimationLogFile -enable &{val}
+    logger CreatureBaseLogFile -enable &{val}
+    logger AvatarAnimationLog -enable &{val}
+    logger AudioLog -enable &{val}
+    logger VoiceLog -enable &{val}
+    logger EapdLog -enable &{val}
+    logger BehaviorTreeLog -enable &{val}
+    logger BehaviorTreeStatsLog -enable &{val}
+    logger UIBrowserLog -enable &{val}
+    logger SPUILog -enable &{val}
+    logger CreatureEffects -enable &{val}
+    logger FlockingLog -enable &{val}
+    logger Simulator -enable &{val}
+    logger GonzagoInput -enable &{val}
+    logger LevelGenFileLog -enable &{val}
+    logger CinematicManagerLog -enable &{val}
+    logger TEScriptTestCheatLog -enable &{val}
+    logger TEPlanetTestBedLog -enable &{val}
+    logger ContentValidationLog -enable &{val}
+    logger ServerEventSystem -enable &{val}
+enddef
+
+log "SporeApp" info "Done."
+
+# check for local startup cheats to run
+sinclude "LocalStartup.txt"

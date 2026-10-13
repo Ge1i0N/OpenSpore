@@ -1,0 +1,957 @@
+{
+ "states": {
+  "GameCinematicsMode": {
+   "id": null,
+   "desc": "",
+   "mode": "GameCinematics",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "Main": {
+   "id": 0,
+   "desc": "Spore Launch Screen",
+   "mode": null,
+   "entry": [],
+   "exit": [],
+   "goto": [
+    "GalaxyGameEntry"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "DevLauncher": {
+   "id": 1,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [
+    "\"uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e\"",
+    "\"uilayout -unload E3LaunchScreen\""
+   ],
+   "effect": [
+    "I_splashscreen",
+    "UI_splashscreen_start"
+   ],
+   "message": [],
+   "prop": []
+  },
+  "BasicLauncher": {
+   "id": null,
+   "desc": "",
+   "mode": "Launcher",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "LaunchScreen": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [],
+   "exit": [],
+   "goto": [
+    "DevLauncher"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "LoadGame": {
+   "id": null,
+   "desc": "Load Game",
+   "mode": "LoadGame",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageLoadGame"
+   ],
+   "prop": []
+  },
+  "Demo": {
+   "id": null,
+   "desc": "Spore EAP3 Demo",
+   "mode": null,
+   "entry": [],
+   "exit": [],
+   "goto": [
+    "GalaxyGameEntry"
+   ],
+   "cheat": [
+    "\"prop demo true\""
+   ],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "Preload": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "PlannerThumbnailGen": {
+   "id": 1933853872,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(PlannerThumbnailGen))"
+   ],
+   "prop": []
+  },
+  "CellEditor": {
+   "id": 36544000,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(CellTemplate))"
+   ],
+   "prop": []
+  },
+  "CellToCreatureEditor": {
+   "id": 92845963,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(CellToCreatureEditor))"
+   ],
+   "prop": []
+  },
+  "CreatureEditor": {
+   "id": 36544001,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(CreatureEditorExtraLarge))"
+   ],
+   "prop": []
+  },
+  "BuildingEditor": {
+   "id": 36544002,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(BuildingTemplate))"
+   ],
+   "prop": []
+  },
+  "VehicleEditor": {
+   "id": 36544003,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(VehicleTemplate))"
+   ],
+   "prop": []
+  },
+  "VehicleLandEditor": {
+   "id": 86717040,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(VehicleMilitaryLand))"
+   ],
+   "prop": []
+  },
+  "VehicleAirEditor": {
+   "id": 86717041,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(VehicleMilitaryAir))"
+   ],
+   "prop": []
+  },
+  "VehicleWaterEditor": {
+   "id": 86717042,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(VehicleMilitaryWater))"
+   ],
+   "prop": []
+  },
+  "UFOEditor": {
+   "id": 4045502675,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(UFOEditorSetup))"
+   ],
+   "prop": []
+  },
+  "FloraEditor": {
+   "id": 36544005,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(FloraEditorSetup))"
+   ],
+   "prop": []
+  },
+  "TribalAccessoriesEditor": {
+   "id": 36544006,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(SpaceAccessoriesEditorSetup))"
+   ],
+   "prop": []
+  },
+  "AdventureAccessoriesEditor": {
+   "id": 121802855,
+   "desc": "",
+   "mode": "Editors",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSwitchEditor -data1 (hash(AdventurerAccessoriesEditorSetup))"
+   ],
+   "prop": []
+  },
+  "TerrainEditor": {
+   "id": 36544016,
+   "desc": "",
+   "mode": "TerrainEditor",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "LevelEditor": {
+   "id": null,
+   "desc": "",
+   "mode": "Game_EditMode",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "LevelEditorFromSpaceGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "LevelEditor"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "LevelEditorFromCreatureGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "LevelEditor"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "LevelEditorFromTribeGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "LevelEditor"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "LevelEditorFromCivilisationGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "LevelEditor"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "ScenarioMode": {
+   "id": null,
+   "desc": "",
+   "mode": "ScenarioMode",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CellGame": {
+   "id": null,
+   "desc": "",
+   "mode": "Game_Cell",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CellGameFromLaunchScreen": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CellGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CellGameFromLoadGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CellGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CreatureGame": {
+   "id": null,
+   "desc": "",
+   "mode": "Game_Creature",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CreatureGameFromLevelEditor": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CreatureGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CreatureGameFromLaunchScreen": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CreatureGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CreatureGameFromCellGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CreatureGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageCellToCreatureTransition"
+   ],
+   "prop": []
+  },
+  "CreatureGameFromLoadGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CreatureGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "TribeGame": {
+   "id": null,
+   "desc": "",
+   "mode": "Game_Tribe",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "TribeGameFromLevelEditor": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "TribeGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "TribeGameFromCreatureGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "TribeGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "TribeGameFromLaunchScreen": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "TribeGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "TribeGameFromLoadGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "TribeGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CivilisationGame": {
+   "id": null,
+   "desc": "",
+   "mode": "Game_Civ",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CivilisationGameFromLevelEditor": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CivilisationGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CivilisationGameFromLaunchScreen": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CivilisationGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CivilisationGameFromLoadGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CivilisationGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "CivilisationGameFromTribeGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "CivilisationGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "SpaceGame": {
+   "id": null,
+   "desc": "",
+   "mode": "Game_Space",
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "SpaceGameFromLevelEditor": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "SpaceGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "SpaceGameFromCivilisationGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "SpaceGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "SpaceGameFromLaunchScreen": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "SpaceGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [
+    "-id $kMessageSpaceGameFromLaunchScreen"
+   ],
+   "prop": []
+  },
+  "SpaceGameFromLoadGame": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [
+    ""
+   ],
+   "exit": [
+    ""
+   ],
+   "goto": [
+    "SpaceGame"
+   ],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "MultiverseJournal": {
+   "id": 57342360,
+   "desc": "",
+   "mode": "MultiverseJournal",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "EffectsViewer": {
+   "id": null,
+   "desc": "",
+   "mode": "EffectsViewer",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "ModelViewer": {
+   "id": null,
+   "desc": "",
+   "mode": "ModelViewer",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "AnimViewer": {
+   "id": 1738377519,
+   "desc": "",
+   "mode": "AnimViewer",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "SniffTest": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [
+    "\"tester -run TestScript sniff_test -quit -ea_asserts\""
+   ],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "SniffTestWithAllAsserts": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [
+    "\"tester -run TestScript sniff_test -quit -ea_asserts\""
+   ],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "SniffTestWithTestAsserts": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [
+    "\"tester -run TestScript sniff_test -quit -test_asserts\""
+   ],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "SniffTestLoadSave": {
+   "id": null,
+   "desc": "",
+   "mode": null,
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [
+    "\"tester -run TestScript sniff_test_load_save -quit -ea_asserts\""
+   ],
+   "effect": [],
+   "message": [],
+   "prop": []
+  },
+  "GalaxyGameEntry": {
+   "id": 46979740,
+   "desc": "",
+   "mode": "GalaxyGameEntry",
+   "entry": [],
+   "exit": [],
+   "goto": [],
+   "cheat": [],
+   "effect": [],
+   "message": [],
+   "prop": []
+  }
+ },
+ "seti": {
+  "kMessageLoadGame": 4172391087,
+  "kMessageSwitchEditor": 36515979,
+  "kMessageCellToCreatureTransition": 44366064,
+  "kMessageCreatureToTribeTransition": 37021194,
+  "kMessageSpaceGameFromLaunchScreen": 37109782
+ }
+}

@@ -1,0 +1,236 @@
+# Scenario Play Mode UI state machine
+# Copyright (c) 2008, Electronic Arts Inc.  All rights reserved
+#
+#
+# Transition Format:
+#
+# AddTransition -FromState <stateName> -ToState <stateName> -Push -Pop -Event <eventType> <eventValue> 
+#      -KeyMod <keyMod> -Object <objectType> -ObjectFlag <objectFlag> -Message <messageName> <messageValue> 
+#      -LongMouseMove <longMouseMoveValue> -Comment <string>
+#
+# if -FromState is not specified, the transition will apply to all states
+#
+# if -ToState is not specified, the transition will keep the machine in the same state after sending the message
+#
+# -Push pushes the current state on a stack before transitioning to the state in -ToState.  This state can be restored with -Pop
+#
+# eventType: MouseDown, MouseDoubleClick, MouseUp, MouseMove, LongMouseMove, MouseWheel, MouseWheel, KeyDown, KeyUp, 
+#     MenuItem, TriggerDown, TriggerUp
+#
+# eventValue: hex number (0x12345678), any string declared by DeclareMenuCommandName() in source code
+#
+# keyMod: CONTROL, ALT, SHIFT, NONE, ANY, NOREPEAT (fires key-down only once for each key up)
+#
+# objectType: C++ class name minus the initial 'c' for a game data object (ie 'Nest' would be 'cNest,' 
+#     'cBuilding' would be 'cBuilding' etc)
+#
+# objectFlag: PlayerOwned, NPCOwned, IsSelected, IsNotSelected, SomeObjectsAreSelected, NoObjectsAreSelected, 
+#     ObjectIsShowingMenu, ObjectIsNotShowingMenu, ObjectIsUnderWater, ObjectIsNotUnderWater
+#
+# messageName: any string declared using DeclareMessage command in this script
+#
+# messageValue: integer value to be send with the message
+#
+# the -LongMouseMove <longMouseMoveValue> specifies that when this transition is invoked, the system will begin 
+#    tracking for a "long" mouse move, which will fire a LongMouseMove event type when triggered.  This is to prevent 
+#    micro-moves from invoking an undesired state transition
+#
+# For example, single click vs drag select, the drag begins after a long move to prevent a small (1 pixel) move
+#    from transitioning to drag select
+
+
+#-----------------------------------------------------
+# Triggers
+
+# avatar related
+set kActJump         0x00000007
+set kActSprint       0x00000008
+set kActSneak        0x00000009   
+set kActBlock        0x00000019
+set kActAction       0x00000016
+set kActAutorun      0x93cf382f
+set kActDropAllItems 0x00000021
+
+set kActTargetNearest  0x051893ad
+set kActUntarget       0x00000015
+set kActToggleVerbTray 0xf3ce0149
+set kActToggleMissionUI 0x540665ff # no trigger in trigger file
+
+# camera related
+set kActCameraZoomIn      0x00000012 # ed 0x00000009, overlaps with sneak (see SPCreatureInputStrategy.h constants)
+set kActCameraZoomOut     0x00000013 # ed 0x00000010
+
+set kActCameraRotateLeft  0x00000010
+set kActCameraRotateRight 0x00000011
+set kActCameraRotateUp    0x051cba70 # ed 0x00000090, no trigger in trigger file
+set kActCameraRotateDown  0x051cba7b # ed 0x00000091, no trigger in trigger file
+
+set kActCameraMoveForward   0x00000001
+set kActCameraMoveBackward  0x00000002
+set kActCameraMoveLeft      0x00000003
+set kActCameraMoveRight     0x00000004
+set kActCameraMoveStrafeLeft  0x00000005 
+set kActCameraMoveStrafeRight 0x00000006
+
+set kActCameraReset       0x00000014
+set kActCameraPitchPan    0x00000018
+set kActCameraControl     0x00000020
+
+set kActDebugLocomotion 0x99999992
+
+#-----------------------------------------------------
+
+DeclareState SCNNeutral
+DeclareState SCNFreeCamera
+DeclareState SCNBanningContent
+DeclareState SCNInspectContent
+DeclareState SCNLeftDown
+DeclareState SCNRightDown
+DeclareState SCNMiddleDown
+DeclareState SCNLeftDrag
+DeclareState SCNRightDrag
+DeclareState SCNEnterBothDown
+DeclareState SCNBothDown
+DeclareState SCNBothToLeft
+DeclareState SCNBothToRight
+
+#-----------------------------------------------------
+
+# movement
+DeclareMessage CommandMouseMove             0x019edcf3
+DeclareMessage CommandMove                  0xd02dcc68
+DeclareMessage CommandAutoRun               0x53c4bde7
+
+# targeting
+DeclareMessage CommandUnTarget              0x01c41da1
+DeclareMessage CommandTargetNearestAnimal   0x051893a3
+
+# camera
+DeclareMessage CommandRotateCamera          0x06493c83
+DeclareMessage CommandCameraPanLookatOffset 0x035f7b83
+DeclareMessage CommandResetCamera           0x50567351
+DeclareMessage CommandSwingLeft             0x705673e1
+DeclareMessage CommandSwingRight            0x705673e9
+DeclareMessage CommandZoomIn                0x025db76a
+DeclareMessage CommandZoomOut               0x025db76f
+DeclareMessage CommandPitchUp               0x051cbb29
+DeclareMessage CommandPitchDown             0x051cbb2d
+DeclareMessage CommandSetDesiredCameraMode  0x027c67ea
+DeclareMessage CommandSetImmediateCameraMode 0x027c7119
+
+# msic
+DeclareMessage CommandAnyVerb               0x01c38e3b
+DeclareMessage CommandToggleMissionUI       0x940666d2
+DeclareMessage CommandReverseAngle          0x507cc87f
+DeclareMessage CommandAllowWASDGoals        0x02c4bfde
+DeclareMessage CommandToggleVerbTray        0x13cdf6fa
+DeclareMessage CommandDropAllItems          0x03c7560d
+
+# ban/inspection
+DeclareMessage CommandBanObject             0xb332763d
+DeclareMessage CommandBanCancel             0xf3327645
+DeclareMessage CommandBanMouseover          0x0639939b
+
+DeclareMessage CommandInspectObject         0x062663dc
+DeclareMessage CommandInspectCancel         0x062663dd 
+
+#-----------------------------------------------------
+
+# Left click does action
+AddTransition -Event MouseDown LEFT         -FromState SCNNeutral -ToState SCNLeftDrag -Message CommandMouseMove -Object TerrainObject -Comment "mouse navigation"
+AddTransition -Event MouseDown LEFT         -FromState SCNNeutral -ToState SCNLeftDown -Message CommandAnyVerb
+AddTransition -Event MouseDoubleClick LEFT  -FromState SCNNeutral -ToState SCNLeftDrag -Message CommandMouseMove -Object TerrainObject
+AddTransition -Event MouseDoubleClick LEFT  -FromState SCNNeutral -ToState SCNLeftDown -Message CommandAnyVerb
+
+# Middle click does rotation
+AddTransition -Event MouseDown MIDDLE   -FromState SCNNeutral    -ToState SCNMiddleDown  -Message CommandRotateCamera 1
+AddTransition -Event MouseUp MIDDLE     -FromState SCNMiddleDown -ToState SCNNeutral     -Message CommandRotateCamera 0
+
+# Right click does rotation
+AddTransition -Event MouseDown RIGHT    -FromState SCNNeutral -ToState SCNRightDown    -Message CommandRotateCamera 1
+
+# Transitions while LMB is down
+AddTransition -Event MouseUp LEFT       -FromState SCNLeftDown -ToState SCNNeutral          -Message CommandMove 0
+AddTransition -Event MouseDown RIGHT    -FromState SCNLeftDown -ToState SCNEnterBothDown 
+
+AddTransition -Event MouseUp LEFT       -FromState SCNLeftDrag -ToState SCNNeutral       -Message CommandMove 1
+AddTransition -Event MouseDown RIGHT    -FromState SCNLeftDrag -ToState SCNEnterBothDown -Message CommandMove 1
+
+# Transitions while RMB is down
+AddTransition -Event MouseUp RIGHT      -FromState SCNRightDown -ToState SCNNeutral         -Message CommandRotateCamera 0
+AddTransition -Event MouseDown LEFT     -FromState SCNRightDown -ToState SCNEnterBothDown 
+
+# Using intermediate states to properly transition between single & combo click functions
+AddTransition -Event MouseMove          -FromState SCNEnterBothDown -ToState SCNBothDown      -Message CommandRotateCamera 1
+AddTransition -Event MouseUp RIGHT      -FromState SCNEnterBothDown -ToState SCNBothToLeft    -Message CommandRotateCamera 0
+AddTransition -Event MouseUp LEFT       -FromState SCNEnterBothDown -ToState SCNBothToRight 
+AddTransition -Event MouseUp RIGHT      -FromState SCNBothDown      -ToState SCNBothToLeft    -Message CommandRotateCamera 0
+AddTransition -Event MouseUp LEFT       -FromState SCNBothDown      -ToState SCNBothToRight 
+
+# Reset states coming out of combo click
+AddTransition -Event MouseUp LEFT       -FromState SCNBothToLeft -ToState SCNNeutral  
+AddTransition -Event MouseDown RIGHT    -FromState SCNBothToLeft -ToState SCNBothDown -Message CommandRotateCamera 1
+
+AddTransition -Event MouseUp RIGHT      -FromState SCNBothToRight -ToState SCNNeutral -Message CommandRotateCamera 0
+AddTransition -Event MouseDown LEFT     -FromState SCNBothToRight -ToState SCNBothDown 
+
+#Drop all items
+AddTransition -Event TriggerDown $kActDropAllItems -Message CommandDropAllItems -Comment "drop all items"
+
+#Camera keyboard controls
+AddTransition -Event TriggerDown $kActCameraPitchPan -Message CommandCameraPanLookatOffset 1
+AddTransition -Event TriggerUp   $kActCameraPitchPan -Message CommandCameraPanLookatOffset 0
+
+#Targeting via keyboard, note that untarget (esc) also brings up settings panel if no target is set and uimachine in neutral state
+AddTransition -Event TriggerDown $kActUntarget -Message CommandUnTarget 0 -Comment "keyboard targeting"
+AddTransition -Event TriggerDown $kActTargetNearest -Message CommandTargetNearestAnimal 0
+AddTransition -Event TriggerDown $kActToggleMissionUI -Message CommandToggleMissionUI 0
+
+#Mode transitions via WASD
+AddTransition -Event TriggerDown $kActCameraMoveForward  -Message CommandSetImmediateCameraMode 1 -Comment "WASD transitions"
+AddTransition -Event TriggerDown $kActCameraMoveBackward -Message CommandSetImmediateCameraMode 1
+AddTransition -Event TriggerDown $kActCameraMoveLeft     -Message CommandSetDesiredCameraMode 1
+AddTransition -Event TriggerDown $kActCameraMoveRight    -Message CommandSetDesiredCameraMode 1
+
+#auto-run
+AddTransition -Event TriggerDown $kActAutorun -Message CommandAutoRun 1
+
+#camera swings
+AddTransition -Event TriggerDown $kActCameraRotateLeft -Message CommandSwingLeft 1 -Comment "camera swings"
+AddTransition -Event TriggerUp   $kActCameraRotateLeft -Message CommandSwingLeft 0
+
+AddTransition -Event TriggerDown $kActCameraRotateRight -Message CommandSwingRight 1
+AddTransition -Event TriggerUp   $kActCameraRotateRight -Message CommandSwingRight 0
+
+AddTransition -Event TriggerDown $kActCameraZoomOut -Message CommandZoomOut 1
+AddTransition -Event TriggerUp   $kActCameraZoomOut -Message CommandZoomOut 0
+
+AddTransition -Event TriggerDown $kActCameraZoomIn -Message CommandZoomIn 1
+AddTransition -Event TriggerUp   $kActCameraZoomIn -Message CommandZoomIn 0
+
+AddTransition -Event TriggerDown $kActCameraRotateUp -Message CommandPitchUp 1
+AddTransition -Event TriggerUp   $kActCameraRotateUp   -Message CommandPitchUp 0
+
+AddTransition -Event TriggerDown $kActCameraRotateDown  -Message CommandPitchDown 1
+AddTransition -Event TriggerUp   $kActCameraRotateDown  -Message CommandPitchDown 0
+
+# utility
+AddTransition -Event TriggerDown $kActToggleVerbTray -KeyMod NOREPEAT -Message CommandToggleVerbTray 0
+
+# banning
+AddTransition -Event MouseDown LEFT     -FromState SCNBanningContent -Message CommandBanObject -1
+AddTransition -Event KeyDown   ESCAPE   -FromState SCNBanningContent -ToState  SCNNeutral -Message CommandBanCancel 0
+AddTransition -Event MouseMove          -FromState SCNBanningContent -Message CommandBanMouseover -1
+AddTransition -Event MouseDown RIGHT    -FromState SCNBanningContent -Message CommandRotateCamera 1
+AddTransition -Event MouseUp   RIGHT    -FromState SCNBanningContent -Message CommandRotateCamera 0
+
+# inspection
+AddTransition -Event MouseDown LEFT     -FromState SCNInspectContent -Message CommandInspectObject -1
+AddTransition -Event KeyDown   ESCAPE   -FromState SCNInspectContent -ToState  SCNNeutral -Message CommandInspectCancel 0
+AddTransition -Event MouseDown RIGHT    -FromState SCNInspectContent -Message CommandRotateCamera 1
+AddTransition -Event MouseUp   RIGHT    -FromState SCNInspectContent -Message CommandRotateCamera 0
+
+
+
+
+
