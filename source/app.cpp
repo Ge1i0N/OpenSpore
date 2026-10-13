@@ -346,7 +346,7 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                       return "capture scheduled for the next frame -> " + p;
                   }});
     console::reg({"pkg", "Inspect a .package: list, header, records, or dump one resource.",
-                  "-list | -hdr <i> | -rec <i> <n> | -path <i> <n> | -types <i> | -dump <i> <n> <out> | -decode <i> <n> <out>",
+                  "-list | -hdr <i> | -rec <i> <n> | -path <i> <n> | -types <i> | -unpack <i|all> <dir> [type] | -dump <i> <n> <out> | -decode <i> <n> <out>",
                   [](const console::CmdContext& c) -> std::string {
                       if (c.args.size() < 2) return "usage: pkg -list | -hdr <i> | -rec <i> <n> | -dump <i> <n> <file>";
                       const std::string& sub = c.args[1];
@@ -417,6 +417,92 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                           if (n >= pk.records().size()) return "pkg: record index out of range";
                           const auto& r = pk.records()[n];
                           return naming::resource_path(r.type(), r.group(), r.instance());
+                      }
+                      if (sub == "-unpack") {
+                          // The standalone-unpacker wish: write resources to disk under their
+                          // REAL names, decoded. Uses only reversed machinery (index -> RefPack
+                          // -> naming), so this is the whole pipeline proving itself on real data.
+                          //   pkg:-unpack,<pkgIndex|all>,<outdir>[,<typeName>]
+                          if (c.args.size() < 4) return "pkg: -unpack needs <pkgIndex|all> <outdir> [type]";
+                          std::string outdir = c.args[3];
+                          std::string only = c.args.size() > 4 ? c.args[4] : std::string();
+                          std::error_code uec;
+                          std::filesystem::create_directories(outdir, uec);
+
+                          std::vector<std::string> targets;
+                          if (c.args[2] == "all") {
+                              targets = all_packages();
+                          } else {
+                              std::string one;
+                              if (!resolve_idx(atoi(c.args[2].c_str()), one)) return "pkg: index out of range";
+                              targets.push_back(one);
+                          }
+
+                          auto sanitize = [](std::string s) {
+                              for (char& ch : s) {
+                                  if (ch == ':' || ch == '?' || ch == '*' || ch == '"' || ch == '<' || ch == '>' ||
+                                      ch == '|')
+                                      ch = '_';
+                              }
+                              return s;
+                          };
+                          u32 written = 0, skipped = 0, failed = 0, pkgs = 0;
+                          u64 bytes = 0;
+                          std::vector<u8> buf;
+                          for (const auto& target : targets) {
+                              pkg::Package up;
+                              if (!up.open(target)) {
+                                  ++failed;
+                                  continue;
+                              }
+                              ++pkgs;
+                              // Namespace by package: the same group/instance recurs across
+                              // packages (every locale has its own Text/..., and Spore_Content
+                              // repeats base-game names), so a flat tree silently overwrote
+                              // itself - measured: 2,944 records produced only 206 files before
+                              // this. Use PARENT+stem: 17 locales each own a "Text.package", so
+                              // the bare stem still collided; "cs-cz_Text" does not.
+                              std::filesystem::path tp(target);
+                              std::string pkgstem = tp.parent_path().filename().string() + "_" + tp.stem().string();
+                              for (u32 n = 0; n < up.records().size(); ++n) {
+                                  const auto& r = up.records()[n];
+                                  const char* tn = naming::type_name(r.type());
+                                  if (!tn) tn = pkg::type_id_name(r.type());
+                                  if (!only.empty() && (!tn || only != tn)) {
+                                      ++skipped;
+                                      continue;
+                                  }
+                                  std::string rel = naming::resource_path(r.type(), r.group(), r.instance());
+                                  if (rel.rfind("0x", 0) == 0) {
+                                      // unnamed: keep it flat and unique by record order
+                                      rel = "unnamed/" + std::to_string(n) + "_" + rel;
+                                  }
+                                  std::filesystem::path out =
+                                      std::filesystem::path(outdir) / sanitize(pkgstem) / sanitize(rel);
+                                  std::filesystem::create_directories(out.parent_path(), uec);
+                                  if (!up.read_resource_decoded(n, buf)) {
+                                      ++failed;
+                                      continue;
+                                  }
+                                  FILE* fo = nullptr;
+                                  if (fopen_s(&fo, out.string().c_str(), "wb") != 0 || !fo) {
+                                      ++failed;
+                                      continue;
+                                  }
+                                  fwrite(buf.data(), 1, buf.size(), fo);
+                                  fclose(fo);
+                                  ++written;
+                                  bytes += buf.size();
+                              }
+                          }
+                          char b[320];
+                          _snprintf_s(b, sizeof(b), _TRUNCATE,
+                                      "unpack: %u pkgs, %u written, %u skipped, %u failed, %llu bytes -> %s%s%s",
+                                      pkgs, written, skipped, failed, (unsigned long long)bytes, outdir.c_str(),
+                                      only.empty() ? "" : " (filter=", only.empty() ? "" : only.c_str());
+                          std::string res = b;
+                          if (!only.empty()) res += ")";
+                          return res;
                       }
                       if (sub == "-types") {
                           // What is actually inside a package, by name. Uses the generated

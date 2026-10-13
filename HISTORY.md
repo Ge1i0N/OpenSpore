@@ -17,6 +17,62 @@ confirmed, its body is not.
 
 ---
 
+## Session 9 — 2026-10-13: the unpacker works on real data (all 57 packages)
+
+Turned the reversed pipeline into a usable tool: `pkg:-unpack <pkgIndex|all> <outdir> [type]`
+writes every resource to disk under its real name, decoded — PROMPT.md's "standalone unpacker"
+wish, and it exercises the whole chain at once (DBPF index → RefPack → type/instance naming).
+
+Measured on the shipped game:
+```
+pkg:-unpack,all,<dir>,locale  -> 57 pkgs, 2,944 written, 0 failed, 27,882,571 bytes
+pkg:-unpack,all,<dir>,png     -> 57 pkgs, 14,549 written, 0 failed, 254,822,851 bytes
+```
+The 14,549 PNGs are real images (200/200 sampled carry the PNG signature), one committed as
+proof: `analysis/shots/unpacked_png_sample.png` is `GGENewGameFlowUI-00.png`, a UI atlas with the
+game's stage icons (fire/tribe, paw/creature, globe/space, rocket) and planetary panoramas.
+
+### A real bug found by counting
+First `all` run reported 2,944 written but produced only **206 files** — the flat tree overwrote
+itself, because the same group/instance recurs across packages (every locale has its own
+`Text/...`; `Spore_Content` repeats base-game names). Fixed by namespacing under `parent_stem`
+(`cs-cz_Text/`); a bare package stem was not enough because 17 locales each own a `Text.package`.
+After the fix, file count == written count exactly (2,944 / 2,944). Counting files rather than
+trusting the log is the check.
+
+### Measurements
+* Written: 2,944 (locale) and 14,549 (png), **0 failures**.
+* PNG signature: 200/200 valid. Build: 0 errors, 0 warnings.
+
+### How this session was verified
+`cmake --build` → 0/0.
+`OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,<dir>,png -quitAfter 20` →
+`unpack: 57 pkgs, 14549 written, 136396 skipped, 0 failed, 254822851 bytes`; on-disk file count
+14,549; 200/200 sampled PNG headers valid; `analysis/shots/unpacked_png_sample.png` renders as a
+real UI atlas (viewed).
+
+---
+
+## Session 9 (prep) — RW4 reader search: what was ruled out
+
+Before switching to the unpacker, the RW4 reader was hunted without success, and the **negative
+results are recorded** so the next attempt does not repeat them:
+* `tools/find_imm.py 0x34575289` and `--ascii w32` → **0** hits; raw byte search of `\x89RW4`,
+  `w32\0` and the `\r\n\x1a\n` marker in `.text` → **0** hits. The magic is `memcpy`'d from the
+  `.rdata` template (`mov esi,0x14f6480 / rep movs`), so it is never an inline immediate.
+* `tools/find_imm.py 0xcafed00d` → 2 hits, **both inside the writer** (`0x006c233d`); it is not
+  shared with the read path.
+* `tools/callers.py 0x11e3f60` (header constructor) → 2 callers; `tools/callers.py 0x004021a0`
+  (the rw4 type accessor) → 3 callers, all in one function (`0x0040246b`). Neither is the reader.
+* New tool `tools/dump_u32.py` reads registration tables: the rw4 type id appears in `.rdata`
+  `0x0140e028`/`0x0140e050` and in `.data` as `(0x2f4e681b, 0x079a8ee7, <handler>)` registration
+  entries at `0x015777e8…0x0157780c` and `0x015ad308…0x015ad320`.
+Conclusion: the reader is reached through the **resource-type dispatch** (a registration table),
+not through the magic — so the next move is the dispatcher, and `tools/dump_u32.py` +
+`tools/callers.py` are the tools for it.
+
+---
+
 ## Session 8 — 2026-10-13: RW4 header pinned down (object table still open)
 
 Continues the RW4 work from session 7. The header is now proven, not observed:

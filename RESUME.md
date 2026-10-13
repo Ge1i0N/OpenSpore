@@ -1,16 +1,15 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 8).
+Last update: 2026-10-13 (session 9).
 
 ## One-line status
 
-**The whole game is enumerated and largely named.** 150,945 resources across 57 packages,
-10.27 GB decoded, **112,155 resource names resolved** (type + group + instance), RefPack solved
-(30,000/30,000 records decode to exactly `memSize`), and the inventory is on the Loader screen.
-The next big item is **RenderWare 4** (NOT RW 3.x — the rw4 streams begin `\x89RW4w32`, version
-`454`, so the field guide's §3 RW-3.7 playbook does not apply as written). `-w -devDirs` still
-boots 10/10 markers at ~33 fps.
+**The whole game is enumerated, named, decoded and now writable to disk.** 150,945 resources
+across 57 packages, 10.27 GB, **112,155 names resolved**; RefPack solved (30,000/30,000 records
+decode to exactly `memSize`); and `pkg:-unpack all` writes real resources under their real names
+(**14,549 PNGs and 2,944 locale files, 0 failures** — verified as genuine PNGs / Czech text). The
+next big item is **RenderWare 4** (the header is pinned down; the object table is not).
 
 ## Upstream knowledge is in the repo, but it is SECONDARY (level 4)
 
@@ -33,6 +32,7 @@ so if consulted at all, read the source. Recorded: MEMORY.md "Upstream knowledge
 | game content decoded | 312 B + 10,191 B Czech text, == `memSize` | `pkg:-decode,0,0` / `,0,2` |
 | type names resolved | `trigger`/`prop` for cs-cz NameGeneration | `-exec pkg:-types,0` |
 | **resources enumerated** | **150,945**, 10.27 GB, 90 types (86 named) | `inventory:` in the log |
+| **resources written to disk** | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
 | **resource names resolved** | **112,155 / 150,945 (74.3%)** | `inventory:` / `pkg:-path` |
 | RW4 header | **confirmed** (28-byte template `0x014f6480` copied by `0x011e3f60`) | `python tools/rw4.py --pkg 45 --rec 1456` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower, as the original) | `-exec state:-list` |
@@ -206,12 +206,20 @@ silent verboseaudio 4.0 5.1 automation …`).
    immediate search finds no reader — find it by call graph from `0x006c233d`/`0x004021b3`, and
    read it instruction by instruction like RefPack. **This is the big one** (12,987 rw4 +
    11,041 gmdl + 5,931 raster + 4,997 animation resources).
-2. **Show decoded game content** on the Loader (we can decode and name it; next is to *use* it).
-   `png` (14,549) and `locale` (2,944) are the cheapest visible wins.
-3. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle
-   `-w` (VERIFY row 15).
-4. Extract `render/rhi.h` **when a renderer bridge actually starts**, not before (`IDEAS.md` §1).
+2. **Use decoded content** on the Loader (we can decode, name AND unpack it; next is to *render*
+   or parse it). The unpacker already emits `locale` text and `png` images under real names.
+3. **`rw4` reader** — the header is pinned down (28-byte template at `0x014f6480`, copied by
+   `0x011e3f60`; sentinel `0xcafed00d`; `tools/rw4.py` validates+dumps it). Still open: the
+   object/chunk table after the header, the `+0x0c` flags, and whether `"454"` is a version or
+   build tag. The magic is **memcpy'd from the template, not compared inline**, so a raw
+   immediate search finds no reader — find it by call graph from `0x006c233d`/`0x004021a0`, and
+   read it instruction by instruction like RefPack. **This is the big one** (12,987 rw4 +
+   11,041 gmdl + 5,931 raster + 4,997 animation resources).
+4. Disassemble the sole `GetCommandLineA` consumer at `0x00e20b5a` and its callee to settle `-w`
+   (VERIFY row 15).
 5. `group`/`unknown` field semantics (VERIFY row 20 is the model; the meaning is open).
+6. An offline CLI unpacker is possible now that `pkg:-unpack` exists (headless, no window); the
+   in-game verb already covers the wishlist item.
 
 Done and off the list: `.package` header + fixed-stride index (session 4: 57 files, 0 invalid,
 17,901 records, 0 violations), in-engine frame capture (✅ `GetBackBuffer` →

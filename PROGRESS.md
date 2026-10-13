@@ -14,6 +14,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | records parsed | **150,945**, 0 invariant violations | `python tools/pkg_kinds.py` |
 | **RefPack decoded exactly** | **30,000 / 30,000**, 0 failures | `python tools/refpack.py --verify --limit 30000` |
 | resources enumerated | **150,945**, 10.27 GB, 90 types (86 named) | `python tools/resource_inventory.py` |
+| resources written to disk | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
 | resource names resolved | **112,155 / 150,945 (74.3%)** | `inventory:` in the log |
 | game content decoded | 312 B + 10,191 B Czech text, == `memSize` | `pkg:-decode,0,0` / `,0,2` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower) | `-exec state:-list` |
@@ -48,11 +49,14 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | Parse **all** indexes | ✅ (session 5) | the index's first dword is a **shared-field bit mask**, so `prefix = 4+4*popcount(K)`, `stride = 32-4*popcount(K)` → **57/57 files, 150,945 records, 0 violations** |
 | Split the former "sentinel" u32 | ✅ (session 5) | it is `compression:u16 + flags:u16`; 0xFFFF=RefPack (98,407 recs, payload starts `10 FB`, packed<mem), 0x0000=raw (52,538 recs, never `10 FB`, packed==mem) — verified by probing payload bytes |
 | Read a resource's bytes | ✅ | `pkg:-dump,0,3,res0.bin` → 1371 B out of `Data\Locale\cs-cz\NameGeneration.package` (type 0x024A0E52, RefPack) |
+| Write resources to disk by name | ✅ (session 9) | `pkg:-unpack <i\|all> <dir> [type]`; 2,944 locale + 14,549 png, 0 failed; PNG signature verified 200/200 |
 | RefPack decode | ✅ **SOLVED** | `source/engine/refpack.cpp`; **30,000/30,000 real records decode to exactly `memSize`** (`tools/refpack.py --verify`). `pkg:-decode` writes the decoded bytes |
 | Decode a real asset | ✅ (session 6) | `pkg:-decode,0,0` → 312 B and `,0,2` → 10,191 B of Czech name-generation text (UTF-8, BOM), both exactly `memSize` |
+| Write the whole game to disk | ✅ (session 9) | `pkg:-unpack,all,<dir>,png` → **14,549 PNGs, 0 failed**, 254 MB; 200/200 sampled carry the PNG signature, and `analysis/shots/unpacked_png_sample.png` is a real UI atlas |
 | Name a resource's type | ✅ (session 6b) | `typeids.inc` (450 ids) + `pkg:-types`; `cs-cz/NameGeneration` = 13 x `trigger` + 1 x `prop` |
 | Name group/instance ids | ✅ (session 7) | `naming.*` loads the registries; **112,155 / 150,945 names resolved (74.3%)**; `pkg:-path` prints `LexiconPlanets_CS.trigger` |
 | Enumerate the whole game | ✅ (session 7) | `tools/resource_inventory.py`: **150,945 resources, 10.27 GB, 90 types (86 named)**; same on the Loader screen |
+| Write resources to disk by name | ✅ (session 9) | `pkg:-unpack <i\|all> <dir> [type]`: **2,944 locale + 14,549 png written, 0 failed**, real files (PNG signature verified 200/200) |
 | Resource type-id → name | 🚧 | ids are **not** FNV of names (0/6 tested); the answer is the registry lookup in `upstream/SporeMaster3/data/reg_type.txt` (593 lines). Top ids known: 0x01A510BB (98%), 0x2F4E681B=`rw4`, 0x024A0E52 (Czech lexicon) |
 | `group`/`unknown` semantics | ❌ | the bit-mask model names them but not their meaning |
 | RenderWare plugin registration family | ❌ | field guide §3; start from `vb -<used>` at 0x0140a980 |

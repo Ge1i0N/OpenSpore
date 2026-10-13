@@ -26,6 +26,7 @@ FNV-1 hashing.
 | Reads EA's data | **57/57 `.package` opened, 0 rejected**; 150,945 resources, 10.27 GB, 0 invariant violations |
 | Decodes EA's data | **RefPack solved**: 30,000/30,000 real records decode to exactly `memSize` |
 | Names EA's data | **112,155 / 150,945 resource names resolved** (type + group + instance) |
+| Writes EA's data | **unpacker**: 2,944 locale + 14,549 png files written under real names, 0 failed |
 | First real content | Czech name/place lexicon, decoded end-to-end (`LexiconPlanets_CS.trigger`) |
 | Fault tolerance | proven: 5 aborts recovered inside the frame loop, 6th in 1 s → storm exit |
 | Crash diagnostics | live symbolised stacks (`file:line`) via our own dbghelp harness |
@@ -54,6 +55,14 @@ Game data goes in `build/bin/Debug/Data/` (base game) and `DataEP1/` (Galactic A
 exactly where the original looks for it. It is **not** in this repo — `refs/` and the assets
 are gitignored; only our own evidence is committed.
 
+The unpacker (the PROMPT.md wish) writes the game's resources out under their real names, decoded:
+
+```powershell
+# every resource of every package, filtered by type
+.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,locale   # all localized text
+.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,png      # 14,549 real PNGs
+```
+
 Unattended / scripting hooks we added for testing. Arguments use `name:arg,args` so **no shell
 quoting is involved** (PowerShell mangles `"-abortNow 9"` into `"._abortNow 9\`, and a harness
 must not depend on that):
@@ -64,6 +73,7 @@ must not depend on that):
 .\OpenSpore.exe -w -devDirs -exec pkg:-rec,0,3                      # one index record
 .\OpenSpore.exe -w -devDirs -exec pkg:-dump,0,3,res0.bin            # first real EA resource (packed)
 .\OpenSpore.exe -w -devDirs -exec pkg:-decode,0,2,dec.bin           # RefPack-decoded game text
+.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,png       # unpack 14,549 real PNGs
 .\OpenSpore.exe -w -devDirs -capture out.bmp -captureAfter 20 -quitAfter 60
 .\OpenSpore.exe -w -devDirs -exec _abortNow:9 -quitAfter 80         # fault-tolerance test
 ```

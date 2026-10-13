@@ -60,7 +60,24 @@ The D3D9 backend stays the regression oracle: any GL output is diffed against it
 
 ---
 
-## 2. From PROMPT.md (the user's own wishlist, kept verbatim-ish)
+## 2. From PROMPT.md (the user's own wishlist, kept verbatim-ish) — status
+
+1. **Beta asset support** — the FBX/x86 beta (`Beta190208`) is a different link; there is an
+   unpacked-tree copy under `upstream`/`refs` (SporeBeta2008 KeyMap etc.) but we have no beta
+   `.package` reader path yet. The DBPF reader is version-aware (version ≤ 3 accepted) so a beta
+   package should open; **untested against a real beta package**.
+2. **Loose files + standalone unpacker** — ✅ **done** (session 9): `pkg:-unpack <i|all> <dir>
+   [type]` writes decoded resources under real names (2,944 locale + 14,549 png, 0 failed). Loose
+   *reading* (unpacked dirs as a data source) is not wired into `fs` yet; the unpacker is the
+   writing half. A headless CLI build would make it a true standalone tool.
+3. **Multiplayer** (P2P or client-server) — not started. The original imports `WSOCK32.dll`
+   (23 fns) + `WS2_32`, and has `hostIP`/`clientIP`/`isHost` launch keys, so the netcode seam is
+   plain sockets; reverse it from those keys' consumers.
+4. **Own Sporepedia server** — not started. Relevant strings/registry keys already found:
+   `SOFTWARE\Electronic Arts\SPORE`, `pollenLogin`/`rpollenLogin`, `My Spore Creations/`,
+   `ftp://10.30.65.74/` (internal leftover).
+
+*(session 9 closes wishlist item 2's writing half.)*
 
 1. **Beta asset support.** The Feb-2008 beta (`Beta190208`) has a different `.package.big`
    layout era. Needs the beta's own data files (we only have its PDB today).
