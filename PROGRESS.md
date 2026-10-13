@@ -15,6 +15,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | **RefPack decoded exactly** | **30,000 / 30,000**, 0 failures | `python tools/refpack.py --verify --limit 30000` |
 | resources enumerated | **150,945**, 10.27 GB, 90 types (86 named) | `python tools/resource_inventory.py` |
 | resources written to disk | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
+| real game asset rendered | `vehiclepainticons~/be_basic_shake_05.png` (128×128) | `analysis/shots/hero_real_asset.png` |
 | resource names resolved | **112,155 / 150,945 (74.3%)** | `inventory:` in the log |
 | game content decoded | 312 B + 10,191 B Czech text, == `memSize` | `pkg:-decode,0,0` / `,0,2` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower) | `-exec state:-list` |
@@ -53,6 +54,7 @@ Runtime yardsticks, all machine-checkable, report after every run:
 | RefPack decode | ✅ **SOLVED** | `source/engine/refpack.cpp`; **30,000/30,000 real records decode to exactly `memSize`** (`tools/refpack.py --verify`). `pkg:-decode` writes the decoded bytes |
 | Decode a real asset | ✅ (session 6) | `pkg:-decode,0,0` → 312 B and `,0,2` → 10,191 B of Czech name-generation text (UTF-8, BOM), both exactly `memSize` |
 | Write the whole game to disk | ✅ (session 9) | `pkg:-unpack,all,<dir>,png` → **14,549 PNGs, 0 failed**, 254 MB; 200/200 sampled carry the PNG signature, and `analysis/shots/unpacked_png_sample.png` is a real UI atlas |
+| Render a real game asset | ✅ (session 10) | `imgfile.*` (GDI+ from memory) → `Device::create_texture_bgra` → `Overlay::image`; the Loader draws a real `png` resource (`analysis/shots/hero_real_asset.png`) |
 | Name a resource's type | ✅ (session 6b) | `typeids.inc` (450 ids) + `pkg:-types`; `cs-cz/NameGeneration` = 13 x `trigger` + 1 x `prop` |
 | Name group/instance ids | ✅ (session 7) | `naming.*` loads the registries; **112,155 / 150,945 names resolved (74.3%)**; `pkg:-path` prints `LexiconPlanets_CS.trigger` |
 | Enumerate the whole game | ✅ (session 7) | `tools/resource_inventory.py`: **150,945 resources, 10.27 GB, 90 types (86 named)**; same on the Loader screen |

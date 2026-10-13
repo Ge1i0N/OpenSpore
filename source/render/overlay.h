@@ -42,6 +42,11 @@ public:
     void text_fmt(float x, float y, u32 argb, const char* fmt, ...);
     float text_width(const std::string& s) const;
 
+    // Draw a decoded game texture (A8R8G8B8, top-down). If keep_aspect and the source is taller
+    // or wider than the box, it is letterboxed inside it.
+    void image(float x, float y, float w, float h, IDirect3DTexture9* tex, int tex_w, int tex_h,
+               bool keep_aspect = true);
+
     int font_height() const { return m_cell_h; }
 
 private:

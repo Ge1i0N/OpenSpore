@@ -66,6 +66,10 @@ public:
     // this function passed &front and did not compile.
     bool capture_frame(const char* path);
 
+    // Upload tightly-packed 32-bit BGRA (top-down) as an A8R8G8B8 texture. Used to put a real
+    // decoded game asset on screen. Returns nullptr on failure (and logs).
+    IDirect3DTexture9* create_texture_bgra(const u8* bgra, int w, int h);
+
     // Defer a capture to the next end_frame(), which is the only point where a scene is
     // guaranteed open (GetFrontBufferData requires one). Returns the path for logging.
     void request_capture(const char* path);

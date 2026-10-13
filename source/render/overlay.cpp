@@ -302,6 +302,37 @@ void Overlay::text_fmt(float x, float y, u32 argb, const char* fmt, ...) {
     text(x, y, argb, buf);
 }
 
+void Overlay::image(float x, float y, float w, float h, IDirect3DTexture9* tex, int tex_w, int tex_h, bool keep_aspect) {
+    if (!m_dev || !tex || tex_w <= 0 || tex_h <= 0) return;
+    flush_text();  // keep batches homogeneous
+    // Letterbox inside the requested box so a real asset is never distorted.
+    if (keep_aspect) {
+        const float sa = (float)tex_w / (float)tex_h;
+        const float ba = w / h;
+        if (sa > ba) {
+            const float nh = w / sa;
+            y += (h - nh) * 0.5f;
+            h = nh;
+        } else {
+            const float nw = h * sa;
+            x += (w - nw) * 0.5f;
+            w = nw;
+        }
+    }
+    set_text_states(m_dev, tex);
+    Vert v[6];
+    const float x1 = x + w, y1 = y + h;
+    const u32 white = 0xFFFFFFFFu;
+    v[0] = {x, y, 0, 1, white, 0, 0};
+    v[1] = {x, y1, 0, 1, white, 0, 1};
+    v[2] = {x1, y, 0, 1, white, 1, 0};
+    v[3] = {x1, y, 0, 1, white, 1, 0};
+    v[4] = {x, y1, 0, 1, white, 0, 1};
+    v[5] = {x1, y1, 0, 1, white, 1, 1};
+    m_dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, v, sizeof(Vert));
+    m_flat_drawn = true;  // next text() must re-arm the font atlas
+}
+
 float Overlay::text_width(const std::string& s) const { return (float)s.size() * (float)m_advance; }
 
 Overlay& overlay() { return g_overlay; }

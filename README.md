@@ -9,12 +9,13 @@
 A from-scratch reimplementation of **Spore: Galactic Adventures**, driven by disassembly of
 the shipped 32-bit binary rather than by wiki knowledge.
 
-![OpenSpore Loader reading EA's data: 150945 resources, 10.27 GB decoded, 112155 named](analysis/shots/hero_inventory.png)
+![OpenSpore Loader: 150945 resources, 10.27 GB decoded, 112155 named, and a real Spore asset rendered](analysis/shots/hero_real_asset.png)
 
-That screenshot is not a mock-up: it is an in-engine capture of our own exe reading the game's
-shipped data, listing **150,945 resources across 57 packages, 10.27 GB decoded, 112,155
-resource names resolved** — by type, through the reversed index, RefPack and the game's own
-FNV-1 hashing.
+That screenshot is not a mock-up: it is an in-engine capture of our own exe. The left side is the
+game's own inventory (**150,945 resources across 57 packages, 10.27 GB decoded, 112,155 names
+resolved**) read through the reversed index, RefPack and FNV-1 hashing. The right side is a **real
+Spore asset** — `vehiclepainticons~/be_basic_shake_05.png` — decoded from the shipped `.package`
+and drawn by our renderer.
 
 ## Status
 
@@ -27,6 +28,8 @@ FNV-1 hashing.
 | Decodes EA's data | **RefPack solved**: 30,000/30,000 real records decode to exactly `memSize` |
 | Names EA's data | **112,155 / 150,945 resource names resolved** (type + group + instance) |
 | Writes EA's data | **unpacker**: 2,944 locale + 14,549 png files written under real names, 0 failed |
+| **Renders EA's data** | a real decoded `.png` asset drawn on our own D3D9 renderer (see the screenshot) |
+| `rw4` (models) | header pinned down; object table not reversed (12,987 resources) |
 | First real content | Czech name/place lexicon, decoded end-to-end (`LexiconPlanets_CS.trigger`) |
 | Fault tolerance | proven: 5 aborts recovered inside the frame loop, 6th in 1 s → storm exit |
 | Crash diagnostics | live symbolised stacks (`file:line`) via our own dbghelp harness |

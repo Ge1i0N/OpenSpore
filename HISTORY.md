@@ -17,6 +17,36 @@ confirmed, its body is not.
 
 ---
 
+## Session 10 — 2026-10-13: a real Spore asset rendered by our own engine
+
+The pipeline now ends in pixels. `source/render/imgfile.*` decodes a PNG **from memory** via GDI+
+(no temp file) into tight BGRA, `Device::create_texture_bgra` uploads it as A8R8G8B8, and
+`Overlay::image` draws it. The Loader picks one real `png` resource, decodes it and shows it with
+its real name.
+
+Measured: `showing real asset vehiclepainticons~/be_basic_shake_05.png (128x128, 24685 decoded
+bytes) from PatchData.package`, `uploaded 128x128 BGRA texture`, and the captured frame
+(`analysis/shots/hero_real_asset.png`) shows that blue vehicle-paint scale pattern rendered by our
+renderer, next to the full inventory readout. That is DBPF index → RefPack → type/instance naming
+→ PNG decode → D3D9 texture → draw, all in our own code.
+
+Also recorded from the user: **`rw4` resources are MODELS (meshes)** — which raises their priority,
+since 12,987 of them plus 11,041 `gmdl` are the geometry the game draws.
+
+New tool `tools/dump_u32.py` reads registration tables, and it found the model-type wiring:
+`0x007635f0` pushes handler `0x7633c0` and type `0x2f4e681b` into the register function `0x6ad090`;
+the handler itself only dispatches through manager virtuals, so the mesh parser is further in.
+
+### How this session was verified
+`cmake --build build --config Debug` → 0 errors, 0 warnings (one real portability fix: GDI+ needs
+`objidl.h` + `propidl.h` included *before* `gdiplus.h`, else `GdiplusHeaders.h` fails on
+`IStream`/`PROPID`).
+`OpenSpore.exe -w -devDirs -capture asset.bmp -captureAfter 25 -quitAfter 40` → exit code 0,
+`GDI+ up`, `uploaded 128x128 BGRA texture`, `showing real asset vehiclepainticons~/be_basic_shake_05.png`,
+`fps=33.5`; the captured frame was converted and **viewed** — the asset renders.
+
+---
+
 ## Session 9 — 2026-10-13: the unpacker works on real data (all 57 packages)
 
 Turned the reversed pipeline into a usable tool: `pkg:-unpack <pkgIndex|all> <outdir> [type]`

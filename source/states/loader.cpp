@@ -16,6 +16,7 @@
 #include "engine/naming.h"
 #include "engine/pkg.h"
 #include "render/device.h"
+#include "render/imgfile.h"
 #include "render/overlay.h"
 
 namespace os::states {
@@ -38,6 +39,11 @@ struct Loader {
     // Global inventory across every package: type -> count, and how many ids resolved.
     std::vector<std::pair<std::string, u32>> top_types;
     u64 total_records = 0, resolved_instances = 0, total_bytes = 0;
+    // One real decoded game asset, uploaded as a texture and drawn (proof the pipeline ends in
+    // pixels on our own renderer).
+    IDirect3DTexture9* tex = nullptr;
+    int tex_w = 0, tex_h = 0;
+    std::string tex_name;
 };
 
 Loader g_loader;
@@ -126,6 +132,38 @@ void loader_enter() {
     LOG_ONCE_INFO("loader", "inventory: %llu resources, %llu decoded bytes, %llu instances named (%s)",
                   (unsigned long long)g_loader.total_records, (unsigned long long)g_loader.total_bytes,
                   (unsigned long long)g_loader.resolved_instances, naming::stats().c_str());
+
+    // Put one real game image on screen. This is the pipeline's end: DBPF index -> RefPack ->
+    // type/instance name -> PNG decode -> D3D9 texture. Any png that decodes to a sane size wins.
+    for (auto& sp : fs::search_paths()) {
+        if (g_loader.tex) break;
+        for (auto& p : pkg::find_packages(sp.dir.string())) {
+            if (g_loader.tex) break;
+            pkg::Package pk;
+            if (!pk.open(p)) continue;
+            for (u32 n = 0; n < pk.records().size(); ++n) {
+                const char* tn = naming::type_name(pk.records()[n].type());
+                if (!tn || std::string(tn) != "png") continue;
+                std::vector<u8> bytes, bgra;
+                if (!pk.read_resource_decoded(n, bytes)) continue;
+                int w = 0, h = 0;
+                if (!image::decode_from_memory(bytes.data(), bytes.size(), bgra, w, h)) continue;
+                if (w < 96 || h < 96 || w > 2048 || h > 2048) continue;  // icons are too small to show
+                IDirect3DTexture9* tex = render::device().create_texture_bgra(bgra.data(), w, h);
+                if (!tex) continue;
+                g_loader.tex = tex;
+                g_loader.tex_w = w;
+                g_loader.tex_h = h;
+                g_loader.tex_name = naming::resource_path(pk.records()[n].type(), pk.records()[n].group(),
+                                                          pk.records()[n].instance());
+                LOG_ONCE_INFO("loader", "showing real asset %s (%dx%d, %zu decoded bytes) from %s",
+                              g_loader.tex_name.c_str(), w, h, bytes.size(),
+                              std::filesystem::path(p).filename().string().c_str());
+                break;
+            }
+        }
+    }
+    if (!g_loader.tex) LOG_WARN("loader", "no drawable png found to display");
     LOG_INFO("loader", "packages: %d index-parsed, %d kind-unknown, %d invalid", g_loader.pkgs_fixed,
              g_loader.pkgs_varwidth, g_loader.pkgs_invalid);
 }
@@ -197,6 +235,15 @@ void loader_render() {
                 (unsigned long long)log::lines_written());
     y += ov.font_height();
     ov.text_fmt(pad, y, kDim, "console: type 'help', then 'state -list'");
+    y += ov.font_height() * 1.5f;
+    // A real decoded Spore asset, drawn by our renderer.
+    if (g_loader.tex) {
+        float side = 300.f;
+        float ix = (float)w - side - pad;
+        float iy = (float)h - side - pad;
+        ov.image(ix, iy, side, side, g_loader.tex, g_loader.tex_w, g_loader.tex_h);
+        ov.text_fmt(ix, iy - ov.font_height(), kAccent, "real asset: %s", g_loader.tex_name.c_str());
+    }
     y += ov.font_height() * 1.5f;
     // Global inventory: what the game actually contains, by name.
     ov.text_fmt(pad, y, kAccent, "inventory: %llu resources, %.2f GB decoded, %llu named",

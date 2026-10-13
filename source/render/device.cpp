@@ -160,6 +160,29 @@ void Device::clear(u32 argb) {
 
 Device& device() { return g_device; }
 
+IDirect3DTexture9* Device::create_texture_bgra(const u8* bgra, int w, int h) {
+    if (!m_device || !bgra || w <= 0 || h <= 0) return nullptr;
+    IDirect3DTexture9* tex = nullptr;
+    HRESULT hr = m_device->CreateTexture((UINT)w, (UINT)h, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &tex, nullptr);
+    if (FAILED(hr) || !tex) {
+        LOG_ERROR("render", "CreateTexture %dx%d failed 0x%08lx", w, h, (unsigned long)hr);
+        return nullptr;
+    }
+    D3DLOCKED_RECT lr{};
+    hr = tex->LockRect(0, &lr, nullptr, 0);
+    if (FAILED(hr)) {
+        LOG_ERROR("render", "texture LockRect failed 0x%08lx", (unsigned long)hr);
+        tex->Release();
+        return nullptr;
+    }
+    for (int y = 0; y < h; ++y) {
+        memcpy((u8*)lr.pBits + (size_t)y * lr.Pitch, bgra + (size_t)y * w * 4, (size_t)w * 4);
+    }
+    tex->UnlockRect(0);
+    LOG_INFO("render", "uploaded %dx%d BGRA texture (%u bytes)", w, h, (u32)(w * h * 4));
+    return tex;
+}
+
 void Device::request_capture(const char* path) {
     if (!path || !*path) return;
     lstrcpynA(m_capture_request, path, MAX_PATH);

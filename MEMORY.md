@@ -265,7 +265,11 @@ flags, so `0x10FB` **and** `0x50FB` pass (0x50FB has bits 12 and 14 set). A stri
 UTF-8 (BOM `EF BB BF`) Czech given names (`Ábel, Adam, Bára, Běla, Emil …`) and toponyms
 (`Abélard, Aberdeen, Adrásteia, Agamemnón …`).
 
-## RenderWare 4 (the next large subsystem) — header CONFIRMED, object table not reversed
+## RenderWare 4 (= MODELS / meshes) — header CONFIRMED, object table not reversed
+
+**`rw4` resources are models (meshes)** — user-confirmed, and consistent with the observed data
+(12,987 of them, plus 11,041 `gmdl`, are the geometry the game draws). This raises their value:
+parsing rw4 is what unlocks the actual 3D content.
 
 The `rw4` resources (0x2F4E681B, 12,987 of them) are **RenderWare 4**, and the field guide's §3
 playbook (RW 3.7 chunk ids, librw as a drop-in) does **not** apply as written.

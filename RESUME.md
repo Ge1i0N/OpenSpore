@@ -1,15 +1,16 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 9).
+Last update: 2026-10-13 (session 10).
 
 ## One-line status
 
-**The whole game is enumerated, named, decoded and now writable to disk.** 150,945 resources
-across 57 packages, 10.27 GB, **112,155 names resolved**; RefPack solved (30,000/30,000 records
-decode to exactly `memSize`); and `pkg:-unpack all` writes real resources under their real names
-(**14,549 PNGs and 2,944 locale files, 0 failures** — verified as genuine PNGs / Czech text). The
-next big item is **RenderWare 4** (the header is pinned down; the object table is not).
+**A real Spore asset now renders on our own engine.** The pipeline runs end to end: DBPF index →
+RefPack → type/instance naming → PNG decode (GDI+) → D3D9 texture → draw. See
+`analysis/shots/hero_real_asset.png`: half is the game's inventory (150,945 resources, 10.27 GB,
+**112,155 names**), half is a real decoded `.png` asset drawn by our renderer. RefPack is solved
+(30,000/30,000); the unpacker writes real resources (14,549 PNGs + 2,944 locale, 0 failed). The
+next big item is **RW4 = the models** (12,987 resources; header pinned down, object table not).
 
 ## Upstream knowledge is in the repo, but it is SECONDARY (level 4)
 
@@ -33,6 +34,7 @@ so if consulted at all, read the source. Recorded: MEMORY.md "Upstream knowledge
 | type names resolved | `trigger`/`prop` for cs-cz NameGeneration | `-exec pkg:-types,0` |
 | **resources enumerated** | **150,945**, 10.27 GB, 90 types (86 named) | `inventory:` in the log |
 | **resources written to disk** | **2,944 locale + 14,549 png**, 0 failed | `pkg:-unpack,all,<dir>,<type>` |
+| **real game asset rendered** | `vehiclepainticons~/be_basic_shake_05.png` (128×128) | `analysis/shots/hero_real_asset.png` |
 | **resource names resolved** | **112,155 / 150,945 (74.3%)** | `inventory:` / `pkg:-path` |
 | RW4 header | **confirmed** (28-byte template `0x014f6480` copied by `0x011e3f60`) | `python tools/rw4.py --pkg 45 --rec 1456` |
 | state hash | `Loader` = **0xd7d04c04** (FNV-1 + tolower, as the original) | `-exec state:-list` |

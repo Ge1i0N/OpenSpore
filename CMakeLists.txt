@@ -118,6 +118,7 @@ set(OS_SOURCES
   source/engine/naming.cpp
   source/render/device.cpp
   source/render/overlay.cpp
+  source/render/imgfile.cpp
   source/states/statemgr.cpp
   source/states/loader.cpp
 )
