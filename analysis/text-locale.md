@@ -101,9 +101,56 @@ near-ASCII rendering (Latin-1 supplement + Latin Extended-A + general punctuatio
 readable-length placeholder. Proper diacritics need a real font atlas; that is backlog, and it is
 recorded as such rather than hidden behind a silently-truncated string.
 
+## Where the text physically lives (measured 2026-10-14, corrects two earlier claims)
+
+Three depths, all required. A search that stops at any one of them reports a false absence:
+
+| depth | where | en-us contribution |
+|---|---|---|
+| 1. flat | `Data/Locale/en-us/{Text,NameGeneration,UI}.package` | 197 tables |
+| 2. nested in EP1 | `DataEP1/Spore_EP1_Locale_0{1,2}.package`, resources of type `package` `0x06EFC6AA`, each itself a whole DBPF | 65 tables (both containers hold the SAME 65, byte-identical) |
+| 3. nested in the PATCH | `Data/PatchData.package`, same trick, one nested package per language | 42 tables |
+
+Distinct result: **265 tables, 23,933 distinct (table,key) texts, 14,657 distinct keys**, from 32,038
+entries parsed out of 5 containers.
+
+* **A nested package is named by `fnv1_lower(<language>)`** — en-us is `0x7080DB55`. Verified for all
+  15 shipped locale directories (`tools/nested_all_langs.py`), and the same enumeration found five
+  further nested languages that ship in the data but have no locale directory here: `en-gb`, `pt-br`,
+  `ko-kr`, `ja-jp`, `zh-tw`. So the rule is a lookup, not a guess, for every language present.
+* **Enumerate nested containers by TYPE, never by filename.** `tools/nested_every.py` walks all 57
+  containers for type `0x06EFC6AA`; the earlier `*Spore_EP1_Locale*` filter is what made `legal`
+  look absent when it was sitting in `PatchData.package` the whole time.
+* **Precedence is measured, not assumed** (`tools/nested_precedence.py`, and the engine logs every
+  override with both container names): 8,102 redefinitions agree, **3 disagree**. Two are
+  PatchData-vs-EP1 on table `0xADE7FFAA` and EP1 wins — which is right, since EP1 fixes the patch's
+  typo ("an error has occured" → "occurred"). The third is an intra-resource repeat.
+* **A key can appear twice inside ONE locale resource** (`tools/locale_dupkeys.py`): 10 of 2,944
+  resources, 23 occurrences, 2 disagreements, both cosmetic (`SPORE™` vs `SPORE`). Our parser keeps
+  one `Entry` per key line, so it sees them and lets the last win; a `{key: text}` map reader cannot
+  see them at all.
+
+## The caption chain, and the honest split of what is left
+
+`spui -caps` measures the layout→text chain: **2,152 inline captions, 1,426 (table,key) references,
+1,384 resolve (97.1%), 42 do not.** `spui -gaps` splits the 42 by CAUSE, because the two kinds need
+different work:
+
+| kind | meaning | tables / keys |
+|---|---|---|
+| **COVERAGE** | the table instance is nowhere in the corpus — data we do not have | `mvj` `0x277DEE6A` (14 keys), and table `0x00000000` (1 ref, a null reference in the layout) |
+| **SEMANTIC** | the table IS parsed; these keys are not in it | `GalaxyGameEntry` `0x2B7A0311` (1), `settings` `0xAD7B2086` (2), `RegistrationAndLogin` `0xB7BCEF68` (1) |
+
+`legal` `0xADB810C4` was on the missing list for two sessions. It is **not** missing; it ships in
+PatchData's nested packages. Every table instance above inverts to a real name by hashing
+`reg_file.txt`'s 125,272 names with `fnv1_lower` — do that before ever concluding data is absent.
+
 ## What this does NOT give us
 
-Which key belongs to which widget. That mapping is inside the `spui` layout, which is a bit-packed
-serializer (see `analysis/ui.md`) and still needs its reader. So today we have the game's STRINGS
-and not yet its LAYOUT — the next step on the Main→playable path remains the `spui` deserializer,
-reachable through the window-class registrar cluster `0x8009f0..0x800b60`.
+Which key belongs to which widget *class*, and what the widgets DO. The `spui` reader now produces
+geometry and captions for all 748 layouts (see `analysis/spui-schema.md`), so the strings and the
+layout are both in hand; what is not reversed is the **behaviour** — the click handlers, and the
+`mode` table the state scripts name (all 60 states still log `mode <M> NOT EXECUTED`). So the next
+step on the Main→playable path is not more text: it is letting the state machine name the layout it
+wants and driving that on screen.
+

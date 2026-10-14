@@ -768,21 +768,24 @@ Measured in `tools/nested_locale.py` / `tools/nested_langs.py`, implemented in
 * **This was the THIRD shape of the session's recurring error.** Not a wrong directory
   (`exe_dir/Locale` vs `Data/Locale`), not a wrong id field (group vs instance), but a wrong
   **CONTAINER DEPTH**. The data was in the tree; the tree was deeper than we looked.
-* Effect on our engine, measured before/after:
+* Effect on our engine, measured before/after. **The "+ nested" column was restated on 2026-10-14
+  after `get(table,key)` was fixed (see below): the old numbers double-counted containers and the
+  resolution rate included seven answers taken from the WRONG table.**
 
-  | | flat only | + nested |
+  | | flat only | + nested (restated, honest) |
   |---|---|---|
-  | locale tables | 197 | **369** |
-  | entries | 18,441 | **37,608** |
+  | locale tables | 197 | **265 distinct, from 5 containers** |
+  | distinct (table,key) | ~18,441 entries | **23,933 texts from 32,038 entries** |
   | distinct keys | 10,246 | **14,657** |
-  | layout caption references that resolve | 1,139 / 1,426 (79.8%) | **1,391 / 1,426 (97.5%)** |
+  | layout caption references that resolve | 1,139 / 1,426 (79.8%) | **1,384 / 1,426 (97.1%)** |
 
 * The tables that were missing are exactly the ones the shipped UI layouts ask for: `EP1_Buttons`
   ('Replay', 'Done', 'Accept Reward', 'Interact'), `EP1_Headers` ('Scores', 'Mission Complete!',
   'Mission Summary', 'Respawn'), `EP1_Tooltips` (183 keys), `GGETextEP1` ('Play Adventure', 'Create
-  Adventure', 'Captain Outfitter'), `ScenarioBuildMode`, `legal`, `mvj`. Verified live in the engine:
+  Adventure', 'Captain Outfitter'), `ScenarioBuildMode`, `legal`. Verified live in the engine:
   `txt:0x8B1A2341:0x077427D2` -> **"Accept Reward"**, `txt:0xAD7B2086:0x0589E51B` -> **"640x480"**,
   `txt:0xC4F86AE0:0x07736311` -> **"Mission Complete!"**.
+  (`mvj` `0x277DEE6A` was listed here too and is **wrong** - see the coverage/semantic split below.)
 * **`Package` now has two backings** (FILE* or an in-memory buffer) behind one `read_at()`, and BOTH
   open paths run the SAME validator clauses. The refactor's first version left `read_resource()` on
   `fseek(m_file,...)`, which failed LOUD (`stream.valid()` assertion, m_file == nullptr) instead of
@@ -796,7 +799,62 @@ Measured in `tools/nested_locale.py` / `tools/nested_langs.py`, implemented in
   748, and `appstates` listed 5 copies of a script that exists 3 times). Both now dedupe by
   `weakly_canonical`, as the `pkg` verb already did.
 
+## Locale, session 13 later: an implicit 64->32 narrowing, and PatchData's own nested packages
+
+Two findings, and the second is the **fourth shape** of this session's recurring error.
+
+* **`get(table,key)` was silently ignoring the table.** `m_by_table` was declared
+  `std::map<u32,std::string>` while every access packed `((u64)table << 32) | key`. The narrowing was
+  **implicit**, so it compiled with 0 warnings and behaved like `get(key)`. In a corpus whose key
+  space is PER TABLE - the very finding that made `get()` refuse ambiguous keys - that is exactly the
+  failure the design exists to prevent, and it was putting another table's string into our menu.
+  * **The symptom was in plain sight in a log line I wrote the same day**: "14,657 distinct
+    (table,key) texts" EQUAL to "14,657 distinct keys". Two counts can only agree like that if one
+    dimension is not being used at all. I nearly recorded it as a success.
+  * Fix: declare the map `u64`, spell the key in ONE function (`pack()`), and put the trap in the
+    header. Effect: caption resolution 1,391 -> **1,384** of 1,426. The number went DOWN because it
+    is now correct; seven refs had been answering from the wrong table.
+  * **Class of bug worth its own check: any 64-bit composite key built by shift-and-or and stored in
+    a 32-bit container.** It never warns. Grep for `<< 32` and ask what the destination type is.
+* **`Data/PatchData.package` carries its OWN nested locale packages** - one per language, **42 en-us
+  tables** against EP1's 65, overlapping on exactly one table instance. The engine had been parsing
+  them all along (its nested pass scans by TYPE across every container). My MEASUREMENT TOOLS did not,
+  because they filtered on the filename `*Spore_EP1_Locale*`.
+  * So "the `legal` and `mvj` tables are absent from our 57 packages" - asserted with confidence, in
+    the hand-off, after a search that supposedly ruled it out - was **half wrong**: `legal`
+    `0xADB810C4` ships in PatchData's nested packages and always did. Fourth shape: **wrong SCOPING OF
+    THE SEARCH** (the first three were wrong directory, wrong id field, wrong container depth).
+  * **Rule: enumerate by TYPE, never by filename.** `tools/nested_every.py` exists to make that
+    unavoidable; it walks all 57 containers and reports every resource of type `package`.
+* **Only `mvj` `0x277DEE6A` is genuinely absent** - 14 keys, no table instance anywhere, all depths.
+  That is a COVERAGE gap (data we do not have), not a FORMAT gap. `spui -gaps` now splits the two,
+  because conflating them is what kept a solved problem alive for two sessions:
+  `COVERAGE 2 tables / 15 keys; SEMANTIC 3 tables / 4 keys` (semantic = `GalaxyGameEntry`,
+  `settings`, `RegistrationAndLogin`, each missing one or two keys their layouts ask for).
+* **A hash is invertible when you have the name list.** `fnv1_lower` over `reg_file.txt` (125,272
+  names) resolves an unknown table instance back to its name directly: `0x277DEE6A`->`mvj`,
+  `0xADB810C4`->`legal`, `0x2B7A0311`->`GalaxyGameEntry`, `0xAD7B2086`->`settings`,
+  `0xB7BCEF68`->`RegistrationAndLogin`. Three lines of Python, and it turns "unknown table" into a
+  searchable name. Do this BEFORE concluding data is missing.
+* **Precedence between containers is now measured, not assumed.** The same `(table,key)` can arrive
+  twice; which wins was an accident of traversal order. Of 32,038 entries -> 23,933 distinct pairs,
+  **8,102 redefinitions AGREE and exactly 3 DISAGREE**. Two are PatchData-vs-EP1 on table
+  `0xADE7FFAA`, and EP1 wins - **correctly**, because EP1 fixes the patch's typo ("an error has
+  occured" -> "occurred"), so the later container is also the newer text. With only 3 affected strings
+  out of 23,933, the original's exact rule is not worth reversing yet.
+* **A key can repeat INSIDE one resource.** `tools/locale_dupkeys.py`: 10 of 2,944 locale resources
+  state a key twice (23 occurrences), only 2 disagree, both cosmetic (`SPORE™` vs `SPORE`,
+  `Spore-nytt` vs `Spore-Nytt`). Our parser stores one `Entry` per key LINE, so it sees these; **a
+  reader that keys a table by `{key: text}` cannot see them at all** and silently picks the first.
+  Ours lets the last one win.
+* **`en-us` is shipped byte-identically in both EP1 containers** (65 tables, 514,211 B, identical
+  SHA-1 per table). A byte-identical nested container is now skipped WITH A COUNT instead of doubling
+  the corpus. The skip is conditional on a real digest match, not on the instance being seen before:
+  a same-instance/different-bytes pair is still parsed twice and logged, because losing text is worse
+  than an extra pass.
+
 ## Git: commit here, the user pushes (session 13)
+
 
 `git push` from a session **cannot authenticate** in this environment: it fails with
 `fatal: User cancelled dialog.` then `could not read Username for 'https://github.com': No such file

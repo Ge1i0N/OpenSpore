@@ -5,7 +5,7 @@ Last update: 2026-10-14 (session 13, end of day — written immediately before c
 
 ---
 
-## HAND-OFF, session 13 end (2026-10-14 ~11:00). Read this block, then just start on step 1 below.
+## HAND-OFF, session 13 continued (2026-10-14 ~13:00). Read this block, then just start on step 1 below.
 
 **Everything is COMMITTED. Pushing is yours, via GitHub Desktop.** The last work commit is `5d652a0`
 ("The EP1 locale text is a DBPF *inside* a DBPF…"); the hand-off commits on top of it are local until
@@ -19,9 +19,12 @@ Our engine **draws a real Spore UI screen** from shipped data: `source/engine/sp
 `spui` layouts using the dictionary that EA's own UI Designer shipped inside the game (14 `xml`
 resources → 306 `proxy` ids), and the Title state renders the game's windows at the game's own
 coordinates with the game's own captions ("Create a New Game", "color picker", "Selected Color",
-"Pick A Star For Your New Game"). The layout→text chain is closed: **1,391 of 1,426 caption
-references (97.5%) resolve to real strings**, because the EP1 text turned out to live in **nested
-packages** (a DBPF inside a DBPF) that nothing had ever opened. `analysis/shots/spui_real.png`.
+"Pick A Star For Your New Game"). The layout→text chain is closed: **1,384 of 1,426 caption
+references (97.1%) resolve to real strings**, because the text turned out to live at **three depths** —
+flat `Data/Locale/en-us`, nested inside `DataEP1/Spore_EP1_Locale_0{1,2}`, and nested inside
+`Data/PatchData` (a DBPF inside a DBPF, which nothing outside the engine had ever enumerated).
+`analysis/shots/spui_real.png`. What is left on this step is not data but **driving**: the state
+machine does not yet choose which layout to show.
 
 ### What the remaining 1 FAIL and 2 UNKNOWN actually are (all the SAME cause — not wrong claims)
 All three are the **vtable-only / uncovered-bytes wall**, not a reversal error:
@@ -54,7 +57,8 @@ killed process reports `0xFFFFFFFF`, which looks like a crash but is not (verifi
 below either way, yardstick 10/10 in both).
 
 Expected: `-> Main (explicit -id 0), description: "Spore Launch Screen"`; `captions: 2152 inline,
-1426 references (1391 resolve ..., 35 do not)`; `"Accept Reward"`. Yardstick 10/10, exit 0, 0 warnings.
+1426 references (1384 resolve ..., 42 do not)`; `"Accept Reward"`. Yardstick 10/10, exit 0, 0 warnings.
+Add `-exec spui:-gaps` for the coverage/semantic split of the 42.
 
 ### Numbers that are currently true (all measured, all reproducible)
 | thing | value |
@@ -62,7 +66,9 @@ Expected: `-> Main (explicit -id 0), description: "Spore Launch Screen"`; `capti
 | boot markers | 10/10, exit 0, 0 build warnings |
 | packages / resources | 57 / 150,945 (unchanged by any of today's refactors) |
 | game states recovered | **60 states, 17 modes**, entry `Main -id 0` → `GalaxyGameEntry` |
-| locale corpus | **369 tables / 37,608 entries / 14,657 keys** (was 197/18,441/10,246 before nested) |
+| locale corpus | **265 distinct tables from 5 containers / 23,933 distinct (table,key) texts / 32,038 entries / 14,657 keys** |
+| nested locale depths | 3: flat `Data/Locale/en-us`, nested in `DataEP1/Spore_EP1_Locale_0{1,2}`, **nested in `Data/PatchData`** |
+| layout→text chain | **1,384 / 1,426 refs resolve (97.1%)**; 42 left = 15 COVERAGE keys + 4 SEMANTIC keys |
 | spui layouts parsed | **748/748, 22,384 windows, 18,232 with a usable Area, 961,360 anchors** |
 | designer schema | **306 ids** (66 Class + 240 Property), 227 present in the binaries |
 | our own reversal audit | **29 PASS / 1 FAIL / 2 UNKNOWN / 1 SKIP** over 33 claims / 131 checks |
@@ -70,40 +76,68 @@ Expected: `-> Main (explicit -id 0), description: "Spore Launch Screen"`; `capti
 | feature map | engine 82.2%, overall 75.7% (261 features: 185 done / 25 partial / 51 todo) |
 
 ### THE NEXT STEP, precise and small
-**Mount the nested packages for ALL languages and finish the caption chain, then start composing a
-real screen.** Concretely, in order:
+**Steps 1 and 2 of yesterday's list are DONE** (recorded below so they are not re-done). The path
+forward is now the UI being DRIVEN, not just rendered:
 
-1. **`text.cpp`'s nested pass currently matches `instance == fnv1_lower(lang)`.** That worked for
-   en-us, but verify it for the other 14 languages before trusting it (one line of python, and
-   `tools/nested_langs.py` already prints the whole mapping — 21 nested packages, one per language).
-   If any language's nested instance is NOT its name hash, the rule needs a fallback.
-2. **The 35 unresolved caption references.** Two tables (`mvj` 0x277DEE6A, `legal` 0xADB810C4) are
-   absent from our 57 packages even at nested depth. Check whether they are in a package we do not
-   have at all (the tree has 57; the retail game ships more) — and if so, record it as a coverage gap,
-   not a format gap. `tools/spui_caption_gaps.py` is the classifier.
-3. **Then the visible goal: make Title draw a CHOOSABLE screen.** `spui::Reader::best_screen()` picks
-   the layout with the most usable Areas. The state script names the real ones
-   (`uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e`), so the honest next feature is:
-   `-state:Main` → load the layout the state's own `cheat` names → draw THAT, instead of the biggest.
-   This is the smallest step that turns "we can render a layout" into "the state machine drives the UI",
-   which is the actual Main→playable path.
-4. After that: the **`mode` table** (all 60 states log `mode X not executed`), then gameplay.
+1. **Let the state machine name the layout and draw THAT.** `spui::Reader::best_screen()` picks the
+   layout with the most usable Areas — our choice, not the game's. The recovered state script names
+   the real ones (`uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e`), so the honest feature is:
+   `-state:Main` → parse the state's own `uilayout`/`cheat` verbs → load the layout **it** names →
+   draw that. Smallest step that turns "we can render a layout" into "the state machine drives the
+   UI", which is the actual Main→playable path. The two 32-bit ids after the name are the next thing
+   to identify: one of them is almost certainly the `spui` instance, so check them against the
+   layout instances we already parse.
+2. Then the **`mode` table**: all 60 states still log `mode <M> NOT EXECUTED`.
+3. Then gameplay.
 
-### Three traps I fell into TODAY — do not repeat them
+### DONE today, so do not redo it (2026-10-14)
+* **The `fnv1_lower(lang)` rule for nested packages is verified for all 15 shipped languages**
+  (`tools/nested_all_langs.py`): 15/15 locale directories match a nested instance, none missing. The
+  same sweep found **five nested languages that ship in the data but have no locale directory here** —
+  `en-gb`, `pt-br`, `ko-kr`, `ja-jp`, `zh-tw` — named by inverting their instances through
+  `reg_file.txt`. No fallback rule is needed.
+* **The caption gaps are classified, and the premise was half WRONG.** `legal` `0xADB810C4` is not
+  missing: `Data/PatchData.package` carries its **own** nested locale packages (one per language, 42
+  en-us tables against EP1's 65), and the engine had been parsing them all along — only the measurement
+  tools could not see them, because they filtered on the filename `*Spore_EP1_Locale*`. Enumerate by
+  **TYPE** (`tools/nested_every.py`). Genuinely absent: `mvj` `0x277DEE6A`, 14 keys, all depths, all 57
+  containers → a COVERAGE gap, not a format gap. `spui -gaps` prints the split.
+* **A real engine bug found on the way: `get(table,key)` was ignoring the table.** `m_by_table` was
+  `std::map<u32,...>` while callers packed a `u64`; the implicit narrowing dropped the table half, so
+  it behaved as `get(key)` and served OTHER tables' strings to the menu. Corpus restated honestly:
+  265 tables / 23,933 distinct texts / 32,038 entries / 14,657 keys, and resolution 1,391 → **1,384**
+  (seven refs had been answering from the wrong table). Precedence between containers is now measured:
+  8,102 duplicate definitions agree, **3 disagree**, and EP1 winning is correct (it fixes the patch's
+  typo). 10 of 2,944 resources also repeat a key **inside** one resource (`tools/locale_dupkeys.py`) —
+  invisible to any `{key: text}` reader.
+
+### Five traps I fell into — do not repeat them
 1. **Double-visit.** The dev search list has both `Data=<exe>\Data` and `cwd=<exe>`, so a recursive
    `find_packages` visits every package TWICE. I hit this twice in one session (`spui` reported 1,349
    layouts where the corpus has 748; `appstates` listed 5 copies of a script that exists 3 times) even
    though the `pkg` verb has carried the `weakly_canonical` dedupe for weeks and MEMORY.md documents it.
    **Any new package scan must dedupe by canonical path.**
-2. **Container depth.** "The data does not exist" was wrong THREE times this session, in three
-   different shapes: wrong directory (`exe_dir/Locale` vs `Data/Locale`), wrong id field
-   (`SporeAppStates` is an INSTANCE, not a group), wrong depth (the EP1 text is a DBPF inside a DBPF).
-   **Before concluding data is missing, enumerate: all types, all id fields, all depths.**
+2. **"The data does not exist" has now been WRONG FOUR TIMES, in four different shapes.** Wrong
+   directory (`exe_dir/Locale` vs `Data/Locale`). Wrong id field (`SporeAppStates` is an INSTANCE, not
+   a group). Wrong **container depth** (the EP1 text is a DBPF inside a DBPF). Wrong **scoping of the
+   search** (`legal` was called absent for two sessions because my tools filtered on the FILENAME
+   `*Spore_EP1_Locale*`, while `Data/PatchData.package` hides its own nested locale packages — the
+   ENGINE saw them, only the measurement was blind). **Before concluding data is missing, enumerate:
+   all types, all id fields, all depths, and check that your SEARCH is typed rather than named.**
 3. **A FAIL from a tool is a hypothesis about the TOOL.** 12 of the 13 audit FAILs were bugs in my own
    checker, not in our reversal (`Memory.getInt(a, TRUE)` is big-endian; `JArray("b")` needs the
    `JByte` class; Ghidra prints `JZ` where objdump prints `je`; a function body can be
    non-contiguous, so "absent" meant "not looked at"; a function-pointer handoff is invisible to a
    call-list check). **Read the evidence, never act on the verdict alone.**
+4. **An implicit 64→32 narrowing in a map key compiles clean at 0 warnings and silently discards a
+   dimension.** `m_by_table` was `std::map<u32,...>` fed `((u64)table<<32)|key`, so `get(table,key)`
+   *was* `get(key)` — the exact failure the per-table key space design exists to prevent, serving other
+   tables' strings to our menu for a whole session. **Grep `<< 32` and check the destination type.**
+5. **A number that goes DOWN can be the correction.** Fixing bug 4 moved resolution 1,391 → 1,384 of
+   1,426. Seven of the old "successes" were answers from the wrong table. And the giveaway had already
+   printed itself in my own log line the same morning: "14,657 distinct (table,key) texts" *equal to*
+   "14,657 distinct keys" — two counts that can only agree if one dimension is unused. **When two
+   independent counts come out identical, suspect that one of them is not measuring what it claims.**
 
 ### Toolchain, if you need the binary again
 * **REA is primary** for interactive questions: `rea decompile <oracle> 0x810940 --provider ghidra --json`.
