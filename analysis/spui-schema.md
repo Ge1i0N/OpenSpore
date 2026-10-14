@@ -177,6 +177,60 @@ resolve that table's keys to the game's own strings. The open items (the presenc
 schema ids that make a sequential walk derail in 637/748 files, why `Area`'s payload is 16 bytes but
 some records are 14) are no longer on the critical path for showing a menu — they are refinements.
 
+## The widget HIERARCHY is in the data: `Children` = `0xEEC1B00B` (found 2026-10-15)
+
+The engine has been GUESSING z-order — `spui::paint_order()` paints the largest Area first and
+`hit_test()` selects the smallest containing Area. Those two rules agree with each other, which is what
+makes clicks honest today, but neither reads the layout's real parent/child tree. The tree exists, and
+it was already on disk twice over.
+
+**1. The designer schema defines it.** Parsing the shipped `xml` resources by ATTRIBUTE (my first
+attempt grepped only `proxy=`, which holds the hex id, and so returned ids with no names and looked
+like a negative result - it was not; the names are in `name=`):
+
+```
+0xeec1b000  WindowFlags      0xeec1b005  Area            0xeec1b00a  Caption
+0xeec1b001  ControlID        0xeec1b006  BackgroundColor 0xeec1b00b  Children
+0xeec1b002  CommandID        0xeec1b007  Drawable        0xeec1b00c  WinProcs
+0xeec1b004  ShadeColor       0xeec1b00e  TextFont
+```
+
+`Children` sits in the same group as `ControlID` and `CommandID`, which is exactly where a container's
+child list belongs. (Same group also names the *other* structural candidates: `WinProcs`,
+`ButtonGroupID` `0xeec1d005`, `ButtonStateFlags` `0xeec1d001`.)
+
+**2. It is present in the layouts.** In `E3LaunchScreen` (`0xE932BD44`, the screen the state script
+names) there are **13 `Children` records**, every one with `code=19` (the array code), `marker=0x0001`,
+and a u16 count immediately after the header. Measured counts, in file order:
+
+```
+63, 69, 74, 79, 84, 89, ...
+```
+
+**3. What follows the count is a NESTED BLOCK of the child's own property records**, and the blocks are
+byte-identical in shape across occurrences - each begins with the same sequence, e.g.
+
+```
+02 D0 C1 EE 09 00 01 00 00 00 00 00    ButtonFlags/Direction = 0
+01 D0 C1 EE 09 00 01 00 00 00 00 00    ButtonStateFlags = 0
+07 B0 C1 EE 13 00 01 00 <count>        Drawable, code 19, ITS OWN nested array
+04 D0 C1 EE 09 00 01 00 01 00 00 00    Alignment = 1
+06 D0 C1 EE 14 00 01 00 32 00 00 00    CaptionBorder, code 20 (6-byte payload)
+```
+
+so children are serialised INLINE, each as a full property set, and the array code 19 nests.
+
+**WHAT IS NOT SETTLED, stated rather than glossed:** whether the u16 after `Children` is a CHILD COUNT,
+a RECORD COUNT, or a BYTE LENGTH. The values rise by ~5 per record while the following blocks look
+identical in shape, which fits "one more child each time" only if a child contributes five records -
+plausible but not measured. Do not build on the number until it is; the tree can be walked from the
+nested blocks themselves without it.
+
+**Consequence for the engine:** the paint order and the hit order can both come from the tree the
+designer actually built, instead of two heuristics that happen to agree. `spui::paint_order()` and
+`spui::hit_test()` are the two functions to replace, and they were written to be replaced - the real
+hierarchy is named in both as the single place to change.
+
 ## What is still not known (recorded, not hidden)
 
 * **The exact record framing.** Pitch is stable per id, but the value does not occupy the whole gap:
