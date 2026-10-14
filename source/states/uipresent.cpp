@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <map>
+#include <set>
 #include <string>
 
 #include "engine/appstates.h"  // the state's own script, which names the screen
@@ -43,6 +44,39 @@ struct CachedTexture {
 
 std::map<TextureKey, CachedTexture> g_textures;
 
+struct ResourceLocation {
+    std::string path;
+    u32 record = 0;
+};
+
+std::map<TextureKey, ResourceLocation> g_resources;
+bool g_resources_indexed = false;
+
+void index_external_resources() {
+    if (g_resources_indexed) return;
+    g_resources_indexed = true;
+    std::set<std::string> seen;
+    u32 packages = 0, records = 0, pngs = 0;
+    for (const auto& sp : os::fs::search_paths()) {
+        for (const auto& path : os::pkg::find_packages(sp.dir.string())) {
+            if (!seen.insert(path).second) continue;
+            os::pkg::Package package;
+            if (!package.open(path)) continue;
+            ++packages;
+            for (u32 n = 0; n < package.records().size(); ++n) {
+                const auto& record = package.records()[n];
+                ++records;
+                if (record.type() != 0x2f7d0004u) continue;
+                ++pngs;
+                g_resources.emplace(TextureKey{record.instance(), record.type(), record.group()},
+                                     ResourceLocation{path, n});
+            }
+        }
+    }
+    LOG_INFO("ui", "drawable resource index: %u packages, %u records, %u PNG entries, %zu keys",
+             packages, records, pngs, g_resources.size());
+}
+
 CachedTexture& load_external(const os::spui::Layout& lay, u16 ref) {
     static CachedTexture missing;
     if (ref == 0xffff || ref >= lay.external_resources.size()) return missing;
@@ -51,26 +85,26 @@ CachedTexture& load_external(const os::spui::Layout& lay, u16 ref) {
     CachedTexture& cached = g_textures[key];
     if (cached.attempted) return cached;
     cached.attempted = true;
-    for (const auto& sp : os::fs::search_paths()) {
-        for (const auto& path : os::pkg::find_packages(sp.dir.string())) {
-            os::pkg::Package package;
-            if (!package.open(path)) continue;
-            for (u32 n = 0; n < package.records().size(); ++n) {
-                const auto& record = package.records()[n];
-                if (record.type() != e.type || record.group() != e.group || record.instance() != e.instance)
-                    continue;
-                std::vector<u8> bytes, bgra;
-                int width = 0, height = 0;
-                if (!package.read_resource_decoded(n, bytes) ||
-                    !image::decode_from_memory(bytes.data(), bytes.size(), bgra, width, height)) continue;
+    index_external_resources();
+    const auto location = g_resources.find(key);
+    if (location != g_resources.end()) {
+        os::pkg::Package package;
+        if (package.open(location->second.path)) {
+            std::vector<u8> bytes, bgra;
+            int width = 0, height = 0;
+            if (package.read_resource_decoded(location->second.record, bytes) &&
+                image::decode_from_memory(bytes.data(), bytes.size(), bgra, width, height)) {
                 cached.texture = render::device().create_texture_bgra(bgra.data(), width, height);
                 cached.width = width;
                 cached.height = height;
                 LOG_INFO("ui", "drawable PNG: %s rec[%u] instance=0x%08X %dx%d",
-                         std::filesystem::path(path).filename().string().c_str(), n, e.instance,
-                         width, height);
+                         std::filesystem::path(location->second.path).filename().string().c_str(),
+                         location->second.record, e.instance, width, height);
                 return cached;
             }
+            LOG_WARN("ui", "drawable PNG decode/read failed: %s rec[%u] instance=0x%08X",
+                     std::filesystem::path(location->second.path).filename().string().c_str(),
+                     location->second.record, e.instance);
         }
     }
     LOG_WARN("ui", "drawable external unresolved: instance=0x%08X type=0x%08X group=0x%08X",
