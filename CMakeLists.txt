@@ -129,6 +129,7 @@ set(OS_SOURCES
   source/states/statemgr.cpp
   source/states/loader.cpp
   source/states/title.cpp
+  source/states/uipresent.cpp
 )
 
 add_executable(OpenSpore WIN32 ${OS_SOURCES} ${OS_RC_FILE})

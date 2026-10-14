@@ -97,6 +97,25 @@ private:
 
 Table& instance();
 
+// The UI verbs a state's script carries. The recovered script contains exactly ONE UI command in
+// the whole file - state DevLauncher's `cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`
+// - and its twin `-unload` on exit. This is the seam between "we render a layout" and "the state
+// machine drives the UI": the script names the screen, and spui::Reader::find_by_name() resolves
+// that name to a resource instance (E3LaunchScreen -> 0xE932BD44, measured).
+//
+// The two trailing ids are KEPT, not discarded. They are not resource ids (they appear in no
+// type/group/instance field of any of the 150,945 records in the corpus) and no name in the 131,854
+// registry names hashes to them; the first appears twice inside the spui byte corpus, the second
+// nowhere. So they are internal to the layout or runtime handles - UNRESOLVED, and dropping them
+// would make that look like a decision rather than an open question.
+struct UiCommand {
+    std::string name;      // the layout name, verbatim from the script
+    u32 id1 = 0;           // the first trailing id, unexplained
+    u32 id2 = 0;           // the second trailing id, unexplained
+    bool unload = false;   // `-unload` (teardown) rather than `-load`
+};
+std::vector<UiCommand> ui_commands(const GameState& gs);
+
 // Registers every game state into our AppStateManager analog, so `-state:TribalAccessoriesEditor`
 // resolves to the real state with the real id. States whose name collides with one we already own
 // (Loader, Title) are skipped with a log line rather than silently shadowing ours.

@@ -9,6 +9,7 @@
 
 #include "engine/fs.h"
 #include "engine/log.h"
+#include "engine/naming.h"  // hash_lower, so a state script's layout NAME becomes an INSTANCE
 #include "engine/pkg.h"
 #include "engine/spui_schema.inc"
 
@@ -256,6 +257,8 @@ std::string Layout::name() const {
 void Reader::load(size_t limit) {
     m_loaded = false;
     m_layouts.clear();
+    m_by_instance.clear();
+    m_shadowed = m_distinct = 0;
     ensure_schema();
     size_t scanned = 0;
     if (limit == 0) limit = SIZE_MAX;  // 0 means "all of them", not "none"
@@ -292,6 +295,30 @@ void Reader::load(size_t limit) {
             L.instance = r.instance();
             parse_layout(bytes, L);
             if (L.windows.empty()) continue;   // nothing readable: do not pretend it is a screen
+            // PRECEDENCE, EXPLICIT. The corpus holds 748 `spui` RESOURCES but only 524 distinct
+            // INSTANCES, so 224 layouts ship more than once - E3LaunchScreen is in Data/PatchData at
+            // 4,486 B and in Data/Spore_Graphics at 4,480 B. The FIRST container on the search path
+            // wins, because that is what mounting a patch ahead of the content packages MEANS:
+            // PatchData's job is to override base content. Before this, find() returned whichever
+            // copy the traversal happened to reach first - the same accident of traversal order that
+            // I just removed from text.cpp's locale precedence, re-introduced in a different
+            // subsystem. A rule has to be stated once, in one place, or it drifts.
+            const size_t idx = m_layouts.size();
+            auto ins = m_by_instance.emplace(L.instance, idx);
+            if (!ins.second) {
+                ++m_shadowed;
+                const Layout& keeper = m_layouts[ins.first->second];
+                if (keeper.bytes != L.bytes) {
+                    if (m_shadowed_diff < 6) {
+                        LOG_INFO("spui", "layout 0x%08X: %s (%u B) shadowed by %s (%u B) - the "
+                                         "earlier container wins", L.instance, pname.c_str(),
+                                 L.bytes, keeper.package.c_str(), keeper.bytes);
+                    }
+                    ++m_shadowed_diff;
+                }
+            } else {
+                ++m_distinct;
+            }
             m_layouts.push_back(std::move(L));
         }
     }
@@ -312,17 +339,28 @@ void Reader::load(size_t limit) {
             else if (w.caption_is_ref) ++caps_ref_nokey;
         }
     }
-    LOG_INFO("spui", "parsed %zu/%zu layouts: %zu windows, %zu with a usable Area (%zu anchors read, "
-                     "%d schema ids); captions: %zu inline, %zu (table,key), %zu table-only",
-             m_layouts.size(), scanned, wins, areas, anchors, kSchemaCount,
+    LOG_INFO("spui", "parsed %zu layouts from %zu %s (%zu distinct instances, %zu shadowed by an "
+                     "earlier container, %zu of those with a different size): %zu windows, %zu with "
+                     "a usable Area (%zu anchors read, %d schema ids); captions: %zu inline, "
+                     "%zu (table,key), %zu table-only",
+             m_layouts.size(), scanned, scanned == 1 ? "resource" : "resources", m_distinct,
+             m_shadowed, m_shadowed_diff, wins, areas, anchors, kSchemaCount,
              caps_inline, caps_ref_key, caps_ref_nokey);
 }
 
 const Layout* Reader::find(u32 inst) const {
-    for (const Layout& L : m_layouts) {
-        if (L.instance == inst) return &L;
-    }
-    return nullptr;
+    auto it = m_by_instance.find(inst);
+    return it == m_by_instance.end() ? nullptr : &m_layouts[it->second];
+}
+
+const Layout* Reader::find_by_name(const std::string& name) const {
+    // A state script names a layout in plain text, and the resource INSTANCE is that name run
+    // through the engine's own hash - the same rule that names a locale table and a nested package.
+    // Measured: E3LaunchScreen -> 0xE932BD44 (a real spui record, in two containers),
+    // LaunchScreen -> 0x562AB2CC (one record). Nothing is guessed here: if the hash does not land on
+    // an instance, the answer is null, and the caller says so rather than inventing a screen.
+    if (name.empty()) return nullptr;
+    return find(naming::hash_lower(name.c_str()));
 }
 
 const Layout* Reader::best_screen() const {

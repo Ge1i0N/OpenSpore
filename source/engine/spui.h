@@ -28,11 +28,21 @@
 // pair and reads each record's own value, which is exact for what it covers and does not depend on the
 // bytes in between. The remaining work is extending the vocabulary, not understanding the structure.
 //
-// THE MENU PAYLOAD: code 18 is overloaded, split by a leading u16 of 0xFFFF - 4,207 inline UTF-16
-// strings and 3,107 references, of which 21 of 36 distinct values are real en-us `locale` TABLE
-// INSTANCES (accidental rate 4.66e-08). So a layout names the TEXT TABLE it draws from, not a
-// per-string key, and engine/text.cpp already resolves those tables. That is the link between the UI
-// layout, the state machine and the localized text.
+// THE MENU PAYLOAD: code 18 is overloaded, split by a leading u16 of 0xFFFF. A reference is
+// `0xFFFF | table:u32 | key:u32`, so a layout names BOTH the locale TABLE and the KEY within it -
+// 1,384 of 1,426 references resolve to real en-us strings through engine/text.cpp (the remaining 42
+// are classified by `spui -gaps`: 15 keys whose table is not in our corpus at all, 4 keys a present
+// table does not define). The earlier reading that a layout names only a TABLE was superseded by that
+// measurement. This is the link between the UI layout, the state machine and the localized text.
+//
+// WHAT THE STATE SCRIPT GIVES THE UI: `uilayout -load <name> <id> <id>` (the only UI verb in the
+// whole recovered script, in state DevLauncher). The NAME hashes to the layout's instance -
+// E3LaunchScreen -> 0xE932BD44, a real `spui` record - so a state can select its screen by name. The
+// two trailing ids are NOT resource ids (they appear in no type/group/instance field of any of the
+// 150,945 records) and no registry name hashes to them; the first appears twice inside the spui byte
+// corpus and the second not at all, so they are internal to the layout or runtime handles. Unresolved
+// and currently unnecessary: `spui::Reader::find_by_name()` does not need them.
+#include <map>
 #include <string>
 #include <vector>
 
@@ -89,14 +99,44 @@ public:
 
     bool loaded() const { return m_loaded; }
     const std::vector<Layout>& layouts() const { return m_layouts; }
+    // The layout whose INSTANCE is `inst`, or null. PRECEDENCE IS EXPLICIT, not an accident of
+    // traversal order: the corpus carries 748 `spui` RESOURCES but only 524 distinct INSTANCES, so
+    // 224 layouts are shipped more than once (E3LaunchScreen is in both Data/PatchData.package,
+    // 4,486 B, and Data/Spore_Graphics.package, 4,480 B). The container that comes FIRST on the
+    // engine's search path wins, because that is what mounting a patch ahead of the content
+    // packages means - and it makes PatchData override base content, which is its job.
+    // XXX ASSUMED, NOT REVERSED: the original's own resource-cache resolution order is not yet read
+    // off the disassembly. text.cpp currently uses the OPPOSITE rule (last parsed wins), so the two
+    // subsystems can disagree for a resource in both. The affected surface is measured and small -
+    // 3 locale strings out of 23,933 - and it is recorded as an open question rather than hidden.
     const Layout* find(u32 instance) const;
+    // The layout a STATE SCRIPT names, e.g. `uilayout -load E3LaunchScreen`. This is the seam
+    // between "we can render a layout" and "the state machine drives the UI": the script gives a
+    // NAME, and fnv1_lower(name) is the resource INSTANCE (measured: E3LaunchScreen -> 0xE932BD44,
+    // which is a real `spui` record; LaunchScreen -> 0x562AB2CC, likewise). Names are never hashed
+    // by guesswork here - see the note on ids in analysis/states.md.
+    const Layout* find_by_name(const std::string& name) const;
+    // How many of the parsed resources were SHADOWED, i.e. their instance already came from an
+    // earlier container. Reported so the 748-vs-524 gap is a number, not a footnote.
+    size_t shadowed() const { return m_shadowed; }
+    size_t distinct_instances() const { return m_distinct; }
+    // Of the shadows, how many hide a DIFFERENT byte length - i.e. how much the precedence rule
+    // could actually change what is drawn. Zero would make the whole question moot; it is not zero.
+    size_t shadowed_differing() const { return m_shadowed_diff; }
     // The layout with the most windows that have a usable Area, which is what a screen needs.
+    // This is OUR choice of what to show; prefer find_by_name() when a state names one.
     const Layout* best_screen() const;
     std::string stats() const;
 
 private:
     bool m_loaded = false;
     std::vector<Layout> m_layouts;
+    std::map<u32, size_t> m_by_instance;  // instance -> index into m_layouts, FIRST container wins
+    size_t m_shadowed = 0;
+    size_t m_distinct = 0;
+    // Shadows whose byte size DIFFERS from the winner - the ones that could actually change what is
+    // on screen, and therefore the measure of how much the (assumed) precedence rule matters.
+    size_t m_shadowed_diff = 0;
 };
 
 Reader& instance();

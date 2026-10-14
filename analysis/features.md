@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 82.2%** | **Overall: 75.7%** | done 185 / partial 25 / todo 51 (261 features)
+**Engine reversal: 82.4%** | **Overall: 76.0%** | done 190 / partial 26 / todo 51 (267 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **47%** | 12 | 6 | 14 |
+| formats | **54%** | 17 | 7 | 14 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **30%** | 2 | 2 | 6 |
@@ -281,13 +281,13 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | RW device bridge | field guide 3 |
 | ⬜ | todo | RW state blocks |  |
 | ⬜ | todo | shaders |  |
-| 🚧 | partial | UI (UTFWin) | menus are spui resources (524; 407 named); classes + request site found |
+| 🚧 | partial | UI (UTFWin) | layouts render with geometry, colours, alphas and the game's own captions, and a STATE can now select which layout shows. Not reversed: widgets' behaviour (click handlers, the 637/748 vocabulary gap, the mode table). |
 
 ---
 
-## formats — 47%
+## formats — 54%
 
-*12 done · 6 partial · 14 todo*
+*17 done · 7 partial · 14 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -308,11 +308,11 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | spui windows | engine/spui.cpp: 400 layouts, 11,465 windows, 9,547 with a usable Area, 472,291 records; Area is LEFT,TOP,RIGHT,BOTTOM (the LTRB reading raised usable areas 7,838 -> 9,547) |
 | ✅ | done | spui drawn on screen | Title renders the real layout at real coordinates with the game's own captions (Create a New Game / color picker / Selected Color) over the real UI atlas |
 | ✅ | done | spui alphas | the shipped ARGB is meaningful (0x007F7F7F transparent); forcing alpha opaque turned the screen into slabs - use as stored + outline |
-| ⬜ | todo | spui all 748 layouts | Reader::load caps at 400 |
+| ✅ | done | spui all 748 layouts | 748/748 resources parsed (22,384 windows, 18,232 with a usable Area, 961,360 anchors) - BUT only 524 distinct INSTANCES: 224 layouts ship more than once, 18 of the shadows with a different byte length. 748 was resources, not screens. |
 | ✅ | done | layout table -> text | caption ref is 0xFFFF|table|key; 1,391 of 1,426 resolve (97.5%) after mounting the nested EP1 packages; 35 remain (mvj, legal) |
 | ✅ | done | nested packages (DBPF in DBPF) | DataEP1/Spore_EP1_Locale_* hold 21 resources of type `package` (0x06EFC6AA), each itself a DBPF, together 1,364 locale resources; the en-us one is instance fnv1_lower("en-us")=0x7080DB55 |
 | ✅ | done | locale corpus | 369 tables / 37,608 entries / 14,657 keys (was 197 / 18,441 / 10,246 with the flat pass alone) |
-| ✅ | done | layout -> locale table | code 18 splits on 0xFFFF: 4,207 inline UTF-16 + 3,107 refs, of which 21/36 distinct are en-us locale TABLE instances (accidental rate 4.66e-08); 0x2B7A0311 = fnv1_lower(GalaxyGameEntry) in BOTH directions |
+| ✅ | done | layout -> locale table | code 18 = 0xFFFF|table:u32|key:u32 (a KEY, not just a table). 1,384 of 1,426 refs resolve (97.1%); 2,152 inline. Was 1,391 - and 7 of those were answers from the WRONG table, because m_by_table was map<u32,...> fed a u64 key, so the table half was silently truncated away. |
 | ⬜ | todo | spui full sequential parse | walk derails in 637/748 with 'id not in schema' - the designer XML lists only 227 of the ids the binaries use. Remaining work is VOCABULARY, not structure |
 | 🚧 | partial | gmsh | stable 24-byte header found (BE words + float runs); layout not derived |
 | 🚧 | partial | blockdata | vec3 array; first two = min/max bbox |
@@ -323,6 +323,12 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | shader bytecode |  |
 | ⬜ | todo | texture atlas |  |
 | ⬜ | todo | model (rw4) | gates the whole content set |
+| ✅ | done | state drives the UI | `cheat "uilayout -load E3LaunchScreen"` in state DevLauncher is EXECUTED, not reported unrunnable: name -> fnv1_lower -> instance 0xE932BD44 -> our spui reader -> 68 windows drawn by states/uipresent.cpp. The frame differs from our own largest-layout pick in 65.9% of sampled pixels, so this is a different SCREEN, not a relabel. analysis/shots/spui_e3launch.png |
+| ⬜ | todo | uilayout's two trailing ids | 0x027996d8 / 0x0279bf9e are NOT resource ids (absent from every type/group/instance field of all 150,945 records) and no registry name hashes to them; the first appears twice in the spui byte corpus, the second nowhere. Internal to the layout, or runtime handles. |
+| 🚧 | partial | spui precedence (resource cache) | ASSUMED, not reversed: spui takes the FIRST container (so PatchData overrides base content), text takes the LAST parsed - two different rules in one engine. Measured surface: 18 spui layouts and 3 of 23,933 locale strings could differ. EP1 beating PatchData on locale is provably right (EP1 fixes the patch's typo), so the real rule is not simply 'earliest wins'. |
+| ✅ | done | locale at three depths | flat Data/Locale/<lang> + nested in DataEP1/Spore_EP1_Locale_0{1,2} + nested in Data/PatchData (42 en-us tables). 265 distinct tables from 5 containers, 23,933 distinct (table,key) texts. The third depth was invisible for two sessions because the search was scoped by FILENAME (*Spore_EP1_Locale*) instead of by TYPE. |
+| ✅ | done | caption gaps classified | spui -gaps splits the 42 unresolved refs into COVERAGE (table instance absent from the corpus: mvj 0x277DEE6A, 14 keys) and SEMANTIC (table present, key missing: 4 keys). `legal` 0xADB810C4 was on the missing list for two sessions and is NOT missing - it ships in PatchData's nested packages. |
+| ✅ | done | intra-resource repeated key | 10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original). |
 
 ---
 

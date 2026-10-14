@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "engine/appstates.h"  // the state's OWN script, which names the screen to show
 #include "engine/fs.h"
 #include "engine/log.h"
 #include "engine/naming.h"
@@ -14,6 +15,7 @@
 #include "render/device.h"
 #include "render/imgfile.h"
 #include "render/overlay.h"
+#include "states/uipresent.h"
 
 // A first real UI state: the game's title/launch screen, composed on OUR renderer from the game's
 // own UI atlas. It exists to exercise the state machine (entry/exit/tick/render) and to show real
@@ -88,93 +90,22 @@ void title_tick(f32 dt) {
 void title_render() {
     using namespace os::render;
     Device& dev = device();
-    Overlay& ov = overlay();
     if (!dev.d3d()) return;
-    if (!dev.begin_frame()) return;
-    int w = dev.width(), h = dev.height();
-    dev.clear(0xFF0A0C10);
-    ov.begin(w, h);
-    if (g_bg) ov.image(0.f, 0.f, (float)w, (float)h, g_bg, g_bg_w, g_bg_h, false);
 
-    // THE REAL LAYOUT. The game's own UI designer schema (shipped as 14 `xml` resources) lets us read
-    // the `spui` layouts, so this draws the game's windows at the game's own coordinates with the
-    // game's own captions - not a menu we invented. The layout is scaled from its design resolution
-    // to the viewport so it is visible at any window size.
-    const auto* lay = os::spui::instance().best_screen();
-    if (lay) {
-        // Design resolution: the widest right/bottom seen among usable rects, rounded up to a
-        // conventional UI size. Measured rather than assumed, so the scale is honest.
-        float maxr = 0.f, maxb = 0.f;
-        for (const auto& win : lay->windows) {
-            if (!win.has_area) continue;
-            maxr = std::max(maxr, win.area.right);
-            maxb = std::max(maxb, win.area.bottom);
-        }
-        const float sx = maxr > 1.f ? (float)w / maxr : 1.f;
-        const float sy = maxb > 1.f ? (float)h / maxb : 1.f;
-        char head[160];
-        std::snprintf(head, sizeof(head), "real spui layout: %s  scaled x%.3f / x%.3f",
-                      lay->name().c_str(), sx, sy);
-        ov.text_fmt(48.f, 22.f, 0xFF8FB8D8, "%s", head);
-        size_t drawn = 0;
-        for (const auto& win : lay->windows) {
-            if (!win.has_area) continue;
-            const float x = win.area.left * sx, y = win.area.top * sy;
-            const float bw = win.area.w() * sx, bh = win.area.h() * sy;
-            if (x + bw < 0.f || y + bh < 0.f || x > (float)w || y > (float)h) continue;
-            // The window's own colour, used AS STORED including its alpha. Forcing alpha to 0xFF here
-            // (which an earlier revision did) turned the layout into opaque slabs: the shipped values
-            // carry meaningful transparency (BackgroundColor 0x007F7F7F is a fully transparent gray,
-            // ShadeColor 0xFFFFFFFF is opaque white). Transparency is part of the data.
-            const u32 bg = win.bg_color;
-            const f32 x2 = x + bw, y2 = y + bh;
-            if ((bg >> 24) != 0) ov.rect(x, y, bw, bh, bg);
-            // Always outline, so a transparent window is still visible as the box the designer placed.
-            const u32 edge = (win.shade_color >> 24) != 0 ? (win.shade_color & 0xFFFFFFu) | 0x90000000u
-                                                          : 0x70A8C8E0u;
-            ov.rect(x, y, bw, 1.f, edge);
-            ov.rect(x, y2 - 1.f, bw, 1.f, edge);
-            ov.rect(x, y, 1.f, bh, edge);
-            ov.rect(x2 - 1.f, y, 1.f, bh, edge);
-            if (!win.caption.empty() || win.caption_is_ref) {
-                // The text is the GAME'S, resolved two ways: inline UTF-16 straight out of the layout,
-                // or the (table, key) pair the layout's Caption record carries, resolved through the
-                // locale tables we parse in engine/text.cpp. The second path is the one that lights up
-                // most widgets - 1,097 of 1,426 reference records carry a key that is a real key of the
-                // referenced table (tools/spui_caption_ref.py).
-                std::string cap;
-                if (!win.caption.empty()) {
-                    cap = win.caption;
-                } else if (win.caption_key_seen) {
-                    cap = os::text::instance().get(win.caption_table, win.caption_key);
-                }
-                if (cap.empty()) {
-                    // Nothing resolved: show WHAT it points at, so the screen documents the gap
-                    // instead of inventing a label (the `Load Game` lesson from the Title menu).
-                    char rb[48];
-                    std::snprintf(rb, sizeof(rb), "[tbl 0x%08X]", win.caption_table);
-                    cap = rb;
-                }
-                cap = os::text::to_display_ascii(cap);
-                if (cap.size() > 44) cap = cap.substr(0, 44) + "...";
-                if (bw >= 24.f && bh >= 10.f) {
-                    ov.text_fmt(x + 3.f, y + bh * 0.5f - 7.f, 0xFFF4F8FC, "%s", cap.c_str());
-                }
-            }
-            if (++drawn >= 260) break;
-        }
-        char foot[180];
-        std::snprintf(foot, sizeof(foot),
-                      "%zu windows drawn from %zu records; captions are the game's own strings",
-                      drawn, lay->anchors);
-        ov.text_fmt(48.f, (float)h - 62.f, 0xFF90A8B8, "%s", foot);
-        ov.end();
-        dev.end_frame();
-        return;
-    }
+    // THE REAL LAYOUT, through the same path every game state uses (see states/uipresent.h).
+    // Title is OUR state, not one from the game's script, so it has no opinion about which layout to
+    // show and falls back to the largest readable one - and the frame says exactly that, because
+    // "the game asked for this" and "we picked this" are different claims.
+    if (present_ui_screen(true, g_bg, g_bg_w, g_bg_h)) return;
 
     // Fallback: no layout parsed (missing packages), so show the state-machine menu we resolve from
     // the locale tables instead of nothing.
+    Overlay& ov = overlay();
+    if (!dev.begin_frame()) return;
+    const int w = dev.width(), h = dev.height();
+    dev.clear(0xFF0A0C10);
+    ov.begin(w, h);
+    if (g_bg) ov.image(0.f, 0.f, (float)w, (float)h, g_bg, g_bg_w, g_bg_h, false);
     auto& tx = os::text::instance();
     float pad = 60.f;
     ov.text_fmt(pad, pad, 0xFFFFE8A0, "OpenSpore");

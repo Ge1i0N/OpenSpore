@@ -6,317 +6,1391 @@
     {
       "name": "harness",
       "features": [
-        {"name": "diag install", "status": "done", "note": "no modal dialogs (field guide 4)"},
-        {"name": "non-fatal asserts", "status": "done", "note": "diag.cpp"},
-        {"name": "exception filter", "status": "done", "note": "SetUnhandledExceptionFilter"},
-        {"name": "symbol handler", "status": "done", "note": "dbghelp SymInitialize"},
-        {"name": "stack walk", "status": "done", "note": "symbolised file:line"},
-        {"name": "log file", "status": "done", "note": "share-readable OpenSpore.log"},
-        {"name": "log console", "status": "done", "note": "consolidated per call-site ledger"},
-        {"name": "log levels", "status": "done", "note": "-logLevel fatal..trace"},
-        {"name": "log once", "status": "done", "note": "one line per call site"},
-        {"name": "console cmds", "status": "done", "note": "help/logLevel/echo/quit/state/pkg"},
-        {"name": "console stdin", "status": "done", "note": "reads the parent console"},
-        {"name": "fault tolerance", "status": "done", "note": "5 aborts recovered; storm limit"},
-        {"name": "frame capture", "status": "done", "note": "BMP between EndScene and Present"},
-        {"name": "config file", "status": "todo", "note": "no ini/config layer yet"}
+        {
+          "name": "diag install",
+          "status": "done",
+          "note": "no modal dialogs (field guide 4)"
+        },
+        {
+          "name": "non-fatal asserts",
+          "status": "done",
+          "note": "diag.cpp"
+        },
+        {
+          "name": "exception filter",
+          "status": "done",
+          "note": "SetUnhandledExceptionFilter"
+        },
+        {
+          "name": "symbol handler",
+          "status": "done",
+          "note": "dbghelp SymInitialize"
+        },
+        {
+          "name": "stack walk",
+          "status": "done",
+          "note": "symbolised file:line"
+        },
+        {
+          "name": "log file",
+          "status": "done",
+          "note": "share-readable OpenSpore.log"
+        },
+        {
+          "name": "log console",
+          "status": "done",
+          "note": "consolidated per call-site ledger"
+        },
+        {
+          "name": "log levels",
+          "status": "done",
+          "note": "-logLevel fatal..trace"
+        },
+        {
+          "name": "log once",
+          "status": "done",
+          "note": "one line per call site"
+        },
+        {
+          "name": "console cmds",
+          "status": "done",
+          "note": "help/logLevel/echo/quit/state/pkg"
+        },
+        {
+          "name": "console stdin",
+          "status": "done",
+          "note": "reads the parent console"
+        },
+        {
+          "name": "fault tolerance",
+          "status": "done",
+          "note": "5 aborts recovered; storm limit"
+        },
+        {
+          "name": "frame capture",
+          "status": "done",
+          "note": "BMP between EndScene and Present"
+        },
+        {
+          "name": "config file",
+          "status": "todo",
+          "note": "no ini/config layer yet"
+        }
       ]
     },
     {
       "name": "startup",
       "features": [
-        {"name": "wWinMain", "status": "done", "note": "thin entry -> app::run"},
-        {"name": "CRT startup", "status": "done", "note": "GetStartupInfo/argv walk documented"},
-        {"name": "cmdline tokenizer", "status": "done", "note": "quote/backslash aware"},
-        {"name": "first-arg fix", "status": "done", "note": "lpCmdLine has no program name"},
-        {"name": "arg lookup helper", "status": "done", "note": "0x0092b570"},
-        {"name": "arg census", "status": "done", "note": "76 sites, 60 names"},
-        {"name": "devDirs/shipDirs", "status": "done", "note": "precedence 0x7e838e"},
-        {"name": "path prefixes", "status": "partial", "note": "strings+order; assembly not walked"},
-        {"name": "window class", "status": "done", "note": "CreateWindowEx"},
-        {"name": "window create", "status": "done", "note": "client 1280x720 default"},
-        {"name": "app icon", "status": "done", "note": "assets/OpenSpore.ico embedded"},
-        {"name": "message pump", "status": "done", "note": "PeekMessage loop"},
-        {"name": "d3d9 create", "status": "done", "note": "single import Direct3DCreate9"},
-        {"name": "display mode", "status": "done", "note": "32-bit requirement 0x7e74a0"},
-        {"name": "present params", "status": "done", "note": "DISCARD swap, interval one"},
-        {"name": "device lost/reset", "status": "done", "note": "TestCooperativeLevel"},
-        {"name": "resize", "status": "done", "note": "WM_SIZE -> Reset"},
-        {"name": "font atlas", "status": "done", "note": "GDI rasterised, 95 glyphs"},
-        {"name": "state manager", "status": "done", "note": "AppStateManager analog"},
-        {"name": "Title UI state", "status": "done", "note": "a Title state (real UI atlas bg) auto->Loader; demonstrates transitions"},
-        {"name": "state register", "status": "done", "note": "FNV-1 ids, dup rejected"},
-        {"name": "startup chain traced", "status": "done", "note": "entry -> WinMain 0xf489e0 -> app_main 0xf48810 -> run 0xf47e90"},
-        {"name": "main loop located", "status": "done", "note": "0x8482f0: PeekMessageW/WM_QUIT/dispatch/Translate/DispatchMessageW"},
-        {"name": "single-instance guard", "status": "done", "note": "Global\\SporeEditorOrGame; -multipleInstances bypasses"},
-        {"name": "app-mode host", "status": "partial", "note": "CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked"},
-        {"name": "state goto", "status": "done", "note": "transitions, no nesting"},
-        {"name": "startup -state", "status": "done", "note": "colon form -state:Name works; confirmed by the shipped script's own header"},
-        {"name": "game state machine (DATA)", "status": "done", "note": "SporeAppStates trigger recovered: 8,499 B ArgScript, 60 states / 17 modes, entry Main -id 0 -> GalaxyGameEntry"},
-        {"name": "stage progression (DATA)", "status": "done", "note": "Cell -> Creature -> Tribe -> Civ -> Space, each with FromLaunchScreen/FromLoadGame/FromLevelEditor"},
-        {"name": "editor set (DATA)", "status": "done", "note": "13 editors share mode Editors; switch by kMessageSwitchEditor 0x22d308b + hash(Setup)"},
-        {"name": "uilayout verb located", "status": "done", "note": "the spui door: uilayout -load <name> <id1> <id2> (E3LaunchScreen 0x027996d8 0x0279bf9e)"},
-        {"name": "reversal audit (Ghidra/REA)", "status": "done", "note": "30 claims / 104 checks from WinMain forward: 17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP; 9 of 10 first-run FAILs were checker bugs"},
-        {"name": "vtable-only function wall", "status": "partial", "note": "7 cited addresses uncarved by Ghidra; 6 proven real entries; fix = seeding (seeds.tsv), not more searching"},
-        {"name": "boot markers", "status": "done", "note": "10/10"},
-        {"name": "clean shutdown", "status": "done", "note": "-quitAfter / WM_CLOSE"}
+        {
+          "name": "wWinMain",
+          "status": "done",
+          "note": "thin entry -> app::run"
+        },
+        {
+          "name": "CRT startup",
+          "status": "done",
+          "note": "GetStartupInfo/argv walk documented"
+        },
+        {
+          "name": "cmdline tokenizer",
+          "status": "done",
+          "note": "quote/backslash aware"
+        },
+        {
+          "name": "first-arg fix",
+          "status": "done",
+          "note": "lpCmdLine has no program name"
+        },
+        {
+          "name": "arg lookup helper",
+          "status": "done",
+          "note": "0x0092b570"
+        },
+        {
+          "name": "arg census",
+          "status": "done",
+          "note": "76 sites, 60 names"
+        },
+        {
+          "name": "devDirs/shipDirs",
+          "status": "done",
+          "note": "precedence 0x7e838e"
+        },
+        {
+          "name": "path prefixes",
+          "status": "partial",
+          "note": "strings+order; assembly not walked"
+        },
+        {
+          "name": "window class",
+          "status": "done",
+          "note": "CreateWindowEx"
+        },
+        {
+          "name": "window create",
+          "status": "done",
+          "note": "client 1280x720 default"
+        },
+        {
+          "name": "app icon",
+          "status": "done",
+          "note": "assets/OpenSpore.ico embedded"
+        },
+        {
+          "name": "message pump",
+          "status": "done",
+          "note": "PeekMessage loop"
+        },
+        {
+          "name": "d3d9 create",
+          "status": "done",
+          "note": "single import Direct3DCreate9"
+        },
+        {
+          "name": "display mode",
+          "status": "done",
+          "note": "32-bit requirement 0x7e74a0"
+        },
+        {
+          "name": "present params",
+          "status": "done",
+          "note": "DISCARD swap, interval one"
+        },
+        {
+          "name": "device lost/reset",
+          "status": "done",
+          "note": "TestCooperativeLevel"
+        },
+        {
+          "name": "resize",
+          "status": "done",
+          "note": "WM_SIZE -> Reset"
+        },
+        {
+          "name": "font atlas",
+          "status": "done",
+          "note": "GDI rasterised, 95 glyphs"
+        },
+        {
+          "name": "state manager",
+          "status": "done",
+          "note": "AppStateManager analog"
+        },
+        {
+          "name": "Title UI state",
+          "status": "done",
+          "note": "a Title state (real UI atlas bg) auto->Loader; demonstrates transitions"
+        },
+        {
+          "name": "state register",
+          "status": "done",
+          "note": "FNV-1 ids, dup rejected"
+        },
+        {
+          "name": "startup chain traced",
+          "status": "done",
+          "note": "entry -> WinMain 0xf489e0 -> app_main 0xf48810 -> run 0xf47e90"
+        },
+        {
+          "name": "main loop located",
+          "status": "done",
+          "note": "0x8482f0: PeekMessageW/WM_QUIT/dispatch/Translate/DispatchMessageW"
+        },
+        {
+          "name": "single-instance guard",
+          "status": "done",
+          "note": "Global\\SporeEditorOrGame; -multipleInstances bypasses"
+        },
+        {
+          "name": "app-mode host",
+          "status": "partial",
+          "note": "CreateAppMode 0x7e8a00 found; ctor 0x7e76e0 not walked"
+        },
+        {
+          "name": "state goto",
+          "status": "done",
+          "note": "transitions, no nesting"
+        },
+        {
+          "name": "startup -state",
+          "status": "done",
+          "note": "colon form -state:Name works; confirmed by the shipped script's own header"
+        },
+        {
+          "name": "game state machine (DATA)",
+          "status": "done",
+          "note": "SporeAppStates trigger recovered: 8,499 B ArgScript, 60 states / 17 modes, entry Main -id 0 -> GalaxyGameEntry"
+        },
+        {
+          "name": "stage progression (DATA)",
+          "status": "done",
+          "note": "Cell -> Creature -> Tribe -> Civ -> Space, each with FromLaunchScreen/FromLoadGame/FromLevelEditor"
+        },
+        {
+          "name": "editor set (DATA)",
+          "status": "done",
+          "note": "13 editors share mode Editors; switch by kMessageSwitchEditor 0x22d308b + hash(Setup)"
+        },
+        {
+          "name": "uilayout verb located",
+          "status": "done",
+          "note": "the spui door: uilayout -load <name> <id1> <id2> (E3LaunchScreen 0x027996d8 0x0279bf9e)"
+        },
+        {
+          "name": "reversal audit (Ghidra/REA)",
+          "status": "done",
+          "note": "30 claims / 104 checks from WinMain forward: 17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP; 9 of 10 first-run FAILs were checker bugs"
+        },
+        {
+          "name": "vtable-only function wall",
+          "status": "partial",
+          "note": "7 cited addresses uncarved by Ghidra; 6 proven real entries; fix = seeding (seeds.tsv), not more searching"
+        },
+        {
+          "name": "boot markers",
+          "status": "done",
+          "note": "10/10"
+        },
+        {
+          "name": "clean shutdown",
+          "status": "done",
+          "note": "-quitAfter / WM_CLOSE"
+        }
       ]
     },
     {
       "name": "launch args",
       "features": [
-        {"name": "-w windowed", "status": "done", "note": "device fn 0x7e74a0"},
-        {"name": "-f fullscreen", "status": "done", "note": "f tested before w"},
-        {"name": "-r WxH", "status": "done", "note": "%dx%d 0x1413ab8"},
-        {"name": "-devDirs", "status": "done", "note": ""},
-        {"name": "-shipDirs", "status": "done", "note": "wins over devDirs"},
-        {"name": "-dataDir", "status": "done", "note": ""},
-        {"name": "-userDataDir", "status": "done", "note": ""},
-        {"name": "-dataBaseDir", "status": "done", "note": ""},
-        {"name": "-locale", "status": "done", "note": "en-US default"},
-        {"name": "-state", "status": "partial", "note": "startup state name"},
-        {"name": "-preload", "status": "partial", "note": "preloaded state"},
-        {"name": "-safe", "status": "done", "note": ""},
-        {"name": "-noSound", "status": "done", "note": ""},
-        {"name": "-vSync/-noVSync", "status": "done", "note": ""},
-        {"name": "-noPlugins", "status": "done", "note": ""},
-        {"name": "-noScripts", "status": "done", "note": ""},
-        {"name": "-multipleInstances", "status": "done", "note": ""},
-        {"name": "-baseGame/-ep1", "status": "done", "note": "content selection"},
-        {"name": "-demo", "status": "done", "note": ""},
-        {"name": "-gonzago", "status": "done", "note": "editor/proto mode"},
-        {"name": "-flock/-mce", "status": "done", "note": ""},
-        {"name": "-mono/-stereo", "status": "done", "note": "audio mode"},
-        {"name": "-jobThreads", "status": "done", "note": ""},
-        {"name": "-jobPriority", "status": "done", "note": ""},
-        {"name": "-writeableData", "status": "done", "note": ""},
-        {"name": "-dumpShaders", "status": "done", "note": "+ -pix/-dumpShadersForPIX"},
-        {"name": "-hostIP/-clientIP", "status": "done", "note": "multiplayer keys"},
-        {"name": "-isHost", "status": "done", "note": ""},
-        {"name": "-pollenLogin", "status": "done", "note": "Sporepedia login"},
-        {"name": "-automation", "status": "done", "note": ""}
+        {
+          "name": "-w windowed",
+          "status": "done",
+          "note": "device fn 0x7e74a0"
+        },
+        {
+          "name": "-f fullscreen",
+          "status": "done",
+          "note": "f tested before w"
+        },
+        {
+          "name": "-r WxH",
+          "status": "done",
+          "note": "%dx%d 0x1413ab8"
+        },
+        {
+          "name": "-devDirs",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-shipDirs",
+          "status": "done",
+          "note": "wins over devDirs"
+        },
+        {
+          "name": "-dataDir",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-userDataDir",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-dataBaseDir",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-locale",
+          "status": "done",
+          "note": "en-US default"
+        },
+        {
+          "name": "-state",
+          "status": "partial",
+          "note": "startup state name"
+        },
+        {
+          "name": "-preload",
+          "status": "partial",
+          "note": "preloaded state"
+        },
+        {
+          "name": "-safe",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-noSound",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-vSync/-noVSync",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-noPlugins",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-noScripts",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-multipleInstances",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-baseGame/-ep1",
+          "status": "done",
+          "note": "content selection"
+        },
+        {
+          "name": "-demo",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-gonzago",
+          "status": "done",
+          "note": "editor/proto mode"
+        },
+        {
+          "name": "-flock/-mce",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-mono/-stereo",
+          "status": "done",
+          "note": "audio mode"
+        },
+        {
+          "name": "-jobThreads",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-jobPriority",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-writeableData",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-dumpShaders",
+          "status": "done",
+          "note": "+ -pix/-dumpShadersForPIX"
+        },
+        {
+          "name": "-hostIP/-clientIP",
+          "status": "done",
+          "note": "multiplayer keys"
+        },
+        {
+          "name": "-isHost",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "-pollenLogin",
+          "status": "done",
+          "note": "Sporepedia login"
+        },
+        {
+          "name": "-automation",
+          "status": "done",
+          "note": ""
+        }
       ]
     },
     {
       "name": "packages (DBPF)",
       "features": [
-        {"name": "magic", "status": "done", "note": "inline immediate 0x46504244"},
-        {"name": "header 0x60", "status": "done", "note": "cmp eax,0x60"},
-        {"name": "version <=3", "status": "done", "note": ""},
-        {"name": "count limit", "status": "done", "note": "< 0x07FFFFFF"},
-        {"name": "index off/size", "status": "done", "note": "== filesize"},
-        {"name": "validator", "status": "done", "note": "clauses replayed 0x008d90b0"},
-        {"name": "index kind mask", "status": "done", "note": "bit0 type/bit1 group/bit2 unknown"},
-        {"name": "prefix/stride", "status": "done", "note": "4+4*popcount, 32-4*popcount"},
-        {"name": "shared type", "status": "done", "note": ""},
-        {"name": "shared group", "status": "done", "note": ""},
-        {"name": "shared unknown", "status": "done", "note": ""},
-        {"name": "record type", "status": "done", "note": ""},
-        {"name": "record group", "status": "partial", "note": "semantics open"},
-        {"name": "record unknown", "status": "todo", "note": "semantics open"},
-        {"name": "record instance", "status": "done", "note": ""},
-        {"name": "offset/packed/mem", "status": "done", "note": ""},
-        {"name": "compression field", "status": "done", "note": "0xFFFF = RefPack"},
-        {"name": "flags field", "status": "done", "note": "0x0001 always"},
-        {"name": "resource read", "status": "done", "note": "pkg:-dump/-rec/-hdr"},
-        {"name": "resource manager", "status": "partial", "note": "getter 0x8de4b0 (global 0x1667aa0); queries 0x686450/0x847780"},
-        {"name": "content loading (trigger)", "status": "partial", "note": "trigger type 0x24a0e52; groups resolved: properties, ConfigManager, SporeAppStates"},
-        {"name": "config scripts read", "status": "done", "note": "source/engine/config.cpp reads Config/*.txt (3 files); cfg verb; $vars resolved"},
-        {"name": "refpack signature", "status": "done", "note": "&0x1FFF == 0x10FB"},
-        {"name": "refpack BE size", "status": "done", "note": "3- or 4-byte"},
-        {"name": "refpack loop", "status": "done", "note": "0x0092c5b0"},
-        {"name": "refpack literals", "status": "done", "note": "+1 count trap"},
-        {"name": "refpack copies", "status": "done", "note": "+1 count trap"},
-        {"name": "decode verify", "status": "done", "note": "30000/30000 to memSize"},
-        {"name": "multi-pkg scan", "status": "done", "note": "57 files"},
-        {"name": "scan dedupe", "status": "done", "note": "canonical path"},
-        {"name": "unpack by type", "status": "done", "note": "pkg:-unpack ... <type>"},
-        {"name": "unpack by name", "status": "done", "note": "real resource names"},
-        {"name": "export raster->BMP", "status": "done", "note": "pkg:-unpack ...,raster writes decoded BMP"},
-        {"name": "export gmdl->OBJ", "status": "done", "note": "pkg:-unpack ...,gmdl writes OBJ; ~53% parse, rest raw"},
-        {"name": "type registry", "status": "partial", "note": "86/90 named"},
-        {"name": "instance naming", "status": "done", "note": "FNV-1+lower 112155/150945"},
-        {"name": "resource_path", "status": "done", "note": "group/instance.type"},
-        {"name": "inventory", "status": "done", "note": "150945 resources, 10.27 GB"},
-        {"name": "repack/write", "status": "todo", "note": "no writer yet"}
+        {
+          "name": "magic",
+          "status": "done",
+          "note": "inline immediate 0x46504244"
+        },
+        {
+          "name": "header 0x60",
+          "status": "done",
+          "note": "cmp eax,0x60"
+        },
+        {
+          "name": "version <=3",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "count limit",
+          "status": "done",
+          "note": "< 0x07FFFFFF"
+        },
+        {
+          "name": "index off/size",
+          "status": "done",
+          "note": "== filesize"
+        },
+        {
+          "name": "validator",
+          "status": "done",
+          "note": "clauses replayed 0x008d90b0"
+        },
+        {
+          "name": "index kind mask",
+          "status": "done",
+          "note": "bit0 type/bit1 group/bit2 unknown"
+        },
+        {
+          "name": "prefix/stride",
+          "status": "done",
+          "note": "4+4*popcount, 32-4*popcount"
+        },
+        {
+          "name": "shared type",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "shared group",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "shared unknown",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "record type",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "record group",
+          "status": "partial",
+          "note": "semantics open"
+        },
+        {
+          "name": "record unknown",
+          "status": "todo",
+          "note": "semantics open"
+        },
+        {
+          "name": "record instance",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "offset/packed/mem",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "compression field",
+          "status": "done",
+          "note": "0xFFFF = RefPack"
+        },
+        {
+          "name": "flags field",
+          "status": "done",
+          "note": "0x0001 always"
+        },
+        {
+          "name": "resource read",
+          "status": "done",
+          "note": "pkg:-dump/-rec/-hdr"
+        },
+        {
+          "name": "resource manager",
+          "status": "partial",
+          "note": "getter 0x8de4b0 (global 0x1667aa0); queries 0x686450/0x847780"
+        },
+        {
+          "name": "content loading (trigger)",
+          "status": "partial",
+          "note": "trigger type 0x24a0e52; groups resolved: properties, ConfigManager, SporeAppStates"
+        },
+        {
+          "name": "config scripts read",
+          "status": "done",
+          "note": "source/engine/config.cpp reads Config/*.txt (3 files); cfg verb; $vars resolved"
+        },
+        {
+          "name": "refpack signature",
+          "status": "done",
+          "note": "&0x1FFF == 0x10FB"
+        },
+        {
+          "name": "refpack BE size",
+          "status": "done",
+          "note": "3- or 4-byte"
+        },
+        {
+          "name": "refpack loop",
+          "status": "done",
+          "note": "0x0092c5b0"
+        },
+        {
+          "name": "refpack literals",
+          "status": "done",
+          "note": "+1 count trap"
+        },
+        {
+          "name": "refpack copies",
+          "status": "done",
+          "note": "+1 count trap"
+        },
+        {
+          "name": "decode verify",
+          "status": "done",
+          "note": "30000/30000 to memSize"
+        },
+        {
+          "name": "multi-pkg scan",
+          "status": "done",
+          "note": "57 files"
+        },
+        {
+          "name": "scan dedupe",
+          "status": "done",
+          "note": "canonical path"
+        },
+        {
+          "name": "unpack by type",
+          "status": "done",
+          "note": "pkg:-unpack ... <type>"
+        },
+        {
+          "name": "unpack by name",
+          "status": "done",
+          "note": "real resource names"
+        },
+        {
+          "name": "export raster->BMP",
+          "status": "done",
+          "note": "pkg:-unpack ...,raster writes decoded BMP"
+        },
+        {
+          "name": "export gmdl->OBJ",
+          "status": "done",
+          "note": "pkg:-unpack ...,gmdl writes OBJ; ~53% parse, rest raw"
+        },
+        {
+          "name": "type registry",
+          "status": "partial",
+          "note": "86/90 named"
+        },
+        {
+          "name": "instance naming",
+          "status": "done",
+          "note": "FNV-1+lower 112155/150945"
+        },
+        {
+          "name": "resource_path",
+          "status": "done",
+          "note": "group/instance.type"
+        },
+        {
+          "name": "inventory",
+          "status": "done",
+          "note": "150945 resources, 10.27 GB"
+        },
+        {
+          "name": "repack/write",
+          "status": "todo",
+          "note": "no writer yet"
+        }
       ]
     },
     {
       "name": "gmdl (meshes)",
       "features": [
-        {"name": "version dword", "status": "done", "note": "= 8"},
-        {"name": "variable header", "status": "done", "note": "{tag,value} groups"},
-        {"name": "bbox[7]", "status": "done", "note": "float32 min/max + 1.0"},
-        {"name": "submesh count", "status": "done", "note": "bbox+0x1c"},
-        {"name": "descriptor", "status": "done", "note": "found by self-consistency"},
-        {"name": "format code 4", "status": "done", "note": ""},
-        {"name": "index count", "status": "done", "note": ""},
-        {"name": "reserved 16", "status": "done", "note": "NOT the stride (trap)"},
-        {"name": "index bytes", "status": "done", "note": "== 2*count"},
-        {"name": "u16 indices", "status": "done", "note": "validated in range"},
-        {"name": "multi-submesh", "status": "done", "note": "shared vertex buffer"},
-        {"name": "vertex blk header", "status": "done", "note": "1,N,0,2,0,0x000C0000"},
-        {"name": "decl count N", "status": "done", "note": "3/4/5/6; sets the stride (24/28/?/36)"},
-        {"name": "decl entries", "status": "partial", "note": "N=3/4/5/6 lay out attributes differently"},
-        {"name": "vertex count", "status": "done", "note": "== max_index+1"},
-        {"name": "vertex bytes", "status": "done", "note": "== count*36"},
-        {"name": "variable stride", "status": "done", "note": "stride = vertex_bytes/vertex_count; N=3/4/6 -> 24/28/36"},
-        {"name": "position float3", "status": "done", "note": "offset 0 at every stride; bbox exact on 1747/4209"},
-        {"name": "uv (N=6)", "status": "done", "note": "2 floats at offset 16, in [0,1] 100%"},
-        {"name": "textured mesh draw", "status": "done", "note": "mesh.cpp applies the raster texture via UVs (MODULATE)"},
-        {"name": "model<->texture binding", "status": "done", "note": "raster with the same instance id (865/865 match); Loader binds it"},
-        {"name": "model cycling", "status": "done", "note": "Loader draws a 2x2 grid of four real models, each with its texture"},
-        {"name": "bbox exact check", "status": "done", "note": "err 0.0000 on 4 variants"},
-        {"name": "attrib semantics", "status": "partial", "note": "uv found; normals/extra open"},
-        {"name": "normals", "status": "partial", "note": "computed from faces, not read"},
-        {"name": "OBJ export", "status": "done", "note": "tools/gmdl_mesh.py --obj"},
-        {"name": "engine draw", "status": "done", "note": "mesh.cpp, 3765 verts"},
-        {"name": "multiple meshes", "status": "todo", "note": "one mesh on screen now"}
+        {
+          "name": "version dword",
+          "status": "done",
+          "note": "= 8"
+        },
+        {
+          "name": "variable header",
+          "status": "done",
+          "note": "{tag,value} groups"
+        },
+        {
+          "name": "bbox[7]",
+          "status": "done",
+          "note": "float32 min/max + 1.0"
+        },
+        {
+          "name": "submesh count",
+          "status": "done",
+          "note": "bbox+0x1c"
+        },
+        {
+          "name": "descriptor",
+          "status": "done",
+          "note": "found by self-consistency"
+        },
+        {
+          "name": "format code 4",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "index count",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "reserved 16",
+          "status": "done",
+          "note": "NOT the stride (trap)"
+        },
+        {
+          "name": "index bytes",
+          "status": "done",
+          "note": "== 2*count"
+        },
+        {
+          "name": "u16 indices",
+          "status": "done",
+          "note": "validated in range"
+        },
+        {
+          "name": "multi-submesh",
+          "status": "done",
+          "note": "shared vertex buffer"
+        },
+        {
+          "name": "vertex blk header",
+          "status": "done",
+          "note": "1,N,0,2,0,0x000C0000"
+        },
+        {
+          "name": "decl count N",
+          "status": "done",
+          "note": "3/4/5/6; sets the stride (24/28/?/36)"
+        },
+        {
+          "name": "decl entries",
+          "status": "partial",
+          "note": "N=3/4/5/6 lay out attributes differently"
+        },
+        {
+          "name": "vertex count",
+          "status": "done",
+          "note": "== max_index+1"
+        },
+        {
+          "name": "vertex bytes",
+          "status": "done",
+          "note": "== count*36"
+        },
+        {
+          "name": "variable stride",
+          "status": "done",
+          "note": "stride = vertex_bytes/vertex_count; N=3/4/6 -> 24/28/36"
+        },
+        {
+          "name": "position float3",
+          "status": "done",
+          "note": "offset 0 at every stride; bbox exact on 1747/4209"
+        },
+        {
+          "name": "uv (N=6)",
+          "status": "done",
+          "note": "2 floats at offset 16, in [0,1] 100%"
+        },
+        {
+          "name": "textured mesh draw",
+          "status": "done",
+          "note": "mesh.cpp applies the raster texture via UVs (MODULATE)"
+        },
+        {
+          "name": "model<->texture binding",
+          "status": "done",
+          "note": "raster with the same instance id (865/865 match); Loader binds it"
+        },
+        {
+          "name": "model cycling",
+          "status": "done",
+          "note": "Loader draws a 2x2 grid of four real models, each with its texture"
+        },
+        {
+          "name": "bbox exact check",
+          "status": "done",
+          "note": "err 0.0000 on 4 variants"
+        },
+        {
+          "name": "attrib semantics",
+          "status": "partial",
+          "note": "uv found; normals/extra open"
+        },
+        {
+          "name": "normals",
+          "status": "partial",
+          "note": "computed from faces, not read"
+        },
+        {
+          "name": "OBJ export",
+          "status": "done",
+          "note": "tools/gmdl_mesh.py --obj"
+        },
+        {
+          "name": "engine draw",
+          "status": "done",
+          "note": "mesh.cpp, 3765 verts"
+        },
+        {
+          "name": "multiple meshes",
+          "status": "todo",
+          "note": "one mesh on screen now"
+        }
       ]
     },
     {
       "name": "rw4 (models)",
       "features": [
-        {"name": "header 28B", "status": "done", "note": "template 0x014f6480"},
-        {"name": "magic 0x34575289", "status": "done", "note": "rep movs 0x011e3f60"},
-        {"name": "\"w32\" field", "status": "done", "note": "+0x04"},
-        {"name": "marker 0A1A0A0D", "status": "done", "note": "+0x08"},
-        {"name": "flags 0x00042000", "status": "partial", "note": "+0x0c meaning open"},
-        {"name": "version \"454\"", "status": "done", "note": "+0x10/+0x14"},
-        {"name": "object table", "status": "todo", "note": "after the header"},
-        {"name": "chunk table", "status": "todo", "note": ""},
-        {"name": "writer", "status": "partial", "note": "0x6c233d writes sentinel"},
-        {"name": "reader", "status": "todo", "note": "not located (magic memcpy'd)"},
-        {"name": "type registration", "status": "done", "note": "0x007635f0 -> 0x6ad090"},
-        {"name": "handler dispatch", "status": "done", "note": "0x7633c0 via managers"},
-        {"name": "model manager", "status": "partial", "note": "globals 0x15fd8b0..; parser deeper"},
-        {"name": "mesh objects", "status": "todo", "note": ""},
-        {"name": "material refs", "status": "todo", "note": ""},
-        {"name": "animation refs", "status": "todo", "note": ""}
+        {
+          "name": "header 28B",
+          "status": "done",
+          "note": "template 0x014f6480"
+        },
+        {
+          "name": "magic 0x34575289",
+          "status": "done",
+          "note": "rep movs 0x011e3f60"
+        },
+        {
+          "name": "\"w32\" field",
+          "status": "done",
+          "note": "+0x04"
+        },
+        {
+          "name": "marker 0A1A0A0D",
+          "status": "done",
+          "note": "+0x08"
+        },
+        {
+          "name": "flags 0x00042000",
+          "status": "partial",
+          "note": "+0x0c meaning open"
+        },
+        {
+          "name": "version \"454\"",
+          "status": "done",
+          "note": "+0x10/+0x14"
+        },
+        {
+          "name": "object table",
+          "status": "todo",
+          "note": "after the header"
+        },
+        {
+          "name": "chunk table",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "writer",
+          "status": "partial",
+          "note": "0x6c233d writes sentinel"
+        },
+        {
+          "name": "reader",
+          "status": "todo",
+          "note": "not located (magic memcpy'd)"
+        },
+        {
+          "name": "type registration",
+          "status": "done",
+          "note": "0x007635f0 -> 0x6ad090"
+        },
+        {
+          "name": "handler dispatch",
+          "status": "done",
+          "note": "0x7633c0 via managers"
+        },
+        {
+          "name": "model manager",
+          "status": "partial",
+          "note": "globals 0x15fd8b0..; parser deeper"
+        },
+        {
+          "name": "mesh objects",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "material refs",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "animation refs",
+          "status": "todo",
+          "note": ""
+        }
       ]
     },
     {
       "name": "render",
       "features": [
-        {"name": "windowed", "status": "done", "note": ""},
-        {"name": "fullscreen", "status": "done", "note": "desktop format"},
-        {"name": "backbuffer", "status": "done", "note": ""},
-        {"name": "depth/stencil", "status": "done", "note": "D24S8"},
-        {"name": "clear", "status": "done", "note": ""},
-        {"name": "begin/end scene", "status": "done", "note": ""},
-        {"name": "present", "status": "done", "note": ""},
-        {"name": "vsync", "status": "done", "note": "interval one"},
-        {"name": "overlay batch", "status": "done", "note": "one DrawPrimitiveUP"},
-        {"name": "glyph metrics", "status": "done", "note": "cell 7x15 advance 7"},
-        {"name": "text stages", "status": "done", "note": "SELECTARG1 texture"},
-        {"name": "image quad", "status": "done", "note": "aspect fit"},
-        {"name": "texture upload", "status": "done", "note": "create_texture_bgra"},
-        {"name": "png decode", "status": "done", "note": "GDI+ from memory"},
-        {"name": "raster native draw", "status": "done", "note": "engine decodes raster DXT1/DXT5/raw and draws it"},
-        {"name": "mesh VB/IB", "status": "done", "note": "managed buffers"},
-        {"name": "mesh normals", "status": "done", "note": "smooth, per-vertex"},
-        {"name": "orbit camera", "status": "done", "note": "hand-built matrices"},
-        {"name": "fixed-func lighting", "status": "done", "note": "directional light"},
-        {"name": "viewport", "status": "done", "note": "mesh sub-viewport"},
-        {"name": "d3dx helpers", "status": "todo", "note": "d3dx9_27 returns with the bridge"},
-        {"name": "RW device bridge", "status": "todo", "note": "field guide 3"},
-        {"name": "RW state blocks", "status": "todo", "note": ""},
-        {"name": "shaders", "status": "todo", "note": ""},
-        {"name": "UI (UTFWin)", "status": "partial", "note": "menus are spui resources (524; 407 named); classes + request site found"}
+        {
+          "name": "windowed",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "fullscreen",
+          "status": "done",
+          "note": "desktop format"
+        },
+        {
+          "name": "backbuffer",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "depth/stencil",
+          "status": "done",
+          "note": "D24S8"
+        },
+        {
+          "name": "clear",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "begin/end scene",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "present",
+          "status": "done",
+          "note": ""
+        },
+        {
+          "name": "vsync",
+          "status": "done",
+          "note": "interval one"
+        },
+        {
+          "name": "overlay batch",
+          "status": "done",
+          "note": "one DrawPrimitiveUP"
+        },
+        {
+          "name": "glyph metrics",
+          "status": "done",
+          "note": "cell 7x15 advance 7"
+        },
+        {
+          "name": "text stages",
+          "status": "done",
+          "note": "SELECTARG1 texture"
+        },
+        {
+          "name": "image quad",
+          "status": "done",
+          "note": "aspect fit"
+        },
+        {
+          "name": "texture upload",
+          "status": "done",
+          "note": "create_texture_bgra"
+        },
+        {
+          "name": "png decode",
+          "status": "done",
+          "note": "GDI+ from memory"
+        },
+        {
+          "name": "raster native draw",
+          "status": "done",
+          "note": "engine decodes raster DXT1/DXT5/raw and draws it"
+        },
+        {
+          "name": "mesh VB/IB",
+          "status": "done",
+          "note": "managed buffers"
+        },
+        {
+          "name": "mesh normals",
+          "status": "done",
+          "note": "smooth, per-vertex"
+        },
+        {
+          "name": "orbit camera",
+          "status": "done",
+          "note": "hand-built matrices"
+        },
+        {
+          "name": "fixed-func lighting",
+          "status": "done",
+          "note": "directional light"
+        },
+        {
+          "name": "viewport",
+          "status": "done",
+          "note": "mesh sub-viewport"
+        },
+        {
+          "name": "d3dx helpers",
+          "status": "todo",
+          "note": "d3dx9_27 returns with the bridge"
+        },
+        {
+          "name": "RW device bridge",
+          "status": "todo",
+          "note": "field guide 3"
+        },
+        {
+          "name": "RW state blocks",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "shaders",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "UI (UTFWin)",
+          "status": "partial",
+          "note": "layouts render with geometry, colours, alphas and the game's own captions, and a STATE can now select which layout shows. Not reversed: widgets' behaviour (click handlers, the 637/748 vocabulary gap, the mode table)."
+        }
       ]
     },
     {
       "name": "formats",
       "features": [
-        {"name": "png", "status": "done", "note": "14549 decoded"},
-        {"name": "locale text", "status": "done", "note": "Czech lexicon end-to-end"},
-        {"name": "locale display", "status": "done", "note": "the game's own labels on our Title screen (New Game 0x05B08767, Options 0x00010009, Exit 0x045BEDD8) + the txt verb"},
-        {"name": "raster", "status": "partial", "note": "header solved; DXT1/DXT5/raw decoded to PNG"},
-        {"name": "dxt / bc", "status": "partial", "note": "DXT1/DXT5 decode (raster_decode.py); not in the engine yet"},
-        {"name": "tga", "status": "todo", "note": ""},
-        {"name": "animation", "status": "todo", "note": "4997 resources"},
-        {"name": "prop", "status": "partial", "note": "structure found (BE count + {key,type,count,size}); 2nd variant open"},
-        {"name": "material", "status": "todo", "note": ""},
-        {"name": "sound (snr)", "status": "todo", "note": "29400 resources"},
-        {"name": "soundProp", "status": "todo", "note": "19296 resources"},
-        {"name": "spui layout", "status": "partial", "note": "524 screens (407 named); DESERIALIZER DOOR FOUND: factory 0x810870 + loader 0x810940 (type id 0x250FE9A2 confirmed in code); it is a UTF/XmlTokenReader TOKEN STREAM, so byte parsing was doomed"},
-        {"name": "spui token alphabet", "status": "done", "note": "NOT bit-packed: byte-packed records id(4)|code:u16|marker(==1)|payload, code stable per id (94.5% of high ids), sizes measured 9/11->4, 16->16 rectf, 17->8, 20->6, 19->array count, 18->string"},
-        {"name": "spui schema (the dictionary)", "status": "done", "note": "14 `xml` resources = the shipped Spore UI Designer project: 306 proxy ids (66 Class + 240 Property), 227 present in spui, 748/748 layouts carry them"},
-        {"name": "spui windows", "status": "done", "note": "engine/spui.cpp: 400 layouts, 11,465 windows, 9,547 with a usable Area, 472,291 records; Area is LEFT,TOP,RIGHT,BOTTOM (the LTRB reading raised usable areas 7,838 -> 9,547)"},
-        {"name": "spui drawn on screen", "status": "done", "note": "Title renders the real layout at real coordinates with the game's own captions (Create a New Game / color picker / Selected Color) over the real UI atlas"},
-        {"name": "spui alphas", "status": "done", "note": "the shipped ARGB is meaningful (0x007F7F7F transparent); forcing alpha opaque turned the screen into slabs - use as stored + outline"},
-        {"name": "spui all 748 layouts", "status": "todo", "note": "Reader::load caps at 400"},
-        {"name": "layout table -> text", "status": "done", "note": "caption ref is 0xFFFF|table|key; 1,391 of 1,426 resolve (97.5%) after mounting the nested EP1 packages; 35 remain (mvj, legal)"},
-        {"name": "nested packages (DBPF in DBPF)", "status": "done", "note": "DataEP1/Spore_EP1_Locale_* hold 21 resources of type `package` (0x06EFC6AA), each itself a DBPF, together 1,364 locale resources; the en-us one is instance fnv1_lower(\"en-us\")=0x7080DB55"},
-        {"name": "locale corpus", "status": "done", "note": "369 tables / 37,608 entries / 14,657 keys (was 197 / 18,441 / 10,246 with the flat pass alone)"},
-        {"name": "layout -> locale table", "status": "done", "note": "code 18 splits on 0xFFFF: 4,207 inline UTF-16 + 3,107 refs, of which 21/36 distinct are en-us locale TABLE instances (accidental rate 4.66e-08); 0x2B7A0311 = fnv1_lower(GalaxyGameEntry) in BOTH directions"},
-        {"name": "spui full sequential parse", "status": "todo", "note": "walk derails in 637/748 with 'id not in schema' - the designer XML lists only 227 of the ids the binaries use. Remaining work is VOCABULARY, not structure"},
-        {"name": "gmsh", "status": "partial", "note": "stable 24-byte header found (BE words + float runs); layout not derived"},
-        {"name": "blockdata", "status": "partial", "note": "vec3 array; first two = min/max bbox"},
-        {"name": "bea", "status": "todo", "note": "2621 resources"},
-        {"name": "poll", "status": "todo", "note": "2590 resources"},
-        {"name": "summary", "status": "todo", "note": "2590 resources"},
-        {"name": "effect", "status": "todo", "note": ""},
-        {"name": "shader bytecode", "status": "todo", "note": ""},
-        {"name": "texture atlas", "status": "todo", "note": ""},
-        {"name": "model (rw4)", "status": "todo", "note": "gates the whole content set"}
+        {
+          "name": "png",
+          "status": "done",
+          "note": "14549 decoded"
+        },
+        {
+          "name": "locale text",
+          "status": "done",
+          "note": "Czech lexicon end-to-end"
+        },
+        {
+          "name": "locale display",
+          "status": "done",
+          "note": "the game's own labels on our Title screen (New Game 0x05B08767, Options 0x00010009, Exit 0x045BEDD8) + the txt verb"
+        },
+        {
+          "name": "raster",
+          "status": "partial",
+          "note": "header solved; DXT1/DXT5/raw decoded to PNG"
+        },
+        {
+          "name": "dxt / bc",
+          "status": "partial",
+          "note": "DXT1/DXT5 decode (raster_decode.py); not in the engine yet"
+        },
+        {
+          "name": "tga",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "animation",
+          "status": "todo",
+          "note": "4997 resources"
+        },
+        {
+          "name": "prop",
+          "status": "partial",
+          "note": "structure found (BE count + {key,type,count,size}); 2nd variant open"
+        },
+        {
+          "name": "material",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "sound (snr)",
+          "status": "todo",
+          "note": "29400 resources"
+        },
+        {
+          "name": "soundProp",
+          "status": "todo",
+          "note": "19296 resources"
+        },
+        {
+          "name": "spui layout",
+          "status": "partial",
+          "note": "524 screens (407 named); DESERIALIZER DOOR FOUND: factory 0x810870 + loader 0x810940 (type id 0x250FE9A2 confirmed in code); it is a UTF/XmlTokenReader TOKEN STREAM, so byte parsing was doomed"
+        },
+        {
+          "name": "spui token alphabet",
+          "status": "done",
+          "note": "NOT bit-packed: byte-packed records id(4)|code:u16|marker(==1)|payload, code stable per id (94.5% of high ids), sizes measured 9/11->4, 16->16 rectf, 17->8, 20->6, 19->array count, 18->string"
+        },
+        {
+          "name": "spui schema (the dictionary)",
+          "status": "done",
+          "note": "14 `xml` resources = the shipped Spore UI Designer project: 306 proxy ids (66 Class + 240 Property), 227 present in spui, 748/748 layouts carry them"
+        },
+        {
+          "name": "spui windows",
+          "status": "done",
+          "note": "engine/spui.cpp: 400 layouts, 11,465 windows, 9,547 with a usable Area, 472,291 records; Area is LEFT,TOP,RIGHT,BOTTOM (the LTRB reading raised usable areas 7,838 -> 9,547)"
+        },
+        {
+          "name": "spui drawn on screen",
+          "status": "done",
+          "note": "Title renders the real layout at real coordinates with the game's own captions (Create a New Game / color picker / Selected Color) over the real UI atlas"
+        },
+        {
+          "name": "spui alphas",
+          "status": "done",
+          "note": "the shipped ARGB is meaningful (0x007F7F7F transparent); forcing alpha opaque turned the screen into slabs - use as stored + outline"
+        },
+        {
+          "name": "spui all 748 layouts",
+          "status": "done",
+          "note": "748/748 resources parsed (22,384 windows, 18,232 with a usable Area, 961,360 anchors) - BUT only 524 distinct INSTANCES: 224 layouts ship more than once, 18 of the shadows with a different byte length. 748 was resources, not screens."
+        },
+        {
+          "name": "layout table -> text",
+          "status": "done",
+          "note": "caption ref is 0xFFFF|table|key; 1,391 of 1,426 resolve (97.5%) after mounting the nested EP1 packages; 35 remain (mvj, legal)"
+        },
+        {
+          "name": "nested packages (DBPF in DBPF)",
+          "status": "done",
+          "note": "DataEP1/Spore_EP1_Locale_* hold 21 resources of type `package` (0x06EFC6AA), each itself a DBPF, together 1,364 locale resources; the en-us one is instance fnv1_lower(\"en-us\")=0x7080DB55"
+        },
+        {
+          "name": "locale corpus",
+          "status": "done",
+          "note": "369 tables / 37,608 entries / 14,657 keys (was 197 / 18,441 / 10,246 with the flat pass alone)"
+        },
+        {
+          "name": "layout -> locale table",
+          "status": "done",
+          "note": "code 18 = 0xFFFF|table:u32|key:u32 (a KEY, not just a table). 1,384 of 1,426 refs resolve (97.1%); 2,152 inline. Was 1,391 - and 7 of those were answers from the WRONG table, because m_by_table was map<u32,...> fed a u64 key, so the table half was silently truncated away."
+        },
+        {
+          "name": "spui full sequential parse",
+          "status": "todo",
+          "note": "walk derails in 637/748 with 'id not in schema' - the designer XML lists only 227 of the ids the binaries use. Remaining work is VOCABULARY, not structure"
+        },
+        {
+          "name": "gmsh",
+          "status": "partial",
+          "note": "stable 24-byte header found (BE words + float runs); layout not derived"
+        },
+        {
+          "name": "blockdata",
+          "status": "partial",
+          "note": "vec3 array; first two = min/max bbox"
+        },
+        {
+          "name": "bea",
+          "status": "todo",
+          "note": "2621 resources"
+        },
+        {
+          "name": "poll",
+          "status": "todo",
+          "note": "2590 resources"
+        },
+        {
+          "name": "summary",
+          "status": "todo",
+          "note": "2590 resources"
+        },
+        {
+          "name": "effect",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "shader bytecode",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "texture atlas",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "model (rw4)",
+          "status": "todo",
+          "note": "gates the whole content set"
+        },
+        {
+          "name": "state drives the UI",
+          "status": "done",
+          "note": "`cheat \"uilayout -load E3LaunchScreen\"` in state DevLauncher is EXECUTED, not reported unrunnable: name -> fnv1_lower -> instance 0xE932BD44 -> our spui reader -> 68 windows drawn by states/uipresent.cpp. The frame differs from our own largest-layout pick in 65.9% of sampled pixels, so this is a different SCREEN, not a relabel. analysis/shots/spui_e3launch.png"
+        },
+        {
+          "name": "uilayout's two trailing ids",
+          "status": "todo",
+          "note": "0x027996d8 / 0x0279bf9e are NOT resource ids (absent from every type/group/instance field of all 150,945 records) and no registry name hashes to them; the first appears twice in the spui byte corpus, the second nowhere. Internal to the layout, or runtime handles."
+        },
+        {
+          "name": "spui precedence (resource cache)",
+          "status": "partial",
+          "note": "ASSUMED, not reversed: spui takes the FIRST container (so PatchData overrides base content), text takes the LAST parsed - two different rules in one engine. Measured surface: 18 spui layouts and 3 of 23,933 locale strings could differ. EP1 beating PatchData on locale is provably right (EP1 fixes the patch's typo), so the real rule is not simply 'earliest wins'."
+        },
+        {
+          "name": "locale at three depths",
+          "status": "done",
+          "note": "flat Data/Locale/<lang> + nested in DataEP1/Spore_EP1_Locale_0{1,2} + nested in Data/PatchData (42 en-us tables). 265 distinct tables from 5 containers, 23,933 distinct (table,key) texts. The third depth was invisible for two sessions because the search was scoped by FILENAME (*Spore_EP1_Locale*) instead of by TYPE."
+        },
+        {
+          "name": "caption gaps classified",
+          "status": "done",
+          "note": "spui -gaps splits the 42 unresolved refs into COVERAGE (table instance absent from the corpus: mvj 0x277DEE6A, 14 keys) and SEMANTIC (table present, key missing: 4 keys). `legal` 0xADB810C4 was on the missing list for two sessions and is NOT missing - it ships in PatchData's nested packages."
+        },
+        {
+          "name": "intra-resource repeated key",
+          "status": "done",
+          "note": "10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original)."
+        }
       ]
     },
     {
       "name": "gameplay",
       "features": [
-        {"name": "simulation", "status": "todo", "note": ""},
-        {"name": "creature editor", "status": "todo", "note": ""},
-        {"name": "cell stage", "status": "todo", "note": ""},
-        {"name": "creature stage", "status": "todo", "note": ""},
-        {"name": "tribal stage", "status": "todo", "note": ""},
-        {"name": "civ stage", "status": "todo", "note": ""},
-        {"name": "space stage", "status": "todo", "note": ""},
-        {"name": "terraforming", "status": "todo", "note": ""},
-        {"name": "missions", "status": "todo", "note": ""},
-        {"name": "traits/abilities", "status": "todo", "note": ""},
-        {"name": "save/load", "status": "todo", "note": ""},
-        {"name": "galaxy gen", "status": "todo", "note": ""},
-        {"name": "multiplayer", "status": "todo", "note": "hostIP/clientIP/isHost args"},
-        {"name": "Sporepedia", "status": "todo", "note": "pollen_metadata resources"},
-        {"name": "achievements", "status": "todo", "note": ""},
-        {"name": "scripts/mods", "status": "todo", "note": ""}
+        {
+          "name": "simulation",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "creature editor",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "cell stage",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "creature stage",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "tribal stage",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "civ stage",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "space stage",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "terraforming",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "missions",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "traits/abilities",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "save/load",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "galaxy gen",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "multiplayer",
+          "status": "todo",
+          "note": "hostIP/clientIP/isHost args"
+        },
+        {
+          "name": "Sporepedia",
+          "status": "todo",
+          "note": "pollen_metadata resources"
+        },
+        {
+          "name": "achievements",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "scripts/mods",
+          "status": "todo",
+          "note": ""
+        }
       ]
     },
     {
       "name": "tooling",
       "features": [
-        {"name": "feature map", "status": "done", "note": "features.json -> PNG + md (this map)"},
-        {"name": "function map", "status": "done", "note": "oracle .text candidates vs our named"},
-        {"name": "PDB symbol map", "status": "done", "note": "136,433 names by subsystem"},
-        {"name": "address guesser", "status": "partial", "note": "220 guesses, 39 HIGH; families not members"},
-        {"name": "refpack verifier", "status": "done", "note": "30000/30000 to memSize"},
-        {"name": "startup map", "status": "done", "note": "analysis/startup.md: entry->WinMain->app_main->run"},
-        {"name": "prop scanner", "status": "done", "note": "prop_scan.py + prop.py (partial)"},
-        {"name": "arg census", "status": "done", "note": "76 sites, 60 names"},
-        {"name": "resource inventory", "status": "done", "note": "150945 resources, 90 types"},
-        {"name": "index validator", "status": "done", "note": "0 violations on 150945 records"},
-        {"name": "build identity", "status": "done", "note": "which reference build matches"},
-        {"name": "name resolver", "status": "done", "note": "112155/150945 names"},
-        {"name": "mesh exporter", "status": "done", "note": "gmdl -> OBJ + PNG render"},
-        {"name": "bmp->png capture", "status": "done", "note": "view in-engine frames"},
-        {"name": "call-graph / xref", "status": "done", "note": "callers.py, xref.py"},
-        {"name": "pdb type records", "status": "todo", "note": "struct/class layouts (level 1 for types)"}
+        {
+          "name": "feature map",
+          "status": "done",
+          "note": "features.json -> PNG + md (this map)"
+        },
+        {
+          "name": "function map",
+          "status": "done",
+          "note": "oracle .text candidates vs our named"
+        },
+        {
+          "name": "PDB symbol map",
+          "status": "done",
+          "note": "136,433 names by subsystem"
+        },
+        {
+          "name": "address guesser",
+          "status": "partial",
+          "note": "220 guesses, 39 HIGH; families not members"
+        },
+        {
+          "name": "refpack verifier",
+          "status": "done",
+          "note": "30000/30000 to memSize"
+        },
+        {
+          "name": "startup map",
+          "status": "done",
+          "note": "analysis/startup.md: entry->WinMain->app_main->run"
+        },
+        {
+          "name": "prop scanner",
+          "status": "done",
+          "note": "prop_scan.py + prop.py (partial)"
+        },
+        {
+          "name": "arg census",
+          "status": "done",
+          "note": "76 sites, 60 names"
+        },
+        {
+          "name": "resource inventory",
+          "status": "done",
+          "note": "150945 resources, 90 types"
+        },
+        {
+          "name": "index validator",
+          "status": "done",
+          "note": "0 violations on 150945 records"
+        },
+        {
+          "name": "build identity",
+          "status": "done",
+          "note": "which reference build matches"
+        },
+        {
+          "name": "name resolver",
+          "status": "done",
+          "note": "112155/150945 names"
+        },
+        {
+          "name": "mesh exporter",
+          "status": "done",
+          "note": "gmdl -> OBJ + PNG render"
+        },
+        {
+          "name": "bmp->png capture",
+          "status": "done",
+          "note": "view in-engine frames"
+        },
+        {
+          "name": "call-graph / xref",
+          "status": "done",
+          "note": "callers.py, xref.py"
+        },
+        {
+          "name": "pdb type records",
+          "status": "todo",
+          "note": "struct/class layouts (level 1 for types)"
+        }
       ]
     },
     {
       "name": "platform",
       "features": [
-        {"name": "x86 build", "status": "done", "note": "MSVC x86 Debug, 0 warnings"},
-        {"name": "x64 build", "status": "todo", "note": "CMake switch exists"},
-        {"name": "beta assets", "status": "todo", "note": "KeyMap available"},
-        {"name": "loose dirs read", "status": "todo", "note": "unpacked trees as data source"},
-        {"name": "standalone CLI", "status": "partial", "note": "-headless works"},
-        {"name": "installer/packaging", "status": "todo", "note": ""},
-        {"name": "config file", "status": "todo", "note": ""},
-        {"name": "localization", "status": "partial", "note": "en-us locale tables parsed (18,441 entries) and displayed; per-table key space enforced; other 14 langs unparsed"},
-        {"name": "crash reporting", "status": "done", "note": "dbghelp stacks"},
-        {"name": "reproducible build", "status": "todo", "note": ""}
+        {
+          "name": "x86 build",
+          "status": "done",
+          "note": "MSVC x86 Debug, 0 warnings"
+        },
+        {
+          "name": "x64 build",
+          "status": "todo",
+          "note": "CMake switch exists"
+        },
+        {
+          "name": "beta assets",
+          "status": "todo",
+          "note": "KeyMap available"
+        },
+        {
+          "name": "loose dirs read",
+          "status": "todo",
+          "note": "unpacked trees as data source"
+        },
+        {
+          "name": "standalone CLI",
+          "status": "partial",
+          "note": "-headless works"
+        },
+        {
+          "name": "installer/packaging",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "config file",
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "name": "localization",
+          "status": "partial",
+          "note": "en-us locale tables parsed (18,441 entries) and displayed; per-table key space enforced; other 14 langs unparsed"
+        },
+        {
+          "name": "crash reporting",
+          "status": "done",
+          "note": "dbghelp stacks"
+        },
+        {
+          "name": "reproducible build",
+          "status": "todo",
+          "note": ""
+        }
       ]
     }
   ]

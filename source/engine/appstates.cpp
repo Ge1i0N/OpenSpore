@@ -13,6 +13,7 @@
 #include "engine/log.h"
 #include "engine/pkg.h"
 #include "states/statemgr.h"
+#include "states/uipresent.h"  // present_ui_screen: the layout a state names, drawn
 
 namespace os::appstates {
 namespace {
@@ -278,6 +279,40 @@ std::string Table::stats() const {
     return buf;
 }
 
+std::vector<UiCommand> ui_commands(const GameState& gs) {
+    std::vector<UiCommand> out;
+    // Both blocks in file order: DevLauncher loads on `entry` and unloads on `exit`, and the pair is
+    // what tells the two apart. Walking only `entry` would miss the teardown half of the only UI
+    // command in the entire script.
+    for (int block = 0; block < 2; ++block) {
+        const std::vector<Action>& acts = block == 0 ? gs.entry : gs.exit;
+        for (const Action& a : acts) {
+            if (a.verb != "cheat") continue;
+            // Action::raw still carries the script's quotes:
+            //     "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"
+            size_t q1 = a.raw.find('"'), q2 = a.raw.rfind('"');
+            const std::string body = (q1 != std::string::npos && q2 != std::string::npos && q2 > q1)
+                                         ? a.raw.substr(q1 + 1, q2 - q1 - 1)
+                                         : a.raw;
+            std::istringstream is(body);
+            std::string cmd, flag, name, s1, s2;
+            if (!(is >> cmd >> flag >> name)) continue;
+            cmd = lower(cmd);
+            flag = lower(flag);
+            if (cmd != "uilayout") continue;
+            const bool load = (flag == "-load"), unload = (flag == "-unload");
+            if (!load && !unload) continue;   // an undocumented subcommand: counted by stats(), not guessed
+            UiCommand u;
+            u.name = name;
+            u.unload = unload;
+            if (is >> s1) parse_u32(s1, u.id1);
+            if (is >> s2) parse_u32(s2, u.id2);
+            out.push_back(u);
+        }
+    }
+    return out;
+}
+
 Table& instance() {
     static Table t;
     return t;
@@ -310,8 +345,28 @@ void install(os::states::Manager& mgr) {
             if (a.verb == "cheat") ++n_cheat;
             if (a.verb == "effect") ++n_effect;
         }
-        st.on_enter = [chain = std::move(chain), mode = std::move(mode), n_msg, n_cheat, n_effect,
-                       name = gs.name]() {
+        // THE STATE'S OWN UI INSTRUCTION. `cheat "uilayout -load <name>"` used to be reported as a
+        // cheat we could not run. But the name hashes to a `spui` resource instance and we can READ
+        // those bytes, so it is now an instruction we EXECUTE: this state gets a renderer that draws
+        // the screen the script asked for. Resolution is deferred to render time on purpose - the
+        // spui table may not be loaded yet at install() time, and a map lookup per frame is cheaper
+        // than an init-order constraint that would silently break.
+        std::vector<UiCommand> uis = ui_commands(gs);
+        size_t n_ui_load = 0;
+        for (const UiCommand& u : uis) {
+            if (!u.unload) ++n_ui_load;
+        }
+        // ONLY a state that names a screen gets a renderer. Setting on_render unconditionally would
+        // swallow the app's renderer-less placeholder, and a state that presents no frame means
+        // `-capture` is never serviced - a hang masquerading as a blank screen.
+        if (n_ui_load) {
+            st.on_render = [uis = std::move(uis)]() {
+                os::states::present_ui_screen(false);
+            };
+        }
+        const size_t n_cheat_unrun = n_cheat > n_ui_load ? n_cheat - n_ui_load : 0;
+        st.on_enter = [chain = std::move(chain), mode = std::move(mode), n_msg, n_cheat_unrun,
+                       n_ui_load, n_effect, name = gs.name]() {
             if (!mode.empty()) {
                 // `mode <M>` configures the engine's mode table, which is not ours yet. Say so with
                 // the name, so the boot log shows the real chain even where we cannot act.
@@ -321,9 +376,15 @@ void install(os::states::Manager& mgr) {
             if (n_msg) {
                 LOG_WARN("appstates", "%s: %zu message(s) not sent (no message bus)", name.c_str(), n_msg);
             }
-            if (n_cheat) {
-                LOG_WARN("appstates", "%s: %zu cheat(s) not run (e.g. the `uilayout -load` that drives "
-                                      "SPUI)", name.c_str(), n_cheat);
+            if (n_ui_load) {
+                // Not a gap: this is the state machine driving the UI, executed every frame by
+                // present_ui_screen() (states/uipresent.cpp).
+                LOG_INFO("appstates", "%s: %zu `uilayout -load` EXECUTED by the UI layer (the screen "
+                                      "this state names)", name.c_str(), n_ui_load);
+            }
+            if (n_cheat_unrun) {
+                LOG_WARN("appstates", "%s: %zu cheat(s) not run (no console-command backend)",
+                         name.c_str(), n_cheat_unrun);
             }
             if (n_effect) {
                 LOG_WARN("appstates", "%s: %zu effect(s) not run (no FX system)", name.c_str(), n_effect);
