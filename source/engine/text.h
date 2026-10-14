@@ -39,10 +39,12 @@
 // which is evidence that UI text keys are allocated in per-widget-group runs - a hint for reading
 // the `spui` layouts once we get there.
 //
-// NOT reversed here: which key belongs to which widget. That mapping lives in the `spui` layout
-// (a bit-packed serializer, analysis/ui.md), so this table can supply the STRINGS for a real menu
-// but not yet the LAYOUT. Display is ASCII-only for now (our overlay font is a 32..126 GDI atlas),
-// so non-ASCII bytes are reported, not silently mangled.
+// NOT reversed here: which key belongs to which widget. That mapping lives in the `spui` layout,
+// whose records are BYTE-PACKED (id | code:u16 | marker:u16 | payload) - the earlier "bit-packed"
+// reading was retracted the day the designer schema was found; see analysis/spui-schema.md. So this
+// table supplies the STRINGS for a real menu, and spui supplies the geometry and the (table,key)
+// references. Display is ASCII-only for now (our overlay font is a 32..126 GDI atlas), so non-ASCII
+// bytes are reported, not silently mangled.
 #include <map>
 #include <string>
 #include <vector>
@@ -60,6 +62,12 @@ struct Entry {
     u32 table = 0;         // the locale resource's instance id
     std::string markup;    // the `~...~` token without the tildes, or ""
     std::string text;      // UTF-8
+    // Which container produced this entry (an index into Tables::sources()). A (table,key) pair can
+    // legitimately arrive from two containers - Data/PatchData.package and the EP1 locale packages
+    // both ship table 0xADE7FFAA - so the source is what turns "which string won" from an accident
+    // of traversal order into something we can state, log, and later match against the original's
+    // own resource-cache precedence.
+    u32 src = 0;
 };
 
 struct Hit {
@@ -84,14 +92,36 @@ public:
     size_t comment_lines() const { return m_comments; }
     size_t continuation_lines() const { return m_continuations; }
     size_t non_ascii() const { return m_non_ascii; }
+    // Containers that contributed text, in the order they were parsed. See Entry::src.
+    const std::vector<std::string>& sources() const { return m_sources; }
+    // How many (table,key) pairs were defined more than once, split by whether the two definitions
+    // AGREE. The disagreeing ones are the real precedence question; the agreeing ones are harmless
+    // duplication (e.g. en-us is shipped byte-identically in two EP1 containers).
+    size_t def_duplicates() const { return m_dup_same + m_dup_diff; }
+    size_t def_duplicates_same() const { return m_dup_same; }
+    size_t def_duplicates_diff() const { return m_dup_diff; }
 
     // The globally-unique answer for a key, or "" when the key is absent or ambiguous.
     std::string get(u32 key) const;
     std::string markup(u32 key) const;
-    // The exact answer from one table.
+    // The exact answer from one table. NOTE the historical trap here: this map was once declared
+    // std::map<u32,...> while callers packed (table<<32)|key into a u64, so the implicit narrowing
+    // truncated the TABLE away and get(table,key) silently became get(key) - returning another
+    // table's string for a menu caption, which is exactly the failure this overload exists to
+    // prevent. The giveaway was the load() log line: "distinct (table,key) texts" equal to
+    // "distinct keys" can only happen if the table half is not participating in the lookup.
     std::string get(u32 table, u32 key) const;
     bool has(u32 key) const { return m_index.count(key) != 0; }
     bool ambiguous(u32 key) const;
+    // Is this TABLE instance in the corpus at all? A caption reference that fails to resolve is a
+    // COVERAGE gap when the answer is no (the text is not in the tree) and a SEMANTIC gap when the
+    // table is present but the key is not. Conflating the two hid real progress: for two sessions
+    // we recorded "the mvj and legal tables are missing", and `legal` does ship - inside the nested
+    // locale packages of Data/PatchData.package.
+    bool has_table(u32 table) const;
+    // Is this exact (table,key) pair defined? Distinct from get() != "" only in intent, but the
+    // distinction matters for an empty string that is a legitimate translation.
+    bool has_in(u32 table, u32 key) const;
 
     // Case-insensitive reverse lookup: which keys carry this label. This is how a menu asks for
     // "New Game" without knowing its key.
@@ -110,12 +140,18 @@ private:
     // packages, and a second copy of this grammar would be exactly the drift that produces two
     // disagreeing views of one dataset.
     size_t parse_package(pkg::Package& pk);
+    // Interns a container label and returns its id, so Entry::src stays a u32 instead of a string
+    // copy per entry (32,038 entries x a path each would cost more than the text itself).
+    u32 source_id(const std::string& label);
     bool m_loaded = false;
     std::string m_lang;
     std::vector<u32> m_tables;                  // locale resource instance ids
     std::vector<Entry> m_entries;
+    std::vector<std::string> m_sources;         // container labels, indexed by Entry::src
     std::map<u32, Index> m_index;
-    std::map<u32, std::string> m_by_table;      // (table<<32)|key packed into a 64-bit map key
+    std::map<u64, std::string> m_by_table;  // (u64(table)<<32)|key - u64 ON PURPOSE, see get()'s note
+    size_t m_dup_same = 0;                      // (table,key) redefined with IDENTICAL text
+    size_t m_dup_diff = 0;                      // (table,key) redefined with DIFFERENT text
     size_t m_ambiguous = 0;
     size_t m_comments = 0;
     size_t m_continuations = 0;

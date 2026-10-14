@@ -5,7 +5,9 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <map>
 #include <set>
+#include <utility>
 
 #include "engine/fs.h"
 #include "engine/log.h"
@@ -32,6 +34,24 @@ std::string lower(std::string s) {
     for (auto& c : s) c = (char)std::tolower((unsigned char)c);
     return s;
 }
+
+// A 64-bit digest of a raw byte buffer, used ONLY to decide whether two resources with the same
+// instance are the same data. Deliberately not the game's FNV: that one is 32-bit and folds case,
+// and a false "these are duplicates" verdict would silently drop a whole language's text. Two
+// independent 32-bit FNV-1 rounds (different seeds) make a collision impractical rather than merely
+// unlikely-in-theory, and cost one pass over ~0.5 MB.
+u64 digest_of(const std::vector<u8>& b) {
+    u64 hi = 0, lo = 0;
+    for (size_t i = 0; i < b.size(); ++i) {
+        hi = ((hi * 0x01000193u) & 0xFFFFFFFFu) ^ b[i];
+        lo = ((lo ^ b[i]) * 0x811C9DC5u) & 0xFFFFFFFFu;
+    }
+    return (hi << 32) | lo;
+}
+
+// The (table,key) map key, spelled in exactly one place so that the 64-bit width can never silently
+// regress to 32 bits again - which is precisely how get(table,key) ended up ignoring the table.
+u64 pack(u32 table, u32 key) { return ((u64)table << 32) | (u64)key; }
 
 bool hex8(const std::string& s, size_t i, u32& out) {
     u32 v = 0;
@@ -245,6 +265,7 @@ std::string to_display_ascii(const std::string& utf8) {
 // two disagreeing views of one dataset.
 size_t Tables::parse_package(pkg::Package& pk) {
     size_t tables_parsed = 0, decode_failed = 0, no_grammar = 0;
+    const u32 src = source_id(pk.path());  // which container these strings came from
     const auto& recs = pk.records();
     for (u32 n = 0; n < recs.size(); ++n) {
         const pkg::Record& r = recs[n];
@@ -284,6 +305,7 @@ size_t Tables::parse_package(pkg::Package& pk) {
                 Entry e;
                 e.key = key;
                 e.table = table_id;
+                e.src = src;
                 if (!rest.empty() && rest[0] == '~') {
                     // The optional `~markup~` token. Measured: 0 unterminated tokens in 18,439
                     // key lines, so a missing close is NOT swallowed as markup - it stays text.
@@ -331,6 +353,8 @@ bool Tables::load(const std::string& lang) {
     m_entries.clear();
     m_index.clear();
     m_by_table.clear();
+    m_sources.clear();
+    m_dup_same = m_dup_diff = 0;
     m_ambiguous = m_comments = m_continuations = m_non_ascii = 0;
 
     // fs.cpp already puts exe_dir/Locale/<lang> on the search path with tag "Locale", so we walk the
@@ -348,7 +372,8 @@ bool Tables::load(const std::string& lang) {
         return false;
     }
 
-    size_t tables_parsed = 0, flat_pkgs = 0, nested_pkgs = 0, nested_tables = 0;
+    size_t tables_parsed = 0, flat_pkgs = 0, nested_pkgs = 0, nested_tables = 0, nested_skipped = 0;
+    std::map<u32, std::pair<u64, std::string>> nested_seen;  // instance -> (digest, container)
     for (const auto& path : locale_pkgs) {
         pkg::Package pk;
         if (!pk.open(path)) continue;
@@ -385,6 +410,30 @@ bool Tables::load(const std::string& lang) {
                 std::vector<u8> bytes;
                 if (!outer.read_resource_decoded(n, bytes)) continue;
                 if (bytes.size() < 0x60 || std::memcmp(bytes.data(), "DBPF", 4) != 0) continue;
+                // The SAME nested instance can be shipped in more than one container: measured,
+                // en-us (0x7080DB55) is in BOTH DataEP1/Spore_EP1_Locale_01 and _02, byte-identical
+                // across all 65 tables (tools/nested_all_langs.py). Parsing it twice doubles every
+                // entry and inflates the corpus count, so a repeat is skipped only when the bytes
+                // really agree; a same-instance/different-bytes conflict is parsed anyway and
+                // shouted about, because dropping text is worse than parsing it twice.
+                const u64 dig = digest_of(bytes);
+                auto prev = nested_seen.find(recs[n].instance());
+                if (prev != nested_seen.end()) {
+                    if (prev->second.first == dig) {
+                        ++nested_skipped;
+                        continue;
+                    }
+                    // NOT a contradiction: this is a PATCH overriding base content, which is what a
+                    // patch is for. Measured, Data/PatchData.package ships its own nested locale
+                    // packages (42 en-us tables) alongside EP1's 65, overlapping on one table. Both
+                    // are parsed, and the container that wins per (table,key) is reported by the
+                    // "locale definition overridden" lines at the end of load().
+                    LOG_INFO("text",
+                             "nested package 0x%08X ships with different contents in %s and %s - "
+                             "parsing both (a patch over base content)",
+                             recs[n].instance(), prev->second.second.c_str(), path.c_str());
+                }
+                nested_seen[recs[n].instance()] = std::make_pair(dig, path);
                 pkg::Package inner;
                 if (!inner.open_from_memory(bytes.data(), bytes.size(),
                         std::filesystem::path(path).filename().string() + "#nested")) continue;
@@ -403,9 +452,35 @@ bool Tables::load(const std::string& lang) {
                          if (a.key != b.key) return a.key < b.key;
                          return a.table < b.table;
                      });
+    // PRECEDENCE, measured rather than assumed. The same (table,key) can be defined by more than one
+    // container: Data/PatchData.package and DataEP1/Spore_EP1_Locale_0{1,2}.package both ship table
+    // 0xADE7FFAA (tools/nested_precedence.py). Because m_entries is sorted by (key, table) and the
+    // sort is STABLE, repeats of one (table,key) stay in container-parse order and the LAST one
+    // parsed wins. That is an accident of traversal order, not a rule we chose - so every disagreement
+    // is counted and the first few are logged with both container names, which turns a silent override
+    // into a fact we can check against the original's own resource-cache precedence later.
+    std::map<u64, u32> winner_src;
+    std::vector<std::string> conflicts;
     for (size_t i = 0; i < m_entries.size(); ++i) {
         const Entry& e = m_entries[i];
-        m_by_table[((u64)e.table << 32) | e.key] = e.text;
+        const u64 k = pack(e.table, e.key);
+        auto w = winner_src.find(k);
+        if (w != winner_src.end()) {
+            if (m_by_table[k] == e.text) {
+                ++m_dup_same;
+            } else {
+                ++m_dup_diff;
+                if (conflicts.size() < 8) {
+                    char b[300];
+                    std::snprintf(b, sizeof(b), "tbl 0x%08X key 0x%08X: %s WINS over %s",
+                                  e.table, e.key, m_sources[e.src].c_str(),
+                                  m_sources[w->second].c_str());
+                    conflicts.push_back(b);
+                }
+            }
+        }
+        m_by_table[k] = e.text;
+        winner_src[k] = e.src;
         Index& ix = m_index[e.key];
         ix.entry_ids.push_back(i);
     }
@@ -425,11 +500,29 @@ bool Tables::load(const std::string& lang) {
     m_tables.erase(std::unique(m_tables.begin(), m_tables.end()), m_tables.end());
 
     m_loaded = true;
-    LOG_INFO("text", "locale '%s': %zu tables (%zu flat packages, %zu nested containers, %zu nested "
-                     "tables), %zu entries, %zu distinct keys, %zu ambiguous, %zu comments, %zu "
-                     "continuation lines, %zu non-ASCII texts",
-             lang.c_str(), tables_parsed, flat_pkgs, nested_pkgs, nested_tables, m_entries.size(),
-             m_index.size(), m_ambiguous, m_comments, m_continuations, m_non_ascii);
+    // The numbers are reported HONESTLY as distinct, not as "tables parsed": a table can reach us
+    // through two containers, and counting the visits inflated this project's own yardstick for a
+    // whole session (see the nested_skipped note above). m_tables is deduped above; m_by_table is
+    // keyed by (table,key), so its size is the count of distinct localized strings.
+    LOG_INFO("text",
+             "locale '%s': %zu distinct tables from %zu containers, %zu nested containers (%zu "
+             "nested tables, %zu byte-identical nested containers skipped), %zu distinct (table,key) "
+             "texts from %zu entries (%zu defined twice, agreeing; %zu defined twice, DISAGREEING), "
+             "%zu distinct keys, %zu ambiguous, %zu comments, %zu continuation lines, %zu non-ASCII "
+             "texts",
+             lang.c_str(), m_tables.size(), m_sources.size(), nested_pkgs, nested_tables, nested_skipped,
+             m_by_table.size(), m_entries.size(), m_dup_same, m_dup_diff, m_index.size(), m_ambiguous, m_comments,
+             m_continuations, m_non_ascii);
+    // A disagreement between containers is a REAL question, so it is logged with both names. Today it
+    // is 2 keys out of 23,933 - both cosmetic - but the COUNT is what tells us whether the original's
+    // precedence rule could ever matter to us, and an unlogged override is invisible.
+    for (const std::string& c : conflicts) {
+        LOG_WARN("text", "locale definition overridden: %s", c.c_str());
+    }
+    if (m_dup_diff > conflicts.size()) {
+        LOG_WARN("text", "... and %zu more overridden definitions not shown",
+                 m_dup_diff - conflicts.size());
+    }
     return true;
 }
 
@@ -450,8 +543,24 @@ std::string Tables::markup(u32 key) const {
 }
 
 std::string Tables::get(u32 table, u32 key) const {
-    auto it = m_by_table.find(((u64)table << 32) | key);
+    auto it = m_by_table.find(pack(table, key));
     return it == m_by_table.end() ? std::string() : it->second;
+}
+
+bool Tables::has_in(u32 table, u32 key) const {
+    return m_by_table.find(pack(table, key)) != m_by_table.end();
+}
+
+bool Tables::has_table(u32 table) const {
+    return std::binary_search(m_tables.begin(), m_tables.end(), table);
+}
+
+u32 Tables::source_id(const std::string& label) {
+    for (u32 i = 0; i < (u32)m_sources.size(); ++i) {
+        if (m_sources[i] == label) return i;
+    }
+    m_sources.push_back(label);
+    return (u32)(m_sources.size() - 1);
 }
 
 bool Tables::ambiguous(u32 key) const {

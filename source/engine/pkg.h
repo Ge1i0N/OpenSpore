@@ -134,6 +134,10 @@ public:
 
     bool ok() const { return m_ok; }
     const std::string& why() const { return m_why; }
+    // Where these bytes came from: a file path for open(), or the label for open_from_memory().
+    // Needed because a definition can arrive from several containers at once, and knowing WHICH one
+    // won is the difference between a measured precedence rule and an accident of traversal order.
+    const std::string& path() const { return m_path; }
     const Header& header() const { return m_hdr; }
 
     // True when this file's index matched one of the three observed kinds and was parsed.

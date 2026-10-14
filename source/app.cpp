@@ -722,6 +722,57 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                                         inline_n, ref_n, resolved, unres, sample.c_str());
                           return buf;
                       }
+                      if (c.args[1] == "-gaps") {
+                          // Classify the references that do NOT resolve. The distinction is the
+                          // whole point: a table we never parsed is a COVERAGE gap (the text is not
+                          // in the tree we have), while a table we did parse that lacks the key is a
+                          // SEMANTIC gap (the layout points at something the shipped text does not
+                          // define). One conflated number kept "mvj and legal are missing" alive for
+                          // two sessions after `legal` had been found sitting in Data/PatchData
+                          // .package's nested locale packages.
+                          auto& tx = text::instance();
+                          std::map<u32, std::vector<u32>> by_table;
+                          size_t refs = 0;
+                          for (const auto& lw : rd.layouts()) {
+                              for (const auto& win : lw.windows) {
+                                  if (!win.caption_is_ref || !win.caption_key_seen) continue;
+                                  ++refs;
+                                  if (tx.has_in(win.caption_table, win.caption_key)) continue;
+                                  auto& v = by_table[win.caption_table];
+                                  if (std::find(v.begin(), v.end(), win.caption_key) == v.end()) {
+                                      v.push_back(win.caption_key);
+                                  }
+                              }
+                          }
+                          size_t cov_tables = 0, sem_tables = 0, cov_keys = 0, sem_keys = 0;
+                          std::ostringstream out;
+                          out << "unresolved caption refs: " << refs << " refs, " << by_table.size()
+                              << " distinct tables";
+                          for (const auto& kv : by_table) {
+                              const bool known = tx.has_table(kv.first);
+                              if (known) { ++sem_tables; sem_keys += kv.second.size(); }
+                              else       { ++cov_tables; cov_keys += kv.second.size(); }
+                              out << "\n  " << (known ? "SEMANTIC  tbl " : "COVERAGE  tbl ");
+                              char b[24];
+                              std::snprintf(b, sizeof(b), "0x%08X", kv.first);
+                              out << b << "  " << kv.second.size() << " key(s)";
+                              out << (known ? " - the table IS parsed; these keys are not in it"
+                                            : " - this table instance is nowhere in the corpus");
+                              size_t shown = 0;
+                              for (u32 k : kv.second) {
+                                  std::snprintf(b, sizeof(b), " 0x%08X", k);
+                                  out << b;
+                                  if (++shown >= 8) {
+                                      if (kv.second.size() > shown) out << " ...";
+                                      break;
+                                  }
+                              }
+                          }
+                          out << "\n  => coverage: " << cov_tables << " tables / " << cov_keys
+                              << " keys; semantic: " << sem_tables << " tables / " << sem_keys
+                              << " keys";
+                          return out.str();
+                      }
                       if (c.args[1] == "-win" && c.args.size() >= 3) {
                           size_t want = (size_t)std::strtoul(c.args[2].c_str(), nullptr, 10);
                           size_t i = 0;
