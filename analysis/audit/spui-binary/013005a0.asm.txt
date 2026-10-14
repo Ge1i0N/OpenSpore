@@ -1,0 +1,59 @@
+GA oracle SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA: 0x013005A0
+Provider: persistent Ghidra 12.1.4 project OpenSporeOracle
+Static evidence only; pseudocode stack/calling conventions may be incomplete.
+
+013005a0  PUSH EBP
+013005a1  MOV EBP,ESP
+013005a3  MOV dword ptr [0x0154f00c],0x1
+013005ad  MOV dword ptr [0x0154f010],0x0
+013005b7  MOV dword ptr [0x0154f014],0x0
+013005c1  MOV dword ptr [0x0154f018],0xeec1b008
+013005cb  MOV EAX,0xd
+013005d0  MOV [0x0154f01c],AX
+013005d6  MOV dword ptr [0x0154f020],0xc4
+013005e0  MOV dword ptr [0x0154f024],0x1
+013005ea  MOV dword ptr [0x0154f028],0x0
+013005f4  MOV dword ptr [0x0154f02c],0x0
+013005fe  MOV dword ptr [0x0154f030],0xeec1b009
+01300608  MOV ECX,0x9
+0130060d  MOV word ptr [0x0154f034],CX
+01300614  MOV dword ptr [0x0154f038],0xa8
+0130061e  MOV dword ptr [0x0154f03c],0x1
+01300628  MOV dword ptr [0x0154f040],0x0
+01300632  MOV dword ptr [0x0154f044],0x0
+0130063c  MOV dword ptr [0x0154f048],0xeec1b00a
+01300646  MOV EDX,0x12
+0130064b  MOV word ptr [0x0154f04c],DX
+01300652  MOV dword ptr [0x0154f050],0xb0
+0130065c  MOV dword ptr [0x0154f054],0x1
+01300666  MOV dword ptr [0x0154f058],0x0
+01300670  MOV dword ptr [0x0154f05c],0x1440cb8
+0130067a  MOV dword ptr [0x0154f060],0xeec1b00b
+01300684  MOV EAX,0x8013
+01300689  MOV [0x0154f064],AX
+0130068f  MOV dword ptr [0x0154f068],0x3c
+01300699  MOV dword ptr [0x0154f06c],0x1
+013006a3  MOV dword ptr [0x0154f070],0x0
+013006ad  MOV dword ptr [0x0154f074],0x1440cc4
+013006b7  MOV dword ptr [0x0154f078],0xeec1b00c
+013006c1  MOV ECX,0x8013
+013006c6  MOV word ptr [0x0154f07c],CX
+013006cd  MOV dword ptr [0x0154f080],0x64
+013006d7  MOV dword ptr [0x0154f084],0x1
+013006e1  MOV dword ptr [0x0154f088],0x0
+013006eb  MOV dword ptr [0x0154f08c],0x1440d34
+013006f5  MOV dword ptr [0x0154f090],0xeec1b00d
+013006ff  MOV EDX,0x13
+01300704  MOV word ptr [0x0154f094],DX
+0130070b  MOV dword ptr [0x0154f098],0x1e4
+01300715  MOV dword ptr [0x0154f09c],0x1
+0130071f  MOV dword ptr [0x0154f0a0],0x0
+01300729  MOV dword ptr [0x0154f0a4],0x0
+01300733  MOV dword ptr [0x0154f0a8],0xeec1b00e
+0130073d  MOV EAX,0x9
+01300742  MOV [0x0154f0ac],AX
+01300748  MOV dword ptr [0x0154f0b0],0xc0
+01300752  MOV dword ptr [0x0154f0b4],0x1
+0130075c  POP EBP
+0130075d  RET

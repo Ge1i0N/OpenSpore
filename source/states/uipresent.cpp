@@ -58,12 +58,8 @@ const os::spui::Layout* requested_by_state(std::string& why) {
 // What a click HITS. Reports the widget's identity as the data gives it: control id, command id, and
 // the caption resolved through the locale tables.
 //
-// WHAT IT DOES NOT DO: act. A widget's `command_id` is an index into the UI system's COMMAND
-// VOCABULARY, and that vocabulary is not reversed (it is the same wall as the 637/748 sequential-walk
-// gap: the designer XML ships 227 of the ids the binaries use). So today the honest end of the chain
-// is "the pointer resolves to exactly one widget, and we can name it" - which is still a step the
-// engine could not take an hour ago, and it is the step everything else hangs off. Claiming more would
-// be decoration.
+// The ControlID-to-state bridge below is our reconstructed launcher behavior. General CommandID
+// dispatch and WinProc behavior remain unimplemented, independently of the now-complete framing.
 void dispatch_click(const os::spui::Layout& lay, int vw, int vh) {
     const os::spui::Window* w = hit_test(lay, (float)input::x(), (float)input::y(), (float)vw,
                                          (float)vh);
@@ -95,7 +91,8 @@ void dispatch_click(const os::spui::Layout& lay, int vw, int vh) {
     // (discounting 0x00000001, which is the block-scoped low-id trap). So a widget in the launch
     // screen CARRIES the id of the state it enters, and a click can drive the state machine WITHOUT
     // reversing the command vocabulary - which is the gate we could not otherwise open.
-    const auto* target = appstates::instance().find_by_id(w->control_id);
+    const auto* target = (w->control_id >= 0x1000 && w->command_id == 0x00e1132f)
+                             ? appstates::instance().find_by_id(w->control_id) : nullptr;
     if (target && !target->name.empty()) {
         LOG_INFO("ui", "click at (%d,%d) -> \"%s\" %s  => ENTER STATE '%s' (control id == state id)",
                  input::x(), input::y(), cap.empty() ? "-" : cap.c_str(), idpart,
@@ -143,12 +140,12 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
     ov.text_fmt(48.f, 38.f, 0xFF6E8FA8, "chosen because: %s", why.c_str());
 
     size_t drawn = 0;
-    // Paint in the shared order (largest first), so what is VISIBLE is what hit_test() will select.
+    // Parent before its serialized Children, with ancestor visibility applied by paint_order().
     const std::vector<size_t> order = os::spui::paint_order(lay);
     for (size_t oi : order) {
         const auto& win = lay.windows[oi];
         if (!win.has_area) continue;
-        const float x = win.area.left * sx, y = win.area.top * sy;
+        const float x = win.placed_area.left * sx, y = win.placed_area.top * sy;
         const float bw = win.area.w() * sx, bh = win.area.h() * sy;
         if (x + bw < 0.f || y + bh < 0.f || x > (float)w || y > (float)h) continue;
         // The window's own colour, used AS STORED including its alpha. Forcing alpha to 0xFF here

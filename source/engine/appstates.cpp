@@ -374,11 +374,11 @@ void install(os::states::Manager& mgr) {
                 // registering function and the state the mode drives, instead of a bare "not
                 // implemented" that tells the reader nothing they can act on.
                 if (const auto* m = appmodes::find_by_name(mode.c_str())) {
-                    LOG_WARN("appstates", "%s: `%s` - %s", name.c_str(), mode.c_str(),
+                    LOG_WARN("appstates", "%s: `%s` driver not implemented - %s", name.c_str(), mode.c_str(),
                              appmodes::describe(*m).c_str());
                 } else {
-                    LOG_WARN("appstates", "%s: `mode %s` not executed - this build of the game has no "
-                                          "such mode class (searched the whole oracle)",
+                    LOG_WARN("appstates", "%s: `mode %s` not executed - registration is not in our "
+                                          "recovered mode table",
                              name.c_str(), mode.c_str());
                 }
             }

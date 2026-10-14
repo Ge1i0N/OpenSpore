@@ -1,0 +1,57 @@
+GA oracle SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA: 0x013005A0
+Provider: persistent Ghidra 12.1.4 project OpenSporeOracle
+Static evidence only; pseudocode stack/calling conventions may be incomplete.
+
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void FUN_013005a0(void)
+
+{
+  _DAT_0154f00c = 1;
+  _DAT_0154f010 = 0;
+  _DAT_0154f014 = 0;
+  _DAT_0154f018 = 0xeec1b008;
+  _DAT_0154f01c = 0xd;
+  _DAT_0154f020 = 0xc4;
+  _DAT_0154f024 = 1;
+  _DAT_0154f028 = 0;
+  _DAT_0154f02c = 0;
+  _DAT_0154f030 = 0xeec1b009;
+  _DAT_0154f034 = 9;
+  _DAT_0154f038 = 0xa8;
+  _DAT_0154f03c = 1;
+  _DAT_0154f040 = 0;
+  _DAT_0154f044 = 0;
+  _DAT_0154f048 = 0xeec1b00a;
+  _DAT_0154f04c = 0x12;
+  _DAT_0154f050 = 0xb0;
+  _DAT_0154f054 = 1;
+  _DAT_0154f058 = 0;
+  _DAT_0154f05c = &PTR_FUN_01440cb8;
+  _DAT_0154f060 = 0xeec1b00b;
+  _DAT_0154f064 = 0x8013;
+  _DAT_0154f068 = 0x3c;
+  _DAT_0154f06c = 1;
+  _DAT_0154f070 = 0;
+  _DAT_0154f074 = &PTR_LAB_01440cc4;
+  _DAT_0154f078 = 0xeec1b00c;
+  _DAT_0154f07c = 0x8013;
+  _DAT_0154f080 = 100;
+  _DAT_0154f084 = 1;
+  _DAT_0154f088 = 0;
+  _DAT_0154f08c = &PTR_LAB_01440d34;
+  _DAT_0154f090 = 0xeec1b00d;
+  _DAT_0154f094 = 0x13;
+  _DAT_0154f098 = 0x1e4;
+  _DAT_0154f09c = 1;
+  _DAT_0154f0a0 = 0;
+  _DAT_0154f0a4 = 0;
+  _DAT_0154f0a8 = 0xeec1b00e;
+  _DAT_0154f0ac = 9;
+  _DAT_0154f0b0 = 0xc0;
+  _DAT_0154f0b4 = 1;
+  return;
+}
+

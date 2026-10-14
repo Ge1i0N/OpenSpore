@@ -8,6 +8,11 @@ project-wide feature view; the tables below are the boot/load chain and the runt
 
 ## Yardstick
 
+**2026-10-15 UI update:** sequential SPUI **748/748**, 93,726 objects / 22,384 windows / 20,659 links /
+1,183,787 exact properties. C++ matches Python fixtures and rejects 486 corrupt inputs atomically.
+Visible click `(311,550)` enters CreatureEditor. The old GGE point selected a hidden child and is
+superseded. Renderer remains diagnostic; gameplay unfinished. See `analysis/spui-binary.md`.
+
 `N_verified` = rows in `VERIFY.md` at status `DISASM-VERIFIED`. Currently **21** of 30.
 Runtime yardsticks, all machine-checkable, report after every run:
 

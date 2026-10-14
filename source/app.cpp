@@ -1001,6 +1001,14 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                             << " discount it and judge on the rest.";
                           return o.str();
                       }
+                      if (c.args[1] == "-tree") {
+                          std::string why;
+                          const auto* layout = c.args.size() >= 3
+                              ? rd.find((u32)std::strtoul(c.args[2].c_str(), nullptr, 16))
+                              : states::requested_by_state(why);
+                          if (!layout) return "-tree: specify a loaded instance or enter a UI state";
+                          return spui::describe_tree(*layout);
+                      }
                       if (c.args[1] == "-dump" && c.args.size() >= 3) {
                           // Dump one layout's ANCHOR LIST in file order: offset, id, schema name, code,
                           // element count. Ground truth from the reader that already works, for

@@ -33,7 +33,10 @@ Disassembly stays the first tool (it overrides habit and third-party docs). On t
 - **Main->playable, so far:** entry -> WinMain (`0xf489e0`) -> app_main (`0xf48810`) -> run
   (`0xf47e90`) -> AppMode (`0x7e8a00`) -> window class (`0x849b20`) -> **main loop (`0x8482f0`)** ->
   config (`Config/*.txt`) -> content load (resource manager) -> `gmdl`/`raster`/`png`/`locale` draw.
-  **Next on the path:** `spui` layout parser so the Loader can show a real menu (`analysis/ui.md`).
+   **UI update 2026-10-15:** sequential parser and child graph work on 748/748 resources (GA reader
+   0x82ce10 / property dispatch 0x82b3f0). Rendering is diagnostic geometry/text. A visible launcher
+   tile enters CreatureEditor; editor/game AppModes are unimplemented. **Next:** drawable references
+   for a coherent screen, then GalaxyGameEntry behavior. See `analysis/spui-binary.md`.
 - Read `RESUME.md` first, then `PROGRESS.md`, `VERIFY.md`, `MEMORY.md`, `IDEAS.md`, `HISTORY.md`.
 
 ## The brief (verbatim)

@@ -8,6 +8,7 @@ fields open · **TODO** = only the type id / count known.
 
 | type | id | count | status | notes |
 |---|---|---|---|---|
+| `spui` | 0x250FE9A2 | 748 resources / 524 instance ids | **SOLVED framing / PARTIAL behavior** | GA 0x82ce10/0x82b3f0; 748/748 exact EOF; code 19 object refs, code 20 structs; 20,659 links. Drawables/WinProcs open; `analysis/spui-binary.md` |
 | `png` | 0x… | 14,549 | **SOLVED** | real PNG; GDI+ decodes; drawn by the engine |
 | `raster` | 0x2f4e681c | 5,931 | **SOLVED** | header `{ver,dim,dim,code,8,tag,base}`; DXT1/DXT5/raw; `analysis/…`, drawn by the engine |
 | `gmdl` | 0x00e6bce5 | 11,041 | **SOLVED** (positions) | stride 36, position = first float3, bbox exact; UV at offset 16; drawn by the engine |
@@ -81,4 +82,3 @@ constant.
 In the binary, `gmsh` (0x01c135da) is loaded through the resource manager at `0x00402301`
 (`mov [ebp+0xc], 0x1c135da` -> `call 0x67dc90` = the manager from global `0x15fd894`, then
 `[mgr]->vtable+0x14`), the same "load resource by type" path as `trigger`.
-

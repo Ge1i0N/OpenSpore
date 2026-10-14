@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 82.8%** | **Overall: 76.2%** | done 194 / partial 28 / todo 51 (273 features)
+**Engine reversal: 83.2%** | **Overall: 76.6%** | done 195 / partial 28 / todo 50 (273 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **57%** | 19 | 9 | 13 |
+| formats | **60%** | 20 | 9 | 12 |
 | gameplay | **6%** | 1 | 0 | 17 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **30%** | 2 | 2 | 6 |
@@ -282,13 +282,13 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | RW device bridge | field guide 3 |
 | ⬜ | todo | RW state blocks |  |
 | ⬜ | todo | shaders |  |
-| 🚧 | partial | UI (UTFWin) | layouts render with geometry, colours, alphas and the game's own captions, and a STATE can now select which layout shows. Not reversed: widgets' behaviour (click handlers, the 637/748 vocabulary gap, the mode table). |
+| 🚧 | partial | UI (UTFWin) | 748/748 sequential SPUI files and child graphs; visibility and pointer picking use the graph. Rendering remains diagnostic geometry/text; drawables, layout/Z WinProcs, general commands and game modes remain incomplete. analysis/spui-binary.md |
 
 ---
 
-## formats — 57%
+## formats — 60%
 
-*19 done · 9 partial · 13 todo*
+*20 done · 9 partial · 12 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -303,18 +303,18 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | material |  |
 | ⬜ | todo | sound (snr) | 29400 resources |
 | ⬜ | todo | soundProp | 19296 resources |
-| 🚧 | partial | spui layout | 524 screens (407 named); DESERIALIZER DOOR FOUND: factory 0x810870 + loader 0x810940 (type id 0x250FE9A2 confirmed in code); it is a UTF/XmlTokenReader TOKEN STREAM, so byte parsing was doomed |
-| ✅ | done | spui token alphabet | NOT bit-packed: byte-packed records id(4)|code:u16|marker(==1)|payload, code stable per id (94.5% of high ids), sizes measured 9/11->4, 16->16 rectf, 17->8, 20->6, 19->array count, 18->string |
+| 🚧 | partial | spui layout | GA binary reader 0x82ce10 / property dispatch 0x82b3f0 recovered; 748/748 exact EOF, 93,726 objects, 22,384 windows, 20,659 Children links. Object graph known; widget/drawable behavior remains partial. Previous XML-tokenizer interpretation was the wrong loader branch. |
+| ✅ | done | spui token alphabet | GA 0x82b3f0: id:u32/type:u16/count:u16; 19=count u16 object indexes, FFFF=null; 20=struct metadata then nested properties; 18=UTF-16 or table/key. Object marker 5FF5 is real, not a type code. Unknown ids preserve framing. 748/748 exact EOF. |
 | ✅ | done | spui schema (the dictionary) | 14 `xml` resources = the shipped Spore UI Designer project: 306 proxy ids (66 Class + 240 Property), 227 present in spui, 748/748 layouts carry them |
-| ✅ | done | spui windows | engine/spui.cpp: 400 layouts, 11,465 windows, 9,547 with a usable Area, 472,291 records; Area is LEFT,TOP,RIGHT,BOTTOM (the LTRB reading raised usable areas 7,838 -> 9,547) |
+| ✅ | done | spui windows | Sequential reader: 93,726 objects, 22,384 windows, 18,232 Areas, 20,659 child links; Python/C++ fixture verifier and 486 malformed-input negative cases. Raw Area is LTRB; placed rectangle applies ancestor origins as our current presentation policy. |
 | ✅ | done | spui drawn on screen | Title renders the real layout at real coordinates with the game's own captions (Create a New Game / color picker / Selected Color) over the real UI atlas |
 | ✅ | done | spui alphas | the shipped ARGB is meaningful (0x007F7F7F transparent); forcing alpha opaque turned the screen into slabs - use as stored + outline |
-| ✅ | done | spui all 748 layouts | 748/748 resources parsed (22,384 windows, 18,232 with a usable Area, 961,360 anchors) - BUT only 524 distinct INSTANCES: 224 layouts ship more than once, 18 of the shadows with a different byte length. 748 was resources, not screens. |
-| ✅ | done | layout table -> text | caption ref is 0xFFFF|table|key; 1,391 of 1,426 resolve (97.5%) after mounting the nested EP1 packages; 35 remain (mvj, legal) |
+| ✅ | done | spui all 748 layouts | 748/748 resources consumed exactly to EOF in Python and C++; 1,183,787 exact properties, 20,659 child links. 524 instance ids / 224 shadows (18 size differences). Corpus fixture verifier also rejects 486 malformed inputs atomically. |
+| ✅ | done | layout table -> text | Caption ref is FFFF/table/key. Exact sequential reader retains 2,152 inline captions and 1,426 refs; 1,384 resolve (97.1%). Historical 1,391 included wrong-table answers from the fixed map-key narrowing bug. |
 | ✅ | done | nested packages (DBPF in DBPF) | DataEP1/Spore_EP1_Locale_* hold 21 resources of type `package` (0x06EFC6AA), each itself a DBPF, together 1,364 locale resources; the en-us one is instance fnv1_lower("en-us")=0x7080DB55 |
-| ✅ | done | locale corpus | 369 tables / 37,608 entries / 14,657 keys (was 197 / 18,441 / 10,246 with the flat pass alone) |
+| ✅ | done | locale corpus | 265 distinct tables / 23,933 distinct table-key texts / 32,038 entries / 14,657 keys. Historical 369/37,608 counted duplicate container contributions. |
 | ✅ | done | layout -> locale table | code 18 = 0xFFFF|table:u32|key:u32 (a KEY, not just a table). 1,384 of 1,426 refs resolve (97.1%); 2,152 inline. Was 1,391 - and 7 of those were answers from the WRONG table, because m_by_table was map<u32,...> fed a u64 key, so the table half was silently truncated away. |
-| ⬜ | todo | spui full sequential parse | walk derails in 637/748 with 'id not in schema' - the designer XML lists only 227 of the ids the binaries use. Remaining work is VOCABULARY, not structure |
+| ✅ | done | spui full sequential parse | GA 0x82ce10/0x82b3f0/0x82b240: 748/748 exact EOF, Python/C++ match, 486 corrupt inputs rejected unchanged. Former vocabulary-wall explanation was wrong: code 19 references and code 20 structs were misread. |
 | 🚧 | partial | gmsh | stable 24-byte header found (BE words + float runs); layout not derived |
 | 🚧 | partial | blockdata | vec3 array; first two = min/max bbox |
 | ⬜ | todo | bea | 2621 resources |
@@ -330,8 +330,8 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | locale at three depths | flat Data/Locale/<lang> + nested in DataEP1/Spore_EP1_Locale_0{1,2} + nested in Data/PatchData (42 en-us tables). 265 distinct tables from 5 containers, 23,933 distinct (table,key) texts. The third depth was invisible for two sessions because the search was scoped by FILENAME (*Spore_EP1_Locale*) instead of by TYPE. |
 | ✅ | done | caption gaps classified | spui -gaps splits the 42 unresolved refs into COVERAGE (table instance absent from the corpus: mvj 0x277DEE6A, 14 keys) and SEMANTIC (table present, key missing: 4 keys). `legal` 0xADB810C4 was on the missing list for two sessions and is NOT missing - it ships in PatchData's nested packages. |
 | ✅ | done | intra-resource repeated key | 10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original). |
-| ✅ | done | input -> widget | pointer -> exactly one widget, same path for a real mouse and `spui:-click` (testable headless). See also z-order: record order is NOT z-order, fixed by one shared policy (paint largest-first, hit the smallest containing). |
-| 🚧 | partial | z-order (paint order) | MEASURED: record order is NOT z-order - the full-screen root of E3LaunchScreen is the LAST record, so painting in record order paints the root OVER its panels. Fixed with one shared policy: paint_order() = largest Area first, hit_test() = smallest containing Area wins, so the widget a click selects is the widget the user can SEE. Frame barely changed (1 of 102,480 sampled px) because the shipped windows are transparent with outlines. The real fix is the parent/child hierarchy, which is not reversed yet. |
+| ✅ | done | input -> widget | Pointer uses actual parent graph, ancestor visibility/enabled and IgnoreMouse. Visible CreatureEditor tile at (311,550) verified; old GGE point hit a hidden child and is superseded. |
+| 🚧 | partial | z-order (paint order) | Actual Children graph replaces area sorting. Parent-before-children and reverse picking share visibility, Enabled, IgnoreMouse and parent Clip. Forward sibling order is our current policy; original dynamic Z order/layout WinProcs and renderer scissor remain incomplete. |
 | ✅ | done | control id == state id (manual id space) | the widget control ids, the state script's manual -id values, and the layout names share ONE manual id space, exactly as the script's author commented ("assign manual IDs just so I can fill in the UI layout stuff more easily"). Measured by spui -xref: 4,187 distinct control ids x 60 states, 9 real hits, <0.001 expected. Discount 0x00000001 - ids below 0x1000 are block-scoped member indices, the standing trap. |
 
 ---
@@ -358,7 +358,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | Sporepedia | pollen_metadata resources |
 | ⬜ | todo | achievements |  |
 | ⬜ | todo | scripts/mods |  |
-| ✅ | done | click -> state transition | AN UNBROKEN DATA-DRIVEN CHAIN: mouse click -> hit-test widget -> control id == state id from the script -> request_goto -> transition -> the new state's screen. Live: click (942,261) -> "GGE" control=0x02CCDA9C -> [state] -> GalaxyGameEntry [0x02ccda9c], which is exactly the script's `state GalaxyGameEntry -id 0x02ccda9c`. Evidence it is not chance: 9 state ids appear as widget control ids (expected <0.001), the captions read "Creature Editor"/"Building Editor"/"Terrain Editor"/"UFO Editor"/"Anim Viewer"/"GGE", and they live in the layout the script NAMES. Bridges the gap WITHOUT the command vocabulary. |
+| ✅ | done | click -> state transition | Reconstructed launcher bridge: visible click (311,550) -> control 022D9E01 / command 00E1132F -> CreatureEditor state, exit 0. The old GGE demo activated an invisible descendant and is corrected. Original general command dispatcher and editor behavior are not implemented. |
 | ⬜ | todo | state enters but cannot act | the honest remainder: entering GalaxyGameEntry logs `mode GalaxyGameEntry not executed`, because a mode is a named AppMode CLASS in code, not data (analysis/modes.md: 11 of 17 names are standalone strings in the oracle, each registered by a per-class factory; 5 do not exist in this build at all). So the next step after this is the AppMode* classes, and it is now REACHABLE BY CLICKING, which it was not before. |
 
 ---

@@ -5,6 +5,27 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ---
 
+## 2026-10-15 — actual SPUI binary reader; 748/748 exact parses and child graphs
+
+Found GA **0x82ce10** by file magic, then read **0x82b3f0** (properties), **0x82b240** (skip/widths),
+**0x13005a0** (Children runtime descriptor). Saved instructions/pseudocode with target SHA-256 in
+`analysis/audit/spui-binary/`. Old XML reader was a different branch. The vocabulary-wall and inline-
+child explanations are superseded by `analysis/spui-binary.md`.
+
+Code 19 is count u16 object indexes; code 20 contains nested structs; 0x5FF5 marks object blocks.
+Replaced anchor scans with bounded sequential C++, preserving object/class/property offsets and
+unknown ids. Resolve Children by object identity; reject bad references, multiple parents and cycles.
+Parent graph/visibility replace size-based paint/pick heuristics.
+
+**Correction:** GGE's parent is hidden; the old flat hit-test activated an invisible widget. Current
+windowed test uses visible `(311,550)` -> **CreatureEditor `0x022D9E01`**, exit 0. This is our launcher
+bridge; original message dispatch, layout WinProcs, Z order and drawables remain incomplete.
+
+Validation: Python/C++ agree on **748/748** full-byte parses: **93,726 objects, 22,384 windows, 18,232
+Areas, 1,183,787 properties, 20,659 links**. C++ verifier rejects **486** malformed inputs atomically
+and accepts unknown property ids. Debug x86 build 0 warnings; 57/57 packages / 150,945 resources;
+captions 1,384/1,426; boot 10/10. Screenshot is a geometry/text diagnostic, not completed gameplay.
+
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
 ### 2026-10-14, the last stretch: THE MENU IS FUNCTIONAL — a click enters a game state

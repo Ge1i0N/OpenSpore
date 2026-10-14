@@ -123,6 +123,8 @@ set(OS_SOURCES
   source/engine/config.cpp
   source/engine/appstates.cpp
   source/engine/spui.cpp
+  source/engine/spui_binary.cpp
+  source/engine/spui_geometry.cpp
   source/engine/text.cpp
   source/render/device.cpp
   source/render/overlay.cpp
@@ -136,6 +138,14 @@ set(OS_SOURCES
 
 add_executable(OpenSpore WIN32 ${OS_SOURCES} ${OS_RC_FILE})
 target_include_directories(OpenSpore PRIVATE source ${OS_GENERATED_DIR})
+
+# Offline parser verification against decoded fixtures from tools/spui_objects.py --extract.
+add_executable(spui_verify EXCLUDE_FROM_ALL tools/spui_verify.cpp
+  source/engine/spui_binary.cpp source/engine/spui_geometry.cpp)
+target_include_directories(spui_verify PRIVATE source)
+if(MSVC)
+  target_compile_options(spui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+endif()
 
 set(OS_DEV_COMMANDS OFF)
 if(CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug" OR CMAKE_CONFIGURATION_TYPES)

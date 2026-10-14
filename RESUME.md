@@ -1,7 +1,52 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-14 (session 13, end of day — written immediately before compaction).
+Last update: 2026-10-15. Current hand-off below supersedes the retained historical snapshot.
+
+## CURRENT HAND-OFF — 2026-10-15: sequential SPUI and actual child graph
+
+This block supersedes older snapshots below. Push is the user's via GitHub Desktop.
+Read `analysis/spui-binary.md` for the format, retained evidence, validation and limitations.
+
+**Done:** found GA binary reader (0x82ce10), property dispatch (0x82b3f0), skip logic (0x82b240).
+Implemented bounded C++ `spui_binary.cpp`, independently checked against Python `spui_objects.py`
+on **748/748** resources through EOF. **486** malformed inputs rejected with output unchanged.
+Unknown ids no longer block structure. Saved Ghidra instructions/pseudocode, target SHA-256 and
+coverage caveats: `analysis/audit/spui-binary/`.
+
+**Why the wall fell:** code 19 is count u16 OBJECT REFERENCES; code 20 contains nested structs;
+0x5FF5 is the actual object marker. The old XML reader was a separate branch. Do not return to
+count/byte-length guesses or the claimed vocabulary-only barrier.
+
+**Current numbers:** 748 resources / 524 distinct ids, 93,726 objects, 22,384 windows, 18,232 Areas,
+**1,183,787 exact properties, 20,659 links**. E3LaunchScreen: 227 objects / 68 windows / 67 links,
+root 266 / design 1024x768. Captions unchanged 1,384/1,426; inventory 57 packages / 150,945 resources;
+Debug x86 0 warnings; boot 10/10.
+
+**Correction:** old `(942,261) -> GGE` activated a HIDDEN branch. Parent visibility is now respected.
+Use visible CreatureEditor tile (entering the state does not implement the editor):
+
+```powershell
+cd build\bin\Debug
+.\OpenSpore.exe -w -devDirs -state:DevLauncher -quitAfter 18 -exec spui:-click,311,550
+```
+
+Expect `-> CreatureEditor [0x022d9e01]`, exit 0. `spui:-tree` reports the object graph;
+`spui:-dump,<instance>,<n>` reports exact properties. Rendering remains diagnostic rectangles/text.
+Tree replaces area-size heuristics, but forward sibling order, ancestor-origin placement and the
+ControlID/state bridge are presentation policies. Dynamic Z/layout WinProcs, drawables and commands
+remain open.
+
+Feature checklist map is now 83.2% engine / 76.6% overall; these are internal checklist ratios,
+not a measured percentage of gameplay completeness.
+
+**Next on Main->playable:** follow drawable references for a coherent current launcher screen,
+then trace GalaxyGameEntry AppMode enter/render in GA. The UI's structural parser is complete for
+the supplied corpus; widget/game behavior is not.
+
+Checks: `python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json
+--extract <temp-fixtures>`; `cmake --build build --config Debug --target OpenSpore spui_verify`;
+`build/Debug/spui_verify.exe <temp-fixtures>`.
 
 ---
 
@@ -72,7 +117,7 @@ Add `-exec spui:-gaps` for the coverage/semantic split of the 42.
 | locale corpus | **265 distinct tables from 5 containers / 23,933 distinct (table,key) texts / 32,038 entries / 14,657 keys** |
 | nested locale depths | 3: flat `Data/Locale/en-us`, nested in `DataEP1/Spore_EP1_Locale_0{1,2}`, **nested in `Data/PatchData`** |
 | layout→text chain | **1,384 / 1,426 refs resolve (97.1%)**; 42 left = 15 COVERAGE keys + 4 SEMANTIC keys |
-| spui layouts parsed | **748 resources = 524 distinct instances** (224 shadowed, 18 with a different size), 22,384 windows, 18,232 with a usable Area, 961,360 anchors |
+| spui layouts parsed | **748 resources = 524 distinct instances** (224 shadowed, 18 with a different size), **93,726 objects, 22,384 windows, 18,232 Areas, 1,183,787 exact properties, 20,659 child links** |
 | **state drives the UI** | **DONE** — DevLauncher's `uilayout -load E3LaunchScreen` executed; 65.9% of pixels differ from our own pick |
 | **menu is FUNCTIONAL** | **click → widget → `control_id` == state id → `request_goto` → transition.** Live: (942,261) → "GGE" `0x02CCDA9C` → `-> GalaxyGameEntry [0x02ccda9c]` |
 | control-id ↔ state-id evidence | 9 real hits of 4,187 distinct control ids × 60 states; **<0.001 expected** by chance; captions "Creature/Building/Vehicle/Flora/Terrain/UFO Editor", "Anim Viewer", "GGE" |

@@ -1,0 +1,276 @@
+GA oracle SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA: 0x0082CE10
+Provider: persistent Ghidra 12.1.4 project OpenSporeOracle
+Static evidence only; pseudocode stack/calling conventions may be incomplete.
+
+
+undefined4 __fastcall FUN_0082ce10(undefined4 *param_1)
+
+{
+  undefined4 *puVar1;
+  char cVar2;
+  int *piVar3;
+  int iVar4;
+  int iVar5;
+  undefined4 uVar6;
+  int *piVar7;
+  undefined4 unaff_EBX;
+  uint uVar8;
+  undefined4 *puVar9;
+  int *piStack_98;
+  ushort auStack_8c [2];
+  int iStack_88;
+  int *piStack_84;
+  int *piStack_80;
+  ushort auStack_7c [2];
+  ushort auStack_78 [2];
+  ushort auStack_74 [2];
+  undefined *puStack_70;
+  undefined4 uStack_6c;
+  undefined4 uStack_68;
+  ushort auStack_64 [2];
+  undefined4 *local_60;
+  undefined *puStack_5c;
+  int *piStack_58;
+  undefined4 uStack_54;
+  uint uStack_4c;
+  int *piStack_48;
+  int local_44;
+  undefined4 uStack_40;
+  undefined4 uStack_3c;
+  int *local_38;
+  uint uStack_34;
+  uint uStack_30;
+  int iStack_2c;
+  int *local_28;
+  undefined4 uStack_24;
+  undefined4 uStack_20;
+  undefined4 auStack_1c [6];
+  
+  piStack_98 = (int *)&stack0xfffffffc;
+  if (param_1 == (undefined4 *)0xfffffdc4) {
+    puVar9 = (undefined4 *)0x0;
+  }
+  else {
+    puVar9 = param_1 + 0x90;
+  }
+  local_60 = puVar9;
+  FUN_0082b1b0(0);
+  piVar3 = (int *)FUN_0067dc90();
+  local_28 = piVar3;
+  local_38 = (int *)FUN_00920320();
+  if (piVar3 == (int *)0x0) {
+LAB_0082ce5f:
+    puVar1 = (undefined4 *)puVar9[8];
+    if (puVar1 != (undefined4 *)0x0) {
+      uVar8 = puVar1[1];
+      uVar6 = puVar1[2];
+      puVar9[8] = *puVar1;
+      if (((uint)puVar9[1] < uVar8) && (uVar8 < (uint)puVar9[2])) {
+        puVar9[3] = uVar8;
+        puVar9[4] = uVar8;
+        puVar9[4] = uVar6;
+        return 0;
+      }
+      FUN_00928ed0(uVar8);
+      puVar9[4] = uVar6;
+      return 0;
+    }
+  }
+  else {
+    if ((((((local_38 != (int *)0x0) &&
+           (iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(&local_44,4), iVar4 == 4)) &&
+          (iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(&uStack_34,2), iVar4 == 2)) &&
+         ((iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(auStack_7c,2), iVar4 == 2 &&
+          (iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(auStack_74,2), iVar4 == 2)))) &&
+        ((iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(auStack_64,2), iVar4 == 2 &&
+         ((iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(auStack_78,2), iVar4 == 2 &&
+          (local_44 == -0x1c01c048)))))) && ((ushort)((short)uStack_34 - 1U) < 3)) {
+      param_1[0x89] = uStack_34 & 0xffff;
+      uStack_30 = (uint)auStack_78[0] + (uint)auStack_64[0] + (uint)auStack_74[0] +
+                  (uint)auStack_7c[0];
+      if (uStack_30 < 0x1771) {
+        piStack_84 = param_1 + 2;
+        FUN_0082c730(uStack_30);
+        iVar4 = 0;
+        if (auStack_7c[0] != 0) {
+          do {
+            puStack_70 = (undefined *)0x0;
+            uStack_6c = 0;
+            uStack_68 = 0;
+            iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(&puStack_70,0xc);
+            if (iVar5 != 0xc) goto LAB_0082d4b4;
+            piStack_58 = &iStack_88;
+            iStack_88 = 0;
+            puStack_5c = &DAT_0141a2d4;
+            uStack_54 = 1;
+            (**(code **)(param_1[0x99] + 0x10))(&puStack_5c,0x3fd,&puStack_70);
+            FUN_00572660(unaff_EBX);
+            FUN_0082cdd0(&piStack_98);
+            if (piStack_98 != (int *)0x0) {
+              (**(code **)(*piStack_98 + 4))();
+            }
+            (**(code **)(param_1[0x99] + 0x14))();
+            iVar4 = iVar4 + 1;
+          } while (iVar4 < (int)(uint)auStack_7c[0]);
+        }
+        iVar4 = 0;
+        if (auStack_74[0] != 0) {
+          do {
+            puStack_70 = (undefined *)0x0;
+            uStack_6c = 0;
+            uStack_68 = 0;
+            iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(&puStack_70,0xc);
+            if (iVar5 != 0xc) goto LAB_0082d4b4;
+            piStack_58 = &iStack_88;
+            iStack_88 = 0;
+            puStack_5c = &DAT_0141a2d4;
+            uStack_54 = 1;
+            (**(code **)(param_1[0x99] + 0x10))(&puStack_5c,0x3fe,&puStack_70);
+            FUN_00572660(unaff_EBX);
+            FUN_0082cdd0(&piStack_98);
+            if (piStack_98 != (int *)0x0) {
+              (**(code **)(*piStack_98 + 4))();
+            }
+            (**(code **)(param_1[0x99] + 0x14))();
+            iVar4 = iVar4 + 1;
+          } while (iVar4 < (int)(uint)auStack_74[0]);
+        }
+        uVar8 = (uint)auStack_64[0];
+        iVar4 = 0;
+        uStack_4c = uVar8;
+        if (uVar8 != 0) {
+          do {
+            auStack_8c[0] = auStack_8c[0] & 0xff00;
+            if ((int)param_1[0x89] < 3) {
+LAB_0082d284:
+              puStack_70 = (undefined *)0x0;
+              uStack_6c = 0;
+              uStack_68 = 0;
+              iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(&puStack_70,0xc);
+              if (iVar5 != 0xc) goto LAB_0082d4b4;
+              uStack_54 = uStack_68;
+              puStack_5c = puStack_70;
+              piStack_58 = (int *)&Rsrc_Icon_46_413.field_0xefa;
+              piStack_80 = (int *)0x0;
+              (**(code **)(*local_28 + 0xc))(&puStack_70,&piStack_80,0,0,0,&puStack_5c);
+              FUN_0082cd90();
+              FUN_0068f570(piStack_80);
+              uVar8 = uStack_4c;
+            }
+            else {
+              iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(auStack_8c,1);
+              if (iVar5 != 1) goto LAB_0082d4b4;
+              if ((char)auStack_8c[0] == '\x01') {
+                iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(&uStack_40,4);
+                if (((iVar5 != 4) ||
+                    (iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(&uStack_3c,4), iVar5 != 4)) ||
+                   (iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(&iStack_88,4), iVar5 != 4))
+                goto LAB_0082d4b4;
+                FUN_0082cd40(iStack_88,auStack_8c);
+                iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(auStack_1c[0],iStack_88 * 2);
+                if (iVar5 != iStack_88 * 2) {
+                  FUN_007a4260();
+                  goto LAB_0082d4b4;
+                }
+                iVar5 = FUN_00f47240(0x28,"UTFWin/RLEHitMask",0,0,0,0);
+                if (iVar5 == 0) {
+                  uVar6 = 0;
+                }
+                else {
+                  uVar6 = FUN_0082c270();
+                }
+                uStack_24 = uStack_40;
+                uStack_20 = uStack_3c;
+                FUN_00957420(&uStack_24,auStack_1c);
+                FUN_00572660(uVar6);
+                FUN_0082cdd0(&piStack_48);
+                if (piStack_48 != (int *)0x0) {
+                  (**(code **)(*piStack_48 + 4))();
+                }
+                FUN_007a4260();
+              }
+              else if ((char)auStack_8c[0] == '\0') goto LAB_0082d284;
+            }
+            iVar4 = iVar4 + 1;
+          } while (iVar4 < (int)uVar8);
+        }
+        iVar4 = 0;
+        if (auStack_78[0] != 0) {
+          do {
+            iVar5 = (**(code **)(*(int *)*param_1 + 0x30))(&uStack_4c,4);
+            if (iVar5 != 4) goto LAB_0082d4b4;
+            piStack_80 = (int *)(**(code **)(*local_38 + 0x24))(uStack_4c,0,0);
+            if (piStack_80 != (int *)0x0) {
+              (**(code **)*piStack_80)();
+            }
+            FUN_0082cdd0(&piStack_80);
+            if (piStack_80 != (int *)0x0) {
+              (**(code **)(*piStack_80 + 4))();
+            }
+            if (*(int *)(param_1[3] + -4) == 0) goto LAB_0082d4b4;
+            iVar4 = iVar4 + 1;
+          } while (iVar4 < (int)(uint)auStack_78[0]);
+        }
+        iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(&iStack_88,2);
+        while ((puVar9 = local_60, iVar4 == 2 &&
+               (iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(auStack_8c,2), puVar9 = local_60,
+               iVar4 == 2))) {
+          if ((short)iStack_88 != 0x5ff5) goto LAB_0082d4b4;
+          if (auStack_8c[0] == 0xffff) {
+            iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(&iStack_2c,4);
+            piVar3 = piStack_84;
+            if ((iVar4 == 4) && (iStack_2c == 0x1c01c047)) {
+              iVar4 = 0;
+              iVar5 = piStack_84[1] - *piStack_84 >> 2;
+              if (0 < iVar5) {
+                do {
+                  piVar7 = *(int **)(*piVar3 + iVar4 * 4);
+                  if ((piVar7 != (int *)0x0) &&
+                     (piVar7 = (int *)(**(code **)(*piVar7 + 0xc))(0xeec58382), piVar7 != (int *)0x0
+                     )) {
+                    (**(code **)(*piVar7 + 0x10))(&puStack_5c);
+                    if (*(code **)(puStack_5c + 0x1c) != (code *)0x0) {
+                      (**(code **)(puStack_5c + 0x1c))(piStack_58);
+                    }
+                  }
+                  iVar4 = iVar4 + 1;
+                } while (iVar4 < iVar5);
+              }
+              FUN_0082aba0();
+              return 1;
+            }
+            goto LAB_0082d4b4;
+          }
+          if ((uStack_30 <= auStack_8c[0]) ||
+             (iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(&piStack_80,2), iVar4 != 2))
+          goto LAB_0082d4b4;
+          if (((uint)piStack_80 & 0x8000) != 0) {
+            FUN_00998ed0(*(undefined4 *)(*piStack_84 + (uint)auStack_8c[0] * 4));
+          }
+          uVar8 = (uint)piStack_80 & 0x7fff;
+          if (200 < uVar8) goto LAB_0082d4b4;
+          if (uVar8 != 0) {
+            piVar3 = (int *)FUN_0082b9e0(*piStack_84 + (uint)auStack_8c[0] * 4);
+            if (piVar3 == (int *)0x0) goto LAB_0082d4b4;
+            (**(code **)(*piVar3 + 0x10))(&puStack_5c);
+            iVar4 = 0;
+            if (uVar8 != 0) {
+              do {
+                cVar2 = FUN_0082b3f0(&puStack_5c);
+                if (cVar2 == '\0') goto LAB_0082d4b4;
+                iVar4 = iVar4 + 1;
+              } while (iVar4 < (int)uVar8);
+            }
+          }
+          iVar4 = (**(code **)(*(int *)*param_1 + 0x30))(&iStack_88,2);
+        }
+        goto LAB_0082ce5f;
+      }
+    }
+LAB_0082d4b4:
+    FUN_0082aba0();
+  }
+  return 0;
+}
+

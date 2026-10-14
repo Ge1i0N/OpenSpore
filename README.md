@@ -11,6 +11,10 @@
 A from-scratch reimplementation of **Spore: Galactic Adventures**, driven by disassembly of
 the shipped 32-bit binary rather than by wiki knowledge.
 
+**UI update (2026-10-15):** all **748 SPUI resources** parse sequentially with actual child graphs
+(20,659 links), from GA disassembly. A visible launcher tile can enter an editor state; widgets still
+render as diagnostic geometry/text and gameplay is unfinished. See [evidence and validation](analysis/spui-binary.md).
+
 ![OpenSpore Loader: the game inventory plus a 2x2 grid of four real Spore models, each with its own texture, drawn by our engine](analysis/shots/model_grid.png)
 
 That screenshot is not a mock-up: it is an in-engine capture of our own exe. The left side is the

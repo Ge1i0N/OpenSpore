@@ -1,5 +1,32 @@
 # MEMORY — durable facts, layouts, traps
 
+## CURRENT SPUI correction — 2026-10-15 (supersedes historical SPUI sections below)
+
+Full evidence/format: `analysis/spui-binary.md`; Ghidra extracts `analysis/audit/spui-binary/`.
+Use these instead of old XML-tokenizer/anchor conclusions.
+
+* Real binary reader **0x82ce10**, property decoder **0x82b3f0**, skip path **0x82b240**. Found by
+  instruction references to file magic `0xE3FE3FB8`, confirmed against actual instructions.
+* `0x5FF5` is a REAL object marker, not a measurement-tool sentinel. Class table precedes object
+  blocks; each has object index and property-count/root-bit word (`0x8000` marks root).
+* Property = id:u32 / type:u16 / count:u16. **Code 19 = count u16 object indexes**, `FFFF=null`.
+  The supposed extra "count after Children" was its FIRST REFERENCE. **Code 20 = nested structures**,
+  not six-byte values. Unknown ids preserve framing. Runtime Children descriptor: `0x130067a`,
+  type `0x8013`, window offset `0x3C`.
+* **748/748** parse exactly through EOF independently in Python/C++: **93,726 objects, 22,384 windows,
+  18,232 Areas, 1,183,787 exact properties (21,329 non-scalar), 20,659 links**. C++ verifier matches
+  all fixtures and rejects **486** corrupt/truncated inputs atomically.
+* E3LaunchScreen: 40 externals + 227 objects; root **266**, 68 windows, **67 links**, extent
+  **1024x768**. Identity is object index, NOT ControlID (ControlIDs repeat).
+* **Old GGE click corrected:** GGE's parent is hidden; the flat hit-test activated an invisible
+  widget. Current visible demonstration: `(311,550)` -> CreatureEditor `0x022D9E01`. The launcher
+  bridge is reconstructed behavior, not the original message dispatcher.
+* Parent graph/visibility replace size sorting. Forward sibling order and simple ancestor-origin
+  placement are presentation policies. Dynamic Z/layout WinProcs, drawable rendering and command
+  dispatch remain incomplete. Diagnostic geometry/text is not the finished menu or gameplay.
+* Missing plaintext names do not prove absent classes; a corrected typo does not prove precedence.
+  Earlier mode/beta/precedence prose made those stronger claims without sufficient evidence.
+
 ## TOOL PRIORITY (user rule, 2026-10-12 — this overrides habit, follow it first)
 
 **Disassembly is THE PRIMARY tool.** Study the data files (hexdumps, header diffs, entropy)

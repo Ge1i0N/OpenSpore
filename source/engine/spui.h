@@ -7,26 +7,14 @@
 // layouts carry them. See analysis/spui-schema.md for every measurement; the table itself is
 // generated into source/engine/spui_schema.inc by tools/gen_spui_schema.py.
 //
-// THE RECORD, measured over 1,098,129 anchors in 748 layouts:
-//
-//     id:u32 | code:u16 | marker:u16(==1) | payload[code]
-//
-//   * `code` is a TYPE CODE, stable per id - 178 of the 182 high ids (>=0x1000) have exactly ONE code
-//     across the whole corpus with 100% agreement (tools/spui_typecode.py). It is NOT a length, which
-//     is what the first attempt got wrong.
-//   * payload sizes are measured by majority vote (tools/spui_read.py): 9/11 -> 4 bytes, 16 -> 16
-//     (a `rectf`), 17 -> 8 (`pointf`), 20 -> 6, 19 -> a u16 element count, 18 -> a u16 CHARACTER count
-//     then UTF-16.
-//   * the stream is BYTE-packed, not bit-packed. Record sizes are simply not multiples of 4 (code 20
-//     gives a 14-byte record), so the id cursor drifts across all four alignments. That drift, and
-//     nothing else, is why the mod-4 histogram is uniform - see the CORRECTION section in
-//     analysis/spui-schema.md, because this file's predecessor misread that histogram as bit packing.
-//
-// WHAT IS NOT SOLVED, stated rather than hidden: a sequential walk reaches EOF cleanly in 0/748
-// layouts and derails in 637 with "id not in schema", because the designer XML lists only 227 of the
-// ids the binaries use. So this reader is ANCHOR-DRIVEN, not sequential: it locates every (id, marker==1)
-// pair and reads each record's own value, which is exact for what it covers and does not depend on the
-// bytes in between. The remaining work is extending the vocabulary, not understanding the structure.
+// Sequential framing from GA 0x82ce10 / 0x82b3f0, verified through EOF on 748/748 resources:
+//   header + external-resource tables + class ids;
+//   0x5FF5:u16 | object_index:u16 | root_flag/property_count:u16 | properties;
+//   property = id:u32 | type:u16 | count:u16 | typed values.
+// Code 19 is count u16 object references (0xFFFF=null); code 20 is nested structs, NOT 6-byte values.
+// Unknown ids keep their framing and offsets. The designer dictionary supplies optional names only.
+// Historical anchor measurements and the inline-Children hypothesis are superseded; see
+// analysis/spui-binary.md. Reading all structure does not implement drawables, WinProcs or commands.
 //
 // THE MENU PAYLOAD: code 18 is overloaded, split by a leading u16 of 0xFFFF. A reference is
 // `0xFFFF | table:u32 | key:u32`, so a layout names BOTH the locale TABLE and the KEY within it -
@@ -38,10 +26,8 @@
 // WHAT THE STATE SCRIPT GIVES THE UI: `uilayout -load <name> <id> <id>` (the only UI verb in the
 // whole recovered script, in state DevLauncher). The NAME hashes to the layout's instance -
 // E3LaunchScreen -> 0xE932BD44, a real `spui` record - so a state can select its screen by name. The
-// two trailing ids are NOT resource ids (they appear in no type/group/instance field of any of the
-// 150,945 records) and no registry name hashes to them; the first appears twice inside the spui byte
-// corpus and the second not at all, so they are internal to the layout or runtime handles. Unresolved
-// and currently unnecessary: `spui::Reader::find_by_name()` does not need them.
+// first trailing id is a root ControlID; the second remains unresolved. These are distinct from
+// the serialized object indexes used by Children and drawable references.
 #include <cstdio>
 #include <map>
 #include <string>
@@ -74,6 +60,14 @@ struct Rect {
 };
 
 struct Window {
+    u16 object_index = 0;
+    u32 class_id = 0;
+    int parent = -1;                  // index into Layout::windows; identity is NOT ControlID
+    std::vector<u16> child_objects;    // serialized code-19 references, including null
+    std::vector<size_t> children;      // resolved indexes into Layout::windows, in file order
+    Rect placed_area;                 // Area translated by ancestor origins
+    bool visible = false;             // includes ancestor visibility
+    bool enabled = false;             // includes ancestor enabled state
     u32 offset = 0;            // byte offset of its ControlID record, for provenance
     u32 control_id = 0;
     u32 command_id = 0;
@@ -92,14 +86,35 @@ struct Window {
     std::string caption_raw;         // the raw bytes, so a non-ASCII caption stays inspectable
 };
 
+struct Property {
+    u32 offset = 0, end = 0;
+    u32 id = 0;
+    u16 code = 0, count = 0;
+    u16 depth = 0;                  // 0=object property; >0=member inside code-20 structure
+};
+
+struct Object {
+    u16 index = 0;
+    u32 class_id = 0, offset = 0, end = 0;
+    bool root = false;               // object property-count word's high bit (GA 0x82ce10)
+    int window = -1;
+    std::vector<Property> properties; // includes nested struct fields, preserving their offsets
+};
+
 struct Layout {
     std::string package;
     u32 record = 0;
     u32 instance = 0;
     u32 bytes = 0;
     std::vector<Window> windows;
-    size_t anchors = 0;              // how many (id, count) records were read
-    size_t multi = 0;                // of those, how many had count != 1 (the old scan skipped them)
+    std::vector<Object> objects;
+    std::vector<size_t> roots;        // window indexes with no parent
+    u16 version = 0;
+    u32 consumed = 0;
+    size_t child_links = 0;
+    bool sequential = false;
+    size_t anchors = 0;              // compatibility name: exact properties, including nested members
+    size_t multi = 0;                // properties whose count != 1
     size_t recognized = 0;           // how many of those had a name in the shipped schema
     std::string name() const;
     // The layout's DESIGN RESOLUTION: the widest right/bottom among its usable Areas. Both the
@@ -110,26 +125,18 @@ struct Layout {
     void design_resolution(float& w, float& h) const;
 };
 
-// The order to PAINT a layout in: largest Area first, so a container is painted behind everything it
-// holds. ONE RULE, SHARED BY DRAWING AND HIT-TESTING.
-//
-// Why this is not cosmetic: the record order in the data is not a z-order (measured - the full-screen
-// root of E3LaunchScreen is the LAST record in the vector, so painting in record order paints the
-// root OVER the panels it contains). hit_test() resolves an overlapping click to the SMALLEST
-// containing window, on the grounds that a user aims at the most specific box. For the two to agree,
-// the painter must put the largest first. If they disagree, the engine would hit-test a widget the
-// user cannot see, which is worse than no clicks at all.
-//
-// Returns indices into lay.windows. Ties keep record order. When the layout's real parent/child
-// hierarchy is reversed from the data, this is the single function to replace - and hit_test needs no
-// change, because "smallest wins" is exactly the inverse of "largest painted first".
+// Transactional, bounded reader from GA 0x82ce10 / 0x82b3f0. Unknown ids do not prevent decoding.
+// On failure layout is unchanged and error includes the byte offset; there is no heuristic fallback.
+bool parse_binary(const std::vector<u8>& bytes, Layout& layout, std::string& error);
+
+// Parent-before-Children presentation traversal using the serialized graph, including visibility.
+// Sibling forward order is our current policy; original dynamic Z order/WinProcs remain open.
 std::vector<size_t> paint_order(const Layout& lay);
 
 // Which window of `lay` is under the VIEWPORT point (vx,vy), when the viewport is (vw,vh)?
 // Returns null when the point hits nothing usable.
 //
-// TOPMOST = the LAST window in draw order that contains the point, so the answer is what the user
-// SEES rather than what the designer listed first. Walks the vector in reverse for that reason.
+// Reverse presentation order, honoring ancestor visibility/enabled, IgnoreMouse and parent Clip.
 //
 // A window with no usable Area cannot be hit: it has no geometry, and inventing one would let a
 // click land on a widget that was never drawn.
@@ -139,7 +146,7 @@ class Reader {
 public:
     // Find and parse every `spui` resource (type 0x250FE9A2) on the package search paths.
     // Never throws; a missing/undecodable resource is logged and skipped.
-    void load(size_t limit = 400);
+    void load(size_t limit = 0);
 
     bool loaded() const { return m_loaded; }
     const std::vector<Layout>& layouts() const { return m_layouts; }
@@ -185,11 +192,9 @@ private:
 
 Reader& instance();
 
-// Dump one layout's ANCHOR LIST in file order (offset, id, schema name, code, element count). This is
-// ground truth from the reader that already works, for questions the reader cannot answer alone - in
-// particular what surrounds a `Children` record (0xEEC1B00B), and therefore what the u16 after it
-// counts. Re-reads the resource rather than caching 748 blobs.
+// Compatibility verb: dump exact properties, with bounded text output. Does not search for anchors.
 std::string dump_anchors(u32 instance, size_t maxn);
+std::string describe_tree(const Layout& layout);
 
 // The schema lookup, for logging and for the `spui` console verb.
 const char* schema_name(u32 id);

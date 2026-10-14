@@ -1,5 +1,10 @@
 # The `spui` loading path — found by following the DATA, not the bytes
 
+> **Correction, 2026-10-15:** the XML/TokenReader path below is a neighboring loader branch, not
+> the binary SPUI decoder. Binary reader **0x82ce10**, property dispatch **0x82b3f0**, skip path
+> **0x82b240**. See [spui-binary.md](spui-binary.md) and retained instructions. The resource type
+> comparison at 0x81098b remains valid; the inferred XML decoder and non-byte-aligned framing do not.
+
 Session 13. This replaces the guesswork in `analysis/ui.md` with a named, disassembled chain, and it
 explains WHY byte-level parsing of `spui` failed.
 

@@ -1,5 +1,10 @@
 # `spui` is NOT a mystery: its property ids are the shipped designer schema
 
+> **2026-10-15: current authority is [spui-binary.md](spui-binary.md).** Historical experiments below
+> are retained, but code 19 is count u16 object references, code 20 contains nested structs, and
+> 0x5FF5 is a real object marker. Unknown ids do not block sequential parsing: 748/748 now reach EOF.
+> The inline-Children and "vocabulary-only wall" explanations below were wrong premises.
+
 Session 13, and it is the biggest unblock since gmdl. It came from refusing to reverse the tokenizer.
 
 ## The move that did it

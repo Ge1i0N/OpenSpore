@@ -24,11 +24,11 @@ from collections import Counter, defaultdict
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "source", "engine", "spui_schema.inc")
 
-# The measured code -> payload size table (tools/spui_read.py, majority vote over 748 layouts).
-# 18 is the string form (a u16 char count then UTF-16) and 19 an array count; both are variable, so
-# the size column carries the FIXED part only and the reader adds the counted bytes.
-CODE_SIZE = {3: 1, 5: 4, 7: 7, 9: 4, 11: 4, 16: 16, 17: 8, 19: 2, 20: 6, 18: 0, 2: 0}
-CODE_VARIABLE = {18, 2}
+# Element widths from GA 0x82b3f0/0x82b240. 18=strings and 20=nested structures have no fixed width;
+# 19 is a two-byte object-table INDEX per element, not an inline array count.
+CODE_SIZE = {2: 1, 3: 1, 4: 2, 5: 4, 6: 8, 7: 1, 8: 2, 9: 4, 10: 8, 11: 4,
+             12: 8, 14: 16, 15: 8, 16: 16, 17: 8, 18: 0, 19: 2, 20: 0}
+CODE_VARIABLE = {18, 20}
 
 
 def harvest(xml_dir):
@@ -93,9 +93,9 @@ def main():
         "// `code` is the u16 the BINARIES place after this id, measured (tools/spui_typecode.py): it is",
         "// a TYPE CODE, stable per id (94.5% of ids >= 0x1000 have exactly one across 748 layouts), not",
         "// a length. `size` is the payload that code implies, by majority vote (tools/spui_read.py).",
-        "// A record is  id(4) | code:u16 | marker:u16(==1) | payload(size).  Code 18 is a string (u16",
-        "// char count then UTF-16) and 19 an array (u16 element count); both are variable, so their",
-        "// size column carries the fixed part only.",
+        "// Property: id:u32 | type:u16 | count:u16 | count typed elements (GA 0x82b3f0).",
+        "// Code 19 is a u16 object index per element; code 18 is a string/reference; code 20",
+        "// contains a struct tag followed by count property sets. Names are optional metadata.",
         "//",
         "// The ids below 0x1000 are BLOCK-SCOPED member indices: the same value means different things",
         "// in different structs (0x01 = Size in Outline Format, TextStyle in a text control). They are",
@@ -122,11 +122,10 @@ def main():
         rec = classes.get(v) or props.get(v)
         is_class = v in classes
         code, size = 0xFFFF, 0
-        # A <Class> (Window, Button, Dialog, Outlined Text, Animated Icon) has NO record code: the
-        # typecode measurement reports 0x5FF5 for them, which is its own sentinel for "this is a class",
-        # and emitting that as a code made the reader match on it. Measured consequence: the moment the
-        # third u16 stopped being required to be 1, five false anchors appeared
-        # (`id=0x4EC1B8D8 "Window" code=24565 count=40`). Classes get 0xFFFF, which the reader skips.
+        # Historical anchor measurement mistook the object marker following the class table for a
+        # type code. 0x5FF5 is a REAL file marker (GA 0x82ce10), not a generator sentinel. Class ids
+        # describe the object table; they are not property headers. Codes here are optional metadata
+        # only: the active sequential reader dispatches on each property's serialized type.
         if codes and str(v) in codes and not is_class:
             c = codes[str(v)]
             code = c.get("code", 0xFFFF)
@@ -147,7 +146,7 @@ def main():
         "    kWinControlID   = 0xeec1b001u,",
         "    kWinCommandID   = 0xeec1b002u,",
         "    kWinShadeColor  = 0xeec1b004u,",
-        "    kWinArea        = 0xeec1b005u,   // rectf: x, y, w, h as four floats",
+        "    kWinArea        = 0xeec1b005u,   // rectf: left, top, right, bottom",
         "    kWinBgColor     = 0xeec1b006u,",
         "    kWinDrawable    = 0xeec1b007u,",
         "    kWinCaption     = 0xeec1b00au,   // code 18: inline UTF-16 OR a locale TABLE reference",

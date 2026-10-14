@@ -1,553 +1,210 @@
 #include "engine/spui.h"
 
 #include <algorithm>
-#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <functional>
 #include <set>
+#include <sstream>
 
 #include "engine/fs.h"
 #include "engine/log.h"
-#include "engine/naming.h"  // hash_lower, so a state script's layout NAME becomes an INSTANCE
+#include "engine/naming.h"
 #include "engine/pkg.h"
 #include "engine/spui_schema.inc"
 
 namespace os::spui {
 namespace {
+constexpr u32 kSpuiType = 0x250fe9a2;
 
-constexpr u32 kSpuiType = 0x250FE9A2u;   // confirmed in code: loader 0x810940 does
-                                          // `cmp dword [eax+4], 0x250FE9A2`
-constexpr u16 kMarker = 0x0001;          // the common VALUE of the third u16, not a constant marker -
-                                         // see the Anchor::count note. Kept for the "count == 1" test.
-constexpr u16 kMaxCount = 4096;          // sanity bound on the element count, so a false anchor cannot
-                                         // claim a gigantic record
-
-// How many anchors of the last parsed layout carried count != 1. Reported so the coverage this
-// correction buys is a NUMBER rather than a claim: those records were invisible to the old scan.
-size_t g_multi_element_anchors = 0;
-constexpr u16 kCodeString = 18;          // inline UTF-16, or a locale TABLE ref when len == 0xFFFF
-constexpr u16 kCodeArray = 19;
-constexpr u16 kInlineSentinel = 0xFFFF;  // "this code-18 value is a reference, not text"
-
-struct SchemaLookup {
-    const SchemaEntry* by_id(u32 id) const {
-        auto it = std::lower_bound(m_sorted.begin(), m_sorted.end(), id,
-                                   [](const std::pair<u32, const SchemaEntry*>& a, u32 b) {
-                                       return a.first < b;
-                                   });
-        if (it != m_sorted.end() && it->first == id) return it->second;
-        return nullptr;
-    }
-    u16 code_or(u32 id, u16 def) const {
-        const SchemaEntry* e = by_id(id);
-        return (e && e->code != 0xFFFF) ? e->code : def;
-    }
-    std::vector<std::pair<u32, const SchemaEntry*>> m_sorted;
-};
-
-SchemaLookup g_schema;
-bool g_schema_ready = false;
-
-void ensure_schema() {
-    if (g_schema_ready) return;
-    g_schema.m_sorted.clear();
-    for (const SchemaEntry& e : kSchema) g_schema.m_sorted.push_back({e.id, &e});
-    std::sort(g_schema.m_sorted.begin(), g_schema.m_sorted.end(),
-              [](const std::pair<u32, const SchemaEntry*>& a, const std::pair<u32, const SchemaEntry*>& b) {
-                  return a.first < b.first;
-              });
-    g_schema_ready = true;
+const SchemaEntry* schema(u32 id) {
+    const auto* begin = std::begin(kSchema);
+    const auto* end = std::end(kSchema);
+    const auto* it = std::lower_bound(begin, end, id,
+        [](const SchemaEntry& entry, u32 key) { return entry.id < key; });
+    return it != end && it->id == id ? it : nullptr;
 }
 
-// The payload size a code implies, measured by majority vote over 748 layouts.
-u32 payload_size(u16 code) {
-    switch (code) {
-        case 3:  return 1;
-        case 5:  return 4;
-        case 7:  return 7;
-        case 9:  return 4;
-        case 11: return 4;
-        case 16: return 16;   // rectf
-        case 17: return 8;    // pointf
-        case 19: return 2;    // a u16 element count (the elements themselves follow; we record the count)
-        case 20: return 6;
-        case 18: return 0;    // variable, handled by the caller
-        default: return 0;
-    }
-}
-
-// The whole record's size: id(4) + code(2) + count(2) + count * element_size. The variable-length
-// codes (18/19) report an element size of 0 here and are handled by the caller, so this returns just
-// the header for them. This exists because the third u16 is a COUNT (see Anchor::count), so a record
-// with 8 colours is 40 bytes and not 12 - which is what the old overlap check assumed.
-u32 record_size(u16 code, u16 count) {
-    const u32 es = payload_size(code);
-    if (es == 0) return 8;
-    return 8 + es * count;
-}
-
-u32 rd32(const u8* p) {
-    return u32(p[0]) | (u32(p[1]) << 8) | (u32(p[2]) << 16) | (u32(p[3]) << 24);
-}
-u16 rd16(const u8* p) { return u16(u32(p[0]) | (u32(p[1]) << 8)); }
-f32 rdf(const u8* p) {
-    u32 v = rd32(p);
-    f32 f;
-    std::memcpy(&f, &v, 4);
-    return f;
-}
-
-// UTF-16LE -> UTF-8, bounded. The length comes from the file, so a mis-aligned anchor can make it
-// huge; cap it before slicing rather than trusting it (this bit the python probe).
-std::string utf16_to_utf8(const u8* p, size_t chars) {
-    std::string out;
-    if (chars > 512) chars = 512;
-    out.reserve(chars * 2);
-    for (size_t i = 0; i < chars; ++i) {
-        u32 c = u32(rd16(p + i * 2));
-        if (c == 0) break;
-        if (c >= 0xD800 && c <= 0xDBFF && i + 1 < chars) {
-            u32 lo = u32(rd16(p + (i + 1) * 2));
-            if (lo >= 0xDC00 && lo <= 0xDFFF) {
-                c = 0x10000 + ((c - 0xD800) << 10) + (lo - 0xDC00);
-                ++i;
-            }
-        }
-        if (c < 0x80) {
-            out.push_back((char)c);
-        } else if (c < 0x800) {
-            out.push_back((char)(0xC0 | (c >> 6)));
-            out.push_back((char)(0x80 | (c & 0x3F)));
-        } else if (c < 0x10000) {
-            out.push_back((char)(0xE0 | (c >> 12)));
-            out.push_back((char)(0x80 | ((c >> 6) & 0x3F)));
-            out.push_back((char)(0x80 | (c & 0x3F)));
-        } else {
-            out.push_back((char)(0xF0 | (c >> 18)));
-            out.push_back((char)(0x80 | ((c >> 12) & 0x3F)));
-            out.push_back((char)(0x80 | ((c >> 6) & 0x3F)));
-            out.push_back((char)(0x80 | (c & 0x3F)));
+std::vector<std::string> packages() {
+    std::vector<std::string> paths;
+    std::set<std::string> seen;
+    for (const auto& sp : fs::search_paths()) {
+        for (const auto& path : pkg::find_packages(sp.dir.string())) {
+            std::error_code ec;
+            std::string key = std::filesystem::weakly_canonical(path, ec).string();
+            if (ec) key = path;
+            if (seen.insert(key).second) paths.push_back(path);
         }
     }
-    return out;
+    return paths;
 }
-
-struct Anchor {
-    u32 off;
-    u32 id;
-    u16 code;
-    // The third u16, previously called the "marker". It is NOT a constant: measured 2026-10-15
-    // (tools/spui_record_count.py), it is an ELEMENT COUNT - 24 records in one layout where reading it
-    // as a count lands on a well-formed record and reading it as a constant marker lands on nothing,
-    // and 0 the other way. `marker == 1` in 98.4% of anchors was an artefact of nearly every scalar
-    // property having exactly one element. Records with count > 1 were therefore being SKIPPED by the
-    // old scan, and they are the interesting ones: `CaptionColors` is 8 colours, not 1.
-    u16 count;
-};
-
-// All (id, marker==1) pairs in `d`. Anchor-driven on purpose: a sequential walk derails in 637/748
-// layouts on ids the shipped schema does not list, but every anchor whose id IS known can be read
-// exactly, independent of whatever sits between two anchors.
-std::vector<Anchor> find_anchors(const std::vector<u8>& d) {
-    std::vector<Anchor> out;
-    const size_t n = d.size();
-    if (n < 8) return out;
-    for (const SchemaEntry& e : kSchema) {
-        if (e.code == 0xFFFF) continue;              // no measured code -> cannot read it
-        // 0x5FF5 (24565) is the generator's sentinel for a CLASS id, not a property: Window, Button,
-        // Dialog, Outlined Text and Animated Icon carry it. A class id has no record of its own, and
-        // matching on it produced false anchors the moment the third u16 stopped being required to be
-        // 1 (measured: `id=0x4EC1B8D8 "Window" code=24565 count=40`, which is not a record shape).
-        // Real codes are small: 2, 5, 7, 9, 11, 16, 17, 18, 19, 20.
-        if (e.code > 32) continue;
-        const u8 pat[4] = {(u8)(e.id & 0xFF), (u8)((e.id >> 8) & 0xFF), (u8)((e.id >> 16) & 0xFF),
-                           (u8)((e.id >> 24) & 0xFF)};
-        for (size_t k = 0; k + 8 <= n; ++k) {
-            if (d[k] != pat[0] || d[k + 1] != pat[1] || d[k + 2] != pat[2] || d[k + 3] != pat[3]) {
-                continue;
-            }
-            // The third u16 is an ELEMENT COUNT, not a constant marker: accept anything in a sane
-            // range. The id's STABLE code must still match exactly, which is what keeps false anchors
-            // rare - and it is the reason relaxing this check is safe.
-            const u16 third = rd16(&d[k + 6]);
-            if (third == 0 || third > kMaxCount) continue;
-            u16 code = rd16(&d[k + 4]);
-            if (code != e.code) continue;            // the id's STABLE code must match
-            out.push_back(Anchor{(u32)k, e.id, code, third});
-        }
-    }
-    std::sort(out.begin(), out.end(), [](const Anchor& a, const Anchor& b) { return a.off < b.off; });
-    // Drop overlaps: one record cannot start inside another's id.
-    std::vector<Anchor> keep;
-    long long last = -100;
-    size_t multi = 0;
-    for (const Anchor& a : out) {
-        if ((long long)a.off < last) continue;   // one record cannot start inside another's bytes
-        keep.push_back(a);
-        if (a.count != kMarker) ++multi;
-        // Advance past THIS RECORD's true size, not a fixed 4 bytes: with count > 1 a record can be
-        // tens of bytes long, and a short advance would keep an anchor from inside its payload.
-        last = (long long)a.off + record_size(a.code, a.count);
-    }
-    g_multi_element_anchors = multi;
-    return keep;
-}
-
-void parse_layout(const std::vector<u8>& d, Layout& L) {
-    const size_t n = d.size();
-    L.bytes = (u32)n;
-    std::vector<Anchor> an = find_anchors(d);
-    L.multi = g_multi_element_anchors;
-    L.anchors = an.size();
-    Window* cur = nullptr;
-    for (size_t ai = 0; ai < an.size(); ++ai) {
-        const Anchor& a = an[ai];
-        const SchemaEntry* e = g_schema.by_id(a.id);
-        if (!e) continue;
-        ++L.recognized;
-        // The record's payload ends where the NEXT anchor begins, not where the file does. Reading
-        // past that boundary is what made every reference look like it carried a key (the stat said
-        // "0 table-only" where the python measurement found records of reclen 14), so the extent is
-        // taken from the anchor list and every `need()` below is honest against it.
-        const size_t bound = (ai + 1 < an.size()) ? an[ai + 1].off : n;
-        const u8* p = d.data() + a.off + 8;         // payload start
-        const size_t avail = bound > a.off + 8 ? bound - (a.off + 8) : 0;
-        auto need = [&](size_t k) { return avail >= k; };
-        if (a.id == kWinControlID) {
-            L.windows.emplace_back();
-            cur = &L.windows.back();
-            cur->offset = a.off;
-            if (need(4)) cur->control_id = rd32(p);
-            continue;
-        }
-        if (!cur) continue;                         // properties before the first window: no owner
-        switch (a.id) {
-            case kWinCommandID:
-                if (need(4)) cur->command_id = rd32(p);
-                break;
-            case kWinFlags:
-                if (need(4)) cur->flags = rd32(p);
-                break;
-            case kWinBgColor:
-                if (need(4)) cur->bg_color = rd32(p);
-                break;
-            case kWinShadeColor:
-                if (need(4)) cur->shade_color = rd32(p);
-                break;
-            case kWinTextFont:
-                if (need(4)) cur->text_font = rd32(p);
-                break;
-            case kWinArea:
-                if (need(16)) {
-                    cur->area.left = rdf(p);
-                    cur->area.top = rdf(p + 4);
-                    cur->area.right = rdf(p + 8);
-                    cur->area.bottom = rdf(p + 12);
-                    // A rect is only usable if the floats are finite and the extent is sane; a
-                    // mis-read would put a window off-screen forever.
-                    if (std::isfinite(cur->area.left) && std::isfinite(cur->area.top) &&
-                        std::isfinite(cur->area.right) && std::isfinite(cur->area.bottom) &&
-                        cur->area.w() > 0.f && cur->area.h() > 0.f && cur->area.w() < 100000.f &&
-                        cur->area.h() < 100000.f) {
-                        cur->has_area = true;
-                    }
-                }
-                break;
-            case kWinCaption: {
-                if (!need(2)) break;
-                u16 len = rd16(p);
-                if (len == kInlineSentinel) {
-                    // The reference form is  0xFFFF | table:u32 | key:u32  (MEASURED:
-                    // tools/spui_caption_ref.py - 1,097 of 1,426 reference records carry a key that is
-                    // a real key OF THE REFERENCED TABLE, resolving to the game's own UI text, e.g.
-                    // table 0xAD7B2086 + key 0x0589E51B -> "640x480"). So a widget says which TEXT
-                    // TABLE it draws from and WHICH ENTRY in it, and engine/text.cpp resolves the
-                    // pair. Some records stop after the table (reclen 14, e.g. table 0x40D7E685), so
-                    // the key is optional and its absence is recorded rather than guessed at.
-                    if (need(6)) {
-                        cur->caption_is_ref = true;
-                        cur->caption_table = rd32(p + 2);
-                    }
-                    if (need(10)) {
-                        cur->caption_key = rd32(p + 6);
-                        cur->caption_key_seen = true;
-                    }
-                } else if (len <= 512 && need((size_t)2 + 2 * (size_t)len)) {
-                    cur->caption = utf16_to_utf8(p + 2, len);
-                    cur->caption_raw.assign((const char*)p, 2 + 2 * (size_t)len);
-                }
-                break;
-            }
-            default:
-                break;
-        }
-    }
-}
-
 }  // namespace
 
 std::string Layout::name() const {
-    char buf[128];
+    char buf[160];
     std::snprintf(buf, sizeof(buf), "%s rec[%u] inst=0x%08X %uB %zu windows",
                   package.c_str(), record, instance, bytes, windows.size());
     return buf;
-}
-
-void Layout::design_resolution(float& w, float& h) const {
-    // The widest right/bottom among the usable Areas. Measured from the layout itself rather than
-    // assumed to be 1024x768, so the scale factor is honest for every one of the 524 layouts - they
-    // do not all share a design size.
-    float maxr = 0.f, maxb = 0.f;
-    for (const Window& win : windows) {
-        if (!win.has_area) continue;
-        if (win.area.right > maxr) maxr = win.area.right;
-        if (win.area.bottom > maxb) maxb = win.area.bottom;
-    }
-    w = maxr;
-    h = maxb;
-}
-
-std::vector<size_t> paint_order(const Layout& lay) {
-    std::vector<size_t> idx;
-    idx.reserve(lay.windows.size());
-    for (size_t n = 0; n < lay.windows.size(); ++n) idx.push_back(n);
-    // Stable sort by DESCENDING area; a window with no usable Area has no geometry and goes last (it
-    // cannot be painted as a box anyway, and hit_test ignores it too, so the two stay consistent).
-    std::stable_sort(idx.begin(), idx.end(), [&lay](size_t a, size_t b) {
-        const Window& wa = lay.windows[a];
-        const Window& wb = lay.windows[b];
-        const bool ea = wa.has_area && wa.area.valid();
-        const bool eb = wb.has_area && wb.area.valid();
-        if (ea != eb) return ea;              // geometric windows first
-        if (!ea) return false;                // both non-geometric: keep record order
-        return wa.area.w() * wa.area.h() > wb.area.w() * wb.area.h();
-    });
-    return idx;
-}
-
-const Window* hit_test(const Layout& lay, float vx, float vy, float vw, float vh) {
-    float dw = 0.f, dh = 0.f;
-    lay.design_resolution(dw, dh);
-    if (dw <= 1.f || dh <= 1.f) return nullptr;   // a layout with no geometry cannot be clicked
-    // Map the VIEWPORT point back into design coordinates with the same factors the presenter used to
-    // map design out to the viewport. One division here, in one place, is why a click and a drawn box
-    // cannot drift apart.
-    const float sx = vw / dw, sy = vh / dh;
-    const float dx = vx / sx, dy = vy / sy;
-    // WHICH window, when several contain the point. The vector order is RECORD order, not z-order -
-    // measured: clicking the viewport centre of E3LaunchScreen lands inside BOTH the full-screen root
-    // (0,0)-(1024,768) and a 353x98 panel at (336,294)-(689,392), and taking the last record in the
-    // vector returned the ROOT, i.e. the widget behind everything. So "last drawn is topmost" is
-    // FALSE for this data.
-    //
-    // The rule used instead is the SMALLEST containing window: whatever the user aimed at, they aimed
-    // at the most specific box, and a root container is by construction the largest. Tie-break on the
-    // later record. This is a HEURISTIC, stated as such - the correct answer is the layout's real
-    // parent/child hierarchy, which we read the pieces of (control ids) but have not yet assembled.
-    // When the hierarchy is reversed, this function is the one place to replace.
-    const Window* best = nullptr;
-    f32 best_area = 0.f;
-    for (const Window& win : lay.windows) {
-        if (!win.has_area || !win.area.valid()) continue;
-        if (!win.area.contains(dx, dy)) continue;
-        const f32 a = win.area.w() * win.area.h();
-        if (!best || a <= best_area) { best = &win; best_area = a; }
-    }
-    return best;
 }
 
 void Reader::load(size_t limit) {
     m_loaded = false;
     m_layouts.clear();
     m_by_instance.clear();
-    m_shadowed = m_distinct = 0;
-    ensure_schema();
-    size_t scanned = 0;
-    if (limit == 0) limit = SIZE_MAX;  // 0 means "all of them", not "none"
-    // Deduplicate by CANONICAL path before scanning. The dev search list contains both
-    // Data=<exe>\Data and cwd=<exe>, so a recursive scan visits every package TWICE - this is a
-    // trap already documented for the `pkg` verb (109 vs 57 packages), and I walked straight back
-    // into it here: 1,349 layouts parsed where the corpus has 748. Two views of one dataset must
-    // not disagree by 2x.
-    std::vector<std::string> pkgs;
-    std::set<std::string> seen;
-    for (const auto& sp : fs::search_paths()) {
-        for (const auto& path : pkg::find_packages(sp.dir.string())) {
-            std::error_code ec;
-            std::string key = std::filesystem::weakly_canonical(path, ec).string();
-            if (ec) key = path;
-            if (seen.insert(key).second) pkgs.push_back(path);
-        }
-    }
-    for (const auto& path : pkgs) {
-        if (m_layouts.size() >= limit) break;
+    m_shadowed = m_shadowed_diff = m_distinct = 0;
+    if (limit == 0) limit = SIZE_MAX;
+    size_t scanned = 0, failed = 0;
+    for (const auto& path : packages()) {
+        if (scanned >= limit) break;
         pkg::Package pk;
         if (!pk.open(path)) continue;
         const auto& recs = pk.records();
-        std::string pname = std::filesystem::path(path).filename().string();
-        for (u32 n = 0; n < recs.size() && m_layouts.size() < limit; ++n) {
+        const std::string pname = std::filesystem::path(path).filename().string();
+        for (u32 n = 0; n < recs.size() && scanned < limit; ++n) {
             const pkg::Record& r = recs[n];
             if (r.type() != kSpuiType) continue;
-            std::vector<u8> bytes;
-            if (!pk.read_resource_decoded(n, bytes)) continue;
             ++scanned;
-            Layout L;
-            L.package = pname;
-            L.record = n;
-            L.instance = r.instance();
-            parse_layout(bytes, L);
-            if (L.windows.empty()) continue;   // nothing readable: do not pretend it is a screen
-            // PRECEDENCE, EXPLICIT. The corpus holds 748 `spui` RESOURCES but only 524 distinct
-            // INSTANCES, so 224 layouts ship more than once - E3LaunchScreen is in Data/PatchData at
-            // 4,486 B and in Data/Spore_Graphics at 4,480 B. The FIRST container on the search path
-            // wins, because that is what mounting a patch ahead of the content packages MEANS:
-            // PatchData's job is to override base content. Before this, find() returned whichever
-            // copy the traversal happened to reach first - the same accident of traversal order that
-            // I just removed from text.cpp's locale precedence, re-introduced in a different
-            // subsystem. A rule has to be stated once, in one place, or it drifts.
-            const size_t idx = m_layouts.size();
-            auto ins = m_by_instance.emplace(L.instance, idx);
-            if (!ins.second) {
-                ++m_shadowed;
-                const Layout& keeper = m_layouts[ins.first->second];
-                if (keeper.bytes != L.bytes) {
-                    if (m_shadowed_diff < 6) {
-                        LOG_INFO("spui", "layout 0x%08X: %s (%u B) shadowed by %s (%u B) - the "
-                                         "earlier container wins", L.instance, pname.c_str(),
-                                 L.bytes, keeper.package.c_str(), keeper.bytes);
-                    }
-                    ++m_shadowed_diff;
-                }
-            } else {
-                ++m_distinct;
+            std::vector<u8> bytes;
+            if (!pk.read_resource_decoded(n, bytes)) { ++failed; continue; }
+            Layout layout;
+            layout.package = pname;
+            layout.record = n;
+            layout.instance = r.instance();
+            std::string error;
+            if (!parse_binary(bytes, layout, error)) {
+                ++failed;
+                LOG_ERROR("spui", "%s rec[%u]: %s", pname.c_str(), n, error.c_str());
+                continue;
             }
-            m_layouts.push_back(std::move(L));
+            for (const Object& obj : layout.objects)
+                for (const Property& p : obj.properties) if (schema(p.id)) ++layout.recognized;
+            const auto ins = m_by_instance.emplace(layout.instance, m_layouts.size());
+            if (ins.second) ++m_distinct;
+            else {
+                ++m_shadowed;
+                if (m_layouts[ins.first->second].bytes != layout.bytes) ++m_shadowed_diff;
+            }
+            m_layouts.push_back(std::move(layout));
         }
     }
-    m_loaded = true;
-    size_t wins = 0, areas = 0, anchors = 0, multi = 0;
-    size_t caps_inline = 0, caps_ref_key = 0, caps_ref_nokey = 0;
-    for (const Layout& L : m_layouts) {
-        wins += L.windows.size();
-        anchors += L.anchors;
-        multi += L.multi;
-        for (const Window& w : L.windows) {
-            areas += w.has_area ? 1 : 0;
-            // Count the THREE caption shapes, because the coverage of the layout->text chain is the
-            // number that matters here: an inline string is already on screen, a (table,key) pair
-            // resolves through engine/text.cpp, and a table-only record cannot be resolved at all
-            // without the game's own selection rule. Reporting them together would hide the gap.
-            if (!w.caption.empty()) ++caps_inline;
-            else if (w.caption_is_ref && w.caption_key_seen) ++caps_ref_key;
-            else if (w.caption_is_ref) ++caps_ref_nokey;
+    size_t objects = 0, windows = 0, areas = 0, props = 0, multi = 0, links = 0;
+    size_t inline_caps = 0, refs = 0;
+    for (const Layout& layout : m_layouts) {
+        objects += layout.objects.size();
+        windows += layout.windows.size();
+        props += layout.anchors;
+        multi += layout.multi;
+        links += layout.child_links;
+        for (const Window& win : layout.windows) {
+            areas += win.has_area ? 1 : 0;
+            inline_caps += !win.caption.empty() ? 1 : 0;
+            refs += win.caption_is_ref ? 1 : 0;
         }
     }
-    LOG_INFO("spui", "parsed %zu layouts from %zu %s (%zu distinct instances, %zu shadowed by an "
-                     "earlier container, %zu of those with a different size): %zu windows, %zu with "
-                     "a usable Area (%zu anchors read, %zu of them with element count != 1, %d schema "
-                     "ids); captions: %zu inline, %zu (table,key), %zu table-only",
-             m_layouts.size(), scanned, scanned == 1 ? "resource" : "resources", m_distinct,
-             m_shadowed, m_shadowed_diff, wins, areas, anchors, multi, kSchemaCount,
-             caps_inline, caps_ref_key, caps_ref_nokey);
+    m_loaded = failed == 0;
+    LOG_ONCE_INFO("spui", "sequential parse %zu/%zu resources, %zu failed: %zu objects, %zu windows, "
+                  "%zu Areas, %zu properties (%zu multi), %zu child links; %zu distinct instances, "
+                  "%zu shadowed (%zu size differs); captions %zu inline / %zu references",
+                  m_layouts.size(), scanned, failed, objects, windows, areas, props, multi, links,
+                  m_distinct, m_shadowed, m_shadowed_diff, inline_caps, refs);
 }
 
 const Layout* Reader::find(u32 inst) const {
-    auto it = m_by_instance.find(inst);
+    const auto it = m_by_instance.find(inst);
     return it == m_by_instance.end() ? nullptr : &m_layouts[it->second];
 }
 
 const Layout* Reader::find_by_name(const std::string& name) const {
-    // A state script names a layout in plain text, and the resource INSTANCE is that name run
-    // through the engine's own hash - the same rule that names a locale table and a nested package.
-    // Measured: E3LaunchScreen -> 0xE932BD44 (a real spui record, in two containers),
-    // LaunchScreen -> 0x562AB2CC (one record). Nothing is guessed here: if the hash does not land on
-    // an instance, the answer is null, and the caller says so rather than inventing a screen.
-    if (name.empty()) return nullptr;
-    return find(naming::hash_lower(name.c_str()));
+    return name.empty() ? nullptr : find(naming::hash_lower(name.c_str()));
 }
 
 const Layout* Reader::best_screen() const {
     const Layout* best = nullptr;
     size_t best_areas = 0;
-    for (const Layout& L : m_layouts) {
-        size_t a = 0;
-        for (const Window& w : L.windows) a += w.has_area ? 1 : 0;
-        if (a > best_areas) { best_areas = a; best = &L; }
+    for (const Layout& layout : m_layouts) {
+        size_t areas = 0;
+        for (const Window& win : layout.windows) areas += win.has_area ? 1 : 0;
+        if (areas > best_areas) { best_areas = areas; best = &layout; }
     }
     return best;
 }
 
 std::string Reader::stats() const {
-    char buf[256];
-    const Layout* b = best_screen();
-    std::snprintf(buf, sizeof(buf), "spui: %zu layouts, best = %s (%zu with Area)", m_layouts.size(),
-                  b ? b->name().c_str() : "none",
-                  b ? [&] { size_t n = 0; for (const Window& w : b->windows) n += w.has_area; return n; }()
-                    : 0);
+    char buf[280];
+    const Layout* best = best_screen();
+    std::snprintf(buf, sizeof(buf), "spui: %zu sequential layouts, %zu distinct; best=%s",
+                  m_layouts.size(), m_distinct, best ? best->name().c_str() : "none");
     return buf;
 }
 
 Reader& instance() {
-    static Reader r;
-    return r;
+    static Reader reader;
+    return reader;
 }
 
-std::string dump_anchors(u32 instance, size_t maxn) {
-    ensure_schema();
-    // Re-walk the search paths for the resource, the same way load() does, so the dump reflects the
-    // bytes the reader actually consumed rather than a cached summary.
-    std::vector<std::string> pkgs;
-    std::set<std::string> seen;
-    for (const auto& sp : fs::search_paths()) {
-        for (const auto& path : pkg::find_packages(sp.dir.string())) {
-            std::error_code ec;
-            std::string key = std::filesystem::weakly_canonical(path, ec).string();
-            if (ec) key = path;
-            if (seen.insert(key).second) pkgs.push_back(path);
-        }
+std::string dump_anchors(u32 inst, size_t maxn) {
+    // Compatibility verb; now emits exact framed properties, not heuristic anchors. The limit keeps
+    // output below the logger's message buffer; use --parse --output in spui_objects.py for a corpus.
+    const Layout* layout = instance().find(inst);
+    if (!layout) return "dump: layout not loaded";
+    std::vector<Property> props;
+    for (const Object& obj : layout->objects)
+        props.insert(props.end(), obj.properties.begin(), obj.properties.end());
+    std::sort(props.begin(), props.end(), [](const Property& a, const Property& b) {
+        return a.offset < b.offset;
+    });
+    std::ostringstream out;
+    out << props.size() << " exact properties of " << layout->name();
+    for (size_t i = 0; i < std::min(maxn, props.size()); ++i) {
+        const Property& p = props[i];
+        char buf[160];
+        std::snprintf(buf, sizeof(buf), "\n  off=%u end=%u depth=%u id=0x%08X code=%u count=%u %s",
+                      p.offset, p.end, p.depth, p.id, p.code, p.count,
+                      schema_name(p.id) ? schema_name(p.id) : "(unknown name)");
+        if (out.str().size() + std::strlen(buf) > 1700) { out << "\n  ..."; break; }
+        out << buf;
     }
-    for (const auto& path : pkgs) {
-        pkg::Package pk;
-        if (!pk.open(path)) continue;
-        const auto& recs = pk.records();
-        for (u32 n = 0; n < recs.size(); ++n) {
-            if (recs[n].type() != kSpuiType || recs[n].instance() != instance) continue;
-            std::vector<u8> bytes;
-            if (!pk.read_resource_decoded(n, bytes)) continue;
-            std::vector<Anchor> an = find_anchors(bytes);
-            std::ostringstream o;
-            o << an.size() << " anchors of instance 0x" << std::hex << instance << std::dec << " from "
-              << std::filesystem::path(path).filename().string() << " (" << bytes.size() << " bytes)";
-            size_t shown = 0;
-            for (const Anchor& a : an) {
-                if (shown++ >= maxn) { o << "\n  ... (" << (an.size() - maxn) << " more)"; break; }
-                const char* nm = schema_name(a.id);
-                char b[200];
-                std::snprintf(b, sizeof(b), "\n  off=%-6u id=0x%08X %-24s code=%-3u count=%u",
-                              a.off, a.id, nm ? nm : "(unknown)", a.code, a.count);
-                o << b;
-            }
-            return o.str();
-        }
-    }
-    return "dump_anchors: instance not found on the search paths";
+    return out.str();
+}
+
+std::string describe_tree(const Layout& layout) {
+    size_t visible = 0;
+    for (const Window& win : layout.windows) visible += win.visible ? 1 : 0;
+    float w = 0.f, h = 0.f;
+    layout.design_resolution(w, h);
+    std::ostringstream out;
+    out << "tree: " << layout.objects.size() << " objects / " << layout.windows.size()
+        << " windows / " << layout.child_links << " links / " << layout.roots.size()
+        << " roots; visible=" << visible << "; design=" << w << 'x' << h
+        << "; consumed=" << layout.consumed << '/' << layout.bytes;
+    size_t shown = 0;
+    std::function<void(size_t, size_t)> visit = [&](size_t n, size_t depth) {
+        if (shown >= 12) return;
+        const Window& win = layout.windows[n];
+        char line[190];
+        std::snprintf(line, sizeof(line), "\n  depth=%zu object=%u parent=%d control=0x%08X children=%zu visible=%d",
+                      depth, win.object_index,
+                      win.parent >= 0 ? (int)layout.windows[(size_t)win.parent].object_index : -1,
+                      win.control_id, win.children.size(), win.visible ? 1 : 0);
+        out << line;
+        ++shown;
+        for (size_t child : win.children) visit(child, depth + 1);
+    };
+    for (size_t root : layout.roots) visit(root, 0);
+    return out.str();
 }
 
 const char* schema_name(u32 id) {
-    ensure_schema();
-    const SchemaEntry* e = g_schema.by_id(id);
-    return e ? e->name : nullptr;
+    const SchemaEntry* entry = schema(id);
+    return entry ? entry->name : nullptr;
 }
 const char* schema_type(u32 id) {
-    ensure_schema();
-    const SchemaEntry* e = g_schema.by_id(id);
-    return e ? e->type : nullptr;
+    const SchemaEntry* entry = schema(id);
+    return entry ? entry->type : nullptr;
 }
 u16 schema_code(u32 id) {
-    ensure_schema();
-    const SchemaEntry* e = g_schema.by_id(id);
-    return e ? e->code : 0xFFFF;
+    const SchemaEntry* entry = schema(id);
+    return entry ? entry->code : 0xffff;
 }
-
 }  // namespace os::spui
