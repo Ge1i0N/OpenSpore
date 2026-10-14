@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 82.4%** | **Overall: 76.0%** | done 190 / partial 26 / todo 51 (267 features)
+**Engine reversal: 82.6%** | **Overall: 76.2%** | done 191 / partial 28 / todo 50 (269 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **54%** | 17 | 7 | 14 |
+| formats | **56%** | 18 | 9 | 13 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **30%** | 2 | 2 | 6 |
@@ -285,9 +285,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 54%
+## formats — 56%
 
-*17 done · 7 partial · 14 todo*
+*18 done · 9 partial · 13 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -323,12 +323,14 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | shader bytecode |  |
 | ⬜ | todo | texture atlas |  |
 | ⬜ | todo | model (rw4) | gates the whole content set |
-| ✅ | done | state drives the UI | `cheat "uilayout -load E3LaunchScreen"` in state DevLauncher is EXECUTED, not reported unrunnable: name -> fnv1_lower -> instance 0xE932BD44 -> our spui reader -> 68 windows drawn by states/uipresent.cpp. The frame differs from our own largest-layout pick in 65.9% of sampled pixels, so this is a different SCREEN, not a relabel. analysis/shots/spui_e3launch.png |
-| ⬜ | todo | uilayout's two trailing ids | 0x027996d8 / 0x0279bf9e are NOT resource ids (absent from every type/group/instance field of all 150,945 records) and no registry name hashes to them; the first appears twice in the spui byte corpus, the second nowhere. Internal to the layout, or runtime handles. |
+| ✅ | done | state drives the UI | unchanged from today's first half: DevLauncher's `uilayout -load E3LaunchScreen` executed; 65.9% of pixels differ from our own largest-layout pick. Now with a pointer on top. |
+| 🚧 | partial | uilayout's two trailing ids | ARG1 IDENTIFIED: 0x027996d8 is a CONTROL ID of E3LaunchScreen, present in BOTH shipped copies (PatchData and Spore_Graphics). ARG2 0x0279bf9e is NOT a control id in any of the 748 layout resources, is in no resource id field of all 150,945 records, and no registry name hashes to it. So `uilayout -load <name> <control_id> <?>` is addressed by (layout, control) and one operand is still unknown - stated with its size, not guessed at. |
 | 🚧 | partial | spui precedence (resource cache) | ASSUMED, not reversed: spui takes the FIRST container (so PatchData overrides base content), text takes the LAST parsed - two different rules in one engine. Measured surface: 18 spui layouts and 3 of 23,933 locale strings could differ. EP1 beating PatchData on locale is provably right (EP1 fixes the patch's typo), so the real rule is not simply 'earliest wins'. |
 | ✅ | done | locale at three depths | flat Data/Locale/<lang> + nested in DataEP1/Spore_EP1_Locale_0{1,2} + nested in Data/PatchData (42 en-us tables). 265 distinct tables from 5 containers, 23,933 distinct (table,key) texts. The third depth was invisible for two sessions because the search was scoped by FILENAME (*Spore_EP1_Locale*) instead of by TYPE. |
 | ✅ | done | caption gaps classified | spui -gaps splits the 42 unresolved refs into COVERAGE (table instance absent from the corpus: mvj 0x277DEE6A, 14 keys) and SEMANTIC (table present, key missing: 4 keys). `legal` 0xADB810C4 was on the missing list for two sessions and is NOT missing - it ships in PatchData's nested packages. |
 | ✅ | done | intra-resource repeated key | 10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original). |
+| ✅ | done | input -> widget | a pointer resolves to exactly ONE widget of the screen the state chose: click (640,360) of E3LaunchScreen -> star tile control=0x022D9E03 command=0x00E1132F, Area (448,571)-(560,692). Same path for a real mouse and for `spui:-click`, so it is testable headless. engine/input.cpp latches edges once per frame; spui::hit_test maps viewport->design through the SAME design_resolution() the presenter scales with. |
+| 🚧 | partial | z-order (paint order) | MEASURED: record order is NOT z-order - the full-screen root of E3LaunchScreen is the LAST record, so painting in record order paints the root OVER its panels. Fixed with one shared policy: paint_order() = largest Area first, hit_test() = smallest containing Area wins, so the widget a click selects is the widget the user can SEE. Frame barely changed (1 of 102,480 sampled px) because the shipped windows are transparent with outlines. The real fix is the parent/child hierarchy, which is not reversed yet. |
 
 ---
 

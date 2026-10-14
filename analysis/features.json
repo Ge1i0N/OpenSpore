@@ -1139,12 +1139,12 @@
         {
           "name": "state drives the UI",
           "status": "done",
-          "note": "`cheat \"uilayout -load E3LaunchScreen\"` in state DevLauncher is EXECUTED, not reported unrunnable: name -> fnv1_lower -> instance 0xE932BD44 -> our spui reader -> 68 windows drawn by states/uipresent.cpp. The frame differs from our own largest-layout pick in 65.9% of sampled pixels, so this is a different SCREEN, not a relabel. analysis/shots/spui_e3launch.png"
+          "note": "unchanged from today's first half: DevLauncher's `uilayout -load E3LaunchScreen` executed; 65.9% of pixels differ from our own largest-layout pick. Now with a pointer on top."
         },
         {
           "name": "uilayout's two trailing ids",
-          "status": "todo",
-          "note": "0x027996d8 / 0x0279bf9e are NOT resource ids (absent from every type/group/instance field of all 150,945 records) and no registry name hashes to them; the first appears twice in the spui byte corpus, the second nowhere. Internal to the layout, or runtime handles."
+          "status": "partial",
+          "note": "ARG1 IDENTIFIED: 0x027996d8 is a CONTROL ID of E3LaunchScreen, present in BOTH shipped copies (PatchData and Spore_Graphics). ARG2 0x0279bf9e is NOT a control id in any of the 748 layout resources, is in no resource id field of all 150,945 records, and no registry name hashes to it. So `uilayout -load <name> <control_id> <?>` is addressed by (layout, control) and one operand is still unknown - stated with its size, not guessed at."
         },
         {
           "name": "spui precedence (resource cache)",
@@ -1165,6 +1165,16 @@
           "name": "intra-resource repeated key",
           "status": "done",
           "note": "10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original)."
+        },
+        {
+          "name": "input -> widget",
+          "status": "done",
+          "note": "a pointer resolves to exactly ONE widget of the screen the state chose: click (640,360) of E3LaunchScreen -> star tile control=0x022D9E03 command=0x00E1132F, Area (448,571)-(560,692). Same path for a real mouse and for `spui:-click`, so it is testable headless. engine/input.cpp latches edges once per frame; spui::hit_test maps viewport->design through the SAME design_resolution() the presenter scales with."
+        },
+        {
+          "name": "z-order (paint order)",
+          "status": "partial",
+          "note": "MEASURED: record order is NOT z-order - the full-screen root of E3LaunchScreen is the LAST record, so painting in record order paints the root OVER its panels. Fixed with one shared policy: paint_order() = largest Area first, hit_test() = smallest containing Area wins, so the widget a click selects is the widget the user can SEE. Frame barely changed (1 of 102,480 sampled px) because the shipped windows are transparent with outlines. The real fix is the parent/child hierarchy, which is not reversed yet."
         }
       ]
     },

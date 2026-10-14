@@ -22,6 +22,7 @@
 #include "engine/raster.h"
 #include "engine/diag.h"
 #include "engine/fs.h"
+#include "engine/input.h"
 #include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
@@ -31,6 +32,7 @@
 #include "render/device.h"
 #include "render/overlay.h"
 #include "states/statemgr.h"
+#include "states/uipresent.h"   // requested_by_state: which layout the current state asked for
 
 namespace os::app {
 namespace {
@@ -193,6 +195,21 @@ LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
             // During boot we keep the arrow.
             SetCursor(LoadCursor(nullptr, IDC_ARROW));
             return TRUE;
+        case WM_MOUSEMOVE:
+            input::on_move(LOWORD(lp), HIWORD(lp));
+            return 0;
+        case WM_LBUTTONDOWN:
+            input::on_move(LOWORD(lp), HIWORD(lp));
+            input::on_button(true, true);
+            return 0;
+        case WM_LBUTTONUP:
+            input::on_move(LOWORD(lp), HIWORD(lp));
+            input::on_button(true, false);
+            return 0;
+        case WM_RBUTTONDOWN:
+            input::on_move(LOWORD(lp), HIWORD(lp));
+            input::on_button(false, true);
+            return 0;
         case WM_KEYDOWN:
             if (wp == VK_ESCAPE) {
                 PostQuitMessage(0);
@@ -773,6 +790,119 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                               << " keys";
                           return out.str();
                       }
+                      if (c.args[1] == "-hit" && c.args.size() >= 4) {
+                          // Resolve a POINTER POSITION to a widget, without needing a window at all.
+                          // This is what makes the click chain regression-testable: the same
+                          // spui::hit_test() the frame uses, driven from the command line.
+                          const int hx = std::atoi(c.args[2].c_str());
+                          const int hy = std::atoi(c.args[3].c_str());
+                          auto& dev = render::device();
+                          const int vw = dev.d3d() ? dev.width() : g_args.width;
+                          const int vh = dev.d3d() ? dev.height() : g_args.height;
+                          std::string why;
+                          const auto* lay = states::requested_by_state(why);
+                          if (!lay) lay = rd.best_screen();   // headless: no state asked, so ours
+                          if (!lay) return "-hit: no layout on screen to hit-test";
+                          const auto* w = spui::hit_test(*lay, (float)hx, (float)hy, (float)vw,
+                                                         (float)vh);
+                          char b[400];
+                          if (!w) {
+                              std::snprintf(b, sizeof(b),
+                                            "hit (%d,%d) in %dx%d viewport -> NO widget (layout %s)",
+                                            hx, hy, vw, vh, lay->name().c_str());
+                              return b;
+                          }
+                          std::string cap;
+                          if (!w->caption.empty()) cap = w->caption;
+                          else if (w->caption_key_seen)
+                              cap = text::instance().get(w->caption_table, w->caption_key);
+                          cap = text::to_display_ascii(cap);
+                          std::snprintf(b, sizeof(b),
+                                        "hit (%d,%d) in %dx%d -> %s  caption=\"%s\"  "
+                                        "control=0x%08X command=0x%08X  [%s]",
+                                        hx, hy, vw, vh, w->area.describe().c_str(), cap.c_str(),
+                                        w->control_id, w->command_id, lay->name().c_str());
+                          return b;
+                      }
+                      if (c.args[1] == "-click" && c.args.size() >= 4) {
+                          // Feed the REAL frame path a synthetic click, so the hit-test exercised here
+                          // is the one the renderer calls - not a parallel implementation that could
+                          // pass while the live path is broken.
+                          const int hx = std::atoi(c.args[2].c_str());
+                          const int hy = std::atoi(c.args[3].c_str());
+                          input::inject_click(hx, hy);
+                          char b[128];
+                          input::describe(b, sizeof(b));
+                          return std::string("injected click at ") + c.args[2] + "," + c.args[3] +
+                                 " -> " + b + " (dispatched on the next presented frame)";
+                      }
+                      if (c.args[1] == "-ctl") {
+                          // List the CURRENT screen's widgets by CONTROL ID. This exists to test one
+                          // specific claim: `uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e`
+                          // carries two ids that are NOT resource ids anywhere in the corpus, and a
+                          // hit-test on the layout's root window came back with control=0x027996D8 -
+                          // the FIRST of them. If the second also appears, then `uilayout -load` is
+                          // addressed by (layout name, control id), which is the last unknown in the
+                          // UI chain and it closes without a single guess.
+                          std::string why;
+                          const auto* lay = states::requested_by_state(why);
+                          if (!lay) lay = rd.best_screen();
+                          if (!lay) return "-ctl: no layout on screen";
+                          const u32 a1 = 0x027996D8u, a2 = 0x0279BF9Eu;
+                          bool got1 = false, got2 = false;
+                          for (const auto& w : lay->windows) {
+                              if (w.control_id == a1) got1 = true;
+                              if (w.control_id == a2) got2 = true;
+                          }
+                          std::ostringstream o;
+                          float dw = 0.f, dh = 0.f;
+                          lay->design_resolution(dw, dh);
+                          // THE VERDICT FIRST. A long multi-line console message is cut by the log's
+                          // per-message buffer, and the listing is exactly the part that can be
+                          // regenerated - the conclusion is not. Ordering by importance, not by the
+                          // order the work was done in.
+                          o << "uilayout arg1 0x027996D8 is a control id in this layout: "
+                            << (got1 ? "YES" : "no")
+                            << ";  arg2 0x0279BF9E: " << (got2 ? "YES" : "no");
+                          o << "\n" << lay->windows.size() << " windows of " << lay->name()
+                            << ", design " << (int)dw << "x" << (int)dh;
+                          // CORPUS-WIDE: is arg2 a control id of some OTHER layout? This matters
+                          // more than it looks, because E3LaunchScreen ships TWICE with different
+                          // byte lengths (4,486 B in PatchData vs 4,480 B in Spore_Graphics) and our
+                          // precedence keeps only one. If arg2 lives in the copy we shadowed, then
+                          // `uilayout -load` is addressed against a version of the layout we are not
+                          // showing - which would be a live demonstration that the precedence rule is
+                          // not cosmetic.
+                          size_t n1 = 0, n2 = 0;
+                          std::string where1, where2;
+                          for (const auto& other : rd.layouts()) {
+                              size_t c1 = 0, c2 = 0;
+                              for (const auto& w : other.windows) {
+                                  if (w.control_id == a1) ++c1;
+                                  if (w.control_id == a2) ++c2;
+                              }
+                              if (c1) { ++n1; if (where1.size() < 90) where1 += " " + other.package; }
+                              if (c2) { ++n2; if (where2.size() < 90) where2 += " " + other.package; }
+                          }
+                          o << "\narg1 0x027996D8 appears in " << n1 << " of " << rd.layouts().size()
+                            << " parsed layout resources:" << (where1.empty() ? " none" : where1);
+                          o << "\narg2 0x0279BF9E appears in " << n2 << ":"
+                            << (where2.empty() ? " none - it is NOT a control id anywhere" : where2);
+                          size_t shown = 0;
+                          for (const auto& w : lay->windows) {
+                              if (shown++ >= 8) break;   // print 8, the rest is only counts
+                              char b[190];
+                              std::snprintf(b, sizeof(b),
+                                            "\n  control=0x%08X command=0x%08X  %s%s", w.control_id,
+                                            w.command_id, w.has_area ? w.area.describe().c_str()
+                                                                      : "(no Area)",
+                                            w.control_id == a1 ? "   <-- uilayout arg 1"
+                                                              : (w.control_id == a2
+                                                                     ? "   <-- uilayout arg 2" : ""));
+                              o << b;
+                          }
+                          return o.str();
+                      }
                       if (c.args[1] == "-win" && c.args.size() >= 3) {
                           size_t want = (size_t)std::strtoul(c.args[2].c_str(), nullptr, 10);
                           size_t i = 0;
@@ -1229,6 +1359,10 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     while (!g_quit) {
         pump_messages();
         if (g_quit) break;
+        // Latch the pointer ONCE per iteration, outside the guarded frame body: frame_body has early
+        // returns (headless, minimized, aborted), and a begin/end pair split across them would leak a
+        // click or double-count one. The renderer sees a stable, edge-triggered view either way.
+        input::begin_frame();
         console::poll();
         if (!first_iter_logged) {
             first_iter_logged = true;
@@ -1257,7 +1391,9 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
         // the frame calls abort()/assert-with-abort, diag's handler logs the stack and
         // longjmps back, and we skip the rest of that frame.
         FrameCtx fctx{dt};
-        if (diag::run_guarded(frame_body, &fctx, "frame")) {
+        const bool frame_aborted = diag::run_guarded(frame_body, &fctx, "frame");
+        input::end_frame();
+        if (frame_aborted) {
             ++g_frame_aborts;
             LOG_ERROR("frame", "frame aborted (total %llu) - skipping this frame",
                       (unsigned long long)g_frame_aborts);

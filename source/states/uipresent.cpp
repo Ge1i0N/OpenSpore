@@ -5,6 +5,7 @@
 #include <string>
 
 #include "engine/appstates.h"  // the state's own script, which names the screen
+#include "engine/input.h"      // the pointer, latched once per frame
 #include "engine/log.h"
 #include "engine/naming.h"     // hash_lower: a layout NAME becomes a resource INSTANCE
 #include "engine/spui.h"
@@ -54,6 +55,42 @@ const os::spui::Layout* requested_by_state(std::string& why) {
     return nullptr;
 }
 
+// What a click HITS. Reports the widget's identity as the data gives it: control id, command id, and
+// the caption resolved through the locale tables.
+//
+// WHAT IT DOES NOT DO: act. A widget's `command_id` is an index into the UI system's COMMAND
+// VOCABULARY, and that vocabulary is not reversed (it is the same wall as the 637/748 sequential-walk
+// gap: the designer XML ships 227 of the ids the binaries use). So today the honest end of the chain
+// is "the pointer resolves to exactly one widget, and we can name it" - which is still a step the
+// engine could not take an hour ago, and it is the step everything else hangs off. Claiming more would
+// be decoration.
+void dispatch_click(const os::spui::Layout& lay, int vw, int vh) {
+    const os::spui::Window* w = hit_test(lay, (float)input::x(), (float)input::y(), (float)vw,
+                                         (float)vh);
+    if (!w) {
+        LOG_INFO("ui", "click at (%d,%d) hit NO widget of %s", input::x(), input::y(),
+                 lay.name().c_str());
+        return;
+    }
+    std::string cap;
+    if (!w->caption.empty()) {
+        cap = w->caption;
+    } else if (w->caption_key_seen) {
+        cap = os::text::instance().get(w->caption_table, w->caption_key);
+    }
+    cap = os::text::to_display_ascii(cap);
+    char idpart[96];
+    std::snprintf(idpart, sizeof(idpart), "control=0x%08X command=0x%08X", w->control_id,
+                  w->command_id);
+    if (cap.empty()) {
+        LOG_INFO("ui", "click at (%d,%d) -> %s  (no caption; %s)", input::x(), input::y(),
+                 w->area.describe().c_str(), idpart);
+    } else {
+        LOG_INFO("ui", "click at (%d,%d) -> \"%s\"  %s  (%s)", input::x(), input::y(), cap.c_str(),
+                 w->area.describe().c_str(), idpart);
+    }
+}
+
 int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
                         IDirect3DTexture9* bg, int bg_w, int bg_h) {
     using namespace os::render;
@@ -71,16 +108,12 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
         g_why_logged = why;
     }
 
-    // Design resolution: the widest right/bottom seen among usable rects. Measured from the layout
-    // itself rather than assumed, so the scale is honest at any window size.
-    float maxr = 0.f, maxb = 0.f;
-    for (const auto& win : lay.windows) {
-        if (!win.has_area) continue;
-        maxr = std::max(maxr, win.area.right);
-        maxb = std::max(maxb, win.area.bottom);
-    }
-    const float sx = maxr > 1.f ? (float)w / maxr : 1.f;
-    const float sy = maxb > 1.f ? (float)h / maxb : 1.f;
+    // Design resolution from the layout itself, through the SAME accessor the hit-test uses, so a
+    // click can never land beside the box the user was aiming at.
+    float dw = 0.f, dh = 0.f;
+    lay.design_resolution(dw, dh);
+    const float sx = dw > 1.f ? (float)w / dw : 1.f;
+    const float sy = dh > 1.f ? (float)h / dh : 1.f;
 
     char head[160];
     std::snprintf(head, sizeof(head), "spui layout: %s  scaled x%.3f / x%.3f",
@@ -89,7 +122,10 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
     ov.text_fmt(48.f, 38.f, 0xFF6E8FA8, "chosen because: %s", why.c_str());
 
     size_t drawn = 0;
-    for (const auto& win : lay.windows) {
+    // Paint in the shared order (largest first), so what is VISIBLE is what hit_test() will select.
+    const std::vector<size_t> order = os::spui::paint_order(lay);
+    for (size_t oi : order) {
+        const auto& win = lay.windows[oi];
         if (!win.has_area) continue;
         const float x = win.area.left * sx, y = win.area.top * sy;
         const float bw = win.area.w() * sx, bh = win.area.h() * sy;
@@ -131,13 +167,23 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
                 ov.text_fmt(x + 3.f, y + bh * 0.5f - 7.f, 0xFFF4F8FC, "%s", cap.c_str());
             }
         }
-        if (++drawn >= 260) break;
+        // A RUNAWAY GUARD, not a policy. It used to be 260, which BINDS: the largest layout here has
+        // 570 windows, so the renderer drew a SUBSET while the hit-test knew all of them, and a click
+        // could select a widget that was never on screen. Any cap the renderer applies must be the
+        // same cap the hit-test respects. 4096 is above every layout in the corpus (max 570 measured
+        // over 524 distinct layouts), so it only fires on a corrupt stream.
+        if (++drawn >= 4096) break;
     }
     char foot[180];
     std::snprintf(foot, sizeof(foot),
                   "%zu windows drawn from %zu records; captions are the game's own strings",
                   drawn, lay.anchors);
     ov.text_fmt(48.f, (float)h - 62.f, 0xFF90A8B8, "%s", foot);
+
+    // THE POINTER. Checked once per frame, after the frame's geometry is known, so a click resolves
+    // against the same scale that just drew the screen.
+    if (input::clicked()) dispatch_click(lay, w, h);
+
     ov.end();
     dev.end_frame();
     return (int)drawn;

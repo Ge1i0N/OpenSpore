@@ -254,6 +254,69 @@ std::string Layout::name() const {
     return buf;
 }
 
+void Layout::design_resolution(float& w, float& h) const {
+    // The widest right/bottom among the usable Areas. Measured from the layout itself rather than
+    // assumed to be 1024x768, so the scale factor is honest for every one of the 524 layouts - they
+    // do not all share a design size.
+    float maxr = 0.f, maxb = 0.f;
+    for (const Window& win : windows) {
+        if (!win.has_area) continue;
+        if (win.area.right > maxr) maxr = win.area.right;
+        if (win.area.bottom > maxb) maxb = win.area.bottom;
+    }
+    w = maxr;
+    h = maxb;
+}
+
+std::vector<size_t> paint_order(const Layout& lay) {
+    std::vector<size_t> idx;
+    idx.reserve(lay.windows.size());
+    for (size_t n = 0; n < lay.windows.size(); ++n) idx.push_back(n);
+    // Stable sort by DESCENDING area; a window with no usable Area has no geometry and goes last (it
+    // cannot be painted as a box anyway, and hit_test ignores it too, so the two stay consistent).
+    std::stable_sort(idx.begin(), idx.end(), [&lay](size_t a, size_t b) {
+        const Window& wa = lay.windows[a];
+        const Window& wb = lay.windows[b];
+        const bool ea = wa.has_area && wa.area.valid();
+        const bool eb = wb.has_area && wb.area.valid();
+        if (ea != eb) return ea;              // geometric windows first
+        if (!ea) return false;                // both non-geometric: keep record order
+        return wa.area.w() * wa.area.h() > wb.area.w() * wb.area.h();
+    });
+    return idx;
+}
+
+const Window* hit_test(const Layout& lay, float vx, float vy, float vw, float vh) {
+    float dw = 0.f, dh = 0.f;
+    lay.design_resolution(dw, dh);
+    if (dw <= 1.f || dh <= 1.f) return nullptr;   // a layout with no geometry cannot be clicked
+    // Map the VIEWPORT point back into design coordinates with the same factors the presenter used to
+    // map design out to the viewport. One division here, in one place, is why a click and a drawn box
+    // cannot drift apart.
+    const float sx = vw / dw, sy = vh / dh;
+    const float dx = vx / sx, dy = vy / sy;
+    // WHICH window, when several contain the point. The vector order is RECORD order, not z-order -
+    // measured: clicking the viewport centre of E3LaunchScreen lands inside BOTH the full-screen root
+    // (0,0)-(1024,768) and a 353x98 panel at (336,294)-(689,392), and taking the last record in the
+    // vector returned the ROOT, i.e. the widget behind everything. So "last drawn is topmost" is
+    // FALSE for this data.
+    //
+    // The rule used instead is the SMALLEST containing window: whatever the user aimed at, they aimed
+    // at the most specific box, and a root container is by construction the largest. Tie-break on the
+    // later record. This is a HEURISTIC, stated as such - the correct answer is the layout's real
+    // parent/child hierarchy, which we read the pieces of (control ids) but have not yet assembled.
+    // When the hierarchy is reversed, this function is the one place to replace.
+    const Window* best = nullptr;
+    f32 best_area = 0.f;
+    for (const Window& win : lay.windows) {
+        if (!win.has_area || !win.area.valid()) continue;
+        if (!win.area.contains(dx, dy)) continue;
+        const f32 a = win.area.w() * win.area.h();
+        if (!best || a <= best_area) { best = &win; best_area = a; }
+    }
+    return best;
+}
+
 void Reader::load(size_t limit) {
     m_loaded = false;
     m_layouts.clear();

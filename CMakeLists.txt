@@ -112,6 +112,7 @@ set(OS_SOURCES
   source/engine/log.cpp
   source/engine/cmdline.cpp
   source/engine/fs.cpp
+  source/engine/input.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp

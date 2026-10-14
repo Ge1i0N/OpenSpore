@@ -42,6 +42,7 @@
 // 150,945 records) and no registry name hashes to them; the first appears twice inside the spui byte
 // corpus and the second not at all, so they are internal to the layout or runtime handles. Unresolved
 // and currently unnecessary: `spui::Reader::find_by_name()` does not need them.
+#include <cstdio>
 #include <map>
 #include <string>
 #include <vector>
@@ -59,6 +60,17 @@ struct Rect {
     f32 w() const { return right - left; }
     f32 h() const { return bottom - top; }
     bool valid() const { return w() > 0.f && h() > 0.f; }
+    bool contains(f32 px, f32 py) const {
+        // Half-open on the far edges, so two adjacent windows sharing an edge cannot both claim a
+        // click on it.
+        return px >= left && px < right && py >= top && py < bottom;
+    }
+    std::string describe() const {
+        char b[80];
+        std::snprintf(b, sizeof(b), "Area (%g,%g)-(%g,%g) %gx%g", left, top, right, bottom,
+                      (double)w(), (double)h());
+        return b;
+    }
 };
 
 struct Window {
@@ -89,7 +101,38 @@ struct Layout {
     size_t anchors = 0;              // how many (id, marker==1) records were read
     size_t recognized = 0;           // how many of those had a name in the shipped schema
     std::string name() const;
+    // The layout's DESIGN RESOLUTION: the widest right/bottom among its usable Areas. Both the
+    // presenter (to scale down to the viewport) and the hit-test (to scale a pointer back up into
+    // design coordinates) call THIS, so the two can never disagree about where a widget is. A
+    // duplicated max-right/max-bottom scan is exactly the drift that makes a click land one pixel
+    // off a button while the screen looks perfect.
+    void design_resolution(float& w, float& h) const;
 };
+
+// The order to PAINT a layout in: largest Area first, so a container is painted behind everything it
+// holds. ONE RULE, SHARED BY DRAWING AND HIT-TESTING.
+//
+// Why this is not cosmetic: the record order in the data is not a z-order (measured - the full-screen
+// root of E3LaunchScreen is the LAST record in the vector, so painting in record order paints the
+// root OVER the panels it contains). hit_test() resolves an overlapping click to the SMALLEST
+// containing window, on the grounds that a user aims at the most specific box. For the two to agree,
+// the painter must put the largest first. If they disagree, the engine would hit-test a widget the
+// user cannot see, which is worse than no clicks at all.
+//
+// Returns indices into lay.windows. Ties keep record order. When the layout's real parent/child
+// hierarchy is reversed from the data, this is the single function to replace - and hit_test needs no
+// change, because "smallest wins" is exactly the inverse of "largest painted first".
+std::vector<size_t> paint_order(const Layout& lay);
+
+// Which window of `lay` is under the VIEWPORT point (vx,vy), when the viewport is (vw,vh)?
+// Returns null when the point hits nothing usable.
+//
+// TOPMOST = the LAST window in draw order that contains the point, so the answer is what the user
+// SEES rather than what the designer listed first. Walks the vector in reverse for that reason.
+//
+// A window with no usable Area cannot be hit: it has no geometry, and inventing one would let a
+// click land on a widget that was never drawn.
+const Window* hit_test(const Layout& lay, float vx, float vy, float vw, float vh);
 
 class Reader {
 public:
