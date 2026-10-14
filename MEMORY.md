@@ -936,6 +936,47 @@ and the test that proves it is cheap:
 * **`tools/ghidra_xref.py` is new and general**: "who references this address / this string by text",
   the direction the PyGhidra bridge did not cover (it could only ask "what does this function do").
 
+## The menu is FUNCTIONAL: a widget's control id IS a state id (session 13; commits bfb7f4a, 4cf3825)
+
+The step that turns "we can draw the game's screen" into "the game's screen does something", and the
+technique is the transferable part.
+
+* **Cross-reference two id spaces before assuming they are unrelated.** `spui -xref` compared the
+  4,187 distinct widget **control ids** (across all 748 layout resources) with the 60 **state ids** from
+  the script. Expected by chance: <0.001 hits. Observed: **9 real hits.** So they are ONE manual id
+  space — which the script's author admits in a comment: *"assign manual IDs just so I can fill in the
+  UI layout stuff more easily."*
+* **The three confirmations, not the arithmetic.** `0x02CCDA9C` == `state GalaxyGameEntry -id
+  0x02ccda9c` **and** its caption reads **"GGE"** **and** it lives in the layout the script NAMES
+  (`uilayout -load E3LaunchScreen`). The editor block is the same story: `0x022D9E01/02/03/05/10`,
+  `0xF12178D3`, `0x679D892F` caption **"Creature Editor", "Building Editor", "Vehicle Editor",
+  "Flora Editor", "Terrain Editor", "UFO Editor", "Anim Viewer"**. A numeric collision is a curiosity;
+  a collision whose label spells the name is a fact.
+* **Discount the low ids.** `0x00000001` (DevLauncher's explicit `-id 1`) also "hits", 12 times — that
+  is the standing trap: ids below 0x1000 are **block-scoped member indices**, not global. The tool
+  prints this caveat so nobody re-derives the false positive as evidence.
+* **Verified live, end to end:** `click (942,261) -> "GGE" control=0x02CCDA9C => ENTER STATE
+  'GalaxyGameEntry'` then `[state] -> GalaxyGameEntry [0x02ccda9c]`. This bridges WITHOUT the command
+  vocabulary (every bridged widget still carries the unexplained `command=0x00E1132F`).
+* **`request_goto()` from outside a transition never ran.** The chain drained only at the tail of
+  `goto_name()`, so an input-driven request queued, logged `chain: queued gotoState 'X'`, and sat there
+  until shutdown — **a feature that looked correct in the log.** Fixed by `Manager::drain_pending()`
+  called at the top of each frame body (so the frame the user sees is the state their click caused).
+  Lesson: check for the line that only appears if the thing EXECUTED.
+* **Vector order is not z-order** (measured): E3LaunchScreen's full-screen root is the LAST record, so
+  "last drawn is topmost" selected the widget behind everything. One policy in two places —
+  `spui::paint_order()` paints largest-Area-first, `hit_test()` selects the smallest containing Area —
+  so a click resolves to something visible. The real fix is the parent/child hierarchy; both functions
+  name it as the single place to replace, and `hit_test` needs no change then, because "smallest wins"
+  is exactly the inverse of "largest first".
+* **A renderer cap must be the hit-test's cap too.** The presenter capped at 260 windows; the largest
+  layout has 570, so it drew a SUBSET while the hit-test knew all of them. Now 4096 — a runaway guard
+  above every real layout, stated as such.
+* **`input.cpp` owns the latch, not the caller.** `inject_click()` originally called `begin_frame()`
+  itself; the console verb runs after the loop already latched this frame, so the loop's next
+  `begin_frame()` overwrote the edge and the click vanished. Injection and live input must agree about
+  who owns the latch or the test proves nothing.
+
 ## Git: commit here, the user pushes (session 13)
 
 

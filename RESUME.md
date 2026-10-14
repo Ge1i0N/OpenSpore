@@ -15,17 +15,19 @@ from a session, just commit and let the user push). Read `git log -1` and `git s
 state rather than trusting any sha written here. No background jobs; the Ghidra project is unlocked.
 
 ### The state in one paragraph
-Our engine draws real Spore UI screens **and the game's own state machine now picks which one**.
-`source/engine/spui.cpp` reads the 748 `spui` resources (524 distinct layouts) using the dictionary
-EA's own UI Designer shipped inside the game (14 `xml` resources → 306 `proxy` ids);
-`source/states/uipresent.cpp` presents a layout as a frame at the game's coordinates with the game's
-colours and captions; and a state whose script says `uilayout -load E3LaunchScreen` gets THAT screen
-drawn, because the name hashes to the resource instance (`fnv1_lower` is the universal instance rule).
-The layout→text chain is **97.1% closed: 1,384 of 1,426 caption references resolve**, because the text
-lives at THREE depths — flat `Data/Locale/en-us`, nested inside `DataEP1/Spore_EP1_Locale_0{1,2}`, and
-nested inside `Data/PatchData` (that last one took four sessions to see, because we kept searching by
-filename instead of by type). `analysis/shots/spui_e3launch.png`. What is left on this step is the
-**`mode` table** — a state can name its screen but not yet configure the engine to play its game.
+**The menu is FUNCTIONAL.** A mouse click on the launch screen resolves to one widget, and that
+widget's `control_id` is a **state id from the game's own script**, so the click drives a real state
+transition: `click (942,261) -> "GGE" control=0x02CCDA9C -> [state] -> GalaxyGameEntry [0x02ccda9c]`,
+where `0x02ccda9c` is exactly what `state GalaxyGameEntry -id` says in the shipped table. The chain is
+unbroken and data-driven end to end: boot → states → the game's strings → the screen the state names →
+the pointer → the next state. It bridges WITHOUT the command vocabulary, because 9 state ids appear as
+widget control ids (expected by chance <0.001) and their captions read "Creature Editor", "Building
+Editor", "Terrain Editor", "UFO Editor", "Anim Viewer", "GGE" — in the layout the script NAMES.
+Underneath: `source/engine/spui.cpp` reads 748 `spui` resources (524 distinct layouts) via the designer
+schema EA shipped in-game; the layout→text chain is **97.1% (1,384 of 1,426 refs)**, the text living at
+three depths (flat, nested in EP1, nested in `Data/PatchData`). What the state still cannot DO is act
+on entering — `mode X not executed` — because modes are `AppMode*` classes in CODE
+(`analysis/modes.md`), and that is now the next step, reachable by clicking. `analysis/shots/spui_e3launch.png`.
 
 ### What the remaining 1 FAIL and 2 UNKNOWN actually are (all the SAME cause — not wrong claims)
 All three are the **vtable-only / uncovered-bytes wall**, not a reversal error:
@@ -72,55 +74,42 @@ Add `-exec spui:-gaps` for the coverage/semantic split of the 42.
 | layout→text chain | **1,384 / 1,426 refs resolve (97.1%)**; 42 left = 15 COVERAGE keys + 4 SEMANTIC keys |
 | spui layouts parsed | **748 resources = 524 distinct instances** (224 shadowed, 18 with a different size), 22,384 windows, 18,232 with a usable Area, 961,360 anchors |
 | **state drives the UI** | **DONE** — DevLauncher's `uilayout -load E3LaunchScreen` executed; 65.9% of pixels differ from our own pick |
+| **menu is FUNCTIONAL** | **click → widget → `control_id` == state id → `request_goto` → transition.** Live: (942,261) → "GGE" `0x02CCDA9C` → `-> GalaxyGameEntry [0x02ccda9c]` |
+| control-id ↔ state-id evidence | 9 real hits of 4,187 distinct control ids × 60 states; **<0.001 expected** by chance; captions "Creature/Building/Vehicle/Flora/Terrain/UFO Editor", "Anim Viewer", "GGE" |
 | designer schema | **306 ids** (66 Class + 240 Property), 227 present in the binaries |
 | our own reversal audit | **29 PASS / 1 FAIL / 2 UNKNOWN / 1 SKIP** over 33 claims / 131 checks |
 | Ghidra functions carved | 55,294 (54,611 before seeding; the 7 seeds cascaded to +683) |
-| feature map | engine 82.4%, overall 76.0% (267 features: 190 done / 26 partial / 51 todo) |
+| feature map | engine 82.8%, overall 76.2% (273 features: 194 done / 27 partial / 52 todo); **gameplay no longer all-todo (1/18)** |
 
 ### THE NEXT STEP, precise and small
-**DONE (2026-10-14, commit `1995cca`): the state machine DRIVES the UI.** `state DevLauncher`'s own
-line `cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"` is now EXECUTED:
-`fnv1_lower("E3LaunchScreen") == 0xE932BD44` is a real `spui` instance, `spui::Reader::find_by_name()`
-resolves it, and `source/states/uipresent.cpp` presents that screen. It is a genuinely different
-screen from the one we would pick ourselves — **-state:DevLauncher vs -state:Title differ in 65.9% of
-sampled pixels** — so this is driving, not relabelling. Reproduce:
+**DONE (2026-10-14): the state machine drives the UI, and INPUT now drives the state machine.** So the
+menu is functional — see the paragraph above for the verified click→state chain. Reproduce it:
 
 ```
 cd build\bin\Debug
-.\OpenSpore.exe -devDirs -w -quitAfter 10 -state:DevLauncher
+.\OpenSpore.exe -devDirs -w -quitAfter 24 -state:DevLauncher -exec spui:-click,942,261
 ```
-Expect `[ui] screen: state 'DevLauncher' asked for 'E3LaunchScreen' -> PatchData.package rec[1053]
-inst=0xE932BD44 24814B 68 windows`, and `1 \`uilayout -load\` EXECUTED by the UI layer`.
+Expect `click at (942,261) -> "GGE" control=0x02CCDA9C ... => ENTER STATE 'GalaxyGameEntry'` then
+`[state] -> GalaxyGameEntry [0x02ccda9c]`. Also useful: `spui:-xref` (the control-id↔state-id
+evidence), `spui:-hit,<x>,<y>` (resolve a pointer, no window needed), `spui:-ctl` (verdict first).
 
-What is actually left on the menu step, in order of how much it unblocks:
+Forward, in order of how much it unblocks:
 
-1. **INPUT drives the UI.** This is the next step, and the mode investigation is what says so. We
-   already read every widget's `Area` rect AND its `command_id`; a click can therefore be hit-tested
-   and dispatched into the state machine, which turns the menu from a picture into a menu. Nothing
-   else on this list is on the path to "playable" — the rest is either detail or the 3D stages.
-2. **The `mode` table — ANSWERED, and the answer is "it is not data"** (`analysis/modes.md`,
-   2026-10-14). 11 of the 17 mode names are standalone ASCII strings in the oracle and appear in NO
-   package (all three id fields, all depths, all 150,945 records); each is referenced exactly once
-   from a function starting ~0x2f bytes earlier — a per-class factory registering itself by name
-   (`0xd3bd20`: allocate 0xe8, construct, `vtable+0x20(obj, data, "Game_Creature")`). The family is
-   real (`AppModeEditorBase::Save` is in the binary). **5 modes — `AnimViewer`, `EffectsViewer`,
-   `Launcher`, `ModelViewer`, `MultiverseJournal` — appear NOWHERE in the 24.9 MB oracle, not even as
-   substrings**, so the script asks for classes this build does not contain; `Editors` occurs only
-   inside an unrelated sentence. Implementing modes therefore means reversing each `AppMode*` class =
-   the GAMEPLAY step. `mode X not executed` stays honest, and we now know precisely why.
-   Bonus: `FUN_00b5dcd0` maps a (mode, sub-mode) pair to STATE NAMES and calls a transition by name —
-   so the original's flow is **mode class → named state → UI layout**, the chain we build forward.
-   Careful: its `0x02ccd1d2` for GalaxyGameEntry is NOT the script's manual `-id 0x02ccda9c`; the mode
-   enum and the script ids are different namespaces.
-3. **The `spui` vocabulary gap**: a sequential walk still derails in 637/748 layouts on "id not in
-   schema", because the designer XML ships 227 of the ids the binaries use. The anchor-driven reader
-   sidesteps it, so this is detail, not structure — but it is what blocks richer widget behaviour.
-4. **Unify the precedence rule.** spui takes the FIRST container, text takes the LAST. Surface: 18
-   layouts and 3 of 23,933 strings. Do not "fix" it by picking one arbitrarily — EP1 beating
-   PatchData on locale is provably right (EP1 fixes the patch's typo), so the original's rule is not
-   "earliest wins". It needs the resource-cache order off the disassembly.
-5. Then gameplay: `effect`/`message`/`prop` actions, and the 2 `uilayout` ids (not resource ids, not
-   registry names, not standalone strings — internal to the layout or runtime handles).
+1. **The `AppMode*` classes.** A state enters but cannot ACT: `mode GalaxyGameEntry not executed`.
+   `analysis/modes.md` settled WHERE modes live — code, not data (11 of 17 names are standalone strings
+   in the oracle, each referenced once by a per-class factory: `0xd3bd20` allocates 0xe8 bytes,
+   constructs, and registers via vtable slot 0x20 with the name). Start from the registrar that the
+   factories call, and from `FUN_00b5dcd0`, which maps a (mode, sub-mode) pair to STATE NAMES. Five
+   modes do not exist in this build at all, so do not go looking for `EffectsViewer`.
+2. **The z-order hierarchy.** `spui::paint_order()` currently guesses (largest Area first) and
+   `hit_test()` inverts that guess (smallest containing wins). They agree with each other, which is what
+   makes clicks honest, but neither reads the layout's real parent/child links. One function to replace.
+3. **The `spui` command vocabulary.** Every bridged widget carries `command=0x00E1132F`; what a command
+   id MEANS is unreversed (same wall as the 637/748 sequential-walk gap). Needed for widgets that do
+   something other than change state.
+4. **Unify the precedence rule** (spui first-container vs text last-container; surface = 18 layouts and
+   3 of 23,933 strings). Needs the original's resource-cache order — do NOT unify by taste.
+5. Then: `effect`/`message`/`prop` actions, `uilayout`'s second id, and the 3D stages.
 
 ### DONE today, so do not redo it (2026-10-14)
 * **The `fnv1_lower(lang)` rule for nested packages is verified for all 15 shipped languages**
@@ -143,7 +132,7 @@ What is actually left on the menu step, in order of how much it unblocks:
   typo). 10 of 2,944 resources also repeat a key **inside** one resource (`tools/locale_dupkeys.py`) —
   invisible to any `{key: text}` reader.
 
-### Five traps I fell into — do not repeat them
+### Eight traps I fell into - do not repeat them
 1. **Double-visit.** The dev search list has both `Data=<exe>\Data` and `cwd=<exe>`, so a recursive
    `find_packages` visits every package TWICE. I hit this twice in one session (`spui` reported 1,349
    layouts where the corpus has 748; `appstates` listed 5 copies of a script that exists 3 times) even
@@ -170,6 +159,22 @@ What is actually left on the menu step, in order of how much it unblocks:
    printed itself in my own log line the same morning: "14,657 distinct (table,key) texts" *equal to*
    "14,657 distinct keys" — two counts that can only agree if one dimension is unused. **When two
    independent counts come out identical, suspect that one of them is not measuring what it claims.**
+6. **A log line that says "queued" is not a log line that says "done".** The click resolved, logged
+   `=> ENTER STATE 'GalaxyGameEntry'`, and the state manager printed `chain: queued gotoState
+   'GalaxyGameEntry' (depth 1)` — then sat in DevLauncher until shutdown, because `request_goto()` from
+   OUTSIDE a transition had nothing to drain it (the contract said "drains at the end of the current
+   transition", and there was no transition). **The feature looked correct in the log.** Always check
+   the consequence, not the intention: `[state] -> GalaxyGameEntry` is the line that only appears if the
+   hop actually executed.
+7. **Vector order is not z-order.** The layouts are a flat record stream; the full-screen root of
+   E3LaunchScreen is the LAST record, so "last drawn is topmost" made a click on a panel select the
+   widget BEHIND everything. Measured, not assumed — and visible only because I clicked a point known to
+   be inside two windows. Painting largest-first and hitting smallest-containing are ONE policy in two
+   places; applied alone, either lets the engine select a widget the user cannot see.
+8. **A long multi-line console message is CUT by the log's per-message buffer.** My `-ctl` verb put its
+   verdict last, in a 2 KB message, so the one line that mattered never appeared and the finding looked
+   absent. **Conclusion first, regenerable listing after** — order by importance, not by the order the
+   work happened in. Same family as trap 3: the tool truncated, the claim was fine.
 
 ### Toolchain, if you need the binary again
 * **REA is primary** for interactive questions: `rea decompile <oracle> 0x810940 --provider ghidra --json`.

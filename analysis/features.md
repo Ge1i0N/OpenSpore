@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 82.6%** | **Overall: 76.2%** | done 191 / partial 28 / todo 50 (269 features)
+**Engine reversal: 82.8%** | **Overall: 76.2%** | done 194 / partial 28 / todo 51 (273 features)
 
 **Legend**
 
@@ -22,14 +22,14 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | category | progress | done | partial | todo |
 |---|:---:|:---:|:---:|:---:|
 | harness | **93%** | 13 | 0 | 1 |
-| startup | **96%** | 32 | 3 | 0 |
+| startup | **96%** | 33 | 3 | 0 |
 | launch args | **97%** | 28 | 2 | 0 |
 | packages (DBPF) | **90%** | 33 | 4 | 2 |
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **56%** | 18 | 9 | 13 |
-| gameplay | **0%** | 0 | 0 | 16 |
+| formats | **57%** | 19 | 9 | 13 |
+| gameplay | **6%** | 1 | 0 | 17 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **30%** | 2 | 2 | 6 |
 
@@ -60,7 +60,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ## startup — 96%
 
-*32 done · 3 partial · 0 todo*
+*33 done · 3 partial · 0 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -99,6 +99,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | 🚧 | partial | vtable-only function wall | 7 cited addresses uncarved by Ghidra; 6 proven real entries; fix = seeding (seeds.tsv), not more searching |
 | ✅ | done | boot markers | 10/10 |
 | ✅ | done | clean shutdown | -quitAfter / WM_CLOSE |
+| ✅ | done | state chain drains per frame | Manager::drain_pending(), called at the top of each frame body. The bug it fixes: request_goto from OUTSIDE a transition queued forever and nothing ran it, while the log said "chain: queued " - a feature that looked correct while doing nothing. A queued hop is now guaranteed to be attempted, and reentry is still refused. |
 
 ---
 
@@ -285,9 +286,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 56%
+## formats — 57%
 
-*18 done · 9 partial · 13 todo*
+*19 done · 9 partial · 13 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -329,14 +330,15 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | locale at three depths | flat Data/Locale/<lang> + nested in DataEP1/Spore_EP1_Locale_0{1,2} + nested in Data/PatchData (42 en-us tables). 265 distinct tables from 5 containers, 23,933 distinct (table,key) texts. The third depth was invisible for two sessions because the search was scoped by FILENAME (*Spore_EP1_Locale*) instead of by TYPE. |
 | ✅ | done | caption gaps classified | spui -gaps splits the 42 unresolved refs into COVERAGE (table instance absent from the corpus: mvj 0x277DEE6A, 14 keys) and SEMANTIC (table present, key missing: 4 keys). `legal` 0xADB810C4 was on the missing list for two sessions and is NOT missing - it ships in PatchData's nested packages. |
 | ✅ | done | intra-resource repeated key | 10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original). |
-| ✅ | done | input -> widget | a pointer resolves to exactly ONE widget of the screen the state chose: click (640,360) of E3LaunchScreen -> star tile control=0x022D9E03 command=0x00E1132F, Area (448,571)-(560,692). Same path for a real mouse and for `spui:-click`, so it is testable headless. engine/input.cpp latches edges once per frame; spui::hit_test maps viewport->design through the SAME design_resolution() the presenter scales with. |
+| ✅ | done | input -> widget | pointer -> exactly one widget, same path for a real mouse and `spui:-click` (testable headless). See also z-order: record order is NOT z-order, fixed by one shared policy (paint largest-first, hit the smallest containing). |
 | 🚧 | partial | z-order (paint order) | MEASURED: record order is NOT z-order - the full-screen root of E3LaunchScreen is the LAST record, so painting in record order paints the root OVER its panels. Fixed with one shared policy: paint_order() = largest Area first, hit_test() = smallest containing Area wins, so the widget a click selects is the widget the user can SEE. Frame barely changed (1 of 102,480 sampled px) because the shipped windows are transparent with outlines. The real fix is the parent/child hierarchy, which is not reversed yet. |
+| ✅ | done | control id == state id (manual id space) | the widget control ids, the state script's manual -id values, and the layout names share ONE manual id space, exactly as the script's author commented ("assign manual IDs just so I can fill in the UI layout stuff more easily"). Measured by spui -xref: 4,187 distinct control ids x 60 states, 9 real hits, <0.001 expected. Discount 0x00000001 - ids below 0x1000 are block-scoped member indices, the standing trap. |
 
 ---
 
-## gameplay — 0%
+## gameplay — 6%
 
-*0 done · 0 partial · 16 todo*
+*1 done · 0 partial · 17 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -356,6 +358,8 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ⬜ | todo | Sporepedia | pollen_metadata resources |
 | ⬜ | todo | achievements |  |
 | ⬜ | todo | scripts/mods |  |
+| ✅ | done | click -> state transition | AN UNBROKEN DATA-DRIVEN CHAIN: mouse click -> hit-test widget -> control id == state id from the script -> request_goto -> transition -> the new state's screen. Live: click (942,261) -> "GGE" control=0x02CCDA9C -> [state] -> GalaxyGameEntry [0x02ccda9c], which is exactly the script's `state GalaxyGameEntry -id 0x02ccda9c`. Evidence it is not chance: 9 state ids appear as widget control ids (expected <0.001), the captions read "Creature Editor"/"Building Editor"/"Terrain Editor"/"UFO Editor"/"Anim Viewer"/"GGE", and they live in the layout the script NAMES. Bridges the gap WITHOUT the command vocabulary. |
+| ⬜ | todo | state enters but cannot act | the honest remainder: entering GalaxyGameEntry logs `mode GalaxyGameEntry not executed`, because a mode is a named AppMode CLASS in code, not data (analysis/modes.md: 11 of 17 names are standalone strings in the oracle, each registered by a per-class factory; 5 do not exist in this build at all). So the next step after this is the AppMode* classes, and it is now REACHABLE BY CLICKING, which it was not before. |
 
 ---
 
