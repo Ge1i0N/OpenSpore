@@ -1017,6 +1017,32 @@ the job is Ghidra, use Ghidra and pay the import, because a hand-rolled approxim
 time anyway once it has to be validated; (3) entropy-vs-dword, section-vs-section, control-vs-target:
 the cheap check is not the shortcut, it is the measurement.
 
+## CORRECTION: the `spui` third u16 is an ELEMENT COUNT, not a marker (session 13, 2026-10-15)
+
+The framing was `id:u32 | code:u16 | marker:u16(==1) | payload[code]` and "marker 0x0001 in 98.4% of
+1,098,129 anchors". **There is no marker.** The third u16 is an element count, and the payload is
+`count * element_size`; 98.4% is just how many properties are scalar.
+
+* **How it was caught:** walking the `Children` block consumed 10 records and then hit
+  `0B D0 C1 EE | 09 00 | 08 00` = `CaptionColors` with third u16 = **8** - eight colours, which the
+  schema names as a list. Reading that as a count lands on a well-formed record; reading it as a marker
+  lands on nothing. **24 records in one layout favour the count reading, 0 favour the marker.**
+* **What it buys:** the old scan required `marker == 1` and so SKIPPED every multi-element record.
+  Anchors go **961,360 -> 977,010** (+1.6%), of which **15,650** have count != 1. NOT the +12.5% the
+  total might suggest - the rest of that gap is the VOCABULARY (unknown ids), still the real wall.
+* **What it does NOT fix:** the sequential walk. Count-aware sizing reaches 10 records vs 9
+  (`tools/spui_walk.py`: 12.7% vs 9.2% of the layout) and gets no further, so "derails in 637 of 748"
+  was never a mis-sizing artefact. Good to know: the old explanation was right.
+* **Knock-on fix:** overlap pruning advanced 4 bytes past an anchor; it now advances by the record's
+  true size, or a false anchor from inside a 40-byte record's payload would survive.
+* **A record is now:** `id(4) | code(2) | count(2) | count * element_size`, with codes 18/19 carrying a
+  length-prefixed payload and count 1.
+
+**Lesson, and it is the same one as the failed beta scanner:** a value that is constant in 98.4% of
+1,098,129 samples is not evidence that it is a CONSTANT - it is evidence that it is usually 1. Two
+independent wall-walks (the beta VA scanner and this) were both caught by asking what the value would
+be if my reading were wrong.
+
 ## Git: commit here, the user pushes (session 13)
 
 

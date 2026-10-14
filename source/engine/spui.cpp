@@ -18,7 +18,14 @@ namespace {
 
 constexpr u32 kSpuiType = 0x250FE9A2u;   // confirmed in code: loader 0x810940 does
                                           // `cmp dword [eax+4], 0x250FE9A2`
-constexpr u16 kMarker = 0x0001;          // 98.4% of 1,098,129 anchors
+constexpr u16 kMarker = 0x0001;          // the common VALUE of the third u16, not a constant marker -
+                                         // see the Anchor::count note. Kept for the "count == 1" test.
+constexpr u16 kMaxCount = 4096;          // sanity bound on the element count, so a false anchor cannot
+                                         // claim a gigantic record
+
+// How many anchors of the last parsed layout carried count != 1. Reported so the coverage this
+// correction buys is a NUMBER rather than a claim: those records were invisible to the old scan.
+size_t g_multi_element_anchors = 0;
 constexpr u16 kCodeString = 18;          // inline UTF-16, or a locale TABLE ref when len == 0xFFFF
 constexpr u16 kCodeArray = 19;
 constexpr u16 kInlineSentinel = 0xFFFF;  // "this code-18 value is a reference, not text"
@@ -68,6 +75,16 @@ u32 payload_size(u16 code) {
         case 18: return 0;    // variable, handled by the caller
         default: return 0;
     }
+}
+
+// The whole record's size: id(4) + code(2) + count(2) + count * element_size. The variable-length
+// codes (18/19) report an element size of 0 here and are handled by the caller, so this returns just
+// the header for them. This exists because the third u16 is a COUNT (see Anchor::count), so a record
+// with 8 colours is 40 bytes and not 12 - which is what the old overlap check assumed.
+u32 record_size(u16 code, u16 count) {
+    const u32 es = payload_size(code);
+    if (es == 0) return 8;
+    return 8 + es * count;
 }
 
 u32 rd32(const u8* p) {
@@ -120,6 +137,13 @@ struct Anchor {
     u32 off;
     u32 id;
     u16 code;
+    // The third u16, previously called the "marker". It is NOT a constant: measured 2026-10-15
+    // (tools/spui_record_count.py), it is an ELEMENT COUNT - 24 records in one layout where reading it
+    // as a count lands on a well-formed record and reading it as a constant marker lands on nothing,
+    // and 0 the other way. `marker == 1` in 98.4% of anchors was an artefact of nearly every scalar
+    // property having exactly one element. Records with count > 1 were therefore being SKIPPED by the
+    // old scan, and they are the interesting ones: `CaptionColors` is 8 colours, not 1.
+    u16 count;
 };
 
 // All (id, marker==1) pairs in `d`. Anchor-driven on purpose: a sequential walk derails in 637/748
@@ -137,21 +161,30 @@ std::vector<Anchor> find_anchors(const std::vector<u8>& d) {
             if (d[k] != pat[0] || d[k + 1] != pat[1] || d[k + 2] != pat[2] || d[k + 3] != pat[3]) {
                 continue;
             }
-            if (rd16(&d[k + 6]) != kMarker) continue;
+            // The third u16 is an ELEMENT COUNT, not a constant marker: accept anything in a sane
+            // range. The id's STABLE code must still match exactly, which is what keeps false anchors
+            // rare - and it is the reason relaxing this check is safe.
+            const u16 third = rd16(&d[k + 6]);
+            if (third == 0 || third > kMaxCount) continue;
             u16 code = rd16(&d[k + 4]);
             if (code != e.code) continue;            // the id's STABLE code must match
-            out.push_back(Anchor{(u32)k, e.id, code});
+            out.push_back(Anchor{(u32)k, e.id, code, third});
         }
     }
     std::sort(out.begin(), out.end(), [](const Anchor& a, const Anchor& b) { return a.off < b.off; });
     // Drop overlaps: one record cannot start inside another's id.
     std::vector<Anchor> keep;
     long long last = -100;
+    size_t multi = 0;
     for (const Anchor& a : out) {
-        if ((long long)a.off < last + 4) continue;
+        if ((long long)a.off < last) continue;   // one record cannot start inside another's bytes
         keep.push_back(a);
-        last = a.off;
+        if (a.count != kMarker) ++multi;
+        // Advance past THIS RECORD's true size, not a fixed 4 bytes: with count > 1 a record can be
+        // tens of bytes long, and a short advance would keep an anchor from inside its payload.
+        last = (long long)a.off + record_size(a.code, a.count);
     }
+    g_multi_element_anchors = multi;
     return keep;
 }
 
@@ -159,6 +192,7 @@ void parse_layout(const std::vector<u8>& d, Layout& L) {
     const size_t n = d.size();
     L.bytes = (u32)n;
     std::vector<Anchor> an = find_anchors(d);
+    L.multi = g_multi_element_anchors;
     L.anchors = an.size();
     Window* cur = nullptr;
     for (size_t ai = 0; ai < an.size(); ++ai) {
@@ -386,11 +420,12 @@ void Reader::load(size_t limit) {
         }
     }
     m_loaded = true;
-    size_t wins = 0, areas = 0, anchors = 0;
+    size_t wins = 0, areas = 0, anchors = 0, multi = 0;
     size_t caps_inline = 0, caps_ref_key = 0, caps_ref_nokey = 0;
     for (const Layout& L : m_layouts) {
         wins += L.windows.size();
         anchors += L.anchors;
+        multi += L.multi;
         for (const Window& w : L.windows) {
             areas += w.has_area ? 1 : 0;
             // Count the THREE caption shapes, because the coverage of the layout->text chain is the
@@ -404,10 +439,10 @@ void Reader::load(size_t limit) {
     }
     LOG_INFO("spui", "parsed %zu layouts from %zu %s (%zu distinct instances, %zu shadowed by an "
                      "earlier container, %zu of those with a different size): %zu windows, %zu with "
-                     "a usable Area (%zu anchors read, %d schema ids); captions: %zu inline, "
-                     "%zu (table,key), %zu table-only",
+                     "a usable Area (%zu anchors read, %zu of them with element count != 1, %d schema "
+                     "ids); captions: %zu inline, %zu (table,key), %zu table-only",
              m_layouts.size(), scanned, scanned == 1 ? "resource" : "resources", m_distinct,
-             m_shadowed, m_shadowed_diff, wins, areas, anchors, kSchemaCount,
+             m_shadowed, m_shadowed_diff, wins, areas, anchors, multi, kSchemaCount,
              caps_inline, caps_ref_key, caps_ref_nokey);
 }
 

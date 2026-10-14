@@ -98,7 +98,8 @@ struct Layout {
     u32 instance = 0;
     u32 bytes = 0;
     std::vector<Window> windows;
-    size_t anchors = 0;              // how many (id, marker==1) records were read
+    size_t anchors = 0;              // how many (id, count) records were read
+    size_t multi = 0;                // of those, how many had count != 1 (the old scan skipped them)
     size_t recognized = 0;           // how many of those had a name in the shipped schema
     std::string name() const;
     // The layout's DESIGN RESOLUTION: the widest right/bottom among its usable Areas. Both the

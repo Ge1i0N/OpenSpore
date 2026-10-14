@@ -220,16 +220,60 @@ byte-identical in shape across occurrences - each begins with the same sequence,
 
 so children are serialised INLINE, each as a full property set, and the array code 19 nests.
 
-**WHAT IS NOT SETTLED, stated rather than glossed:** whether the u16 after `Children` is a CHILD COUNT,
-a RECORD COUNT, or a BYTE LENGTH. The values rise by ~5 per record while the following blocks look
-identical in shape, which fits "one more child each time" only if a child contributes five records -
-plausible but not measured. Do not build on the number until it is; the tree can be walked from the
-nested blocks themselves without it.
+**WHAT IS NOT SETTLED, stated rather than glossed:** what the u16 after a code-19 header counts. The
+walk in `tools/spui_tree.py` reads it as a RECORD count and derails after 10 records, so "records" is
+RULED OUT; "child count", "element count" and "byte length of the nested block" are all still open, and
+the values rise by ~5 per record while the following blocks look identical in shape. The tree can be
+walked from the nested blocks themselves, so nothing needs to depend on this number yet - but do not
+put a name on it until it is measured.
 
 **Consequence for the engine:** the paint order and the hit order can both come from the tree the
 designer actually built, instead of two heuristics that happen to agree. `spui::paint_order()` and
 `spui::hit_test()` are the two functions to replace, and they were written to be replaced - the real
 hierarchy is named in both as the single place to change.
+
+## CORRECTION 2026-10-15: the third u16 is an ELEMENT COUNT, not a constant marker
+
+The framing has been `id:u32 | code:u16 | marker:u16(==1) | payload[code]`, with "marker 0x0001 in
+98.4% of 1,098,129 anchors". **The marker is not a marker.** It is an ELEMENT COUNT, and the 98.4% is
+simply how many properties are scalar.
+
+How it surfaced: a walk of the `Children` block (see the hierarchy section) consumed 10 records
+coherently and then hit
+
+```
+0B D0 C1 EE | 09 00 | 08 00     id 0xEEC1D00B = CaptionColors, code 9, third u16 = 8
+```
+
+`CaptionColors` is a LIST of colours per the schema, so 8 is eight colours. Tested both readings
+(`tools/spui_record_count.py`), over every record in the layout whose third u16 is neither 0 nor 1:
+
+| reading | next record after the record of interest |
+|---|---|
+| third u16 is a constant marker (payload = element size) | **nothing** - misaligned |
+| third u16 is a count (payload = count x element size) | `id=0xEEC1D003 code=9 third=1` - well formed |
+
+**24 records in one layout where the count reading is coherent and the marker reading is not, 0 the
+other way.** So the record is `id(4) | code(2) | count(2) | count * element_size`, and a record with 8
+colours is 40 bytes rather than 12.
+
+**Consequences, both measured:**
+
+* **Coverage:** the old scan required `marker == 1` and therefore SKIPPED every multi-element record.
+  With the count accepted (and the id's stable code still required, which is what keeps false anchors
+  rare), anchors read across the corpus go **961,360 -> 977,010**, of which **15,650** carry a count
+  other than 1. So the correction buys +1.6% coverage, not the +12.5% the 1,098,129 total might
+  suggest - the rest of that gap is the VOCABULARY (unknown ids), which is the wall it always was.
+* **It does NOT fix the sequential walk.** Walking with count-aware sizing reaches 10 records where
+  marker-sizing reaches 9 on E3LaunchScreen, and gets no further: `tools/spui_walk.py` reports
+  12.7% vs 9.2% of the layout. So the "derails in 637 of 748" wall is NOT a mis-sizing artefact, which
+  is worth knowing - the previous explanation was right and this correction is about coverage.
+* **Overlap pruning had to change with it:** the old check advanced 4 bytes past an anchor, which would
+  keep a false anchor from inside a 40-byte record's payload. It now advances by the record's true size
+  (`record_size(code, count)`).
+
+Nothing else moved: 22,384 windows, 18,232 usable Areas, 1,384 of 1,426 captions, 57/57 packages,
+yardstick 10/10, 0 warnings.
 
 ## What is still not known (recorded, not hidden)
 
