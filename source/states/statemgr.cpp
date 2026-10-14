@@ -128,6 +128,22 @@ void Manager::request_goto(const std::string& name) {
     m_pending.push_back(name);
 }
 
+void Manager::drain_pending() {
+    if (m_in_transition) return;   // a transition in flight drains its own chain at its tail
+    while (!m_pending.empty()) {
+        std::string nxt = m_pending.front();
+        m_pending.erase(m_pending.begin());
+        if (++m_chain_depth > 32) {
+            LOG_ERROR("state", "state chain deeper than 32 hops from the frame drain, stopping at '%s'",
+                      nxt.c_str());
+            m_pending.clear();
+            break;
+        }
+        goto_name(nxt);   // goto_name drains anything ITS entry block queued
+    }
+    m_chain_depth = 0;
+}
+
 bool Manager::next() {
     if (m_all.empty()) return false;
     size_t idx = 0;

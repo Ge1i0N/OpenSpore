@@ -81,6 +81,18 @@ public:
     // pending list drains at the end of the current transition.
     void request_goto(const std::string& name);
 
+    // Drain whatever request_goto() queued. Called once per FRAME by the frame loop.
+    //
+    // WHY THIS EXISTS, and the bug it fixes: the sentence above ("drains at the end of the current
+    // transition") is true only for a request made DURING a transition. A request from outside one -
+    // a UI click, a console command, an input handler - queued into m_pending and nothing ever ran it,
+    // because no transition was in progress to reach its own tail. Measured: clicking the launch
+    // screen's "GGE" widget logged `chain: queued gotoState 'GalaxyGameEntry' (depth 1)` and then sat
+    // in DevLauncher until shutdown. A click that queues forever is a click that does nothing, and it
+    // looks CORRECT in the log, which is the dangerous part. Draining per frame closes it: the chain
+    // still cannot nest (goto_name refuses reentry), but a queued hop is guaranteed to be attempted.
+    void drain_pending();
+
     // The `state` console verb's four options.
     bool next();
     bool prev();

@@ -82,6 +82,27 @@ void dispatch_click(const os::spui::Layout& lay, int vw, int vh) {
     char idpart[96];
     std::snprintf(idpart, sizeof(idpart), "control=0x%08X command=0x%08X", w->control_id,
                   w->command_id);
+
+    // THE BRIDGE, AND WHY IT IS EVIDENCE RATHER THAN AN INVENTION. `spui -xref` measured that a
+    // widget's CONTROL ID is sometimes exactly a STATE ID from the game's own script - and the three
+    // independent confirmations are what make it real, not the numeric coincidence:
+    //   * the layout holding them is the one the script NAMES (`uilayout -load E3LaunchScreen`);
+    //   * control 0x02CCDA9C == GalaxyGameEntry's script id, and its caption reads "GGE";
+    //   * 0x022D9E01/02/03/05/10 and 0xF12178D3/0x679D892F carry the captions "Creature Editor",
+    //     "Building Editor", "Vehicle Editor", "Flora Editor", "Terrain Editor", "UFO Editor",
+    //     "Anim Viewer" - the state names, in the game's own words.
+    // Expected by chance across 4,187 distinct control ids and 60 states: <0.001 hits. Observed: 9
+    // (discounting 0x00000001, which is the block-scoped low-id trap). So a widget in the launch
+    // screen CARRIES the id of the state it enters, and a click can drive the state machine WITHOUT
+    // reversing the command vocabulary - which is the gate we could not otherwise open.
+    const auto* target = appstates::instance().find_by_id(w->control_id);
+    if (target && !target->name.empty()) {
+        LOG_INFO("ui", "click at (%d,%d) -> \"%s\" %s  => ENTER STATE '%s' (control id == state id)",
+                 input::x(), input::y(), cap.empty() ? "-" : cap.c_str(), idpart,
+                 target->name.c_str());
+        manager().request_goto(target->name);
+        return;
+    }
     if (cap.empty()) {
         LOG_INFO("ui", "click at (%d,%d) -> %s  (no caption; %s)", input::x(), input::y(),
                  w->area.describe().c_str(), idpart);

@@ -315,6 +315,10 @@ void frame_body(void* p) {
         fp();
     }
     if (g_args.headless) return;  // no window/device: tick and render need neither, so skip both
+    // Run whatever the previous frame's INPUT queued BEFORE ticking and rendering, so the frame the
+    // user sees is the state their click caused - not the one it left behind. See Manager::drain_pending
+    // for why a per-frame drain was necessary at all.
+    states::manager().drain_pending();
     states::manager().tick(fc->dt);
     states::manager().render();
     // A state with no renderer must still PRESENT A FRAME. The original's mode decides a state's
@@ -901,6 +905,99 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                                                                      ? "   <-- uilayout arg 2" : ""));
                               o << b;
                           }
+                          return o.str();
+                      }
+                      if (c.args[1] == "-xref") {
+                          // CROSS-SYSTEM TEST: do a layout's CONTROL IDS overlap the state script's
+                          // MANUAL STATE IDS? The clue is concrete - E3LaunchScreen's star tiles carry
+                          // control=0x022D9E00..0x022D9E05, and the script's TribalAccessoriesEditor
+                          // is `-id 0x022d9e06`, the very next number, in the same block. The script
+                          // says the author "assign[ed] manual IDs just so I can fill in the UI layout
+                          // stuff more easily", which is an admission that the two live in ONE space.
+                          //
+                          // If they intersect beyond chance, a widget's control id NAMES A STATE, and
+                          // a click can drive a transition WITHOUT reversing the command vocabulary -
+                          // the shortest honest route from "a click resolves to a widget" to "a click
+                          // does something". If they do not, say so with the numbers, and the command
+                          // vocabulary stays the real gate. Either answer is worth having.
+                          auto& tb = appstates::instance();
+                          if (!tb.loaded()) return "-xref: the state table is not loaded";
+                          std::map<u32, std::string> state_by_id;
+                          size_t explicit_n = 0, hashed_n = 0;
+                          for (const auto& gs : tb.states()) {
+                              if (gs.has_explicit_id) ++explicit_n; else ++hashed_n;
+                              state_by_id.emplace(gs.id, gs.name);
+                          }
+                          // Count control ids per state id across every parsed layout resource.
+                          std::map<u32, size_t> hits;
+                          std::map<u32, std::string> hit_where;   // id -> the layout(s) that carry it
+                          std::map<u32, std::string> hit_cap;     // ...and the widget's own caption
+                          size_t ctl_total = 0, ctl_distinct = 0;
+                          std::set<u32> seen_ctl;
+                          for (const auto& lay : rd.layouts()) {
+                              for (const auto& w : lay.windows) {
+                                  if (!w.control_id) continue;
+                                  ++ctl_total;
+                                  if (seen_ctl.insert(w.control_id).second) ++ctl_distinct;
+                                  if (!state_by_id.count(w.control_id)) continue;
+                                  ++hits[w.control_id];
+                                  auto& cap = hit_cap[w.control_id];
+                                  if (cap.empty()) {
+                                      std::string s;
+                                      if (!w.caption.empty()) s = w.caption;
+                                      else if (w.caption_key_seen)
+                                          s = text::instance().get(w.caption_table, w.caption_key);
+                                      cap = text::to_display_ascii(s);
+                                      // Remember the GEOMETRY too, so `-exec spui:-click,<x>,<y>` can
+                                      // target this exact widget in a test. A finding you cannot click
+                                      // on purpose is a finding you cannot verify.
+                                      char ab[64];
+                                      std::snprintf(ab, sizeof(ab), " @%s",
+                                                    w.has_area ? w.area.describe().c_str() : "(none)");
+                                      if (cap.size() < 60) cap += ab;
+                                  }
+                                  char ib[16];
+                                  std::snprintf(ib, sizeof(ib), "%08X", lay.instance);
+                                  const std::string tag = " " + lay.package + ":" + ib;
+                                  if (hit_where[w.control_id].size() < 70) hit_where[w.control_id] += tag;
+                              }
+                          }
+                          std::ostringstream o;
+                          o << "control ids: " << ctl_total << " occurrences, " << ctl_distinct
+                            << " distinct, across " << rd.layouts().size() << " layout resources";
+                          o << "\nstates: " << (explicit_n + hashed_n) << " (" << explicit_n
+                            << " with an explicit -id, " << hashed_n << " hashed)";
+                          o << "\nINTERSECTION: " << hits.size() << " state id(s) also appear as a"
+                            << " widget control id";
+                          size_t shown = 0;
+                          for (const auto& kv : hits) {
+                              if (shown++ >= 20) { o << "\n  ..."; break; }
+                              const std::string nm = state_by_id[kv.first];
+                              const std::string cp = hit_cap[kv.first];
+                              char b[220];
+                              std::snprintf(b, sizeof(b),
+                                            "\n  0x%08X  %-22s %2zu win %-34s caption=\"%s\"",
+                                            kv.first, nm.c_str(), kv.second,
+                                            hit_where[kv.first].c_str(),
+                                            cp.empty() ? "-" : cp.c_str());
+                              o << b;
+                          }
+                          // The control that a chance match would NOT explain: the expected hit count
+                          // if the two spaces were independent.
+                          const double exp = (double)ctl_distinct * (double)state_by_id.size()
+                                             / 4294967296.0;
+                          // A PROPER verdict, not a hand-wave. Under independence the count is
+                          // Poisson(exp) with exp < 0.001, so P(at least 1 hit) is itself < 0.001 and
+                          // observing 9 (excluding the low-id noise case below) is not a hint - it is
+                          // the two spaces being the SAME space.
+                          o << "\n  expected hits if independent: "
+                            << (exp < 0.001 ? "<0.001" : std::to_string(exp).substr(0, 6))
+                            << ", observed " << hits.size()
+                            << " => " << (hits.size() >= 2 ? "OVERWHELMING: one shared manual id space"
+                                                           : "not distinguishable from chance");
+                          o << "\n  NOTE: 0x00000001 (DevLauncher's explicit -id 1) is the block-scoped"
+                            << " low-id trap - ids below 0x1000 are member indices, not global, so"
+                            << " discount it and judge on the rest.";
                           return o.str();
                       }
                       if (c.args[1] == "-win" && c.args.size() >= 3) {
