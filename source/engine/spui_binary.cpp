@@ -84,6 +84,11 @@ public:
         }
         for (u16 ref : references)
             if (ref != 0xffff && ref >= total) fail("object reference out of range");
+        for (const Object& obj : out.objects) {
+            out.drawable_links += obj.external_refs.size();
+            for (u16 ref : obj.external_refs)
+                if (ref >= out.external_resources.size()) fail("ImageDrawable external index out of range");
+        }
         std::vector<int> windows(total, -1);
         for (size_t n = 0; n < out.windows.size(); ++n)
             windows[out.windows[n].object_index] = (int)n;
@@ -251,6 +256,8 @@ private:
                 const u16 ref = u16le();
                 references.push_back(ref);
                 if (top && p.id == 0xeec1b00b) win->child_objects.push_back(ref);
+                if (top && p.id == 0x01be0001u && obj.class_id == 0x01be6b15u)
+                    obj.external_refs.push_back(ref);
             }
         } else if (p.code == 18) {
             for (u32 n = 0; n < p.count; ++n) {

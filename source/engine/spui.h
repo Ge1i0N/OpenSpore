@@ -105,6 +105,7 @@ struct Object {
     bool root = false;               // object property-count word's high bit (GA 0x82ce10)
     int window = -1;
     std::vector<Property> properties; // includes nested struct fields, preserving their offsets
+    std::vector<u16> external_refs;   // ImageDrawable's object 0x01BE0001 -> external table indexes
 };
 
 struct Layout {
@@ -119,6 +120,7 @@ struct Layout {
     u16 version = 0;
     u32 consumed = 0;
     size_t child_links = 0;
+    size_t drawable_links = 0;
     bool sequential = false;
     size_t anchors = 0;              // compatibility name: exact properties, including nested members
     size_t multi = 0;                // properties whose count != 1

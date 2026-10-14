@@ -88,7 +88,7 @@ void Reader::load(size_t limit) {
             m_layouts.push_back(std::move(layout));
         }
     }
-    size_t objects = 0, windows = 0, areas = 0, props = 0, multi = 0, links = 0;
+    size_t objects = 0, windows = 0, areas = 0, props = 0, multi = 0, links = 0, drawable = 0;
     size_t inline_caps = 0, refs = 0;
     for (const Layout& layout : m_layouts) {
         objects += layout.objects.size();
@@ -96,6 +96,7 @@ void Reader::load(size_t limit) {
         props += layout.anchors;
         multi += layout.multi;
         links += layout.child_links;
+        drawable += layout.drawable_links;
         for (const Window& win : layout.windows) {
             areas += win.has_area ? 1 : 0;
             inline_caps += !win.caption.empty() ? 1 : 0;
@@ -104,9 +105,9 @@ void Reader::load(size_t limit) {
     }
     m_loaded = failed == 0;
     LOG_ONCE_INFO("spui", "sequential parse %zu/%zu resources, %zu failed: %zu objects, %zu windows, "
-                  "%zu Areas, %zu properties (%zu multi), %zu child links; %zu distinct instances, "
+                  "%zu Areas, %zu properties (%zu multi), %zu child links, %zu ImageDrawable external refs; %zu distinct instances, "
                   "%zu shadowed (%zu size differs); captions %zu inline / %zu references",
-                  m_layouts.size(), scanned, failed, objects, windows, areas, props, multi, links,
+                  m_layouts.size(), scanned, failed, objects, windows, areas, props, multi, links, drawable,
                   m_distinct, m_shadowed, m_shadowed_diff, inline_caps, refs);
 }
 
