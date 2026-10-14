@@ -106,6 +106,11 @@ an ordered list of indexes into the object table. `FillDrawable` and `WinProcs` 
 mechanism with other target classes. Object identity must never be reconstructed from ControlID:
 several windows in one file deliberately share ControlID values.
 
+`tools/spui_drawables.py` shows the next rendering boundary without claiming that raw words are image
+instances: `Window -> DialogDrawable -> ImageDrawable`, `Button -> DialogDrawable ->
+ButtonDrawableStandard`, and WinProcs resolve to `Fade`, `Glide`, or `Inflate`. Class-specific property
+payloads still need reverse engineering before PNG/raster lookup is safe.
+
 E3LaunchScreen (`0xE932BD44`) in each shipped copy:
 
 | quantity | value |

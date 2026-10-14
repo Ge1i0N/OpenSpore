@@ -58,8 +58,8 @@ const os::spui::Layout* requested_by_state(std::string& why) {
 // What a click HITS. Reports the widget's identity as the data gives it: control id, command id, and
 // the caption resolved through the locale tables.
 //
-// The ControlID-to-state bridge below is our reconstructed launcher behavior. General CommandID
-// dispatch and WinProc behavior remain unimplemented, independently of the now-complete framing.
+    // The ControlID-to-state bridge below is our reconstructed launcher behavior. General CommandID
+    // dispatch and WinProc behavior remain unimplemented, independently of the now-complete framing.
 void dispatch_click(const os::spui::Layout& lay, int vw, int vh) {
     const os::spui::Window* w = hit_test(lay, (float)input::x(), (float)input::y(), (float)vw,
                                          (float)vh);

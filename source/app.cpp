@@ -695,7 +695,7 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                               for (const auto& w : L.windows) a += w.has_area;
                               char b[192];
                               std::snprintf(b, sizeof(b), "  [%2zu] %-28s rec[%-6u] 0x%08X  %4zu win "
-                                            "(%zu with Area, %zu/%zu anchors)",
+                                            "(%zu with Area, %zu/%zu exact properties)",
                                             i, L.package.c_str(), L.record, L.instance,
                                             L.windows.size(), a, L.recognized, L.anchors);
                               s += b; s += "\n";
