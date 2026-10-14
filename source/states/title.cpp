@@ -136,8 +136,26 @@ void title_render() {
             ov.rect(x, y2 - 1.f, bw, 1.f, edge);
             ov.rect(x, y, 1.f, bh, edge);
             ov.rect(x2 - 1.f, y, 1.f, bh, edge);
-            if (!win.caption.empty()) {
-                std::string cap = os::text::to_display_ascii(win.caption);
+            if (!win.caption.empty() || win.caption_is_ref) {
+                // The text is the GAME'S, resolved two ways: inline UTF-16 straight out of the layout,
+                // or the (table, key) pair the layout's Caption record carries, resolved through the
+                // locale tables we parse in engine/text.cpp. The second path is the one that lights up
+                // most widgets - 1,097 of 1,426 reference records carry a key that is a real key of the
+                // referenced table (tools/spui_caption_ref.py).
+                std::string cap;
+                if (!win.caption.empty()) {
+                    cap = win.caption;
+                } else if (win.caption_key_seen) {
+                    cap = os::text::instance().get(win.caption_table, win.caption_key);
+                }
+                if (cap.empty()) {
+                    // Nothing resolved: show WHAT it points at, so the screen documents the gap
+                    // instead of inventing a label (the `Load Game` lesson from the Title menu).
+                    char rb[48];
+                    std::snprintf(rb, sizeof(rb), "[tbl 0x%08X]", win.caption_table);
+                    cap = rb;
+                }
+                cap = os::text::to_display_ascii(cap);
                 if (cap.size() > 44) cap = cap.substr(0, 44) + "...";
                 if (bw >= 24.f && bh >= 10.f) {
                     ov.text_fmt(x + 3.f, y + bh * 0.5f - 7.f, 0xFFF4F8FC, "%s", cap.c_str());

@@ -54,9 +54,14 @@ five stages Cell → Creature → Tribe → Civ → Space are explicit data.
    schema" because the designer XML lists only 227 of the ids the binaries use. The reader is
    anchor-driven so it does not block on this, but a clean sequential parse needs the missing names —
    and the derailing ids are visible in the bytes, so this is bookkeeping, not discovery.
-3. **Resolve the code-18 table reference to text.** We know a layout names its locale TABLE
-   (21 of 36 distinct refs, accidental rate 4.66e-08); wiring `Window::caption_table` through
-   `engine/text.cpp` gives every widget its real string instead of only the inline ones.
+3. ✅ **DONE: the code-18 table reference resolves to text.** A Caption reference is
+   `0xFFFF | table:u32 | key:u32` (measured, `tools/spui_caption_ref.py`), and wiring it through
+   `engine/text.cpp` resolves **1,391 of 1,426 references (97.5%)**. Getting there needed the EP1 text
+   mounted at all: it lives in NESTED packages (`tools/nested_locale.py`), which doubled the corpus to
+   **369 tables / 37,608 entries / 14,657 keys**. Live in the engine: `txt:0x8B1A2341:0x077427D2` ->
+   "Accept Reward", `txt:0xC4F86AE0:0x07736311` -> "Mission Complete!". 35 references still do not
+   resolve (tables `mvj` 0x277DEE6A and `legal` 0xADB810C4 are absent from our 57 packages even
+   nested).
 4. **The presence mask** (a 10-member / 40-byte struct occupies 10 bytes, so only non-default members
    serialize — still a hypothesis).
 5. Then the `mode` table, which is what the 60 states actually ask for (`mode GalaxyGameEntry` is

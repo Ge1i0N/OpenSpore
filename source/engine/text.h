@@ -49,6 +49,10 @@
 
 #include "common.h"
 
+namespace os::pkg {
+class Package;
+}  // namespace os::pkg
+
 namespace os::text {
 
 struct Entry {
@@ -101,6 +105,11 @@ private:
         std::vector<size_t> entry_ids;  // into m_entries
         bool agrees = true;             // all texts identical
     };
+    // Parse every `locale` resource of ONE package into the shared tables, and return how many tables
+    // it yielded. Shared by the flat and the NESTED pass on purpose: the EP1 text lives in nested
+    // packages, and a second copy of this grammar would be exactly the drift that produces two
+    // disagreeing views of one dataset.
+    size_t parse_package(pkg::Package& pk);
     bool m_loaded = false;
     std::string m_lang;
     std::vector<u32> m_tables;                  // locale resource instance ids

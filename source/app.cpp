@@ -441,7 +441,9 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
 
     // 3e. the game's UI LAYOUTS (`spui`), read with the schema that the shipped designer XML supplies.
     // Anchor-driven, so it does not depend on the ids the designer XML omits (analysis/spui-schema.md).
-    spui::instance().load();
+    // limit 0 = every layout: there are 748 and the parse is cheap (measured: 400 took well under a
+    // second), so capping it would only hide screens from the `spui` verb.
+    spui::instance().load(0);
 
     // 4. window (skipped headless)
     if (g_args.headless) {
@@ -599,6 +601,24 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                           return s;
                       }
                       // -label <text> | <0xKEY> | <tableINST> <0xKEY>
+                      // `txt <table> <key>` OR `txt <table>:<key>`. The colon form exists because our
+                      // CLI's native separator is ':' (as in -state:Name), and a space-separated pair
+                      // is awkward to pass through -exec from a shell that eats spaces.
+                      if (c.args.size() >= 2 && c.args[1].find(':') != std::string::npos) {
+                          size_t colon = c.args[1].find(':');
+                          std::string ta = c.args[1].substr(0, colon), ka = c.args[1].substr(colon + 1);
+                          u32 table = (u32)std::strtoul(ta.c_str(), nullptr, 0);
+                          u32 key = (u32)std::strtoul(ka.c_str(), nullptr, 0);
+                          std::string v = tx.get(table, key);
+                          char nb[160];
+                          if (v.empty()) {
+                              std::snprintf(nb, sizeof(nb), "no key 0x%08X in table 0x%08X", key, table);
+                              return nb;
+                          }
+                          std::snprintf(nb, sizeof(nb), "tbl 0x%08X key 0x%08X = %s  ->  %s", table, key,
+                                        text::to_display_ascii(v).c_str(), v.c_str());
+                          return nb;
+                      }
                       if (c.args.size() >= 4) {
                           u32 table = (u32)std::strtoul(c.args[2].c_str(), nullptr, 0);
                           u32 key = (u32)std::strtoul(c.args[3].c_str(), nullptr, 0);
@@ -662,6 +682,46 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                           return s;
                       }
                       const spui::Layout* L = rd.best_screen();
+                      if (c.args[1] == "-caps") {
+                          // Measure the layout -> locale-text CHAIN, not just the layout: an inline
+                          // caption is already text, a (table,key) pair is only text if our parsed
+                          // tables contain that key. Reporting the layout count alone would overstate
+                          // how much of the menu is actually readable.
+                          auto& tx = text::instance();
+                          size_t inline_n = 0, ref_n = 0, resolved = 0, unres = 0;
+                          std::string sample;
+                          for (const auto& lw : rd.layouts()) {
+                              for (const auto& win : lw.windows) {
+                                  if (!win.caption.empty()) {
+                                      ++inline_n;
+                                      continue;
+                                  }
+                                  if (!win.caption_is_ref) continue;
+                                  ++ref_n;
+                                  std::string s = win.caption_key_seen
+                                                      ? tx.get(win.caption_table, win.caption_key)
+                                                      : std::string();
+                                  if (!s.empty()) {
+                                      ++resolved;
+                                      if (sample.empty()) {
+                                          char b[160];
+                                          std::snprintf(b, sizeof(b), "  e.g. tbl 0x%08X key 0x%08X -> \"%s\"",
+                                                        win.caption_table, win.caption_key,
+                                                        text::to_display_ascii(s).substr(0, 60).c_str());
+                                          sample = b;
+                                      }
+                                  } else {
+                                      ++unres;
+                                  }
+                              }
+                          }
+                          char buf[400];
+                          std::snprintf(buf, sizeof(buf),
+                                        "captions: %zu inline, %zu references (%zu resolve through the "
+                                        "locale tables, %zu do not)%s",
+                                        inline_n, ref_n, resolved, unres, sample.c_str());
+                          return buf;
+                      }
                       if (c.args[1] == "-win" && c.args.size() >= 3) {
                           size_t want = (size_t)std::strtoul(c.args[2].c_str(), nullptr, 10);
                           size_t i = 0;

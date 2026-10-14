@@ -7,6 +7,49 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### THE EP1 TEXT IS A DBPF *INSIDE* A DBPF: the layout->text chain closes at 97.5%
+Following the caption references to their end produced the session's third "the data does not exist"
+correction, and a new shape of the same error: not a wrong directory, not a wrong id field, but a wrong
+**CONTAINER DEPTH**.
+`tools/spui_caption_ref.py` first established the record shape — code 18 splits on a leading u16 of
+`0xFFFF` into 4,207 inline UTF-16 strings and 3,107 references, and a reference is
+`0xFFFF | table:u32 | key:u32`, with **1,097 of 1,426** carrying a key that is a real key of the
+referenced table. The record is exactly 10 bytes: the next property id follows immediately
+(`06 b0 c1 ee` = BackgroundColor), which is what confirms the framing rather than guessing it.
+`tools/spui_caption_gaps.py` then classified the 298 that did NOT resolve: **285 (96%) were tables
+absent from our tree entirely**, and the registry named them — `EP1_Headers`, `GGETextEP1`,
+`EP1_Buttons`, `EP1_Tooltips`, `ScenarioBuildMode`, `legal`, `mvj`. I hypothesised they were in
+`DataEP1/Spore_EP1_Locale_*.package`; `tools/find_ep1_locale.py` showed those packages contain **zero**
+`locale` resources, which killed that hypothesis but exposed the real answer in the same output: those
+packages hold 17 + 4 resources of type **`package` (0x06EFC6AA)**, and `tools/nested_locale.py` proved
+each one **is itself a whole DBPF**, together carrying **1,364 `locale` resources**.
+The user's memory was right ("вложенные пакеты либо по папкам"), and the wrong half of my own reasoning
+was assuming a package index is flat.
+`tools/nested_langs.py` settled which nested container is ours: instance **0x7080DB55 ==
+fnv1_lower("en-us")** — a nested package is named by the SAME hash rule that names a locale table, so
+selecting a language is a lookup, not a guess. Verified from both ends:
+`fnv1_lower("EP1_Buttons") == 0x8B1A2341`, the very table the layouts reference.
+Engine work: `pkg::Package::open_from_memory()` (a second backing store behind one `read_at()`, with
+BOTH open paths running the oracle's validator clauses unchanged), and `text::Tables::parse_package()`
+extracted so the flat and nested passes share ONE copy of the grammar — a second copy is exactly how
+two views of one dataset start disagreeing.
+Measured before/after: locale tables **197 -> 369**, entries **18,441 -> 37,608**, distinct keys
+**10,246 -> 14,657**, and layout caption references that resolve **1,139/1,426 (79.8%) ->
+1,391/1,426 (97.5%)**. Live in the engine:
+`txt:0x8B1A2341:0x077427D2` -> **"Accept Reward"**, `txt:0xAD7B2086:0x0589E51B` -> **"640x480"**,
+`txt:0xC4F86AE0:0x07736311` -> **"Mission Complete!"**. 35 references still do not resolve (`mvj`
+0x277DEE6A and `legal` 0xADB810C4 are absent from our 57 packages even nested) — recorded, not hidden.
+Two process notes worth keeping:
+* The refactor first left `read_resource()` on `fseek(m_file, ...)`, so a nested package (m_file ==
+  nullptr) hit the UCRT `stream.valid()` assertion and died. **Loud was the right outcome** — had it
+  silently returned nothing, the EP1 tables would have looked absent for a fourth reason.
+* I re-entered the **double-visit trap** twice in one session (`spui` reported 1,349 layouts where the
+  corpus has 748; `appstates` listed 5 copies of a script that exists 3 times), even though the `pkg`
+  verb has carried the `weakly_canonical` dedupe since an earlier session and MEMORY.md documents it.
+  Both now dedupe. A documented trap does not protect you unless you look it up before writing the loop.
+Also added `txt <table>:<key>` (colon form) because our CLI's native separator is `:` and a
+space-separated pair cannot survive `-exec` through a shell that eats spaces.
+
 ### WE DRAW A REAL SPORE UI SCREEN NOW: 9,547 windows at the game's own coordinates, with its own captions
 `source/engine/spui.{h,cpp}` + the generated `source/engine/spui_schema.inc`
 (`tools/gen_spui_schema.py`, the same pattern as `typeids.inc`: the registry is DATA, so the table is

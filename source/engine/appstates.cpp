@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <map>
+#include <set>
 #include <sstream>
 
 #include "engine/fs.h"
@@ -163,8 +164,21 @@ void parse(const std::string& body, std::vector<GameState>& out, std::map<std::s
 // Reads the trigger resource out of the packages. Returns the decoded text and names the winning
 // package; `all` collects every copy so the log can show the mount-order ambiguity honestly.
 bool read_resource(std::string& text, std::string& source, std::vector<std::string>& all) {
+    // Deduplicate by canonical path: the dev search list has both Data=<exe>\Data and cwd=<exe>, so a
+    // recursive scan visits every package TWICE. Without this the "copies seen" log listed 5 copies
+    // of a script that exists 3 times, which is exactly the trap already documented for the `pkg`
+    // verb and re-entered in spui.cpp the same day.
+    std::vector<std::string> pkgs;
+    std::set<std::string> seen_path;
     for (const auto& sp : fs::search_paths()) {
         for (const auto& path : pkg::find_packages(sp.dir.string())) {
+            std::error_code ec;
+            std::string key = std::filesystem::weakly_canonical(path, ec).string();
+            if (ec) key = path;
+            if (seen_path.insert(key).second) pkgs.push_back(path);
+        }
+    }
+    for (const auto& path : pkgs) {
             pkg::Package pk;
             if (!pk.open(path)) continue;
             const auto& recs = pk.records();
@@ -191,7 +205,6 @@ bool read_resource(std::string& text, std::string& source, std::vector<std::stri
                 }
             }
         }
-    }
     return !text.empty();
 }
 

@@ -64,7 +64,9 @@ struct Window {
     // Code-18 (Caption) content, in whichever of the two forms it came in.
     std::string caption;             // decoded inline text (UTF-16 -> code points)
     u32 caption_table = 0;           // the referenced locale TABLE instance, 0 when inline
+    u32 caption_key = 0;             // ...and the KEY within it: 0xFFFF|table|key, measured 1097/1426
     bool caption_is_ref = false;
+    bool caption_key_seen = false;   // false = the record carried a table but no key (reclen 14)
     std::string caption_raw;         // the raw bytes, so a non-ASCII caption stays inspectable
 };
 

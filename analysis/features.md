@@ -5,7 +5,7 @@
 > AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they
 > cannot drift apart.
 
-**Engine reversal: 81.6%** | **Overall: 75.1%** | done 182 / partial 25 / todo 52 (259 features)
+**Engine reversal: 82.2%** | **Overall: 75.7%** | done 185 / partial 25 / todo 51 (261 features)
 
 **Legend**
 
@@ -28,7 +28,7 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | gmdl (meshes) | **91%** | 24 | 3 | 1 |
 | rw4 (models) | **53%** | 7 | 3 | 6 |
 | render | **82%** | 20 | 1 | 4 |
-| formats | **40%** | 9 | 6 | 15 |
+| formats | **47%** | 12 | 6 | 14 |
 | gameplay | **0%** | 0 | 0 | 16 |
 | tooling | **91%** | 14 | 1 | 1 |
 | platform | **30%** | 2 | 2 | 6 |
@@ -285,9 +285,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 
 ---
 
-## formats — 40%
+## formats — 47%
 
-*9 done · 6 partial · 15 todo*
+*12 done · 6 partial · 14 todo*
 
 | | status | feature | notes |
 |:---:|---|---|---|
@@ -309,7 +309,9 @@ The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of 
 | ✅ | done | spui drawn on screen | Title renders the real layout at real coordinates with the game's own captions (Create a New Game / color picker / Selected Color) over the real UI atlas |
 | ✅ | done | spui alphas | the shipped ARGB is meaningful (0x007F7F7F transparent); forcing alpha opaque turned the screen into slabs - use as stored + outline |
 | ⬜ | todo | spui all 748 layouts | Reader::load caps at 400 |
-| ⬜ | todo | layout table -> text | Window::caption_table names a locale table but is not yet resolved through engine/text.cpp, so only inline captions show |
+| ✅ | done | layout table -> text | caption ref is 0xFFFF|table|key; 1,391 of 1,426 resolve (97.5%) after mounting the nested EP1 packages; 35 remain (mvj, legal) |
+| ✅ | done | nested packages (DBPF in DBPF) | DataEP1/Spore_EP1_Locale_* hold 21 resources of type `package` (0x06EFC6AA), each itself a DBPF, together 1,364 locale resources; the en-us one is instance fnv1_lower("en-us")=0x7080DB55 |
+| ✅ | done | locale corpus | 369 tables / 37,608 entries / 14,657 keys (was 197 / 18,441 / 10,246 with the flat pass alone) |
 | ✅ | done | layout -> locale table | code 18 splits on 0xFFFF: 4,207 inline UTF-16 + 3,107 refs, of which 21/36 distinct are en-us locale TABLE instances (accidental rate 4.66e-08); 0x2B7A0311 = fnv1_lower(GalaxyGameEntry) in BOTH directions |
 | ⬜ | todo | spui full sequential parse | walk derails in 637/748 with 'id not in schema' - the designer XML lists only 227 of the ids the binaries use. Remaining work is VOCABULARY, not structure |
 | 🚧 | partial | gmsh | stable 24-byte header found (BE words + float runs); layout not derived |

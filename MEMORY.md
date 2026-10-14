@@ -753,6 +753,49 @@ is **bigEndIndexOrder, not alignment** · `JArray("b")` (needs the `JByte` CLASS
 `db.NoTransactionException` — and even then the worker threads cannot see a script's transaction, so
 **drive analysis with `analyzeHeadless -process`, not from a script.**
 
+## NESTED packages: the EP1 locale text is a DBPF *inside* a DBPF (session 13)
+
+Measured in `tools/nested_locale.py` / `tools/nested_langs.py`, implemented in
+`pkg::Package::open_from_memory` + `text::Tables::load`:
+
+* `DataEP1/Spore_EP1_Locale_01.package` (3.8 MB) holds **17 resources of type `package`
+  (0x06EFC6AA)**, and `_02` holds 4. Each of those resources **is itself a whole DBPF**. Together they
+  carry **1,364 `locale` resources** - more than the 2944 base-game ones per-language.
+* **A nested package is named by the same rule as a locale table**: the en-us one has instance
+  `0x7080DB55 == fnv1_lower("en-us")`. Verified both directions
+  (`fnv1_lower("EP1_Buttons") == 0x8B1A2341`, the table the layouts reference). So choosing the right
+  nested container for a language is a lookup, not a guess.
+* **This was the THIRD shape of the session's recurring error.** Not a wrong directory
+  (`exe_dir/Locale` vs `Data/Locale`), not a wrong id field (group vs instance), but a wrong
+  **CONTAINER DEPTH**. The data was in the tree; the tree was deeper than we looked.
+* Effect on our engine, measured before/after:
+
+  | | flat only | + nested |
+  |---|---|---|
+  | locale tables | 197 | **369** |
+  | entries | 18,441 | **37,608** |
+  | distinct keys | 10,246 | **14,657** |
+  | layout caption references that resolve | 1,139 / 1,426 (79.8%) | **1,391 / 1,426 (97.5%)** |
+
+* The tables that were missing are exactly the ones the shipped UI layouts ask for: `EP1_Buttons`
+  ('Replay', 'Done', 'Accept Reward', 'Interact'), `EP1_Headers` ('Scores', 'Mission Complete!',
+  'Mission Summary', 'Respawn'), `EP1_Tooltips` (183 keys), `GGETextEP1` ('Play Adventure', 'Create
+  Adventure', 'Captain Outfitter'), `ScenarioBuildMode`, `legal`, `mvj`. Verified live in the engine:
+  `txt:0x8B1A2341:0x077427D2` -> **"Accept Reward"**, `txt:0xAD7B2086:0x0589E51B` -> **"640x480"**,
+  `txt:0xC4F86AE0:0x07736311` -> **"Mission Complete!"**.
+* **`Package` now has two backings** (FILE* or an in-memory buffer) behind one `read_at()`, and BOTH
+  open paths run the SAME validator clauses. The refactor's first version left `read_resource()` on
+  `fseek(m_file,...)`, which failed LOUD (`stream.valid()` assertion, m_file == nullptr) instead of
+  silently returning garbage - a good outcome, and the reason the nested path is worth having one
+  accessor rather than two read paths.
+* The `locale` parse is now ONE method (`Tables::parse_package`) shared by the flat and nested passes.
+  Deliberate: a second copy of the grammar is exactly how two views of one dataset start disagreeing.
+* Also fixed here, because it was the same bug class waiting to bite again: `appstates` and `spui` both
+  re-entered the **double-visit trap** (the dev search list has both `Data=<exe>\Data` and `cwd=<exe>`,
+  so a recursive scan visits every package twice - `spui` reported 1,349 layouts where the corpus has
+  748, and `appstates` listed 5 copies of a script that exists 3 times). Both now dedupe by
+  `weakly_canonical`, as the `pkg` verb already did.
+
 ## TRAP: scoop's `current` is a JUNCTION, and REA refuses it (session 13)
 
 `C:\Users\DartPower\scoop\apps\ghidra\current` is `<JUNCTION>` → `ReparsePoint` in its attributes. REA's

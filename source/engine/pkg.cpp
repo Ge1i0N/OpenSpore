@@ -75,12 +75,38 @@ bool Package::open(const std::string& path) {
     long long fsz = ftell(f);
     fseek(f, 0, SEEK_SET);
     m_hdr.file_size = (u64)fsz;
+    m_file = f;
+    return parse((u64)fsz);
+}
 
+bool Package::open_from_memory(const u8* data, size_t size, const std::string& label) {
+    close();
+    m_path = label;
+    if (!data || size == 0) {
+        m_why = "empty nested package";
+        return false;
+    }
+    m_mem.assign(data, data + size);
+    m_hdr.file_size = (u64)size;
+    return parse((u64)size);
+}
+
+bool Package::read_at(u64 off, void* dst, size_t n) {
+    if (!m_mem.empty()) {
+        if (off + n > m_mem.size()) return false;
+        std::memcpy(dst, m_mem.data() + off, n);
+        return true;
+    }
+    if (!m_file) return false;
+    if (fseek(m_file, (long)off, SEEK_SET) != 0) return false;
+    return fread(dst, 1, n, m_file) == n;
+}
+
+bool Package::parse(u64 fsz) {
     u8 hdr[kHdrSize];
-    if (fsz < (long long)kHdrSize || fread(hdr, 1, kHdrSize, f) != kHdrSize) {
-        m_why = "file smaller than the 0x60-byte header";
-        LOG_ERROR("pkg", "open(%s): %s", path.c_str(), m_why.c_str());
-        fclose(f);
+    if (fsz < (u64)kHdrSize || !read_at(0, hdr, kHdrSize)) {
+        m_why = "source smaller than the 0x60-byte header";
+        LOG_ERROR("pkg", "parse(%s): %s", m_path.c_str(), m_why.c_str());
         return false;
     }
     m_hdr.magic = le32(hdr + 0x00);
@@ -110,21 +136,19 @@ bool Package::open(const std::string& path) {
     }
     if (!m_why.empty()) {
         m_ok = false;
-        LOG_ERROR("pkg", "REJECT %s: %s (ver=%u count=%u idx_size=%u idx_off=%u size=%lld)", path.c_str(),
+        LOG_ERROR("pkg", "REJECT %s: %s (ver=%u count=%u idx_size=%u idx_off=%u size=%lld)", m_path.c_str(),
                   m_why.c_str(), m_hdr.version, m_hdr.count, m_hdr.index_size, m_hdr.index_offset, fsz);
-        fclose(f);
         return false;
     }
 
-    m_file = f;
     m_ok = true;
 
     // Read the kind dword (index dword[0]) and check the measured formula.
     u8 kb[4] = {};
-    if (fseek(f, (long)m_hdr.index_offset, SEEK_SET) != 0 || fread(kb, 1, 4, f) != 4) {
+    if (!read_at(m_hdr.index_offset, kb, 4)) {
         m_why = "cannot read index kind";
         m_ok = false;
-        LOG_ONCE_ERROR("pkg", "%s: %s at 0x%x", path.c_str(), m_why.c_str(), m_hdr.index_offset);
+        LOG_ONCE_ERROR("pkg", "%s: %s at 0x%x", m_path.c_str(), m_why.c_str(), m_hdr.index_offset);
         return false;
     }
     m_hdr.kind = le32(kb);
@@ -133,17 +157,16 @@ bool Package::open(const std::string& path) {
     if (!m_kind_known || m_hdr.index_size != ki.prefix + ki.stride * m_hdr.count) {
         LOG_ONCE_WARN("pkg", "%s: kind=%u count=%u idx_size=%u does not fit prefix+stride*count "
                             "(predicted %u) - index NOT parsed",
-                      path.c_str(), m_hdr.kind, m_hdr.count, m_hdr.index_size,
+                      m_path.c_str(), m_hdr.kind, m_hdr.count, m_hdr.index_size,
                       m_kind_known ? ki.prefix + ki.stride * m_hdr.count : 0u);
         return true;  // header valid, index unknown
     }
 
     std::vector<u8> idx(m_hdr.index_size);
-    if (fseek(f, (long)m_hdr.index_offset, SEEK_SET) != 0 ||
-        fread(idx.data(), 1, m_hdr.index_size, f) != m_hdr.index_size) {
+    if (!read_at(m_hdr.index_offset, idx.data(), m_hdr.index_size)) {
         m_why = "cannot read index";
         m_ok = false;
-        LOG_ONCE_ERROR("pkg", "%s: %s at 0x%x", path.c_str(), m_why.c_str(), m_hdr.index_offset);
+        LOG_ONCE_ERROR("pkg", "%s: %s at 0x%x", m_path.c_str(), m_why.c_str(), m_hdr.index_offset);
         return false;
     }
     // The prefix is the kind dword followed by one u32 per SHARED field, in field order.
@@ -190,18 +213,19 @@ bool Package::open(const std::string& path) {
             r.raw[r.i_size] = 0;  // mark unreadable rather than trust it
         }
     }
-    if (dropped) LOG_WARN("pkg", "%s: %u/%u records violate offset+size<=index_offset", path.c_str(), dropped,
+    if (dropped) LOG_WARN("pkg", "%s: %u/%u records violate offset+size<=index_offset", m_path.c_str(), dropped,
                           m_hdr.count);
-    LOG_ONCE_INFO("pkg", "opened %s: ver=%u kind=%u count=%u idx_off=0x%x idx_size=%u records=%zu", path.c_str(),
+    LOG_ONCE_INFO("pkg", "opened %s: ver=%u kind=%u count=%u idx_off=0x%x idx_size=%u records=%zu", m_path.c_str(),
                   m_hdr.version, m_hdr.kind, m_hdr.count, m_hdr.index_offset, m_hdr.index_size, m_records.size());
     return true;
 }
-
 void Package::close() {
     if (m_file) {
         fclose(m_file);
         m_file = nullptr;
     }
+    m_mem.clear();
+    m_mem.shrink_to_fit();
     m_records.clear();
     m_ok = false;
     m_kind_known = false;
@@ -209,15 +233,17 @@ void Package::close() {
 }
 
 bool Package::read_resource(u32 record_index, std::vector<u8>& out_bytes) {
-    if (!m_ok || !m_file || record_index >= m_records.size()) return false;
+    if (!m_ok || (!m_file && m_mem.empty()) || record_index >= m_records.size()) return false;
     const Record& r = m_records[record_index];
     if (r.packed_size() == 0) return false;
     if ((u64)r.offset() + r.packed_size() > m_hdr.file_size) return false;
     out_bytes.resize(r.packed_size());
-    if (fseek(m_file, (long)r.offset(), SEEK_SET) != 0) return false;
-    size_t got = fread(out_bytes.data(), 1, r.packed_size(), m_file);
-    if (got != r.packed_size()) {
-        LOG_WARN("pkg", "%s: record %u short read %zu/%u", m_path.c_str(), record_index, got, r.packed_size());
+    // Go through read_at so a NESTED package (backed by m_mem) reads the same way a file does. This
+    // is the one place the refactor first missed, and it failed loudly rather than silently: a nested
+    // Package has m_file == nullptr, so the UCRT asserted `stream.valid()` in fseek(). Loud is good.
+    if (!read_at(r.offset(), out_bytes.data(), r.packed_size())) {
+        LOG_WARN("pkg", "%s: record %u unreadable (%u bytes at 0x%x)", m_path.c_str(), record_index,
+                 r.packed_size(), r.offset());
         return false;
     }
     return true;

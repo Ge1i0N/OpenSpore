@@ -3,9 +3,13 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <cstring>
+#include <filesystem>
+#include <set>
 
 #include "engine/fs.h"
 #include "engine/log.h"
+#include "engine/naming.h"
 #include "engine/pkg.h"
 
 namespace os::text {
@@ -16,6 +20,13 @@ namespace {
 // confirmation that the id is right is that all 2,944 resources carrying it parse with the grammar
 // documented in text.h.
 constexpr u32 kLocaleType = 0x02FAC0B6u;
+
+// Type id of a resource that IS itself a DBPF - a NESTED package. Measured (tools/nested_locale.py):
+// DataEP1/Spore_EP1_Locale_0{1,2}.package hold 21 of them, one per language, carrying 1,364 `locale`
+// resources between them. The en-us one has instance 0x7080DB55 == fnv1_lower("en-us"), i.e. a nested
+// package is named by the SAME hash rule that names a locale table - which is what makes picking the
+// right one a lookup rather than a guess.
+constexpr u32 kNestedType = 0x06EFC6AAu;
 
 std::string lower(std::string s) {
     for (auto& c : s) c = (char)std::tolower((unsigned char)c);
@@ -228,6 +239,91 @@ std::string to_display_ascii(const std::string& utf8) {
     return out;
 }
 
+// Parse every `locale` resource of ONE package (flat or nested) into the shared tables, and
+// return how many tables it yielded. Shared by both passes on purpose: the EP1 text lives in
+// nested packages, and a second copy of this grammar would be exactly the drift that produces
+// two disagreeing views of one dataset.
+size_t Tables::parse_package(pkg::Package& pk) {
+    size_t tables_parsed = 0, decode_failed = 0, no_grammar = 0;
+    const auto& recs = pk.records();
+    for (u32 n = 0; n < recs.size(); ++n) {
+        const pkg::Record& r = recs[n];
+        if (r.type() != kLocaleType) continue;
+        std::vector<u8> bytes;
+        if (!pk.read_resource_decoded(n, bytes)) {
+            ++decode_failed;
+            continue;
+        }
+        if (bytes.size() < 4) continue;
+
+        size_t pos = 0;
+        if (bytes.size() >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) pos = 3;
+        std::string body((const char*)bytes.data() + pos, bytes.size() - pos);
+
+        const u32 table_id = r.instance();
+        m_tables.push_back(table_id);
+        size_t before = m_entries.size();
+        u32 cur_key = 0;
+        bool in_record = false;
+        for (const std::string& raw_line : split_crlf(body)) {
+            size_t s = raw_line.find_first_not_of(" \t");
+            if (s == std::string::npos) {
+                in_record = false;  // a blank line closes the record
+                continue;
+            }
+            const std::string t = raw_line.substr(s);
+            if (t[0] == '#') {
+                ++m_comments;  // 5,434 of these, including the assembled-table warning
+                in_record = false;
+                continue;
+            }
+            u32 key;
+            size_t after;
+            if (parse_key(t, key, after)) {
+                std::string rest = t.substr(after);
+                Entry e;
+                e.key = key;
+                e.table = table_id;
+                if (!rest.empty() && rest[0] == '~') {
+                    // The optional `~markup~` token. Measured: 0 unterminated tokens in 18,439
+                    // key lines, so a missing close is NOT swallowed as markup - it stays text.
+                    size_t close = rest.find('~', 1);
+                    if (close != std::string::npos) {
+                        e.markup = rest.substr(1, close - 1);
+                        rest.erase(0, close + 1);
+                        size_t k = rest.find_first_not_of(" \t");
+                        rest = k == std::string::npos ? std::string() : rest.substr(k);
+                    }
+                }
+                e.text = rest;
+                if (has_non_ascii(e.text)) ++m_non_ascii;
+                cur_key = key;
+                in_record = true;
+                m_entries.push_back(e);
+                continue;
+            }
+            if (in_record) {
+                // A continuation of the previous record's text (measured: 17 of 31,209 lines).
+                ++m_continuations;
+                Entry& e = m_entries.back();
+                e.text.push_back('\n');
+                e.text += t;
+                if (has_non_ascii(t)) ++m_non_ascii;
+                continue;
+            }
+            ++m_continuations;  // an orphan line before any key: counted, never guessed at
+        }
+        if (m_entries.size() == before) {
+            ++no_grammar;
+            m_tables.pop_back();
+        } else {
+            ++tables_parsed;
+        }
+    }
+    (void)decode_failed;
+    return tables_parsed;
+}
+
 bool Tables::load(const std::string& lang) {
     m_loaded = false;
     m_lang = lang;
@@ -252,83 +348,50 @@ bool Tables::load(const std::string& lang) {
         return false;
     }
 
-    size_t tables_parsed = 0, decode_failed = 0, no_grammar = 0;
+    size_t tables_parsed = 0, flat_pkgs = 0, nested_pkgs = 0, nested_tables = 0;
     for (const auto& path : locale_pkgs) {
         pkg::Package pk;
         if (!pk.open(path)) continue;
-        const auto& recs = pk.records();
-        for (u32 n = 0; n < recs.size(); ++n) {
-            const pkg::Record& r = recs[n];
-            if (r.type() != kLocaleType) continue;
-            std::vector<u8> bytes;
-            if (!pk.read_resource_decoded(n, bytes)) {
-                ++decode_failed;
-                continue;
-            }
-            if (bytes.size() < 4) continue;
+        ++flat_pkgs;
+        tables_parsed += parse_package(pk);
+    }
 
-            size_t pos = 0;
-            if (bytes.size() >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) pos = 3;
-            std::string body((const char*)bytes.data() + pos, bytes.size() - pos);
-
-            const u32 table_id = r.instance();
-            m_tables.push_back(table_id);
-            size_t before = m_entries.size();
-            u32 cur_key = 0;
-            bool in_record = false;
-            for (const std::string& raw_line : split_crlf(body)) {
-                size_t s = raw_line.find_first_not_of(" \t");
-                if (s == std::string::npos) {
-                    in_record = false;  // a blank line closes the record
-                    continue;
-                }
-                const std::string t = raw_line.substr(s);
-                if (t[0] == '#') {
-                    ++m_comments;  // 5,434 of these, including the assembled-table warning
-                    in_record = false;
-                    continue;
-                }
-                u32 key;
-                size_t after;
-                if (parse_key(t, key, after)) {
-                    std::string rest = t.substr(after);
-                    Entry e;
-                    e.key = key;
-                    e.table = table_id;
-                    if (!rest.empty() && rest[0] == '~') {
-                        // The optional `~markup~` token. Measured: 0 unterminated tokens in 18,439
-                        // key lines, so a missing close is NOT swallowed as markup - it stays text.
-                        size_t close = rest.find('~', 1);
-                        if (close != std::string::npos) {
-                            e.markup = rest.substr(1, close - 1);
-                            rest.erase(0, close + 1);
-                            size_t k = rest.find_first_not_of(" \t");
-                            rest = k == std::string::npos ? std::string() : rest.substr(k);
-                        }
-                    }
-                    e.text = rest;
-                    if (has_non_ascii(e.text)) ++m_non_ascii;
-                    cur_key = key;
-                    in_record = true;
-                    m_entries.push_back(e);
-                    continue;
-                }
-                if (in_record) {
-                    // A continuation of the previous record's text (measured: 17 of 31,209 lines).
-                    ++m_continuations;
-                    Entry& e = m_entries.back();
-                    e.text.push_back('\n');
-                    e.text += t;
-                    if (has_non_ascii(t)) ++m_non_ascii;
-                    continue;
-                }
-                ++m_continuations;  // an orphan line before any key: counted, never guessed at
+    // NESTED packages: the EP1 locale text is not a file on disk at all. DataEP1/
+    // Spore_EP1_Locale_0{1,2}.package hold 21 resources of type `package` (0x06EFC6AA), each of
+    // which IS a whole DBPF, together carrying 1,364 `locale` resources (tools/nested_locale.py).
+    // Without this pass the EP1 text tables (EP1_Buttons, EP1_Headers, EP1_Tooltips, GGETextEP1,
+    // ScenarioBuildMode, ...) are absent, and ~285 caption references in the shipped UI layouts
+    // point at exactly those. This is the THIRD shape of this session's recurring error: not a
+    // wrong directory (exe_dir/Locale vs Data/Locale), not a wrong id field (group vs instance),
+    // but a wrong CONTAINER DEPTH - the data was in the tree, the tree was deeper than we looked.
+    {
+        const u32 want = naming::hash_lower(lang.c_str());
+        std::vector<std::string> all;
+        std::set<std::string> seen;
+        for (const auto& sp : fs::search_paths()) {
+            for (const auto& p : pkg::find_packages(sp.dir.string())) {
+                std::error_code ec;
+                std::string key = std::filesystem::weakly_canonical(p, ec).string();
+                if (ec) key = p;
+                if (seen.insert(key).second) all.push_back(p);
             }
-            if (m_entries.size() == before) {
-                ++no_grammar;
-                m_tables.pop_back();
-            } else {
-                ++tables_parsed;
+        }
+        for (const auto& path : all) {
+            pkg::Package outer;
+            if (!outer.open(path)) continue;
+            const auto& recs = outer.records();
+            for (u32 n = 0; n < recs.size(); ++n) {
+                if (recs[n].type() != kNestedType || recs[n].instance() != want) continue;
+                std::vector<u8> bytes;
+                if (!outer.read_resource_decoded(n, bytes)) continue;
+                if (bytes.size() < 0x60 || std::memcmp(bytes.data(), "DBPF", 4) != 0) continue;
+                pkg::Package inner;
+                if (!inner.open_from_memory(bytes.data(), bytes.size(),
+                        std::filesystem::path(path).filename().string() + "#nested")) continue;
+                ++nested_pkgs;
+                size_t got = parse_package(inner);
+                nested_tables += got;
+                tables_parsed += got;
             }
         }
     }
@@ -362,11 +425,11 @@ bool Tables::load(const std::string& lang) {
     m_tables.erase(std::unique(m_tables.begin(), m_tables.end()), m_tables.end());
 
     m_loaded = true;
-    LOG_INFO("text", "locale '%s': %zu/%zu tables parsed (%zu no-grammar, %zu decode failures), "
-                     "%zu entries, %zu distinct keys, %zu ambiguous, %zu comments, %zu continuation "
-                     "lines, %zu non-ASCII texts",
-             lang.c_str(), tables_parsed, tables_parsed + no_grammar, no_grammar, decode_failed,
-             m_entries.size(), m_index.size(), m_ambiguous, m_comments, m_continuations, m_non_ascii);
+    LOG_INFO("text", "locale '%s': %zu tables (%zu flat packages, %zu nested containers, %zu nested "
+                     "tables), %zu entries, %zu distinct keys, %zu ambiguous, %zu comments, %zu "
+                     "continuation lines, %zu non-ASCII texts",
+             lang.c_str(), tables_parsed, flat_pkgs, nested_pkgs, nested_tables, m_entries.size(),
+             m_index.size(), m_ambiguous, m_comments, m_continuations, m_non_ascii);
     return true;
 }
 

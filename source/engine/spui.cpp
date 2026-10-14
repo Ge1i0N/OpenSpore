@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
+#include <set>
 
 #include "engine/fs.h"
 #include "engine/log.h"
@@ -158,12 +160,18 @@ void parse_layout(const std::vector<u8>& d, Layout& L) {
     std::vector<Anchor> an = find_anchors(d);
     L.anchors = an.size();
     Window* cur = nullptr;
-    for (const Anchor& a : an) {
+    for (size_t ai = 0; ai < an.size(); ++ai) {
+        const Anchor& a = an[ai];
         const SchemaEntry* e = g_schema.by_id(a.id);
         if (!e) continue;
         ++L.recognized;
+        // The record's payload ends where the NEXT anchor begins, not where the file does. Reading
+        // past that boundary is what made every reference look like it carried a key (the stat said
+        // "0 table-only" where the python measurement found records of reclen 14), so the extent is
+        // taken from the anchor list and every `need()` below is honest against it.
+        const size_t bound = (ai + 1 < an.size()) ? an[ai + 1].off : n;
         const u8* p = d.data() + a.off + 8;         // payload start
-        const size_t avail = n - (a.off + 8);
+        const size_t avail = bound > a.off + 8 ? bound - (a.off + 8) : 0;
         auto need = [&](size_t k) { return avail >= k; };
         if (a.id == kWinControlID) {
             L.windows.emplace_back();
@@ -209,10 +217,20 @@ void parse_layout(const std::vector<u8>& d, Layout& L) {
                 if (!need(2)) break;
                 u16 len = rd16(p);
                 if (len == kInlineSentinel) {
-                    // the "not inline" form: a reference to a whole locale TABLE
+                    // The reference form is  0xFFFF | table:u32 | key:u32  (MEASURED:
+                    // tools/spui_caption_ref.py - 1,097 of 1,426 reference records carry a key that is
+                    // a real key OF THE REFERENCED TABLE, resolving to the game's own UI text, e.g.
+                    // table 0xAD7B2086 + key 0x0589E51B -> "640x480"). So a widget says which TEXT
+                    // TABLE it draws from and WHICH ENTRY in it, and engine/text.cpp resolves the
+                    // pair. Some records stop after the table (reclen 14, e.g. table 0x40D7E685), so
+                    // the key is optional and its absence is recorded rather than guessed at.
                     if (need(6)) {
                         cur->caption_is_ref = true;
                         cur->caption_table = rd32(p + 2);
+                    }
+                    if (need(10)) {
+                        cur->caption_key = rd32(p + 6);
+                        cur->caption_key_seen = true;
                     }
                 } else if (len <= 512 && need((size_t)2 + 2 * (size_t)len)) {
                     cur->caption = utf16_to_utf8(p + 2, len);
@@ -240,39 +258,64 @@ void Reader::load(size_t limit) {
     m_layouts.clear();
     ensure_schema();
     size_t scanned = 0;
+    if (limit == 0) limit = SIZE_MAX;  // 0 means "all of them", not "none"
+    // Deduplicate by CANONICAL path before scanning. The dev search list contains both
+    // Data=<exe>\Data and cwd=<exe>, so a recursive scan visits every package TWICE - this is a
+    // trap already documented for the `pkg` verb (109 vs 57 packages), and I walked straight back
+    // into it here: 1,349 layouts parsed where the corpus has 748. Two views of one dataset must
+    // not disagree by 2x.
+    std::vector<std::string> pkgs;
+    std::set<std::string> seen;
     for (const auto& sp : fs::search_paths()) {
         for (const auto& path : pkg::find_packages(sp.dir.string())) {
-            if (m_layouts.size() >= limit) break;
-            pkg::Package pk;
-            if (!pk.open(path)) continue;
-            const auto& recs = pk.records();
-            std::string pname = std::filesystem::path(path).filename().string();
-            for (u32 n = 0; n < recs.size() && m_layouts.size() < limit; ++n) {
-                const pkg::Record& r = recs[n];
-                if (r.type() != kSpuiType) continue;
-                std::vector<u8> bytes;
-                if (!pk.read_resource_decoded(n, bytes)) continue;
-                ++scanned;
-                Layout L;
-                L.package = pname;
-                L.record = n;
-                L.instance = r.instance();
-                parse_layout(bytes, L);
-                if (L.windows.empty()) continue;   // nothing readable: do not pretend it is a screen
-                m_layouts.push_back(std::move(L));
-            }
+            std::error_code ec;
+            std::string key = std::filesystem::weakly_canonical(path, ec).string();
+            if (ec) key = path;
+            if (seen.insert(key).second) pkgs.push_back(path);
+        }
+    }
+    for (const auto& path : pkgs) {
+        if (m_layouts.size() >= limit) break;
+        pkg::Package pk;
+        if (!pk.open(path)) continue;
+        const auto& recs = pk.records();
+        std::string pname = std::filesystem::path(path).filename().string();
+        for (u32 n = 0; n < recs.size() && m_layouts.size() < limit; ++n) {
+            const pkg::Record& r = recs[n];
+            if (r.type() != kSpuiType) continue;
+            std::vector<u8> bytes;
+            if (!pk.read_resource_decoded(n, bytes)) continue;
+            ++scanned;
+            Layout L;
+            L.package = pname;
+            L.record = n;
+            L.instance = r.instance();
+            parse_layout(bytes, L);
+            if (L.windows.empty()) continue;   // nothing readable: do not pretend it is a screen
+            m_layouts.push_back(std::move(L));
         }
     }
     m_loaded = true;
-    size_t wins = 0, areas = 0;
+    size_t wins = 0, areas = 0, anchors = 0;
+    size_t caps_inline = 0, caps_ref_key = 0, caps_ref_nokey = 0;
     for (const Layout& L : m_layouts) {
         wins += L.windows.size();
-        for (const Window& w : L.windows) areas += w.has_area ? 1 : 0;
+        anchors += L.anchors;
+        for (const Window& w : L.windows) {
+            areas += w.has_area ? 1 : 0;
+            // Count the THREE caption shapes, because the coverage of the layout->text chain is the
+            // number that matters here: an inline string is already on screen, a (table,key) pair
+            // resolves through engine/text.cpp, and a table-only record cannot be resolved at all
+            // without the game's own selection rule. Reporting them together would hide the gap.
+            if (!w.caption.empty()) ++caps_inline;
+            else if (w.caption_is_ref && w.caption_key_seen) ++caps_ref_key;
+            else if (w.caption_is_ref) ++caps_ref_nokey;
+        }
     }
     LOG_INFO("spui", "parsed %zu/%zu layouts: %zu windows, %zu with a usable Area (%zu anchors read, "
-                     "%d schema ids)", m_layouts.size(), scanned, wins, areas,
-             [&] { size_t s = 0; for (const Layout& L : m_layouts) s += L.anchors; return s; }(),
-             kSchemaCount);
+                     "%d schema ids); captions: %zu inline, %zu (table,key), %zu table-only",
+             m_layouts.size(), scanned, wins, areas, anchors, kSchemaCount,
+             caps_inline, caps_ref_key, caps_ref_nokey);
 }
 
 const Layout* Reader::find(u32 inst) const {

@@ -55,6 +55,7 @@
 //     rw4=0x2f4e681b match no FNV variant (0/6 tested), so type ids are assigned, not hashed.
 #include <cstdio>
 #include <string>
+#include <cstring>
 #include <vector>
 
 #include "common.h"
@@ -119,6 +120,16 @@ public:
     // Opens and validates the header. On failure, ok()==false and why() says which of the
     // validator's clauses rejected it - never a dialog, never a throw (PROMPT.md).
     bool open(const std::string& path);
+
+    // Opens a DBPF that lives in MEMORY, i.e. a NESTED package. Spore ships those: the EP1 locale
+    // text is inside DataEP1/Spore_EP1_Locale_0{1,2}.package as 21 resources of type `package`
+    // (0x06EFC6AA), each of which is itself a whole DBPF - measured in tools/nested_locale.py, they
+    // hold 1,364 `locale` resources, and the en-us one (instance 0x7080DB55 == fnv1_lower("en-us"),
+    // so a nested package is named by the SAME hash rule as a locale table) carries 130 EP1 text
+    // tables that our flat loader could not see. Same validation as the file path: the oracle's
+    // validator does not care where the bytes came from.
+    bool open_from_memory(const u8* data, size_t size, const std::string& label);
+
     void close();
 
     bool ok() const { return m_ok; }
@@ -144,6 +155,12 @@ public:
     std::string describe() const;  // one-line summary for the log and the loader screen
 
 private:
+    // Read `n` bytes at `off` from whichever backing store this package has (file or memory).
+    bool read_at(u64 off, void* dst, size_t n);
+    // The header/index validation shared by both open paths, so a nested package is validated by
+    // EXACTLY the same clauses as a file (the oracle's validator does not care where bytes came from).
+    bool parse(u64 fsz);
+
     Header m_hdr{};
     bool m_ok = false;
     bool m_kind_known = false;
@@ -152,6 +169,7 @@ private:
     SharedFields m_shared{};
     std::vector<Record> m_records;
     FILE* m_file = nullptr;
+    std::vector<u8> m_mem;  // non-empty for a nested package opened from memory
 };
 
 // Enumerate every package under a directory (the loader's "what is actually here" view).
