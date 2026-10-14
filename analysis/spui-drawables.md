@@ -28,5 +28,14 @@ well-defined: resolve the target drawable object's class and property payload, t
 resource references used by that drawable. It is not yet honest to treat the `raw` property words as
 PNG/raster instance ids; the object class and its class-specific property schema must be read first.
 
+## Image reference resolution — measured
+
+`ImageDrawable`/`ButtonDrawableStandard` image properties resolve to an intermediary object class
+`0x01BE6B15`, whose `0x01BE0001` property contains an external-table index. E3LaunchScreen has 40
+external entries. Every used image reference resolves as `{instance, type=0x2F7D0004,
+group=0x31A44893}` and all 16 used instances resolve exactly once in `Data/Spore_Graphics.package` as
+PNG resources. This closes `ImageDrawable -> external index -> PNG DBPF resource`; alignment, tiling,
+scaling and Button state-image selection remain to be applied.
+
 The current diagnostic renderer draws geometry and captions. It intentionally does not pretend that
 `ImageDrawable` or `ButtonDrawableStandard` are already rendered. That is the next visual milestone.

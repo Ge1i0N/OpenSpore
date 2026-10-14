@@ -93,6 +93,12 @@ struct Property {
     u16 depth = 0;                  // 0=object property; >0=member inside code-20 structure
 };
 
+struct ExternalResource {
+    u32 instance = 0;
+    u32 type = 0;
+    u32 group = 0;
+};
+
 struct Object {
     u16 index = 0;
     u32 class_id = 0, offset = 0, end = 0;
@@ -108,6 +114,7 @@ struct Layout {
     u32 bytes = 0;
     std::vector<Window> windows;
     std::vector<Object> objects;
+    std::vector<ExternalResource> external_resources;
     std::vector<size_t> roots;        // window indexes with no parent
     u16 version = 0;
     u32 consumed = 0;

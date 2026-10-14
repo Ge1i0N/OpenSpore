@@ -156,7 +156,8 @@ class BinaryLayout:
         self.total = sum(self.counts)
         if self.total > 6000:
             raise FormatError('more than 6000 resources/objects')
-        self.take(12*(self.counts[0]+self.counts[1]))
+        self.external = [tuple(self.integer('<I') for _ in range(3))
+                         for _ in range(self.counts[0] + self.counts[1])]
         for _ in range(self.counts[2]):
             kind = self.integer('<B') if self.version >= 3 else 0
             if kind == 0:
@@ -225,6 +226,7 @@ class BinaryLayout:
     def summary(self):
         return {'version': self.version, 'counts': self.counts, 'bytes': len(self.data),
                 'sha256': hashlib.sha256(self.data).hexdigest(),
+                'external': self.external,
                 'consumed': self.pos, 'objects': len(self.objects),
                 'roots': [i for i, o in self.objects.items() if o['root']],
                 'properties': sum(self.codes.values()), 'codes': dict(self.codes),

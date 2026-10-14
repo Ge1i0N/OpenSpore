@@ -106,6 +106,11 @@ an ordered list of indexes into the object table. `FillDrawable` and `WinProcs` 
 mechanism with other target classes. Object identity must never be reconstructed from ControlID:
 several windows in one file deliberately share ControlID values.
 
+External tables are retained in `Layout::external_resources`. E3LaunchScreen drawable image objects
+use external indexes whose records are PNG resources (`type=0x2F7D0004`, group `0x31A44893`); all 16
+used image instances resolve once in `Spore_Graphics.package`. Remaining drawable work is interpreting
+class-specific Image/Button/Dialog scaling and state selection.
+
 `tools/spui_drawables.py` shows the next rendering boundary without claiming that raw words are image
 instances: `Window -> DialogDrawable -> ImageDrawable`, `Button -> DialogDrawable ->
 ButtonDrawableStandard`, and WinProcs resolve to `Fade`, `Glide`, or `Inflate`. Class-specific property

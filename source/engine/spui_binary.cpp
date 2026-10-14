@@ -24,7 +24,17 @@ public:
         for (u32& count : counts) count = u16le();
         total = counts[0] + counts[1] + counts[2] + counts[3];
         if (total > 6000) fail("resource/object count exceeds original limit");
-        skip(12 * (counts[0] + counts[1]));
+        out.external_resources.clear();
+        out.external_resources.reserve(counts[0] + counts[1]);
+        // GA reader evidence: external triples are instance, type, group. E3LaunchScreen's group-1
+        // records are PNG type 0x2F7D0004, and code-19 ImageDrawable refs index these triples.
+        for (u32 n = 0; n < counts[0] + counts[1]; ++n) {
+            ExternalResource ext;
+            ext.instance = u32le();
+            ext.type = u32le();
+            ext.group = u32le();
+            out.external_resources.push_back(ext);
+        }
         for (u32 n = 0; n < counts[2]; ++n) {
             const u8 kind = out.version >= 3 ? byte() : 0;
             if (kind == 0) skip(12);
