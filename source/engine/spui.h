@@ -65,6 +65,7 @@ struct Window {
     int parent = -1;                  // index into Layout::windows; identity is NOT ControlID
     std::vector<u16> child_objects;    // serialized code-19 references, including null
     std::vector<size_t> children;      // resolved indexes into Layout::windows, in file order
+    u16 drawable_object = 0xffff;      // object referenced by WindowBase::FillDrawable
     Rect placed_area;                 // Area translated by ancestor origins
     bool visible = false;             // includes ancestor visibility
     bool enabled = false;             // includes ancestor enabled state
@@ -91,6 +92,7 @@ struct Property {
     u32 id = 0;
     u16 code = 0, count = 0;
     u16 depth = 0;                  // 0=object property; >0=member inside code-20 structure
+    std::vector<u16> refs;          // code-19 object/external references
 };
 
 struct ExternalResource {

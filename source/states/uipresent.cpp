@@ -2,15 +2,20 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <filesystem>
+#include <map>
 #include <string>
 
 #include "engine/appstates.h"  // the state's own script, which names the screen
 #include "engine/input.h"      // the pointer, latched once per frame
 #include "engine/log.h"
 #include "engine/naming.h"     // hash_lower: a layout NAME becomes a resource INSTANCE
+#include "engine/fs.h"
+#include "engine/pkg.h"
 #include "engine/spui.h"
 #include "engine/text.h"
 #include "render/device.h"
+#include "render/imgfile.h"
 #include "render/overlay.h"
 #include "states/statemgr.h"
 
@@ -20,6 +25,83 @@ namespace {
 // The last `why` we logged, so the choice is announced once per change and not 60 times a second.
 // Kept here rather than in the caller because every state that draws a layout shares this path.
 std::string g_why_logged;
+
+struct TextureKey {
+    u32 instance, type, group;
+    bool operator<(const TextureKey& o) const {
+        if (type != o.type) return type < o.type;
+        if (group != o.group) return group < o.group;
+        return instance < o.instance;
+    }
+};
+
+struct CachedTexture {
+    IDirect3DTexture9* texture = nullptr;
+    int width = 0, height = 0;
+    bool attempted = false;
+};
+
+std::map<TextureKey, CachedTexture> g_textures;
+
+CachedTexture& load_external(const os::spui::Layout& lay, u16 ref) {
+    static CachedTexture missing;
+    if (ref == 0xffff || ref >= lay.external_resources.size()) return missing;
+    const auto& e = lay.external_resources[ref];
+    const TextureKey key{e.instance, e.type, e.group};
+    CachedTexture& cached = g_textures[key];
+    if (cached.attempted) return cached;
+    cached.attempted = true;
+    for (const auto& sp : os::fs::search_paths()) {
+        for (const auto& path : os::pkg::find_packages(sp.dir.string())) {
+            os::pkg::Package package;
+            if (!package.open(path)) continue;
+            for (u32 n = 0; n < package.records().size(); ++n) {
+                const auto& record = package.records()[n];
+                if (record.type() != e.type || record.group() != e.group || record.instance() != e.instance)
+                    continue;
+                std::vector<u8> bytes, bgra;
+                int width = 0, height = 0;
+                if (!package.read_resource_decoded(n, bytes) ||
+                    !image::decode_from_memory(bytes.data(), bytes.size(), bgra, width, height)) continue;
+                cached.texture = render::device().create_texture_bgra(bgra.data(), width, height);
+                cached.width = width;
+                cached.height = height;
+                LOG_INFO("ui", "drawable PNG: %s rec[%u] instance=0x%08X %dx%d",
+                         std::filesystem::path(path).filename().string().c_str(), n, e.instance,
+                         width, height);
+                return cached;
+            }
+        }
+    }
+    LOG_WARN("ui", "drawable external unresolved: instance=0x%08X type=0x%08X group=0x%08X",
+             e.instance, e.type, e.group);
+    return cached;
+}
+
+const os::spui::Object* object_at(const os::spui::Layout& lay, u16 index) {
+    for (const auto& object : lay.objects) if (object.index == index) return &object;
+    return nullptr;
+}
+
+bool image_reference(const os::spui::Layout& lay, u16 index, u32 depth, u16& external) {
+    if (depth > 16 || index == 0xffff) return false;
+    const auto* object = object_at(lay, index);
+    if (!object) return false;
+    if (!object->external_refs.empty()) {
+        external = object->external_refs.front();
+        return true;
+    }
+    // Dialog/Button drawable classes wrap ImageDrawable objects. Follow code-19 object links until
+    // an ImageDrawable's 0x01BE0001 external-table reference is reached; do not assume one wrapper
+    // level, because the same schema supports Dialog (10 images), Button (4/6), and arrays.
+    for (const auto& property : object->properties) {
+        if (property.code != 19) continue;
+        for (u16 ref : property.refs) {
+            if (image_reference(lay, ref, depth + 1, external)) return true;
+        }
+    }
+    return false;
+}
 
 }  // namespace
 
@@ -146,7 +228,7 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
         const auto& win = lay.windows[oi];
         if (!win.has_area) continue;
         const float x = win.placed_area.left * sx, y = win.placed_area.top * sy;
-        const float bw = win.area.w() * sx, bh = win.area.h() * sy;
+        const float bw = win.placed_area.w() * sx, bh = win.placed_area.h() * sy;
         if (x + bw < 0.f || y + bh < 0.f || x > (float)w || y > (float)h) continue;
         // The window's own colour, used AS STORED including its alpha. Forcing alpha to 0xFF here
         // (which an earlier revision did) turned the layout into opaque slabs: the shipped values
@@ -155,6 +237,14 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
         const u32 cbg = win.bg_color;
         const f32 x2 = x + bw, y2 = y + bh;
         if ((cbg >> 24) != 0) ov.rect(x, y, bw, bh, cbg);
+        // First real drawable: ImageDrawable's `Image` object points to one external PNG entry.
+        // We deliberately handle only the plain image class here; Button/Dialog state selection,
+        // tiling and nine-slice scaling remain separate behaviors and are not silently approximated.
+        u16 external = 0xffff;
+        if (image_reference(lay, win.drawable_object, 0, external)) {
+            CachedTexture& image = load_external(lay, external);
+            if (image.texture) ov.image(x, y, bw, bh, image.texture, image.width, image.height, true);
+        }
         // Always outline, so a transparent window is still visible as the box the designer placed.
         const u32 edge = (win.shade_color >> 24) != 0 ? (win.shade_color & 0xFFFFFFu) | 0x90000000u
                                                       : 0x70A8C8E0u;

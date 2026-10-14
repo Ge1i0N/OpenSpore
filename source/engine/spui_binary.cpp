@@ -255,9 +255,11 @@ private:
             for (u32 n = 0; n < p.count; ++n) {
                 const u16 ref = u16le();
                 references.push_back(ref);
+                p.refs.push_back(ref);
                 if (top && p.id == 0xeec1b00b) win->child_objects.push_back(ref);
                 if (top && p.id == 0x01be0001u && obj.class_id == 0x01be6b15u)
                     obj.external_refs.push_back(ref);
+                if (top && p.id == 0xeec1b007u && n == 0) win->drawable_object = ref;
             }
         } else if (p.code == 18) {
             for (u32 n = 0; n < p.count; ++n) {
