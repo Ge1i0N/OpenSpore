@@ -977,6 +977,46 @@ technique is the transferable part.
   `begin_frame()` overwrote the edge and the click vanished. Injection and live input must agree about
   who owns the latch or the test proves nothing.
 
+## The Beta190208 build: readable, and bounded (session 13; full doc: `analysis/modes.md`)
+
+`refs/bins/Beta190208_Also/SporeApp.exe`, 32,616,448 B, 2008-02-19. Supplied by the user.
+
+* **Its code is NOT encrypted**: `.text` = 23,535,616 B at **entropy 6.27** (ordinary x86). The retail
+  GA `SporeApp.exe` is 8.0000 — SecuROM-encrypted, which is why the oracle is the *unpacked* GA dump.
+  The beta IS a SecuROM build (sections `ars` 7.9999, `artem` 7.9952, `.securom`), but its code reads.
+  **Entropy per PE section is the cheap, honest way to answer "is this readable"** (`tools/beta_check.py`).
+* **What it adds:** `Launcher`, `AnimViewer`, `ModelViewer`, `TerrainEditor`, `Editors` — five mode
+  names the GA oracle lacks or cannot locate. They are all DEV tools (viewers/editors), none on the
+  Main->playable path, so the beta does not unblock the next step. `EffectsViewer` and
+  `MultiverseJournal` are in neither build.
+* **Dating signal:** `ScenarioMode` occurs ZERO times in the beta and is a registered GA mode, so it
+  was ADDED between February and release. The betas->GA story is "editors cut, one game stage added",
+  which is why the GA script asks for mode names its own binary does not contain: the script is data
+  and was never pruned.
+* **RULES:** the beta is a REFERENCE (cut content, cross-checks) — **its ADDRESSES are never the
+  target's**, same rule as the Beta190208 PDB and `upstream/SporeMaster3`. The reversal oracle is the
+  GA `SporeApp.exe.unpacked.exe` alone. To ask the beta a structural question, import IT into Ghidra;
+  do not hand-roll a scanner.
+
+## TRAP: I hand-rolled a VA-dword scanner for the beta, and it FAILED ITS OWN CONTROL
+
+Nearly became a false claim, and the control is the whole story. To avoid a ~20-minute Ghidra import I
+computed each name string's file offset -> VA, then scanned `.text` for the little-endian dword (the
+encoding a `push imm32` of a string address uses). Every missing mode name came back with **0
+references** — which reads like "the beta does not register these".
+
+Then the control: the SAME method on the ten names the GA oracle **provably** registers
+(`Game_Creature`, `Game_Space`, `Game_Tribe`, `Game_Civ`, `LoadGame`, `GalaxyGameEntry`,
+`Game_EditMode`, `GameCinematics`) returned **0 as well**. A method that reports "no reference" for
+things that certainly have references is broken and can conclude nothing. Both scripts are deleted
+rather than left to be trusted later.
+
+**Rules worth keeping:** (1) any scan that yields "nothing found" must be validated on a case where
+something MUST be found — otherwise the absence is a property of the scanner; (2) when the tool for
+the job is Ghidra, use Ghidra and pay the import, because a hand-rolled approximation costs the import
+time anyway once it has to be validated; (3) entropy-vs-dword, section-vs-section, control-vs-target:
+the cheap check is not the shortcut, it is the measurement.
+
 ## Git: commit here, the user pushes (session 13)
 
 

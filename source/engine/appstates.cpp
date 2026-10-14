@@ -1,3 +1,4 @@
+#include "engine/appmodes.h"  // the recovered mode table, so the log can name what a mode IS
 #include "engine/appstates.h"
 
 #include <algorithm>
@@ -368,10 +369,18 @@ void install(os::states::Manager& mgr) {
         st.on_enter = [chain = std::move(chain), mode = std::move(mode), n_msg, n_cheat_unrun,
                        n_ui_load, n_effect, name = gs.name]() {
             if (!mode.empty()) {
-                // `mode <M>` configures the engine's mode table, which is not ours yet. Say so with
-                // the name, so the boot log shows the real chain even where we cannot act.
-                LOG_WARN("appstates", "%s: `mode %s` not executed (the engine's mode table is not "
-                                      "implemented)", name.c_str(), mode.c_str());
+                // `mode <M>` selects one of the original's ten named driver CLASSES, which we do not
+                // have. But we now KNOW the table (analysis/modes.md), so the log names the tag, the
+                // registering function and the state the mode drives, instead of a bare "not
+                // implemented" that tells the reader nothing they can act on.
+                if (const auto* m = appmodes::find_by_name(mode.c_str())) {
+                    LOG_WARN("appstates", "%s: `%s` - %s", name.c_str(), mode.c_str(),
+                             appmodes::describe(*m).c_str());
+                } else {
+                    LOG_WARN("appstates", "%s: `mode %s` not executed - this build of the game has no "
+                                          "such mode class (searched the whole oracle)",
+                             name.c_str(), mode.c_str());
+                }
             }
             if (n_msg) {
                 LOG_WARN("appstates", "%s: %zu message(s) not sent (no message bus)", name.c_str(), n_msg);

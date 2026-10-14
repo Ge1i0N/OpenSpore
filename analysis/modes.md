@@ -43,18 +43,146 @@ So `mode Game_Creature` does not index a table — it **selects one of a family 
 family is real: the binary contains `AppMode` literals including the qualified name
 `AppModeEditorBase::Save` (at file offset `0x00FF4E9D`).
 
-## Answer 2 — five modes do not exist in this build, under any spelling
+## Answer 2 — seven of the script's 17 mode names are not in the GA mode table
 
 `AnimViewer`, `EffectsViewer`, `Launcher`, `ModelViewer`, `MultiverseJournal` appear **nowhere in the
 24,895,528 bytes of the oracle — not even as substrings** (ASCII or UTF-16). The script asks for them;
-the shipped GA binary has no such class. `Editors` occurs once, but inside an unrelated English
-sentence ("...switch to the creature editor or an out..."), which is a substring false positive and
-**not** a registration. So 13 states sharing mode `Editors` are asking for a name that resolves some
-other way (or is built from a longer literal we have not located).
+the shipped GA binary has no such class. `TerrainEditor` and `Editors` DO occur in the oracle, but not
+as defined string data, so an xref-by-text cannot reach them and their registration is not located yet.
+`Editors` also occurs inside unrelated English prose ("...switch to the creature editor or an out..."),
+which is a substring false positive and **not** a registration.
+
+**The Beta190208 build settles what those names were** (next section): `Launcher`, `AnimViewer`,
+`ModelViewer`, `TerrainEditor` and `Editors` are all present there, so they are REAL modes that were
+CUT between February and release — the GA script simply was not pruned. `EffectsViewer` and
+`MultiverseJournal` are in neither build. So the honest split is 10 in the GA table, 5 cut after the
+beta, 2 in neither.
 
 **Consequence for us:** the mode table cannot be "loaded" from data, and implementing it means
-reversing each `AppMode*` class — which is the GAMEPLAY work, not the menu work. Logging
-`mode X not executed` remains the honest state, and we now know exactly why.
+reversing each `AppMode*` class — which is the GAMEPLAY work, not the menu work. The five the beta
+adds are all DEV tools (viewers/editors), none on the Main->playable path, so they do not unblock the
+next step; the five playable stages are already in the GA table. Logging `mode X not executed` remains
+the honest state, and we now know exactly why.
+
+## The Beta190208 build: useful, and exactly how much (checked 2026-10-14)
+
+`refs/bins/Beta190208_Also/SporeApp.exe`, 32,616,448 B, dated 2008-02-19 - the build the Beta190208
+PDB belongs to. Two questions, answered separately because they are different questions.
+
+**1. Is its code readable?** Yes, and this is measured rather than assumed - Shannon entropy per PE
+section (`tools/beta_check.py`):
+
+| section | raw size | entropy | reading |
+|---|---|---|---|
+| `.text` | 23,535,616 | **6.27** | **ordinary x86 - NOT encrypted** |
+| `.rdata` | 2,199,552 | 5.35 | ordinary data |
+| `.data` | 1,097,728 | 3.57 | sparse |
+| `ars` | 3,248,128 | **7.9999** | encrypted/compressed |
+| `artem` | 1,044,480 | **7.9952** | encrypted/compressed |
+| `.securom` | 1,363,968 | 5.58 | the protection's own section |
+
+Compare the retail GA `SporeApp.exe`, whose `.text` is **8.0000** - i.e. SecuROM-encrypted, which is why
+the project's oracle is the *unpacked* GA dump and never the retail file. So: the beta IS a SecuROM
+build (it has `ars`/`artem`/`.securom`), but its 23.5 MB of code is in the clear.
+
+**2. Does it carry the mode names the GA oracle lacks?** Partly, and the answer is more interesting
+than a yes:
+
+| name | in GA oracle | in beta | where in the beta |
+|---|---|---|---|
+| `Launcher` | absent | present | .rdata, only inside longer strings |
+| `AnimViewer` | absent | present | .rdata, 1 standalone C string |
+| `ModelViewer` | absent | present | .rdata, 1 standalone C string |
+| `TerrainEditor` | present (no registration located) | present | .rdata, 1 standalone C string |
+| `Editors` | present (no registration located) | present | .rdata, 1 standalone C string |
+| `EffectsViewer` | absent | **absent** | - |
+| `MultiverseJournal` | absent | **absent** | - |
+
+And a dating signal: **`ScenarioMode` occurs ZERO times in the beta** while being a registered GA mode,
+so it was added between February and release. The betas-to-GA story is therefore "editors cut, one
+game stage added", which explains the GA script asking for mode names its own binary does not contain:
+the script is data and was not pruned.
+
+**A NEGATIVE RESULT WORTH KEEPING, because it nearly became a claim.** I tried to establish whether the
+beta *registers* those five names, without importing it into Ghidra (a ~20-minute job for a small
+question), by converting each string's file offset to a VA and scanning `.text` for the little-endian
+dword - the encoding a `push imm32` of a string address uses. Every missing name came back with **0
+references**. That looked like an answer. It is not: `tools/beta_control.py` ran the SAME method on the
+ten names the GA oracle provably registers - `Game_Creature`, `Game_Space`, `Game_Tribe`, `Game_Civ`,
+`LoadGame`, `GalaxyGameEntry`, `Game_EditMode`, `GameCinematics` - and they came back **0 as well**. A
+method that reports "no reference" for things that certainly have references is broken, and it can
+conclude nothing. **The correct tool for the beta is Ghidra, the same as for the oracle.** Both
+byte-scan scripts are deleted rather than left in the tree to be trusted later.
+
+**Verdict on usefulness.** Real but bounded, and off the current path:
+
+* **What it is good for:** a cut-content reference (five names GA no longer ships, with the strings
+  still present), and a second, independently dated build to cross-check anything we are unsure about -
+  the same role `upstream/SporeMaster3` plays, and with the same rule attached: **its ADDRESSES are
+  never the target's.** Project rule: the reversal oracle is the GA `SporeApp.exe.unpacked.exe` alone.
+* **What it is NOT good for right now:** the five names it adds are `AnimViewer`, `ModelViewer`,
+  `TerrainEditor`, `Editors`, `Launcher` - all DEV tools (viewers and editors), none of them on the
+  Main->playable path. The five playable stages (Cell, Creature, Tribe, Civ, Space) plus
+  GalaxyGameEntry, ScenarioMode, LoadGame and GameCinematics are ALL already in the GA table, so the
+  beta does not unblock the next step. It becomes valuable when the editors are on the path, or if a
+  GA question turns out to be answerable by comparison.
+
+## The complete mode table, read out of the binary (2026-10-14, later)
+
+
+The registration functions are tiny, and there are exactly ten. Each one is a single call:
+
+```c
+(**(code **)(*<registry> + 0x20))(object, <MODE_TAG>, "<MODE NAME>");
+```
+
+so the table below is not inferred from names matching — it is the argument list of a registration
+call, with the object the factory just allocated beside it.
+
+| mode name | MODE TAG (2nd arg) | registers from | object size | constructor |
+|---|---|---|---|---|
+| `Game_Cell` | `0x01654C00` | `0x00e616c0` | `0x0c` | vtable `PTR_LAB_01485490` |
+| `Game_Creature` | `0x01654C01` | `0x00d3bd20` | `0xe8` | `0x00d3b960` |
+| `Game_Tribe` | `0x01654C02` | `0x00cdb4e0` | `0x3a8` | `0x00cd9b90` |
+| `Game_Civ` | `0x01654C04` | `0x00cfa480` | `0x150` | `0x00cf9a10` |
+| `Game_Space` | `0x01654C05` | `0x00fddb30` | `0x198` | `0x00fdc9f0` |
+| `Game_EditMode` | `0x01654C06` | `0x00d1c2a0` | `0x54` | `0x00d1c150` |
+| `LoadGame` | `0x01654C08` | `0x00b5d500` | `0x04` | vtable `PTR_LAB_014625b0` |
+| `ScenarioMode` | `0x01654C10` | `0x00ef1870` | `0xe0` | `0x00ef0210` |
+| `GalaxyGameEntry` | `0x02CCD1D2` | `0x00ddde30` | `0x10` | vtable `PTR_FUN_0147d2b0` |
+| `GameCinematics` | `0x8916F92D` | `0x00eb2e40` | `0x48` | `0x00eb28b0` |
+
+**The MODE TAG is the address of a static marker object, not a sequence number.** The values
+`0x01654C00/01/02/04/05/06/08/10` sit one byte apart in `.data` — these are empty, zero-initialised
+statics whose ADDRESS is their identity, so the linker packed them adjacently. That is why the numbers
+have holes (no `03`, `07`, `09`…): a hole is simply a marker the linker placed elsewhere or that is not
+used as a mode. `GalaxyGameEntry` and `GameCinematics` use markers in other data regions, which is why
+their values look unrelated.
+
+**CROSS-VALIDATION against the state script.** Every one of the ten names is exactly a name the shipped
+`SporeAppStates` script's `mode` verbs ask for, and the pairing is one-to-one:
+
+| mode | the state whose script says `mode <this>` |
+|---|---|
+| `Game_Cell` / `Game_Creature` / `Game_Tribe` / `Game_Civ` / `Game_Space` | `CellGame` / `CreatureGame` / `TribeGame` / `CivilisationGame` / `SpaceGame` |
+| `Game_EditMode` | `LevelEditor` |
+| `LoadGame` | `LoadGame` |
+| `ScenarioMode` | `ScenarioMode` |
+| `GalaxyGameEntry` | `GalaxyGameEntry` |
+| `GameCinematics` | `GameCinematicsMode` |
+
+Two independent artifacts — the binary's registration calls and the shipped script — agree on all ten.
+And `FUN_00b5dcd0` (the mode→state mapper) switches on **the same tags** to select the transition:
+`0x01654C00→"CellGame"`, `01→"CreatureGame"`, `02→"TribeGame"`, `04→"CivilisationGame"`,
+`05→"SpaceGame"`, `10→"ScenarioMode"`, `0x02CCD1D2→"GalaxyGameEntry"`, plus an `"Editor"` suffix path.
+Three functions, one tag space.
+
+**What a mode IS, now that the table is complete.** A mode is a lightweight driver object (4 bytes for
+`LoadGame`, 12 for `Game_Cell` — just a vtable, up to `0x3a8` for `Game_Tribe`) registered under a tag
+and selected by tag. The behaviour lives in the class's vtable methods, not in the registry. So
+"implementing the mode table" is not a data-loading job: it is implementing ten driver classes, which
+is the gameplay work. What we CAN now do — and do — is hold the table, so the engine knows the tag,
+the class address and the state each mode drives instead of printing "not implemented".
 
 ## Answer 3 — the mode/state link runs the way we hoped
 

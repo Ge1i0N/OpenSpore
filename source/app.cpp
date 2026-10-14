@@ -26,6 +26,7 @@
 #include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
+#include "engine/appmodes.h"
 #include "engine/appstates.h"
 #include "engine/spui.h"
 #include "engine/text.h"
@@ -1088,23 +1089,11 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                           return s;
                       }
                       if (c.args[1] == "-modes") {
-                          std::vector<std::string> modes;
-                          for (const auto& gs : tb.states()) {
-                              if (gs.mode.empty()) continue;
-                              if (std::find(modes.begin(), modes.end(), gs.mode) == modes.end()) {
-                                  modes.push_back(gs.mode);
-                              }
-                          }
-                          std::sort(modes.begin(), modes.end());
-                          std::string s = std::to_string(modes.size()) + " distinct modes:\n";
-                          for (const auto& m : modes) {
-                              s += "  " + m + "  <-";
-                              for (const auto& gs : tb.states()) {
-                                  if (gs.mode == m) s += " " + gs.name;
-                              }
-                              s += "\n";
-                          }
-                          return s;
+                          // The recovered mode table, cited. Replaces the old ad-hoc distinct-name
+                          // listing: that told us what the script ASKS FOR, which is half the question.
+                          // The other half - what a mode IS - is now answered from the binary
+                          // (analysis/modes.md), so the verb reports the table itself.
+                          return appmodes::report();
                       }
                       const auto* gs = tb.find(c.args[1]);
                       if (!gs) {

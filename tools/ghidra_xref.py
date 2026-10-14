@@ -39,12 +39,16 @@ def main():
         RM = prog.getReferenceManager()
         listing = prog.getListing()
 
-        # Split the arguments into --string <text> and bare addresses.
-        strings, addrs, i = [], [], 0
+        # Split the arguments into --string <text>, --bytes <text> and bare addresses.
+        strings, raw_needles, addrs, i = [], [], [], 0
         while i < len(args):
             a = args[i]
             if a == "--string" and i + 1 < len(args):
                 strings.append(args[i + 1])
+                i += 2
+                continue
+            if a == "--bytes" and i + 1 < len(args):
+                raw_needles.append(args[i + 1])
                 i += 2
                 continue
             addrs.append(a)
@@ -73,6 +77,27 @@ def main():
             for w in sorted(want):
                 print("NO DEFINED STRING DATA matches %r - it may be an undefined byte sequence, or"
                       " spelled differently (try the exact case)" % w)
+
+        # --bytes <text>: search RAW PROGRAM MEMORY rather than defined string data. Needed because a
+        # name can sit in undefined bytes (Ghidra then creates no string, and an xref-by-text cannot
+        # reach it) - which is exactly the case for the two mode names TerrainEditor and Editors:
+        # they ARE in the binary but have no registration located yet. Searching bytes finds the
+        # address even when the data type is wrong.
+        if raw_needles:
+            mem = prog.getMemory()
+            mon = None
+            for text in raw_needles:
+                addr = None
+                for enc, label in ((text.encode("latin-1", "replace"), "ascii"),
+                                   (text.encode("utf-16-le"), "utf16")):
+                    a = mem.findBytes(prog.getMinAddress(), enc, None, True, mon)
+                    if a is not None:
+                        print("BYTES %r (%s) found at %s" % (text, label, a))
+                        resolved.append(("bytes %r (%s)" % (text, label), a))
+                        addr = a
+                        break
+                if addr is None:
+                    print("BYTES %r NOT IN PROGRAM MEMORY (either encoding)" % text)
 
         print("targets resolved: %d" % len(resolved))
         for label, addr in resolved:

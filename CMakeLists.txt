@@ -113,6 +113,7 @@ set(OS_SOURCES
   source/engine/cmdline.cpp
   source/engine/fs.cpp
   source/engine/input.cpp
+  source/engine/appmodes.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
