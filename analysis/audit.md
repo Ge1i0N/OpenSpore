@@ -36,16 +36,16 @@ question at all. **Only `FAIL` is a correction; `UNKNOWN` is unfinished work.**
   - claim: TokenIOContext 0x38, MemoryStream 0x24, SharedPointer 0x18 - the object sizes, so our engine's model has known extents
 - `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00903330 (0x00903330..0x0090339c, 34 insns)
   - claim: the TokenIOContext constructor
+- `PASS` [ok] `func` [PASS] refs 0x00925e80, 0x00925eb0 present
+  - claim: CORRECTED (the 12th checker artifact of this audit): the read/write callbacks are PUSHED as arguments and stored by the callee, so they are REFERENCES, not calls. Our first check asked for `calls` and FAILed a correct claim - a function-pointer handoff is invisible to a call-list check. The objdump shows it: 90335f push 0x925eb0 / 903364 push 0x925e80 / 90338a call 0x928d90.
 - `PASS` [ok] `func` [PASS] string 0x0143a460 ('UTF/XmlTokenReader/TokenIOContext/mAlloc') referenced
   - claim: TRAP-AND-PAYOFF: 0x143a460 is stored into [esi] exactly where a vtable goes, but it is an ASCII STRING. Reading it as a vtable would have invented a fake 12-method class; reading it as a string names the reader family - XML/TokenReader.
-- `FAIL` [MISMATCH] `func` [FAIL] direct calls missing: 0x00925e80, 0x00925eb0 (has 4 calls)
-  - claim: the read/write callbacks the token reader installs over the MemoryStream
 - `PASS` [ok] `func_exists` Ghidra has a function here: FUN_00902fd0 (0x00902fd0..0x00903232, 207 insns)
   - claim: the XML/TokenReader user
 - `PASS` [ok] `func` [PASS] string 0x0143a450 ('XML/TokenReader') referenced
   - claim: the reader's own name
 - `PASS` [ok] `func` [PASS] calls 0x00901680, 0x009016e0, 0x00900e10 present
-  - claim: THE NEXT STEP: the token reader's core. Recovering its token alphabet is what turns spui from a bit-packed mystery into a parsed layout.
+  - claim: the reader's core. NOTE: recovering its alphabet turned out NOT to be the way forward - the shipped designer XML gave us the property dictionary directly and the format is byte-packed RECORDS, not a bit stream (see analysis/spui-schema.md). These three functions are now the route to the remaining detail: the presence mask and the ids the designer XML omits.
 
 ## UNKNOWN (2)
 

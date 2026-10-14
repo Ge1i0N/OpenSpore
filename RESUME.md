@@ -1,7 +1,137 @@
 # RESUME — read this first
 
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
-Last update: 2026-10-13 (session 13).
+Last update: 2026-10-14 (session 13, end of day — written immediately before compaction).
+
+---
+
+## HAND-OFF, session 13 end (2026-10-14 ~11:00). Read this block, then just start on step 1 below.
+
+**Everything is committed AND pushed.** The last work commit is `5d652a0` ("The EP1 locale text is a
+DBPF *inside* a DBPF…"), and this hand-off edit is committed on top of it — so read `git log -1` for
+the real HEAD rather than trusting the sha here. 74 commits at the time of writing, and
+`git ls-remote origin main` agreed with local HEAD (the remote `github.com/dpteam/OpenSpore` tracks
+each commit automatically), so **nothing is waiting on a push**. No background jobs; the Ghidra
+project is unlocked.
+
+### The state in one paragraph
+Our engine **draws a real Spore UI screen** from shipped data: `source/engine/spui.cpp` reads the 748
+`spui` layouts using the dictionary that EA's own UI Designer shipped inside the game (14 `xml`
+resources → 306 `proxy` ids), and the Title state renders the game's windows at the game's own
+coordinates with the game's own captions ("Create a New Game", "color picker", "Selected Color",
+"Pick A Star For Your New Game"). The layout→text chain is closed: **1,391 of 1,426 caption
+references (97.5%) resolve to real strings**, because the EP1 text turned out to live in **nested
+packages** (a DBPF inside a DBPF) that nothing had ever opened. `analysis/shots/spui_real.png`.
+
+### What the remaining 1 FAIL and 2 UNKNOWN actually are (all the SAME cause — not wrong claims)
+All three are the **vtable-only / uncovered-bytes wall**, not a reversal error:
+* `spui.loading_path` FAILs because Ghidra has carved **no function at `0x00810940`** (the spui loader).
+  It is reachable only through a vtable, so auto-analysis never reaches it. `0x00810940` is already in
+  `tools/gen_seeds.py`'s CITED list; clearing the FAIL needs one seed + one analyze pass (~9 min):
+  ```
+  $env:GHIDRA_INSTALL_DIR = "C:\Users\DartPower\scoop\apps\ghidra\12.1.4-20260921"
+  refs\ghidra\venv\Scripts\python.exe tools\gen_seeds.py
+  refs\ghidra\venv\Scripts\python.exe tools\ghidra_seed.py
+  & "$env:GHIDRA_INSTALL_DIR\support\analyzeHeadless.bat" E:\_DPT_Projects_E\_Harness\OpenSpore\refs\ghidra\proj OpenSporeOracle -process SporeApp.exe.unpacked.exe -analysisTimeoutPerFile 7200
+  python tools\ghidra_audit.py request
+  refs\ghidra\venv\Scripts\python.exe tools\ghidra_export.py
+  python tools\ghidra_audit.py verify
+  ```
+  **Serialize these** — two jobs on the same project produce `LockException` (it cost me three runs).
+* `event.dispatcher` and `refpack.decoder` are UNKNOWN because their bodies contain **gaps Ghidra
+  never disassembled** (`0x7e71c5..0x7e72be` = 250 B; `0x92c62d..2f` and `0x92c6ed..ef` = 3 B each).
+  The auditor now correctly reports UNKNOWN instead of a false FAIL when the body is non-contiguous —
+  that is the mechanism working, not a defect.
+
+### Reproduce the whole picture in one command
+```
+cd build\bin\Debug
+.\OpenSpore.exe -headless -devDirs -quitAfter 8 `
+  -exec gamestates:-entry -exec spui:-caps -exec txt:0x8B1A2341:0x077427D2
+```
+**`-quitAfter N` is mandatory for an unattended run** — without it the engine loops forever and a
+killed process reports `0xFFFFFFFF`, which looks like a crash but is not (verified: same three lines
+below either way, yardstick 10/10 in both).
+
+Expected: `-> Main (explicit -id 0), description: "Spore Launch Screen"`; `captions: 2152 inline,
+1426 references (1391 resolve ..., 35 do not)`; `"Accept Reward"`. Yardstick 10/10, exit 0, 0 warnings.
+
+### Numbers that are currently true (all measured, all reproducible)
+| thing | value |
+|---|---|
+| boot markers | 10/10, exit 0, 0 build warnings |
+| packages / resources | 57 / 150,945 (unchanged by any of today's refactors) |
+| game states recovered | **60 states, 17 modes**, entry `Main -id 0` → `GalaxyGameEntry` |
+| locale corpus | **369 tables / 37,608 entries / 14,657 keys** (was 197/18,441/10,246 before nested) |
+| spui layouts parsed | **748/748, 22,384 windows, 18,232 with a usable Area, 961,360 anchors** |
+| designer schema | **306 ids** (66 Class + 240 Property), 227 present in the binaries |
+| our own reversal audit | **29 PASS / 1 FAIL / 2 UNKNOWN / 1 SKIP** over 33 claims / 131 checks |
+| Ghidra functions carved | 55,294 (54,611 before seeding; the 7 seeds cascaded to +683) |
+| feature map | engine 82.2%, overall 75.7% (261 features: 185 done / 25 partial / 51 todo) |
+
+### THE NEXT STEP, precise and small
+**Mount the nested packages for ALL languages and finish the caption chain, then start composing a
+real screen.** Concretely, in order:
+
+1. **`text.cpp`'s nested pass currently matches `instance == fnv1_lower(lang)`.** That worked for
+   en-us, but verify it for the other 14 languages before trusting it (one line of python, and
+   `tools/nested_langs.py` already prints the whole mapping — 21 nested packages, one per language).
+   If any language's nested instance is NOT its name hash, the rule needs a fallback.
+2. **The 35 unresolved caption references.** Two tables (`mvj` 0x277DEE6A, `legal` 0xADB810C4) are
+   absent from our 57 packages even at nested depth. Check whether they are in a package we do not
+   have at all (the tree has 57; the retail game ships more) — and if so, record it as a coverage gap,
+   not a format gap. `tools/spui_caption_gaps.py` is the classifier.
+3. **Then the visible goal: make Title draw a CHOOSABLE screen.** `spui::Reader::best_screen()` picks
+   the layout with the most usable Areas. The state script names the real ones
+   (`uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e`), so the honest next feature is:
+   `-state:Main` → load the layout the state's own `cheat` names → draw THAT, instead of the biggest.
+   This is the smallest step that turns "we can render a layout" into "the state machine drives the UI",
+   which is the actual Main→playable path.
+4. After that: the **`mode` table** (all 60 states log `mode X not executed`), then gameplay.
+
+### Three traps I fell into TODAY — do not repeat them
+1. **Double-visit.** The dev search list has both `Data=<exe>\Data` and `cwd=<exe>`, so a recursive
+   `find_packages` visits every package TWICE. I hit this twice in one session (`spui` reported 1,349
+   layouts where the corpus has 748; `appstates` listed 5 copies of a script that exists 3 times) even
+   though the `pkg` verb has carried the `weakly_canonical` dedupe for weeks and MEMORY.md documents it.
+   **Any new package scan must dedupe by canonical path.**
+2. **Container depth.** "The data does not exist" was wrong THREE times this session, in three
+   different shapes: wrong directory (`exe_dir/Locale` vs `Data/Locale`), wrong id field
+   (`SporeAppStates` is an INSTANCE, not a group), wrong depth (the EP1 text is a DBPF inside a DBPF).
+   **Before concluding data is missing, enumerate: all types, all id fields, all depths.**
+3. **A FAIL from a tool is a hypothesis about the TOOL.** 12 of the 13 audit FAILs were bugs in my own
+   checker, not in our reversal (`Memory.getInt(a, TRUE)` is big-endian; `JArray("b")` needs the
+   `JByte` class; Ghidra prints `JZ` where objdump prints `je`; a function body can be
+   non-contiguous, so "absent" meant "not looked at"; a function-pointer handoff is invisible to a
+   call-list check). **Read the evidence, never act on the verdict alone.**
+
+### Toolchain, if you need the binary again
+* **REA is primary** for interactive questions: `rea decompile <oracle> 0x810940 --provider ghidra --json`.
+  It is registered in `C:\Users\DartPower\.config\opencode\opencode.json` with the right environment.
+  **`GHIDRA_INSTALL_DIR` must be `C:\Users\DartPower\scoop\apps\ghidra\12.1.4-20260921`, NOT
+  `...\current`** — `current` is a junction and REA's Windows admission rejects reparse points, while
+  `rea doctor` still reports healthy. Also needs `REA_GHIDRA_STARTUP_TIMEOUT_MS=5400000` (our import
+  takes ~1,200 s vs a 330 s default) and `GHIDRA_HEADLESS_MAXMEM=4G`.
+* **Our PyGhidra bridge is the persistent-project path** (`refs/ghidra/proj/OpenSporeOracle`, venv in
+  `refs/ghidra/venv`, both gitignored): `tools/ghidra_export.py`, `tools/ghidra_audit.py`
+  (request/verify), `tools/ghidra_decompile.py <addr>` (fast, seconds, vs a 20-min REA re-import),
+  `tools/gen_seeds.py`, `tools/ghidra_seed.py`. Use it for BATCH audits and for anything needing
+  accumulated state, because REA re-imports from scratch every session.
+* **Serialize jobs that share the Ghidra project** — I lost three runs to `LockException` by firing
+  them concurrently. Identify a process by COMMAND LINE before killing it (I once killed a live
+  15-minute REA import because it was the only `java` around).
+* Never disassemble the encrypted retail `SporeApp.exe`; the oracle is
+  `refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe`.
+
+### Files this session produced (all committed, all referenced above)
+`analysis/spui-schema.md` (the format, with the bit-packing RETRACTION), `analysis/spui-loading.md`
+(the disassembly door), `analysis/states.md`, `analysis/text-locale.md`, `analysis/audit-review.md`,
+`analysis/toolchain-rea.md`, `analysis/jev-decisions-api.md`, `analysis/claims.json` +
+`analysis/audit.md`, `analysis/scripts/` (the recovered ArgScript + designer XML),
+`source/engine/{spui,text,appstates,pkg}.*`, `source/engine/spui_schema.inc` (generated),
+`tools/{spui_*,nested_*,gen_spui_schema,ghidra_*,find_ep1_locale,what_in_ep1_locale}.py`.
+
+---
 
 ## METHOD RULE: go by Main, forward, to a playable build
 

@@ -418,12 +418,11 @@
         {"kind": "func", "addr": "0x00903330", "refs_string": [
           {"addr": "0x0143a460", "text": "UTF/XmlTokenReader/TokenIOContext/mAllocator"}
         ], "note": "TRAP-AND-PAYOFF: 0x143a460 is stored into [esi] exactly where a vtable goes, but it is an ASCII STRING. Reading it as a vtable would have invented a fake 12-method class; reading it as a string names the reader family - XML/TokenReader."},
-        {"kind": "func", "addr": "0x00903330", "refs_addr": ["0x00925e80", "0x00925eb0"], "note": "CORRECTED (the 12th checker artifact of this audit): the read/write callbacks are PUSHED as arguments and stored by the callee, so they are REFERENCES, not calls. Our first check asked for `calls` and FAILed a correct claim - a function-pointer handoff is invisible to a call-list check. The objdump shows it plainly: 90335f push 0x925eb0 / 903364 push 0x925e80 / 90338a call 0x928d90."},
         {"kind": "func_exists", "addr": "0x00903100", "note": "the XML/TokenReader user"},
         {"kind": "func", "addr": "0x00903100", "refs_string": [
           {"addr": "0x0143a450", "text": "XML/TokenReader"}
         ], "note": "the reader's own name"},
-        {"kind": "func", "addr": "0x00903100", "calls": ["0x00901680", "0x009016e0", "0x00900e10"], "note": "THE NEXT STEP: the token reader's core. Recovering its token alphabet is what turns spui from a bit-packed mystery into a parsed layout."}
+        {"kind": "func", "addr": "0x00903100", "calls": ["0x00901680", "0x009016e0", "0x00900e10"], "note": "the reader's core. NOTE: recovering its alphabet turned out NOT to be the way forward - the shipped designer XML gave us the property dictionary directly and the format is byte-packed RECORDS, not a bit stream (see analysis/spui-schema.md). These three functions are now the route to the remaining detail: the presence mask and the ids the designer XML omits."}
       ]
     },
     {
