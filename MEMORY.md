@@ -853,6 +853,61 @@ Two findings, and the second is the **fourth shape** of this session's recurring
   a same-instance/different-bytes pair is still parsed twice and logged, because losing text is worse
   than an extra pass.
 
+## The state machine drives the UI (session 13, commit 1995cca)
+
+The menu step's real milestone, and the technique that got there is worth more than the fact.
+
+* **`fnv1_lower(<name>)` is the UNIVERSAL instance rule, across resource types.** A state script names
+  a screen in plain text and that name IS the pointer:
+  `fnv1_lower("E3LaunchScreen") == 0xE932BD44`, a real `spui` record (in BOTH `Data/PatchData.package`
+  and `Data/Spore_Graphics.package`); `fnv1_lower("LaunchScreen") == 0x562AB2CC`, also a `spui`.
+  The same sweep showed one name carrying SEVERAL types: `E3LaunchScreen` is also a `prop`
+  (`0x00B1B104`, from `reg_type.txt`), and `SpaceGame`/`CreatureGame`/`TribeGame` name a `png`
+  (`0x2F7D0004`) as well as their locale table. So: **name -> hash -> (type, instance)**, and the type
+  is what you are asking for.
+* **Identify an unknown id by its ROLE, not by hunting for it** (`tools/id_role.py`). A DBPF index has
+  three id fields, so WHERE an id appears tells you what it is: `type` => a resource class (look it up
+  in `reg_type.txt`); `group` => a collection; `instance` => one resource. Scan all three across the
+  whole corpus **index-only** (no payload decode) and an id that appears nowhere is definitively NOT a
+  resource id. That is how `uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e`'s two trailing ids got
+  classified: absent from all 150,945 records, and no registry name hashes to them, so they are
+  internal to the layout or runtime handles. `find_by_name()` does not need them. **Still unresolved.**
+* **748 `spui` RESOURCES is not 748 layouts.** There are **524 distinct instances**: 224 layouts ship
+  more than once, 18 of those shadows with a different byte length (E3LaunchScreen: 4,486 B packed in
+  PatchData vs 4,480 B in Spore_Graphics). Any count of "things we parsed" must say whether it is
+  resources or distinct ids — the same distinction that turned the locale corpus from 369 to 265.
+* **Precedence must be STATED, or it drifts between subsystems.** `find()` used to return whichever
+  copy the traversal reached first. Now: spui takes the FIRST container (so PatchData overrides base
+  content, which is what mounting a patch ahead of the packages means), text takes the LAST parsed.
+  Those two rules DISAGREE, and the honest surface is 18 layouts and 3 of 23,933 strings. Do **not**
+  "fix" it by unifying arbitrarily: EP1 beating PatchData on locale is provably right (EP1 fixes the
+  patch's typo "occured" -> "occurred"), so the original's rule is not "earliest wins". It needs the
+  resource-cache order off the disassembly — a small, self-contained question, still open.
+* **A state gets an `on_render` ONLY if its script names a layout.** Setting it unconditionally swallows
+  the renderer-less placeholder, and a state that presents no frame means `-capture` is never serviced:
+  a hang wearing a blank screen. A state that asked for something unreadable logs it ONCE and shows
+  nothing, rather than silently substituting a screen the game never asked for.
+* Proof it is driving and not relabelling: `-state:DevLauncher` (the game's choice) and `-state:Title`
+  (our largest-layout choice) differ in **65.9% of 102,480 sampled pixels**.
+
+## Testing traps found the hard way today
+
+* **`pkg:-unpack,all,<dir>` with NO type filter is a 10 GB job** and timed out past 15 minutes. The
+  recorded 2,944-file / 0-failed yardstick is the **`,locale` filtered** form:
+  `pkg:-unpack,all,<dir>,locale`. Say which one you ran, or the number means nothing.
+* **Exit code 4 is `render::device().init()` refusing**, the only `return 4` in `app.cpp`, and it can
+  happen when unattended runs are launched back-to-back (the previous process is still tearing down its
+  device). The engine handled it correctly: FATAL, boot chain printed, log shut down, distinct code.
+  **Put a pause between unattended runs; do not chase code 4 as a bug.**
+* **A grep for `ERROR|ASSERT|abort` matches the clean-shutdown line** `aborts=0 asserts=0`. Filter on
+  `ERROR ` / `ASSERT ` with the level marker, or you will "find" failures that are successes.
+* **`Get-Content file | ForEach { $_.Line }` yields nothing** — plain strings have no `.Line`. Only
+  MatchInfo (from `Select-String`) does. Mixing the two silently prints empty output and looks like the
+  log was empty.
+* **Two counts coming out IDENTICAL is a smell, not a win.** "14,657 distinct (table,key) texts" equal
+  to "14,657 distinct keys" could only happen if the table dimension was unused — the tell that the
+  `u64`-into-`u32` map key had thrown the table away. See the locale section above.
+
 ## Git: commit here, the user pushes (session 13)
 
 

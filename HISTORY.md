@@ -7,6 +7,70 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### 2026-10-14, later: THE STATE MACHINE DRIVES THE UI, and a 64→32 narrowing that had been lying to us
+
+Four commits, all measured. In order of what they cost:
+
+**1. `get(table,key)` was silently ignoring the table** (`fba967b`). `m_by_table` was
+`std::map<u32,std::string>` while every access packed `((u64)table << 32) | key`; the narrowing was
+implicit, compiled at 0 warnings, and reduced the per-table lookup to a global one — the exact failure
+the ambiguous-key refusal exists to prevent, serving other tables' strings to our menu. **The tell was
+already printed in a log line I wrote that morning**: "14,657 distinct (table,key) texts" *equal to*
+"14,657 distinct keys". Caption resolution went 1,391 → **1,384 of 1,426**: the number fell because it
+became true. Verification: the map is now `u64`, the key is spelled by one `pack()`, and the corpus is
+reported as distinct pairs, entries, and duplicate-agree/disagree counts (32,038 → 23,933; 8,102 agree,
+3 disagree).
+
+**2. `Data/PatchData.package` carries its own nested locale packages** (`fba967b`, `daad387`). The
+fourth "the data does not exist" of the session, in a new shape: **wrong scoping of the search**. The
+engine had parsed them all along (its nested pass scans by TYPE); my tools filtered on the filename
+`*Spore_EP1_Locale*`, so `legal` `0xADB810C4` stayed "missing" for two sessions after it had been read
+off disk every boot. `tools/nested_every.py` enumerates by type across all 57 containers: 44 nested
+`package` resources, 20 instances shipped in more than one container, en-us in three (PatchData 42
+tables, EP1_01 and EP1_02 byte-identical at 65). Verification: `spui -gaps` now splits the 42
+unresolved refs into COVERAGE (`mvj`, 14 keys, absent everywhere) and SEMANTIC (4 keys in tables we
+do have) — and `legal` is gone from the missing list.
+
+**3. Precedence measured instead of assumed** (`fba967b`, `1995cca`). Both locale and spui had been
+letting traversal order decide. Locale: 3 of 23,933 strings disagree, and EP1 winning is provably
+correct (it fixes PatchData's "occured"). spui: **748 resources are only 524 distinct instances** —
+224 layouts ship twice, 18 with a different length — so `find()` now indexes by instance with an
+explicit first-container-wins rule (PatchData overrides base content), and the load line reports
+resources, distinct ids, shadows, and differing shadows. The two subsystems' rules still disagree;
+that is recorded as an open question with its size (18 layouts, 3 strings) rather than papered over,
+because "earliest wins" cannot be the original's rule given the locale evidence.
+
+**4. `uilayout -load` is EXECUTED, not reported unrunnable** (`1995cca`). The recovered 60-state script
+contains exactly one UI verb, in `state DevLauncher`:
+`cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"`. The name is the pointer —
+`fnv1_lower("E3LaunchScreen") == 0xE932BD44`, a real `spui` record — so `spui::Reader::find_by_name()`
+resolves it and the new `source/states/uipresent.{h,cpp}` presents that screen. Title lost its private
+copy of the drawing code; both go through one path now.
+
+* Verification, live: `[ui] screen: state 'DevLauncher' asked for 'E3LaunchScreen' -> PatchData.package
+  rec[1053] inst=0xE932BD44 24814B 68 windows`, preceded by `DevLauncher: 1 \`uilayout -load\` EXECUTED
+  by the UI layer`. Screenshot `analysis/shots/spui_e3launch.png`.
+* Verification that this is DRIVING and not relabelling: `-state:DevLauncher` (the game's choice) vs
+  `-state:Title` (our largest-layout choice, `Spore_EP1_Data rec[4870]`, 570 windows) differ in
+  **67,532 of 102,480 sampled pixels = 65.9%**. A different screen, chosen by the data.
+* Verification that nothing else broke: 0 build warnings, yardstick 10/10, exit 0, 57/57 packages
+  (0 unknown/invalid), 150,945 resources, 748 layouts / 22,384 windows / 18,232 Areas / 961,360
+  anchors, locale 265 tables / 23,933 texts / 14,657 keys, unpack `,locale` → 2,944 written / 0 failed,
+  `txt:0x8B1A2341:0x077427D2` → "Accept Reward", and Main / CreatureGame / TribalAccessoriesEditor each
+  still capture a frame. Feature map 82.2% → **82.4%** engine, 75.7% → **76.0%** overall.
+* **Unresolved, stated:** the two trailing ids are not resource ids (absent from all three index fields
+  of all 150,945 records) and no registry name hashes to them; the first appears twice in the spui byte
+  corpus, the second nowhere. `find_by_name()` does not need them.
+* **A side discovery worth its own line:** one name can carry several resource types. `E3LaunchScreen`
+  is a `spui` AND a `prop` (`0x00B1B104`); `SpaceGame`/`CreatureGame`/`TribeGame` name a `png`
+  (`0x2F7D0004`) as well as their locale table. `tools/id_role.py` answers "what IS this id" by scanning
+  all three index fields — role, not search.
+* **Testing traps, each paid for:** `pkg:-unpack,all,<dir>` with no type filter is a 10 GB job (timed
+  out at 15 min) — the 2,944 yardstick is the `,locale` form; exit code 4 is `render::device().init()`
+  refusing under back-to-back unattended launches, correctly handled, not a bug; a grep for
+  `ERROR|ASSERT|abort` matches the clean-shutdown line `aborts=0`; and `Get-Content | %{ $_.Line }`
+  prints nothing, because plain strings have no `.Line`.
+
 ### THE EP1 TEXT IS A DBPF *INSIDE* A DBPF: the layout->text chain closes at 97.5%
 Following the caption references to their end produced the session's third "the data does not exist"
 correction, and a new shape of the same error: not a wrong directory, not a wrong id field, but a wrong

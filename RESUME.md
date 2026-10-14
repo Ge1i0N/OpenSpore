@@ -15,16 +15,17 @@ from a session, just commit and let the user push). Read `git log -1` and `git s
 state rather than trusting any sha written here. No background jobs; the Ghidra project is unlocked.
 
 ### The state in one paragraph
-Our engine **draws a real Spore UI screen** from shipped data: `source/engine/spui.cpp` reads the 748
-`spui` layouts using the dictionary that EA's own UI Designer shipped inside the game (14 `xml`
-resources → 306 `proxy` ids), and the Title state renders the game's windows at the game's own
-coordinates with the game's own captions ("Create a New Game", "color picker", "Selected Color",
-"Pick A Star For Your New Game"). The layout→text chain is closed: **1,384 of 1,426 caption
-references (97.1%) resolve to real strings**, because the text turned out to live at **three depths** —
-flat `Data/Locale/en-us`, nested inside `DataEP1/Spore_EP1_Locale_0{1,2}`, and nested inside
-`Data/PatchData` (a DBPF inside a DBPF, which nothing outside the engine had ever enumerated).
-`analysis/shots/spui_real.png`. What is left on this step is not data but **driving**: the state
-machine does not yet choose which layout to show.
+Our engine draws real Spore UI screens **and the game's own state machine now picks which one**.
+`source/engine/spui.cpp` reads the 748 `spui` resources (524 distinct layouts) using the dictionary
+EA's own UI Designer shipped inside the game (14 `xml` resources → 306 `proxy` ids);
+`source/states/uipresent.cpp` presents a layout as a frame at the game's coordinates with the game's
+colours and captions; and a state whose script says `uilayout -load E3LaunchScreen` gets THAT screen
+drawn, because the name hashes to the resource instance (`fnv1_lower` is the universal instance rule).
+The layout→text chain is **97.1% closed: 1,384 of 1,426 caption references resolve**, because the text
+lives at THREE depths — flat `Data/Locale/en-us`, nested inside `DataEP1/Spore_EP1_Locale_0{1,2}`, and
+nested inside `Data/PatchData` (that last one took four sessions to see, because we kept searching by
+filename instead of by type). `analysis/shots/spui_e3launch.png`. What is left on this step is the
+**`mode` table** — a state can name its screen but not yet configure the engine to play its game.
 
 ### What the remaining 1 FAIL and 2 UNKNOWN actually are (all the SAME cause — not wrong claims)
 All three are the **vtable-only / uncovered-bytes wall**, not a reversal error:
@@ -69,26 +70,45 @@ Add `-exec spui:-gaps` for the coverage/semantic split of the 42.
 | locale corpus | **265 distinct tables from 5 containers / 23,933 distinct (table,key) texts / 32,038 entries / 14,657 keys** |
 | nested locale depths | 3: flat `Data/Locale/en-us`, nested in `DataEP1/Spore_EP1_Locale_0{1,2}`, **nested in `Data/PatchData`** |
 | layout→text chain | **1,384 / 1,426 refs resolve (97.1%)**; 42 left = 15 COVERAGE keys + 4 SEMANTIC keys |
-| spui layouts parsed | **748/748, 22,384 windows, 18,232 with a usable Area, 961,360 anchors** |
+| spui layouts parsed | **748 resources = 524 distinct instances** (224 shadowed, 18 with a different size), 22,384 windows, 18,232 with a usable Area, 961,360 anchors |
+| **state drives the UI** | **DONE** — DevLauncher's `uilayout -load E3LaunchScreen` executed; 65.9% of pixels differ from our own pick |
 | designer schema | **306 ids** (66 Class + 240 Property), 227 present in the binaries |
 | our own reversal audit | **29 PASS / 1 FAIL / 2 UNKNOWN / 1 SKIP** over 33 claims / 131 checks |
 | Ghidra functions carved | 55,294 (54,611 before seeding; the 7 seeds cascaded to +683) |
-| feature map | engine 82.2%, overall 75.7% (261 features: 185 done / 25 partial / 51 todo) |
+| feature map | engine 82.4%, overall 76.0% (267 features: 190 done / 26 partial / 51 todo) |
 
 ### THE NEXT STEP, precise and small
-**Steps 1 and 2 of yesterday's list are DONE** (recorded below so they are not re-done). The path
-forward is now the UI being DRIVEN, not just rendered:
+**DONE (2026-10-14, commit `1995cca`): the state machine DRIVES the UI.** `state DevLauncher`'s own
+line `cheat "uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e"` is now EXECUTED:
+`fnv1_lower("E3LaunchScreen") == 0xE932BD44` is a real `spui` instance, `spui::Reader::find_by_name()`
+resolves it, and `source/states/uipresent.cpp` presents that screen. It is a genuinely different
+screen from the one we would pick ourselves — **-state:DevLauncher vs -state:Title differ in 65.9% of
+sampled pixels** — so this is driving, not relabelling. Reproduce:
 
-1. **Let the state machine name the layout and draw THAT.** `spui::Reader::best_screen()` picks the
-   layout with the most usable Areas — our choice, not the game's. The recovered state script names
-   the real ones (`uilayout -load E3LaunchScreen 0x027996d8 0x0279bf9e`), so the honest feature is:
-   `-state:Main` → parse the state's own `uilayout`/`cheat` verbs → load the layout **it** names →
-   draw that. Smallest step that turns "we can render a layout" into "the state machine drives the
-   UI", which is the actual Main→playable path. The two 32-bit ids after the name are the next thing
-   to identify: one of them is almost certainly the `spui` instance, so check them against the
-   layout instances we already parse.
-2. Then the **`mode` table**: all 60 states still log `mode <M> NOT EXECUTED`.
-3. Then gameplay.
+```
+cd build\bin\Debug
+.\OpenSpore.exe -devDirs -w -quitAfter 10 -state:DevLauncher
+```
+Expect `[ui] screen: state 'DevLauncher' asked for 'E3LaunchScreen' -> PatchData.package rec[1053]
+inst=0xE932BD44 24814B 68 windows`, and `1 \`uilayout -load\` EXECUTED by the UI layer`.
+
+What is actually left on the menu step, in order of how much it unblocks:
+
+1. **The `mode` table.** Every state still logs ``mode <M> not executed (the engine's mode table is
+   not implemented)`` — DevLauncher asks for `EffectsViewer`, `BasicLauncher` asks for `Launcher`,
+   17 modes across 60 states. This is the last thing standing between "a state shows its screen" and
+   "a state configures the engine to play its game". `gamestates:-modes` lists them.
+2. **The `spui` vocabulary gap**: a sequential walk still derails in 637/748 layouts on "id not in
+   schema", because the designer XML ships 227 of the ids the binaries use. The anchor-driven reader
+   sidesteps it, so this is detail, not structure — but it is what blocks widget BEHAVIOUR (click
+   handlers, the `command_id` we already read but cannot act on).
+3. **Unify the precedence rule.** spui takes the FIRST container, text takes the LAST. Surface: 18
+   layouts and 3 of 23,933 strings. Do not "fix" it by picking one arbitrarily — EP1 beating
+   PatchData on locale is provably right (EP1 fixes the patch's typo), so the original's rule is not
+   "earliest wins". It needs the resource-cache order off the disassembly, which is a small,
+   self-contained question.
+4. Then gameplay: `effect`/`message`/`prop` actions, and the 2 `uilayout` ids (not resource ids, not
+   registry names — internal to the layout or runtime handles).
 
 ### DONE today, so do not redo it (2026-10-14)
 * **The `fnv1_lower(lang)` rule for nested packages is verified for all 15 shipped languages**
