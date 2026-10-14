@@ -7,12 +7,12 @@ Last update: 2026-10-14 (session 13, end of day — written immediately before c
 
 ## HAND-OFF, session 13 end (2026-10-14 ~11:00). Read this block, then just start on step 1 below.
 
-**Everything is committed AND pushed.** The last work commit is `5d652a0` ("The EP1 locale text is a
-DBPF *inside* a DBPF…"), and this hand-off edit is committed on top of it — so read `git log -1` for
-the real HEAD rather than trusting the sha here. 74 commits at the time of writing, and
-`git ls-remote origin main` agreed with local HEAD (the remote `github.com/dpteam/OpenSpore` tracks
-each commit automatically), so **nothing is waiting on a push**. No background jobs; the Ghidra
-project is unlocked.
+**Everything is COMMITTED. Pushing is yours, via GitHub Desktop.** The last work commit is `5d652a0`
+("The EP1 locale text is a DBPF *inside* a DBPF…"); the hand-off commits on top of it are local until
+you push them, which is the normal workflow here (my `git push` cannot authenticate from this session —
+`User cancelled dialog` / `could not read Username for 'https://github.com'` — so never try to push
+from a session, just commit and let the user push). Read `git log -1` and `git status` for the real
+state rather than trusting any sha written here. No background jobs; the Ghidra project is unlocked.
 
 ### The state in one paragraph
 Our engine **draws a real Spore UI screen** from shipped data: `source/engine/spui.cpp` reads the 748

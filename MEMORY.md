@@ -796,6 +796,14 @@ Measured in `tools/nested_locale.py` / `tools/nested_langs.py`, implemented in
   748, and `appstates` listed 5 copies of a script that exists 3 times). Both now dedupe by
   `weakly_canonical`, as the `pkg` verb already did.
 
+## Git: commit here, the user pushes (session 13)
+
+`git push` from a session **cannot authenticate** in this environment: it fails with
+`fatal: User cancelled dialog.` then `could not read Username for 'https://github.com': No such file
+or directory` (no `/dev/tty`). **The user pushes manually via GitHub Desktop.** So: commit liberally,
+never spend a round on `git push`, and do not treat "local only" as a problem to solve or report as a
+risk. `origin/main` lagging `HEAD` by a commit or two is the normal steady state.
+
 ## TRAP: scoop's `current` is a JUNCTION, and REA refuses it (session 13)
 
 `C:\Users\DartPower\scoop\apps\ghidra\current` is `<JUNCTION>` → `ReparsePoint` in its attributes. REA's
