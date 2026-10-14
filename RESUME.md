@@ -94,21 +94,33 @@ inst=0xE932BD44 24814B 68 windows`, and `1 \`uilayout -load\` EXECUTED by the UI
 
 What is actually left on the menu step, in order of how much it unblocks:
 
-1. **The `mode` table.** Every state still logs ``mode <M> not executed (the engine's mode table is
-   not implemented)`` — DevLauncher asks for `EffectsViewer`, `BasicLauncher` asks for `Launcher`,
-   17 modes across 60 states. This is the last thing standing between "a state shows its screen" and
-   "a state configures the engine to play its game". `gamestates:-modes` lists them.
-2. **The `spui` vocabulary gap**: a sequential walk still derails in 637/748 layouts on "id not in
+1. **INPUT drives the UI.** This is the next step, and the mode investigation is what says so. We
+   already read every widget's `Area` rect AND its `command_id`; a click can therefore be hit-tested
+   and dispatched into the state machine, which turns the menu from a picture into a menu. Nothing
+   else on this list is on the path to "playable" — the rest is either detail or the 3D stages.
+2. **The `mode` table — ANSWERED, and the answer is "it is not data"** (`analysis/modes.md`,
+   2026-10-14). 11 of the 17 mode names are standalone ASCII strings in the oracle and appear in NO
+   package (all three id fields, all depths, all 150,945 records); each is referenced exactly once
+   from a function starting ~0x2f bytes earlier — a per-class factory registering itself by name
+   (`0xd3bd20`: allocate 0xe8, construct, `vtable+0x20(obj, data, "Game_Creature")`). The family is
+   real (`AppModeEditorBase::Save` is in the binary). **5 modes — `AnimViewer`, `EffectsViewer`,
+   `Launcher`, `ModelViewer`, `MultiverseJournal` — appear NOWHERE in the 24.9 MB oracle, not even as
+   substrings**, so the script asks for classes this build does not contain; `Editors` occurs only
+   inside an unrelated sentence. Implementing modes therefore means reversing each `AppMode*` class =
+   the GAMEPLAY step. `mode X not executed` stays honest, and we now know precisely why.
+   Bonus: `FUN_00b5dcd0` maps a (mode, sub-mode) pair to STATE NAMES and calls a transition by name —
+   so the original's flow is **mode class → named state → UI layout**, the chain we build forward.
+   Careful: its `0x02ccd1d2` for GalaxyGameEntry is NOT the script's manual `-id 0x02ccda9c`; the mode
+   enum and the script ids are different namespaces.
+3. **The `spui` vocabulary gap**: a sequential walk still derails in 637/748 layouts on "id not in
    schema", because the designer XML ships 227 of the ids the binaries use. The anchor-driven reader
-   sidesteps it, so this is detail, not structure — but it is what blocks widget BEHAVIOUR (click
-   handlers, the `command_id` we already read but cannot act on).
-3. **Unify the precedence rule.** spui takes the FIRST container, text takes the LAST. Surface: 18
+   sidesteps it, so this is detail, not structure — but it is what blocks richer widget behaviour.
+4. **Unify the precedence rule.** spui takes the FIRST container, text takes the LAST. Surface: 18
    layouts and 3 of 23,933 strings. Do not "fix" it by picking one arbitrarily — EP1 beating
    PatchData on locale is provably right (EP1 fixes the patch's typo), so the original's rule is not
-   "earliest wins". It needs the resource-cache order off the disassembly, which is a small,
-   self-contained question.
-4. Then gameplay: `effect`/`message`/`prop` actions, and the 2 `uilayout` ids (not resource ids, not
-   registry names — internal to the layout or runtime handles).
+   "earliest wins". It needs the resource-cache order off the disassembly.
+5. Then gameplay: `effect`/`message`/`prop` actions, and the 2 `uilayout` ids (not resource ids, not
+   registry names, not standalone strings — internal to the layout or runtime handles).
 
 ### DONE today, so do not redo it (2026-10-14)
 * **The `fnv1_lower(lang)` rule for nested packages is verified for all 15 shipped languages**

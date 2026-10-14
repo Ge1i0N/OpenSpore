@@ -908,6 +908,34 @@ The menu step's real milestone, and the technique that got there is worth more t
   to "14,657 distinct keys" could only happen if the table dimension was unused — the tell that the
   `u64`-into-`u32` map key had thrown the table away. See the locale section above.
 
+## The `mode` table is CODE, not data (session 13; full doc: `analysis/modes.md`)
+
+The assumption was that modes are another shipped table, findable the way `SporeAppStates` was. Wrong,
+and the test that proves it is cheap:
+
+* **11 of the 17 mode names are standalone ASCII strings in the oracle and appear in NO package** —
+  checked against all three id fields, every depth, all 150,945 records (`tools/mode_where.py`).
+* **Each name is referenced exactly once, from a function that starts ~0x2f bytes earlier** — the
+  signature of a per-class factory registering itself by name. `0xd3bd20`: allocate 0xe8, construct,
+  `(**(code**)(*param_1+0x20))(obj, &DAT_01654c01, "Game_Creature")`. The family is real: the binary
+  contains `AppModeEditorBase::Save`.
+* **5 modes exist NOWHERE in the 24.9 MB oracle, not even as substrings** (`AnimViewer`,
+  `EffectsViewer`, `Launcher`, `ModelViewer`, `MultiverseJournal`): the script asks for classes this
+  build does not ship. `Editors` occurs once, inside an unrelated English sentence — a substring false
+  positive, NOT a registration. **Always search substrings before believing an absence.**
+* Consequence: `mode X not executed` stays the honest log line, and we know exactly why — implementing
+  modes means reversing each `AppMode*` class, which is the GAMEPLAY step, not the menu step.
+* **The mode→state link runs our way**: `FUN_00b5dcd0` maps a (mode, sub-mode) pointer pair to STATE
+  NAMES and calls a transition by name (`Game_Cell`→"CellGame", `Game_Creature`→"CreatureGame",
+  `Game_Tribe`→"TribeGame", `Game_Civ`→"CivilisationGame", `Game_Space`→"SpaceGame",
+  `ScenarioMode`→"ScenarioMode", `0x02ccd1d2`→"GalaxyGameEntry"). So the original's flow is
+  **mode class → named state → UI layout**.
+* **TRAP in that table**: `0x02ccd1d2` is close to, but NOT, `GalaxyGameEntry`'s script `-id`
+  `0x02ccda9c`. The mode enum's object addresses and the script's manual ids are **different
+  namespaces**. Reading one as the other produces confident garbage.
+* **`tools/ghidra_xref.py` is new and general**: "who references this address / this string by text",
+  the direction the PyGhidra bridge did not cover (it could only ask "what does this function do").
+
 ## Git: commit here, the user pushes (session 13)
 
 
