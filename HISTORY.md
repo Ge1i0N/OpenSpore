@@ -7,6 +7,39 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## Session 13 — 2026-10-13: the engine draws real Spore geometry; a first-argument bug fixed; a progress map
 
+### 2026-10-14, the last stretch: THE MENU IS FUNCTIONAL — a click enters a game state
+Six commits (`fba967b`→`e55fc41`). The path's menu step went from "we can draw a screen" to "the screen
+does something", with every link in the chain justified by data rather than by choice.
+
+1. **`uilayout -load` is EXECUTED** — `fnv1_lower("E3LaunchScreen") == 0xE932BD44` is a real `spui`
+   instance, so a state's own words select its screen; `-state:DevLauncher` vs `-state:Title` differ in
+   **65.9%** of sampled pixels, i.e. a different SCREEN, not a relabel. (`1995cca`)
+2. **Modes answered**: code, not data — 11 of 17 names are standalone strings in the oracle, each
+   registered once by a per-class factory; **5 exist nowhere in the 24.9 MB binary**. (`8710631`,
+   `analysis/modes.md`)
+3. **A pointer resolves to exactly one widget**, same path for a real mouse and for `spui:-click`.
+   (`bfb7f4a`)
+4. **A widget's control id IS a state id**: 9 real hits of 4,187 control ids × 60 states, **<0.001
+   expected**, and the labels spell it out — `0x02CCDA9C` captions **"GGE"**, `0x022D9E01…10` caption
+   "Creature/Building/Vehicle/Flora/Terrain Editor". Verified live:
+   `click (942,261) -> "GGE" => ENTER STATE 'GalaxyGameEntry'` → `[state] -> GalaxyGameEntry
+   [0x02ccda9c]`, the script's own `-id`. (`4cf3825`)
+
+**Two bugs that looked like working code, both found by running the consequence rather than the
+intention.** (a) `request_goto()` from outside a transition logged `chain: queued gotoState 'X'` and
+never executed — fixed by `Manager::drain_pending()` per frame. (b) The presenter's 260-window cap
+BINDS (largest layout has 570), so it drew a subset the hit-test could still select. And a measurement
+correction: **vector order is not z-order** — E3LaunchScreen's full-screen root is the LAST record, so
+"last drawn is topmost" selected the widget behind everything; fixed as ONE policy (paint
+largest-first, hit the smallest containing), with the real parent/child hierarchy named as the single
+place to replace it.
+
+Verification: 0 build warnings, yardstick 10/10, exit 0, 57/57 packages, 150,945 resources, 748 layout
+resources = 524 distinct / 22,384 windows / 18,232 Areas / 961,360 anchors, locale 265 tables / 23,933
+texts / 14,657 keys, captions 1,384 of 1,426, unpack `,locale` 2,944/0 failed, Main/GalaxyGameEntry/
+CreatureGame each still capture a frame. Map **82.2% → 82.8%** engine, **75.7% → 76.2%** overall
+(273 features, 194 done), and **gameplay is no longer all-todo**.
+
 ### 2026-10-14, later: THE STATE MACHINE DRIVES THE UI, and a 64→32 narrowing that had been lying to us
 
 Four commits, all measured. In order of what they cost:
