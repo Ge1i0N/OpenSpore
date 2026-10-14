@@ -1001,6 +1001,17 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
                             << " discount it and judge on the rest.";
                           return o.str();
                       }
+                      if (c.args[1] == "-dump" && c.args.size() >= 3) {
+                          // Dump one layout's ANCHOR LIST in file order: offset, id, schema name, code,
+                          // element count. Ground truth from the reader that already works, for
+                          // questions it cannot answer alone - e.g. what surrounds a `Children` record
+                          // (0xEEC1B00B), and therefore what the u16 after it counts.
+                          const u32 want = (u32)std::strtoul(c.args[2].c_str(), nullptr, 16);
+                          const size_t maxn = c.args.size() >= 4
+                                                  ? (size_t)std::strtoul(c.args[3].c_str(), nullptr, 10)
+                                                  : 60;
+                          return spui::dump_anchors(want, maxn);
+                      }
                       if (c.args[1] == "-win" && c.args.size() >= 3) {
                           size_t want = (size_t)std::strtoul(c.args[2].c_str(), nullptr, 10);
                           size_t i = 0;

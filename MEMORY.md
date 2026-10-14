@@ -1028,8 +1028,13 @@ The framing was `id:u32 | code:u16 | marker:u16(==1) | payload[code]` and "marke
   schema names as a list. Reading that as a count lands on a well-formed record; reading it as a marker
   lands on nothing. **24 records in one layout favour the count reading, 0 favour the marker.**
 * **What it buys:** the old scan required `marker == 1` and so SKIPPED every multi-element record.
-  Anchors go **961,360 -> 977,010** (+1.6%), of which **15,650** have count != 1. NOT the +12.5% the
+  Anchors go **961,360 -> 976,318** (+1.6%), of which **15,032** have count != 1. NOT the +12.5% the
   total might suggest - the rest of that gap is the VOCABULARY (unknown ids), still the real wall.
+* **A false anchor the relaxation let in:** `id=0x4EC1B8D8 "Window" code=24565 count=40`. Cause: the
+  typecode measurement reports **0x5FF5** for a `<Class>` id as its sentinel for "class, not property",
+  and the generator emitted it as a code for five ids (Window, Button, Dialog, Outlined Text, Animated
+  Icon). Fixed at the source (classes get 0xFFFF) and guarded in the reader (no code above 32 is a
+  code). `tools/schema_code_audit.py` reports 0 implausible codes.
 * **What it does NOT fix:** the sequential walk. Count-aware sizing reaches 10 records vs 9
   (`tools/spui_walk.py`: 12.7% vs 9.2% of the layout) and gets no further, so "derails in 637 of 748"
   was never a mis-sizing artefact. Good to know: the old explanation was right.

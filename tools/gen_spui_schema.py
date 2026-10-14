@@ -122,7 +122,12 @@ def main():
         rec = classes.get(v) or props.get(v)
         is_class = v in classes
         code, size = 0xFFFF, 0
-        if codes and str(v) in codes:
+        # A <Class> (Window, Button, Dialog, Outlined Text, Animated Icon) has NO record code: the
+        # typecode measurement reports 0x5FF5 for them, which is its own sentinel for "this is a class",
+        # and emitting that as a code made the reader match on it. Measured consequence: the moment the
+        # third u16 stopped being required to be 1, five false anchors appeared
+        # (`id=0x4EC1B8D8 "Window" code=24565 count=40`). Classes get 0xFFFF, which the reader skips.
+        if codes and str(v) in codes and not is_class:
             c = codes[str(v)]
             code = c.get("code", 0xFFFF)
             size = CODE_SIZE.get(code, 0)

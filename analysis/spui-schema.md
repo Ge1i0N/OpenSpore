@@ -220,12 +220,21 @@ byte-identical in shape across occurrences - each begins with the same sequence,
 
 so children are serialised INLINE, each as a full property set, and the array code 19 nests.
 
-**WHAT IS NOT SETTLED, stated rather than glossed:** what the u16 after a code-19 header counts. The
-walk in `tools/spui_tree.py` reads it as a RECORD count and derails after 10 records, so "records" is
-RULED OUT; "child count", "element count" and "byte length of the nested block" are all still open, and
-the values rise by ~5 per record while the following blocks look identical in shape. The tree can be
-walked from the nested blocks themselves, so nothing needs to depend on this number yet - but do not
-put a name on it until it is measured.
+**WHAT IS NOT SETTLED, stated rather than glossed - and now with the ruled-out readings listed.** What
+the u16 after a code-19 header counts is still open, and three readings are now MEASURED to be wrong:
+
+| reading | test | result |
+|---|---|---|
+| RECORDS | walk that many records (`tools/spui_tree.py`) | derails after 10 -> **ruled out** |
+| BYTE LENGTH of the nested block | next record at `off + 10 + N` (`tools/spui_code19.py`) | 1 of 14 land well-formed -> **ruled out** |
+| ELEMENT COUNT of 4-byte elements | next record at `off + 10 + 4N` (same tool) | 0 of 14 -> **ruled out** |
+
+The values rise steadily across the layout (41, 43, 44, 46, 47, 49, 50, 52, ... interleaved between
+`FillDrawable` and an image record), which looks like a running index or a cumulative position rather
+than a size - but that is a guess and is recorded as one. **Consequence: the explicit parent/child tree
+is not readable from this field yet, so the engine keeps its geometry-based containment (paint largest
+first, hit the smallest containing Area), which is honest and works.** Two heuristics that agree with
+each other beat a tree read wrongly.
 
 **Consequence for the engine:** the paint order and the hit order can both come from the tree the
 designer actually built, instead of two heuristics that happen to agree. `spui::paint_order()` and
@@ -260,10 +269,20 @@ colours is 40 bytes rather than 12.
 **Consequences, both measured:**
 
 * **Coverage:** the old scan required `marker == 1` and therefore SKIPPED every multi-element record.
-  With the count accepted (and the id's stable code still required, which is what keeps false anchors
-  rare), anchors read across the corpus go **961,360 -> 977,010**, of which **15,650** carry a count
-  other than 1. So the correction buys +1.6% coverage, not the +12.5% the 1,098,129 total might
-  suggest - the rest of that gap is the VOCABULARY (unknown ids), which is the wall it always was.
+  With the count accepted - and the id's stable code still required, plus a code-plausibility guard
+  (see below) - anchors read across the corpus go **961,360 -> 976,318**, of which **15,032** carry a
+  count other than 1. So the correction buys **+14,958 anchors (+1.6%)**, not the +12.5% the 1,098,129
+  total might suggest - the rest of that gap is the VOCABULARY (unknown ids), which is the wall it
+  always was. (An earlier run of this same measurement reported 977,010 before the class-sentinel guard
+  below; 976,318 is the honest figure and supersedes it.)
+* **A FALSE ANCHOR the relaxation let in, and the guard that closes it.** Relaxing the third u16 from
+  "must be 1" to "any sane count" admits an anchor whenever the schema holds a garbage code for an id.
+  It did: `id=0x4EC1B8D8 "Window" code=24565 count=40`, which is not a record shape. The cause is in the
+  GENERATOR: `tools/spui_typecode.py` reports **0x5FF5** for a `<Class>` id as its sentinel for "this is
+  a class, not a property", and the schema emitted that as a code - for five ids (`Window`, `Button`,
+  `Dialog`, `Outlined Text`, `Animated Icon`). Fixed at the source (classes now get 0xFFFF, which the
+  reader skips) AND guarded in the reader (no code above 32 is a code; real codes are 2, 5, 7, 9, 11,
+  16, 17, 18, 19, 20). `tools/schema_code_audit.py` now reports 0 implausible codes.
 * **It does NOT fix the sequential walk.** Walking with count-aware sizing reaches 10 records where
   marker-sizing reaches 9 on E3LaunchScreen, and gets no further: `tools/spui_walk.py` reports
   12.7% vs 9.2% of the layout. So the "derails in 637 of 748" wall is NOT a mis-sizing artefact, which

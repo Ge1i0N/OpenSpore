@@ -155,6 +155,12 @@ std::vector<Anchor> find_anchors(const std::vector<u8>& d) {
     if (n < 8) return out;
     for (const SchemaEntry& e : kSchema) {
         if (e.code == 0xFFFF) continue;              // no measured code -> cannot read it
+        // 0x5FF5 (24565) is the generator's sentinel for a CLASS id, not a property: Window, Button,
+        // Dialog, Outlined Text and Animated Icon carry it. A class id has no record of its own, and
+        // matching on it produced false anchors the moment the third u16 stopped being required to be
+        // 1 (measured: `id=0x4EC1B8D8 "Window" code=24565 count=40`, which is not a record shape).
+        // Real codes are small: 2, 5, 7, 9, 11, 16, 17, 18, 19, 20.
+        if (e.code > 32) continue;
         const u8 pat[4] = {(u8)(e.id & 0xFF), (u8)((e.id >> 8) & 0xFF), (u8)((e.id >> 16) & 0xFF),
                            (u8)((e.id >> 24) & 0xFF)};
         for (size_t k = 0; k + 8 <= n; ++k) {
@@ -485,6 +491,47 @@ std::string Reader::stats() const {
 Reader& instance() {
     static Reader r;
     return r;
+}
+
+std::string dump_anchors(u32 instance, size_t maxn) {
+    ensure_schema();
+    // Re-walk the search paths for the resource, the same way load() does, so the dump reflects the
+    // bytes the reader actually consumed rather than a cached summary.
+    std::vector<std::string> pkgs;
+    std::set<std::string> seen;
+    for (const auto& sp : fs::search_paths()) {
+        for (const auto& path : pkg::find_packages(sp.dir.string())) {
+            std::error_code ec;
+            std::string key = std::filesystem::weakly_canonical(path, ec).string();
+            if (ec) key = path;
+            if (seen.insert(key).second) pkgs.push_back(path);
+        }
+    }
+    for (const auto& path : pkgs) {
+        pkg::Package pk;
+        if (!pk.open(path)) continue;
+        const auto& recs = pk.records();
+        for (u32 n = 0; n < recs.size(); ++n) {
+            if (recs[n].type() != kSpuiType || recs[n].instance() != instance) continue;
+            std::vector<u8> bytes;
+            if (!pk.read_resource_decoded(n, bytes)) continue;
+            std::vector<Anchor> an = find_anchors(bytes);
+            std::ostringstream o;
+            o << an.size() << " anchors of instance 0x" << std::hex << instance << std::dec << " from "
+              << std::filesystem::path(path).filename().string() << " (" << bytes.size() << " bytes)";
+            size_t shown = 0;
+            for (const Anchor& a : an) {
+                if (shown++ >= maxn) { o << "\n  ... (" << (an.size() - maxn) << " more)"; break; }
+                const char* nm = schema_name(a.id);
+                char b[200];
+                std::snprintf(b, sizeof(b), "\n  off=%-6u id=0x%08X %-24s code=%-3u count=%u",
+                              a.off, a.id, nm ? nm : "(unknown)", a.code, a.count);
+                o << b;
+            }
+            return o.str();
+        }
+    }
+    return "dump_anchors: instance not found on the search paths";
 }
 
 const char* schema_name(u32 id) {

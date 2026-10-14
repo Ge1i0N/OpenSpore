@@ -185,6 +185,12 @@ private:
 
 Reader& instance();
 
+// Dump one layout's ANCHOR LIST in file order (offset, id, schema name, code, element count). This is
+// ground truth from the reader that already works, for questions the reader cannot answer alone - in
+// particular what surrounds a `Children` record (0xEEC1B00B), and therefore what the u16 after it
+// counts. Re-reads the resource rather than caching 748 blobs.
+std::string dump_anchors(u32 instance, size_t maxn);
+
 // The schema lookup, for logging and for the `spui` console verb.
 const char* schema_name(u32 id);
 const char* schema_type(u32 id);
