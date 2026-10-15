@@ -50,6 +50,9 @@ public:
     bool open(const CatalogInput& catalog,const spui::Layout& source,const std::vector<StarSceneCardInput>& cards,std::string& error);
     bool close(std::string& error);
     bool apply_available(u64 ticket,ImageProvider* provider,std::string& error);
+    // Explicit case/current observation only; no mouse/selection -> native phase dispatch. Accepted
+    // requests retire draw/pick views, including blocked/equal guards; invalid requests preserve them.
+    bool apply_phase_transition(u64 ticket,size_t entry_index,const StarTransitionInputs& inputs,std::string& error);
     // Every accepted update retires the previous frame, even when camera is unavailable/invalid.
     // Global camera failure returns false; per-card failures are reported, excluded from layers/hits.
     bool update(u64 ticket,const SceneCameraObservation& camera,std::string& error);

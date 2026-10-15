@@ -35,6 +35,7 @@ IMAGE_FUNCTIONS = (0x97d030,0x97d070,0x6c0230,0x97d840,0xde3db0,0xde3eb0,0x80632
 ANIMATED_FUNCTIONS = (0x7f5500,0x7f5550,0x7f5a30,0x7f5b50,0x7f5d50,0x7f5e30,0xdf9200)
 SCENE_FUNCTIONS = (0x67dcd0,0x67dec0,0x67dd10,0x67dd40,0x67df50,0x67dd50,0x67df60,
                    0x67dd90,0xde46d0,0xddd920,0xddd150,0xde3c20,0x7c4250,0xdf6110)
+TRANSITION_FUNCTIONS = (0xdf6d80,0xdf7ac0,0xdf7bf0,0x436350,0x436390,0xa20670,0x67ca60,0x95f950,0x95fda0,0x95fe20)
 
 
 def main():
@@ -47,8 +48,9 @@ def main():
     images = '--images' in sys.argv
     animated = '--animated' in sys.argv
     scene = '--scene' in sys.argv
-    addresses = SCENE_FUNCTIONS if scene else ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-scene' if scene else 'analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
+    transition = '--transition' in sys.argv
+    addresses = TRANSITION_FUNCTIONS if transition else SCENE_FUNCTIONS if scene else ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-star-transition' if transition else 'analysis/audit/gge-scene' if scene else 'analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
@@ -96,6 +98,38 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--transition' in sys.argv:
+        dest=ROOT/'analysis/audit/gge-star-transition'; dest.mkdir(parents=True,exist_ok=True)
+        facts={'oracle_sha256':digest,'authority':'local Ghidra/objdump static instructions, not original input/phase runtime',
+               'dispatch_table':{'va':'00DF7670','cases':{str(i+1):hex(pe.u32(0xdf7670+i*4)) for i in range(5)}},
+               'guard':'DF6D93 equality UI-data+2C vs requested case skips body. All normal returns1; case4 returns before common latch write.',
+               'case2':['436350/436390 eventD06D9182','hide046A9CA7','show04656452','show05B31710','write phase+2C'],
+               'case3':['eventD06D9182','show046A9CA7','67CA60 service+4C(1,046A9CA7 window)','write phase+2C','entry name02E712E4/046EA550','show05B31710'],
+               'case4':['eventD2FC3AD5','hide04656452','hide05B31710','return1 WITHOUT assigning+2C'],
+               'case5':['event6C6DA889','hide04656452','hide046A9CA7','show03753F40','if05B31710 exists copy05B34D93 slot34->target slot60 then show','write phase+2C'],
+               'callers':{'DF7BF0':'controller+FC nonzero blocks; changing controller+F8 entry restores old case1 then saved->3/candidate->2, projection/placement afterward',
+                          'DF7AC0':'changing controller+FC restores prior case1 when explicit flag true, sets new pointer; saved->5/candidate->4 when flag true; other controller/service side effects unimplemented'},
+               'rectangle_boundary':'table1415328 slots34/60/64 ->95F950/95FDA0/95FE20: getter returns interface-local+94 RECT, setter copies four floats and notifies. Do not label source34->target60 copy a layered-object relation without more evidence.',
+               'service_boundary':'436350/436390 use service getterA20670(global166D9F4), no-op if absent; 67CA60 returnsglobal15FCC4C. Host does not infer event purpose/audio/focus or fabricate absent manager.',
+               'host_scope':['requested2..5 + explicit observed current guard, per-transition object choices and ordered requirement plan',
+                             'flags(mask1), names and literal local-rect copy; event/control service Unsupported, no native latch/notifications',
+                             'host independent visual application despite unimplemented services, NOT original skip/error scheduling',
+                             'scene retires draw/pick frame after accepted request; no automatic picking dispatch or active-camera producer'],
+               'corpus':[]}
+        for path,record,inst,data in layouts([ROOT/'build/bin/Debug/Data/PatchData.package',ROOT/'build/bin/Debug/Data/Spore_Graphics.package'],0x21df01f2):
+            b=BinaryLayout(data); b.parse(); controls={}
+            for i,obj in b.objects.items():
+                for prop in obj['properties']:
+                    if prop['id']==0xeec1b001 and 'raw' in prop:
+                        control=int.from_bytes(bytes.fromhex(prop['raw']),'little')
+                        if control in (0x046a9ca7,0x04656452,0x05b31710,0x03753f40,0x05b34d93,0x02e712e4,0x046ea550):
+                            controls.setdefault(hex(control),[]).append({'object':i,'parent':b.parents.get(i)})
+            facts['corpus'].append({'package':path.name,'record':record,'sha256':hashlib.sha256(data).hexdigest(),'controls':controls})
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        for name,start,end in [('cases2-to5',0xdf6daf,0xdf6ff7),('hover-caller',0xdf7bf0,0xdf7cac),('selected-caller',0xdf7ac0,0xdf7be8),('rectangle-setters',0x95fda0,0x95fe7f)]:
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(disasm(pe,start,end))+'\n',encoding='utf-8',newline='\n')
+        print('retained explicit show/phase cases, caller predicates and rectangle/service boundaries; no target execution')
+        return
     if '--scene' in sys.argv:
         dest=ROOT/'analysis/audit/gge-scene'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'local Ghidra/objdump static evidence; host projection collection is separate design, not native scene execution',

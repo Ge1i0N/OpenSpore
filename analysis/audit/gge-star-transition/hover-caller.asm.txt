@@ -1,0 +1,63 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  df7bf0:	51                   	push   ecx
+  df7bf1:	a1 44 13 6a 01       	mov    eax,ds:0x16a1344
+  df7bf6:	83 b8 fc 00 00 00 00 	cmp    DWORD PTR [eax+0xfc],0x0
+  df7bfd:	56                   	push   esi
+  df7bfe:	8b f1                	mov    esi,ecx
+  df7c00:	0f 85 a3 00 00 00    	jne    0xdf7ca9
+  df7c06:	8b 88 f8 00 00 00    	mov    ecx,DWORD PTR [eax+0xf8]
+  df7c0c:	57                   	push   edi
+  df7c0d:	8b 7c 24 10          	mov    edi,DWORD PTR [esp+0x10]
+  df7c11:	3b cf                	cmp    ecx,edi
+  df7c13:	0f 84 8f 00 00 00    	je     0xdf7ca8
+  df7c19:	85 c9                	test   ecx,ecx
+  df7c1b:	74 14                	je     0xdf7c31
+  df7c1d:	8b c1                	mov    eax,ecx
+  df7c1f:	8b 88 b8 00 00 00    	mov    ecx,DWORD PTR [eax+0xb8]
+  df7c25:	6a 01                	push   0x1
+  df7c27:	e8 54 f1 ff ff       	call   0xdf6d80
+  df7c2c:	a1 44 13 6a 01       	mov    eax,ds:0x16a1344
+  df7c31:	c7 80 f8 00 00 00 00 	mov    DWORD PTR [eax+0xf8],0x0
+  df7c38:	00 00 00
+  df7c3b:	85 ff                	test   edi,edi
+  df7c3d:	74 69                	je     0xdf7ca8
+  df7c3f:	8b 8f b8 00 00 00    	mov    ecx,DWORD PTR [edi+0xb8]
+  df7c45:	85 c9                	test   ecx,ecx
+  df7c47:	74 5f                	je     0xdf7ca8
+  df7c49:	80 bf ac 00 00 00 00 	cmp    BYTE PTR [edi+0xac],0x0
+  df7c50:	74 04                	je     0xdf7c56
+  df7c52:	6a 03                	push   0x3
+  df7c54:	eb 02                	jmp    0xdf7c58
+  df7c56:	6a 02                	push   0x2
+  df7c58:	e8 23 f1 ff ff       	call   0xdf6d80
+  df7c5d:	8b 16                	mov    edx,DWORD PTR [esi]
+  df7c5f:	8b 42 60             	mov    eax,DWORD PTR [edx+0x60]
+  df7c62:	6a 01                	push   0x1
+  df7c64:	6a 00                	push   0x0
+  df7c66:	8b ce                	mov    ecx,esi
+  df7c68:	ff d0                	call   eax
+  df7c6a:	8d 4c 24 10          	lea    ecx,[esp+0x10]
+  df7c6e:	51                   	push   ecx
+  df7c6f:	8d 54 24 0c          	lea    edx,[esp+0xc]
+  df7c73:	52                   	push   edx
+  df7c74:	8d 87 80 00 00 00    	lea    eax,[edi+0x80]
+  df7c7a:	50                   	push   eax
+  df7c7b:	e8 a0 bf fe ff       	call   0xde3c20
+  df7c80:	d9 44 24 1c          	fld    DWORD PTR [esp+0x1c]
+  df7c84:	8b 16                	mov    edx,DWORD PTR [esi]
+  df7c86:	d9 5c 24 08          	fstp   DWORD PTR [esp+0x8]
+  df7c8a:	d9 44 24 14          	fld    DWORD PTR [esp+0x14]
+  df7c8e:	8b 42 64             	mov    eax,DWORD PTR [edx+0x64]
+  df7c91:	83 c4 04             	add    esp,0x4
+  df7c94:	d9 1c 24             	fstp   DWORD PTR [esp]
+  df7c97:	57                   	push   edi
+  df7c98:	8b ce                	mov    ecx,esi
+  df7c9a:	ff d0                	call   eax
+  df7c9c:	8b 0d 44 13 6a 01    	mov    ecx,DWORD PTR ds:0x16a1344
+  df7ca2:	89 b9 f8 00 00 00    	mov    DWORD PTR [ecx+0xf8],edi
+  df7ca8:	5f                   	pop    edi
+  df7ca9:	5e                   	pop    esi
+  df7caa:	59                   	pop    ecx
+  df7cab:	c2                   	.byte 0xc2

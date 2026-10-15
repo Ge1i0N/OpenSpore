@@ -29,6 +29,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE star host lifecycle | [gge-star-lifecycle](gge-star-lifecycle.md) | owned generation-scoped action application/retry, names/centering/image/frame bindings; host-independent policy, not native phase/listener completion |
 | GGE direct package images | [gge-streaming-images](gge-streaming-images.md) | bounded file-backed PNG provider + 64-bit resource/index seeks; actual large original atlas feeds lifecycle without a test carrier |
 | GGE host scene boundary | [gge-star-scene](gge-star-scene.md) | explicit Available catalogue + active camera → owned placement/layers/pick; stale-frame suspension, not native factory/effects or visible galaxy completion |
+| GGE explicit phase/show cases | [gge-star-transition](gge-star-transition.md) | observed guard + requested2..5, narrow visible/name/rect subset; actual panel hit without IgnoreMouse workaround, no native latch/services/dispatch |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |

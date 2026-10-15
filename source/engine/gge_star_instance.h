@@ -27,6 +27,9 @@ public:
     bool set_caption_text(u16 object,const std::u16string& text,std::string& error);
     // DF6D80 passes root rectangle translated to (0,0); 806E00 floors centered local position.
     bool center_in_root(u16 object,std::string& error);
+    // Literal local rectangle copy, native source slot34 -> target slot60 subset; no parent-space
+    // conversion, notifications, visibility change or serialized property mutation.
+    bool copy_local_rect(u16 target,u16 source,std::string& error);
     bool image_target(u16 window,u16& drawable,std::string& error) const;
     bool current_image(u16 window,spui::ImageBinding& out,std::string& error) const;
     // CF3C4EAE only; override keyed by drawable identity, so windows sharing it share the image

@@ -1,0 +1,4 @@
+# Aligned caller and WindowBase rectangle getter; verified from GA instructions.
+0x00df7ac0	function	os_GGE_selected_entry_phase_request
+0x00df7bf0	function	os_GGE_hover_entry_phase_request
+0x0095f950	function	os_WindowBase_get_rect34

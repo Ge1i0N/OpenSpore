@@ -1,0 +1,21 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x0095FE20
+
+void __thiscall FUN_0095fe20(int *param_1,float param_2,float param_3)
+
+{
+  float local_10;
+  float local_c;
+  float local_8;
+  float local_4;
+
+  local_8 = ((float)param_1[0x27] - (float)param_1[0x25]) + param_2;
+  local_10 = param_2;
+  local_4 = ((float)param_1[0x28] - (float)param_1[0x26]) + param_3;
+  local_c = param_3;
+  (**(code **)(*param_1 + 0x60))(&local_10);
+  return;
+}

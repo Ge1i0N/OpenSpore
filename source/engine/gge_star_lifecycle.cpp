@@ -169,4 +169,34 @@ bool StarUiLifecycle::apply_available(u64 ticket,ImageProvider* provider,std::st
     for (auto& action:report_.actions) if (!terminal(action.status)) apply_action(*instance_,action,images);
     increment(report_.passes); error.clear(); return true;
 }
+bool StarUiLifecycle::apply_phase_transition(u64 ticket,const StarTransitionInputs& inputs,std::string& error) {
+    if (busy_||!instance_||!ticket||ticket!=report_.ticket) { error="inactive/stale/reentrant phase request"; return false; }
+    StarTransitionReport result;
+    if (!plan_star_transition(*instance_,inputs,result.plan,error)) return false;
+    struct Guard { bool& busy; ~Guard() { busy=false; } } guard{busy_}; busy_=true;
+    PassImages unused(nullptr);
+    for (const auto& request:result.plan.requests) {
+        StarTransitionResult outcome;
+        if (request.operation==StarTransitionOp::ServiceEvent) {
+            outcome.status=Status::Unsupported; outcome.detail="opaque 436350/436390 service event not executed";
+        } else {
+            StarHostAction action; action.request.target=request.target;
+            if (request.operation==StarTransitionOp::Flag||request.operation==StarTransitionOp::EntryName) {
+                action.request.operation=request.operation==StarTransitionOp::Flag?Phase1Op::Flag:Phase1Op::EntryName;
+                action.request.mask=request.mask; action.request.flag_value=request.value;
+                apply_action(*instance_,action,unused);
+            } else if (resolve(*instance_,request.target,action)) {
+                const bool source_bound=!request.source||resolve(*instance_,*request.source,action);
+                if (source_bound) {
+                    if (request.operation==StarTransitionOp::CopyWindowRect&&request.source&&request.source->object) {
+                        action.status=instance_->copy_local_rect(*request.target.object,*request.source->object,action.detail)?Status::Applied:Status::Failed;
+                    } else { action.status=Status::Unsupported; action.detail="67CA60 service control request not executed"; }
+                }
+            }
+            outcome.status=action.status; outcome.detail=std::move(action.detail);
+        }
+        result.results.push_back(std::move(outcome));
+    }
+    report_.transition=std::move(result); error.clear(); return true;
+}
 }  // namespace os::gge

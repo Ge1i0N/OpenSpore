@@ -20,6 +20,9 @@ Supported operations are now connected in one host owner:
 - Entry name, bounded UTF-16 → UTF-8 inline caption.
 - Separate `DF9200` configuration flags/caption reference and [Animated Icon](gge-animated-icon.md)
   frame selection plus exact serialized atlas-pixel attachment.
+- The [explicit phase-case follow-up](gge-star-transition.md) applies the recovered **visible mask1**,
+  name and local rectangle-copy subset of `DF6D80` cases **2..5**. It requires separate current-phase
+  observation/choices; opaque services and native phase latch are not executed or synthesized.
 
 Tooltip/userdata, native layering, saved terrain, profile and timestamp/colour services remain
 Unsupported (or structurally Missing/Ambiguous). No pointer, name-service answer or date string is

@@ -35,7 +35,8 @@ struct Provider final:ImageProvider {
         if (reenter) {
             std::string error; const auto ticket=reenter->report().ticket;
             denied=denied&&!reenter->close(error)&&!reenter->open(99,*source,entry,inputs,error)&&
-                !reenter->apply_available(ticket,this,error)&&!reenter->place(ticket,{0,0,false},error)&&reenter->report().ticket==ticket;
+                !reenter->apply_available(ticket,this,error)&&!reenter->place(ticket,{0,0,false},error)&&
+                !reenter->apply_phase_transition(ticket,StarTransitionInputs{2u,1u,{}},error)&&reenter->report().ticket==ticket;
         }
         ImageRead result;
         switch (mode) {

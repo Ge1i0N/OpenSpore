@@ -1,0 +1,26 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x0095FE20
+
+0095fe20  SUB ESP,0x10
+0095fe23  MOVSS XMM0,dword ptr [ESP + 0x14]
+0095fe29  MOVSS XMM2,dword ptr [ECX + 0x9c]
+0095fe31  SUBSS XMM2,dword ptr [ECX + 0x94]
+0095fe39  MOVSS XMM1,dword ptr [ESP + 0x18]
+0095fe3f  MOV EAX,dword ptr [ECX]
+0095fe41  MOV EAX,dword ptr [EAX + 0x60]
+0095fe44  ADDSS XMM2,XMM0
+0095fe48  MOVSS dword ptr [ESP],XMM0
+0095fe4d  MOVSS XMM0,dword ptr [ECX + 0xa0]
+0095fe55  SUBSS XMM0,dword ptr [ECX + 0x98]
+0095fe5d  LEA EDX,[ESP]
+0095fe60  ADDSS XMM0,XMM1
+0095fe64  PUSH EDX
+0095fe65  MOVSS dword ptr [ESP + 0x8],XMM1
+0095fe6b  MOVSS dword ptr [ESP + 0xc],XMM2
+0095fe71  MOVSS dword ptr [ESP + 0x10],XMM0
+0095fe77  CALL EAX
+0095fe79  ADD ESP,0x10
+0095fe7c  RET 0x8

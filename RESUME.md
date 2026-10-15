@@ -153,6 +153,17 @@ test with `-w -devDirs`; retain evidence and commit.
   template remains hidden/IgnoreMouse after current phase subset. Picking test clears ONLY root177
   IgnoreMouse in controlled copy, not native show behavior. No new GPU galaxy/native mount readiness.
   analysis/gge-star-scene.md / audit/gge-scene/ retain14 functions, globals and separate camera paths.
+- gge_star_transition.*: explicit DF6D80 requested2..5 + observed native UI-data+2C equality guard,
+  distinct per-transition duplicate choices; Unknown current -> blocked no-body, equal -> no-op.
+  Host lifecycle/scene apply flags(mask1)/entry name/literal local rect only, separate transition
+  report. Event436350/436390 and67CA60 service request Unsupported, no native latch or auto input route.
+  CORRECTION case4 returns1 WITHOUT assigning+2C; case3 latch before name tail. Source34->target60
+  copies RECT(four floats) via95F950/95FDA0, not a layered-object relation; phase1 80DE40 still unsupported.
+  F8 callerDF7BF0 saved->3/candidate->2 whenFC null; FC callerDF7AC0 saved->5/candidate->4 only explicit flag.
+  gge_star_transition_verify:195 checks, actual untouched-layout panel41 hit with root177 flags19
+  unchanged; no controlled IgnoreMouse workaround needed in this new test. Camera/current-phase/
+  catalogue observations still controlled, no new GPU native galaxy/live caller.
+  analysis/gge-star-transition.md / audit/gge-star-transition/ retain10 functions/corpus/instructions.
 
 ## Next, in order
 
@@ -178,7 +189,8 @@ test with `-w -devDirs`; retain evidence and commit.
     plain ImageDrawable only (gge_image_provider). The host lifecycle now joins independent image/
     frame/name/flag/centering actions with explicit outcome/retry, not native services/order/listeners.
     Direct production streaming PNG provider and host scene observation/ownership collector are now present.
-    Next: concrete active-camera producer/controller, native show/phase lifecycle and explicit genuine
+    Explicit show/phase body subset now implemented with separate observed guard, no native latch.
+    Next: actual input/callback/service route, active/current-phase producer and explicit genuine
     catalogue adapter integration/GPU card validation. Native factory/effects/playback/grid normalization
     remain separate. Plan itself executes no
     services and native return1 is not readiness; image-operation success is not phase completion.
@@ -202,7 +214,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -228,6 +240,7 @@ $frameCapture = Join-Path $env:TEMP ('OpenSpore-frame-' + [guid]::NewGuid() + '.
 $streamDir = Join-Path $env:TEMP ('OpenSpore-stream-' + [guid]::NewGuid())
 .\build\Debug\gge_streaming_image_verify.exe .\build\bin\Debug\Data\Spore_Graphics.package $streamDir
 .\build\Debug\gge_star_scene_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package
+.\build\Debug\gge_star_transition_verify.exe $fixtures
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

@@ -1,0 +1,55 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF7AC0
+
+void __thiscall os_GGE_selected_entry_phase_request(int *param_1,int param_2,char param_3)
+
+{
+  int *piVar1;
+  undefined4 uVar2;
+  undefined4 uVar3;
+
+  if (*(int *)(DAT_016a1344 + 0xfc) == param_2) {
+    return;
+  }
+  if (param_2 == 0) {
+    if (*(int *)(DAT_016a1344 + 0x108) == 2) {
+      FUN_00de9e70();
+      if (*(int *)(DAT_016a1344 + 0xfc) == 0) goto LAB_00df7ba4;
+      if (*(int *)(*(int *)(DAT_016a1344 + 0xfc) + 0xb8) != 0) {
+        piVar1 = (int *)FUN_00810650(0x46ad82d,1);
+        if (piVar1 != (int *)0x0) {
+          (**(code **)(*piVar1 + 0x7c))(1,0);
+        }
+        FUN_00de5380(0);
+      }
+    }
+  }
+  else {
+    (**(code **)(*param_1 + 0x5c))(0);
+    uVar2 = 2;
+    FUN_00dd9130(2);
+    FUN_00dda070(uVar2);
+    *(undefined1 *)(DAT_016a1344 + 0x271) = 0;
+    uVar3 = 0;
+    uVar2 = 0x2e25815e;
+    *(undefined1 *)(DAT_016a1344 + 200) = 0;
+    FUN_0067ca80(0x2e25815e,0);
+    FUN_0067c370(uVar2,uVar3);
+  }
+  if ((*(int *)(DAT_016a1344 + 0xfc) != 0) && (param_3 != '\0')) {
+    FUN_00df6d80(1);
+  }
+LAB_00df7ba4:
+  *(undefined4 *)(DAT_016a1344 + 0xfc) = 0;
+  if ((param_2 != 0) && (*(int *)(DAT_016a1344 + 0xfc) = param_2, param_3 != '\0')) {
+    if (*(char *)(param_2 + 0xac) != '\0') {
+      FUN_00df6d80(5);
+      return;
+    }
+    FUN_00df6d80(4);
+  }
+  return;
+}

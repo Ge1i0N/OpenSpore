@@ -1,6 +1,6 @@
 {
   "updated": "2026-10-15",
-  "source_sha256": "18a77b8a899a9eb8ea80563a8f6effbb87530145d2bd857d8ba4ec3a1a7e1e7f",
+  "source_sha256": "2e4cc9b8ac60f084d66c377612605060bbe76a3bb94edacee09cc52a1b66550f",
   "method": "Equal-weight tracked items; done=1, partial=0.5, todo=0. Not game or code coverage.",
   "overall": {
     "total": 294,

@@ -1,0 +1,164 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "local Ghidra/objdump static instructions, not original input/phase runtime",
+  "dispatch_table": {
+    "va": "00DF7670",
+    "cases": {
+      "1": "0xdf6ff9",
+      "2": "0xdf6daf",
+      "3": "0xdf6e25",
+      "4": "0xdf6ee3",
+      "5": "0xdf6f3b"
+    }
+  },
+  "guard": "DF6D93 equality UI-data+2C vs requested case skips body. All normal returns1; case4 returns before common latch write.",
+  "case2": [
+    "436350/436390 eventD06D9182",
+    "hide046A9CA7",
+    "show04656452",
+    "show05B31710",
+    "write phase+2C"
+  ],
+  "case3": [
+    "eventD06D9182",
+    "show046A9CA7",
+    "67CA60 service+4C(1,046A9CA7 window)",
+    "write phase+2C",
+    "entry name02E712E4/046EA550",
+    "show05B31710"
+  ],
+  "case4": [
+    "eventD2FC3AD5",
+    "hide04656452",
+    "hide05B31710",
+    "return1 WITHOUT assigning+2C"
+  ],
+  "case5": [
+    "event6C6DA889",
+    "hide04656452",
+    "hide046A9CA7",
+    "show03753F40",
+    "if05B31710 exists copy05B34D93 slot34->target slot60 then show",
+    "write phase+2C"
+  ],
+  "callers": {
+    "DF7BF0": "controller+FC nonzero blocks; changing controller+F8 entry restores old case1 then saved->3/candidate->2, projection/placement afterward",
+    "DF7AC0": "changing controller+FC restores prior case1 when explicit flag true, sets new pointer; saved->5/candidate->4 when flag true; other controller/service side effects unimplemented"
+  },
+  "rectangle_boundary": "table1415328 slots34/60/64 ->95F950/95FDA0/95FE20: getter returns interface-local+94 RECT, setter copies four floats and notifies. Do not label source34->target60 copy a layered-object relation without more evidence.",
+  "service_boundary": "436350/436390 use service getterA20670(global166D9F4), no-op if absent; 67CA60 returnsglobal15FCC4C. Host does not infer event purpose/audio/focus or fabricate absent manager.",
+  "host_scope": [
+    "requested2..5 + explicit observed current guard, per-transition object choices and ordered requirement plan",
+    "flags(mask1), names and literal local-rect copy; event/control service Unsupported, no native latch/notifications",
+    "host independent visual application despite unimplemented services, NOT original skip/error scheduling",
+    "scene retires draw/pick frame after accepted request; no automatic picking dispatch or active-camera producer"
+  ],
+  "corpus": [
+    {
+      "package": "PatchData.package",
+      "record": 19201,
+      "sha256": "23087d7ae97793db2e9c550fa0ffdd27f5b4738ea90d5f8b43c25ecac22f01f5",
+      "controls": {
+        "0x5b31710": [
+          {
+            "object": 28,
+            "parent": 177
+          }
+        ],
+        "0x4656452": [
+          {
+            "object": 41,
+            "parent": 177
+          }
+        ],
+        "0x2e712e4": [
+          {
+            "object": 67,
+            "parent": 86
+          }
+        ],
+        "0x46a9ca7": [
+          {
+            "object": 87,
+            "parent": 90
+          },
+          {
+            "object": 90,
+            "parent": 177
+          }
+        ],
+        "0x5b34d93": [
+          {
+            "object": 95,
+            "parent": 176
+          }
+        ],
+        "0x46ea550": [
+          {
+            "object": 128,
+            "parent": 175
+          }
+        ],
+        "0x3753f40": [
+          {
+            "object": 176,
+            "parent": 177
+          }
+        ]
+      }
+    },
+    {
+      "package": "Spore_Graphics.package",
+      "record": 18791,
+      "sha256": "6fe95d3998eacbfcfd8747d152709a0e45650cff10d0d85f15f4b6393d96fe61",
+      "controls": {
+        "0x5b31710": [
+          {
+            "object": 28,
+            "parent": 177
+          }
+        ],
+        "0x4656452": [
+          {
+            "object": 41,
+            "parent": 177
+          }
+        ],
+        "0x2e712e4": [
+          {
+            "object": 67,
+            "parent": 86
+          }
+        ],
+        "0x46a9ca7": [
+          {
+            "object": 87,
+            "parent": 90
+          },
+          {
+            "object": 90,
+            "parent": 177
+          }
+        ],
+        "0x5b34d93": [
+          {
+            "object": 95,
+            "parent": 176
+          }
+        ],
+        "0x46ea550": [
+          {
+            "object": 128,
+            "parent": 175
+          }
+        ],
+        "0x3753f40": [
+          {
+            "object": 176,
+            "parent": 177
+          }
+        ]
+      }
+    }
+  ]
+}

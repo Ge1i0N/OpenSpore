@@ -1,0 +1,218 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  df6daf:	e8 9c f5 63 ff       	call   0x436350
+  df6db4:	50                   	push   eax
+  df6db5:	68 82 91 6d d0       	push   0xd06d9182
+  df6dba:	e8 d1 f5 63 ff       	call   0x436390
+  df6dbf:	83 c4 08             	add    esp,0x8
+  df6dc2:	6a 01                	push   0x1
+  df6dc4:	68 a7 9c 6a 04       	push   0x46a9ca7
+  df6dc9:	8b ce                	mov    ecx,esi
+  df6dcb:	e8 80 98 a1 ff       	call   0x810650
+  df6dd0:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6dd2:	6a 00                	push   0x0
+  df6dd4:	8b c8                	mov    ecx,eax
+  df6dd6:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6dd9:	6a 01                	push   0x1
+  df6ddb:	ff d0                	call   eax
+  df6ddd:	6a 01                	push   0x1
+  df6ddf:	68 52 64 65 04       	push   0x4656452
+  df6de4:	8b ce                	mov    ecx,esi
+  df6de6:	e8 65 98 a1 ff       	call   0x810650
+  df6deb:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6ded:	6a 01                	push   0x1
+  df6def:	8b c8                	mov    ecx,eax
+  df6df1:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6df4:	6a 01                	push   0x1
+  df6df6:	ff d0                	call   eax
+  df6df8:	6a 01                	push   0x1
+  df6dfa:	68 10 17 b3 05       	push   0x5b31710
+  df6dff:	8b ce                	mov    ecx,esi
+  df6e01:	e8 4a 98 a1 ff       	call   0x810650
+  df6e06:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6e08:	6a 01                	push   0x1
+  df6e0a:	8b c8                	mov    ecx,eax
+  df6e0c:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6e0f:	6a 01                	push   0x1
+  df6e11:	ff d0                	call   eax
+  df6e13:	89 6e 2c             	mov    DWORD PTR [esi+0x2c],ebp
+  df6e16:	b0 01                	mov    al,0x1
+  df6e18:	5f                   	pop    edi
+  df6e19:	5e                   	pop    esi
+  df6e1a:	5d                   	pop    ebp
+  df6e1b:	5b                   	pop    ebx
+  df6e1c:	81 c4 80 00 00 00    	add    esp,0x80
+  df6e22:	c2 04 00             	ret    0x4
+  df6e25:	e8 26 f5 63 ff       	call   0x436350
+  df6e2a:	50                   	push   eax
+  df6e2b:	68 82 91 6d d0       	push   0xd06d9182
+  df6e30:	e8 5b f5 63 ff       	call   0x436390
+  df6e35:	83 c4 08             	add    esp,0x8
+  df6e38:	6a 01                	push   0x1
+  df6e3a:	68 a7 9c 6a 04       	push   0x46a9ca7
+  df6e3f:	8b ce                	mov    ecx,esi
+  df6e41:	e8 0a 98 a1 ff       	call   0x810650
+  df6e46:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6e48:	6a 01                	push   0x1
+  df6e4a:	8b c8                	mov    ecx,eax
+  df6e4c:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6e4f:	6a 01                	push   0x1
+  df6e51:	ff d0                	call   eax
+  df6e53:	e8 08 5c 88 ff       	call   0x67ca60
+  df6e58:	8b d8                	mov    ebx,eax
+  df6e5a:	8b 3b                	mov    edi,DWORD PTR [ebx]
+  df6e5c:	6a 01                	push   0x1
+  df6e5e:	68 a7 9c 6a 04       	push   0x46a9ca7
+  df6e63:	8b ce                	mov    ecx,esi
+  df6e65:	83 c7 4c             	add    edi,0x4c
+  df6e68:	e8 e3 97 a1 ff       	call   0x810650
+  df6e6d:	8b 17                	mov    edx,DWORD PTR [edi]
+  df6e6f:	50                   	push   eax
+  df6e70:	6a 01                	push   0x1
+  df6e72:	8b cb                	mov    ecx,ebx
+  df6e74:	ff d2                	call   edx
+  df6e76:	6a 01                	push   0x1
+  df6e78:	68 e4 12 e7 02       	push   0x2e712e4
+  df6e7d:	8b ce                	mov    ecx,esi
+  df6e7f:	89 6e 2c             	mov    DWORD PTR [esi+0x2c],ebp
+  df6e82:	e8 c9 97 a1 ff       	call   0x810650
+  df6e87:	8b 4e 30             	mov    ecx,DWORD PTR [esi+0x30]
+  df6e8a:	8b 09                	mov    ecx,DWORD PTR [ecx]
+  df6e8c:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6e8e:	8b 92 80 00 00 00    	mov    edx,DWORD PTR [edx+0x80]
+  df6e94:	51                   	push   ecx
+  df6e95:	8b c8                	mov    ecx,eax
+  df6e97:	ff d2                	call   edx
+  df6e99:	6a 01                	push   0x1
+  df6e9b:	68 50 a5 6e 04       	push   0x46ea550
+  df6ea0:	8b ce                	mov    ecx,esi
+  df6ea2:	e8 a9 97 a1 ff       	call   0x810650
+  df6ea7:	8b 4e 30             	mov    ecx,DWORD PTR [esi+0x30]
+  df6eaa:	8b 09                	mov    ecx,DWORD PTR [ecx]
+  df6eac:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6eae:	8b 92 80 00 00 00    	mov    edx,DWORD PTR [edx+0x80]
+  df6eb4:	51                   	push   ecx
+  df6eb5:	8b c8                	mov    ecx,eax
+  df6eb7:	ff d2                	call   edx
+  df6eb9:	6a 01                	push   0x1
+  df6ebb:	68 10 17 b3 05       	push   0x5b31710
+  df6ec0:	8b ce                	mov    ecx,esi
+  df6ec2:	e8 89 97 a1 ff       	call   0x810650
+  df6ec7:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6ec9:	6a 01                	push   0x1
+  df6ecb:	8b c8                	mov    ecx,eax
+  df6ecd:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6ed0:	6a 01                	push   0x1
+  df6ed2:	ff d0                	call   eax
+  df6ed4:	b0 01                	mov    al,0x1
+  df6ed6:	5f                   	pop    edi
+  df6ed7:	5e                   	pop    esi
+  df6ed8:	5d                   	pop    ebp
+  df6ed9:	5b                   	pop    ebx
+  df6eda:	81 c4 80 00 00 00    	add    esp,0x80
+  df6ee0:	c2 04 00             	ret    0x4
+  df6ee3:	e8 68 f4 63 ff       	call   0x436350
+  df6ee8:	50                   	push   eax
+  df6ee9:	68 d5 3a fc d2       	push   0xd2fc3ad5
+  df6eee:	e8 9d f4 63 ff       	call   0x436390
+  df6ef3:	83 c4 08             	add    esp,0x8
+  df6ef6:	6a 01                	push   0x1
+  df6ef8:	68 52 64 65 04       	push   0x4656452
+  df6efd:	8b ce                	mov    ecx,esi
+  df6eff:	e8 4c 97 a1 ff       	call   0x810650
+  df6f04:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6f06:	33 db                	xor    ebx,ebx
+  df6f08:	53                   	push   ebx
+  df6f09:	8b c8                	mov    ecx,eax
+  df6f0b:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6f0e:	6a 01                	push   0x1
+  df6f10:	ff d0                	call   eax
+  df6f12:	6a 01                	push   0x1
+  df6f14:	68 10 17 b3 05       	push   0x5b31710
+  df6f19:	8b ce                	mov    ecx,esi
+  df6f1b:	e8 30 97 a1 ff       	call   0x810650
+  df6f20:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6f22:	53                   	push   ebx
+  df6f23:	8b c8                	mov    ecx,eax
+  df6f25:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6f28:	6a 01                	push   0x1
+  df6f2a:	ff d0                	call   eax
+  df6f2c:	b0 01                	mov    al,0x1
+  df6f2e:	5f                   	pop    edi
+  df6f2f:	5e                   	pop    esi
+  df6f30:	5d                   	pop    ebp
+  df6f31:	5b                   	pop    ebx
+  df6f32:	81 c4 80 00 00 00    	add    esp,0x80
+  df6f38:	c2 04 00             	ret    0x4
+  df6f3b:	e8 10 f4 63 ff       	call   0x436350
+  df6f40:	50                   	push   eax
+  df6f41:	68 89 a8 6d 6c       	push   0x6c6da889
+  df6f46:	e8 45 f4 63 ff       	call   0x436390
+  df6f4b:	83 c4 08             	add    esp,0x8
+  df6f4e:	6a 01                	push   0x1
+  df6f50:	68 52 64 65 04       	push   0x4656452
+  df6f55:	8b ce                	mov    ecx,esi
+  df6f57:	e8 f4 96 a1 ff       	call   0x810650
+  df6f5c:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6f5e:	33 db                	xor    ebx,ebx
+  df6f60:	53                   	push   ebx
+  df6f61:	8b c8                	mov    ecx,eax
+  df6f63:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6f66:	6a 01                	push   0x1
+  df6f68:	ff d0                	call   eax
+  df6f6a:	6a 01                	push   0x1
+  df6f6c:	68 a7 9c 6a 04       	push   0x46a9ca7
+  df6f71:	8b ce                	mov    ecx,esi
+  df6f73:	e8 d8 96 a1 ff       	call   0x810650
+  df6f78:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6f7a:	53                   	push   ebx
+  df6f7b:	8b c8                	mov    ecx,eax
+  df6f7d:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6f80:	6a 01                	push   0x1
+  df6f82:	ff d0                	call   eax
+  df6f84:	6a 01                	push   0x1
+  df6f86:	68 40 3f 75 03       	push   0x3753f40
+  df6f8b:	8b ce                	mov    ecx,esi
+  df6f8d:	e8 be 96 a1 ff       	call   0x810650
+  df6f92:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6f94:	6a 01                	push   0x1
+  df6f96:	8b c8                	mov    ecx,eax
+  df6f98:	8b 42 7c             	mov    eax,DWORD PTR [edx+0x7c]
+  df6f9b:	6a 01                	push   0x1
+  df6f9d:	ff d0                	call   eax
+  df6f9f:	6a 01                	push   0x1
+  df6fa1:	68 10 17 b3 05       	push   0x5b31710
+  df6fa6:	8b ce                	mov    ecx,esi
+  df6fa8:	e8 a3 96 a1 ff       	call   0x810650
+  df6fad:	8b f8                	mov    edi,eax
+  df6faf:	3b fb                	cmp    edi,ebx
+  df6fb1:	0f 84 a4 06 00 00    	je     0xdf765b
+  df6fb7:	6a 01                	push   0x1
+  df6fb9:	68 93 4d b3 05       	push   0x5b34d93
+  df6fbe:	8b ce                	mov    ecx,esi
+  df6fc0:	e8 8b 96 a1 ff       	call   0x810650
+  df6fc5:	8b 10                	mov    edx,DWORD PTR [eax]
+  df6fc7:	8b 1f                	mov    ebx,DWORD PTR [edi]
+  df6fc9:	8b c8                	mov    ecx,eax
+  df6fcb:	8b 42 34             	mov    eax,DWORD PTR [edx+0x34]
+  df6fce:	83 c3 60             	add    ebx,0x60
+  df6fd1:	ff d0                	call   eax
+  df6fd3:	8b 13                	mov    edx,DWORD PTR [ebx]
+  df6fd5:	50                   	push   eax
+  df6fd6:	8b cf                	mov    ecx,edi
+  df6fd8:	ff d2                	call   edx
+  df6fda:	8b 07                	mov    eax,DWORD PTR [edi]
+  df6fdc:	8b 50 7c             	mov    edx,DWORD PTR [eax+0x7c]
+  df6fdf:	6a 01                	push   0x1
+  df6fe1:	6a 01                	push   0x1
+  df6fe3:	8b cf                	mov    ecx,edi
+  df6fe5:	ff d2                	call   edx
+  df6fe7:	89 6e 2c             	mov    DWORD PTR [esi+0x2c],ebp
+  df6fea:	b0 01                	mov    al,0x1
+  df6fec:	5f                   	pop    edi
+  df6fed:	5e                   	pop    esi
+  df6fee:	5d                   	pop    ebp
+  df6fef:	5b                   	pop    ebx
+  df6ff0:	81 c4 80 00 00 00    	add    esp,0x80
+  df6ff6:	c2                   	.byte 0xc2

@@ -1,5 +1,6 @@
 #pragma once
 #include "engine/gge_image_provider.h"
+#include "engine/gge_star_transition.h"
 #include <memory>
 
 namespace os::gge {
@@ -16,11 +17,20 @@ struct StarHostAction {
     u32 attempts=0;
     std::string detail;
 };
+struct StarTransitionResult {
+    StarHostActionStatus status=StarHostActionStatus::Pending;
+    std::string detail;
+};
+struct StarTransitionReport {
+    StarTransitionPlan plan;
+    std::vector<StarTransitionResult> results; // same order as plan.requests
+};
 struct StarHostReport {
     u64 ticket=0;
     u32 passes=0;
     std::string phase_blocked_on,configuration_blocked_on;
     std::vector<StarHostAction> actions;
+    std::optional<StarTransitionReport> transition; // last explicit call, never a native phase latch
 };
 struct StarLifecycleInputs {
     StarPhase1Inputs phase1;
@@ -41,8 +51,11 @@ public:
     bool close(std::string& error);
     // A true return means the pass was accepted, NOT that all actions/assets/services succeeded.
     // nullptr provider yields Unknown asset results, not fake Missing/Found. Provider exceptions
-    // become per-action failures. Reentrant open/close/apply/place rejected before mutation.
+    // become per-action failures. Reentrant open/close/apply/place/transition rejected before mutation.
     bool apply_available(u64 ticket,ImageProvider* provider,std::string& error);
+    // Explicit observed case/guard, independent host flags/name/local-rect subset only. Opaque
+    // service actions remain visible as Unsupported; no original latch/current-phase update.
+    bool apply_phase_transition(u64 ticket,const StarTransitionInputs& inputs,std::string& error);
     // Scene-owned pixel placement only; no camera acquisition, native phase or move notifications.
     bool place(u64 ticket,const StarUiPlacement& placement,std::string& error);
     // Borrowed view: invalidated by successful open/close or destruction of this owner.

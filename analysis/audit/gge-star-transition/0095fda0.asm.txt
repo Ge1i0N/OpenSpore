@@ -1,0 +1,39 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x0095FDA0
+
+0095fda0  MOV EDX,dword ptr [ESP + 0x4]
+0095fda4  MOVSS XMM0,dword ptr [EDX]
+0095fda8  MOVSS XMM1,dword ptr [ECX + 0x94]
+0095fdb0  UCOMISS XMM1,XMM0
+0095fdb3  LAHF
+0095fdb4  TEST AH,0x44
+0095fdb7  JP 0x0095fdef
+0095fdb9  MOVSS XMM1,dword ptr [ECX + 0x98]
+0095fdc1  UCOMISS XMM1,dword ptr [EDX + 0x4]
+0095fdc5  LAHF
+0095fdc6  TEST AH,0x44
+0095fdc9  JP 0x0095fdef
+0095fdcb  MOVSS XMM1,dword ptr [ECX + 0x9c]
+0095fdd3  UCOMISS XMM1,dword ptr [EDX + 0x8]
+0095fdd7  LAHF
+0095fdd8  TEST AH,0x44
+0095fddb  JP 0x0095fdef
+0095fddd  MOVSS XMM1,dword ptr [ECX + 0xa0]
+0095fde5  UCOMISS XMM1,dword ptr [EDX + 0xc]
+0095fde9  LAHF
+0095fdea  TEST AH,0x44
+0095fded  JNP 0x0095fe1c
+0095fdef  MOVSS dword ptr [ECX + 0x94],XMM0
+0095fdf7  FLD float ptr [EDX + 0x4]
+0095fdfa  FSTP float ptr [ECX + 0x98]
+0095fe00  FLD float ptr [EDX + 0x8]
+0095fe03  FSTP float ptr [ECX + 0x9c]
+0095fe09  FLD float ptr [EDX + 0xc]
+0095fe0c  FSTP float ptr [ECX + 0xa0]
+0095fe12  MOV EAX,dword ptr [ECX]
+0095fe14  MOV EDX,dword ptr [EAX + 0x94]
+0095fe1a  CALL EDX
+0095fe1c  RET 0x4

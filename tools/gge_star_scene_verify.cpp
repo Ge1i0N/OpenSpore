@@ -33,7 +33,8 @@ struct Reentry final:ImageProvider {
     ImageRead read(const ImageKey& key) override {
         ++calls; std::string error; const auto t=scene->ticket();
         denied=denied&&!scene->close(error)&&!scene->open(*catalog,*source,*cards,error)&&
-            !scene->apply_available(t,this,error)&&!scene->update(t,camera(),error)&&scene->layers(scene->frame().serial).empty();
+            !scene->apply_available(t,this,error)&&!scene->update(t,camera(),error)&&
+            !scene->apply_phase_transition(t,0,StarTransitionInputs{2u,1u,{}},error)&&scene->layers(scene->frame().serial).empty();
         return backend->read(key);
     }
 };

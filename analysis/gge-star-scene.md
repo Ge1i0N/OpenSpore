@@ -135,6 +135,9 @@ original-runtime screenshot, a newly observed native visible card or a playable 
 This verifier asserts host layout/resolver/pick state, not a new GPU scene readback. The renderer seam
 is compiled; existing image/frame/scissor GPU suites cover their controlled subsets independently.
 Normal Main/GGE still has no automatic caller, active-camera producer or genuine catalogue source.
+The [explicit transition follow-up](gge-star-transition.md) now requests native case2..5 visual
+subsets on untouched layouts. Its case2 panel hit no longer needs this verifier's controlled
+IgnoreMouse fixture; real caller/current-phase observations and automatic dispatch are still absent.
 
 ```powershell
 cmake --build build --config Debug --target OpenSpore gge_star_scene_verify

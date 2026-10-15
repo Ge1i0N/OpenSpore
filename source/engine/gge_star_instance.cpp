@@ -137,6 +137,16 @@ bool StarUiInstance::move_root(const StarUiPlacement& placement,std::string& err
     if (!refresh(windows,root_,error)) return false;
     layout_.windows=std::move(windows); error.clear(); return true;
 }
+bool StarUiInstance::copy_local_rect(u16 target,u16 source,std::string& error) {
+    const auto to=find_object(target),from=find_object(source);
+    if (!to||!from||*to==root_||!layout_.windows[*to].has_area||!layout_.windows[*from].has_area||
+        !finite(layout_.windows[*from].area)||!layout_.windows[*from].area.valid()) {
+        error="window rectangle-copy target/source/geometry unsupported"; return false;
+    }
+    auto windows=layout_.windows; windows[*to].area=windows[*from].area;
+    if (!refresh(windows,root_,error)) return false;
+    layout_.windows=std::move(windows); error.clear(); return true;
+}
 bool StarUiInstance::image_target(u16 window,u16& drawable,std::string& error) const {
     const auto n=find_object(window);
     if (!n) { error="image target window unavailable"; return false; }

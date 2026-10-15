@@ -42,6 +42,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE star host lifecycle | owned open/apply/close + generation-scoped immutable plans; independent flags/centering/name/refs/image/frame application and retries | host policy, not native dependency/order/phase/listener completion; Unsupported services explicit; no automatic GGE caller |
 | GGE direct streaming PNG provider | same-handle bounded file/index/resource reads, exact keys, shared decoder, 64-bit file seeks; large original atlas feeds lifecycle directly | one explicitly selected DBPF3.0/index3 file, no precedence/discovery; old memory adapter unchanged; not native scene readiness |
 | GGE host scene collection | explicit Available catalogue + tagged active camera → per-card projection/clamp/owned placement → current layer/pick views/shared draw hook | host ordering/limits, stale-frame suspension; native factories/controller camera/show/effects/live source not implemented; no forced visibility |
+| GGE explicit show/phase cases | requested2..5 + separately observed current guard; exact visible-mask1/name/local-rect host subset, per-action outcomes | opaque service events/control request Unsupported; no native latch/automatic input dispatch; actual case2 panel hit with original root IgnoreMouse |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
 
@@ -78,6 +79,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE star host lifecycle | 232 checks; direct package provider/real layouts/PNG + controlled metadata, per-action retries/cache/reentry/stale tickets/UTF/local centering | `gge_star_lifecycle_verify <fixtures> <main-package> <atlas-package>`; [host policy/evidence](analysis/gge-star-lifecycle.md) |
 | GGE streaming image provider | 95 checks: large original atlas, raw/RefPack/all masks, bounded index/resource/PNG failures, sparse data/index >2GiB and >4GiB rejection, sharing protection, 544 ownership cycles | `gge_streaming_image_verify <original-Graphics.package> <NEW-test-dir>`; [bounds/evidence](analysis/gge-streaming-images.md) |
 | GGE host scene | 204 checks; Available-vs-Unknown/empty, active-vs-retained camera, stale frames, projection/4px/clamp/layer/pick/budgets/reentry; raw hidden template unchanged | `gge_star_scene_verify <fixtures> <original-Graphics.package>`; [controlled visibility/native boundary](analysis/gge-star-scene.md) |
+| GGE explicit phase transitions | 195 checks; ordered cases/guard/events/flags/name/rect, duplicates/ancestor state, transactional failures, actual untouched-panel picking and scene-frame retirement | `gge_star_transition_verify <fixtures>`; [case4 no-latch correction/callers](analysis/gge-star-transition.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

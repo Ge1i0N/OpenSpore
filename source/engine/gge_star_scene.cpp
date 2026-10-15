@@ -55,6 +55,15 @@ bool StarUiScene::apply_available(u64 ticket,ImageProvider* provider,std::string
     for (auto& c:cards_) if (!c.lifecycle->apply_available(c.lifecycle->report().ticket,provider,error)) return false;
     error.clear(); return true;
 }
+bool StarUiScene::apply_phase_transition(u64 ticket,size_t index,const StarTransitionInputs& inputs,std::string& error) {
+    if (busy_||!catalog_available_||!ticket||ticket!=ticket_||index>=cards_.size()) {
+        error="inactive/unavailable/stale/reentrant/out-of-range scene phase request"; return false;
+    }
+    auto& c=*cards_[index].lifecycle;
+    if (!c.apply_phase_transition(c.report().ticket,inputs,error)) return false;
+    retire_frame(); // visibility/enable/caption state may differ; no implicit mouse->phase dispatch
+    return true;
+}
 bool StarUiScene::update(u64 ticket,const SceneCameraObservation& camera,std::string& error) {
     if (busy_||!catalog_available_||!ticket||ticket!=ticket_||frame_serial_==std::numeric_limits<u64>::max()) {
         error="inactive/unavailable/stale/reentrant host scene update/frame exhausted"; return false;
