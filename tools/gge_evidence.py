@@ -23,13 +23,17 @@ INTRO_FUNCTIONS = (0xdea4b0, 0xdeb450, 0xdea3d0, 0xdeaf70, 0xdea820, 0xdeb060, 0
                    0xde5280, 0xde5380, 0xfd90d0, 0x6ab790)
 FLOW_FUNCTIONS = (0xe008b0, 0xdf9620, 0xdf8700, 0xdf85b0, 0xdf95a0, 0xdf7cb0, 0xdf7f30,
                   0xdf9200, 0xdf8300, 0xdf9740, 0x60b5d0, 0x60b340, 0x60b440, 0x60b470)
+CATALOG_FUNCTIONS = (0xb3d3a0, 0xba6450, 0x5c66d0, 0xba6380, 0xbb61c0, 0xbb24d0,
+                     0xbac7b0, 0xbb4d40, 0xbb8c90, 0xb26ce0, 0xb26f90,
+                     0xdf95a0, 0xdf7cb0, 0xdf7f30, 0xb27580)
 
 
 def main():
     intro = '--intro' in sys.argv
     flow = '--flow' in sys.argv
-    addresses = FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-flow' if flow else
+    catalog = '--catalog' in sys.argv
+    addresses = CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
@@ -77,6 +81,29 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--catalog' in sys.argv:
+        dest = ROOT/'analysis/audit/gge-catalog'
+        dest.mkdir(parents=True, exist_ok=True)
+        for name,start,end in [('source-getters',0xbb9c50,0xbb9cf4),
+                               ('saved-list-layout',0xdf95a0,0xdf9619),
+                               ('new-record-fields',0xdf7d24,0xdf7e92),
+                               ('saved-record-fields',0xdf7f30,0xdf822f)]:
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(disasm(pe,start,end))+'\n',
+                                              encoding='utf-8',newline='\n')
+        facts={'oracle_sha256':digest,'catalog_manager_getter':'0x00b3d3a0',
+               'catalog_global':'0x0167eae4','saved_vector_offset':'0xf0',
+               'candidate_vector_offset':'0xdc','gge_entry_stride':'0xbc',
+               'record_position_offset':'0x80','stage_offset':'0xa8',
+               'saved_flag_offset':'0xac','visible_flag_offset':'0xad','source_index_offset':'0xb0',
+               'save_header_reference':[{'va':hex(va),'word':pe.u32(va),'section':pe.section_of(va)['name']}
+                                         for va in (0x145f844,0x145f848)],
+               'strings':[{'va':hex(va),'value':pe.wstr(va)} for va in (0x145fb30,0x146616c)],
+               'limits':['static GA evidence only; no original process launched',
+                         'typed host field projection, not original ABI or stars.db reader',
+                         'constructor/serializer calling conventions may be incomplete in pseudocode']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        print('retained catalog identity/record fields and stars.db string addresses')
+        return
     if '--flow' in sys.argv:
         dest = ROOT/'analysis/audit/gge-flow'
         dest.mkdir(parents=True, exist_ok=True)

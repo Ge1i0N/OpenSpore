@@ -1,0 +1,169 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00BB4D40
+
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void __fastcall FUN_00bb4d40(int param_1)
+
+{
+  int *piVar1;
+  int iVar2;
+  tm *ptVar3;
+  undefined1 **ppuVar4;
+  int *piVar5;
+  undefined4 *puVar6;
+  undefined4 *puVar7;
+  undefined4 uStack_14b0;
+  undefined4 uStack_14ac;
+  undefined4 uStack_14a8;
+  undefined1 *puStack_14a4;
+  undefined1 *puStack_14a0;
+  undefined1 *puStack_149c;
+  undefined1 *puStack_1494;
+  undefined1 *puStack_1490;
+  undefined1 *puStack_148c;
+  undefined4 auStack_1484 [9];
+  int aiStack_1460 [11];
+  int iStack_1434;
+  undefined4 uStack_4;
+
+  uStack_4 = 0xbb4d4a;
+  if (*(char *)(param_1 + 0x21c) == '\0') {
+    return;
+  }
+  FUN_00ba6f50(0);
+  FUN_00bac530();
+  FUN_00bafa10();
+  piVar1 = (int *)FUN_00f48a40();
+  (**(code **)(*piVar1 + 0x20))(L"PlanetScripts");
+  iVar2 = FUN_010211b0();
+  if (iVar2 != 0) {
+    if (*(int *)(param_1 + 0x1dc) != 0) {
+      _time64((__time64_t *)0x0);
+      ptVar3 = _localtime64((__time64_t *)&stack0xffffeb40);
+      if (ptVar3 == (tm *)0x0) {
+        iVar2 = *(int *)(param_1 + 0x1dc);
+        *(undefined4 *)(iVar2 + 0x18) = 0;
+        *(undefined4 *)(iVar2 + 0x1c) = 0;
+        *(undefined4 *)(iVar2 + 0x20) = 0;
+        *(undefined4 *)(iVar2 + 0x24) = 0;
+        *(undefined4 *)(iVar2 + 0x28) = 0;
+        *(undefined4 *)(iVar2 + 0x2c) = 0;
+        *(undefined4 *)(iVar2 + 0x30) = 0;
+        *(undefined4 *)(iVar2 + 0x34) = 0;
+        *(undefined4 *)(iVar2 + 0x38) = 0;
+      }
+      else {
+        piVar1 = (int *)(*(int *)(param_1 + 0x1dc) + 0x18);
+        for (iVar2 = 9; iVar2 != 0; iVar2 = iVar2 + -1) {
+          *piVar1 = ptVar3->tm_sec;
+          ptVar3 = (tm *)&ptVar3->tm_min;
+          piVar1 = piVar1 + 1;
+        }
+      }
+      *(undefined4 *)(*(int *)(param_1 + 0x1dc) + 0x10) = DAT_0145f844;
+      *(undefined4 *)(*(int *)(param_1 + 0x1dc) + 0x14) = DAT_0145f848;
+      FUN_00bb9c70(2,1);
+      FUN_00bb9cf0();
+    }
+    FUN_010211b0();
+    iVar2 = FUN_00c30dc0();
+    if (iVar2 == 0) {
+      iVar2 = FUN_010210f0();
+    }
+    else {
+      FUN_010211b0();
+      iVar2 = FUN_00c30dc0();
+    }
+    if (iVar2 != 0) {
+      piVar1 = *(int **)(param_1 + 0xe0);
+      piVar5 = *(int **)(param_1 + 0xdc);
+      if (piVar5 != piVar1) {
+        do {
+          if (*piVar5 == iVar2) break;
+          piVar5 = piVar5 + 1;
+        } while (piVar5 != piVar1);
+        if (piVar5 != piVar1) {
+          FUN_00bf3560(piVar5);
+        }
+      }
+    }
+    FUN_01021220();
+  }
+  piVar1 = (int *)FUN_00688f90(L"stars.db.tmp");
+  if (piVar1 != (int *)0x0) {
+    (**(code **)*piVar1)();
+    FUN_00693d10(piVar1,0x1897c18,0x1897c18,0x1897c18);
+    FUN_00692e60();
+    puStack_14a4 = &DAT_01667bac;
+    puStack_14a0 = &DAT_01667bac;
+    puStack_1494 = &DAT_01667bac;
+    puStack_1490 = &DAT_01667bac;
+    uStack_14ac = *(undefined4 *)(param_1 + 0x68);
+    puStack_149c = &DAT_01667bae;
+    puStack_148c = &DAT_01667bae;
+    if ((undefined1 **)(param_1 + 0x6c) != &puStack_14a4) {
+      FUN_00423690(*(undefined1 **)(param_1 + 0x6c),*(undefined4 *)(param_1 + 0x70));
+    }
+    puVar6 = (undefined4 *)(param_1 + 0x7c);
+    puVar7 = auStack_1484;
+    for (iVar2 = 9; iVar2 != 0; iVar2 = iVar2 + -1) {
+      *puVar7 = *puVar6;
+      puVar6 = puVar6 + 1;
+      puVar7 = puVar7 + 1;
+    }
+    uStack_14a8 = DAT_0145f84c;
+    ppuVar4 = (undefined1 **)FUN_0093c510(aiStack_1460 + 9,"3.1.0.29",0xffffffff);
+    if (ppuVar4 != &puStack_1494) {
+      FUN_00423690(*ppuVar4,ppuVar4[1]);
+    }
+    if ((2 < (int)(iStack_1434 - aiStack_1460[9] & 0xfffffffeU)) && (aiStack_1460[9] != 0)) {
+      FUN_00f47220(aiStack_1460[9]);
+    }
+    _time64((__time64_t *)0x0);
+    ptVar3 = _localtime64((__time64_t *)&stack0xffffeb40);
+    if (ptVar3 == (tm *)0x0) {
+      aiStack_1460[0] = 0;
+      aiStack_1460[1] = 0;
+      aiStack_1460[2] = 0;
+      aiStack_1460[3] = 0;
+      aiStack_1460[4] = 0;
+      aiStack_1460[5] = 0;
+      aiStack_1460[6] = 0;
+      aiStack_1460[7] = 0;
+      aiStack_1460[8] = 0;
+    }
+    else {
+      piVar5 = aiStack_1460;
+      for (iVar2 = 9; iVar2 != 0; iVar2 = iVar2 + -1) {
+        *piVar5 = ptVar3->tm_sec;
+        ptVar3 = (tm *)&ptVar3->tm_min;
+        piVar5 = piVar5 + 1;
+      }
+    }
+    FUN_00692f50(&uStack_14ac,&DAT_01689c50,0x1a80d26);
+    FUN_006928c0(uStack_14b0);
+    _DAT_01689644 = FUN_00b3d480();
+    _DAT_01689640 = *(undefined4 *)(param_1 + 0x204);
+    FUN_004010a0();
+    FUN_00b21d30(&DAT_0156c64c);
+    FUN_00692f50(param_1,&DAT_0156c668,0x1a80d26);
+    FUN_006928c0(uStack_14b0);
+    FUN_004010a0();
+    FUN_00b21d30(&DAT_0156c64c);
+    FUN_00d167e0();
+    FUN_006939c0();
+  }
+  (**(code **)(*piVar1 + 0x2c))();
+  (**(code **)(piVar1[1] + 0x1c))();
+  (**(code **)(piVar1[1] + 8))();
+  FUN_006891e0(L"stars.db.tmp",L"stars.db");
+                    /* WARNING: Could not recover jumptable at 0x00bb50c4. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+  (**(code **)(*piVar1 + 4))();
+  return;
+}

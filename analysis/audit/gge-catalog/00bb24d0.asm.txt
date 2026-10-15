@@ -1,0 +1,71 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00BB24D0
+
+00bb24d0  PUSH EBX
+00bb24d1  PUSH ESI
+00bb24d2  MOV ESI,dword ptr [ESP + 0xc]
+00bb24d6  PUSH EDI
+00bb24d7  MOV EDI,ECX
+00bb24d9  MOV ECX,ESI
+00bb24db  MOV BL,0x1
+00bb24dd  CALL 0x00bb9c50
+00bb24e2  CMP EAX,0x1
+00bb24e5  JLE 0x00bb24e9
+00bb24e7  XOR BL,BL
+00bb24e9  CMP byte ptr [ESP + 0x14],0x0
+00bb24ee  JNZ 0x00bb24ff
+00bb24f0  PUSH 0x1
+00bb24f2  MOV ECX,ESI
+00bb24f4  CALL 0x00bb9c60
+00bb24f9  TEST AL,AL
+00bb24fb  JZ 0x00bb24ff
+00bb24fd  XOR BL,BL
+00bb24ff  MOV ECX,ESI
+00bb2501  CALL 0x00b1fd00
+00bb2506  CMP EAX,-0x1
+00bb2509  JZ 0x00bb250d
+00bb250b  XOR BL,BL
+00bb250d  CMP ESI,dword ptr [EDI + 0x148]
+00bb2513  JNZ 0x00bb251d
+00bb2515  POP EDI
+00bb2516  POP ESI
+00bb2517  XOR AL,AL
+00bb2519  POP EBX
+00bb251a  RET 0x8
+00bb251d  TEST BL,BL
+00bb251f  JZ 0x00bb2571
+00bb2521  FLD float ptr [0x0156c51c]
+00bb2527  PUSH ECX
+00bb2528  FSTP float ptr [ESP]
+00bb252b  PUSH ESI
+00bb252c  MOV ECX,EDI
+00bb252e  CALL 0x00bb2350
+00bb2533  TEST AL,AL
+00bb2535  JZ 0x00bb2515
+00bb2537  CMP byte ptr [ESI + 0xac],0x0
+00bb253e  JZ 0x00bb2571
+00bb2540  MOV ECX,ESI
+00bb2542  CALL 0x00bba900
+00bb2547  MOV ECX,dword ptr [EAX + 0x4]
+00bb254a  SUB ECX,dword ptr [EAX]
+00bb254c  AND ECX,0xfffffffc
+00bb254f  CMP ECX,0x14
+00bb2552  JZ 0x00bb2556
+00bb2554  XOR BL,BL
+00bb2556  PUSH 0x0
+00bb2558  MOV ECX,ESI
+00bb255a  CALL 0x00bbabd0
+00bb255f  PUSH EAX
+00bb2560  CALL 0x00b3d530
+00bb2565  MOV ECX,EAX
+00bb2567  CALL 0x00bbc7e0
+00bb256c  CMP EAX,0x3
+00bb256f  JNZ 0x00bb2515
+00bb2571  POP EDI
+00bb2572  POP ESI
+00bb2573  MOV AL,BL
+00bb2575  POP EBX
+00bb2576  RET 0x8

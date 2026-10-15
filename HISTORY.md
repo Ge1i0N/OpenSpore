@@ -7,6 +7,27 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-15 — catalogue sources and typed GGE entry projection
+
+After restart, confirmed clean HEAD `0dfdd85` and resumed catalogue work without repeating DBCheck.
+Traced manager getter `0xB3D3A0`, +0xDC candidate vector, +0xF0 saved vector, population `0xBB61C0`,
+stars.db serializer load `0xBB8C90` and save `0xBB4D40`. Retained 15 functions and record-field
+instructions under `analysis/audit/gge-catalog/`; save format remains unimplemented.
+
+`gge_catalog.cpp` projects typed source metadata into owned entries, preserving saved/new placement,
+independent source indices, duplicate star IDs, unchanged world positions, flag/stage defaults,
+terrain-image load/missing distinctions and two-word save-header predicates. Unknown input lists do not
+publish a fake empty-ready catalogue; invalid data leaves output unchanged. 4096 entry/text limits
+are host safeguards, not original StarManager quotas. Verification uses 19 grouped controlled-input
+checks; no live provider, generated starfield, save I/O or binary 0xBC-file decoder was added.
+During final evidence review, the earlier tentative “current save key” interpretation was disproven:
+0x145F844/48 are .rdata constants (0x25,3), not runtime identity. Corrected code/tests/docs to neutral
+header-word comparison and retained probe 0xB27580; no Current/Other save-identity claim remains.
+Final validation: warning-free Debug x86, catalog/DBCheck/Intro/binding/SPUI suites PASS,
+544 package lifetime cycles and D3D9 scissor readback PASS; live Main -> GGE -> DevLauncher ->
+CreatureEditor exits 0 with aborts/asserts 0. Dashboard 204 done / 35 partial / 53 todo (292 items);
+no gameplay-done increment or new galaxy capture is claimed.
+
 ## 2026-10-15 — DBCheck branch executor and Play Spore state-2 dependencies
 
 State2 constructor `0xE008B0` resolves to wide name Play Spore through `0xE00930`. Traced enter,

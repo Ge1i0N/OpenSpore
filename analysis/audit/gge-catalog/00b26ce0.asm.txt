@@ -1,0 +1,50 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00B26CE0
+
+00b26ce0  MOV EAX,ECX
+00b26ce2  MOV ECX,0x1667bac
+00b26ce7  MOV dword ptr [EAX],ECX
+00b26ce9  MOV dword ptr [EAX + 0x4],ECX
+00b26cec  MOV EDX,0x1667bae
+00b26cf1  MOV dword ptr [EAX + 0x8],EDX
+00b26cf4  MOV dword ptr [EAX + 0x10],ECX
+00b26cf7  MOV dword ptr [EAX + 0x14],ECX
+00b26cfa  MOV dword ptr [EAX + 0x18],EDX
+00b26cfd  MOV dword ptr [EAX + 0x20],ECX
+00b26d00  MOV dword ptr [EAX + 0x24],ECX
+00b26d03  MOV dword ptr [EAX + 0x28],EDX
+00b26d06  XOR ECX,ECX
+00b26d08  MOV dword ptr [EAX + 0x30],ECX
+00b26d0b  MOV dword ptr [EAX + 0x34],ECX
+00b26d0e  MOV dword ptr [EAX + 0x38],ECX
+00b26d11  MOV dword ptr [EAX + 0x3c],ECX
+00b26d14  MOV dword ptr [EAX + 0x40],ECX
+00b26d17  MOV dword ptr [EAX + 0x44],ECX
+00b26d1a  MOV dword ptr [EAX + 0x48],ECX
+00b26d1d  MOV dword ptr [EAX + 0x4c],ECX
+00b26d20  MOV dword ptr [EAX + 0x50],ECX
+00b26d23  MOV dword ptr [EAX + 0x54],ECX
+00b26d26  MOV dword ptr [EAX + 0x58],ECX
+00b26d29  MOV dword ptr [EAX + 0x5c],ECX
+00b26d2c  MOV dword ptr [EAX + 0x60],ECX
+00b26d2f  MOV dword ptr [EAX + 0x64],ECX
+00b26d32  MOV dword ptr [EAX + 0x68],ECX
+00b26d35  MOV dword ptr [EAX + 0x6c],ECX
+00b26d38  MOV dword ptr [EAX + 0x70],ECX
+00b26d3b  MOV dword ptr [EAX + 0x74],ECX
+00b26d3e  MOV dword ptr [EAX + 0x78],ECX
+00b26d41  MOV dword ptr [EAX + 0x7c],ECX
+00b26d44  MOV dword ptr [EAX + 0x8c],0x4
+00b26d4e  MOV dword ptr [EAX + 0x90],ECX
+00b26d54  MOV dword ptr [EAX + 0xa0],ECX
+00b26d5a  MOV dword ptr [EAX + 0xa4],ECX
+00b26d60  MOV dword ptr [EAX + 0xa8],ECX
+00b26d66  MOV byte ptr [EAX + 0xac],CL
+00b26d6c  MOV byte ptr [EAX + 0xad],CL
+00b26d72  MOV dword ptr [EAX + 0xb0],ECX
+00b26d78  MOV dword ptr [EAX + 0xb4],ECX
+00b26d7e  MOV dword ptr [EAX + 0xb8],ECX
+00b26d84  RET

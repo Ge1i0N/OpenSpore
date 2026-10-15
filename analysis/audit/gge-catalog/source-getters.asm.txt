@@ -1,0 +1,99 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  bb9c50:	8b 41 4c             	mov    eax,DWORD PTR [ecx+0x4c]
+  bb9c53:	c3                   	ret
+  bb9c54:	cc                   	int3
+  bb9c55:	cc                   	int3
+  bb9c56:	cc                   	int3
+  bb9c57:	cc                   	int3
+  bb9c58:	cc                   	int3
+  bb9c59:	cc                   	int3
+  bb9c5a:	cc                   	int3
+  bb9c5b:	cc                   	int3
+  bb9c5c:	cc                   	int3
+  bb9c5d:	cc                   	int3
+  bb9c5e:	cc                   	int3
+  bb9c5f:	cc                   	int3
+  bb9c60:	8b 41 5c             	mov    eax,DWORD PTR [ecx+0x5c]
+  bb9c63:	23 44 24 04          	and    eax,DWORD PTR [esp+0x4]
+  bb9c67:	f7 d8                	neg    eax
+  bb9c69:	1b c0                	sbb    eax,eax
+  bb9c6b:	f7 d8                	neg    eax
+  bb9c6d:	c2 04 00             	ret    0x4
+  bb9c70:	80 7c 24 08 00       	cmp    BYTE PTR [esp+0x8],0x0
+  bb9c75:	74 0a                	je     0xbb9c81
+  bb9c77:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  bb9c7b:	09 41 5c             	or     DWORD PTR [ecx+0x5c],eax
+  bb9c7e:	c2 08 00             	ret    0x8
+  bb9c81:	8b 54 24 04          	mov    edx,DWORD PTR [esp+0x4]
+  bb9c85:	f7 d2                	not    edx
+  bb9c87:	21 51 5c             	and    DWORD PTR [ecx+0x5c],edx
+  bb9c8a:	c2 08 00             	ret    0x8
+  bb9c8d:	cc                   	int3
+  bb9c8e:	cc                   	int3
+  bb9c8f:	cc                   	int3
+  bb9c90:	8a 41 50             	mov    al,BYTE PTR [ecx+0x50]
+  bb9c93:	c3                   	ret
+  bb9c94:	cc                   	int3
+  bb9c95:	cc                   	int3
+  bb9c96:	cc                   	int3
+  bb9c97:	cc                   	int3
+  bb9c98:	cc                   	int3
+  bb9c99:	cc                   	int3
+  bb9c9a:	cc                   	int3
+  bb9c9b:	cc                   	int3
+  bb9c9c:	cc                   	int3
+  bb9c9d:	cc                   	int3
+  bb9c9e:	cc                   	int3
+  bb9c9f:	cc                   	int3
+  bb9ca0:	8b 41 5c             	mov    eax,DWORD PTR [ecx+0x5c]
+  bb9ca3:	25 ff bf ff ff       	and    eax,0xffffbfff
+  bb9ca8:	0d 00 20 00 00       	or     eax,0x2000
+  bb9cad:	89 41 5c             	mov    DWORD PTR [ecx+0x5c],eax
+  bb9cb0:	c3                   	ret
+  bb9cb1:	cc                   	int3
+  bb9cb2:	cc                   	int3
+  bb9cb3:	cc                   	int3
+  bb9cb4:	cc                   	int3
+  bb9cb5:	cc                   	int3
+  bb9cb6:	cc                   	int3
+  bb9cb7:	cc                   	int3
+  bb9cb8:	cc                   	int3
+  bb9cb9:	cc                   	int3
+  bb9cba:	cc                   	int3
+  bb9cbb:	cc                   	int3
+  bb9cbc:	cc                   	int3
+  bb9cbd:	cc                   	int3
+  bb9cbe:	cc                   	int3
+  bb9cbf:	cc                   	int3
+  bb9cc0:	8b 41 2c             	mov    eax,DWORD PTR [ecx+0x2c]
+  bb9cc3:	25 ff 7f ff ff       	and    eax,0xffff7fff
+  bb9cc8:	0d 00 40 00 00       	or     eax,0x4000
+  bb9ccd:	89 41 2c             	mov    DWORD PTR [ecx+0x2c],eax
+  bb9cd0:	c3                   	ret
+  bb9cd1:	cc                   	int3
+  bb9cd2:	cc                   	int3
+  bb9cd3:	cc                   	int3
+  bb9cd4:	cc                   	int3
+  bb9cd5:	cc                   	int3
+  bb9cd6:	cc                   	int3
+  bb9cd7:	cc                   	int3
+  bb9cd8:	cc                   	int3
+  bb9cd9:	cc                   	int3
+  bb9cda:	cc                   	int3
+  bb9cdb:	cc                   	int3
+  bb9cdc:	cc                   	int3
+  bb9cdd:	cc                   	int3
+  bb9cde:	cc                   	int3
+  bb9cdf:	cc                   	int3
+  bb9ce0:	e8 1b 3f fd ff       	call   0xb8dc00
+  bb9ce5:	83 f8 05             	cmp    eax,0x5
+  bb9ce8:	0f 94 c0             	sete   al
+  bb9ceb:	c3                   	ret
+  bb9cec:	cc                   	int3
+  bb9ced:	cc                   	int3
+  bb9cee:	cc                   	int3
+  bb9cef:	cc                   	int3
+  bb9cf0:	8d 41 74             	lea    eax,[ecx+0x74]
+  bb9cf3:	c3                   	ret

@@ -1,0 +1,40 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "catalog_manager_getter": "0x00b3d3a0",
+  "catalog_global": "0x0167eae4",
+  "saved_vector_offset": "0xf0",
+  "candidate_vector_offset": "0xdc",
+  "gge_entry_stride": "0xbc",
+  "record_position_offset": "0x80",
+  "stage_offset": "0xa8",
+  "saved_flag_offset": "0xac",
+  "visible_flag_offset": "0xad",
+  "source_index_offset": "0xb0",
+  "save_header_reference": [
+    {
+      "va": "0x145f844",
+      "word": 37,
+      "section": ".rdata"
+    },
+    {
+      "va": "0x145f848",
+      "word": 3,
+      "section": ".rdata"
+    }
+  ],
+  "strings": [
+    {
+      "va": "0x145fb30",
+      "value": "stars.db"
+    },
+    {
+      "va": "0x146616c",
+      "value": "stars.db.tmp"
+    }
+  ],
+  "limits": [
+    "static GA evidence only; no original process launched",
+    "typed host field projection, not original ABI or stars.db reader",
+    "constructor/serializer calling conventions may be incomplete in pseudocode"
+  ]
+}

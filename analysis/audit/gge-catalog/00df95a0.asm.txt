@@ -1,0 +1,49 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF95A0
+
+00df95a0  PUSH EBX
+00df95a1  PUSH EBP
+00df95a2  PUSH ESI
+00df95a3  PUSH EDI
+00df95a4  MOV EBX,ECX
+00df95a6  CALL 0x00df94e0
+00df95ab  CALL 0x00b3d3a0
+00df95b0  MOV EDI,dword ptr [EAX + 0xf4]
+00df95b6  SUB EDI,dword ptr [EAX + 0xf0]
+00df95bc  ADD EAX,0xf0
+00df95c1  SAR EDI,0x2
+00df95c4  CALL 0x00b3d3a0
+00df95c9  MOV ECX,EAX
+00df95cb  CALL 0x00ba6450
+00df95d0  MOV ESI,dword ptr [EAX + 0x4]
+00df95d3  SUB ESI,dword ptr [EAX]
+00df95d5  LEA EBP,[EBX + 0x8]
+00df95d8  SAR ESI,0x2
+00df95db  ADD ESI,EDI
+00df95dd  PUSH ESI
+00df95de  MOV ECX,EBP
+00df95e0  CALL 0x00de9dd0
+00df95e5  MOV EAX,EDI
+00df95e7  IMUL EAX,EAX,0xbc
+00df95ed  ADD EAX,dword ptr [EBP]
+00df95f0  SUB ESI,EDI
+00df95f2  PUSH ESI
+00df95f3  PUSH EAX
+00df95f4  MOV ECX,EBX
+00df95f6  CALL 0x00df7cb0
+00df95fb  MOV ECX,dword ptr [EBP]
+00df95fe  PUSH EDI
+00df95ff  PUSH ECX
+00df9600  MOV ECX,EBX
+00df9602  CALL 0x00df7f30
+00df9607  MOV ECX,EBX
+00df9609  CALL 0x00df9200
+00df960e  POP EDI
+00df960f  POP ESI
+00df9610  POP EBP
+00df9611  MOV ECX,EBX
+00df9613  POP EBX
+00df9614  JMP 0x00df8300

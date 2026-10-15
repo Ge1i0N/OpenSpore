@@ -1,0 +1,46 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  df95a0:	53                   	push   ebx
+  df95a1:	55                   	push   ebp
+  df95a2:	56                   	push   esi
+  df95a3:	57                   	push   edi
+  df95a4:	8b d9                	mov    ebx,ecx
+  df95a6:	e8 35 ff ff ff       	call   0xdf94e0
+  df95ab:	e8 f0 3d d4 ff       	call   0xb3d3a0
+  df95b0:	8b b8 f4 00 00 00    	mov    edi,DWORD PTR [eax+0xf4]
+  df95b6:	2b b8 f0 00 00 00    	sub    edi,DWORD PTR [eax+0xf0]
+  df95bc:	05 f0 00 00 00       	add    eax,0xf0
+  df95c1:	c1 ff 02             	sar    edi,0x2
+  df95c4:	e8 d7 3d d4 ff       	call   0xb3d3a0
+  df95c9:	8b c8                	mov    ecx,eax
+  df95cb:	e8 80 ce da ff       	call   0xba6450
+  df95d0:	8b 70 04             	mov    esi,DWORD PTR [eax+0x4]
+  df95d3:	2b 30                	sub    esi,DWORD PTR [eax]
+  df95d5:	8d 6b 08             	lea    ebp,[ebx+0x8]
+  df95d8:	c1 fe 02             	sar    esi,0x2
+  df95db:	03 f7                	add    esi,edi
+  df95dd:	56                   	push   esi
+  df95de:	8b cd                	mov    ecx,ebp
+  df95e0:	e8 eb 07 ff ff       	call   0xde9dd0
+  df95e5:	8b c7                	mov    eax,edi
+  df95e7:	69 c0 bc 00 00 00    	imul   eax,eax,0xbc
+  df95ed:	03 45 00             	add    eax,DWORD PTR [ebp+0x0]
+  df95f0:	2b f7                	sub    esi,edi
+  df95f2:	56                   	push   esi
+  df95f3:	50                   	push   eax
+  df95f4:	8b cb                	mov    ecx,ebx
+  df95f6:	e8 b5 e6 ff ff       	call   0xdf7cb0
+  df95fb:	8b 4d 00             	mov    ecx,DWORD PTR [ebp+0x0]
+  df95fe:	57                   	push   edi
+  df95ff:	51                   	push   ecx
+  df9600:	8b cb                	mov    ecx,ebx
+  df9602:	e8 29 e9 ff ff       	call   0xdf7f30
+  df9607:	8b cb                	mov    ecx,ebx
+  df9609:	e8 f2 fb ff ff       	call   0xdf9200
+  df960e:	5f                   	pop    edi
+  df960f:	5e                   	pop    esi
+  df9610:	5d                   	pop    ebp
+  df9611:	8b cb                	mov    ecx,ebx
+  df9613:	5b                   	pop    ebx
+  df9614:	e9 e7 ec ff ff       	jmp    0xdf8300
