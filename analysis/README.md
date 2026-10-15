@@ -27,6 +27,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE image application | [gge-image-bindings](gge-image-bindings.md) | explicit DBPF PNG provider + per-instance plain ImageDrawable overrides/resolver/GPU test; not Animated Icon or full phase/scene execution |
 | GGE Animated Icon selector | [gge-animated-icon](gge-animated-icon.md) | separate static frame/index/atlas bindings, QI offset correction, actual five-frame assets; no auto playback or scene readiness |
 | GGE star host lifecycle | [gge-star-lifecycle](gge-star-lifecycle.md) | owned generation-scoped action application/retry, names/centering/image/frame bindings; host-independent policy, not native phase/listener completion |
+| GGE direct package images | [gge-streaming-images](gge-streaming-images.md) | bounded file-backed PNG provider + 64-bit resource/index seeks; actual large original atlas feeds lifecycle without a test carrier |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |

@@ -66,6 +66,7 @@ namespace os::pkg {
 struct Header {
     u32 magic = 0;
     u32 version = 0;
+    u32 minor = 0;
     u32 count = 0;        // header +0x24
     u32 index_size = 0;   // header +0x2c
     u32 index_offset = 0; // header +0x40, or +0x28 when +0x40 == 0 (the loader's fallback)
@@ -119,6 +120,13 @@ struct SharedFields {
     bool has_type = false, has_group = false, has_unknown = false;
 };
 
+// Optional HOST allocation bounds, checked on the SAME open handle before index allocation.
+// Defaults preserve existing broad Package behavior; not original format/version limits.
+struct ReadLimits {
+    u64 file_bytes=~u64{0};
+    u32 records=0xffffffffu,index_bytes=0xffffffffu;
+};
+
 class Package {
 public:
     Package() = default;
@@ -129,6 +137,7 @@ public:
     // Opens and validates the header. On failure, ok()==false and why() says which of the
     // validator's clauses rejected it - never a dialog, never a throw (PROMPT.md).
     bool open(const std::string& path);
+    bool open_bounded(const std::string& path,const ReadLimits& limits);
 
     // Opens a DBPF that lives in MEMORY, i.e. a NESTED package. Spore ships those: the EP1 locale
     // text is inside DataEP1/Spore_EP1_Locale_0{1,2}.package as 21 resources of type `package`
@@ -176,7 +185,7 @@ private:
     bool read_at(u64 off, void* dst, size_t n);
     // The header/index validation shared by both open paths, so a nested package is validated by
     // EXACTLY the same clauses as a file (the oracle's validator does not care where bytes came from).
-    bool parse(u64 fsz);
+    bool parse(u64 fsz,const ReadLimits& limits=ReadLimits{});
 
     Header m_hdr{};
     bool m_ok = false;

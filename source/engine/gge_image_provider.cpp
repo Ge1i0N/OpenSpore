@@ -22,6 +22,28 @@ const spui::Window* target(const StarUiInstance& instance,const StarControlBindi
     for (const auto& w:instance.layout().windows) if (w.object_index==*binding.object&&w.control_id==binding.control) return &w;
     return nullptr;
 }
+bool supported_key(const ImageKey& key) { return key.instance&&key.type==0x2f7d0004u; }
+ImageRead decode_png(const ImageKey& key,const std::vector<u8>& bytes,const std::string& provenance) {
+    ImageRead result;
+    const u8 signature[8]{137,80,78,71,13,10,26,10};
+    if (bytes.size()<33||std::memcmp(bytes.data(),signature,8)||be32(bytes,8)!=13||
+        std::memcmp(bytes.data()+12,"IHDR",4)) {
+        result.status=ImageReadStatus::ReadFailure; result.error="PNG header rejected"; return result;
+    }
+    const u32 width=be32(bytes,16),height=be32(bytes,20);
+    if (!width||!height||width>4096||height>4096) {
+        result.status=ImageReadStatus::Unsupported; result.error="PNG dimensions exceed 4096 host bound"; return result;
+    }
+    auto pixels=std::make_shared<spui::ImagePixels>(); int w=0,h=0;
+    if (!image::decode_from_memory(bytes.data(),bytes.size(),pixels->bgra,w,h)||
+        w!=(int)width||h!=(int)height||pixels->bgra.size()!=size_t(width)*height*4) {
+        result.status=ImageReadStatus::ReadFailure; result.error="PNG pixel decode failed/dimensions mismatch"; return result;
+    }
+    pixels->resource={key.instance,key.type,key.group}; pixels->width=width; pixels->height=height;
+    pixels->provenance=provenance;
+    result.image.resource=pixels->resource; result.image.logical_width=w; result.image.logical_height=h;
+    result.image.pixels=std::move(pixels); result.status=ImageReadStatus::Found; return result;
+}
 }
 bool ExplicitImageProvider::open(const std::string& path,std::string& error) {
     label_=path; return reader_.open(path,error);
@@ -31,36 +53,50 @@ bool ExplicitImageProvider::open_from_memory(const std::vector<u8>& bytes,std::s
 }
 ImageRead ExplicitImageProvider::read(const ImageKey& key) {
     ImageRead result;
-    if (!key.instance||key.type!=0x2f7d0004u) {
-        result.status=ImageReadStatus::Unsupported; result.error="provider supports nonzero-instance PNG keys only"; return result;
-    }
+    if (!supported_key(key)) { result.status=ImageReadStatus::Unsupported; result.error="provider supports nonzero-instance PNG keys only"; return result; }
     auto resource=reader_.read_unique({key.instance,key.type,key.group});
     switch (resource.status) {
     case starsdb::ResourceReadStatus::NotFound: result.status=ImageReadStatus::Missing; break;
     case starsdb::ResourceReadStatus::Ambiguous: result.status=ImageReadStatus::Ambiguous; break;
-    case starsdb::ResourceReadStatus::Found: break;
+    case starsdb::ResourceReadStatus::Found:
+        return decode_png(key,resource.bytes,label_+" record["+std::to_string(resource.matching_record_indices[0])+"]");
     case starsdb::ResourceReadStatus::PackageRejected: result.status=ImageReadStatus::Unknown; break;
     default: result.status=ImageReadStatus::ReadFailure; break;
     }
-    if (resource.status!=starsdb::ResourceReadStatus::Found) { result.error=resource.error; return result; }
-    const u8 signature[8]{137,80,78,71,13,10,26,10};
-    if (resource.bytes.size()<33||std::memcmp(resource.bytes.data(),signature,8)||be32(resource.bytes,8)!=13||
-        std::memcmp(resource.bytes.data()+12,"IHDR",4)) {
-        result.status=ImageReadStatus::ReadFailure; result.error="PNG header rejected"; return result;
-    }
-    const u32 width=be32(resource.bytes,16),height=be32(resource.bytes,20);
-    if (!width||!height||width>4096||height>4096) {
-        result.status=ImageReadStatus::Unsupported; result.error="PNG dimensions exceed 4096 host bound"; return result;
-    }
-    auto pixels=std::make_shared<spui::ImagePixels>(); int w=0,h=0;
-    if (!image::decode_from_memory(resource.bytes.data(),resource.bytes.size(),pixels->bgra,w,h)||
-        w!=(int)width||h!=(int)height||pixels->bgra.size()!=size_t(width)*height*4) {
-        result.status=ImageReadStatus::ReadFailure; result.error="PNG pixel decode failed/dimensions mismatch"; return result;
-    }
-    pixels->resource={key.instance,key.type,key.group}; pixels->width=width; pixels->height=height;
-    pixels->provenance=label_+" record["+std::to_string(resource.matching_record_indices[0])+"]";
-    result.image.resource=pixels->resource; result.image.logical_width=w; result.image.logical_height=h;
-    result.image.pixels=std::move(pixels); result.status=ImageReadStatus::Found; return result;
+    result.error=resource.error; return result;
+}
+bool StreamingImageProvider::open(const std::string& path,std::string& error) {
+    close();
+    const auto fail=[&](const std::string& why) { error=why; close(); return false; };
+    if (path.empty()||path.find('\0')!=std::string::npos) return fail("explicit package path is empty/contains NUL");
+    if (!package_.open_bounded(path,{u64{1}<<32,65536,4*1024*1024})) return fail(package_.why());
+    const auto& h=package_.header();
+    if (h.version!=3||h.minor!=0||h.field_3c!=3) return fail("streaming PNG provider requires DBPF3.0/index3");
+    if (h.index_offset<0x60||h.index_size<4||h.kind>7||!package_.index_parsed()||package_.records().size()!=h.count)
+        return fail("streaming PNG provider requires a fully parsed bounded DBPF directory");
+    opened_=true; error.clear(); return true;
+}
+void StreamingImageProvider::close() { opened_=false; package_.close(); }
+ImageRead StreamingImageProvider::read(const ImageKey& key) {
+    ImageRead result;
+    const auto fail=[&](ImageReadStatus s,const char* why) { result.status=s; result.error=why; return result; };
+    if (!supported_key(key)) return fail(ImageReadStatus::Unsupported,"provider supports nonzero-instance PNG keys only");
+    if (!opened_) return fail(ImageReadStatus::Unknown,"streaming image provider is not open");
+    const auto matches=package_.find_records({key.instance,key.type,key.group});
+    if (matches.empty()) return fail(ImageReadStatus::Missing,"exact ResourceKey not found in selected package");
+    if (matches.size()!=1) return fail(ImageReadStatus::Ambiguous,"exact ResourceKey has duplicate DBPF records");
+    const auto& r=package_.records()[matches[0]];
+    if (r.unknown()!=0||r.flags()!=1||(r.compression()!=0&&!r.refpacked()))
+        return fail(ImageReadStatus::Unsupported,"resource high key word/flags/compression unsupported");
+    if (r.packed_size()>64*1024*1024||r.mem_size()>64*1024*1024)
+        return fail(ImageReadStatus::Unsupported,"resource exceeds 64MiB packed/decoded host limit");
+    if (!r.packed_size()||!r.mem_size()||r.offset()<0x60||r.offset()>=package_.header().index_offset||
+        r.packed_size()>package_.header().index_offset-r.offset()||(!r.refpacked()&&r.packed_size()!=r.mem_size()))
+        return fail(ImageReadStatus::ReadFailure,"resource span/size invalid or unreadable");
+    std::vector<u8> bytes;
+    if (!package_.read_resource_decoded(matches[0],bytes)||bytes.size()!=r.mem_size())
+        return fail(ImageReadStatus::ReadFailure,"selected resource read/decompression/size check failed");
+    return decode_png(key,bytes,package_.path()+" record["+std::to_string(matches[0])+"] (file-backed)");
 }
 ImageApplyResult apply_star_image(StarUiInstance& instance,u64 plan_id,const Phase1Request& request,ImageProvider& provider) {
     const auto fail=[](ImageApplyStatus s,const char* why) { return ImageApplyResult{s,why}; };

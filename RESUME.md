@@ -118,7 +118,7 @@ test with `-w -devDirs`; retain evidence and commit.
   no-op returning true; host Changed/Unchanged/IgnoredOutOfRange.
   Only AutoPlay=false/explicit positive bounded grids/obsolete width0; actual icons45/93 both Image44,
   frames5 rows1 columns5. Actual atlas key B89D2CD2/2F7D0004/31A44893 in Graphics record15591,256x512.
-  gge_animated_verify:163 checks, actual PNG in a clearly constructed bounded DBPF carrier, controlled
+  gge_animated_verify:159 checks (four carrier-open assertions removed), direct original atlas PNG, controlled
   2x3 red/blue GPU readback. Native normalization/playback/live GGE caller unimplemented.
   analysis/gge-animated-icon.md / audit/gge-animated/ retain seven functions and property corpus.
 - gge_star_lifecycle.* now owns one immutable input/instance/report snapshot: transactional open,
@@ -129,9 +129,18 @@ test with `-w -devDirs`; retain evidence and commit.
   per pass including failures. Tooltip/layer/profile/timestamp/terrain/native phase/listeners remain
   Unsupported or structurally missing. Null provider Unknown; thrown/dishonest backend Failed.
   Separate phase1/config duplicate choices, no fake locale availability or native phase completion.
-  gge_star_lifecycle_verify:228 checks, actual PNG/layouts, explicitly constructed atlas carrier,
+  gge_star_lifecycle_verify:232 checks, actual PNG/layouts, direct StreamingImageProvider/lifecycle path,
   controlled metadata/getter variant/reentry/UTF/floor/ownership tests. Screen unchanged.
   analysis/gge-star-lifecycle.md / audit/gge-star-lifecycle/ retain policy/native boundaries.
+- StreamingImageProvider in gge_image_provider.*: explicit file-backed DBPF3.0/index3, <=4GiB file,
+  <=65536 records/4MiB directory/64MiB packed+decoded resource/4096 PNG axis. Exact key+duplicates,
+  shared decoder with old <=256MiB memory provider (unchanged), no priority/discovery/profile scans.
+  Package::open_bounded checks allocations on same handle; file seek/tell now64-bit; minor version
+  retained, mismatched/unknown directory no longer reports parsed. Direct original Graphics atlas
+  B89D2CD2/2F7D0004/31A44893 record15591 256x512 now feeds animation/lifecycle without carrier.
+  gge_streaming_image_verify:95 checks, all masks/raw/RefPack/errors/bounds/sharing, sparse data+index above
+  2GiB, >4GiB rejection,544 successful/failed-reopen ownership cycles. No new scene readiness.
+  analysis/gge-streaming-images.md records host limits/direct integration and mutable-source boundary.
 
 ## Next, in order
 
@@ -156,7 +165,7 @@ test with `-w -devDirs`; retain evidence and commit.
     adapter with explicit resolved object targets/actual resource failures is now implemented for PNG
     plain ImageDrawable only (gge_image_provider). The host lifecycle now joins independent image/
     frame/name/flag/centering actions with explicit outcome/retry, not native services/order/listeners.
-    Next: explicit production streaming PNG provider + scene/camera ownership and real Available
+    Direct production streaming PNG provider is now present. Next: scene/camera ownership and real Available
     catalogue integration. Playback/native grid normalization remain separate. Plan itself executes no
     services and native return1 is not readiness; image-operation success is not phase completion.
     Continue thumbnail/main-image/plugin ports (DF6D80)
@@ -179,7 +188,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -202,6 +211,8 @@ $imageCapture = Join-Path $env:TEMP ('OpenSpore-image-' + [guid]::NewGuid() + '.
 $frameCapture = Join-Path $env:TEMP ('OpenSpore-frame-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\gge_animated_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package $frameCapture
 .\build\Debug\gge_star_lifecycle_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package .\build\bin\Debug\Data\Spore_Graphics.package
+$streamDir = Join-Path $env:TEMP ('OpenSpore-stream-' + [guid]::NewGuid())
+.\build\Debug\gge_streaming_image_verify.exe .\build\bin\Debug\Data\Spore_Graphics.package $streamDir
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

@@ -228,6 +228,13 @@ add_executable(gge_star_lifecycle_verify EXCLUDE_FROM_ALL tools/gge_star_lifecyc
 target_include_directories(gge_star_lifecycle_verify PRIVATE source)
 target_compile_definitions(gge_star_lifecycle_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_link_libraries(gge_star_lifecycle_verify PRIVATE user32 gdi32 ole32)
+add_executable(gge_streaming_image_verify EXCLUDE_FROM_ALL tools/gge_streaming_image_verify.cpp
+  source/engine/gge_image_provider.cpp source/engine/gge_star_instance.cpp source/engine/gge_star_phase1.cpp
+  source/engine/spui_drawable.cpp source/engine/spui_binary.cpp source/engine/spui_geometry.cpp
+  ${OS_SAVE_HEADER_SOURCES} source/render/imgfile.cpp)
+target_include_directories(gge_streaming_image_verify PRIVATE source)
+target_compile_definitions(gge_streaming_image_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_link_libraries(gge_streaming_image_verify PRIVATE user32 gdi32 ole32)
 add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_inspect PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
@@ -261,6 +268,7 @@ if(MSVC)
   target_compile_options(gge_image_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_animated_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_star_lifecycle_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(gge_streaming_image_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)

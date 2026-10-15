@@ -102,7 +102,7 @@ does **not** say the locale table/key exists, loaded, or formatted by native str
 
 ## Verification
 
-`gge_star_lifecycle_verify`: **228 checks PASS** on both actual 152-object/58-window star layouts.
+`gge_star_lifecycle_verify`: **232 checks PASS** on both actual 152-object/58-window star layouts.
 Controlled metadata/provider behavior is explicitly separate from original save/catalogue evidence.
 
 - Unknown branch/configuration inputs versus observed false, independent action outcomes.
@@ -118,10 +118,9 @@ Controlled metadata/provider behavior is explicitly separate from original save/
 - Provider reentry, template/sibling isolation, exact Cyrillic/emoji UTF conversion, empty/malformed/
   oversized captions, moved-root local centering and root/missing-target rejection.
 
-The original large Graphics package still exceeds the narrow provider's file-size limit. As in the
-Animated Icon verifier, the test uses a caller-selected exact original atlas record, **unchanged PNG
-bytes in a constructed one-record in-memory DBPF**, then the bounded provider. That carrier is not
-an original package or save. No production streaming provider or expanded discovery scope is implied.
+The [direct streaming provider](gge-streaming-images.md) now reads the original large Graphics package
+without a constructed DBPF carrier. Tests also pass that production provider directly to the lifecycle
+on both layouts (228→232 checks). The old narrow memory adapter's limits/discovery scope stay unchanged.
 This new verifier asserts resolver state, not a new GPU/full-card/galaxy screenshot; prior image/
 Animated Icon D3D9 readback tests cover their controlled GPU subsets separately.
 
@@ -136,12 +135,12 @@ Evidence: [host/native distinction and centering constant](audit/gge-star-lifecy
 [phase-1](gge-star-phase1.md), [images](gge-image-bindings.md), [Animated Icon](gge-animated-icon.md).
 This step reuses retained local Ghidra/objdump evidence; it does not introduce new REA Evidence IDs.
 
-Next: an explicit production streaming image provider and scene/active-camera ownership contracts,
-then real Available catalogue input and per-star projection/selection integration. Native service
+Next: scene/active-camera ownership contracts, then real Available catalogue input and per-star
+projection/selection integration. Native service
 callbacks/listeners and phase ordering remain separate work, not inferred from this host pass.
 
-Final Debug x86 warning-free. The 228 lifecycle checks and all prior phase1/instance/projection/
-parser/catalogue/DBCheck/Intro/SPUI/package suites PASS; image80, AnimatedIcon163 and D3D9 scissor
+Final Debug x86 warning-free. The lifecycle checks and all prior phase1/instance/projection/
+parser/catalogue/DBCheck/Intro/SPUI/package suites PASS; image80, AnimatedIcon and D3D9 scissor
 readbacks PASS. Six Python tests, 55 maintained Markdown link checks and dashboard --check PASS.
 Launcher/Main → GGE/visible launcher → CreatureEditor smoke runs exit0, aborts/asserts0, with the
 MoviePlayer observation still explicitly Unknown. New launcher capture is RGB pixel-identical to

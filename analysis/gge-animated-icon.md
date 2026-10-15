@@ -71,7 +71,7 @@ to unrelated template art. Layouts without such state retain their previous diag
 
 ## Verification and exact test boundary
 
-`gge_animated_verify`: **163 checks PASS** on both actual layouts, plus controlled variants:
+`gge_animated_verify`: **159 checks PASS** on both actual layouts, plus controlled variants:
 
 - Actual Image44/resource key → unchanged shipped atlas PNG → existing provider's BGRA decode →
   separate window bindings → indices0..4 → atlas-composed quad.
@@ -85,12 +85,10 @@ to unrelated template art. Layouts without such state retain their previous diag
   and black pixels outside the scissor. This tests the host frame-quad/GPU path, **not original animation
   execution or a full mounted star card**. The shipped PNG is decoded/resolved but not that GPU fixture.
 
-The large original `Spore_Graphics.package` exceeds the existing 256MiB explicit image-provider bound.
-The test reads only its exact unique atlas record through the existing streaming `pkg::Package`,
-places the **unchanged PNG bytes into a constructed one-record DBPF in memory**, and calls the bounded
-provider. That carrier is explicitly a fixture, not a shipped package/save. The runtime provider's
-size policy/priority/search scope is not widened; a production explicit streaming image adapter is
-still needed to use that large package directly through `ImageProvider`.
+The [streaming provider follow-up](gge-streaming-images.md) now reads the original large Graphics
+package directly through `ImageProvider`; this verifier no longer constructs a DBPF carrier. Four
+carrier-open assertions were removed (163→159 checks). The old memory provider still has its 256MiB
+limit; the new provider has separate bounded file/index/resource rules, not inferred package priority.
 
 ```powershell
 cmake --build build --config Debug --target OpenSpore gge_animated_verify
@@ -108,13 +106,13 @@ REA MCP was not connected in this session; an aligned registration was observed 
 No configuration/engine changes were made. These are retained local Ghidra/objdump/asset results,
 not REA Evidence IDs or native runtime observations.
 
-Next: phase-action lifecycle and explicit package-backed pixel loading at runtime, then scene/camera
-ownership and real Available catalogue input. Full playback can be added separately, not inferred
+Next: scene/camera ownership and real Available catalogue input; host lifecycle/direct package-backed
+pixel loading now have separate implementations. Full playback can be added separately, not inferred
 from this static stage selector. MoviePlayer/DBCheck/native mount readiness remain unchanged.
 The [host lifecycle follow-up](gge-star-lifecycle.md) now joins the static selector/pixel attachment
 with explicit configuration choices and per-action outcomes. Native phase ordering/playback are not implied.
 
-Final Debug x86 build warning-free. The 163 new checks and all prior image/phase1/instance/projection/
+Final Debug x86 build warning-free. The static selector checks and all prior image/phase1/instance/projection/
 parser/catalogue/DBCheck/Intro/SPUI/package/scissor suites PASS. Six Python tests, 54 maintained
 Markdown link checks and generated dashboard --check PASS. Launcher/Main → GGE/visible launcher →
 CreatureEditor smoke runs exit0, aborts/asserts0; MoviePlayer observation remains Unknown. The new

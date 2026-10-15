@@ -26,6 +26,19 @@ private:
     starsdb::ExplicitDbpfReader reader_;
     std::string label_;
 };
+// File-backed alternative for original large packages: explicit one-file DBPF3.0/index3 only.
+// Bounded index + per-resource reads, never a whole-file vector or installation/profile search.
+// Limits: file<=4GiB, records<=65536, index<=4MiB, packed/decoded resource<=64MiB, PNG<=4096/axis.
+class StreamingImageProvider final:public ImageProvider {
+public:
+    bool open(const std::string& path,std::string& error);
+    void close();
+    ImageRead read(const ImageKey& key) override;
+    const pkg::Package& package() const { return package_; }
+private:
+    pkg::Package package_;
+    bool opened_=false;
+};
 enum class ImageApplyStatus { Applied, Blocked, Missing, Ambiguous, Unsupported, ReadFailure };
 struct ImageApplyResult { ImageApplyStatus status=ImageApplyStatus::Blocked; std::string error; };
 // Applies ONE resolved ImageResource/StageImageTarget request. No phase completion, no other

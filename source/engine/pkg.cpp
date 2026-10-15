@@ -63,6 +63,9 @@ u32 le32(const u8* p) { return (u32)p[0] | ((u32)p[1] << 8) | ((u32)p[2] << 16) 
 }  // namespace
 
 bool Package::open(const std::string& path) {
+    return open_bounded(path,ReadLimits{});
+}
+bool Package::open_bounded(const std::string& path,const ReadLimits& limits) {
     close();
     m_path = path;
     FILE* f = nullptr;
@@ -71,12 +74,12 @@ bool Package::open(const std::string& path) {
         LOG_ERROR("pkg", "open(%s): %s", path.c_str(), m_why.c_str());
         return false;
     }
-    fseek(f, 0, SEEK_END);
-    long long fsz = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    if (_fseeki64(f,0,SEEK_END)!=0) { fclose(f); m_why="cannot seek package end"; return false; }
+    const auto fsz=_ftelli64(f);
+    if (fsz<0||_fseeki64(f,0,SEEK_SET)!=0) { fclose(f); m_why="cannot determine package size"; return false; }
     m_hdr.file_size = (u64)fsz;
     m_file = f;
-    return parse((u64)fsz);
+    return parse((u64)fsz,limits);
 }
 
 bool Package::open_from_memory(const u8* data, size_t size, const std::string& label) {
@@ -93,16 +96,18 @@ bool Package::open_from_memory(const u8* data, size_t size, const std::string& l
 
 bool Package::read_at(u64 off, void* dst, size_t n) {
     if (!m_mem.empty()) {
-        if (off + n > m_mem.size()) return false;
+        if (off>m_mem.size()||n>m_mem.size()-off) return false;
         std::memcpy(dst, m_mem.data() + off, n);
         return true;
     }
     if (!m_file) return false;
-    if (fseek(m_file, (long)off, SEEK_SET) != 0) return false;
+    if (off>m_hdr.file_size||n>m_hdr.file_size-off) return false;
+    if (_fseeki64(m_file,(__int64)off,SEEK_SET)!=0) return false;
     return fread(dst, 1, n, m_file) == n;
 }
 
-bool Package::parse(u64 fsz) {
+bool Package::parse(u64 fsz,const ReadLimits& limits) {
+    if (fsz>limits.file_bytes) { m_why="package exceeds host file-size limit"; return false; }
     u8 hdr[kHdrSize];
     if (fsz < (u64)kHdrSize || !read_at(0, hdr, kHdrSize)) {
         m_why = "source smaller than the 0x60-byte header";
@@ -111,6 +116,7 @@ bool Package::parse(u64 fsz) {
     }
     m_hdr.magic = le32(hdr + 0x00);
     m_hdr.version = le32(hdr + 0x04);
+    m_hdr.minor = le32(hdr + 0x08);
     m_hdr.count = le32(hdr + 0x24);
     m_hdr.index_size = le32(hdr + 0x2c);
     m_hdr.field_3c = le32(hdr + 0x3c);
@@ -143,6 +149,10 @@ bool Package::parse(u64 fsz) {
 
     m_ok = true;
 
+    if (m_hdr.count>limits.records||m_hdr.index_size>limits.index_bytes) {
+        m_ok=false; m_why="package directory exceeds host count/index allocation limit"; return false;
+    }
+
     // Read the kind dword (index dword[0]) and check the measured formula.
     u8 kb[4] = {};
     if (!read_at(m_hdr.index_offset, kb, 4)) {
@@ -159,6 +169,7 @@ bool Package::parse(u64 fsz) {
                             "(predicted %u) - index NOT parsed",
                       m_path.c_str(), m_hdr.kind, m_hdr.count, m_hdr.index_size,
                       m_kind_known ? ki.prefix + ki.stride * m_hdr.count : 0u);
+        m_kind_known=false;
         return true;  // header valid, index unknown
     }
 

@@ -49,6 +49,8 @@ fits that deliberately narrow explicit-package subset.
 The returned `spui::ImageBinding` owns a shared const `ImagePixels` object: exact resource triple,
 dimensions, BGRA and explicit package/record provenance, plus atlas UV and logical dimensions.
 The provider itself is not a resource cache or an implementation of original package precedence.
+The separate [file-backed provider](gge-streaming-images.md) now supports bounded direct reads from
+large original packages; it shares this decoder without changing the old memory adapter's limits.
 The helper reuses the existing GDI+ decoder; it is not a complete hardened PNG-format validator.
 
 ## Application, isolation and sharing

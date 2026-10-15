@@ -15,14 +15,6 @@ using namespace os::gge;
 using Bytes=std::vector<u8>;
 using Change=StarUiInstance::FrameChange;
 static void le(Bytes& b,size_t at,u32 v) { for (size_t i=0;i<4;++i) b[at+i]=(u8)(v>>(8*i)); }
-// Constructed container holding UNCHANGED shipped PNG, not an original resource package or save.
-static Bytes container(const spui::ExternalResource& key,const Bytes& png) {
-    const size_t offset=0x60+png.size(); Bytes b(offset+36,0);
-    le(b,0,0x46504244); le(b,4,3); le(b,0x24,1); le(b,0x2c,36); le(b,0x3c,3); le(b,0x40,(u32)offset);
-    std::copy(png.begin(),png.end(),b.begin()+0x60); le(b,offset,4);
-    le(b,offset+8,key.type); le(b,offset+12,key.group); le(b,offset+16,key.instance); le(b,offset+20,0x60);
-    le(b,offset+24,(u32)png.size()); le(b,offset+28,(u32)png.size()); le(b,offset+32,0x10000); return b;
-}
 static spui::Property* prop(spui::Layout& layout,u16 object,u32 id) {
     for (auto& o:layout.objects) if (o.index==object) for (auto& p:o.properties) if (!p.depth&&p.id==id) return &p;
     return nullptr;
@@ -59,8 +51,8 @@ int main(int argc,char** argv) {
     if (argc!=4) { std::cerr<<"usage: gge_animated_verify <SPUI-fixtures> <explicit-original-atlas-package> <new-controlled.bmp>\n"; return 2; }
     size_t checks=0,fixtures=0; std::string error;
     const auto check=[&](bool ok,const char* why) { ++checks; if (!ok) std::cerr<<why<<'\n'; return ok; };
-    pkg::Package atlas;
-    if (!check(atlas.open(argv[2]),"explicit original atlas package open")) return 1;
+    StreamingImageProvider atlas;
+    if (!check(atlas.open(argv[2],error),"explicit original atlas streaming provider open")) return 1;
     std::ifstream manifest(std::filesystem::path(argv[1])/"manifest.txt"); std::string name;
     size_t bytes,objects,windows,props,links,roots;
     while (manifest>>name>>bytes>>objects>>windows>>props>>links>>roots) {
@@ -89,12 +81,11 @@ int main(int argc,char** argv) {
             if (!check(a.set_animation_frame(icon,1,change,error)&&change==Change::Unchanged&&!a.layout().runtime_animations.count(icon),
                 "same index causes no new binding/redraw request")) return 1;
             const auto& key=descriptor.image.resource;
-            const auto matches=atlas.find_records({key.instance,key.type,key.group}); Bytes png;
-            if (!check(matches.size()==1&&atlas.read_resource_decoded(matches[0],png),"exact original atlas resource, no first-key/fallback lookup")) return 1;
-            ExplicitImageProvider provider; auto packed=container(key,png);
-            if (!check(provider.open_from_memory(packed,error),"controlled DBPF carrier for actual atlas PNG within narrow provider bound")) return 1;
-            auto loaded=provider.read({key.instance,key.type,key.group});
-            if (!check(loaded.status==ImageReadStatus::Found&&loaded.image.pixels,"actual atlas PNG decoded through explicit provider")) return 1;
+            const auto matches=atlas.package().find_records({key.instance,key.type,key.group});
+            if (!check(matches.size()==1,"exact original atlas resource, no first-key/fallback lookup")) return 1;
+            auto loaded=atlas.read({key.instance,key.type,key.group});
+            if (!check(loaded.status==ImageReadStatus::Found&&loaded.image.pixels&&
+                loaded.image.pixels->provenance.find("(file-backed)")!=std::string::npos,"actual original atlas decoded directly, no constructed DBPF carrier")) return 1;
             if (!check(a.set_animation_pixels(icon,loaded.image.pixels,error)&&a.animation_frame(icon,frame,error)&&frame==1,
                 "atlas pixels installed without resetting current frame")) return 1;
             spui::ImageQuad quad;

@@ -24,5 +24,5 @@
     "native phase latch/listeners/plugins/mount",
     "automatic GGE caller, catalogue discovery, scene/camera/effects"
   ],
-  "verification": "gge_star_lifecycle_verify: controlled metadata on actual SPUI/PNG; atlas PNG in clearly constructed bounded DBPF carrier; no new live GGE/GPU scene claim"
+  "verification": "gge_star_lifecycle_verify: controlled metadata on actual SPUI/PNG; direct StreamingImageProvider for original large atlas package, no constructed carrier; no new live GGE/GPU scene claim"
 }

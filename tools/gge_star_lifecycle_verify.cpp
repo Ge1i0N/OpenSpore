@@ -13,13 +13,6 @@ using namespace os::gge;
 using Status=StarHostActionStatus;
 using Kind=StarHostActionKind;
 using Bytes=std::vector<u8>;
-static void le(Bytes& b,size_t at,u32 v) { for (size_t i=0;i<4;++i) b[at+i]=(u8)(v>>(8*i)); }
-static Bytes carrier(const spui::ExternalResource& k,const Bytes& png) {
-    const size_t off=0x60+png.size(); Bytes b(off+36,0);
-    le(b,0,0x46504244); le(b,4,3); le(b,0x24,1); le(b,0x2c,36); le(b,0x3c,3); le(b,0x40,(u32)off);
-    std::copy(png.begin(),png.end(),b.begin()+0x60); le(b,off,4); le(b,off+8,k.type); le(b,off+12,k.group);
-    le(b,off+16,k.instance); le(b,off+20,0x60); le(b,off+24,(u32)png.size()); le(b,off+28,(u32)png.size()); le(b,off+32,0x10000); return b;
-}
 static const spui::Window& window(const StarUiInstance& instance,u16 object) {
     for (const auto& w:instance.layout().windows) if (w.object_index==object) return w;
     throw std::runtime_error("test object missing");
@@ -73,8 +66,8 @@ int main(int argc,char** argv) {
         if (main.status==ImageReadStatus::Found) break;
     }
     if (!check(main.status==ImageReadStatus::Found,"actual main PNG decode")) return 1;
-    pkg::Package atlas;
-    if (!check(atlas.open(argv[3]),"explicit original atlas package")) return 1;
+    StreamingImageProvider atlas;
+    if (!check(atlas.open(argv[3],error),"explicit original atlas streaming provider")) return 1;
     std::ifstream manifest(std::filesystem::path(argv[1])/"manifest.txt"); std::string name;
     size_t bytes,objects,windows,props,links,roots;
     while (manifest>>name>>bytes>>objects>>windows>>props>>links>>roots) {
@@ -120,12 +113,12 @@ int main(int argc,char** argv) {
             "no provider gives Unknown not Missing/Found")) return 1;
         Provider provider; provider.main=main; spui::AnimationDescriptor descriptor;
         if (!check(host.instance()->animation(45,descriptor,error),"real animation descriptor")) return 1;
-        const auto& r=descriptor.image.resource; const auto matches=atlas.find_records({r.instance,r.type,r.group}); Bytes png;
-        ExplicitImageProvider wrapped;
-        if (!check(matches.size()==1&&atlas.read_resource_decoded(matches[0],png)&&wrapped.open_from_memory(carrier(r,png),error),
-            "unchanged original atlas PNG in explicitly constructed bounded carrier")) return 1;
-        provider.atlas=wrapped.read({r.instance,r.type,r.group});
-        if (!check(provider.atlas.status==ImageReadStatus::Found,"actual atlas decode, not fake pixels")) return 1;
+        const auto& r=descriptor.image.resource; const auto matches=atlas.package().find_records({r.instance,r.type,r.group});
+        if (!check(matches.size()==1&&atlas.package().header().file_size>256*1024*1024,
+            "original large atlas package index, no constructed carrier")) return 1;
+        provider.atlas=atlas.read({r.instance,r.type,r.group});
+        if (!check(provider.atlas.status==ImageReadStatus::Found&&provider.atlas.image.pixels->provenance.find("(file-backed)")!=std::string::npos,
+            "actual direct-streamed atlas decode, not fake pixels")) return 1;
         if (!check(host.apply_available(ticket,&provider,error)&&provider.main_calls==1&&provider.atlas_calls==1&&
             action(host,Kind::AnimationPixels,0x026e0002).status==Status::Missing,"missing assets explicit, one backend read per key per pass")) return 1;
         if (!check(action(host,Kind::Phase1,0x046ea4b6,Phase1Op::TooltipUserData).status==Status::Unsupported&&
@@ -222,6 +215,12 @@ int main(int argc,char** argv) {
         if (!check(flags_applied&&flag_count==4&&(window(*host.instance(),94).flags&1u)&&(window(*host.instance(),47).flags&1u)&&
             !(window(*host.instance(),114).flags&2u)&&!(window(*host.instance(),125).flags&1u),
             "four raw configuration flag changes applied to real windows, not renamed layer semantics")) return 1;
+        if (!check(host.open(99,source,entry,inputs,error)&&host.apply_available(host.report().ticket,&atlas,error),
+            "production streaming provider passed DIRECTLY to lifecycle, no routing fixture")) return 1;
+        if (!check(action(host,Kind::AnimationPixels,0x026e0002).status==Status::Applied&&
+            spui::animation_quad(host.instance()->layout(),45,{0,0,32,32},quad)&&
+            quad.pixels->provenance.find(argv[3])!=std::string::npos&&host.instance()->animation_frame(45,frame,error)&&frame==3,
+            "direct original package pixels reach frame resolver with original package provenance")) return 1;
         // Focused owned-instance primitive boundaries used by the lifecycle.
         StarUiInstance primitive;
         if (!check(primitive.instantiate(7,source,entry,error),"primitive instance")) return 1;

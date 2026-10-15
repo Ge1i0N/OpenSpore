@@ -108,7 +108,7 @@ def retain_static():
                              'UTF16-to-UTF8 inline name, bounded malformed/NUL rejection; locale reference binding NOT locale availability'],
                'unimplemented':['tooltip/userdata native pointers','layer relation/selected terrain services','profile service/name','timestamp/colour service',
                                 'native phase latch/listeners/plugins/mount','automatic GGE caller, catalogue discovery, scene/camera/effects'],
-               'verification':'gge_star_lifecycle_verify: controlled metadata on actual SPUI/PNG; atlas PNG in clearly constructed bounded DBPF carrier; no new live GGE/GPU scene claim'}
+               'verification':'gge_star_lifecycle_verify: controlled metadata on actual SPUI/PNG; direct StreamingImageProvider for original large atlas package, no constructed carrier; no new live GGE/GPU scene claim'}
         (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
         (dest/'local-centering.asm.txt').write_text(header+'\n'.join(disasm(pe,0x806e00,0x806e9e))+'\n',encoding='utf-8',newline='\n')
         print('retained centering constant/instructions and explicit host lifecycle policy; no target execution')
