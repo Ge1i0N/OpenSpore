@@ -1,0 +1,50 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static GA instructions + shipped assets; no native service execution",
+  "correction": "DF6D80 observable normal return paths MOV AL,1, including missing-root skip. It is not a dependency validator, no retained false phase1 path. Earlier description of phase1 failure was unsupported.",
+  "root_guard": "root0x02E5A4A8 missing at DF700B skips to phase assignment/return1, not false",
+  "body_scope": "phase1 case body only; native current-phase skip at DF6D93 is outside host plan",
+  "thumbnail": "record+0x3C.instance nonzero => bind to0x02E71340/0x046EA568; zero=>hide both, show0x068DAC20/21",
+  "main_image": "record+0x30 ->0x046A9A21/0x046EA4B6; asset key presence is not resource read success",
+  "tooltip": "0x046EA4B6 userdata key0x037AC490 assigned native game-ui-data+0x18 (host emits requirement, no pointer)",
+  "image_interface": "window+0xA8 fill drawable -> QI0xEF3C47CF; +0x18 image getter DE3DB0, +0x14 setter DE3EB0 then window+0x90 invalidation",
+  "image_fallback": "DE3EB0 explicit shared image nonnull skips resource lookup; null tries resource triple via806320 (zero triple in stage-target calls); no host asset fallback invented",
+  "animated_icon_distinct": "DF9200 window QI0x0106F146 ->embedded+0x20C slot+0x14 stage index; NOT image-drawable QI0xEF3C47CF",
+  "stage_descriptions": {
+    "0": {
+      "table": "0x2b7a0311",
+      "key": "0x5b08702"
+    },
+    "1": {
+      "table": "0x2b7a0311",
+      "key": "0x5b08703"
+    },
+    "2": {
+      "table": "0x2b7a0311",
+      "key": "0x5b08704"
+    },
+    "4": {
+      "table": "0x2b7a0311",
+      "key": "0x5b08705"
+    },
+    "5": {
+      "table": "0x2b7a0311",
+      "key": "0x5b08706"
+    }
+  },
+  "stage_description_targets": [
+    "0x0594a640",
+    "0x05ff9352"
+  ],
+  "stage_image": "source_control=uint32(stage+0x03744FF0); current image transferred to0x02E713A8,0x046EA523,0x026E0001,0x026E0002",
+  "profile": "record+0x48 presence => profile name requests0x05FF9AD2/0x05FF9D44; not conflated with observed profile service result",
+  "layer_reference": "0x05B31710 related to0x05B347BC if saved else0x04656452; 80DE40 native layer operation unexecuted",
+  "tail_dependencies": "DE45C0 selected StarRecord saved byte/presence controls terrain layer/timestamp/colour branches, separate from GGE entry.saved",
+  "host_policy": [
+    "bounded ordered prefix stops on unobserved dynamic branch; it does not report native load error",
+    "Found=unique structural object or explicit checked choice, NOT native interface or resource readiness",
+    "Missing/Ambiguous targets preserved; no first-ControlID choice or blanket optional-control failure",
+    "all resource observations stay Unknown, no native calls/window mutation/phase or mount latch",
+    "no actual renderer camera/scene, selected star services or live caller"
+  ]
+}

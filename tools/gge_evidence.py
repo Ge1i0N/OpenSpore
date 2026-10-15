@@ -30,6 +30,7 @@ PRESENT_FUNCTIONS = (0xde3c20,0x7c4250,0x805f90,0xdf6010,0xdf6110,0xdf9200,0xdf7
 MOUNT_FUNCTIONS = (0xdf7690,0xdf6d80,0xdf9160,0xdf82a0,0x812250,0x8121c0,0x812100,
                    0x811c20,0x811bc0,0x8102a0,0x80f7d0,0xde46d0,0xddd920,0xdda8c0,
                    0xddd150,0xddb730,0xdda940)
+PHASE1_FUNCTIONS = (0xdf6d80,0xde3db0,0xde3eb0,0xde3f50,0x806320,0x806e00,0xdf7690,0xdf9200)
 
 
 def main():
@@ -38,8 +39,9 @@ def main():
     catalog = '--catalog' in sys.argv
     present = '--present' in sys.argv
     mount = '--mount' in sys.argv
-    addresses = MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
+    phase1 = '--phase1' in sys.argv
+    addresses = PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
@@ -87,6 +89,39 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--phase1' in sys.argv:
+        dest=ROOT/'analysis/audit/gge-star-phase1'; dest.mkdir(parents=True,exist_ok=True)
+        facts={'oracle_sha256':digest,'authority':'static GA instructions + shipped assets; no native service execution',
+               'correction':'DF6D80 observable normal return paths MOV AL,1, including missing-root skip. It is not a dependency validator, no retained false phase1 path. Earlier description of phase1 failure was unsupported.',
+               'root_guard':'root0x02E5A4A8 missing at DF700B skips to phase assignment/return1, not false',
+               'body_scope':'phase1 case body only; native current-phase skip at DF6D93 is outside host plan',
+               'thumbnail':'record+0x3C.instance nonzero => bind to0x02E71340/0x046EA568; zero=>hide both, show0x068DAC20/21',
+               'main_image':'record+0x30 ->0x046A9A21/0x046EA4B6; asset key presence is not resource read success',
+               'tooltip':'0x046EA4B6 userdata key0x037AC490 assigned native game-ui-data+0x18 (host emits requirement, no pointer)',
+               'image_interface':'window+0xA8 fill drawable -> QI0xEF3C47CF; +0x18 image getter DE3DB0, +0x14 setter DE3EB0 then window+0x90 invalidation',
+               'image_fallback':'DE3EB0 explicit shared image nonnull skips resource lookup; null tries resource triple via806320 (zero triple in stage-target calls); no host asset fallback invented',
+               'animated_icon_distinct':'DF9200 window QI0x0106F146 ->embedded+0x20C slot+0x14 stage index; NOT image-drawable QI0xEF3C47CF',
+               'stage_descriptions':{str(stage):{'table':'0x2b7a0311','key':hex(key)} for stage,key in [(0,0x05b08702),(1,0x05b08703),(2,0x05b08704),(4,0x05b08705),(5,0x05b08706)]},
+               'stage_description_targets':['0x0594a640','0x05ff9352'],
+               'stage_image':'source_control=uint32(stage+0x03744FF0); current image transferred to0x02E713A8,0x046EA523,0x026E0001,0x026E0002',
+               'profile':'record+0x48 presence => profile name requests0x05FF9AD2/0x05FF9D44; not conflated with observed profile service result',
+               'layer_reference':'0x05B31710 related to0x05B347BC if saved else0x04656452; 80DE40 native layer operation unexecuted',
+               'tail_dependencies':'DE45C0 selected StarRecord saved byte/presence controls terrain layer/timestamp/colour branches, separate from GGE entry.saved',
+               'host_policy':['bounded ordered prefix stops on unobserved dynamic branch; it does not report native load error',
+                              'Found=unique structural object or explicit checked choice, NOT native interface or resource readiness',
+                              'Missing/Ambiguous targets preserved; no first-ControlID choice or blanket optional-control failure',
+                              'all resource observations stay Unknown, no native calls/window mutation/phase or mount latch',
+                              'no actual renderer camera/scene, selected star services or live caller']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        for name,start,end in [('phase1-entry-and-default',0xdf6d80,0xdf6daf),
+                               ('missing-root-and-return',0xdf6ff9,0xdf701e),
+                               ('phase1-return-true',0xdf7654,0xdf766d),
+                               ('image-get-interface',0xde3db0,0xde3de4),
+                               ('image-set-interface',0xde3eb0,0xde3f4b),
+                               ('animated-index-interface',0xdf932e,0xdf93a8)]:
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(disasm(pe,start,end))+'\n',encoding='utf-8',newline='\n')
+        print('retained phase1 binding branches, distinct interfaces and corrected unconditional true return')
+        return
     if '--mount' in sys.argv:
         dest=ROOT/'analysis/audit/gge-star-mount'
         dest.mkdir(parents=True,exist_ok=True)
@@ -95,8 +130,8 @@ def retain_static():
                               'layout name ->0x812250: resource tag0x0510A95B, group0x40464100, parent lookup=true, mount0x05B598FA',
                               '0x8121C0/0x812100/0x811C20 load and parent-attach native root objects',
                               '0x80F7D0 allocates/retains layered object, stored at game-ui-data +0x8C',
-                              'if load true: 0xDF6D80 phase1; if its result true: attach four controller listeners via window slot+0x104',
-                              'DF7690 returns load result even if later phase initialization failed; not native readiness'],
+                              'if load true: call 0xDF6D80 phase1, then return-value check before four controller listeners via window slot+0x104',
+                              'CORRECTION: DF6D80 normal return paths yield1 even on missing root; no false/error path established. DF7690 returns load result; neither return proves native dependency readiness'],
                'listener_controls':['0x03753F40','0x04656452','0x046A9CA7','0x0638491D'],
                'phase1_dependencies':['root/related controls, thumbnail and main image resources',
                                       'stage-specific image/plugin and locale/name services',

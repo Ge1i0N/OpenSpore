@@ -1,0 +1,16 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  df6ff9:	6a 01                	push   0x1
+  df6ffb:	68 a8 a4 e5 02       	push   0x2e5a4a8
+  df7000:	e8 4b 96 a1 ff       	call   0x810650
+  df7005:	8b f8                	mov    edi,eax
+  df7007:	33 db                	xor    ebx,ebx
+  df7009:	3b fb                	cmp    edi,ebx
+  df700b:	0f 84 4a 06 00 00    	je     0xdf765b
+  df7011:	8b 07                	mov    eax,DWORD PTR [edi]
+  df7013:	8b 50 7c             	mov    edx,DWORD PTR [eax+0x7c]
+  df7016:	6a 01                	push   0x1
+  df7018:	6a 01                	push   0x1
+  df701a:	8b cf                	mov    ecx,edi
+  df701c:	ff d2                	call   edx

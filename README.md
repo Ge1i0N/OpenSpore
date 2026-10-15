@@ -98,7 +98,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify
 ```
 
 Расположение данных рядом с собранным executable:
@@ -154,6 +154,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\planet_record_verify.exe
 .\build\Debug\gge_star_present_verify.exe $fixtures
 .\build\Debug\gge_star_instance_verify.exe $fixtures
+.\build\Debug\gge_star_phase1_verify.exe $fixtures
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
@@ -194,6 +195,9 @@ Post-load модель исправлена: **15** проверок ветки 
 Добавлен [host-слой независимых star UI instances](analysis/gge-star-instance.md): **167** проверок
 владения, перемещения, флагов, caption refs и pixel picking. Общий renderer теперь имеет pixel-layer hook;
 native plugins/callbacks/сцена и автоматическое подключение к GGE всё ещё не реализованы.
+[Phase-1 binding plan](analysis/gge-star-phase1.md) добавляет **247** проверок порядка и веток привязки
+изображений/controls, не исполняя сервисы. Поиск уникального target или наличие resource key не
+считается успешной загрузкой; видимый экран пока не изменён.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI

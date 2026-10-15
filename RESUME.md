@@ -91,10 +91,17 @@ test with `-w -devDirs`; retain evidence and commit.
   checks on two real layouts plus controlled graph errors. Duplicate ControlID0x026E0002 maps to
   objects45/55: no first-ID collapse or native dynamic lookup assumption. Shared renderer now has
   `states::draw_spui_pixel_layer` (1:1 pixels, no state/click dispatch); GGE has no live caller yet.
-  Native mount remains false: load result DF7690 != phase1 DF6D80 completion, plugins/listeners/
+  Native mount remains false: neither DF7690 load result nor DF6D80 return proves service completion; plugins/listeners/
   thumbnail/profile dependencies missing. Scene setup traced DE46D0->DDD920->DDD150 plus separate
   GGE effects world0x02DDA976; exact factories/camera identities not all recovered.
   `analysis/gge-star-instance.md` / `audit/gge-star-mount/` retain 17 functions and corpus identities.
+- `engine/gge_star_phase1.*`: ordered phase1 case-body binding plan, 247 checks on both real layouts.
+  Missing thumbnail/profile/selected-star branch observations stop with bounded prefix/blocked_on;
+  structural Found/Missing/Ambiguous targets retain candidates, explicit choices checked; assets always
+  Unknown (no resource read). Image drawable QI0xEF3C47CF differs from Animated Icon0x0106F146.
+  **CORRECTION**: DF6D80 normal paths return1 including missing-root skip, not a false/error dependency
+  validator. No native operations/phase latch/listeners/readiness or automatic runtime caller.
+  `analysis/gge-star-phase1.md` / `audit/gge-star-phase1/` retain 8 functions and return instructions.
 
 ## Next, in order
 
@@ -115,7 +122,10 @@ test with `-w -devDirs`; retain evidence and commit.
     Planet structural reader/selection + typed saved adapter are implemented; join context saved-list
     references with explicit planet/header/terrain sources, keeping all missing/unsupported statuses.
     Visible boundary: math/config + owned host geometry/mutation/pick/pixel-layer hook are implemented,
-    but not attached to GGE. Next recover phase1 thumbnail/main-image/plugin/listener ports (DF6D80)
+    but not attached to GGE. Phase1 branch/control/resource plan now exists; next image-provider/drawable
+    adapter with explicit resolved object targets and actual resource failures, then action executor/
+    lifecycle/listeners. Current plan is no native service execution and native return1 is not readiness.
+    Continue thumbnail/main-image/plugin ports (DF6D80)
     and scene factory contracts (DDD150 via67DD40/50, render stages67DD10), actual camera acquisition
     from renderer67DCD0(+50 -> returned +38 versus active +58). Controller +198 is not proven the
     same camera as active projection. Effects world separate67DD90. Then source-to-instance lifecycle
@@ -135,7 +145,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -152,6 +162,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\planet_record_verify.exe
 .\build\Debug\gge_star_present_verify.exe $fixtures
 .\build\Debug\gge_star_instance_verify.exe $fixtures
+.\build\Debug\gge_star_phase1_verify.exe $fixtures
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

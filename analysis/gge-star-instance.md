@@ -46,9 +46,10 @@ established merely by serialized order. No native-priority assumption is introdu
 5. A true load invokes `0xDF6D80` phase1: more controls, thumbnail/main images, stage image plugins,
    locale/name/profile/current-planet state and notifications. Some pseudocode stack/loop recovery
    is incomplete; instructions, not analyst names, govern this dependency trace.
-6. Listeners for `0x03753F40`, `0x04656452`, `0x046A9CA7`, `0x0638491D` attach after phase1 reports
-   true. **`0xDF7690` returns the load result even if phase1 fails.** Load success is not complete
-   native readiness.
+6. Listeners for `0x03753F40`, `0x04656452`, `0x046A9CA7`, `0x0638491D` attach after the caller's
+   phase1 return test. **Correction:** all inspected `0xDF6D80` normal returns set AL=1, even when
+   root lookup skips its body; no false/error dependency-validation path is established. `0xDF7690`
+   returns load result; neither return proves native readiness. [Detailed corrected bindings](gge-star-phase1.md).
 
 `native_mount_complete()` therefore always returns **false** in the host mechanism. Instantiation
 does not execute phase1, callbacks, plugins, tooltip linkage, camera/effects or force hidden branches.

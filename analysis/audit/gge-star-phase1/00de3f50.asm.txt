@@ -1,0 +1,79 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE3F50
+
+00de3f50  SUB ESP,0x78
+00de3f53  LEA ECX,[ESP]
+00de3f56  CALL 0x006b4ff0
+00de3f5b  MOV EAX,dword ptr [ESP + 0x80]
+00de3f62  CMP EAX,0x5
+00de3f65  JA 0x00de4031
+00de3f6b  JMP dword ptr [EAX*0x4 + 0xde4070]
+00de3f72  PUSH 0x0
+00de3f74  PUSH 0x5b08702
+00de3f79  PUSH 0x2b7a0311
+00de3f7e  LEA ECX,[ESP + 0x20]
+00de3f82  CALL 0x006b5700
+00de3f87  PUSH EAX
+00de3f88  LEA ECX,[ESP + 0x4]
+00de3f8c  CALL 0x006b53c0
+00de3f91  LEA ECX,[ESP + 0x14]
+00de3f95  JMP 0x00de402c
+00de3f9a  PUSH 0x0
+00de3f9c  PUSH 0x5b08703
+00de3fa1  PUSH 0x2b7a0311
+00de3fa6  LEA ECX,[ESP + 0x34]
+00de3faa  CALL 0x006b5700
+00de3faf  PUSH EAX
+00de3fb0  LEA ECX,[ESP + 0x4]
+00de3fb4  CALL 0x006b53c0
+00de3fb9  LEA ECX,[ESP + 0x28]
+00de3fbd  JMP 0x00de402c
+00de3fbf  PUSH 0x0
+00de3fc1  PUSH 0x5b08704
+00de3fc6  PUSH 0x2b7a0311
+00de3fcb  LEA ECX,[ESP + 0x48]
+00de3fcf  CALL 0x006b5700
+00de3fd4  PUSH EAX
+00de3fd5  LEA ECX,[ESP + 0x4]
+00de3fd9  CALL 0x006b53c0
+00de3fde  LEA ECX,[ESP + 0x3c]
+00de3fe2  JMP 0x00de402c
+00de3fe4  PUSH 0x0
+00de3fe6  PUSH 0x5b08705
+00de3feb  PUSH 0x2b7a0311
+00de3ff0  LEA ECX,[ESP + 0x5c]
+00de3ff4  CALL 0x006b5700
+00de3ff9  PUSH EAX
+00de3ffa  LEA ECX,[ESP + 0x4]
+00de3ffe  CALL 0x006b53c0
+00de4003  LEA ECX,[ESP + 0x50]
+00de4007  JMP 0x00de402c
+00de4009  PUSH 0x0
+00de400b  PUSH 0x5b08706
+00de4010  PUSH 0x2b7a0311
+00de4015  LEA ECX,[ESP + 0x70]
+00de4019  CALL 0x006b5700
+00de401e  PUSH EAX
+00de401f  LEA ECX,[ESP + 0x4]
+00de4023  CALL 0x006b53c0
+00de4028  LEA ECX,[ESP + 0x64]
+00de402c  CALL 0x006b51d0
+00de4031  PUSH ESI
+00de4032  LEA ECX,[ESP + 0x4]
+00de4036  CALL 0x006b5550
+00de403b  MOV ESI,dword ptr [ESP + 0x80]
+00de4042  PUSH EAX
+00de4043  MOV ECX,ESI
+00de4045  MOV dword ptr [ESI],0x0
+00de404b  MOV dword ptr [ESI + 0x4],0x0
+00de4052  MOV dword ptr [ESI + 0x8],0x0
+00de4059  CALL 0x00579a90
+00de405e  LEA ECX,[ESP + 0x4]
+00de4062  CALL 0x006b51d0
+00de4067  MOV EAX,ESI
+00de4069  POP ESI
+00de406a  ADD ESP,0x78
+00de406d  RET

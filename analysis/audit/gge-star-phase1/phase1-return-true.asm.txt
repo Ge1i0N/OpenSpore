@@ -1,0 +1,12 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  df7654:	8b ac 24 94 00 00 00 	mov    ebp,DWORD PTR [esp+0x94]
+  df765b:	89 6e 2c             	mov    DWORD PTR [esi+0x2c],ebp
+  df765e:	5f                   	pop    edi
+  df765f:	5e                   	pop    esi
+  df7660:	5d                   	pop    ebp
+  df7661:	b0 01                	mov    al,0x1
+  df7663:	5b                   	pop    ebx
+  df7664:	81 c4 80 00 00 00    	add    esp,0x80
+  df766a:	c2 04 00             	ret    0x4

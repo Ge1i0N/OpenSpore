@@ -6,8 +6,8 @@
     "layout name ->0x812250: resource tag0x0510A95B, group0x40464100, parent lookup=true, mount0x05B598FA",
     "0x8121C0/0x812100/0x811C20 load and parent-attach native root objects",
     "0x80F7D0 allocates/retains layered object, stored at game-ui-data +0x8C",
-    "if load true: 0xDF6D80 phase1; if its result true: attach four controller listeners via window slot+0x104",
-    "DF7690 returns load result even if later phase initialization failed; not native readiness"
+    "if load true: call 0xDF6D80 phase1, then return-value check before four controller listeners via window slot+0x104",
+    "CORRECTION: DF6D80 normal return paths yield1 even on missing root; no false/error path established. DF7690 returns load result; neither return proves native dependency readiness"
   ],
   "listener_controls": [
     "0x03753F40",

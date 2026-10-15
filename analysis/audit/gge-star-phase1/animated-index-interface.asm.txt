@@ -1,0 +1,41 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  df932e:	8b 88 b8 00 00 00    	mov    ecx,DWORD PTR [eax+0xb8]
+  df9334:	6a 01                	push   0x1
+  df9336:	68 01 00 6e 02       	push   0x26e0001
+  df933b:	e8 10 73 a1 ff       	call   0x810650
+  df9340:	85 c0                	test   eax,eax
+  df9342:	74 24                	je     0xdf9368
+  df9344:	8b 10                	mov    edx,DWORD PTR [eax]
+  df9346:	8b c8                	mov    ecx,eax
+  df9348:	8b 42 0c             	mov    eax,DWORD PTR [edx+0xc]
+  df934b:	68 46 f1 06 01       	push   0x106f146
+  df9350:	ff d0                	call   eax
+  df9352:	85 c0                	test   eax,eax
+  df9354:	74 12                	je     0xdf9368
+  df9356:	8b 90 0c 02 00 00    	mov    edx,DWORD PTR [eax+0x20c]
+  df935c:	8d 88 0c 02 00 00    	lea    ecx,[eax+0x20c]
+  df9362:	8b 42 14             	mov    eax,DWORD PTR [edx+0x14]
+  df9365:	56                   	push   esi
+  df9366:	ff d0                	call   eax
+  df9368:	8b 43 08             	mov    eax,DWORD PTR [ebx+0x8]
+  df936b:	8b 8c 28 b8 00 00 00 	mov    ecx,DWORD PTR [eax+ebp*1+0xb8]
+  df9372:	03 c5                	add    eax,ebp
+  df9374:	6a 01                	push   0x1
+  df9376:	68 02 00 6e 02       	push   0x26e0002
+  df937b:	e8 d0 72 a1 ff       	call   0x810650
+  df9380:	85 c0                	test   eax,eax
+  df9382:	74 24                	je     0xdf93a8
+  df9384:	8b 10                	mov    edx,DWORD PTR [eax]
+  df9386:	8b c8                	mov    ecx,eax
+  df9388:	8b 42 0c             	mov    eax,DWORD PTR [edx+0xc]
+  df938b:	68 46 f1 06 01       	push   0x106f146
+  df9390:	ff d0                	call   eax
+  df9392:	85 c0                	test   eax,eax
+  df9394:	74 12                	je     0xdf93a8
+  df9396:	8b 90 0c 02 00 00    	mov    edx,DWORD PTR [eax+0x20c]
+  df939c:	8d 88 0c 02 00 00    	lea    ecx,[eax+0x20c]
+  df93a2:	8b 42 14             	mov    eax,DWORD PTR [edx+0x14]
+  df93a5:	56                   	push   esi
+  df93a6:	ff d0                	call   eax

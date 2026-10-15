@@ -1,0 +1,63 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00806E00
+
+00806e00  SUB ESP,0x10
+00806e03  PUSH ESI
+00806e04  MOV ESI,dword ptr [ESP + 0x18]
+00806e08  TEST ESI,ESI
+00806e0a  JZ 0x00806e99
+00806e10  MOV EAX,dword ptr [ESI]
+00806e12  MOV EDX,dword ptr [EAX + 0x38]
+00806e15  PUSH EBX
+00806e16  PUSH EDI
+00806e17  MOV ECX,ESI
+00806e19  CALL EDX
+00806e1b  FLD float ptr [EAX]
+00806e1d  MOV EDI,dword ptr [ESP + 0x24]
+00806e21  FSTP float ptr [ESP + 0xc]
+00806e25  FLD float ptr [EAX + 0x4]
+00806e28  MOV EBX,dword ptr [ESI]
+00806e2a  FLD float ptr [EAX + 0x8]
+00806e2d  SUB ESP,0x8
+00806e30  FSTP float ptr [ESP + 0x1c]
+00806e34  FLD float ptr [EAX + 0xc]
+00806e37  FLD float ptr [EDI + 0x4]
+00806e3a  FLD float ptr [EDI]
+00806e3c  FSTP float ptr [ESP + 0x28]
+00806e40  FLD float ptr [EDI + 0xc]
+00806e43  FSUB ST0,ST1
+00806e45  FXCH ST2
+00806e47  FSUBRP ST3,ST0
+00806e49  FXCH
+00806e4b  FSUBRP ST2,ST0
+00806e4d  FXCH
+00806e4f  FMUL float ptr [0x0145be38]
+00806e55  FADDP
+00806e57  FSTP double ptr [ESP]
+00806e5a  CALL 0x011e0946
+00806e5f  PUSH ECX
+00806e60  FSTP float ptr [ESP + 0x8]
+00806e64  FLD float ptr [EDI + 0x8]
+00806e67  FLD float ptr [ESP + 0x2c]
+00806e6b  FSUB ST1,ST0
+00806e6d  FLD float ptr [ESP + 0x20]
+00806e71  FSUB float ptr [ESP + 0x18]
+00806e75  FSUBP ST2,ST0
+00806e77  FXCH
+00806e79  FMUL float ptr [0x0145be38]
+00806e7f  FADDP
+00806e81  FSTP double ptr [ESP]
+00806e84  CALL 0x011e0946
+00806e89  MOV EAX,dword ptr [EBX + 0x64]
+00806e8c  FSTP float ptr [ESP + 0x4]
+00806e90  ADD ESP,0x4
+00806e93  MOV ECX,ESI
+00806e95  CALL EAX
+00806e97  POP EDI
+00806e98  POP EBX
+00806e99  POP ESI
+00806e9a  ADD ESP,0x10
+00806e9d  RET

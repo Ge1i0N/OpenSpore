@@ -1,0 +1,67 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  de3eb0:	56                   	push   esi
+  de3eb1:	8b 74 24 08          	mov    esi,DWORD PTR [esp+0x8]
+  de3eb5:	57                   	push   edi
+  de3eb6:	85 f6                	test   esi,esi
+  de3eb8:	0f 84 88 00 00 00    	je     0xde3f46
+  de3ebe:	8b 06                	mov    eax,DWORD PTR [esi]
+  de3ec0:	8b 90 a8 00 00 00    	mov    edx,DWORD PTR [eax+0xa8]
+  de3ec6:	8b ce                	mov    ecx,esi
+  de3ec8:	ff d2                	call   edx
+  de3eca:	85 c0                	test   eax,eax
+  de3ecc:	74 78                	je     0xde3f46
+  de3ece:	8b 10                	mov    edx,DWORD PTR [eax]
+  de3ed0:	8b c8                	mov    ecx,eax
+  de3ed2:	8b 42 0c             	mov    eax,DWORD PTR [edx+0xc]
+  de3ed5:	68 cf 47 3c ef       	push   0xef3c47cf
+  de3eda:	ff d0                	call   eax
+  de3edc:	8b f8                	mov    edi,eax
+  de3ede:	85 ff                	test   edi,edi
+  de3ee0:	74 64                	je     0xde3f46
+  de3ee2:	8b 4c 24 14          	mov    ecx,DWORD PTR [esp+0x14]
+  de3ee6:	89 4c 24 0c          	mov    DWORD PTR [esp+0xc],ecx
+  de3eea:	85 c9                	test   ecx,ecx
+  de3eec:	74 0e                	je     0xde3efc
+  de3eee:	8b 11                	mov    edx,DWORD PTR [ecx]
+  de3ef0:	8b 02                	mov    eax,DWORD PTR [edx]
+  de3ef2:	ff d0                	call   eax
+  de3ef4:	8b 44 24 0c          	mov    eax,DWORD PTR [esp+0xc]
+  de3ef8:	85 c0                	test   eax,eax
+  de3efa:	75 20                	jne    0xde3f1c
+  de3efc:	8b 54 24 10          	mov    edx,DWORD PTR [esp+0x10]
+  de3f00:	6a ff                	push   0xffffffff
+  de3f02:	6a ff                	push   0xffffffff
+  de3f04:	6a 00                	push   0x0
+  de3f06:	8d 4c 24 18          	lea    ecx,[esp+0x18]
+  de3f0a:	51                   	push   ecx
+  de3f0b:	52                   	push   edx
+  de3f0c:	e8 0f 24 a2 ff       	call   0x806320
+  de3f11:	8b 44 24 20          	mov    eax,DWORD PTR [esp+0x20]
+  de3f15:	83 c4 14             	add    esp,0x14
+  de3f18:	85 c0                	test   eax,eax
+  de3f1a:	74 2a                	je     0xde3f46
+  de3f1c:	8b 17                	mov    edx,DWORD PTR [edi]
+  de3f1e:	50                   	push   eax
+  de3f1f:	8b 42 14             	mov    eax,DWORD PTR [edx+0x14]
+  de3f22:	8b cf                	mov    ecx,edi
+  de3f24:	ff d0                	call   eax
+  de3f26:	8b 16                	mov    edx,DWORD PTR [esi]
+  de3f28:	8b 82 90 00 00 00    	mov    eax,DWORD PTR [edx+0x90]
+  de3f2e:	8b ce                	mov    ecx,esi
+  de3f30:	ff d0                	call   eax
+  de3f32:	8b 4c 24 0c          	mov    ecx,DWORD PTR [esp+0xc]
+  de3f36:	85 c9                	test   ecx,ecx
+  de3f38:	74 07                	je     0xde3f41
+  de3f3a:	8b 11                	mov    edx,DWORD PTR [ecx]
+  de3f3c:	8b 42 04             	mov    eax,DWORD PTR [edx+0x4]
+  de3f3f:	ff d0                	call   eax
+  de3f41:	5f                   	pop    edi
+  de3f42:	b0 01                	mov    al,0x1
+  de3f44:	5e                   	pop    esi
+  de3f45:	c3                   	ret
+  de3f46:	5f                   	pop    edi
+  de3f47:	32 c0                	xor    al,al
+  de3f49:	5e                   	pop    esi
+  de3f4a:	c3                   	ret
