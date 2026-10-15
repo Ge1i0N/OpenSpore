@@ -1,0 +1,25 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DDDE30
+
+void FUN_00ddde30(int *param_1)
+
+{
+  undefined4 *puVar1;
+
+  puVar1 = (undefined4 *)FUN_00f47240(0x10,&DAT_013ebc48,0,0,0,0);
+  if (puVar1 == (undefined4 *)0x0) {
+    puVar1 = (undefined4 *)0x0;
+  }
+  else {
+    puVar1[1] = &PTR_FUN_013ec438;
+    puVar1[2] = 0;
+    *puVar1 = &PTR_FUN_0147d2b0;
+    puVar1[1] = &PTR_LAB_0147d29c;
+    puVar1[3] = 0;
+  }
+  (**(code **)(*param_1 + 0x20))(puVar1,0x2ccd1d2,"GalaxyGameEntry");
+  return;
+}

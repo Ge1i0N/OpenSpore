@@ -357,11 +357,13 @@ void install(os::states::Manager& mgr) {
         for (const UiCommand& u : uis) {
             if (!u.unload) ++n_ui_load;
         }
-        // ONLY a state that names a screen gets a renderer. Setting on_render unconditionally would
+        // Only a script UI request or an evidence-backed mode UI subset gets a renderer.
+        // Setting on_render unconditionally would
         // swallow the app's renderer-less placeholder, and a state that presents no frame means
         // `-capture` is never serviced - a hang masquerading as a blank screen.
-        if (n_ui_load) {
-            st.on_render = [uis = std::move(uis)]() {
+        const auto* mode_ui = appmodes::primary_ui(gs.mode.c_str());
+        if (n_ui_load || mode_ui) {
+            st.on_render = []() {
                 os::states::present_ui_screen(false);
             };
         }
@@ -374,12 +376,17 @@ void install(os::states::Manager& mgr) {
                 // registering function and the state the mode drives, instead of a bare "not
                 // implemented" that tells the reader nothing they can act on.
                 if (const auto* m = appmodes::find_by_name(mode.c_str())) {
-                    LOG_WARN("appstates", "%s: `%s` driver not implemented - %s", name.c_str(), mode.c_str(),
+                    LOG_WARN("appstates", "%s: `%s` full driver not implemented - %s", name.c_str(), mode.c_str(),
                              appmodes::describe(*m).c_str());
                 } else {
                     LOG_WARN("appstates", "%s: `mode %s` not executed - registration is not in our "
                                           "recovered mode table",
                              name.c_str(), mode.c_str());
+                }
+                if (const auto* binding = appmodes::primary_ui(mode.c_str())) {
+                    LOG_INFO("appstates", "%s: mode-owned primary UI '%s' [0x%08X] enabled from GA "
+                             "0x%08X; %s", name.c_str(), binding->layout, binding->instance,
+                             binding->load_function, binding->limitation);
                 }
             }
             if (n_msg) {

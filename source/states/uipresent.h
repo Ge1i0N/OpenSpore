@@ -22,7 +22,8 @@ struct IDirect3DTexture9;
 
 namespace os::states {
 
-// The layout the CURRENT state's script asks for, or null. Sets `why` to a sentence explaining the
+// The layout the CURRENT state's script asks for, or a recovered default primary mode UI subset.
+// Returns null on missing/unsupported bindings. Sets `why` to a sentence explaining the
 // outcome, for the frame and the log - "state 'DevLauncher' asked for 'E3LaunchScreen'" is a
 // different claim about progress than "state 'X' names no layout".
 const os::spui::Layout* requested_by_state(std::string& why);

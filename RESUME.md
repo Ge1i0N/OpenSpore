@@ -23,12 +23,18 @@ test with `-w -devDirs`; retain evidence and commit.
 - `Package` RAII fixed FILE leaks; 544 scoped cycles at CRT limit 512 pass.
 - `inherited_clip` now drives picking and D3D9 per-window scissor; nested/empty/boundary cases and
   real quad/text/reset pixel readback pass. This aligns our host policy, not full original layout parity.
+- Main -> GalaxyGameEntry now presents the code-confirmed default primary layout `GlobalUIGGE-9`.
+  **Not the galaxy scene or driver lifecycle**: only 9 serialized windows currently visible.
+  `analysis/galaxy-entry.md` and `audit/galaxy-entry/` retain lifecycle slots, constructor defaults,
+  property overrides and exact UI-loading path. `mode_ui_verify` tests binding/hash boundaries.
 
 ## Next, in order
 
 1. Recover needed drawable tiling/outline and Button capture/release/checked behavior from GA.
-2. Trace GalaxyGameEntry's registered driver (`0xDDDE30`, table in `analysis/modes.md`) into its
-   actual enter/tick/render behavior. A registration table is not gameplay.
+2. Continue GGE controller state map `0xDE7660`: states 0/1/8/9 share handler constructed at
+   `0xDEA4B0`; update `0xDE8710` forces handler 1 while +0x1EC is 1..5. Driver lifecycle/UI path
+   is now statically traced, primary UI defaults only are presented. Follow handler enter/tick/exit,
+   scene/camera dependencies and WinProc behavior, not forced visibility. A UI binding is not gameplay.
 3. Advance the first playable stage without claiming full UI or full format parity.
 
 Dynamic sibling Z-order and layout WinProcs are still open. Forward serialized sibling traversal,
@@ -37,10 +43,11 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
+.\build\Debug\mode_ui_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

@@ -1,0 +1,110 @@
+# GalaxyGameEntry — GA driver boundary and primary UI subset
+
+Reviewed **2026-10-15**. GA-unpacked SHA-256:
+`086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
+Static instructions and persistent Ghidra pseudocode are retained in `audit/galaxy-entry/`.
+Static evidence does not observe the original runtime. All addresses below are GA VAs.
+
+## What is answered
+
+- Registrar `0xDDDE30` allocates a **0x10-byte driver**, installs vtable `0x147D2B0`, zeroes fields
+  +8/+C and registers `(driver, 0x02CCD1D2, "GalaxyGameEntry")` at registry slot +0x20.
+- `0xDDDBE0` allocates `UI/GGE/PatchManager`, **0x2080 bytes**, and retains it at driver +0xC.
+- `0xDDDF80` allocates a **0x274-byte controller** through `0xDE6B90`, stores it at global
+  `0x16A1344`, links the patch manager at controller +0xF0, sets up property defaults/overrides,
+  initializes state objects via `0xDE7660`, sets controller +0x1EC to 1 and registers a `levels` verb.
+- `0xDDD960` calls `0xDEA1B0` on that controller. It activates effects/UI (`0xDE46D0`,
+  **`0xDE5900`**), subscribes message IDs and activates a current internal state handler.
+- `0xDDD9E0` delegates controller deactivation to `0xDE8160`; `0xDDDC50` removes additional
+  registrations/resources and releases the patch manager. These method-role labels are inferred
+  from side effects, not recovered original symbols or a fully traced mode-manager caller.
+- `0xDDDB80` forwards two float inputs to `0xDE8710`, converts the second to an integer using
+  the binary's scale constant, then updates two further managers. Controller +0x108/+0x10C are
+  current/requested internal state fields, not the outer AppState ID. Our host does not execute this.
+
+## Vtable slots retained, not guessed into a renderer
+
+| Offset | Target | Observed side effect / boundary |
+|---:|---|---|
+| +0x00 / +0x04 | `0xC6AB00` / `0x7B87B0` | reference count at +8 |
+| +0x08 | `0xDDDE90` | destructor / patch-manager release |
+| +0x0C | `0xDDDBE0` | patch-manager creation |
+| +0x10 | `0xDDDF80` | controller and auxiliary registration setup |
+| +0x14 | `0xDDDC50` | cleanup/release |
+| +0x18 | `0xDDD960` | controller activation path, includes UI |
+| +0x1C | `0xDDD9E0` | controller deactivation path |
+| +0x20 | `0x1082A20` | immediate `ret 4`; not a discovered galaxy render routine |
+| +0x24 / +0x28 | `0xDDDA40` / `0xDDDA30` | controller delegates |
+| +0x2C / +0x30 / +0x34 | `0xDDDAC0` / `0xDDDA50` / `0xDDDB50` | input-shaped controller delegates |
+| +0x38 | `0x6F2F90` | not attributed here |
+| +0x3C | `0xDDDB80` | update-shaped forwarding described above |
+| +0x40 | `0x111CD70` | returns zero, `ret 4` |
+
+Nine previously uncarved vtable targets were explicitly seeded into the persistent project using
+`analysis/audit/gge-seeds.tsv`. No full reanalysis or beta addresses were needed. Seeded names ending
+in `_candidate` are analyst labels, not proof of original symbol identity.
+
+## The default UI is established by code, not filename similarity
+
+Wide-string constructors at `0x136BCE0/0x136BD00/0x136BD20` initialize:
+
+| Runtime string global | Default | Hash / corpus |
+|---|---|---|
+| `0x16A0D24` | `GlobalUIGGE-9` | **0x52C07413**; PatchData rec 10642 / Spore_Graphics rec 10399; 249,031 bytes, 1,368 objects / 320 windows |
+| `0x16A0D34` | `GGEZoomPanel` | **0xCB6A4669**; PatchData rec 3113 / Spore_Graphics rec 2987; 17,091 bytes, 67 objects / 13 windows |
+| `0x16A0D44` | `GGEZoomPanelV2` | **0x28F6D535**; EP1_Data rec 12415; 28,910 bytes, 117 objects / 21 windows |
+
+The record numbers are measured for the project's package corpus. `audit/galaxy-entry/ui-corpus.json`
+retains decoded-resource hashes and counts. Corresponding string bytes/addresses are in `binding.json`.
+
+`0xDE5900` selects ZoomPanel/V2 using `0x6854E0(2)` (branch interpretation not fully reversed),
+then hashes `0x16A0D24` with seed `0x811C9DC5`, mode 1 (`0x932F00`) and loads GlobalUI. The descriptor
+also carries request tag `0x0510A95B` and `0x40464100`. These are **not** PNG type/group IDs.
+GlobalUI vtable +8 -> `0xE035F0` -> `0x8121C0`; the loader path forwards a mount operand
+`0x2EDD95CA` through `0x812100` to `0x8106C0` for parent lookup. We do not replace the serialized
+root ControlID with this operand or treat it as a SPUI object index.
+
+**Defaults can be overridden:** `0xDDDF80` reads property strings including `0xAF963138`,
+`0xD6F8F4A4`, `0x9E64A562` into these globals. Current subset uses the recovered defaults, not an
+implemented GGE configuration property-list consumer. BSS runtime globals are not file-backed
+values: `PE.read` beyond a section's raw length can misleadingly expose unrelated bytes.
+
+## Implemented now — deliberately bounded
+
+`engine/mode_ui.cpp` exposes only the recovered **default primary UI binding**. A state whose
+script names `mode GalaxyGameEntry` now presents `GlobalUIGGE-9` through the existing typed
+drawable renderer. Script-owned `uilayout` requests retain priority; other modes remain unsupported.
+The immutable layout/root IDs are not modified and missing resources are not replaced with a
+made-up screen. The visible launcher control/state bridge is restricted to DevLauncher/E3LaunchScreen;
+GGE's command IDs are not interpreted using that shortcut.
+
+This removes the generic renderer-less placeholder for the GGE primary UI, **not** the mode's
+missing controller lifecycle. The screen explicitly says that the galaxy scene, zoom panels and
+controller events are unimplemented. [Diagnostic capture](shots/gge_primary_ui.png).
+Only **9** serialized windows are drawn by current visibility policy; the many hidden branches
+are not forced visible. This sparse result is a baseline for actual WinProc/controller work,
+not an approximation of a working galaxy selector.
+
+## Validation and remaining work
+
+- `mode_ui_verify`: exact case-insensitive mode matching, unsupported/null names, primary name/hash,
+  citation/mount operands PASS. This is a binding test, not driver execution.
+- Live `-w -devDirs -state:Main -quitAfter 30`: Main -> GalaxyGameEntry -> primary layout;
+  capture written, boot 10/10, exit 0, aborts/asserts 0.
+- Existing SPUI corpus, malformed-input, atlas and clipping regressions remain required.
+- Live round trip `Main -> GGE`, console `state:DevLauncher`, then visible click `(311,550)` ->
+  CreatureEditor passes, with no stale GGE screen, aborts or asserts. Full GGE driver teardown
+  is not simulated: this checks our stateless primary-UI binding only.
+
+Next target is the controller's internal state map (`0xDE7660`), especially shared handlers for
+states **0/1/8/9** (constructed at `0xDEA4B0`). `0xDE8710` selects handler 1 while +0x1EC is 1..5.
+Its actual update/enter/exit side effects, scene/camera/effects dependencies, save selection,
+ZoomPanel composition, options/WinProc wiring and original messages must be understood before
+claiming a playable GGE. A registration or visible frame is not that claim.
+
+Reproduce retained evidence:
+
+```powershell
+refs/ghidra/venv/Scripts/python.exe tools/gge_evidence.py
+python tools/gge_evidence.py --static
+```

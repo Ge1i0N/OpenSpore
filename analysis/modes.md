@@ -6,6 +6,10 @@
 > are bounded observations, **not proof that a class does not exist**. Input/visible launcher
 > navigation now works; next runtime work is described in [RESUME](../RESUME.md).
 
+**GGE follow-up:** [GalaxyGameEntry driver/UI trace](galaxy-entry.md) now follows the registered
+vtable into controller setup, activation and code-owned UI names. Default primary `GlobalUIGGE-9`
+is presented by our host; full original driver lifecycle, galaxy scene and events remain missing.
+
 Measured 2026-10-14 with `tools/mode_where.py`, `tools/ghidra_xref.py` and `tools/mode_absent.py`.
 This settles a question that was about to be attacked from the wrong side.
 

@@ -33,6 +33,11 @@ boot → DevLauncher → E3LaunchScreen → видимая плитка → Crea
 
 Детали и GA-адреса: [SPUI binary](analysis/spui-binary.md) · [drawables](analysis/spui-drawables.md).
 
+Следующий участок Main-пути тоже подключён: `Main → GalaxyGameEntry` показывает подтверждённый
+GA-кодом primary layout `GlobalUIGGE-9`. Это пока **почти пустой диагностический UI без галактики**,
+zoom-панелей и runtime-контроллера, не готовый экран выбора игры.
+[Разбор и ограничения](analysis/galaxy-entry.md) · [capture](analysis/shots/gge_primary_ui.png).
+
 ## Что работает — и где граница
 
 | Область | Реализовано и проверено | Ещё не готово |
@@ -90,7 +95,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify
 ```
 
 Расположение данных рядом с собранным executable:
@@ -117,6 +122,9 @@ cd build/bin/Debug
 
 # Регрессия видимого перехода; редактор после перехода пока не работает
 .\OpenSpore.exe -w -devDirs -state:DevLauncher -quitAfter 18 -exec spui:-click,311,550
+
+# Main -> GalaxyGameEntry: только подтверждённый primary UI subset, без симуляции галактики
+.\OpenSpore.exe -w -devDirs -state:Main -quitAfter 30 -capture gge.bmp -captureAfter 20
 ```
 
 `-quitAfter` задаётся **в кадрах**, не секундах. Для автоматических запусков задавайте его явно.
@@ -130,6 +138,7 @@ cd build/bin/Debug
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
+.\build\Debug\mode_ui_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

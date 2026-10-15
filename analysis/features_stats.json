@@ -1,14 +1,14 @@
 {
   "updated": "2026-10-15",
-  "source_sha256": "a5cbc65cdb0217750ca0ab4efb7ee1bdcdff0a9299d8de27596e911ae6ef15d7",
+  "source_sha256": "a73fdcf89964e6692cd2437b9cc1a03a9a8abf72c1aa4d53b7f47a5e20a42873",
   "method": "Equal-weight tracked items; done=1, partial=0.5, todo=0. Not game or code coverage.",
   "overall": {
-    "total": 288,
+    "total": 289,
     "done": 204,
-    "partial": 31,
+    "partial": 32,
     "todo": 53,
-    "done_pct": 70.83,
-    "weighted_checklist_index": 76.22
+    "done_pct": 70.59,
+    "weighted_checklist_index": 76.12
   },
   "scopes": {
     "engine": {
@@ -20,12 +20,12 @@
       "weighted_checklist_index": 83.93
     },
     "ui": {
-      "total": 21,
+      "total": 22,
       "done": 12,
-      "partial": 4,
+      "partial": 5,
       "todo": 5,
-      "done_pct": 57.14,
-      "weighted_checklist_index": 66.67
+      "done_pct": 54.55,
+      "weighted_checklist_index": 65.91
     },
     "gameplay": {
       "total": 17,
@@ -136,12 +136,12 @@
     {
       "name": "UI / SPUI behavior",
       "scope": "ui",
-      "total": 21,
+      "total": 22,
       "done": 12,
-      "partial": 4,
+      "partial": 5,
       "todo": 5,
-      "done_pct": 57.14,
-      "weighted_checklist_index": 66.67
+      "done_pct": 54.55,
+      "weighted_checklist_index": 65.91
     },
     {
       "name": "gameplay",

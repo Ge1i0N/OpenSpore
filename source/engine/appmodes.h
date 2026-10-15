@@ -43,6 +43,19 @@ const Mode* find_by_name(const char* name);
 // mapper), so the mapping here is the game's, not our guess.
 const char* state_for_tag(u32 tag);
 
+// Bounded mode-owned UI subset recovered from GA code, not inferred from a layout filename.
+// This does NOT implement the original mode driver, galaxy renderer or widget event handlers.
+struct UiBinding {
+    const char* mode;
+    const char* layout;
+    u32 instance;
+    u32 mount_control;     // loader's parent lookup operand; original attachment not implemented
+    u32 load_function;
+    u32 name_initializer;
+    const char* limitation;
+};
+const UiBinding* primary_ui(const char* mode);
+
 // A one-line description for the log: name, tag, registrar and the state it drives.
 std::string describe(const Mode& m);
 

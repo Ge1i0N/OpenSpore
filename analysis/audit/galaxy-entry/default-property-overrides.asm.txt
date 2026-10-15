@@ -1,0 +1,99 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  dde05c:	8b 4c 24 08          	mov    ecx,DWORD PTR [esp+0x8]
+  dde060:	b8 ac 7b 66 01       	mov    eax,0x1667bac
+  dde065:	89 44 24 0c          	mov    DWORD PTR [esp+0xc],eax
+  dde069:	89 44 24 10          	mov    DWORD PTR [esp+0x10],eax
+  dde06d:	8d 44 24 0c          	lea    eax,[esp+0xc]
+  dde071:	50                   	push   eax
+  dde072:	68 c5 94 d9 21       	push   0x21d994c5
+  dde077:	51                   	push   ecx
+  dde078:	c7 44 24 20 ae 7b 66 	mov    DWORD PTR [esp+0x20],0x1667bae
+  dde07f:	01
+  dde080:	e8 7b 33 8c ff       	call   0x6a1400
+  dde085:	83 c4 0c             	add    esp,0xc
+  dde088:	84 c0                	test   al,al
+  dde08a:	74 14                	je     0xdde0a0
+  dde08c:	8b 54 24 10          	mov    edx,DWORD PTR [esp+0x10]
+  dde090:	8b 44 24 0c          	mov    eax,DWORD PTR [esp+0xc]
+  dde094:	52                   	push   edx
+  dde095:	50                   	push   eax
+  dde096:	b9 f8 0c 6a 01       	mov    ecx,0x16a0cf8
+  dde09b:	e8 f0 55 64 ff       	call   0x423690
+  dde0a0:	8b 54 24 08          	mov    edx,DWORD PTR [esp+0x8]
+  dde0a4:	8d 4c 24 0c          	lea    ecx,[esp+0xc]
+  dde0a8:	51                   	push   ecx
+  dde0a9:	68 3e 80 be 90       	push   0x90be803e
+  dde0ae:	52                   	push   edx
+  dde0af:	e8 4c 33 8c ff       	call   0x6a1400
+  dde0b4:	83 c4 0c             	add    esp,0xc
+  dde0b7:	84 c0                	test   al,al
+  dde0b9:	74 14                	je     0xdde0cf
+  dde0bb:	8b 44 24 10          	mov    eax,DWORD PTR [esp+0x10]
+  dde0bf:	8b 4c 24 0c          	mov    ecx,DWORD PTR [esp+0xc]
+  dde0c3:	50                   	push   eax
+  dde0c4:	51                   	push   ecx
+  dde0c5:	b9 08 0d 6a 01       	mov    ecx,0x16a0d08
+  dde0ca:	e8 c1 55 64 ff       	call   0x423690
+  dde0cf:	8b 44 24 08          	mov    eax,DWORD PTR [esp+0x8]
+  dde0d3:	8d 54 24 0c          	lea    edx,[esp+0xc]
+  dde0d7:	52                   	push   edx
+  dde0d8:	68 38 31 96 af       	push   0xaf963138
+  dde0dd:	50                   	push   eax
+  dde0de:	e8 1d 33 8c ff       	call   0x6a1400
+  dde0e3:	83 c4 0c             	add    esp,0xc
+  dde0e6:	84 c0                	test   al,al
+  dde0e8:	74 14                	je     0xdde0fe
+  dde0ea:	8b 4c 24 10          	mov    ecx,DWORD PTR [esp+0x10]
+  dde0ee:	8b 54 24 0c          	mov    edx,DWORD PTR [esp+0xc]
+  dde0f2:	51                   	push   ecx
+  dde0f3:	52                   	push   edx
+  dde0f4:	b9 24 0d 6a 01       	mov    ecx,0x16a0d24
+  dde0f9:	e8 92 55 64 ff       	call   0x423690
+  dde0fe:	8b 4c 24 08          	mov    ecx,DWORD PTR [esp+0x8]
+  dde102:	8d 44 24 0c          	lea    eax,[esp+0xc]
+  dde106:	50                   	push   eax
+  dde107:	68 a4 f4 f8 d6       	push   0xd6f8f4a4
+  dde10c:	51                   	push   ecx
+  dde10d:	e8 ee 32 8c ff       	call   0x6a1400
+  dde112:	83 c4 0c             	add    esp,0xc
+  dde115:	84 c0                	test   al,al
+  dde117:	74 14                	je     0xdde12d
+  dde119:	8b 54 24 10          	mov    edx,DWORD PTR [esp+0x10]
+  dde11d:	8b 44 24 0c          	mov    eax,DWORD PTR [esp+0xc]
+  dde121:	52                   	push   edx
+  dde122:	50                   	push   eax
+  dde123:	b9 44 0d 6a 01       	mov    ecx,0x16a0d44
+  dde128:	e8 63 55 64 ff       	call   0x423690
+  dde12d:	8b 54 24 08          	mov    edx,DWORD PTR [esp+0x8]
+  dde131:	8d 4c 24 0c          	lea    ecx,[esp+0xc]
+  dde135:	51                   	push   ecx
+  dde136:	68 62 a5 64 9e       	push   0x9e64a562
+  dde13b:	52                   	push   edx
+  dde13c:	e8 bf 32 8c ff       	call   0x6a1400
+  dde141:	83 c4 0c             	add    esp,0xc
+  dde144:	84 c0                	test   al,al
+  dde146:	74 14                	je     0xdde15c
+  dde148:	8b 44 24 10          	mov    eax,DWORD PTR [esp+0x10]
+  dde14c:	8b 4c 24 0c          	mov    ecx,DWORD PTR [esp+0xc]
+  dde150:	50                   	push   eax
+  dde151:	51                   	push   ecx
+  dde152:	b9 9c 10 6a 01       	mov    ecx,0x16a109c
+  dde157:	e8 34 55 64 ff       	call   0x423690
+  dde15c:	8b 44 24 08          	mov    eax,DWORD PTR [esp+0x8]
+  dde160:	8d 54 24 0c          	lea    edx,[esp+0xc]
+  dde164:	52                   	push   edx
+  dde165:	68 60 44 44 ab       	push   0xab444460
+  dde16a:	50                   	push   eax
+  dde16b:	e8 90 32 8c ff       	call   0x6a1400
+  dde170:	83 c4 0c             	add    esp,0xc
+  dde173:	84 c0                	test   al,al
+  dde175:	74 14                	je     0xdde18b
+  dde177:	8b 4c 24 10          	mov    ecx,DWORD PTR [esp+0x10]
+  dde17b:	8b 54 24 0c          	mov    edx,DWORD PTR [esp+0xc]
+  dde17f:	51                   	push   ecx
+  dde180:	52                   	push   edx
+  dde181:	b9 ac 10 6a 01       	mov    ecx,0x16a10ac
+  dde186:	e8 05 55 64 ff       	call   0x423690
+  dde18b:	8b                   	.byte 0x8b

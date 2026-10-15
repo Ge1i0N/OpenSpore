@@ -7,6 +7,24 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-15 — GGE driver trace and default primary UI subset
+
+From registrar `0xDDDE30` / vtable `0x147D2B0`, followed setup/controller/activation/UI loading.
+Nine uncarved vtable targets were explicitly seeded into persistent Ghidra. Retained 15 functions,
+wide-name constructors and override instructions in `analysis/audit/galaxy-entry/`.
+GA defaults are GlobalUIGGE-9, GGEZoomPanel and GGEZoomPanelV2; all resolve to actual SPUI records.
+
+The host now presents only the confirmed **default primary GlobalUI** when the state script selects
+mode GalaxyGameEntry. Main -> GGE gets a real-art sparse diagnostic frame instead of a generic
+renderer-less placeholder. Only 9 serialized windows visible; hidden panels were not forced on.
+Galaxy scene, zoom composition, runtime property overrides, controller lifecycle and input behavior
+remain unimplemented, explicitly labelled on screen. Tests cover mode/name/hash boundaries plus
+the existing parser/drawable/scissor suite; live Main -> GGE capture exits cleanly.
+
+Also corrected the runtime mode report: missing ASCII/UTF-16 names are bounded search negatives,
+not proof of absent code. The launcher ControlID/state shortcut is now explicitly scoped to
+DevLauncher/E3LaunchScreen, not silently used as GGE command dispatch.
+
 ## 2026-10-15 — atlas-aware launcher and documentation/dashboard refresh
 
 **Continuation after docs:** shared ancestor Clip now drives picking and per-window D3D9 scissor.

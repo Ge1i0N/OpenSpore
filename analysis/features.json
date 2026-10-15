@@ -1196,7 +1196,8 @@
         {"name": "button capture / release events", "status": "todo", "note": "Pointer-to-visual-state adapter only; original capture/release semantics open."},
         {"name": "radio checked-state mutation", "status": "todo", "note": "Quad resolver accepts selected bit; host events do not toggle it yet."},
         {"name": "general command dispatch", "status": "todo", "note": "command_id 0x00E1132F not reversed; control/state bridge is not a substitute."},
-        {"name": "original text/font rendering", "status": "todo", "note": "Locale captions are real; ASCII GDI atlas, clipping and text layout are scaffolding."}
+        {"name": "original text/font rendering", "status": "todo", "note": "Locale captions are real; ASCII GDI atlas, clipping and text layout are scaffolding."},
+        {"name": "GGE mode-owned primary UI", "status": "partial", "note": "GA 0xDE5900 + static wide-name initializer 0x136BCE0 bind default GlobalUIGGE-9 (0x52C07413). Main -> GalaxyGameEntry now presents that layout; sparse serialized visibility only. Galaxy scene, zoom layers, configuration overrides and original controller events are NOT implemented. analysis/galaxy-entry.md"}
       ]
     },
     {

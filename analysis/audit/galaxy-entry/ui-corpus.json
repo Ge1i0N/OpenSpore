@@ -1,0 +1,60 @@
+[
+  {
+    "name": "GlobalUIGGE-9",
+    "instance": "0x52c07413",
+    "matches": [
+      {
+        "package": "PatchData.package",
+        "record": 10642,
+        "bytes": 249031,
+        "sha256": "febb3552414790b104e0263170cdc9a86365d2d4aec792f4553d35ec66a10d9d",
+        "objects": 1368,
+        "windows": 320
+      },
+      {
+        "package": "Spore_Graphics.package",
+        "record": 10399,
+        "bytes": 249031,
+        "sha256": "a7c3c676231e2c9509253d370cc107353ea756b8ee16b65dce42e54b03746802",
+        "objects": 1368,
+        "windows": 320
+      }
+    ]
+  },
+  {
+    "name": "GGEZoomPanel",
+    "instance": "0xcb6a4669",
+    "matches": [
+      {
+        "package": "PatchData.package",
+        "record": 3113,
+        "bytes": 17091,
+        "sha256": "411a699e00aa87817b0803e1acfcbb3ccd140af21c6d8afe5d35fcb2421e5bb0",
+        "objects": 67,
+        "windows": 13
+      },
+      {
+        "package": "Spore_Graphics.package",
+        "record": 2987,
+        "bytes": 17091,
+        "sha256": "110e20fbc8ee50fd439f22a319c3db0a044b1bd2cb207648540f442291685fd0",
+        "objects": 67,
+        "windows": 13
+      }
+    ]
+  },
+  {
+    "name": "GGEZoomPanelV2",
+    "instance": "0x28f6d535",
+    "matches": [
+      {
+        "package": "Spore_EP1_Data.package",
+        "record": 12415,
+        "bytes": 28910,
+        "sha256": "49e24564e56fca7f3104082dc5b38814a2ff3857bc9084193bdfa47cebe408a1",
+        "objects": 117,
+        "windows": 21
+      }
+    ]
+  }
+]

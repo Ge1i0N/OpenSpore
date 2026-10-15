@@ -1,0 +1,99 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "names": [
+    {
+      "string_va": "0x147d3f4",
+      "runtime_global": "0x16a0d24",
+      "override_property": "0xaf963138",
+      "default": "GlobalUIGGE-9"
+    },
+    {
+      "string_va": "0x147d410",
+      "runtime_global": "0x16a0d34",
+      "override_property": "0xd6f8f4a4",
+      "default": "GGEZoomPanel"
+    },
+    {
+      "string_va": "0x147d42c",
+      "runtime_global": "0x16a0d44",
+      "override_property": "0x9e64a562",
+      "default": "GGEZoomPanelV2"
+    }
+  ],
+  "vtable": [
+    {
+      "slot": "0x0",
+      "target": "0xc6ab00"
+    },
+    {
+      "slot": "0x4",
+      "target": "0x7b87b0"
+    },
+    {
+      "slot": "0x8",
+      "target": "0xddde90"
+    },
+    {
+      "slot": "0xc",
+      "target": "0xdddbe0"
+    },
+    {
+      "slot": "0x10",
+      "target": "0xdddf80"
+    },
+    {
+      "slot": "0x14",
+      "target": "0xdddc50"
+    },
+    {
+      "slot": "0x18",
+      "target": "0xddd960"
+    },
+    {
+      "slot": "0x1c",
+      "target": "0xddd9e0"
+    },
+    {
+      "slot": "0x20",
+      "target": "0x1082a20"
+    },
+    {
+      "slot": "0x24",
+      "target": "0xddda40"
+    },
+    {
+      "slot": "0x28",
+      "target": "0xddda30"
+    },
+    {
+      "slot": "0x2c",
+      "target": "0xdddac0"
+    },
+    {
+      "slot": "0x30",
+      "target": "0xddda50"
+    },
+    {
+      "slot": "0x34",
+      "target": "0xdddb50"
+    },
+    {
+      "slot": "0x38",
+      "target": "0x6f2f90"
+    },
+    {
+      "slot": "0x3c",
+      "target": "0xdddb80"
+    },
+    {
+      "slot": "0x40",
+      "target": "0x111cd70"
+    }
+  ],
+  "limitations": [
+    "static-only",
+    "method roles tentative without callers",
+    "default strings can be overridden by runtime property list",
+    "original UI mounting and controller events not reproduced"
+  ]
+}

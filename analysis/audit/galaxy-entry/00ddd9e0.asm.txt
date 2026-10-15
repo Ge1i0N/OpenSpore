@@ -1,0 +1,30 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DDD9E0
+
+00ddd9e0  FLDZ
+00ddd9e2  PUSH ESI
+00ddd9e3  PUSH 0x0
+00ddd9e5  SUB ESP,0x8
+00ddd9e8  MOV ESI,ECX
+00ddd9ea  FST float ptr [ESP + 0x4]
+00ddd9ee  MOV EAX,dword ptr [ESI]
+00ddd9f0  FSTP float ptr [ESP]
+00ddd9f3  MOV EDX,dword ptr [EAX + 0x2c]
+00ddd9f6  PUSH 0x3ea
+00ddd9fb  CALL EDX
+00ddd9fd  FLDZ
+00ddd9ff  MOV EAX,dword ptr [ESI]
+00ddda01  MOV EDX,dword ptr [EAX + 0x30]
+00ddda04  PUSH 0x0
+00ddda06  SUB ESP,0x8
+00ddda09  FST float ptr [ESP + 0x4]
+00ddda0d  MOV ECX,ESI
+00ddda0f  FSTP float ptr [ESP]
+00ddda12  PUSH 0x3ea
+00ddda17  CALL EDX
+00ddda19  MOV ECX,dword ptr [0x016a1344]
+00ddda1f  POP ESI
+00ddda20  JMP 0x00de8160

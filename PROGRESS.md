@@ -24,6 +24,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | SPUI graph | 93,726 objects / 22,384 windows / 20,659 child links; shared ancestor Clip for paint/picking | dynamic Z/layout still host policy |
 | Drawables | atlas UV/logical sizes; None-tiling ImageDrawable; non-tileable Standard/Radio state slices | tiling, shadow/outline, dialog pieces open |
 | Input | visible `(311,550)` -> CreatureEditor `0x022D9E01` | control/state bridge, not original command bus |
+| GGE primary UI | Main -> GalaxyGameEntry presents the GA-default `GlobalUIGGE-9` | sparse serialized visibility; galaxy scene, zoom panels, properties/controller events not implemented |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
 
@@ -41,6 +42,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | Index invariants | 57 packages / 150,945 records / 0 violations | `python tools/pkg_kinds.py` |
 | Live launcher | real atlas-aware art, exit 0, aborts/asserts 0 | [capture](analysis/shots/spui_e3launch_uv.png) |
 | Visible transition | CreatureEditor entered, exit 0 | `-state:DevLauncher -quitAfter 18 -exec spui:-click,311,550` |
+| GGE UI binding | exact mode/name/hash test; Main -> GGE capture, exit 0 | `mode_ui_verify`; [static/live boundary](analysis/galaxy-entry.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

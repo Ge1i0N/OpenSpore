@@ -1,0 +1,26 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DDD960
+
+undefined4 __fastcall os_GGE_activate_candidate(int *param_1)
+
+{
+  char cVar1;
+  int *piVar2;
+
+  (**(code **)(*param_1 + 0x2c))(0x3ea,0,0,0);
+  (**(code **)(*param_1 + 0x30))(0x3ea,0,0,0);
+  FUN_00dea1b0();
+  piVar2 = (int *)FUN_0067cb00();
+  if (piVar2 != (int *)0x0) {
+    (**(code **)(*piVar2 + 0x54))();
+  }
+  thunk_FUN_0080ff80();
+  cVar1 = FUN_00810800(0x614de4c);
+  if (cVar1 != '\0') {
+    FUN_00810700(0x614de4c,0);
+  }
+  return 1;
+}

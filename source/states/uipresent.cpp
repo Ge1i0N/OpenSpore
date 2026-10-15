@@ -8,6 +8,7 @@
 #include <string>
 
 #include "engine/appstates.h"  // the state's own script, which names the screen
+#include "engine/appmodes.h"
 #include "engine/input.h"      // the pointer, latched once per frame
 #include "engine/log.h"
 #include "engine/naming.h"     // hash_lower: a layout NAME becomes a resource INSTANCE
@@ -143,6 +144,11 @@ const os::spui::Layout* requested_by_state(std::string& why) {
                       st.c_str(), u.name.c_str(), naming::hash_lower(u.name.c_str()));
         why = b;
     }
+    if (const auto* binding = os::appmodes::primary_ui(gs->mode.c_str())) {
+        const auto* layout = rd.find(binding->instance);
+        why = "mode '" + gs->mode + "' -> " + binding->layout + "; " + binding->limitation;
+        return layout;
+    }
     why = "state '" + st + "' names no layout";
     return nullptr;
 }
@@ -183,7 +189,8 @@ void dispatch_click(const os::spui::Layout& lay, int vw, int vh) {
     // (discounting 0x00000001, which is the block-scoped low-id trap). So a widget in the launch
     // screen CARRIES the id of the state it enters, and a click can drive the state machine WITHOUT
     // reversing the command vocabulary - which is the gate we could not otherwise open.
-    const auto* target = (w->control_id >= 0x1000 && w->command_id == 0x00e1132f)
+    const auto* target = (lay.instance == 0xe932bd44u && manager().current_name() == "DevLauncher" &&
+                         w->control_id >= 0x1000 && w->command_id == 0x00e1132f)
                              ? appstates::instance().find_by_id(w->control_id) : nullptr;
     if (target && !target->name.empty()) {
         LOG_INFO("ui", "click at (%d,%d) -> \"%s\" %s  => ENTER STATE '%s' (control id == state id)",
@@ -297,6 +304,15 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
         if (++drawn >= 4096) break;
     }
     ov.reset_clip(); // diagnostics below are outside the per-window scissor
+    if (const auto* gs = os::appstates::instance().find(manager().current_name())) {
+        if (os::appmodes::primary_ui(gs->mode.c_str())) {
+            // Honest boundary, drawn after game widgets so their runtime-uninitialized positions
+            // cannot cover it. No fake starfield or forced visibility for controller-owned panels.
+            ov.rect(32.f, (float)h - 116.f, (float)w - 64.f, 40.f, 0xe0101820u);
+            ov.text(48.f, (float)h - 106.f, 0xffffce80u,
+                    "GGE PRIMARY UI ONLY - galaxy scene, zoom panels and controller events are not implemented");
+        }
+    }
     char foot[180];
     std::snprintf(foot, sizeof(foot),
                   "%zu windows drawn from %zu records; captions are the game's own strings",

@@ -1,0 +1,34 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00812100
+
+undefined4 __thiscall FUN_00812100(int param_1,int *param_2,char param_3,undefined4 param_4)
+
+{
+  int *piVar1;
+
+  if ((param_2 == (int *)0x0) && (param_3 != '\0')) {
+    param_2 = (int *)FUN_008106c0(param_4);
+  }
+  if (param_2 != *(int **)(param_1 + 0x88)) {
+    if (*(int **)(param_1 + 0x88) != (int *)0x0) {
+      FUN_008101e0();
+    }
+    piVar1 = *(int **)(param_1 + 0x88);
+    if (param_2 != piVar1) {
+      if (param_2 != (int *)0x0) {
+        (**(code **)*param_2)();
+      }
+      *(int **)(param_1 + 0x88) = param_2;
+      if (piVar1 != (int *)0x0) {
+        (**(code **)(*piVar1 + 4))();
+      }
+    }
+    if (*(int *)(param_1 + 0x88) != 0) {
+      FUN_00811c20();
+    }
+  }
+  return 1;
+}

@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     size_t passed = 0, negative = 0;
     std::string file;
     size_t size, objects, windows, props, links, roots;
-    bool negative_done = false;
+    bool negative_done = false, gge_done = false;
     while (manifest >> file >> size >> objects >> windows >> props >> links >> roots) {
         auto data = bytes(dir / file);
         spui::Layout layout;
@@ -71,6 +71,13 @@ int main(int argc, char** argv) {
             std::cerr << file << ": corpus mismatch " << error << '\n'; return 1;
         }
         ++passed;
+        if (file.find("52c07413") != std::string::npos) {
+            if (size != 249031 || objects != 1368 || windows != 320) {
+                std::cerr << "GGE primary UI corpus/serialized visibility mismatch\n";
+                return 1;
+            }
+            gge_done = true;
+        }
         if (!negative_done && file.find("e932bd44") != std::string::npos) {
             negative_done = true;
             float dw = 0.f, dh = 0.f;
@@ -214,10 +221,11 @@ int main(int argc, char** argv) {
                 { std::cerr << "unknown property id broke framing\n"; return 1; }
         }
     }
-    if (!passed || !negative_done) { std::cerr << "incomplete fixture corpus\n"; return 1; }
+    if (!passed || !negative_done || !gge_done) { std::cerr << "incomplete fixture corpus\n"; return 1; }
     std::cout << passed << " corpus layouts match; " << negative
               << " malformed inputs rejected with output unchanged\n";
     std::cout << "drawable atlas/state/fixed-scale/alignment/unsupported-mode checks passed\n";
     std::cout << "ancestor clipping / empty intersection / boundary picking checks passed\n";
+    std::cout << "GGE primary UI corpus: 1368 objects / 320 windows verified (not controller behavior)\n";
     return 0;
 }

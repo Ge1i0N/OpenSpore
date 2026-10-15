@@ -11,6 +11,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | Atlas / drawable subset | [spui-drawables](spui-drawables.md) | current implemented branches and GA instruction extracts |
 | UI overview | [ui](ui.md) | current navigation, links to deeper evidence |
 | AppMode registrations | [modes](modes.md) | ten recovered registrations, not implemented driver behavior |
+| GalaxyGameEntry | [galaxy-entry](galaxy-entry.md) | lifecycle/UI-loading evidence and implemented default primary UI subset, not a playable galaxy |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |

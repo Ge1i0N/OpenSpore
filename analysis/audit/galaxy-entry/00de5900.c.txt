@@ -1,0 +1,136 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE5900
+
+void __fastcall FUN_00de5900(int param_1)
+
+{
+  char cVar1;
+  int *piVar2;
+  undefined4 uVar3;
+  int iVar4;
+  int *piVar5;
+  float *pfVar6;
+  uint uVar7;
+  undefined4 *puStack_24;
+  undefined4 uStack_20;
+  undefined4 uStack_1c;
+  undefined4 uStack_18;
+  uint local_14 [5];
+
+  cVar1 = FUN_006854e0(2);
+  uVar3 = DAT_016a0d34;
+  if (cVar1 != '\0') {
+    uVar3 = DAT_016a0d44;
+  }
+  FUN_00812250(uVar3,0x40464100,1,0x5b598fa);
+  local_14[0] = 0x615b966;
+  local_14[1] = 0x61dd69b;
+  local_14[2] = 0x615b616;
+  local_14[3] = 0x70d74e7;
+  local_14[4] = 0x70d7509;
+  uVar7 = 0;
+  do {
+    if (param_1 == 0) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = param_1 + 4;
+    }
+    piVar2 = (int *)FUN_00810650(local_14[uVar7],1);
+    (**(code **)(*piVar2 + 0x104))(iVar4);
+    uVar7 = uVar7 + 1;
+  } while (uVar7 < 3);
+  cVar1 = FUN_006854e0(2);
+  if (cVar1 != '\0') {
+    uVar7 = 3;
+    do {
+      if (param_1 == 0) {
+        iVar4 = 0;
+      }
+      else {
+        iVar4 = param_1 + 4;
+      }
+      piVar2 = (int *)FUN_00810650(local_14[uVar7],1);
+      (**(code **)(*piVar2 + 0x104))(iVar4);
+      piVar2 = DAT_015fd91c;
+      uVar7 = uVar7 + 1;
+    } while (uVar7 < 5);
+    *(undefined1 *)(param_1 + 0x271) = 1;
+    if (((piVar2 != (int *)0x0) &&
+        (cVar1 = (**(code **)(*piVar2 + 0x24))(0x8069a6c,&puStack_24), cVar1 != '\0')) &&
+       (*(short *)((int)puStack_24 + 0x12) == 1)) {
+      if ((*(byte *)(puStack_24 + 4) & 0x30) != 0) {
+        puStack_24 = (undefined4 *)*puStack_24;
+      }
+      *(undefined1 *)(param_1 + 0x271) = *(undefined1 *)puStack_24;
+    }
+    if (*(char *)(param_1 + 0x271) != '\0') {
+      local_14[4] = 0x10000;
+      local_14[0] = local_14[0] & 0xffffff00;
+      (**(code **)(*piVar2 + 0x14))(0x8069a6c,local_14);
+      if ((local_14[4] & 4) != 0) {
+        FUN_0093daf0(0);
+      }
+      uVar3 = FUN_006b1f20(0x11ac192,0);
+      FUN_006b1ce0(piVar2,uVar3);
+    }
+  }
+  FUN_00de48c0();
+  iVar4 = FUN_00f47240(0x68,"UI/GGE/GlobalUI",0,0,0,0);
+  if (iVar4 == 0) {
+    uVar3 = 0;
+  }
+  else {
+    uVar3 = FUN_00e03a80();
+  }
+  *(undefined4 *)(param_1 + 0x184) = uVar3;
+  *(undefined1 *)(param_1 + 0x103) = 1;
+  uStack_20 = FUN_00932f00(DAT_016a0d24,0x811c9dc5,1);
+  uStack_1c = 0x510a95b;
+  uStack_18 = 0x40464100;
+  cVar1 = (**(code **)(**(int **)(param_1 + 0x184) + 8))(&uStack_20);
+  if (cVar1 != '\0') {
+    piVar2 = (int *)FUN_00e01280(0xffffffff);
+    (**(code **)(*piVar2 + 0x104))(param_1 + 4);
+    piVar2 = (int *)FUN_00e01280(0x36c4a10);
+    if (piVar2 != (int *)0x0) {
+      piVar5 = (int *)(**(code **)(*piVar2 + 0x10))();
+      (**(code **)(*piVar5 + 0xe0))(piVar2);
+    }
+  }
+  FUN_00de4ff0(1);
+  FUN_00de4160();
+  piVar2 = (int *)FUN_00e01280(0x4810f47);
+  if (piVar2 != (int *)0x0) {
+    pfVar6 = (float *)(**(code **)(*piVar2 + 0x38))();
+    *(float *)(param_1 + 0x194) = pfVar6[2] - *pfVar6;
+  }
+  piVar2 = (int *)FUN_00e01280(0x10ed852);
+  if ((piVar2 != (int *)0x0) &&
+     (piVar2 = (int *)(**(code **)(*piVar2 + 0xc))(0x8ed27e7a), piVar2 != (int *)0x0)) {
+    iVar4 = FUN_00f47240(0x34,"UI/NetworkActivityProc",0,0,0,0);
+    if (iVar4 == 0) {
+      uVar3 = 0;
+    }
+    else {
+      uVar3 = FUN_00e01660();
+    }
+    piVar2 = (int *)(**(code **)(*piVar2 + 0x10))();
+    (**(code **)(*piVar2 + 0x104))(uVar3);
+  }
+  piVar2 = (int *)FUN_0067ca60();
+  piVar5 = (int *)FUN_0067ca60();
+  iVar4 = *piVar5;
+  uVar3 = (**(code **)(*piVar2 + 4))();
+  (**(code **)(iVar4 + 0x4c))(1,uVar3);
+  piVar2 = (int *)FUN_0067dcc0();
+  cVar1 = (**(code **)(*piVar2 + 0x54))();
+  if ((cVar1 == '\0') && (iVar4 = FUN_00e01280(0x3e30d88), iVar4 != 0)) {
+    piVar2 = (int *)FUN_00e01280(0x3e30d88);
+    (**(code **)(*piVar2 + 0x7c))(1,0);
+  }
+  return;
+}

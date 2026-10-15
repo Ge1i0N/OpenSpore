@@ -19,6 +19,7 @@ host policy; unresolved. None of these alone means the complete original feature
 | RefPack | `0x92C5B0`, `0x92CCD0`, `0x92CD40` | original loops/signature, 30,000 exact recorded decodes | length check is not a full pixel/content equivalence proof |
 | State scripts | `SporeAppStates`, instance `0xD6396913` | 60 states / 17 mode names recovered from ArgScript | script data is not driver behavior |
 | AppMode registrations | 10 GA registrations | [mode table](analysis/modes.md) represented in `appmodes.cpp` | enter/tick/render not implemented; missing strings do not prove absent classes |
+| GGE primary UI | `0xDDDE30` -> driver vtable `0x147D2B0`; activation-shaped `0xDDD960` -> `0xDEA1B0` -> `0xDE5900` | default string at `0x147D3F4`, initializer `0x136BCE0`, GlobalUI load `0xE035F0`; Main -> GGE presents GlobalUIGGE-9 | default primary UI only, original lifecycle/config overrides/zoom/scene/events not implemented; [evidence](analysis/galaxy-entry.md) |
 | SPUI binary | `0x82CE10`, `0x82B3F0`, `0x82B240`, `0x13005A0` | 748/748 EOF, exact graph/property framing; 486 negative cases | [binary evidence](analysis/spui-binary.md) |
 | Image object | `0x13004A0`, `0x957710/750`, `0x9576F0` | external PNG ref, UV rect and logical dimensions | Image is class `0x01BE6B15`, not ImageDrawable |
 | ImageDrawable | `0x97D1E0`, ctor `0x97D840`, table `0x154F690` | None-tiling fixed width/height, scale and alignment | shadow/outline/tiling not implemented |

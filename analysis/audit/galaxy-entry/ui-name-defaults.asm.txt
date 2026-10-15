@@ -1,0 +1,34 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+ 136bce0:	68 f4 d3 47 01       	push   0x147d3f4
+ 136bce5:	b9 24 0d 6a 01       	mov    ecx,0x16a0d24
+ 136bcea:	e8 a1 dd 20 ff       	call   0x579a90
+ 136bcef:	68 30 63 3c 01       	push   0x13c6330
+ 136bcf4:	e8 36 4b e7 ff       	call   0x11e082f
+ 136bcf9:	59                   	pop    ecx
+ 136bcfa:	c3                   	ret
+ 136bcfb:	cc                   	int3
+ 136bcfc:	cc                   	int3
+ 136bcfd:	cc                   	int3
+ 136bcfe:	cc                   	int3
+ 136bcff:	cc                   	int3
+ 136bd00:	68 10 d4 47 01       	push   0x147d410
+ 136bd05:	b9 34 0d 6a 01       	mov    ecx,0x16a0d34
+ 136bd0a:	e8 81 dd 20 ff       	call   0x579a90
+ 136bd0f:	68 60 63 3c 01       	push   0x13c6360
+ 136bd14:	e8 16 4b e7 ff       	call   0x11e082f
+ 136bd19:	59                   	pop    ecx
+ 136bd1a:	c3                   	ret
+ 136bd1b:	cc                   	int3
+ 136bd1c:	cc                   	int3
+ 136bd1d:	cc                   	int3
+ 136bd1e:	cc                   	int3
+ 136bd1f:	cc                   	int3
+ 136bd20:	68 2c d4 47 01       	push   0x147d42c
+ 136bd25:	b9 44 0d 6a 01       	mov    ecx,0x16a0d44
+ 136bd2a:	e8 61 dd 20 ff       	call   0x579a90
+ 136bd2f:	68 90 63 3c 01       	push   0x13c6390
+ 136bd34:	e8 f6 4a e7 ff       	call   0x11e082f
+ 136bd39:	59                   	pop    ecx
+ 136bd3a:	c3                   	ret

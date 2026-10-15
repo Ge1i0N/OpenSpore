@@ -1,0 +1,88 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DEA1B0
+
+undefined4 __fastcall FUN_00dea1b0(int param_1)
+
+{
+  int iVar1;
+  int *piVar2;
+  undefined4 uVar3;
+  undefined4 uVar4;
+  undefined4 uVar5;
+
+  *(undefined1 *)(param_1 + 0xc9) = 1;
+  FUN_00de46d0();
+  FUN_00de5900();
+  FUN_00de5420(1);
+  *(undefined1 *)(param_1 + 0x140) = 0;
+  *(undefined1 *)(param_1 + 0x1f6) = 1;
+  iVar1 = FUN_00b3d460();
+  if ((((*(int **)(iVar1 + 0x20) != (int *)(iVar1 + 0x20)) || (*(int *)(iVar1 + 0x34) != 0)) &&
+      (DAT_016a0e08 != '\0')) && (DAT_016a0e18 != '\0')) {
+    uVar5 = 0;
+    uVar4 = 0x2ccd1d2;
+    uVar3 = 1;
+    FUN_00b3d510(1,0x2ccd1d2,0);
+    FUN_00e3e350(uVar3,uVar4,uVar5);
+  }
+  FUN_00b3d480();
+  FUN_00b32220();
+  iVar1 = FUN_00b3d350();
+  *(undefined4 *)(iVar1 + 0x110) = 0;
+  FUN_00de9f70();
+  if (*(int *)(param_1 + 0x108) == 1) {
+    *(undefined4 *)(param_1 + 0x10c) = 2;
+  }
+  iVar1 = param_1 + 8;
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x4360e14);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x56bbd7f);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x44db12e);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x5bd6378);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x5dd52c7);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x6203fdc);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x4519b5f);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x625d27d);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x67c75bd6);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x634297ad);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x275a9c8c);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0xeda117de);
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x20))(iVar1,0x8085c4c);
+  piVar2 = *(int **)(param_1 + 0x38);
+  if (*(char *)(param_1 + 0x24c) == '\0') {
+    if (piVar2 != (int *)0x0) {
+      (**(code **)(*piVar2 + 0x4c))();
+    }
+  }
+  else {
+    if (piVar2 != (int *)0x0) {
+      (**(code **)(*piVar2 + 0x48))(*(undefined4 *)(param_1 + 0x250));
+    }
+    *(undefined1 *)(param_1 + 0x24c) = 0;
+    piVar2 = *(int **)(param_1 + 0x250);
+    if (piVar2 != (int *)0x0) {
+      *(undefined4 *)(param_1 + 0x250) = 0;
+      (**(code **)(*piVar2 + 8))();
+    }
+    *(undefined1 *)(param_1 + 0x24d) = 0;
+  }
+  for (iVar1 = *(int *)(param_1 + 300); iVar1 != param_1 + 0x128; iVar1 = FUN_00921810(iVar1)) {
+    (**(code **)(**(int **)(iVar1 + 0x14) + 0x38))();
+  }
+  return 1;
+}

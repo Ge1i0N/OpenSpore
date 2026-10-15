@@ -6,7 +6,7 @@
 // release exe too (not a debug-only secret). Every claim below is level-1 evidence from
 // refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe:
 //
-//  * State identity is a 32-bit FNV-1a hash of the name:
+//  * State identity is FNV-1 (mul then xor), lowercase name unless script overrides it:
 //      007e40f2: push 0x811c9dc5 / push eax(name) / call 0x932e50
 //      007e4103: mov [ecx+0x28], eax          ; ID stored on the state
 //      007e4132: cmp ecx,[eax+edx*4]          ; duplicate-ID probe
@@ -16,7 +16,7 @@
 //    'transition' 0x01413188, 'entry' 0x01413180, 'exit' 0x01413178, 'endChain' 0x014130f8,
 //    and the behaviour-tree tag '.eBT' 0x014131bd. So states are DECLARED IN SCRIPT DATA
 //    (.eBT behaviour trees) and instantiated by this manager - the set of state names is
-//    data, not code. We have no .big assets yet, hence our own Loader state below.
+//    data, not code; the shipped SporeAppStates table is now loaded by engine/appstates.cpp.
 //  * Nesting is illegal, and transitions are a chain, not a stack:
 //      0x014135dc "can't nest states or transitions"   (refs 0x7e35ce, 0x7e3fde)
 //      0x014135b4 'unknown to state'    0x014135c8 'unknown from state'

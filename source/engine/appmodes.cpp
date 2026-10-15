@@ -33,12 +33,11 @@ const Mode kModes[] = {
 // The script asks for 17 modes; the table above has 10. The other 7 are NOT all the same kind of
 // missing, and conflating them is how a coverage gap turns into a wrong claim. Measured
 // (tools/mode_where.py, tools/mode_absent.py, both searching the whole 24.9 MB oracle):
-//   * five appear NOWHERE, not even as a substring, in ASCII or UTF-16 - the script asks for classes
-//     this build does not ship;
+//   * five were not found as ASCII/UTF-16 strings in the bounded whole-file search. This does NOT
+//     establish absence of an implementation or dynamically formed names;
 //   * two DO occur in the binary (`TerrainEditor` 5 times, `Editors` once) but their registration was
 //     not located, because they are not defined STRING data and so `ghidra_xref.py --string` cannot
-//     reach them. Those two are a REAL, ACTIONABLE gap: two registration calls still to find, which
-//     means the mode table is 10 of a likely 12.
+//     reach them. Their registration remains a gap; no complete inventory is claimed.
 struct Absent { const char* name; bool in_binary; };
 const Absent kNotInTable[] = {
     {"AnimViewer", false}, {"EffectsViewer", false}, {"Launcher", false}, {"ModelViewer", false},
@@ -109,8 +108,7 @@ std::string report() {
         rows += b;
     }
     // COVERAGE, measured rather than asserted: the script asks for modes by name; a name it uses that
-    // is not in the table is split into "this build has no such class" and "the class exists but its
-    // registration is not located yet" - the second is a TO-DO, the first is a fact about the build.
+    // is not in the table is split by observed string-search results, not class existence.
     std::vector<std::string> seen_names;
     size_t asked = 0, in_table = 0, absent = 0, unfound = 0;
     std::string missing_absent, missing_unfound;
@@ -147,12 +145,11 @@ std::string report() {
     std::string out;
     std::snprintf(b, sizeof(b),
                   "%zu modes recovered from the binary; the script asks for %zu distinct mode(s): "
-                  "%zu in the table, %zu absent from this build, %zu present but registration unfound",
+                   "%zu in the table, %zu names not found by string search, %zu names present but registration unfound",
                   count(), asked, in_table, absent, unfound);
     out = b;
     if (!missing_absent.empty()) {
-        out += "\n  asked for but ABSENT from this build (nowhere in the 24.9 MB oracle, not even a"
-               " substring):" + missing_absent;
+        out += "\n  requested names NOT FOUND by the recorded ASCII/UTF-16 search (not proof of absent code):" + missing_absent;
     }
     if (!missing_unfound.empty()) {
         out += "\n  asked for, PRESENT in the binary, registration NOT YET FOUND (no defined string"
