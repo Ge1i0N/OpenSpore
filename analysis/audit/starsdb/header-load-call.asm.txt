@@ -1,0 +1,27 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  bb9050:	66 01 68 26          	add    WORD PTR [eax+0x26],bp
+  bb9054:	0d a8 01 89 84       	or     eax,0x848901a8
+  bb9059:	24 dc                	and    al,0xdc
+  bb905b:	00 00                	add    BYTE PTR [eax],al
+  bb905d:	00 89 84 24 ec 00    	add    BYTE PTR [ecx+0xec2484],cl
+  bb9063:	00 00                	add    BYTE PTR [eax],al
+  bb9065:	68 50 9c 68 01       	push   0x1689c50
+  bb906a:	8d 84 24 d0 00 00 00 	lea    eax,[esp+0xd0]
+  bb9071:	50                   	push   eax
+  bb9072:	8d 8c 24 44 01 00 00 	lea    ecx,[esp+0x144]
+  bb9079:	89 74 24 28          	mov    DWORD PTR [esp+0x28],esi
+  bb907d:	89 bc 24 dc 00 00 00 	mov    DWORD PTR [esp+0xdc],edi
+  bb9084:	89 bc 24 e0 00 00 00 	mov    DWORD PTR [esp+0xe0],edi
+  bb908b:	89 bc 24 ec 00 00 00 	mov    DWORD PTR [esp+0xec],edi
+  bb9092:	89 bc 24 f0 00 00 00 	mov    DWORD PTR [esp+0xf0],edi
+  bb9099:	e8 b2 9e ad ff       	call   0x692f50
+  bb909e:	56                   	push   esi
+  bb909f:	8d 8c 24 3c 01 00 00 	lea    ecx,[esp+0x13c]
+  bb90a6:	e8 35 ad ad ff       	call   0x693de0
+  bb90ab:	8b 8c 24 cc 00 00 00 	mov    ecx,DWORD PTR [esp+0xcc]
+  bb90b2:	51                   	push   ecx
+  bb90b3:	8d 4c 24 2c          	lea    ecx,[esp+0x2c]
+  bb90b7:	e8 c4 9d ad ff       	call   0x692e80
+  bb90bc:	8b                   	.byte 0x8b

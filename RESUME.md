@@ -43,7 +43,12 @@ test with `-w -devDirs`; retain evidence and commit.
   first then candidates, two source indices, raw world positions, stage/resource/save-status rules.
   `gge_catalog_verify`: 19 grouped controlled-input checks. No live producer or on-disk ABI parser.
   Source fill `0xBB61C0`, stars.db load `0xBB8C90` and save `0xBB4D40` traced and retained;
-  `analysis/gge-catalog.md` / `audit/gge-catalog/`. Do not reinterpret 0xBC as a file stride.
+   `analysis/gge-catalog.md` / `audit/gge-catalog/`. Do not reinterpret 0xBC as a file stride.
+- `engine/serialized_frame.*` / `starsdb.*`: bounded serializer-prefix inspector, six metadata fields
+  and opaque named StarManager spans; `starsdb_verify`: 240 constructed checks. No real-save corpus,
+  outer-transport guarantee, object/grid/reference decoding or runtime wiring. `analysis/starsdb.md`
+  / `audit/starsdb/` retain 23 focused GA functions, constructor schema and instructions. `tools/pe.py`
+  now rejects BSS and reads crossing a raw section boundary; two independent Python tests cover it.
 
 ## Next, in order
 
@@ -53,8 +58,11 @@ test with `-w -devDirs`; retain evidence and commit.
    The branch executor has been tested but needs actual UI/content-manager/WinProc ports; callback
    `0x60B470` is not established as per-frame and must not be polled into fake completion.
    Continue state2 constructor `0xE008B0` and state10 (`0xDEC320/0xDEC3B0`) return/effect lifecycle.
-   Source task: stars.db serializer descriptors consumed by `0xBB8C90`, and its galaxy/star-grid
-   generation path, before attaching the typed catalog builder to live UI. Controlled test records
+    Source task: stars.db list reader `0xBAE0B0`, serializer context reference/object methods, grid reader
+    `0xBB6950` and StarRecord descriptors; then galaxy/star-grid generation, before attaching the typed
+    catalog builder to live UI. Frame/metadata decoding is done as a bounded prefix subset; do not
+    repeat BSS reads of `0x1689C50` or treat the list writer's context values as coordinates.
+    Controlled test records
    are not shipped saves or a recovered galaxy. No filesystem writes are authorized by this step.
    The current primary UI is diagnostic; original Intro hides it. Never force hidden branches visible.
 3. Advance the first playable stage without claiming full UI or full format parity.
@@ -65,7 +73,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -73,6 +81,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\gge_intro_verify.exe
 .\build\Debug\gge_dbcheck_verify.exe $fixtures
 .\build\Debug\gge_catalog_verify.exe
+.\build\Debug\starsdb_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

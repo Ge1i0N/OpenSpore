@@ -1,0 +1,52 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  692ac3:	8b 45 00             	mov    eax,DWORD PTR [ebp+0x0]
+  692ac6:	8b 50 24             	mov    edx,DWORD PTR [eax+0x24]
+  692ac9:	6a 00                	push   0x0
+  692acb:	8b cd                	mov    ecx,ebp
+  692acd:	ff d2                	call   edx
+  692acf:	8b 4c 24 18          	mov    ecx,DWORD PTR [esp+0x18]
+  692ad3:	8b d8                	mov    ebx,eax
+  692ad5:	8b 45 00             	mov    eax,DWORD PTR [ebp+0x0]
+  692ad8:	8b 50 28             	mov    edx,DWORD PTR [eax+0x28]
+  692adb:	83 c1 fc             	add    ecx,0xfffffffc
+  692ade:	6a 00                	push   0x0
+  692ae0:	51                   	push   ecx
+  692ae1:	8b cd                	mov    ecx,ebp
+  692ae3:	89 5c 24 18          	mov    DWORD PTR [esp+0x18],ebx
+  692ae7:	ff d2                	call   edx
+  692ae9:	8b 06                	mov    eax,DWORD PTR [esi]
+  692aeb:	8b 50 20             	mov    edx,DWORD PTR [eax+0x20]
+  692aee:	8b ce                	mov    ecx,esi
+  692af0:	ff d2                	call   edx
+  692af2:	8b 10                	mov    edx,DWORD PTR [eax]
+  692af4:	8b cb                	mov    ecx,ebx
+  692af6:	2b 4c 24 18          	sub    ecx,DWORD PTR [esp+0x18]
+  692afa:	89 4c 24 18          	mov    DWORD PTR [esp+0x18],ecx
+  692afe:	8b c8                	mov    ecx,eax
+  692b00:	8b 42 18             	mov    eax,DWORD PTR [edx+0x18]
+  692b03:	ff d0                	call   eax
+  692b05:	6a 00                	push   0x0
+  692b07:	6a 01                	push   0x1
+  692b09:	8d 4c 24 20          	lea    ecx,[esp+0x20]
+  692b0d:	51                   	push   ecx
+  692b0e:	50                   	push   eax
+  692b0f:	e8 cc 7e 2a 00       	call   0x93a9e0
+  692b14:	8b 16                	mov    edx,DWORD PTR [esi]
+  692b16:	8b 42 20             	mov    eax,DWORD PTR [edx+0x20]
+  692b19:	83 c4 10             	add    esp,0x10
+  692b1c:	8b ce                	mov    ecx,esi
+  692b1e:	ff d0                	call   eax
+  692b20:	8b 8f 04 0a 00 00    	mov    ecx,DWORD PTR [edi+0xa04]
+  692b26:	8b 10                	mov    edx,DWORD PTR [eax]
+  692b28:	89 4c 24 18          	mov    DWORD PTR [esp+0x18],ecx
+  692b2c:	8b c8                	mov    ecx,eax
+  692b2e:	8b 42 18             	mov    eax,DWORD PTR [edx+0x18]
+  692b31:	ff d0                	call   eax
+  692b33:	6a 00                	push   0x0
+  692b35:	6a 01                	push   0x1
+  692b37:	8d 4c 24 20          	lea    ecx,[esp+0x20]
+  692b3b:	51                   	push   ecx
+  692b3c:	50                   	push   eax
+  692b3d:	e8 9e 7e 2a 00       	call   0x93a9e0

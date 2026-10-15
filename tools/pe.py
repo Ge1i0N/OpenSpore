@@ -80,14 +80,18 @@ class PE:
 
     def file_off(self, va: int) -> int | None:
         s = self.section_of(va)
-        if s is None:
+        # Virtual zero-fill tails have no bytes in the executable file.
+        if s is None or va - s["va"] >= s["raw"]:
             return None
         return s["off"] + (va - self.base - s["rva"])
 
     def read(self, va: int, size: int) -> bytes:
         """Read `size` bytes at virtual address `va` (file-backed content)."""
         off = self.file_off(va)
-        if off is None:
+        section = self.section_of(va)
+        if size < 0:
+            raise ValueError("negative read size")
+        if off is None or section is None or size > section["raw"] - (va - section["va"]):
             raise ValueError(f"VA 0x{va:08x} is not backed by file data")
         data = self.raw[off : off + size]
         if len(data) != size:

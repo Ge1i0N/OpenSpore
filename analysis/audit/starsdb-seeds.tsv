@@ -1,0 +1,8 @@
+# GA static constructor + scalar/string binary callbacks; aligned entries verified by objdump.
+0x01326120	function	os_StarManager_serialization_descriptors
+0x00572810	function	os_Serializer_uint32_read
+0x00572840	function	os_Serializer_uint32_write
+0x00ac8700	function	os_Serializer_wstring_read
+0x00ac8730	function	os_Serializer_wstring_write
+0x00b26950	function	os_Serializer_timestamp_read
+0x00b26970	function	os_Serializer_timestamp_write

@@ -1,0 +1,323 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x01326120
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+01326120  SUB ESP,0x3c
+01326123  PUSH EBX
+01326124  XOR EAX,EAX
+01326126  PUSH EBP
+01326127  PUSH ESI
+01326128  PUSH EDI
+01326129  MOV EBP,0x692c60
+0132612e  MOV EBX,0xc2e640
+01326133  MOV EDX,0x692f70
+01326138  MOV dword ptr [ESP + 0x10],0x1466400
+01326140  MOV dword ptr [ESP + 0x14],0x3fabad0
+01326148  MOV dword ptr [ESP + 0x28],EAX
+0132614c  MOV dword ptr [ESP + 0x2c],EAX
+01326150  MOV dword ptr [ESP + 0x30],EBP
+01326154  MOV dword ptr [ESP + 0x34],0xbb6950
+0132615c  MOV dword ptr [ESP + 0x38],0xba7500
+01326164  MOV dword ptr [ESP + 0x3c],EBX
+01326168  MOV dword ptr [ESP + 0x40],EDX
+0132616c  MOV dword ptr [ESP + 0x44],0xb1fb30
+01326174  MOV dword ptr [ESP + 0x48],0xc51560
+0132617c  MOV dword ptr [ESP + 0x18],0xc8
+01326184  MOV ECX,0xf
+01326189  LEA ESI,[ESP + 0x10]
+0132618d  MOV EDI,0x156c668
+01326192  MOVSD.REP ES:EDI,ESI
+01326194  MOV dword ptr [ESP + 0x10],0x14663ec
+0132619c  MOV dword ptr [ESP + 0x14],0x3ea8676
+013261a4  MOV dword ptr [ESP + 0x28],EAX
+013261a8  MOV dword ptr [ESP + 0x2c],EAX
+013261ac  MOV dword ptr [ESP + 0x30],EBP
+013261b0  MOV dword ptr [ESP + 0x34],0xbae0b0
+013261b8  MOV dword ptr [ESP + 0x38],0xaca670
+013261c0  MOV dword ptr [ESP + 0x3c],EBX
+013261c4  MOV dword ptr [ESP + 0x40],EDX
+013261c8  MOV dword ptr [ESP + 0x44],0xb6f960
+013261d0  MOV dword ptr [ESP + 0x48],0xc6c530
+013261d8  MOV dword ptr [ESP + 0x18],0xdc
+013261e0  MOV ECX,0xf
+013261e5  LEA ESI,[ESP + 0x10]
+013261e9  MOV EDI,0x156c6a4
+013261ee  MOVSD.REP ES:EDI,ESI
+013261f0  MOV dword ptr [ESP + 0x10],0x14663d4
+013261f8  MOV dword ptr [ESP + 0x14],0x3ea8679
+01326200  MOV dword ptr [ESP + 0x28],EAX
+01326204  MOV dword ptr [ESP + 0x2c],EAX
+01326208  MOV dword ptr [ESP + 0x30],EBP
+0132620c  MOV dword ptr [ESP + 0x34],0xbae0b0
+01326214  MOV dword ptr [ESP + 0x38],0xaca670
+0132621c  MOV dword ptr [ESP + 0x3c],EBX
+01326220  MOV dword ptr [ESP + 0x40],EDX
+01326224  MOV dword ptr [ESP + 0x44],0xb6f960
+0132622c  MOV dword ptr [ESP + 0x48],0xc6c530
+01326234  MOV dword ptr [ESP + 0x18],0xf0
+0132623c  MOV ECX,0xf
+01326241  LEA ESI,[ESP + 0x10]
+01326245  MOV EDI,0x156c6e0
+0132624a  MOVSD.REP ES:EDI,ESI
+0132624c  MOV dword ptr [ESP + 0x10],0x14663c8
+01326254  MOV dword ptr [ESP + 0x14],0x55ceb62
+0132625c  MOV dword ptr [ESP + 0x28],EAX
+01326260  MOV dword ptr [ESP + 0x2c],EAX
+01326264  MOV dword ptr [ESP + 0x30],EBP
+01326268  MOV dword ptr [ESP + 0x34],0xbae0b0
+01326270  MOV dword ptr [ESP + 0x38],0xaca670
+01326278  MOV dword ptr [ESP + 0x3c],EBX
+0132627c  MOV dword ptr [ESP + 0x40],EDX
+01326280  MOV ECX,0xf
+01326285  LEA ESI,[ESP + 0x10]
+01326289  MOV EDI,0x156c71c
+0132628e  MOV dword ptr [ESP + 0x44],0xb6f960
+01326296  MOV dword ptr [ESP + 0x48],0xc6c530
+0132629e  MOV dword ptr [ESP + 0x18],0x104
+013262a6  MOVSD.REP ES:EDI,ESI
+013262a8  MOV dword ptr [ESP + 0x10],0x14663b0
+013262b0  MOV dword ptr [ESP + 0x14],0x4274872
+013262b8  MOV dword ptr [ESP + 0x28],EAX
+013262bc  MOV dword ptr [ESP + 0x2c],EAX
+013262c0  MOV dword ptr [ESP + 0x30],EBP
+013262c4  MOV dword ptr [ESP + 0x34],0xbab210
+013262cc  MOV dword ptr [ESP + 0x38],0xba9630
+013262d4  MOV dword ptr [ESP + 0x3c],EBX
+013262d8  MOV dword ptr [ESP + 0x40],EDX
+013262dc  MOV dword ptr [ESP + 0x44],0xba75a0
+013262e4  MOV dword ptr [ESP + 0x48],0xbaa440
+013262ec  MOV dword ptr [ESP + 0x18],0x12c
+013262f4  MOV ECX,0xf
+013262f9  LEA ESI,[ESP + 0x10]
+013262fd  MOV EDI,0x156c758
+01326302  MOVSD.REP ES:EDI,ESI
+01326304  MOV dword ptr [ESP + 0x10],0x1466398
+0132630c  MOV dword ptr [ESP + 0x14],0x563c450
+01326314  MOV dword ptr [ESP + 0x28],EAX
+01326318  MOV dword ptr [ESP + 0x2c],EAX
+0132631c  MOV dword ptr [ESP + 0x30],EBP
+01326320  MOV dword ptr [ESP + 0x34],0xbae0b0
+01326328  MOV dword ptr [ESP + 0x38],0xaca670
+01326330  MOV dword ptr [ESP + 0x3c],EBX
+01326334  MOV dword ptr [ESP + 0x40],EDX
+01326338  MOV dword ptr [ESP + 0x44],0xb6f960
+01326340  MOV dword ptr [ESP + 0x48],0xc6c530
+01326348  MOV dword ptr [ESP + 0x18],0x118
+01326350  MOV ECX,0xf
+01326355  LEA ESI,[ESP + 0x10]
+01326359  MOV EDI,0x156c794
+0132635e  MOVSD.REP ES:EDI,ESI
+01326360  MOV dword ptr [ESP + 0x10],0x1466390
+01326368  MOV dword ptr [ESP + 0x14],0x3f5bbc2
+01326370  MOV dword ptr [ESP + 0x28],EAX
+01326374  MOV dword ptr [ESP + 0x2c],EAX
+01326378  MOV dword ptr [ESP + 0x30],EBP
+0132637c  MOV dword ptr [ESP + 0x34],0xba7570
+01326384  MOV dword ptr [ESP + 0x38],0xbcaad0
+0132638c  MOV dword ptr [ESP + 0x3c],EBX
+01326390  MOV dword ptr [ESP + 0x40],EDX
+01326394  MOV dword ptr [ESP + 0x44],0xb6f650
+0132639c  MOV dword ptr [ESP + 0x48],0xac7f90
+013263a4  MOV dword ptr [ESP + 0x18],0x148
+013263ac  MOV ECX,0xf
+013263b1  LEA ESI,[ESP + 0x10]
+013263b5  MOV EDI,0x156c7d0
+013263ba  MOVSD.REP ES:EDI,ESI
+013263bc  MOV dword ptr [ESP + 0x10],0x146637c
+013263c4  MOV dword ptr [ESP + 0x14],0x44ee63e
+013263cc  MOV dword ptr [ESP + 0x28],EAX
+013263d0  MOV dword ptr [ESP + 0x2c],EAX
+013263d4  MOV dword ptr [ESP + 0x30],EBP
+013263d8  MOV dword ptr [ESP + 0x34],0xba83a0
+013263e0  MOV dword ptr [ESP + 0x38],0xbcaad0
+013263e8  MOV dword ptr [ESP + 0x3c],EBX
+013263ec  MOV dword ptr [ESP + 0x40],EDX
+013263f0  MOV dword ptr [ESP + 0x44],0xb6f650
+013263f8  MOV dword ptr [ESP + 0x48],0xac7f90
+01326400  MOV dword ptr [ESP + 0x18],0x220
+01326408  MOV ECX,0xf
+0132640d  LEA ESI,[ESP + 0x10]
+01326411  MOV EDI,0x156c80c
+01326416  MOVSD.REP ES:EDI,ESI
+01326418  MOV dword ptr [ESP + 0x10],0x1466368
+01326420  MOV dword ptr [ESP + 0x14],0x44ee640
+01326428  MOV dword ptr [ESP + 0x28],EAX
+0132642c  MOV dword ptr [ESP + 0x2c],EAX
+01326430  MOV dword ptr [ESP + 0x30],EBP
+01326434  MOV dword ptr [ESP + 0x34],0x572810
+0132643c  MOV dword ptr [ESP + 0x38],0x572840
+01326444  MOV dword ptr [ESP + 0x3c],0x693060
+0132644c  MOV dword ptr [ESP + 0x40],0x694ed0
+01326454  MOV dword ptr [ESP + 0x44],0xb1fb30
+0132645c  MOV ECX,0xf
+01326461  LEA ESI,[ESP + 0x10]
+01326465  MOV EDI,0x156c848
+0132646a  MOV dword ptr [ESP + 0x48],0x675c60
+01326472  MOV dword ptr [ESP + 0x18],0x1d4
+0132647a  MOVSD.REP ES:EDI,ESI
+0132647c  MOV dword ptr [ESP + 0x10],0x1466360
+01326484  MOV dword ptr [ESP + 0x14],0x44ee641
+0132648c  MOV dword ptr [ESP + 0x28],EAX
+01326490  MOV dword ptr [ESP + 0x2c],EAX
+01326494  MOV dword ptr [ESP + 0x30],EBP
+01326498  MOV dword ptr [ESP + 0x34],0x572810
+013264a0  MOV dword ptr [ESP + 0x38],0x572840
+013264a8  MOV dword ptr [ESP + 0x3c],0x693060
+013264b0  MOV dword ptr [ESP + 0x40],0x694ed0
+013264b8  MOV dword ptr [ESP + 0x44],0xb1fb30
+013264c0  MOV dword ptr [ESP + 0x48],0x675c60
+013264c8  MOV dword ptr [ESP + 0x18],0x1d8
+013264d0  MOV ECX,0xf
+013264d5  LEA ESI,[ESP + 0x10]
+013264d9  MOV EDI,0x156c884
+013264de  MOVSD.REP ES:EDI,ESI
+013264e0  MOV dword ptr [ESP + 0x10],0x1466354
+013264e8  MOV dword ptr [ESP + 0x14],0x52c47aa
+013264f0  MOV dword ptr [ESP + 0x28],EAX
+013264f4  MOV dword ptr [ESP + 0x2c],EAX
+013264f8  MOV dword ptr [ESP + 0x30],EBP
+013264fc  MOV dword ptr [ESP + 0x34],0xbab390
+01326504  MOV dword ptr [ESP + 0x38],0xba9630
+0132650c  MOV dword ptr [ESP + 0x3c],EBX
+01326510  MOV dword ptr [ESP + 0x40],EDX
+01326514  MOV dword ptr [ESP + 0x44],0xba75a0
+0132651c  MOV dword ptr [ESP + 0x48],0xbaa440
+01326524  MOV dword ptr [ESP + 0x18],0x150
+0132652c  MOV ECX,0xf
+01326531  LEA ESI,[ESP + 0x10]
+01326535  MOV EDI,0x156c8c0
+0132653a  MOVSD.REP ES:EDI,ESI
+0132653c  MOV dword ptr [ESP + 0x10],0x1466340
+01326544  MOV dword ptr [ESP + 0x14],0x5528d40
+0132654c  MOV dword ptr [ESP + 0x28],EAX
+01326550  MOV dword ptr [ESP + 0x2c],EAX
+01326554  MOV dword ptr [ESP + 0x30],EBP
+01326558  MOV dword ptr [ESP + 0x34],0xba6820
+01326560  MOV dword ptr [ESP + 0x38],0xba6840
+01326568  MOV dword ptr [ESP + 0x3c],EBX
+0132656c  MOV dword ptr [ESP + 0x40],EDX
+01326570  MOV dword ptr [ESP + 0x44],0xba67e0
+01326578  MOV dword ptr [ESP + 0x48],0xac7f90
+01326580  MOV dword ptr [ESP + 0x18],0x1e0
+01326588  MOV ECX,0xf
+0132658d  LEA ESI,[ESP + 0x10]
+01326591  MOV EDI,0x156c8fc
+01326596  MOVSD.REP ES:EDI,ESI
+01326598  MOV dword ptr [ESP + 0x10],0x1466324
+013265a0  MOV dword ptr [ESP + 0x14],0x579f61c
+013265a8  MOV dword ptr [ESP + 0x28],EAX
+013265ac  MOV dword ptr [ESP + 0x2c],EAX
+013265b0  MOV dword ptr [ESP + 0x30],0x11874f0
+013265b8  MOV dword ptr [ESP + 0x34],0xb5cc70
+013265c0  MOV dword ptr [ESP + 0x38],0xb5cc90
+013265c8  MOV dword ptr [ESP + 0x3c],EBX
+013265cc  MOV dword ptr [ESP + 0x40],EDX
+013265d0  MOV dword ptr [ESP + 0x44],0xb1fb30
+013265d8  MOV dword ptr [ESP + 0x48],EAX
+013265dc  MOV dword ptr [ESP + 0x18],0x1689644
+013265e4  MOV ECX,0xf
+013265e9  LEA ESI,[ESP + 0x10]
+013265ed  MOV EDI,0x156c938
+013265f2  MOVSD.REP ES:EDI,ESI
+013265f4  MOV dword ptr [ESP + 0x10],0x1466304
+013265fc  MOV dword ptr [ESP + 0x14],0x56e616c
+01326604  MOV dword ptr [ESP + 0x28],EAX
+01326608  MOV dword ptr [ESP + 0x2c],EAX
+0132660c  MOV dword ptr [ESP + 0x30],0x11874f0
+01326614  MOV dword ptr [ESP + 0x34],0xba6860
+0132661c  MOV dword ptr [ESP + 0x38],0xba6880
+01326624  MOV dword ptr [ESP + 0x3c],EBX
+01326628  MOV dword ptr [ESP + 0x40],EDX
+0132662c  MOV dword ptr [ESP + 0x44],0xb1fb30
+01326634  MOV dword ptr [ESP + 0x48],EAX
+01326638  MOV ECX,0xf
+0132663d  LEA ESI,[ESP + 0x10]
+01326641  MOV EDI,0x156c974
+01326646  MOV dword ptr [ESP + 0x18],0x1689640
+0132664e  MOVSD.REP ES:EDI,ESI
+01326650  MOV dword ptr [ESP + 0x10],0x14662f4
+01326658  MOV dword ptr [ESP + 0x14],0x5d55277
+01326660  MOV dword ptr [ESP + 0x28],EAX
+01326664  MOV dword ptr [ESP + 0x2c],EAX
+01326668  MOV dword ptr [ESP + 0x30],0x11874f0
+01326670  MOV dword ptr [ESP + 0x34],0xbb17f0
+01326678  MOV dword ptr [ESP + 0x38],0xba83d0
+01326680  MOV dword ptr [ESP + 0x3c],0xc2e640
+01326688  MOV dword ptr [ESP + 0x40],0x694ba0
+01326690  MOV dword ptr [ESP + 0x44],0xb1fb30
+01326698  MOV dword ptr [ESP + 0x48],EAX
+0132669c  MOV dword ptr [ESP + 0x18],0x156c64c
+013266a4  MOV ECX,0xf
+013266a9  LEA ESI,[ESP + 0x10]
+013266ad  MOV EDI,0x156c9b0
+013266b2  MOVSD.REP ES:EDI,ESI
+013266b4  MOV dword ptr [ESP + 0x30],EBP
+013266b8  MOV dword ptr [ESP + 0x3c],EBX
+013266bc  MOV dword ptr [ESP + 0x10],0x14662e4
+013266c4  MOV dword ptr [ESP + 0x14],0x5d55278
+013266cc  MOV dword ptr [ESP + 0x28],EAX
+013266d0  MOV dword ptr [ESP + 0x2c],EAX
+013266d4  MOV dword ptr [ESP + 0x34],0xbb19c0
+013266dc  MOV dword ptr [ESP + 0x38],0xba75e0
+013266e4  MOV dword ptr [ESP + 0x40],EDX
+013266e8  MOV dword ptr [ESP + 0x44],0xb1fb30
+013266f0  MOV dword ptr [ESP + 0x48],0xbab510
+013266f8  MOV dword ptr [ESP + 0x18],0x208
+01326700  MOV ECX,0xf
+01326705  LEA ESI,[ESP + 0x10]
+01326709  MOV EDI,0x156c9ec
+0132670e  MOVSD.REP ES:EDI,ESI
+01326710  MOV dword ptr [ESP + 0x30],EBP
+01326714  MOV dword ptr [ESP + 0x3c],EBX
+01326718  MOV dword ptr [ESP + 0x10],0x14662cc
+01326720  MOV dword ptr [ESP + 0x14],0x563c451
+01326728  MOV dword ptr [ESP + 0x28],EAX
+0132672c  MOV dword ptr [ESP + 0x2c],EAX
+01326730  MOV dword ptr [ESP + 0x34],0xb04d60
+01326738  MOV dword ptr [ESP + 0x38],0xc76360
+01326740  MOV dword ptr [ESP + 0x40],EDX
+01326744  MOV dword ptr [ESP + 0x44],0xb1fb30
+0132674c  MOV dword ptr [ESP + 0x48],0xeafe10
+01326754  MOV dword ptr [ESP + 0x18],0xa0
+0132675c  MOV ECX,0xf
+01326761  LEA ESI,[ESP + 0x10]
+01326765  MOV EDI,0x156ca28
+0132676a  MOVSD.REP ES:EDI,ESI
+0132676c  MOV dword ptr [ESP + 0x30],EBP
+01326770  MOV dword ptr [ESP + 0x3c],EBX
+01326774  MOV dword ptr [ESP + 0x10],0x14662b8
+0132677c  MOV dword ptr [ESP + 0x14],0x6b94eb9
+01326784  MOV dword ptr [ESP + 0x28],EAX
+01326788  MOV dword ptr [ESP + 0x2c],EAX
+0132678c  MOV dword ptr [ESP + 0x34],0xbb1b60
+01326794  MOV dword ptr [ESP + 0x38],0xba7660
+0132679c  MOV dword ptr [ESP + 0x40],EDX
+013267a0  MOV dword ptr [ESP + 0x44],0xb1fb30
+013267a8  MOV dword ptr [ESP + 0x48],0xbab660
+013267b0  MOV dword ptr [ESP + 0x18],0x16c
+013267b8  MOV ECX,0xf
+013267bd  LEA ESI,[ESP + 0x10]
+013267c1  MOV EDI,0x156ca64
+013267c6  MOVSD.REP ES:EDI,ESI
+013267c8  MOV dword ptr [ESP + 0x30],EBP
+013267cc  MOV dword ptr [ESP + 0x3c],EBX
+013267d0  MOV ECX,0xf
+013267d5  LEA ESI,[ESP + 0x10]
+013267d9  MOV EDI,0x156caa0
+013267de  MOV dword ptr [ESP + 0x10],0x14662a8
+013267e6  MOV dword ptr [ESP + 0x14],0x799479d
+013267ee  MOV dword ptr [ESP + 0x28],EAX
+013267f2  MOV dword ptr [ESP + 0x2c],EAX
+013267f6  MOV dword ptr [ESP + 0x34],0xbab7b0
+013267fe  MOV dword ptr [ESP + 0x38],0xba76e0
+01326806  MOV dword ptr [ESP + 0x40],EDX
+0132680a  MOV dword ptr [ESP + 0x44],0xd01340
+01326812  MOV dword ptr [ESP + 0x48],0xbab8d0
+0132681a  MOV dword ptr [ESP + 0x18],0x184
+01326822  MOVSD.REP ES:EDI,ESI
+01326824  POP EDI
+01326825  POP ESI
+01326826  POP EBP
+01326827  POP EBX
+01326828  ADD ESP,0x3c
+0132682b  RET

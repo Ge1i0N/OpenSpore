@@ -1,0 +1,59 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static GA instructions + analyst transcription",
+  "header_initializer": "0x01325db0",
+  "manager_initializer": "0x01326120",
+  "runtime_header_descriptor": "0x01689c50 (BSS; do not read as raw file bytes)",
+  "header_fields": [
+    {
+      "name": "savedGameVersionOnSave",
+      "id": "0x3f140b6",
+      "host_offset": "0x4",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "savedGameVersionOnGenerate",
+      "id": "0x3f140b7",
+      "host_offset": "0x0",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "buildVersionOnSave",
+      "id": "0x3f140b8",
+      "host_offset": "0x18",
+      "payload": "BE length + native UTF16LE",
+      "read_callback": "0xac8700"
+    },
+    {
+      "name": "buildVersionOnGenerate",
+      "id": "0x3f140b9",
+      "host_offset": "0x8",
+      "payload": "BE length + native UTF16LE",
+      "read_callback": "0xac8700"
+    },
+    {
+      "name": "timestampOnSave",
+      "id": "0x3f140ba",
+      "host_offset": "0x4c",
+      "payload": "9 BE u32",
+      "read_callback": "0xb26950"
+    },
+    {
+      "name": "timestampOnGenerate",
+      "id": "0x3f140bb",
+      "host_offset": "0x28",
+      "payload": "9 BE u32",
+      "read_callback": "0xb26950"
+    }
+  ],
+  "frame_format": "BE tag, BE size-after-first-eight, BE count, count*(BE id,BE bytes), payloads",
+  "serialized_tag": "0x01a80d26",
+  "coverage": [
+    "structural serializer-stream prefix only",
+    "no real stars.db sample validated",
+    "outer transport/path mode not claimed universally",
+    "manager objects/references, unknown payloads and trailing bytes not decoded"
+  ]
+}

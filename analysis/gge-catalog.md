@@ -114,7 +114,9 @@ refs/ghidra/venv/Scripts/python.exe tools/gge_evidence.py --catalog
 python tools/gge_evidence.py --static --catalog
 ```
 
-Next concrete sources: the serializer descriptors consumed by `0xBB8C90` (stars.db read) and the
+Follow-up: [stars.db serializer prefix](starsdb.md) now recovers framing, the six metadata fields and
+StarManager descriptor names. Its prefix inspector does not decode records/references or validate
+a real save. Next concrete sources are the context/object protocol consumed by `0xBB8C90` and the
 galaxy/star grid populated by its generation path. Separately, implement a real host MoviePlayer
 and DBCheck adapter before driving the state-2 scene. Do not use the typed test entries as shipped
 save data or mark a synthetic starfield as recovered gameplay.

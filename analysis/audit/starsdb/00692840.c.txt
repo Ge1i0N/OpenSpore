@@ -1,0 +1,32 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00692840
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+void __thiscall FUN_00692840(int param_1,undefined4 param_2,int param_3,undefined4 param_4)
+
+{
+  int *piVar1;
+  int *piVar2;
+  int iVar3;
+  int *piVar4;
+
+  *(undefined4 *)(param_1 + 0xa0c) = param_2;
+  *(int *)(param_1 + 0xa10) = param_3;
+  *(undefined4 *)(param_1 + 0xa00) = 0;
+  *(undefined4 *)(param_1 + 0xa04) = 0;
+  *(undefined4 *)(param_1 + 0xa08) = param_4;
+  piVar4 = (int *)(param_3 + 0x28);
+  while (((piVar4[-1] != 0 && (*piVar4 != 0)) && (iVar3 = *(int *)(param_1 + 0xa00), iVar3 < 0x80)))
+  {
+    *(int *)(param_1 + 0xa00) = iVar3 + 1;
+    piVar2 = (int *)(param_1 + iVar3 * 0x14);
+    piVar2[4] = (int)(piVar4 + -10);
+    *(undefined1 *)(piVar2 + 2) = 0;
+    piVar2[1] = 0;
+    *piVar2 = piVar4[-9];
+    piVar1 = piVar4 + -4;
+    piVar4 = piVar4 + 0xf;
+    piVar2[3] = *piVar1;
+  }
+  return;
+}

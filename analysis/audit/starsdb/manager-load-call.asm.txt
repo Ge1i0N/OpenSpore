@@ -1,0 +1,17 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  bb913f:	68 26 0d a8 01       	push   0x1a80d26
+  bb9144:	a3 44 96 68 01       	mov    ds:0x1689644,eax
+  bb9149:	8b 8d 04 02 00 00    	mov    ecx,DWORD PTR [ebp+0x204]
+  bb914f:	68 68 c6 56 01       	push   0x156c668
+  bb9154:	89 0d 40 96 68 01    	mov    DWORD PTR ds:0x1689640,ecx
+  bb915a:	55                   	push   ebp
+  bb915b:	8d 8c 24 44 01 00 00 	lea    ecx,[esp+0x144]
+  bb9162:	e8 e9 9d ad ff       	call   0x692f50
+  bb9167:	8b 54 24 1c          	mov    edx,DWORD PTR [esp+0x1c]
+  bb916b:	52                   	push   edx
+  bb916c:	8d 8c 24 3c 01 00 00 	lea    ecx,[esp+0x13c]
+  bb9173:	e8 68 ac ad ff       	call   0x693de0
+  bb9178:	e8 23 7f 84 ff       	call   0x4010a0
+  bb917d:	68                   	.byte 0x68

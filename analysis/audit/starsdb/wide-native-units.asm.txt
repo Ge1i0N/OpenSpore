@@ -1,0 +1,59 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  93a670:	83 7c 24 10 01       	cmp    DWORD PTR [esp+0x10],0x1
+  93a675:	53                   	push   ebx
+  93a676:	8b 5c 24 08          	mov    ebx,DWORD PTR [esp+0x8]
+  93a67a:	74 09                	je     0x93a685
+  93a67c:	8b 03                	mov    eax,DWORD PTR [ebx]
+  93a67e:	8b 50 10             	mov    edx,DWORD PTR [eax+0x10]
+  93a681:	8b cb                	mov    ecx,ebx
+  93a683:	ff d2                	call   edx
+  93a685:	8b 03                	mov    eax,DWORD PTR [ebx]
+  93a687:	8b 50 14             	mov    edx,DWORD PTR [eax+0x14]
+  93a68a:	8b cb                	mov    ecx,ebx
+  93a68c:	ff d2                	call   edx
+  93a68e:	85 c0                	test   eax,eax
+  93a690:	74 04                	je     0x93a696
+  93a692:	32 c0                	xor    al,al
+  93a694:	5b                   	pop    ebx
+  93a695:	c3                   	ret
+  93a696:	8b 03                	mov    eax,DWORD PTR [ebx]
+  93a698:	8b 50 30             	mov    edx,DWORD PTR [eax+0x30]
+  93a69b:	55                   	push   ebp
+  93a69c:	56                   	push   esi
+  93a69d:	8b 74 24 14          	mov    esi,DWORD PTR [esp+0x14]
+  93a6a1:	57                   	push   edi
+  93a6a2:	8b 7c 24 1c          	mov    edi,DWORD PTR [esp+0x1c]
+  93a6a6:	8d 2c 3f             	lea    ebp,[edi+edi*1]
+  93a6a9:	55                   	push   ebp
+  93a6aa:	56                   	push   esi
+  93a6ab:	8b cb                	mov    ecx,ebx
+  93a6ad:	c6 44 24 1c 00       	mov    BYTE PTR [esp+0x1c],0x0
+  93a6b2:	ff d2                	call   edx
+  93a6b4:	3b c5                	cmp    eax,ebp
+  93a6b6:	75 25                	jne    0x93a6dd
+  93a6b8:	83 7c 24 20 01       	cmp    DWORD PTR [esp+0x20],0x1
+  93a6bd:	74 17                	je     0x93a6d6
+  93a6bf:	85 ff                	test   edi,edi
+  93a6c1:	74 13                	je     0x93a6d6
+  93a6c3:	66 8b 06             	mov    ax,WORD PTR [esi]
+  93a6c6:	8a e8                	mov    ch,al
+  93a6c8:	4f                   	dec    edi
+  93a6c9:	83 c6 02             	add    esi,0x2
+  93a6cc:	8a cc                	mov    cl,ah
+  93a6ce:	66 89 4e fe          	mov    WORD PTR [esi-0x2],cx
+  93a6d2:	85 ff                	test   edi,edi
+  93a6d4:	75 ed                	jne    0x93a6c3
+  93a6d6:	5f                   	pop    edi
+  93a6d7:	5e                   	pop    esi
+  93a6d8:	5d                   	pop    ebp
+  93a6d9:	b0 01                	mov    al,0x1
+  93a6db:	5b                   	pop    ebx
+  93a6dc:	c3                   	ret
+  93a6dd:	8a 44 24 14          	mov    al,BYTE PTR [esp+0x14]
+  93a6e1:	5f                   	pop    edi
+  93a6e2:	5e                   	pop    esi
+  93a6e3:	5d                   	pop    ebp
+  93a6e4:	5b                   	pop    ebx
+  93a6e5:	c3                   	ret

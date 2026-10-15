@@ -1,0 +1,42 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00692840
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00692840  MOV EAX,dword ptr [ESP + 0x4]
+00692844  MOV EDX,dword ptr [ESP + 0xc]
+00692848  PUSH EBX
+00692849  PUSH ESI
+0069284a  MOV dword ptr [ECX + 0xa0c],EAX
+00692850  MOV EAX,dword ptr [ESP + 0x10]
+00692854  XOR EBX,EBX
+00692856  PUSH EDI
+00692857  MOV dword ptr [ECX + 0xa10],EAX
+0069285d  MOV dword ptr [ECX + 0xa00],EBX
+00692863  MOV dword ptr [ECX + 0xa04],EBX
+00692869  MOV dword ptr [ECX + 0xa08],EDX
+0069286f  LEA ESI,[EAX + 0x28]
+00692872  CMP dword ptr [ESI + -0x4],EBX
+00692875  JZ 0x006928b2
+00692877  CMP dword ptr [ESI],EBX
+00692879  JZ 0x006928b2
+0069287b  MOV EDX,dword ptr [ECX + 0xa00]
+00692881  CMP EDX,0x80
+00692887  JGE 0x006928b2
+00692889  LEA EAX,[EDX + EDX*0x4]
+0069288c  INC EDX
+0069288d  MOV dword ptr [ECX + 0xa00],EDX
+00692893  LEA EAX,[ECX + EAX*0x4]
+00692896  LEA EDX,[ESI + -0x28]
+00692899  MOV dword ptr [EAX + 0x10],EDX
+0069289c  MOV byte ptr [EAX + 0x8],BL
+0069289f  MOV dword ptr [EAX + 0x4],EBX
+006928a2  MOV EDI,dword ptr [EDX + 0x4]
+006928a5  MOV dword ptr [EAX],EDI
+006928a7  MOV EDX,dword ptr [EDX + 0x18]
+006928aa  ADD ESI,0x3c
+006928ad  MOV dword ptr [EAX + 0xc],EDX
+006928b0  JMP 0x00692872
+006928b2  POP EDI
+006928b3  POP ESI
+006928b4  POP EBX
+006928b5  RET 0xc
