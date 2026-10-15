@@ -1188,7 +1188,7 @@
         {"name": "drawable PNG index", "status": "done", "note": "57 packages / 150945 records / 14549 PNG entries / 14450 keys. First-key priority is a policy, not full original semantics."},
         {"name": "package lifetime regression", "status": "done", "note": "RAII closes FILE handles; pkg_lifetime_verify: 544 open/read/destruct cycles at CRT limit 512."},
         {"name": "dynamic sibling Z / layout", "status": "partial", "note": "Actual Children links; forward sibling traversal and translated origins are presentation policies. WinProcs not executed."},
-        {"name": "renderer ancestor clipping", "status": "todo", "note": "Hit-test Clip works; renderer scissor not yet connected."},
+        {"name": "renderer ancestor clipping", "status": "done", "note": "Shared inherited_clip intersects Clip-marked ancestors and viewport for paint/picking. D3D9 scissor readback tests flat/image quads, text flush and reset; geometry tests empty/nested/boundary cases. Host presentation policy, not full original layout/WinProc parity."},
         {"name": "Standard / Edge image tiling", "status": "partial", "note": "GA branches identified at 0x97D1E0; renderer intentionally rejects unsupported modes."},
         {"name": "tileable button edges", "status": "partial", "note": "GA Tileable branch identified; only non-tileable branch implemented."},
         {"name": "image outline / shadow", "status": "partial", "note": "Static render branches identified; not reproduced by our renderer."},

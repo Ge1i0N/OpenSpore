@@ -147,9 +147,15 @@ target_include_directories(spui_verify PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
   source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
 target_include_directories(pkg_lifetime_verify PRIVATE source)
+add_executable(overlay_clip_verify EXCLUDE_FROM_ALL tools/overlay_clip_verify.cpp
+  source/render/device.cpp source/render/overlay.cpp source/engine/log.cpp)
+target_include_directories(overlay_clip_verify PRIVATE source)
+target_compile_definitions(overlay_clip_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_link_libraries(overlay_clip_verify PRIVATE d3d9 user32 gdi32)
 if(MSVC)
   target_compile_options(spui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
 endif()
 
 set(OS_DEV_COMMANDS OFF)

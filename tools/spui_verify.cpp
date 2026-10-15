@@ -16,8 +16,44 @@ static std::vector<u8> bytes(const std::filesystem::path& path) {
     return std::vector<u8>(std::istreambuf_iterator<char>(f), {});
 }
 
+static bool clipping_checks() {
+    spui::Layout lay;
+    lay.windows.resize(3);
+    lay.roots = {0};
+    for (auto& win : lay.windows) win.has_area = win.visible = win.enabled = true;
+    lay.windows[0].area = lay.windows[0].placed_area = {0, 0, 100, 100};
+    lay.windows[0].flags = 0x400;
+    lay.windows[0].children = {1};
+    lay.windows[1].parent = 0;
+    lay.windows[1].area = lay.windows[1].placed_area = {20, 20, 80, 80};
+    lay.windows[1].flags = 0x400;
+    lay.windows[1].children = {2};
+    lay.windows[2].parent = 1;
+    lay.windows[2].area = lay.windows[2].placed_area = {-10, -10, 120, 120};
+    const spui::Rect viewport{0, 0, 100, 100};
+    auto clip = spui::inherited_clip(lay, 2, viewport);
+    if (clip.left != 20 || clip.top != 20 || clip.right != 80 || clip.bottom != 80) return false;
+    // Own Clip flag limits children, not this window's own rendering.
+    clip = spui::inherited_clip(lay, 1, viewport);
+    if (clip.left != 0 || clip.right != 100) return false;
+    if (spui::inherited_clip(lay, 2, {90, 90, 100, 100}).valid()) return false;
+    if (spui::hit_test(lay, 30, 30, 100, 100) != &lay.windows[2] ||
+        spui::hit_test(lay, 10, 10, 100, 100) != &lay.windows[0] ||
+        spui::hit_test(lay, 80, 30, 100, 100) != &lay.windows[0]) return false;
+    lay.windows[1].flags = 0;
+    clip = spui::inherited_clip(lay, 2, viewport);
+    if (clip.left != 0 || clip.right != 100) return false;
+    lay.windows[0].parent = 2; // cycle: bounded even for a synthetic invalid Layout
+    if (spui::inherited_clip(lay, 2, viewport).valid()) return false;
+    lay.windows[0].parent = 99;
+    if (spui::inherited_clip(lay, 2, viewport).valid() ||
+        spui::inherited_clip(lay, 99, viewport).valid()) return false;
+    return true;
+}
+
 int main(int argc, char** argv) {
     if (argc != 2) { std::cerr << "usage: spui_verify <fixture-directory>\n"; return 2; }
+    if (!clipping_checks()) { std::cerr << "ancestor clipping/picking regression\n"; return 1; }
     const std::filesystem::path dir(argv[1]);
     std::ifstream manifest(dir / "manifest.txt");
     if (!manifest) { std::cerr << "missing manifest\n"; return 2; }
@@ -182,5 +218,6 @@ int main(int argc, char** argv) {
     std::cout << passed << " corpus layouts match; " << negative
               << " malformed inputs rejected with output unchanged\n";
     std::cout << "drawable atlas/state/fixed-scale/alignment/unsupported-mode checks passed\n";
+    std::cout << "ancestor clipping / empty intersection / boundary picking checks passed\n";
     return 0;
 }

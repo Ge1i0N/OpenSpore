@@ -145,6 +145,10 @@ bool parse_binary(const std::vector<u8>& bytes, Layout& layout, std::string& err
 // Sibling forward order is our current policy; original dynamic Z order/WinProcs remain open.
 std::vector<size_t> paint_order(const Layout& lay);
 
+// Intersect viewport with Clip-marked ancestors (not the window's own Area). Empty on invalid
+// indices/cycles/intersections. Shared host presentation policy for renderer and pointer picking.
+Rect inherited_clip(const Layout& lay, size_t window, const Rect& viewport);
+
 // Which window of `lay` is under the VIEWPORT point (vx,vy), when the viewport is (vw,vh)?
 // Returns null when the point hits nothing usable.
 //

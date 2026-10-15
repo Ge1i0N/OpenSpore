@@ -39,7 +39,7 @@ boot → DevLauncher → E3LaunchScreen → видимая плитка → Crea
 |---|---|---|
 | Запуск | x86 Debug, окно, консоль/лог, **10/10** boot markers, capture и fault-tolerance harness | x64 и выпуск для обычных игроков |
 | Пакеты | **57/57 DBPF**, **150 945** записей; RefPack; CLI-распаковка; вложенные пакеты | запись/repack, полная оригинальная приоритизация ресурсов |
-| SPUI | **748/748** файлов до EOF, **93 726** объектов, **22 384** окна, **20 659** связей Children | WinProcs, динамическая раскладка/Z-порядок, общий command dispatcher |
+| SPUI | **748/748** файлов до EOF, **93 726** объектов, **22 384** окна, **20 659** связей Children; общий ancestor Clip для picking/render | WinProcs, динамическая раскладка/Z-порядок, общий command dispatcher |
 | UI art | UV и логические размеры Image; None-tiling ImageDrawable; нетайловые Standard/Radio; scale/alignment | tiling, outline/shadow, Dialog pieces и полный event lifecycle кнопок |
 | Текст | locale-таблицы, в том числе вложенные; **1 384 / 1 426** caption refs разрешаются | оригинальный шрифтовой renderer, полный Unicode/layout |
 | Модели | поддерживаемый subset `gmdl`, UV, `raster` DXT1/DXT5/raw; галерея настоящих моделей | полноценные RW4, материалы, анимация и игровой мир |
@@ -90,7 +90,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify
 ```
 
 Расположение данных рядом с собранным executable:
@@ -131,6 +131,8 @@ $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
+$clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
+.\build\Debug\overlay_clip_verify.exe $clipCapture
 python tools/pkg_kinds.py
 python -m unittest discover -s tools/tests -p 'test_*.py'
 python tools/feature_map.py --check
@@ -138,7 +140,8 @@ python tools/docs_check.py
 ```
 
 Последняя проверка: **748** corpus matches, **486** malformed inputs rejected атомарно,
-drawable UV/state/scale/alignment checks PASS; **544** scoped package cycles при CRT-лимите **512**.
+drawable UV/state/scale/alignment и ancestor Clip checks PASS; **544** scoped package cycles при CRT-лимите **512**.
+Отдельный D3D9 readback проверяет реальные пиксели flat/image quad, text flush и scissor reset.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI
@@ -180,8 +183,9 @@ drawable UV/state/scale/alignment checks PASS; **544** scoped package cycles п�
 | [IDEAS.md](IDEAS.md) | roadmap, отложенные идеи и опровергнутые гипотезы |
 | [HISTORY.md](HISTORY.md) | хронология: что проверялось в тот момент, не текущий статус |
 
-Ближайший путь: согласовать renderer clipping с hit testing, восстановить недостающие drawable/event
-ветки, затем идти в `GalaxyGameEntry` и поведение `AppMode`. Подробный план — в [RESUME.md](RESUME.md).
+Renderer clipping уже согласован с hit testing в текущей presentation policy. Ближайший путь:
+недостающие drawable/event ветки, затем `GalaxyGameEntry` и поведение `AppMode`.
+Подробный план — в [RESUME.md](RESUME.md).
 
 ## Происхождение материалов
 

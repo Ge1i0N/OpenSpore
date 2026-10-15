@@ -21,7 +21,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | Packages | 57 DBPF files / 150,945 records; index invariants pass; RefPack implemented | full resource priority and write/repack open |
 | Locale | 265 distinct tables / 23,933 distinct table-key texts in the recorded en-us corpus | original text/font pipeline incomplete |
 | SPUI framing | 748/748 exact EOF in Python/C++; code 19 references, code 20 nested structs | framing is not full widget behavior |
-| SPUI graph | 93,726 objects / 22,384 windows / 20,659 child links; visibility-aware paint/picking | dynamic Z/layout still host policy |
+| SPUI graph | 93,726 objects / 22,384 windows / 20,659 child links; shared ancestor Clip for paint/picking | dynamic Z/layout still host policy |
 | Drawables | atlas UV/logical sizes; None-tiling ImageDrawable; non-tileable Standard/Radio state slices | tiling, shadow/outline, dialog pieces open |
 | Input | visible `(311,550)` -> CreatureEditor `0x022D9E01` | control/state bridge, not original command bus |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
@@ -31,12 +31,13 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 
 | Check | Recorded result | Command / evidence |
 |---|---|---|
-| Build | 0 compiler warnings/errors, x86 Debug | `cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify` |
+| Build | 0 compiler warnings/errors, x86 Debug | `cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify` |
 | Boot | 10/10 markers | `-w -devDirs`, newest section of `OpenSpore.log` |
 | Independent SPUI parse | 748/748 through EOF | `python tools/spui_objects.py --parse --all ...` |
 | C++ corpus + malformed inputs | 748 matches; 486 rejected atomically | `spui_verify <fixtures>` |
 | Drawable subset | atlas, standard/radio states, fixed scale, three alignments, unsupported modes | same `spui_verify` target |
 | Package lifetime | 544 open/read/destruct cycles at CRT limit 512 | `pkg_lifetime_verify <package>` |
+| Ancestor Clip | nested/empty/boundary geometry, shared picking; D3D9 quad/text/state pixel readback PASS | `spui_verify <fixtures>` and `overlay_clip_verify <new-capture.bmp>` |
 | Index invariants | 57 packages / 150,945 records / 0 violations | `python tools/pkg_kinds.py` |
 | Live launcher | real atlas-aware art, exit 0, aborts/asserts 0 | [capture](analysis/shots/spui_e3launch_uv.png) |
 | Visible transition | CreatureEditor entered, exit 0 | `-state:DevLauncher -quitAfter 18 -exec spui:-click,311,550` |
@@ -54,9 +55,8 @@ is separate and is not exhaustive binary-code coverage.
 
 ## Immediate work
 
-1. Renderer clipping consistent with graph picking.
-2. Needed drawable and event behavior, tied to GA evidence.
-3. GalaxyGameEntry AppMode behavior and the first playable stage.
+1. Needed drawable and event behavior, tied to GA evidence.
+2. GalaxyGameEntry AppMode behavior and the first playable stage.
 
 See [RESUME](RESUME.md), [VERIFY](VERIFY.md), [analysis index](analysis/README.md).
 Earlier tables, obsolete hashes and the hidden GGE demo are retained only in

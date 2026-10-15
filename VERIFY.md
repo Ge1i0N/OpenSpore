@@ -25,6 +25,7 @@ host policy; unresolved. None of these alone means the complete original feature
 | Standard / Radio | `0x966A40`, `0x966AD0`, render prefix `0x9655F0` | four/six horizontal state cells, composed with atlas UV | non-tileable branch only; host event adapter not original capture lifecycle |
 | Visible launcher transition | live `-w -devDirs` | `(311,550)` -> CreatureEditor, exit 0, aborts/asserts 0 | reconstructed control/state bridge; editor still missing |
 | Package FILE ownership | our `Package` lifetime regression | destructor closes FILE; 544 cycles at CRT limit 512 | host correctness fix, not a recovered GA algorithm |
+| Ancestor Clip / renderer scissor | shipped WindowBase Clip mask `0x400`; host `inherited_clip` + D3D9 | nested/empty/boundary picking tests + real flat/image/text/reset readback PASS | shared presentation policy; does not claim original full renderer/layout parity |
 
 ## Explicit presentation policies / remaining unknowns
 
@@ -53,6 +54,6 @@ addresses and mistaken hypotheses. [Audit snapshot](analysis/audit.md) is genera
 
 ## Next evidence needed
 
-Renderer Clip/scissor parity, original Button capture/checked/command behavior, needed tiling/outline
+Original Button capture/checked/command behavior, needed tiling/outline
 branches, then GalaxyGameEntry driver enter/tick/render. Reproduce current checks via
 [README](README.md#проверки), retain bounded evidence and update the feature source after verification.

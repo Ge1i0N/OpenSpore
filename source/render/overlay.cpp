@@ -3,6 +3,8 @@
 #include <windows.h>
 
 #include <cstdarg>
+#include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 
@@ -229,6 +231,7 @@ void Overlay::begin(int screen_w, int screen_h) {
     m_screen_h = screen_h;
     m_vcount = 0;
     m_flat_drawn = false;
+    reset_clip();
 }
 
 void Overlay::flush_text() {
@@ -246,6 +249,34 @@ void Overlay::flush_text() {
 void Overlay::end() {
     if (!m_dev || !m_atlas) return;
     flush_text();
+    reset_clip();
+}
+
+bool Overlay::set_clip(float left, float top, float right, float bottom) {
+    if (!m_dev || m_screen_w <= 0 || m_screen_h <= 0) return false;
+    flush_text();
+    if (!std::isfinite(left) || !std::isfinite(top) || !std::isfinite(right) ||
+        !std::isfinite(bottom)) return false;
+    RECT clip{
+        (LONG)std::ceil(std::clamp(left, 0.f, (float)m_screen_w)),
+        (LONG)std::ceil(std::clamp(top, 0.f, (float)m_screen_h)),
+        (LONG)std::ceil(std::clamp(right, 0.f, (float)m_screen_w)),
+        (LONG)std::ceil(std::clamp(bottom, 0.f, (float)m_screen_h))};
+    if (clip.right <= clip.left || clip.bottom <= clip.top) return false;
+    const HRESULT rect_hr = m_dev->SetScissorRect(&clip);
+    const HRESULT state_hr = m_dev->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+    if (FAILED(rect_hr) || FAILED(state_hr)) {
+        LOG_WARN("overlay", "scissor failed: rect=0x%08lx state=0x%08lx",
+                 (unsigned long)rect_hr, (unsigned long)state_hr);
+        return false;
+    }
+    return true;
+}
+
+void Overlay::reset_clip() {
+    if (!m_dev) return;
+    flush_text();
+    m_dev->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
 }
 
 void Overlay::rect(float x, float y, float w, float h, u32 argb) {

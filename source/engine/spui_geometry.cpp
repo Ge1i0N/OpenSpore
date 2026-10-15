@@ -1,6 +1,7 @@
 #include "engine/spui.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace os::spui {
 
@@ -37,6 +38,27 @@ std::vector<size_t> paint_order(const Layout& lay) {
     return order;
 }
 
+Rect inherited_clip(const Layout& lay, size_t window, const Rect& viewport) {
+    if (window >= lay.windows.size() || !viewport.valid() ||
+        !std::isfinite(viewport.left) || !std::isfinite(viewport.top) ||
+        !std::isfinite(viewport.right) || !std::isfinite(viewport.bottom)) return {};
+    Rect clip = viewport;
+    size_t depth = 0;
+    for (int p = lay.windows[window].parent; p >= 0; p = lay.windows[(size_t)p].parent) {
+        if ((size_t)p >= lay.windows.size() || ++depth > lay.windows.size()) return {};
+        const Window& parent = lay.windows[(size_t)p];
+        // Shipped WindowBase schema: Clip 0x400 means clip CHILD windows.
+        if ((parent.flags & 0x400) && parent.has_area) {
+            clip.left = std::max(clip.left, parent.placed_area.left);
+            clip.top = std::max(clip.top, parent.placed_area.top);
+            clip.right = std::min(clip.right, parent.placed_area.right);
+            clip.bottom = std::min(clip.bottom, parent.placed_area.bottom);
+            if (!clip.valid()) return {};
+        }
+    }
+    return clip;
+}
+
 const Window* hit_test(const Layout& lay, float vx, float vy, float vw, float vh) {
     float dw = 0.f, dh = 0.f;
     lay.design_resolution(dw, dh);
@@ -49,13 +71,7 @@ const Window* hit_test(const Layout& lay, float vx, float vy, float vw, float vh
         // Visible / Enabled / IgnoreMouse are masks in the shipped WindowBase designer schema.
         if (!win.has_area || !win.enabled || (win.flags & 0x10) ||
             !win.placed_area.contains(dx, dy)) continue;
-        bool clipped = false;
-        for (int p = win.parent; p >= 0; p = lay.windows[(size_t)p].parent) {
-            const Window& parent = lay.windows[(size_t)p];
-            if ((parent.flags & 0x400) && parent.has_area &&
-                !parent.placed_area.contains(dx, dy)) { clipped = true; break; }
-        }
-        if (!clipped) return &win;
+        if (inherited_clip(lay, *it, {0, 0, dw, dh}).contains(dx, dy)) return &win;
     }
     return nullptr;
 }

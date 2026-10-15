@@ -51,6 +51,8 @@ State script → named SPUI → object graph → typed drawable → Image UV/log
 Overlay quad. None-tiling ImageDrawable fixed scale/alignment and non-tileable four/six-frame
 Standard/Radio selection are implemented and tested. Diagnostic outlines and ASCII text remain.
 
-Next: renderer Clip/scissor consistent with picking, needed tiling/outline branches and original
-Button events, then GalaxyGameEntry AppMode behavior. Dynamic Z/layout, Dialog pieces, font layout,
+Renderer Clip/scissor now shares `inherited_clip` with picking; real D3D9 pixel readback verifies
+flat/image/text clipping and state reset. See [drawable limits](spui-drawables.md#ancestor-clip--host-renderer-policy).
+Next: needed tiling/outline branches and original Button events, then GalaxyGameEntry AppMode behavior.
+Dynamic Z/layout, Dialog pieces, font layout,
 radio checked-state mutation and CommandID dispatch are not complete.

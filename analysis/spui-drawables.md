@@ -88,7 +88,7 @@ unsupported classes/tiling modes and invalid geometry return false without chang
 fixed-size scaling, all three alignments, unsupported tiling and invalid/missing drawable handling,
 alongside the 748-layout / 486 malformed-input suite. Capture: `analysis/shots/spui_e3launch_uv.png`.
 This is a coherent real-art launcher, **not** a full original SPUI implementation: dynamic sibling
-Z-order, general scissor/Clip application, outline/shadow, Standard/Edge tiling and Dialog pieces
+Z-order, original full clipping/layout behavior, outline/shadow, Standard/Edge tiling and Dialog pieces
 still need work. No gameplay completion percentage is inferred from the visual improvement.
 
 ### Previously missing PNGs: resource lifetime defect, not absent assets
@@ -99,3 +99,22 @@ The index reduced repeated scans but did not fix ownership. `Package` now closes
 is non-copyable. `pkg_lifetime_verify` runs 544 scoped open/read/destruct cycles with the limit
 unchanged at 512. Earlier explanations attributing misses to type/group or run length were unproven
 and are superseded by this lifecycle diagnosis.
+
+## Ancestor Clip — host renderer policy
+
+The shipped WindowBase schema defines `Clip` mask `0x400` as clipping **child windows**
+(`analysis/scripts/xml/xml_892ff8e7.xml`, property declaration). This was already honored by picking.
+`spui::inherited_clip()` now intersects all flagged ancestors with the viewport for both picking
+and painting. A window's own Clip flag does not restrict its own image. Empty/cyclic/invalid
+synthetic graph paths produce an empty rectangle.
+
+`Overlay::set_clip()` flushes queued text before changing the D3D9 scissor. `reset_clip()` and frame
+boundaries flush before disabling it, preventing text from inheriting the next widget's clip. Scissor
+coordinates are clamped to the viewport and rounded with ceil on all edges, matching integer mouse
+coordinates in a half-open interval. That rounding is **our explicit presentation policy**, not
+claimed original fractional-pixel behavior.
+
+Verified by geometry/picking tests and `overlay_clip_verify`, a separate target using the actual
+overlay/device on a 64x64 D3D9 backbuffer. It reads back flat/image quads, queued text, empty/NaN
+rejection and reset. [Recorded verification](audit/spui-drawables/clipping-verification.md).
+This closes the host renderer/picking inconsistency, not the full original Clip/WinProc/Z pipeline.

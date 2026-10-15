@@ -9,6 +9,15 @@ Every entry ends with its verification. If a change has no measurable delta it i
 
 ## 2026-10-15 — atlas-aware launcher and documentation/dashboard refresh
 
+**Continuation after docs:** shared ancestor Clip now drives picking and per-window D3D9 scissor.
+The shipped schema's Clip mask is `0x400` and limits children, not the parent itself. Geometry tests
+cover nested intersections, own-vs-ancestor flags, empty bounds, half-open edges and invalid cycles.
+`overlay_clip_verify` draws through the real D3D9 overlay and verifies captured pixels for a flat quad,
+an image quad, queued text before/under a clip, empty/NaN rejection and reset. PASS, warning-free build;
+launcher capture and visible CreatureEditor regression remain healthy. This is host-policy consistency,
+not a newly proven original WinProc/scissor pipeline. Dashboard updated to 204 done / 31 partial /
+53 todo out of the same 288 tracked items.
+
 GA Image UV/logical dimensions, ImageDrawable fixed-axis scale/alignment and Standard/Radio
 four/six-frame selection now produce the real-art launcher capture
 [spui_e3launch_uv.png](analysis/shots/spui_e3launch_uv.png). Evidence retained under

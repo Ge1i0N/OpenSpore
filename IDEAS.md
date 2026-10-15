@@ -1,6 +1,6 @@
 # IDEAS — deferred work, stubs, bug classes, and things explicitly disproven
 
-> **Current roadmap, 2026-10-15:** renderer clipping → needed drawable/Button event behavior →
+> **Current roadmap, 2026-10-15:** ancestor Clip/scissor now tested; next needed drawable/Button events →
 > GalaxyGameEntry AppMode → first playable stage. See [RESUME](RESUME.md).
 > The numbered research notes below preserve their original chronology/proposals; "now" inside an
 > older section is not a current task. Do not reimplement the already working package reader/unpacker.

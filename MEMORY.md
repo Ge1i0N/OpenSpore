@@ -26,6 +26,7 @@ point. [Full historical notebook](docs/archive/MEMORY-2026-10-15.md) is retained
 | SPUI | sequential object/property stream; code 19 = count u16 references, FFFF=null; code 20 = nested structs |
 | SPUI identity | object index, **not ControlID**; root flag 0x8000; marker 0x5FF5; 748 exact EOF parses |
 | Geometry | Area = left/top/right/bottom; ancestor visibility/enabled apply; current placement/Z is a host policy |
+| Clip | parent flag 0x400 clips children, not itself; shared `inherited_clip` drives pointer picking and per-window D3D9 scissor; pixel regression tests pass |
 | Drawable chain | Window → typed drawable → Image (`0x01BE6B15`) → external PNG, atlas UV/logical size |
 | Supported drawables | ImageDrawable None branch + non-tileable Standard/Radio; scale/alignment and state slices tested |
 | Locale | key space is per table; use `(u64(table)<<32)|key`, never narrow it to u32 |

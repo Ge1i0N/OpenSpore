@@ -21,14 +21,15 @@ test with `-w -devDirs`; retain evidence and commit.
 - Visible `(311,550)` -> CreatureEditor `0x022D9E01`. This is a reconstructed launcher bridge,
   **not** general command dispatch or an implemented editor. Old `(942,261)` selected hidden GGE.
 - `Package` RAII fixed FILE leaks; 544 scoped cycles at CRT limit 512 pass.
+- `inherited_clip` now drives picking and D3D9 per-window scissor; nested/empty/boundary cases and
+  real quad/text/reset pixel readback pass. This aligns our host policy, not full original layout parity.
 
 ## Next, in order
 
-1. Make renderer ancestor Clip/scissor agree with graph hit testing, including empty intersections.
-2. Recover needed drawable tiling/outline and Button capture/release/checked behavior from GA.
-3. Trace GalaxyGameEntry's registered driver (`0xDDDE30`, table in `analysis/modes.md`) into its
+1. Recover needed drawable tiling/outline and Button capture/release/checked behavior from GA.
+2. Trace GalaxyGameEntry's registered driver (`0xDDDE30`, table in `analysis/modes.md`) into its
    actual enter/tick/render behavior. A registration table is not gameplay.
-4. Advance the first playable stage without claiming full UI or full format parity.
+3. Advance the first playable stage without claiming full UI or full format parity.
 
 Dynamic sibling Z-order and layout WinProcs are still open. Forward serialized sibling traversal,
 ancestor-origin translation, resource override choices and pointer-to-drawable state are host policies.
@@ -36,11 +37,13 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
+$clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
+.\build\Debug\overlay_clip_verify.exe $clipCapture
 python tools/pkg_kinds.py
 python -m unittest discover -s tools/tests -p 'test_*.py'
 python tools/feature_map.py --check

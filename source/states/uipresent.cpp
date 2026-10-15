@@ -241,6 +241,8 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
         const float x = win.placed_area.left * sx, y = win.placed_area.top * sy;
         const float bw = win.placed_area.w() * sx, bh = win.placed_area.h() * sy;
         if (x + bw < 0.f || y + bh < 0.f || x > (float)w || y > (float)h) continue;
+        const auto clip = os::spui::inherited_clip(lay, oi, {0, 0, (float)w/sx, (float)h/sy});
+        if (!clip.valid() || !ov.set_clip(clip.left*sx, clip.top*sy, clip.right*sx, clip.bottom*sy)) continue;
         // The window's own colour, used AS STORED including its alpha. Forcing alpha to 0xFF here
         // (which an earlier revision did) turned the layout into opaque slabs: the shipped values
         // carry meaningful transparency (BackgroundColor 0x007F7F7F is a fully transparent gray,
@@ -294,6 +296,7 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
         // over 524 distinct layouts), so it only fires on a corrupt stream.
         if (++drawn >= 4096) break;
     }
+    ov.reset_clip(); // diagnostics below are outside the per-window scissor
     char foot[180];
     std::snprintf(foot, sizeof(foot),
                   "%zu windows drawn from %zu records; captions are the game's own strings",
