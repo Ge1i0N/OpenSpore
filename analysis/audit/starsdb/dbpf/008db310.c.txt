@@ -1,0 +1,156 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x008DB310
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+undefined4 __thiscall
+os_DBPF_index_serialize_key_order(int param_1,char param_2,int *param_3,int param_4)
+
+{
+  int *piVar1;
+  int iVar2;
+  uint *puVar3;
+  uint *puVar4;
+  int *piVar5;
+  int iVar6;
+  uint *puVar7;
+  bool bVar8;
+  uint unaff_EBP;
+  uint uVar9;
+  undefined4 unaff_ESI;
+  char cVar10;
+  undefined4 uStack_8;
+  int iStack_4;
+
+  piVar5 = *(int **)(param_1 + 0x2c);
+  iVar6 = *piVar5;
+  uVar9 = 0;
+  bVar8 = true;
+  uStack_8._0_3_ = CONCAT12(1,(ushort)uStack_8);
+  uStack_8 = (int *)CONCAT13(1,(uint3)uStack_8);
+  iStack_4 = 0;
+  if (iVar6 == 0) {
+    piVar5 = piVar5 + 1;
+    iVar6 = *piVar5;
+    while (iVar6 == 0) {
+      piVar5 = piVar5 + 1;
+      iVar6 = *piVar5;
+    }
+    iVar6 = *piVar5;
+  }
+  if (*(int *)(param_1 + 0x34) == 0) {
+    bVar8 = false;
+    uStack_8 = (int *)(uint)(ushort)uStack_8;
+  }
+  else {
+    iStack_4 = *(int *)(iVar6 + 8);
+    uVar9 = *(uint *)(iVar6 + 4);
+    iVar6 = *(int *)(iVar6 + 0x1c);
+    while (iVar6 == 0) {
+      piVar1 = piVar5 + 1;
+      piVar5 = piVar5 + 1;
+      iVar6 = *piVar1;
+    }
+  }
+  iVar2 = *(int *)(*(int *)(param_1 + 0x2c) + *(int *)(param_1 + 0x30) * 4);
+  if (iVar6 != iVar2) {
+    do {
+      if (uStack_8._2_1_ == '\0') {
+LAB_008db397:
+        uStack_8 = (int *)((uint)uStack_8 & 0xffff);
+      }
+      else {
+        uStack_8._0_3_ = CONCAT12(1,(ushort)uStack_8);
+        uStack_8 = (int *)(uint)(uint3)uStack_8;
+        if (*(uint *)(iVar6 + 4) != uVar9) goto LAB_008db397;
+      }
+      if ((bVar8) && (*(int *)(iVar6 + 8) == iStack_4)) {
+        bVar8 = true;
+      }
+      else {
+        bVar8 = false;
+      }
+      iVar6 = *(int *)(iVar6 + 0x1c);
+      while (iVar6 == 0) {
+        piVar1 = piVar5 + 1;
+        piVar5 = piVar5 + 1;
+        iVar6 = *piVar1;
+      }
+    } while (iVar6 != iVar2);
+    uStack_8 = (int *)CONCAT13(bVar8,(uint3)uStack_8);
+  }
+  iVar6 = 0x20;
+  *param_3 = 4;
+  if (uStack_8._2_1_ != '\0') {
+    *param_3 = 8;
+    iVar6 = 0x1c;
+  }
+  if (bVar8 != false) {
+    *param_3 = *param_3 + 4;
+    iVar6 = iVar6 + -4;
+  }
+  *param_3 = *param_3 + 4;
+  iVar6 = *param_3 + (iVar6 + -4) * param_4;
+  *param_3 = iVar6;
+  puVar4 = (uint *)(**(code **)(**(int **)(param_1 + 4) + 8))
+                             (iVar6,"Resource/PFIndexModifiable_image",0);
+  *uStack_8 = (int)puVar4;
+  if (puVar4 == (uint *)0x0) {
+    return 0;
+  }
+  cVar10 = (char)((uint)unaff_ESI >> 0x10);
+  iVar6 = 1;
+  *puVar4 = -(uint)bVar8 & 2 | (uint)(cVar10 != '\0') | 4;
+  if (cVar10 != '\0') {
+    puVar4[1] = uVar9;
+    iVar6 = 2;
+  }
+  if (bVar8 != false) {
+    puVar4[iVar6] = unaff_EBP;
+    iVar6 = iVar6 + 1;
+  }
+  puVar4[iVar6] = 0;
+  piVar5 = *(int **)(param_1 + 0x2c);
+  puVar7 = (uint *)*piVar5;
+  if (puVar7 == (uint *)0x0) {
+    piVar5 = piVar5 + 1;
+    iVar2 = *piVar5;
+    while (iVar2 == 0) {
+      piVar5 = piVar5 + 1;
+      iVar2 = *piVar5;
+    }
+    puVar7 = (uint *)*piVar5;
+  }
+  puVar3 = *(uint **)(*(int *)(param_1 + 0x2c) + *(int *)(param_1 + 0x30) * 4);
+  if (puVar7 != puVar3) {
+    puVar4 = puVar4 + iVar6 + 1;
+    do {
+      if (cVar10 == '\0') {
+        *puVar4 = puVar7[1];
+        puVar4 = puVar4 + 1;
+      }
+      if ((char)((uint)unaff_ESI >> 0x18) == '\0') {
+        *puVar4 = puVar7[2];
+        puVar4 = puVar4 + 1;
+      }
+      *puVar4 = *puVar7;
+      puVar4[1] = puVar7[3];
+      puVar4[2] = puVar7[4] | 0x80000000;
+      puVar4[3] = puVar7[5];
+      if ((*(char *)((int)puVar7 + 0x1a) == '\0') && (param_2 == '\0')) {
+        uVar9 = 0;
+      }
+      else {
+        uVar9 = 0x10000;
+      }
+      puVar4[4] = (ushort)puVar7[6] | uVar9;
+      puVar4 = puVar4 + 5;
+      puVar7 = (uint *)puVar7[7];
+      while (puVar7 == (uint *)0x0) {
+        piVar1 = piVar5 + 1;
+        piVar5 = piVar5 + 1;
+        puVar7 = (uint *)*piVar1;
+      }
+    } while (puVar7 != puVar3);
+  }
+  return 1;
+}

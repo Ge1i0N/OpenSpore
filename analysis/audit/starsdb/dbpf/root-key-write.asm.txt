@@ -1,0 +1,9 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  bb4eaa:	68 18 7c 89 01       	push   0x1897c18
+  bb4eaf:	68 18 7c 89 01       	push   0x1897c18
+  bb4eb4:	68 18 7c 89 01       	push   0x1897c18
+  bb4eb9:	55                   	push   ebp
+  bb4eba:	8d 4c 24 28          	lea    ecx,[esp+0x28]
+  bb4ebe:	e8 4d ee ad ff       	call   0x693d10

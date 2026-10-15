@@ -53,19 +53,20 @@ u32 decode(const u8* src, u32 src_len, u32 expected, std::vector<u8>& out) {
             if (len > 0x70u) {
                 // 0xFC..0xFF: tail - copy (c & 3) literals and stop
                 lits = c & 3u;
-                if (i + lits > src_len) return (u32)-1;
+                if (i + lits > src_len || lits > size-out.size()) return (u32)-1;
                 for (u32 k = 0; k < lits; ++k) out.push_back(src[i++]);
                 break;
             }
-            if (i + len > src_len) return (u32)-1;
+            if (i + len > src_len || len > size-out.size()) return (u32)-1;
             for (u32 k = 0; k < len; ++k) out.push_back(src[i++]);
             continue;
         }
         if (lits) {
-            if (i + lits > src_len) return (u32)-1;
+            if (i + lits > src_len || lits > size-out.size()) return (u32)-1;
             for (u32 k = 0; k < lits; ++k) out.push_back(src[i++]);
         }
         if (dist == 0 || dist > out.size()) return (u32)-1;
+        if (len > size-out.size()) return (u32)-1; // reject before expansion, not after allocating beyond declared size
         const size_t s = out.size() - dist;
         // Byte-by-byte: a match may overlap its own output (RLE semantics in the original).
         for (u32 k = 0; k < len; ++k) out.push_back(out[s + k]);

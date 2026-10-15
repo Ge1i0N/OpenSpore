@@ -98,7 +98,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect
 ```
 
 Расположение данных рядом с собранным executable:
@@ -148,6 +148,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\starsdb_verify.exe
 .\build\Debug\starsdb_links_verify.exe
 .\build\Debug\starsdb_context_verify.exe
+.\build\Debug\starsdb_dbpf_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
@@ -172,7 +173,8 @@ producer каталога и live-галактика ещё не реализо�
 добавлен read-only инспектор префикса и caller-selected wire subset: framing, шесть полей метаданных,
 ссылки/ячейки и 14 полей StarRecord. [Контекст объектов](analysis/starsdb-context.md) теперь читает
 индекс и class stream, проверяет envelope CRC и связывает `(class_id, token)` с записью.
-**240 + 362 + 126** синтетических проверок проходят; физический DBPF save adapter и post-load fixups
+Read-only [DBPF-адаптер](analysis/starsdb-dbpf.md) подключает эти readers к точным root/index/class keys.
+**240 + 362 + 126 + 266** синтетических проверок проходят; post-load fixups и live producer
 не подключены, настоящие сохранения этим тестом не проверены.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 

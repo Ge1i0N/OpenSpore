@@ -1,0 +1,35 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00693CA0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00693ca0  PUSH -0x1
+00693ca2  PUSH 0x120cff6
+00693ca7  MOV EAX,FS:[0x0]
+00693cad  PUSH EAX
+00693cae  MOV dword ptr FS:[0x0],ESP
+00693cb5  PUSH ECX
+00693cb6  PUSH ESI
+00693cb7  MOV ESI,ECX
+00693cb9  XOR EAX,EAX
+00693cbb  MOV dword ptr [ESI],0x1403998
+00693cc1  MOV dword ptr [ESP + 0x4],ESI
+00693cc5  MOV dword ptr [ESI + 0x4],EAX
+00693cc8  MOV dword ptr [ESP + 0x10],EAX
+00693ccc  MOV dword ptr [ESI + 0x8],EAX
+00693ccf  MOV EAX,dword ptr [ESP + 0x20]
+00693cd3  MOV ECX,dword ptr [ESP + 0x24]
+00693cd7  MOV EDX,dword ptr [ESP + 0x1c]
+00693cdb  PUSH EAX
+00693cdc  MOV EAX,dword ptr [ESP + 0x1c]
+00693ce0  PUSH ECX
+00693ce1  PUSH EDX
+00693ce2  PUSH EAX
+00693ce3  MOV ECX,ESI
+00693ce5  MOV byte ptr [ESP + 0x20],0x1
+00693cea  CALL 0x006938d0
+00693cef  MOV ECX,dword ptr [ESP + 0x8]
+00693cf3  MOV EAX,ESI
+00693cf5  POP ESI
+00693cf6  MOV dword ptr FS:[0x0],ECX
+00693cfd  ADD ESP,0x10
+00693d00  RET 0x10

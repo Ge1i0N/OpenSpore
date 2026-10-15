@@ -1,0 +1,52 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x008DBE20
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+008dbe20  SUB ESP,0x2c
+008dbe23  PUSH ESI
+008dbe24  MOV ESI,dword ptr [ESP + 0x34]
+008dbe28  PUSH EDI
+008dbe29  PUSH ESI
+008dbe2a  LEA EAX,[ESP + 0xc]
+008dbe2e  PUSH EAX
+008dbe2f  MOV EDI,ECX
+008dbe31  CALL 0x008db6e0
+008dbe36  MOV ECX,dword ptr [EDI + 0x8]
+008dbe39  MOV EDX,dword ptr [EDI + 0x4]
+008dbe3c  MOV EAX,dword ptr [ESP + 0x8]
+008dbe40  CMP EAX,dword ptr [EDX + ECX*0x4]
+008dbe43  JNZ 0x008dbe9e
+008dbe45  PUSH EBX
+008dbe46  XOR EAX,EAX
+008dbe48  XOR ECX,ECX
+008dbe4a  XOR EDX,EDX
+008dbe4c  XOR EBX,EBX
+008dbe4e  MOV word ptr [ESP + 0x18],BX
+008dbe53  MOV EBX,dword ptr [ESI]
+008dbe55  MOV dword ptr [ESP + 0x2c],ECX
+008dbe59  MOV byte ptr [ESP + 0x3c],AL
+008dbe5d  MOV byte ptr [ESP + 0x1a],AL
+008dbe61  MOV ECX,dword ptr [ESP + 0x18]
+008dbe65  MOV dword ptr [ESP + 0x30],EDX
+008dbe69  MOV EDX,dword ptr [ESP + 0x3c]
+008dbe6d  MOV dword ptr [ESP + 0x28],EAX
+008dbe71  PUSH EDX
+008dbe72  MOV dword ptr [ESP + 0x38],ECX
+008dbe76  LEA EAX,[ESP + 0x20]
+008dbe7a  MOV dword ptr [ESP + 0x20],EBX
+008dbe7e  MOV EBX,dword ptr [ESI + 0x4]
+008dbe81  MOV ESI,dword ptr [ESI + 0x8]
+008dbe84  PUSH EAX
+008dbe85  LEA ECX,[ESP + 0x14]
+008dbe89  PUSH ECX
+008dbe8a  MOV ECX,EDI
+008dbe8c  MOV dword ptr [ESP + 0x2c],EBX
+008dbe90  MOV dword ptr [ESP + 0x30],ESI
+008dbe94  CALL 0x008db760
+008dbe99  MOV EAX,dword ptr [ESP + 0xc]
+008dbe9d  POP EBX
+008dbe9e  POP EDI
+008dbe9f  ADD EAX,0xc
+008dbea2  POP ESI
+008dbea3  ADD ESP,0x2c
+008dbea6  RET 0x4

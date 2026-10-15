@@ -12,15 +12,15 @@ and looks up a wire reference by **(class_id, token)**. Unknown class bodies rem
 `starsdb_context_inspect` exercises that path read-only. No scanning, magic search, original factories,
 pointer dereference, property/name fixups, gameplay readiness or runtime catalogue publication.
 
-This extends [the prefix and reference readers](starsdb.md); it does **not** attach the physical
-`stars.db` DBPF container yet. The old default `starsdb_inspect` input is a serializer stream, not a
+This extends [the prefix and reference readers](starsdb.md); a separate [physical DBPF adapter](starsdb-dbpf.md)
+now supplies decoded resources with strict version/key checks. The default `starsdb_inspect` input is a serializer stream, not a
 universal claim that every physical save starts with the shared frame tag.
 
 ## Context identity and resource boundary
 
 - [Context writer `0x69FB90`](audit/starsdb/context/0069fb90.asm.txt) emits an index resource whose
-  key's three memory words are `(0x0179D304, 0x0179D310, 0)`; per-class keys are
-  `(0x0179D304, class_id, 0)`. These key words select resources, not embedded byte offsets.
+  ResourceKey memory words are `(instance, type, group) = (0x0179D304, 0x0179D310, 0)`; per-class
+  keys are `(0x0179D304, class_id, 0)`. These key words select resources, not embedded byte offsets.
 - [Context reader `0x69F1D0`](audit/starsdb/context/0069f1d0.asm.txt) opens that index, then one
   resource per declared class. It creates/reuses objects and invokes their virtual read method.
 - `0x69F950` is a generic class-bucket lookup/insert helper. **Correction to an earlier intermediate
@@ -31,7 +31,8 @@ universal claim that every physical save starts with the shared frame tag.
   `0x8DA2A0`'s DBPF implementation, wraps it in `0x69FA60`'s serializer manager, and opens context.
   The [file-backed vtables](audit/starsdb/context/vtables.json) and forwarding methods connect
   manager slots to DBPF open/resource paths (`0x8D8CA0`, `0x8DA6F0`, `0x8D8F70`). The physical-package
-  adapter, exact resource-key translation and save version modes remain to be attached/tested.
+  adapter and exact key translation are now implemented as the bounded [DBPF subset](starsdb-dbpf.md);
+  save-version coverage beyond it remains open.
 
 An object token is the original writer's pointer-shaped word, **not** StarRecord's `mKey`. The host
 retains it as an opaque class-scoped identity. A reference with the right token but wrong class
@@ -110,14 +111,22 @@ decoded streams for CLI smoke testing; it refuses an existing directory. It neve
 Evidence: 23 functions (C + instructions), vtables, bounded extracts and [schema notes](audit/starsdb/context/schema.json).
 
 Final regression: Debug x86 warning-free; prefix/link/context and catalogue/DBCheck/Intro/binding/
-SPUI/package/scissor suites PASS. Six Python tests and 45 maintained Markdown link checks PASS.
+SPUI/package/scissor suites PASS. Six Python tests and 46 maintained Markdown link checks PASS.
 Live `-w -devDirs` Main → GGE and launcher → CreatureEditor both exit 0, aborts/asserts 0;
 MoviePlayer remains explicitly Unknown. These are host regressions, not real database loading.
 
+## Root serialization resource
+
+The loader and writer pass three equal words `0x01897C18` to the context serializer factory at
+`0x693CA0/0x693D10`. Static inspection shows these are ResourceKey arguments used as a value, not a
+pointer to a descriptor or a file offset. The host therefore records the key tuple but does not read
+bytes from virtual address `0x01897C18`. A coincident file-backed mapping at that numeric address
+does not turn these immediate key values into a descriptor pointer.
+
 ## Next dependency
 
-Attach an explicit read-only DBPF resource adapter for the loader's actual keys and package version,
-then load root metadata/manager and context streams from a real selected database. Require all
+The [explicit read-only DBPF adapter](starsdb-dbpf.md) now supplies these streams on constructed
+fixtures. Validate a real selected database when available. Require all
 needed classes/objects and resource/name fixups before feeding typed catalogue metadata. Missing
 classes or unsupported versions stay Unknown/error, not observed-empty or ready. New-galaxy
 generation, save discovery/probing, MoviePlayer/DBCheck and scene/UI/effects remain separate work.

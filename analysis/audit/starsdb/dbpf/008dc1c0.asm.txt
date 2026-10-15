@@ -1,0 +1,26 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x008DC1C0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+008dc1c0  MOV EAX,dword ptr [ESP + 0x8]
+008dc1c4  PUSH EBX
+008dc1c5  MOV EBX,dword ptr [EAX + 0x8]
+008dc1c8  PUSH EBP
+008dc1c9  MOV EBP,dword ptr [EAX + 0xc]
+008dc1cc  PUSH ESI
+008dc1cd  MOV ESI,dword ptr [EAX]
+008dc1cf  PUSH EDI
+008dc1d0  MOV EDI,dword ptr [EAX + 0x4]
+008dc1d3  MOV EAX,dword ptr [ESP + 0x14]
+008dc1d7  PUSH EAX
+008dc1d8  ADD ECX,0x28
+008dc1db  CALL 0x008dbe20
+008dc1e0  MOV dword ptr [EAX],ESI
+008dc1e2  MOV dword ptr [EAX + 0x4],EDI
+008dc1e5  POP EDI
+008dc1e6  MOV dword ptr [EAX + 0x8],EBX
+008dc1e9  POP ESI
+008dc1ea  MOV dword ptr [EAX + 0xc],EBP
+008dc1ed  POP EBP
+008dc1ee  POP EBX
+008dc1ef  RET 0x8

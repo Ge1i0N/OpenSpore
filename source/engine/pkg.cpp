@@ -249,6 +249,17 @@ bool Package::read_resource(u32 record_index, std::vector<u8>& out_bytes) {
     return true;
 }
 
+std::vector<u32> Package::find_records(const ResourceKey& key) const {
+    std::vector<u32> matches;
+    if (!m_ok || !m_kind_known) return matches;
+    for (u32 i=0; i<m_records.size(); ++i) {
+        const auto& record=m_records[i];
+        if (record.instance()==key.instance && record.type()==key.type && record.group()==key.group)
+            matches.push_back(i);
+    }
+    return matches;
+}
+
 bool Package::read_resource_decoded(u32 record_index, std::vector<u8>& out_bytes) {
     if (record_index >= m_records.size()) return false;
     const Record& r = m_records[record_index];

@@ -1,0 +1,4 @@
+# Aligned GA entries verified with objdump; preserve actual instructions for key-order claims.
+0x008db310	function	os_DBPF_index_serialize_key_order
+0x008dc1c0	function	os_DBPF_index_set_record
+0x008dbb20	function	os_DBPF_index_lookup_record

@@ -1,0 +1,43 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "GA static instructions; no real-save corpus",
+  "ResourceKey_memory_order": [
+    "instance",
+    "type",
+    "group"
+  ],
+  "DBPF_index_order": [
+    "type",
+    "group",
+    "instance_hi_32",
+    "instance_lo_32",
+    "offset",
+    "packed_size",
+    "mem_size",
+    "compression_and_flags"
+  ],
+  "key_mapping": "node +0 instance -> index instance_lo; node +4 type -> index type; node +8 group -> index group; high word written zero",
+  "root_key": {
+    "instance": "0x01897c18",
+    "type": "0x01897c18",
+    "group": "0x01897c18"
+  },
+  "context_index_key": {
+    "instance": "0x0179d304",
+    "type": "0x0179d310",
+    "group": "0"
+  },
+  "class_key": {
+    "instance": "0x0179d304",
+    "type": "class_id",
+    "group": "0"
+  },
+  "implementation": "read-only single explicit DBPF, raw/RefPack decoded exact keys, root prefix + manager links + context classes",
+  "host_subset": [
+    "DBPF 3.0 / index 3 only; all other versions explicitly rejected",
+    "256 MiB package/aggregate, 64 MiB resource, 65536 DBPF records",
+    "unique matching keys, high instance word zero, flags 1, raw sizes equal or RefPack",
+    "root exact EOF, unknown class bodies opaque, no post-load fixups or readiness"
+  ],
+  "validation": "constructed DBPF only; bounded workspace glob found no stars.db, no profile scan performed"
+}

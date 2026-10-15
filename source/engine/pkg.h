@@ -109,6 +109,10 @@ struct Record {
     u16 flags() const { return (u16)(raw[i_flags] >> 16); }  // 0x0001 on every record seen
 };
 
+struct ResourceKey {
+    u32 instance=0, type=0, group=0;
+};
+
 // The shared prefix values, when the kind masks a field out of the records.
 struct SharedFields {
     u32 type = 0, group = 0, unknown = 0;
@@ -151,6 +155,10 @@ public:
     const SharedFields& shared() const { return m_shared; }
 
     const std::vector<Record>& records() const { return m_records; }
+
+    // Exact ResourceKey lookup in this package's parsed DBPF index. No priority/profile search.
+    // Returned indices are package-local record indices; duplicate matches are retained.
+    std::vector<u32> find_records(const ResourceKey& key) const;
 
     // Read a resource's PACKED bytes. Returns false if the record is out of range or the
     // read fails; never asserts.

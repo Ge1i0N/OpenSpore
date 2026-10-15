@@ -122,6 +122,7 @@ set(OS_SOURCES
   source/engine/starsdb.cpp
   source/engine/starsdb_links.cpp
   source/engine/starsdb_context.cpp
+  source/engine/starsdb_dbpf.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
@@ -170,6 +171,10 @@ add_executable(starsdb_context_verify EXCLUDE_FROM_ALL tools/starsdb_context_ver
 target_include_directories(starsdb_context_verify PRIVATE source)
 add_executable(starsdb_context_inspect EXCLUDE_FROM_ALL tools/starsdb_context_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp source/engine/starsdb_context.cpp)
 target_include_directories(starsdb_context_inspect PRIVATE source)
+add_executable(starsdb_dbpf_inspect EXCLUDE_FROM_ALL tools/starsdb_dbpf_inspect.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp source/engine/starsdb_context.cpp source/engine/starsdb_dbpf.cpp)
+target_include_directories(starsdb_dbpf_inspect PRIVATE source)
+add_executable(starsdb_dbpf_verify EXCLUDE_FROM_ALL tools/starsdb_dbpf_verify.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp source/engine/starsdb_context.cpp source/engine/starsdb_dbpf.cpp)
+target_include_directories(starsdb_dbpf_verify PRIVATE source)
 add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_inspect PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
@@ -190,6 +195,8 @@ if(MSVC)
   target_compile_options(starsdb_links_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_context_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_context_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(starsdb_dbpf_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(starsdb_dbpf_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)

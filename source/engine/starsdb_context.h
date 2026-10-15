@@ -2,7 +2,8 @@
 #include "engine/starsdb_links.h"
 
 namespace os::starsdb {
-constexpr u32 kContextResourceType=0x0179d304u, kContextIndexInstance=0x0179d310u;
+// ResourceKey memory order is (instance, type, group), as passed to the GA manager.
+constexpr u32 kContextInstance=0x0179d304u, kContextIndexType=0x0179d310u, kContextGroup=0u;
 struct ClassCount { u32 class_id=0, count=0; };
 struct ContextIndex {
     u32 version=0, declared_objects=0;

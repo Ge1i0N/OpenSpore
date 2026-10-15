@@ -52,10 +52,15 @@ test with `-w -devDirs`; retain evidence and commit.
   now rejects BSS and reads crossing a raw section boundary; two independent Python tests cover it.
 - `engine/starsdb_context.*` adds explicit DECODED index/class-stream parsing, envelope CRC and
   `(class_id,token)` structural lookup into StarRecord fields. `starsdb_context_verify`: 126 constructed
-  checks; `starsdb_context_inspect` read-only CLI smoke PASS. No physical save DBPF adapter/factories/
-  resource fixups/live producer. `analysis/starsdb-context.md` / `audit/starsdb/context/` retain evidence.
+  checks; `starsdb_context_inspect` read-only CLI smoke PASS. Physical adapter is separate (below);
+  no factories/resource fixups/live producer. `analysis/starsdb-context.md` / `audit/starsdb/context/` retain evidence.
   Context outer map is class_id -> nested token, not token -> nested class. CRC covers only
   min(total_record_bytes-8,1000000) bytes starting at token; envelope length INCLUDES its 12-byte header.
+- `engine/starsdb_dbpf.*`: single explicit read-only DBPF 3.0/index3 adapter to root/context/classes;
+  exact ResourceKey (instance,type,group), duplicates/missing/errors explicit, structural output atomic.
+  `starsdb_dbpf_verify`: 266 constructed checks / 270 with optional explicit-path smoke. No real DB
+  found under workspace `**/stars.db`; no profile scan. RefPack now bounds every append by declared
+  decoded size. `analysis/starsdb-dbpf.md` retains key-order evidence and host version/size policies.
 
 ## Next, in order
 
@@ -65,9 +70,12 @@ test with `-w -devDirs`; retain evidence and commit.
    The branch executor has been tested but needs actual UI/content-manager/WinProc ports; callback
    `0x60B470` is not established as per-frame and must not be polled into fake completion.
    Continue state2 constructor `0xE008B0` and state10 (`0xDEC320/0xDEC3B0`) return/effect lifecycle.
-    Source task: attach explicit read-only physical DBPF resource adapter for context/root keys
-    (context key memory words 0x0179D304, index=0x0179D310 or class_id, 0); check key translation and
-    package versions, then decode StarRecord resource/property fixups and grid/record graph; afterward galaxy/star-grid
+    Source task: validate the implemented read-only physical DBPF adapter on a real explicitly selected
+    database when available; do not scan profiles or use synthetic fixtures as saves. Context/root keys
+    (ResourceKey memory order instance,type,group: context `(0x0179D304, index=0x0179D310 or class_id, 0)`;
+    root `(0x01897C18,0x01897C18,0x01897C18)`). Key translation established at 0x8DB310; older
+    package versions not supported. Continue StarRecord name/resource/property fixups and save metadata,
+    then grid/record graph and galaxy/star-grid
     generation, before attaching the typed catalog builder to live UI. Frame/metadata and wire-shape
     decoding are bounded subsets; do not repeat BSS reads of `0x1689C50` or treat context values as
     coordinates.
@@ -82,7 +90,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -93,6 +101,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\starsdb_verify.exe
 .\build\Debug\starsdb_links_verify.exe
 .\build\Debug\starsdb_context_verify.exe
+.\build\Debug\starsdb_dbpf_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

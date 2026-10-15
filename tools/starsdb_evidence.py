@@ -24,6 +24,8 @@ CONTEXT_ADDRESSES=(0x69f1d0,0x69fb90,0x69ec20,0x932cd0,0x932d70,0x571f40,
                    0x69f950,0x69e9e0,0x6a0110,0x69ecc0,0x69e770,0x69f7b0,
                    0x69fa60,0x69f840,0x8da2a0,0x69ddb0,0x69dde0,0x69de00,0x69de20,
                    0x8d8ca0,0x8da6f0,0x8d8f70,0x69e090)
+DBPF_ADDRESSES=(0x693ca0,0x6938d0,0x69e090,0x69e260,0x8da6f0,0x8db310,0x8dc1c0,
+                0x8dbb20,0x8db6e0,0x8dbe20,0x8dba40)
 
 
 def main():
@@ -31,8 +33,14 @@ def main():
     pyghidra.start(verbose=False)
     from pyghidra import open_project,program_context
     from ghidra.app.decompiler import DecompInterface
-    dest=DEST/'context' if '--context' in sys.argv else DEST/'links' if '--links' in sys.argv else DEST
-    addresses=CONTEXT_ADDRESSES if '--context' in sys.argv else LINK_ADDRESSES if '--links' in sys.argv else ADDRESSES
+    if '--dbpf' in sys.argv:
+        dest,addresses=DEST/'dbpf',DBPF_ADDRESSES
+    elif '--context' in sys.argv:
+        dest,addresses=DEST/'context',CONTEXT_ADDRESSES
+    elif '--links' in sys.argv:
+        dest,addresses=DEST/'links',LINK_ADDRESSES
+    else:
+        dest,addresses=DEST,ADDRESSES
     dest.mkdir(parents=True,exist_ok=True)
     digest=hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
     project=open_project(str(ROOT/'refs/ghidra/proj'),'OpenSporeOracle')
@@ -146,6 +154,7 @@ def static_context():
     dest.mkdir(parents=True,exist_ok=True)
     digest=hashlib.sha256(pe.raw).hexdigest()
     value={'oracle_sha256':digest,'authority':'static GA instructions + analyst transcription; no original runtime/save corpus',
+           'resource_key_memory_order':['instance','type','group'],
            'index_resource_key_memory_words':['0x0179d304','0x0179d310','0'],
            'class_resource_key_memory_words':['0x0179d304','class_id','0'],
            'index_payload':'BE version=1, BE class_count, BE total_objects, class_count*(BE class_id,BE count)',
@@ -173,8 +182,36 @@ def static_context():
     print('retained context/index/envelope/CRC notes and forwarding tables; decoded-stream subset only')
 
 
+def static_dbpf():
+    from tools.pe import PE
+    from tools.find_imm import disasm
+    pe=PE()
+    dest=DEST/'dbpf'
+    dest.mkdir(parents=True,exist_ok=True)
+    digest=hashlib.sha256(pe.raw).hexdigest()
+    value={'oracle_sha256':digest,'authority':'GA static instructions; no real-save corpus',
+           'ResourceKey_memory_order':['instance','type','group'],
+           'DBPF_index_order':['type','group','instance_hi_32','instance_lo_32','offset','packed_size','mem_size','compression_and_flags'],
+           'key_mapping':'node +0 instance -> index instance_lo; node +4 type -> index type; node +8 group -> index group; high word written zero',
+           'root_key':{'instance':'0x01897c18','type':'0x01897c18','group':'0x01897c18'},
+           'context_index_key':{'instance':'0x0179d304','type':'0x0179d310','group':'0'},
+           'class_key':{'instance':'0x0179d304','type':'class_id','group':'0'},
+           'implementation':'read-only single explicit DBPF, raw/RefPack decoded exact keys, root prefix + manager links + context classes',
+           'host_subset':['DBPF 3.0 / index 3 only; all other versions explicitly rejected',
+                          '256 MiB package/aggregate, 64 MiB resource, 65536 DBPF records',
+                          'unique matching keys, high instance word zero, flags 1, raw sizes equal or RefPack',
+                          'root exact EOF, unknown class bodies opaque, no post-load fixups or readiness'],
+           'validation':'constructed DBPF only; bounded workspace glob found no stars.db, no profile scan performed'}
+    (dest/'schema.json').write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8',newline='\n')
+    for name,lo,hi in [('root-key-load',0xbb9027,0xbb9040),('root-key-write',0xbb4eaa,0xbb4ec3),
+                       ('index-key-order',0x8db424,0x8db4f4)]:
+        (dest/(name+'.asm.txt')).write_text('GA-unpacked SHA-256: %s\nBounded static objdump.\n\n'%digest+
+            '\n'.join(disasm(pe,lo,hi))+'\n',encoding='utf-8',newline='\n')
+    print('retained ResourceKey-to-DBPF mapping and root constants (not pointer reads)')
+
+
 if __name__=='__main__':
     if '--static' in sys.argv:
-        static_context() if '--context' in sys.argv else static_links() if '--links' in sys.argv else static()
+        static_dbpf() if '--dbpf' in sys.argv else static_context() if '--context' in sys.argv else static_links() if '--links' in sys.argv else static()
     else:
         main()

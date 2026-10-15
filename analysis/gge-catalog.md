@@ -117,8 +117,9 @@ python tools/gge_evidence.py --static --catalog
 Follow-up: [stars.db serializer prefix](starsdb.md) now recovers framing, the six metadata fields and
 StarManager descriptor names. Explicit modes now decode wire references/grid and 14 StarRecord
 fields; [context subset](starsdb-context.md) now links class/token identities to fields using explicit
-decoded streams, but does not load a physical save or execute post-load fixups. Next concrete sources
-are the DBPF resource adapter consumed by `0xBB8C90` and the
+decoded streams; [physical DBPF subset](starsdb-dbpf.md) now supplies exact keys on constructed
+files, not a real-save corpus or executed post-load fixups. Next concrete sources
+are the StarRecord name/resource and save-metadata producers consumed by `0xBB8C90` and the
 galaxy/star grid populated by its generation path. Separately, implement a real host MoviePlayer
 and DBCheck adapter before driving the state-2 scene. Do not use the typed test entries as shipped
 save data or mark a synthetic starfield as recovered gameplay.

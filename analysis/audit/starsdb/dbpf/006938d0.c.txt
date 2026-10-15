@@ -1,0 +1,51 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x006938D0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+undefined4 __thiscall
+FUN_006938d0(int param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
+
+{
+  int *piVar1;
+  char cVar2;
+  undefined4 *unaff_FS_OFFSET;
+  undefined4 local_18;
+  undefined4 local_14;
+  undefined4 local_10;
+  undefined4 local_c;
+  undefined1 *puStack_8;
+  undefined4 local_4;
+
+  piVar1 = param_2;
+  local_c = *unaff_FS_OFFSET;
+  puStack_8 = &LAB_01214368;
+  *unaff_FS_OFFSET = &local_c;
+  if (param_2 != (int *)0x0) {
+    param_2 = (int *)0x0;
+    local_14 = param_3;
+    local_18 = param_4;
+    local_10 = param_5;
+    local_4 = 0;
+    cVar2 = (**(code **)(*piVar1 + 0x18))(&local_18,&param_2);
+    if (cVar2 != '\0') {
+      cVar2 = (**(code **)(*param_2 + 0x1c))();
+      if (cVar2 == '\0') {
+        (**(code **)(*piVar1 + 0x1c))(param_2);
+      }
+      else {
+        FUN_00b5fab0(piVar1);
+        FUN_00ac93c0(&param_2);
+      }
+    }
+    local_4 = 0xffffffff;
+    if (param_2 != (int *)0x0) {
+      (**(code **)(*param_2 + 4))();
+    }
+  }
+  if ((*(int *)(param_1 + 4) != 0) && (*(int *)(param_1 + 8) != 0)) {
+    *unaff_FS_OFFSET = local_c;
+    return 1;
+  }
+  *unaff_FS_OFFSET = local_c;
+  return 0;
+}
