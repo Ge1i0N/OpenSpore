@@ -32,6 +32,7 @@ MOUNT_FUNCTIONS = (0xdf7690,0xdf6d80,0xdf9160,0xdf82a0,0x812250,0x8121c0,0x81210
                    0xddd150,0xddb730,0xdda940)
 PHASE1_FUNCTIONS = (0xdf6d80,0xde3db0,0xde3eb0,0xde3f50,0x806320,0x806e00,0xdf7690,0xdf9200)
 IMAGE_FUNCTIONS = (0x97d030,0x97d070,0x6c0230,0x97d840,0xde3db0,0xde3eb0,0x806320)
+ANIMATED_FUNCTIONS = (0x7f5500,0x7f5550,0x7f5a30,0x7f5b50,0x7f5d50,0x7f5e30,0xdf9200)
 
 
 def main():
@@ -42,8 +43,9 @@ def main():
     mount = '--mount' in sys.argv
     phase1 = '--phase1' in sys.argv
     images = '--images' in sys.argv
-    addresses = IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
+    animated = '--animated' in sys.argv
+    addresses = ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
@@ -91,6 +93,33 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--animated' in sys.argv:
+        dest=ROOT/'analysis/audit/gge-animated'; dest.mkdir(parents=True,exist_ok=True)
+        facts={'oracle_sha256':digest,'authority':'static GA instructions + shipped SPUI/XML; host static selector only',
+               'class':'0x0106F14B AnimatedIconWin',
+               'qi_correction':'7F5500: QI0106F146 returns object itself; QI0105A93D returns +20C; QI010EDF11 returns +210. DF9200 queries 0106F146 THEN uses +20C.',
+               'interface_table':{'va':'0x014152f4','entries':{hex(o):hex(pe.u32(0x14152f4+o)) for o in range(0,0x20,4)}},
+               'constructor':'7F5D50 initializes current frame object+228 to1, count+230 to0, rows+23C to1, columns+240 to0',
+               'normalization':'7F5E30 derives counts/frame dimensions and creates/updates special fill, then resets current+228 to0 and attaches animation backend. Host pixel attachment does NOT execute this lifecycle and preserves constructor/caller index.',
+               'setter':'7F5550 interface+14: signed frame>=0 and frame<count; changes current+1C only when different, calls window invalidation; ALL normal paths return AL=1, including invalid indices',
+               'paint':'7F5B50: image+248 and rows+23C/columns+240; row=frame/columns, col=frame%columns; normalized rect(col/columns,row/rows,(col+1)/columns,(row+1)/rows); destination window extents',
+               'host_limits':['explicit positive bounded frame/grid counts only, obsolete Frame Width=0, Auto Play=false',
+                              'runtime map keyed by window object, separate from fill drawable overrides',
+                              'decoded pixels must match serialized image key, preserve atlas UV/logical dimensions',
+                              'no native image-dependent grid normalization, playback clock, notifications, plugins, mounted GGE or catalogue readiness'],
+               'fixtures':[]}
+        for path,record,inst,data in layouts([ROOT/'build/bin/Debug/Data/PatchData.package',ROOT/'build/bin/Debug/Data/Spore_Graphics.package'],0x21df01f2):
+            b=BinaryLayout(data); b.parse()
+            icons=[]
+            for i,obj in b.objects.items():
+                if obj['class']==0x0106f14b:
+                    icons.append({'object':i,'properties':obj['properties']})
+            facts['fixtures'].append({'package':path.name,'record':record,'sha256':hashlib.sha256(data).hexdigest(),'icons':icons})
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        for name,start,end in [('qi-and-index-setter',0x7f5500,0x7f557e),('frame-quad',0x7f5b50,0x7f5cad),('constructor',0x7f5d50,0x7f5e03)]:
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(disasm(pe,start,end))+'\n',encoding='utf-8',newline='\n')
+        print('retained AnimatedIconWin QI/frame/grid/constructor and real layout evidence, no target execution')
+        return
     if '--images' in sys.argv:
         dest=ROOT/'analysis/audit/gge-images'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'GA static instructions; host provider tested separately on actual PNG and controlled failures',

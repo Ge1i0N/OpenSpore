@@ -26,10 +26,12 @@ instantiates/updates these images automatically yet; the normal GGE screen is un
   Failure does not itself clear the previous image. Native refcounts/invalidation are not executed
   by the host, which uses shared immutable pixel ownership and derives a fresh quad each draw.
 
-Only the plain ImageDrawable path is implemented. Other classes, including Animated Icon
+Only the plain ImageDrawable path is implemented by this executor. Other classes, including Animated Icon
 `0x0106F14B`, explicitly return **Unsupported**. No attempt is made to treat Animated Icon's
 `0x0106F146` stage-index interface as the image-drawable interface or to select a different duplicate
 control by class. [Evidence](audit/gge-images/facts.json) retains table entries and exact setter calls.
+The separate [static Animated Icon selector](gge-animated-icon.md) now handles explicit index and
+atlas-image state through a different API; the image executor's supported class set is unchanged.
 
 ## Explicit provider and availability
 

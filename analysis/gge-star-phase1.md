@@ -70,8 +70,9 @@ caption keys `0x067735D4/D5`. Locale/string-builder services are not executed by
   A supplied nonnull shared image bypasses ResourceKey lookup. If null, it tries `0x806320` with
   the given key; stage-target calls pass a zero triple. A missing stage image is therefore not
   permission to choose an arbitrary reachable template image or pretend an asset loaded.
-- `0xDF9200`: window QI **`0x0106F146`**, Animated Icon's embedded interface at `+0x20C`, slot
-  `+0x14`, receives the stage index. This is not the image-drawable interface above.
+- `0xDF9200`: window QI **`0x0106F146`** returns AnimatedIconWin itself; the caller then takes
+  its embedded interface at `+0x20C`, slot `+0x14`, which receives the stage index. This is not the
+  image-drawable interface above. [Recovered selector/ABI correction](gge-animated-icon.md).
 
 Real ControlID `0x026E0002` matches two objects, 45 and 55; one is Animated Icon class `0x0106F14B`,
 the other a regular window. The planner does not use class type alone to guess native recursive

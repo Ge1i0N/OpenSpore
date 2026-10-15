@@ -55,6 +55,7 @@ bool StarUiInstance::instantiate(u64 instance_id,const spui::Layout& source,cons
     // Full ownership only after validation; source assets retain their original serialized identity.
     spui::Layout next=source;
     next.runtime_images.clear(); // only raw template provenance seeds a new host lifetime
+    next.runtime_animations.clear();
     const size_t root=source.roots[0];
     if (!refresh(next.windows,root,error)) return false;
     if (next.windows[root].control_id!=kStarUiRoot||!next.windows[root].has_area||!next.windows[root].area.valid()) {
@@ -123,6 +124,43 @@ bool StarUiInstance::set_image(u16 window,const spui::ImageBinding& image,std::s
     if (!image_target(window,drawable,error)) return false;
     if (!image.pixels||!spui::valid_image_binding(image)) { error="drawable override requires valid decoded image pixels"; return false; }
     layout_.runtime_images.insert_or_assign(drawable,image); error.clear(); return true;
+}
+bool StarUiInstance::animation(u16 window,spui::AnimationDescriptor& out,std::string& error) const {
+    const auto n=find_object(window);
+    if (!n||layout_.windows[*n].class_id!=0x0106f14bu) { error="Animated Icon window unavailable/unsupported"; return false; }
+    return spui::animation_descriptor(layout_,window,out,error);
+}
+bool StarUiInstance::animation_frame(u16 window,i32& out,std::string& error) const {
+    spui::AnimationDescriptor descriptor;
+    if (!animation(window,descriptor,error)) return false;
+    const auto it=layout_.runtime_animations.find(window);
+    out=it==layout_.runtime_animations.end()?1:it->second.frame;
+    error.clear(); return true;
+}
+bool StarUiInstance::set_animation_frame(u16 window,i32 frame,FrameChange& result,std::string& error) {
+    spui::AnimationDescriptor descriptor;
+    if (!animation(window,descriptor,error)) return false;
+    if (frame<0||frame>=descriptor.frames) { result=FrameChange::IgnoredOutOfRange; error.clear(); return true; }
+    const auto it=layout_.runtime_animations.find(window);
+    const i32 old=it==layout_.runtime_animations.end()?1:it->second.frame;
+    if (frame==old) { result=FrameChange::Unchanged; error.clear(); return true; }
+    if (it==layout_.runtime_animations.end()) {
+        spui::AnimationBinding binding; binding.image=descriptor.image; binding.frame=frame;
+        layout_.runtime_animations.emplace(window,std::move(binding));
+    } else it->second.frame=frame;
+    result=FrameChange::Changed; error.clear(); return true;
+}
+bool StarUiInstance::set_animation_pixels(u16 window,std::shared_ptr<const spui::ImagePixels> pixels,std::string& error) {
+    spui::AnimationDescriptor descriptor;
+    if (!animation(window,descriptor,error)) return false;
+    descriptor.image.pixels=std::move(pixels);
+    if (!descriptor.image.pixels||!spui::valid_image_binding(descriptor.image)) {
+        error="Animated Icon requires decoded pixels matching its exact serialized resource key"; return false;
+    }
+    const auto it=layout_.runtime_animations.find(window);
+    const i32 frame=it==layout_.runtime_animations.end()?1:it->second.frame;
+    layout_.runtime_animations.insert_or_assign(window,spui::AnimationBinding{std::move(descriptor.image),frame});
+    error.clear(); return true;
 }
 const spui::Window* StarUiInstance::pick(float x,float y,const spui::Rect& viewport) const {
     if (!active()||!finite(viewport)||!std::isfinite(viewport.w())||!std::isfinite(viewport.h())||!viewport.valid()||

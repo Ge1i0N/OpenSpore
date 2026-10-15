@@ -257,7 +257,12 @@ size_t paint_spui_layer(const os::spui::Layout& lay,float sx,float sy,int w,int 
         // Host input -> drawable state is our adapter; the frame selection and geometry are GA's.
         const u32 state = !win.enabled ? 1u : hovered == &win ? (input::left_down() ? 3u : 2u) : 0u;
         os::spui::ImageQuad quad;
-        if (os::spui::drawable_quad(lay, win.drawable_object, win.placed_area, state, quad)) {
+        // Only explicitly attached host animation state changes this path. Unbound/static layouts
+        // keep their previous fill presentation; an attached but unavailable frame never falls back.
+        const bool has_quad=win.class_id==0x0106f14bu&&lay.runtime_animations.count(win.object_index)?
+            os::spui::animation_quad(lay,win.object_index,win.placed_area,quad):
+            os::spui::drawable_quad(lay,win.drawable_object,win.placed_area,state,quad);
+        if (has_quad) {
             CachedTexture& image = quad.pixels?load_runtime(quad.pixels):load_external(lay, quad.external);
             if (image.texture) ov.image_uv(quad.area.left * sx, quad.area.top * sy,
                 quad.area.w() * sx, quad.area.h() * sy, image.texture,

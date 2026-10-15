@@ -118,6 +118,12 @@ struct ImageBinding {
     std::shared_ptr<const ImagePixels> pixels; // null for a serialized/unloaded resource reference
 };
 
+// AnimatedIconWin has its OWN image/frame state, not a FillDrawable image override.
+struct AnimationBinding {
+    ImageBinding image;
+    i32 frame=1; // GA constructor ONLY; native 0x7F5E30 normalization later resets to0
+};
+
 struct Object {
     u16 index = 0;
     u32 class_id = 0, offset = 0, end = 0;
@@ -136,6 +142,7 @@ struct Layout {
     std::vector<Object> objects;
     std::vector<ExternalResource> external_resources;
     std::map<u16,ImageBinding> runtime_images; // drawable object index -> host image override
+    std::map<u16,AnimationBinding> runtime_animations; // Animated Icon WINDOW object index
     std::vector<size_t> roots;        // window indexes with no parent
     u16 version = 0;
     u32 consumed = 0;

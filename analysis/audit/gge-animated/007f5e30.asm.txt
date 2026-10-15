@@ -1,0 +1,133 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x007F5E30
+
+007f5e30  PUSH ECX
+007f5e31  PUSH EBX
+007f5e32  PUSH EBP
+007f5e33  PUSH ESI
+007f5e34  MOV ESI,ECX
+007f5e36  MOV EBX,dword ptr [ESI + 0x248]
+007f5e3c  MOV ECX,dword ptr [ESI + 0x238]
+007f5e42  MOV EBP,dword ptr [ESI + 0x230]
+007f5e48  MOV EAX,dword ptr [ESI + 0x240]
+007f5e4e  PUSH EDI
+007f5e4f  MOV EDI,dword ptr [ESI + 0x234]
+007f5e55  TEST EBX,EBX
+007f5e57  JNZ 0x007f5e6d
+007f5e59  MOV EAX,0x1
+007f5e5e  MOV EDI,0x20
+007f5e63  MOV ECX,EDI
+007f5e65  MOV EBP,EAX
+007f5e67  MOV dword ptr [ESP + 0x10],EAX
+007f5e6b  JMP 0x007f5edc
+007f5e6d  TEST EDI,EDI
+007f5e6f  JG 0x007f5e94
+007f5e71  TEST EAX,EAX
+007f5e73  JLE 0x007f5e88
+007f5e75  CVTSI2SS XMM0,dword ptr [EBX + 0x1c]
+007f5e7a  CVTSI2SS XMM1,EAX
+007f5e7e  DIVSS XMM0,XMM1
+007f5e82  CVTTSS2SI EDI,XMM0
+007f5e86  JMP 0x007f5e8b
+007f5e88  MOV EDI,dword ptr [EBX + 0x20]
+007f5e8b  TEST EDI,EDI
+007f5e8d  JG 0x007f5e94
+007f5e8f  MOV EDI,0x1
+007f5e94  MOV EAX,dword ptr [EBX + 0x1c]
+007f5e97  CDQ
+007f5e98  IDIV EDI
+007f5e9a  MOV dword ptr [ESP + 0x10],EAX
+007f5e9e  TEST ECX,ECX
+007f5ea0  JG 0x007f5ecb
+007f5ea2  MOV EAX,dword ptr [ESI + 0x23c]
+007f5ea8  TEST EAX,EAX
+007f5eaa  JLE 0x007f5ebf
+007f5eac  CVTSI2SS XMM0,dword ptr [EBX + 0x20]
+007f5eb1  CVTSI2SS XMM1,EAX
+007f5eb5  DIVSS XMM0,XMM1
+007f5eb9  CVTTSS2SI ECX,XMM0
+007f5ebd  JMP 0x007f5ec2
+007f5ebf  MOV ECX,dword ptr [EBX + 0x20]
+007f5ec2  TEST ECX,ECX
+007f5ec4  JG 0x007f5ecb
+007f5ec6  MOV ECX,0x1
+007f5ecb  MOV EAX,dword ptr [EBX + 0x20]
+007f5ece  CDQ
+007f5ecf  IDIV ECX
+007f5ed1  TEST EBP,EBP
+007f5ed3  JG 0x007f5edc
+007f5ed5  MOV EBP,EAX
+007f5ed7  IMUL EBP,dword ptr [ESP + 0x10]
+007f5edc  MOV EDX,dword ptr [ESI + 0x4]
+007f5edf  MOV dword ptr [ESI + 0x234],EDI
+007f5ee5  MOV dword ptr [ESI + 0x238],ECX
+007f5eeb  MOV ECX,dword ptr [ESP + 0x10]
+007f5eef  LEA EDI,[ESI + 0x4]
+007f5ef2  MOV dword ptr [ESI + 0x240],ECX
+007f5ef8  MOV dword ptr [ESI + 0x23c],EAX
+007f5efe  MOV EAX,dword ptr [EDX + 0xa8]
+007f5f04  MOV ECX,EDI
+007f5f06  MOV dword ptr [ESI + 0x230],EBP
+007f5f0c  CALL EAX
+007f5f0e  XOR EBP,EBP
+007f5f10  CMP EAX,EBP
+007f5f12  JZ 0x007f5f28
+007f5f14  MOV EDX,dword ptr [EAX]
+007f5f16  MOV ECX,EAX
+007f5f18  MOV EAX,dword ptr [EDX + 0xc]
+007f5f1b  PUSH 0x26e0fbc
+007f5f20  CALL EAX
+007f5f22  MOV EBX,EAX
+007f5f24  CMP EBX,EBP
+007f5f26  JNZ 0x007f5f87
+007f5f28  CALL 0x00951220
+007f5f2d  PUSH EAX
+007f5f2e  PUSH 0x1415520
+007f5f33  PUSH 0x4
+007f5f35  PUSH 0x14
+007f5f37  CALL 0x00951230
+007f5f3c  ADD ESP,0x10
+007f5f3f  CMP EAX,EBP
+007f5f41  JZ 0x007f5f78
+007f5f43  CVTSI2SS XMM0,dword ptr [ESI + 0x234]
+007f5f4b  CVTSI2SS XMM1,dword ptr [ESI + 0x238]
+007f5f53  MOV dword ptr [EAX + 0x4],0x1444c40
+007f5f5a  MOV dword ptr [EAX + 0x8],EBP
+007f5f5d  MOV dword ptr [EAX],0x1415500
+007f5f63  MOV dword ptr [EAX + 0x4],0x14154e8
+007f5f6a  MOVSS dword ptr [EAX + 0xc],XMM0
+007f5f6f  MOVSS dword ptr [EAX + 0x10],XMM1
+007f5f74  MOV EBX,EAX
+007f5f76  JMP 0x007f5f7a
+007f5f78  XOR EBX,EBX
+007f5f7a  MOV EDX,dword ptr [EDI]
+007f5f7c  MOV EAX,dword ptr [EDX + 0xb0]
+007f5f82  PUSH EBX
+007f5f83  MOV ECX,EDI
+007f5f85  CALL EAX
+007f5f87  CVTSI2SS XMM0,dword ptr [ESI + 0x238]
+007f5f8f  CVTSI2SS XMM1,dword ptr [ESI + 0x234]
+007f5f97  MOVSS dword ptr [EBX + 0xc],XMM1
+007f5f9c  MOVSS dword ptr [EBX + 0x10],XMM0
+007f5fa1  MOV EDX,dword ptr [ESI + 0x270]
+007f5fa7  MOV EAX,dword ptr [EDX + 0x14]
+007f5faa  LEA EDI,[ESI + 0x270]
+007f5fb0  MOV ECX,EDI
+007f5fb2  MOV dword ptr [ESI + 0x228],EBP
+007f5fb8  CALL EAX
+007f5fba  MOV EDX,dword ptr [EDI]
+007f5fbc  LEA EAX,[ESI + 0x20c]
+007f5fc2  PUSH EAX
+007f5fc3  MOV EAX,dword ptr [EDX + 0x10]
+007f5fc6  MOV ECX,EDI
+007f5fc8  CALL EAX
+007f5fca  POP EDI
+007f5fcb  MOV byte ptr [ESI + 0x22c],AL
+007f5fd1  POP ESI
+007f5fd2  POP EBP
+007f5fd3  POP EBX
+007f5fd4  POP ECX
+007f5fd5  RET

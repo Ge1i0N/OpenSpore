@@ -110,6 +110,17 @@ test with `-w -devDirs`; retain evidence and commit.
   `gge_image_verify`: 80 checks with actual PatchData PNG record94 128x128, real SPUI layouts and
   controlled red2x2 D3D9/scissor readback. Not a full phase executor/live GGE scene.
   `analysis/gge-image-bindings.md` / `audit/gge-images/` retain setter/getter/interface evidence.
+- Animated Icon static selector: StarUiInstance explicit window get/set frame/pixels, Layout map
+  runtime_animations separate from fill-drawable overrides; atlas UV/logical size retained.
+  CORRECTION QI0106F146 returns object, DF9200 then takes+20C (QI0105A93D itself returns+20C).
+  Constructor frame1 ONLY: native normalizer7F5E30 later resets0/connects backend (not executed here).
+  Host pixel attach preserves constructor/caller index, not native rebind. Setter invalid indices
+  no-op returning true; host Changed/Unchanged/IgnoredOutOfRange.
+  Only AutoPlay=false/explicit positive bounded grids/obsolete width0; actual icons45/93 both Image44,
+  frames5 rows1 columns5. Actual atlas key B89D2CD2/2F7D0004/31A44893 in Graphics record15591,256x512.
+  gge_animated_verify:163 checks, actual PNG in a clearly constructed bounded DBPF carrier, controlled
+  2x3 red/blue GPU readback. Native normalization/playback/live GGE caller unimplemented.
+  analysis/gge-animated-icon.md / audit/gge-animated/ retain seven functions and property corpus.
 
 ## Next, in order
 
@@ -133,7 +144,8 @@ test with `-w -devDirs`; retain evidence and commit.
     but not attached to GGE. Phase1 branch/control/resource plan now exists; next image-provider/drawable
     adapter with explicit resolved object targets/actual resource failures is now implemented for PNG
     plain ImageDrawable only (gge_image_provider). Next join image application + remaining phase1
-    actions into instance lifecycle, Animated Icon semantics and listeners. Plan itself executes no
+    actions + static Animated Icon selector into instance lifecycle and listeners. Playback/native
+    grid normalization remain separate. Plan itself executes no
     services and native return1 is not readiness; image-operation success is not phase completion.
     Continue thumbnail/main-image/plugin ports (DF6D80)
     and scene factory contracts (DDD150 via67DD40/50, render stages67DD10), actual camera acquisition
@@ -155,7 +167,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -175,6 +187,8 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\gge_star_phase1_verify.exe $fixtures
 $imageCapture = Join-Path $env:TEMP ('OpenSpore-image-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\gge_image_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package $imageCapture
+$frameCapture = Join-Path $env:TEMP ('OpenSpore-frame-' + [guid]::NewGuid() + '.bmp')
+.\build\Debug\gge_animated_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package $frameCapture
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

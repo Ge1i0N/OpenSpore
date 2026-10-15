@@ -1,0 +1,585 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static GA instructions + shipped SPUI/XML; host static selector only",
+  "class": "0x0106F14B AnimatedIconWin",
+  "qi_correction": "7F5500: QI0106F146 returns object itself; QI0105A93D returns +20C; QI010EDF11 returns +210. DF9200 queries 0106F146 THEN uses +20C.",
+  "interface_table": {
+    "va": "0x014152f4",
+    "entries": {
+      "0x0": "0x977550",
+      "0x4": "0x986260",
+      "0x8": "0x7f5a50",
+      "0xc": "0x7f5a40",
+      "0x10": "0xff3480",
+      "0x14": "0x7f5550",
+      "0x18": "0x985d70",
+      "0x1c": "0x7f5580"
+    }
+  },
+  "constructor": "7F5D50 initializes current frame object+228 to1, count+230 to0, rows+23C to1, columns+240 to0",
+  "normalization": "7F5E30 derives counts/frame dimensions and creates/updates special fill, then resets current+228 to0 and attaches animation backend. Host pixel attachment does NOT execute this lifecycle and preserves constructor/caller index.",
+  "setter": "7F5550 interface+14: signed frame>=0 and frame<count; changes current+1C only when different, calls window invalidation; ALL normal paths return AL=1, including invalid indices",
+  "paint": "7F5B50: image+248 and rows+23C/columns+240; row=frame/columns, col=frame%columns; normalized rect(col/columns,row/rows,(col+1)/columns,(row+1)/rows); destination window extents",
+  "host_limits": [
+    "explicit positive bounded frame/grid counts only, obsolete Frame Width=0, Auto Play=false",
+    "runtime map keyed by window object, separate from fill drawable overrides",
+    "decoded pixels must match serialized image key, preserve atlas UV/logical dimensions",
+    "no native image-dependent grid normalization, playback clock, notifications, plugins, mounted GGE or catalogue readiness"
+  ],
+  "fixtures": [
+    {
+      "package": "PatchData.package",
+      "record": 19201,
+      "sha256": "23087d7ae97793db2e9c550fa0ffdd27f5b4738ea90d5f8b43c25ecac22f01f5",
+      "icons": [
+        {
+          "object": 45,
+          "properties": [
+            {
+              "offset": 3906,
+              "id": 4005670912,
+              "code": 9,
+              "count": 1,
+              "raw": "0b000000",
+              "end": 3918
+            },
+            {
+              "offset": 3918,
+              "id": 4005670913,
+              "code": 9,
+              "count": 1,
+              "raw": "02006e02",
+              "end": 3930
+            },
+            {
+              "offset": 3930,
+              "id": 4005670914,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 3942
+            },
+            {
+              "offset": 3942,
+              "id": 4005670917,
+              "code": 16,
+              "count": 1,
+              "raw": "000064c2000060410000e8c100002842",
+              "end": 3966
+            },
+            {
+              "offset": 3966,
+              "id": 4005670916,
+              "code": 9,
+              "count": 1,
+              "raw": "ffffffff",
+              "end": 3978
+            },
+            {
+              "offset": 3978,
+              "id": 4005670926,
+              "code": 9,
+              "count": 1,
+              "raw": "69bbae00",
+              "end": 3990
+            },
+            {
+              "offset": 3990,
+              "id": 4005679107,
+              "code": 19,
+              "count": 1,
+              "refs": [
+                44
+              ],
+              "end": 4000
+            },
+            {
+              "offset": 4000,
+              "id": 4005679104,
+              "code": 11,
+              "count": 1,
+              "raw": "0000803f",
+              "end": 4012
+            },
+            {
+              "offset": 4012,
+              "id": 4005679106,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 4024
+            },
+            {
+              "offset": 4024,
+              "id": 4005679105,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 4036
+            },
+            {
+              "offset": 4036,
+              "id": 4005679108,
+              "code": 9,
+              "count": 1,
+              "raw": "01000000",
+              "end": 4048
+            },
+            {
+              "offset": 4048,
+              "id": 4005679109,
+              "code": 2,
+              "count": 1,
+              "raw": "00",
+              "end": 4057
+            },
+            {
+              "offset": 4057,
+              "id": 4005679110,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 4069
+            },
+            {
+              "offset": 4069,
+              "id": 4005679111,
+              "code": 9,
+              "count": 1,
+              "raw": "05000000",
+              "end": 4081
+            },
+            {
+              "offset": 4081,
+              "id": 4005679112,
+              "code": 9,
+              "count": 1,
+              "raw": "01000000",
+              "end": 4093
+            },
+            {
+              "offset": 4093,
+              "id": 4005679113,
+              "code": 9,
+              "count": 1,
+              "raw": "05000000",
+              "end": 4105
+            }
+          ]
+        },
+        {
+          "object": 93,
+          "properties": [
+            {
+              "offset": 12175,
+              "id": 4005670912,
+              "code": 9,
+              "count": 1,
+              "raw": "0b000000",
+              "end": 12187
+            },
+            {
+              "offset": 12187,
+              "id": 4005670913,
+              "code": 9,
+              "count": 1,
+              "raw": "01006e02",
+              "end": 12199
+            },
+            {
+              "offset": 12199,
+              "id": 4005670914,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 12211
+            },
+            {
+              "offset": 12211,
+              "id": 4005670917,
+              "code": 16,
+              "count": 1,
+              "raw": "0000c8c200008841000090c200003442",
+              "end": 12235
+            },
+            {
+              "offset": 12235,
+              "id": 4005670916,
+              "code": 9,
+              "count": 1,
+              "raw": "ffffffff",
+              "end": 12247
+            },
+            {
+              "offset": 12247,
+              "id": 4005670926,
+              "code": 9,
+              "count": 1,
+              "raw": "69bbae00",
+              "end": 12259
+            },
+            {
+              "offset": 12259,
+              "id": 4005679107,
+              "code": 19,
+              "count": 1,
+              "refs": [
+                44
+              ],
+              "end": 12269
+            },
+            {
+              "offset": 12269,
+              "id": 4005679104,
+              "code": 11,
+              "count": 1,
+              "raw": "0000803f",
+              "end": 12281
+            },
+            {
+              "offset": 12281,
+              "id": 4005679106,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 12293
+            },
+            {
+              "offset": 12293,
+              "id": 4005679105,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 12305
+            },
+            {
+              "offset": 12305,
+              "id": 4005679108,
+              "code": 9,
+              "count": 1,
+              "raw": "01000000",
+              "end": 12317
+            },
+            {
+              "offset": 12317,
+              "id": 4005679109,
+              "code": 2,
+              "count": 1,
+              "raw": "00",
+              "end": 12326
+            },
+            {
+              "offset": 12326,
+              "id": 4005679110,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 12338
+            },
+            {
+              "offset": 12338,
+              "id": 4005679111,
+              "code": 9,
+              "count": 1,
+              "raw": "05000000",
+              "end": 12350
+            },
+            {
+              "offset": 12350,
+              "id": 4005679112,
+              "code": 9,
+              "count": 1,
+              "raw": "01000000",
+              "end": 12362
+            },
+            {
+              "offset": 12362,
+              "id": 4005679113,
+              "code": 9,
+              "count": 1,
+              "raw": "05000000",
+              "end": 12374
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "package": "Spore_Graphics.package",
+      "record": 18791,
+      "sha256": "6fe95d3998eacbfcfd8747d152709a0e45650cff10d0d85f15f4b6393d96fe61",
+      "icons": [
+        {
+          "object": 45,
+          "properties": [
+            {
+              "offset": 3906,
+              "id": 4005670912,
+              "code": 9,
+              "count": 1,
+              "raw": "0b000000",
+              "end": 3918
+            },
+            {
+              "offset": 3918,
+              "id": 4005670913,
+              "code": 9,
+              "count": 1,
+              "raw": "02006e02",
+              "end": 3930
+            },
+            {
+              "offset": 3930,
+              "id": 4005670914,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 3942
+            },
+            {
+              "offset": 3942,
+              "id": 4005670917,
+              "code": 16,
+              "count": 1,
+              "raw": "000064c2000060410000e8c100002842",
+              "end": 3966
+            },
+            {
+              "offset": 3966,
+              "id": 4005670916,
+              "code": 9,
+              "count": 1,
+              "raw": "ffffffff",
+              "end": 3978
+            },
+            {
+              "offset": 3978,
+              "id": 4005670926,
+              "code": 9,
+              "count": 1,
+              "raw": "69bbae00",
+              "end": 3990
+            },
+            {
+              "offset": 3990,
+              "id": 4005679107,
+              "code": 19,
+              "count": 1,
+              "refs": [
+                44
+              ],
+              "end": 4000
+            },
+            {
+              "offset": 4000,
+              "id": 4005679104,
+              "code": 11,
+              "count": 1,
+              "raw": "0000803f",
+              "end": 4012
+            },
+            {
+              "offset": 4012,
+              "id": 4005679106,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 4024
+            },
+            {
+              "offset": 4024,
+              "id": 4005679105,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 4036
+            },
+            {
+              "offset": 4036,
+              "id": 4005679108,
+              "code": 9,
+              "count": 1,
+              "raw": "01000000",
+              "end": 4048
+            },
+            {
+              "offset": 4048,
+              "id": 4005679109,
+              "code": 2,
+              "count": 1,
+              "raw": "00",
+              "end": 4057
+            },
+            {
+              "offset": 4057,
+              "id": 4005679110,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 4069
+            },
+            {
+              "offset": 4069,
+              "id": 4005679111,
+              "code": 9,
+              "count": 1,
+              "raw": "05000000",
+              "end": 4081
+            },
+            {
+              "offset": 4081,
+              "id": 4005679112,
+              "code": 9,
+              "count": 1,
+              "raw": "01000000",
+              "end": 4093
+            },
+            {
+              "offset": 4093,
+              "id": 4005679113,
+              "code": 9,
+              "count": 1,
+              "raw": "05000000",
+              "end": 4105
+            }
+          ]
+        },
+        {
+          "object": 93,
+          "properties": [
+            {
+              "offset": 12175,
+              "id": 4005670912,
+              "code": 9,
+              "count": 1,
+              "raw": "0b000000",
+              "end": 12187
+            },
+            {
+              "offset": 12187,
+              "id": 4005670913,
+              "code": 9,
+              "count": 1,
+              "raw": "01006e02",
+              "end": 12199
+            },
+            {
+              "offset": 12199,
+              "id": 4005670914,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 12211
+            },
+            {
+              "offset": 12211,
+              "id": 4005670917,
+              "code": 16,
+              "count": 1,
+              "raw": "0000c8c200008841000090c200003442",
+              "end": 12235
+            },
+            {
+              "offset": 12235,
+              "id": 4005670916,
+              "code": 9,
+              "count": 1,
+              "raw": "ffffffff",
+              "end": 12247
+            },
+            {
+              "offset": 12247,
+              "id": 4005670926,
+              "code": 9,
+              "count": 1,
+              "raw": "69bbae00",
+              "end": 12259
+            },
+            {
+              "offset": 12259,
+              "id": 4005679107,
+              "code": 19,
+              "count": 1,
+              "refs": [
+                44
+              ],
+              "end": 12269
+            },
+            {
+              "offset": 12269,
+              "id": 4005679104,
+              "code": 11,
+              "count": 1,
+              "raw": "0000803f",
+              "end": 12281
+            },
+            {
+              "offset": 12281,
+              "id": 4005679106,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 12293
+            },
+            {
+              "offset": 12293,
+              "id": 4005679105,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 12305
+            },
+            {
+              "offset": 12305,
+              "id": 4005679108,
+              "code": 9,
+              "count": 1,
+              "raw": "01000000",
+              "end": 12317
+            },
+            {
+              "offset": 12317,
+              "id": 4005679109,
+              "code": 2,
+              "count": 1,
+              "raw": "00",
+              "end": 12326
+            },
+            {
+              "offset": 12326,
+              "id": 4005679110,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 12338
+            },
+            {
+              "offset": 12338,
+              "id": 4005679111,
+              "code": 9,
+              "count": 1,
+              "raw": "05000000",
+              "end": 12350
+            },
+            {
+              "offset": 12350,
+              "id": 4005679112,
+              "code": 9,
+              "count": 1,
+              "raw": "01000000",
+              "end": 12362
+            },
+            {
+              "offset": 12362,
+              "id": 4005679113,
+              "code": 9,
+              "count": 1,
+              "raw": "05000000",
+              "end": 12374
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

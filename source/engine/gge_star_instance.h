@@ -1,11 +1,13 @@
 #pragma once
 #include "engine/gge_star_present.h"
+#include "engine/spui_drawable.h"
 
 namespace os::gge {
 // Owned host window-graph instance, NOT native cSPUILayeredObject / original mount completion.
 // IDs are caller-issued host identities, separate from record indices, star IDs and ControlID.
 class StarUiInstance {
 public:
+    enum class FrameChange { Changed, Unchanged, IgnoredOutOfRange };
     StarUiInstance() = default;
     StarUiInstance(const StarUiInstance&) = delete;
     StarUiInstance& operator=(const StarUiInstance&) = delete;
@@ -27,6 +29,13 @@ public:
     // CF3C4EAE only; override keyed by drawable identity, so windows sharing it share the image
     // within this instance, as the native setter does. Template/sibling instance remain untouched.
     bool set_image(u16 window,const spui::ImageBinding& image,std::string& error);
+    // Separate AnimatedIconWin state. Explicit window identity, never first matching ControlID.
+    bool animation(u16 window,spui::AnimationDescriptor& out,std::string& error) const;
+    bool animation_frame(u16 window,i32& out,std::string& error) const;
+    bool set_animation_frame(u16 window,i32 frame,FrameChange& result,std::string& error);
+    // Host-only pixel attachment, NOT native image rebind/normalization (which resets frame to0).
+    // Caller may use an explicit ImageProvider; retain current index and SERIALIZED atlas metadata.
+    bool set_animation_pixels(u16 window,std::shared_ptr<const spui::ImagePixels> pixels,std::string& error);
     bool move_root(const StarUiPlacement& placement,std::string& error);
     // Pixel-space layer, no design-resolution rescaling after moving the root. No CommandID dispatch.
     // Returned window pointer is invalidated by successful mutation, instantiate or clear.

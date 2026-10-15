@@ -1,0 +1,48 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  7f5500:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  7f5504:	3d 3d a9 05 01       	cmp    eax,0x105a93d
+  7f5509:	74 29                	je     0x7f5534
+  7f550b:	3d 46 f1 06 01       	cmp    eax,0x106f146
+  7f5510:	74 1d                	je     0x7f552f
+  7f5512:	3d 11 df 0e 01       	cmp    eax,0x10edf11
+  7f5517:	74 09                	je     0x7f5522
+  7f5519:	89 44 24 04          	mov    DWORD PTR [esp+0x4],eax
+  7f551d:	e9 9e a3 16 00       	jmp    0x95f8c0
+  7f5522:	85 c9                	test   ecx,ecx
+  7f5524:	74 1b                	je     0x7f5541
+  7f5526:	8d 81 10 02 00 00    	lea    eax,[ecx+0x210]
+  7f552c:	c2 04 00             	ret    0x4
+  7f552f:	8b c1                	mov    eax,ecx
+  7f5531:	c2 04 00             	ret    0x4
+  7f5534:	85 c9                	test   ecx,ecx
+  7f5536:	74 09                	je     0x7f5541
+  7f5538:	8d 81 0c 02 00 00    	lea    eax,[ecx+0x20c]
+  7f553e:	c2 04 00             	ret    0x4
+  7f5541:	33 c0                	xor    eax,eax
+  7f5543:	c2 04 00             	ret    0x4
+  7f5546:	cc                   	int3
+  7f5547:	cc                   	int3
+  7f5548:	cc                   	int3
+  7f5549:	cc                   	int3
+  7f554a:	cc                   	int3
+  7f554b:	cc                   	int3
+  7f554c:	cc                   	int3
+  7f554d:	cc                   	int3
+  7f554e:	cc                   	int3
+  7f554f:	cc                   	int3
+  7f5550:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  7f5554:	85 c0                	test   eax,eax
+  7f5556:	7c 21                	jl     0x7f5579
+  7f5558:	3b 41 24             	cmp    eax,DWORD PTR [ecx+0x24]
+  7f555b:	7d 1c                	jge    0x7f5579
+  7f555d:	39 41 1c             	cmp    DWORD PTR [ecx+0x1c],eax
+  7f5560:	74 17                	je     0x7f5579
+  7f5562:	89 41 1c             	mov    DWORD PTR [ecx+0x1c],eax
+  7f5565:	8b 81 f8 fd ff ff    	mov    eax,DWORD PTR [ecx-0x208]
+  7f556b:	8b 90 90 00 00 00    	mov    edx,DWORD PTR [eax+0x90]
+  7f5571:	81 c1 f8 fd ff ff    	add    ecx,0xfffffdf8
+  7f5577:	ff d2                	call   edx
+  7f5579:	b0 01                	mov    al,0x1
+  7f557b:	c2 04 00             	ret    0x4

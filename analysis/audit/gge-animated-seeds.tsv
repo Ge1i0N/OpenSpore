@@ -1,0 +1,6 @@
+# Aligned native AnimatedIconWin functions, checked by objdump before carving.
+0x007f5550	function	os_AnimatedIcon_set_frame
+0x007f5a30	function	os_AnimatedIcon_class_id
+0x007f5b50	function	os_AnimatedIcon_paint_frame
+0x007f5d50	function	os_AnimatedIcon_constructor
+0x007f5e30	function	os_AnimatedIcon_normalize_grid

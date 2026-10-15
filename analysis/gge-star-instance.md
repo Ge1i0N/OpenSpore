@@ -55,6 +55,8 @@ established merely by serialized order. No native-priority assumption is introdu
 does not execute phase1, callbacks, plugins, tooltip linkage, camera/effects or force hidden branches.
 The [image follow-up](gge-image-bindings.md) now supports explicit CF3C4EAE image get/set overrides
 inside one instance, including shared drawable identity. It does not mark phase1 or native mount complete.
+The [Animated Icon follow-up](gge-animated-icon.md) adds separate per-window static frame/atlas bindings,
+with explicit object selection, constructor1 and invalid-index no-op results; no playback/mount completion.
 
 ## Separate scene/camera setup
 

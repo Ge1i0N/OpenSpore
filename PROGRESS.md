@@ -37,7 +37,8 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE star presentation calculations | explicit-camera projection, root centering/saved clamp/4px deadband, stage/caption/flag plan; real star-layout controls bound | no camera creation/per-entry mounting/plugins/effects/runtime scene; current screen unchanged |
 | GGE owned host instances | separate window graphs per entry, explicit object-index overlays, recomputed geometry/Clip/pixel picking and shared renderer hook | native mount/phase1/plugins/listeners/camera/scene absent; no automatic GGE instantiation or changed screen |
 | GGE phase-1 binding plan | ordered control/image/locale/profile/selected-star requirements; structural statuses and explicit duplicate choices | no native operations/interface queries/resource loads or phase latch; native return1 is not a readiness check |
-| GGE image application subset | explicit DBPF PNG provider → decoded immutable pixels → plain ImageDrawable override → shared painter; atlas/instance isolation | one resolved image request only; Animated Icon/full phase lifecycle/native callbacks/scene not implemented; GGE screen unchanged |
+| GGE image application subset | explicit DBPF PNG provider → decoded immutable pixels → plain ImageDrawable override → shared painter; atlas/instance isolation | one resolved image request only; Animated Icon uses separate static-selector API; full phase lifecycle/native callbacks/scene not implemented; GGE screen unchanged |
+| GGE static Animated Icon | explicit window index → separate frame state → atlas-composed quad/shared painter; actual five-frame descriptors | AutoPlay=false/positive grid only; no native normalization/playback/automatic GGE caller; QI0106F146 returns object, caller takes+20C |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
 
@@ -70,6 +71,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE host star instances | 167 checks on two real layouts + controlled graph failures; duplicate ControlIDs not collapsed; template/sibling isolation | `gge_star_instance_verify <fixtures>`; [host/native boundary](analysis/gge-star-instance.md) |
 | GGE phase-1 binding plan | 247 checks on two real layouts; Unknown branch prefix, correct image interfaces, target ambiguity and no mutation | `gge_star_phase1_verify <fixtures>`; [evidence/correction](analysis/gge-star-phase1.md) |
 | GGE image provider/application | 80 checks, actual PNG/SPUI asset path + controlled D3D9 red-image/scissor readback; asset errors do not mutate old image | `gge_image_verify <fixtures> <explicit-package> <new-bmp>`; [evidence/limits](analysis/gge-image-bindings.md) |
+| GGE Animated Icon static frame | 163 checks, actual SPUI/atlas PNG and controlled multi-row GPU/scissor readback; frame/image/window isolation | `gge_animated_verify <fixtures> <explicit-atlas-package> <new-bmp>`; [evidence/carrier boundary](analysis/gge-animated-icon.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).
