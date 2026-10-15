@@ -1,0 +1,60 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  806e00:	83 ec 10             	sub    esp,0x10
+  806e03:	56                   	push   esi
+  806e04:	8b 74 24 18          	mov    esi,DWORD PTR [esp+0x18]
+  806e08:	85 f6                	test   esi,esi
+  806e0a:	0f 84 89 00 00 00    	je     0x806e99
+  806e10:	8b 06                	mov    eax,DWORD PTR [esi]
+  806e12:	8b 50 38             	mov    edx,DWORD PTR [eax+0x38]
+  806e15:	53                   	push   ebx
+  806e16:	57                   	push   edi
+  806e17:	8b ce                	mov    ecx,esi
+  806e19:	ff d2                	call   edx
+  806e1b:	d9 00                	fld    DWORD PTR [eax]
+  806e1d:	8b 7c 24 24          	mov    edi,DWORD PTR [esp+0x24]
+  806e21:	d9 5c 24 0c          	fstp   DWORD PTR [esp+0xc]
+  806e25:	d9 40 04             	fld    DWORD PTR [eax+0x4]
+  806e28:	8b 1e                	mov    ebx,DWORD PTR [esi]
+  806e2a:	d9 40 08             	fld    DWORD PTR [eax+0x8]
+  806e2d:	83 ec 08             	sub    esp,0x8
+  806e30:	d9 5c 24 1c          	fstp   DWORD PTR [esp+0x1c]
+  806e34:	d9 40 0c             	fld    DWORD PTR [eax+0xc]
+  806e37:	d9 47 04             	fld    DWORD PTR [edi+0x4]
+  806e3a:	d9 07                	fld    DWORD PTR [edi]
+  806e3c:	d9 5c 24 28          	fstp   DWORD PTR [esp+0x28]
+  806e40:	d9 47 0c             	fld    DWORD PTR [edi+0xc]
+  806e43:	d8 e1                	fsub   st,st(1)
+  806e45:	d9 ca                	fxch   st(2)
+  806e47:	de e3                	fsubrp st(3),st
+  806e49:	d9 c9                	fxch   st(1)
+  806e4b:	de e2                	fsubrp st(2),st
+  806e4d:	d9 c9                	fxch   st(1)
+  806e4f:	d8 0d 38 be 45 01    	fmul   DWORD PTR ds:0x145be38
+  806e55:	de c1                	faddp  st(1),st
+  806e57:	dd 1c 24             	fstp   QWORD PTR [esp]
+  806e5a:	e8 e7 9a 9d 00       	call   0x11e0946
+  806e5f:	51                   	push   ecx
+  806e60:	d9 5c 24 08          	fstp   DWORD PTR [esp+0x8]
+  806e64:	d9 47 08             	fld    DWORD PTR [edi+0x8]
+  806e67:	d9 44 24 2c          	fld    DWORD PTR [esp+0x2c]
+  806e6b:	dc e9                	fsub   st(1),st
+  806e6d:	d9 44 24 20          	fld    DWORD PTR [esp+0x20]
+  806e71:	d8 64 24 18          	fsub   DWORD PTR [esp+0x18]
+  806e75:	de ea                	fsubp  st(2),st
+  806e77:	d9 c9                	fxch   st(1)
+  806e79:	d8 0d 38 be 45 01    	fmul   DWORD PTR ds:0x145be38
+  806e7f:	de c1                	faddp  st(1),st
+  806e81:	dd 1c 24             	fstp   QWORD PTR [esp]
+  806e84:	e8 bd 9a 9d 00       	call   0x11e0946
+  806e89:	8b 43 64             	mov    eax,DWORD PTR [ebx+0x64]
+  806e8c:	d9 5c 24 04          	fstp   DWORD PTR [esp+0x4]
+  806e90:	83 c4 04             	add    esp,0x4
+  806e93:	8b ce                	mov    ecx,esi
+  806e95:	ff d0                	call   eax
+  806e97:	5f                   	pop    edi
+  806e98:	5b                   	pop    ebx
+  806e99:	5e                   	pop    esi
+  806e9a:	83 c4 10             	add    esp,0x10
+  806e9d:	c3                   	ret

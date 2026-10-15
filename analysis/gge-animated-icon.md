@@ -111,6 +111,8 @@ not REA Evidence IDs or native runtime observations.
 Next: phase-action lifecycle and explicit package-backed pixel loading at runtime, then scene/camera
 ownership and real Available catalogue input. Full playback can be added separately, not inferred
 from this static stage selector. MoviePlayer/DBCheck/native mount readiness remain unchanged.
+The [host lifecycle follow-up](gge-star-lifecycle.md) now joins the static selector/pixel attachment
+with explicit configuration choices and per-action outcomes. Native phase ordering/playback are not implied.
 
 Final Debug x86 build warning-free. The 163 new checks and all prior image/phase1/instance/projection/
 parser/catalogue/DBCheck/Intro/SPUI/package/scissor suites PASS. Six Python tests, 54 maintained

@@ -121,6 +121,17 @@ test with `-w -devDirs`; retain evidence and commit.
   gge_animated_verify:163 checks, actual PNG in a clearly constructed bounded DBPF carrier, controlled
   2x3 red/blue GPU readback. Native normalization/playback/live GGE caller unimplemented.
   analysis/gge-animated-icon.md / audit/gge-animated/ retain seven functions and property corpus.
+- gge_star_lifecycle.* now owns one immutable input/instance/report snapshot: transactional open,
+  generation ticket per successful open (even same host ID), apply_available/close; reentry rejected.
+  Independent host action policy (NOT original dependency/order): flags/local-floor centering,
+  UTF16 name, locale ref binding, image executor and separate config frame/pixels/flags/caption.
+  Applied/ref-bound/observed/no-op actions settle; unresolved errors retry; one exact resource read
+  per pass including failures. Tooltip/layer/profile/timestamp/terrain/native phase/listeners remain
+  Unsupported or structurally missing. Null provider Unknown; thrown/dishonest backend Failed.
+  Separate phase1/config duplicate choices, no fake locale availability or native phase completion.
+  gge_star_lifecycle_verify:228 checks, actual PNG/layouts, explicitly constructed atlas carrier,
+  controlled metadata/getter variant/reentry/UTF/floor/ownership tests. Screen unchanged.
+  analysis/gge-star-lifecycle.md / audit/gge-star-lifecycle/ retain policy/native boundaries.
 
 ## Next, in order
 
@@ -143,9 +154,10 @@ test with `-w -devDirs`; retain evidence and commit.
     Visible boundary: math/config + owned host geometry/mutation/pick/pixel-layer hook are implemented,
     but not attached to GGE. Phase1 branch/control/resource plan now exists; next image-provider/drawable
     adapter with explicit resolved object targets/actual resource failures is now implemented for PNG
-    plain ImageDrawable only (gge_image_provider). Next join image application + remaining phase1
-    actions + static Animated Icon selector into instance lifecycle and listeners. Playback/native
-    grid normalization remain separate. Plan itself executes no
+    plain ImageDrawable only (gge_image_provider). The host lifecycle now joins independent image/
+    frame/name/flag/centering actions with explicit outcome/retry, not native services/order/listeners.
+    Next: explicit production streaming PNG provider + scene/camera ownership and real Available
+    catalogue integration. Playback/native grid normalization remain separate. Plan itself executes no
     services and native return1 is not readiness; image-operation success is not phase completion.
     Continue thumbnail/main-image/plugin ports (DF6D80)
     and scene factory contracts (DDD150 via67DD40/50, render stages67DD10), actual camera acquisition
@@ -167,7 +179,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -189,6 +201,7 @@ $imageCapture = Join-Path $env:TEMP ('OpenSpore-image-' + [guid]::NewGuid() + '.
 .\build\Debug\gge_image_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package $imageCapture
 $frameCapture = Join-Path $env:TEMP ('OpenSpore-frame-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\gge_animated_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package $frameCapture
+.\build\Debug\gge_star_lifecycle_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package .\build\bin\Debug\Data\Spore_Graphics.package
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

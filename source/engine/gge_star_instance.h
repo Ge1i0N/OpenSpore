@@ -24,6 +24,9 @@ public:
     // Only visible/enabled/IgnoreMouse/Clip masks are supported by the current host geometry model.
     bool set_window_flag(u16 object,u32 mask,bool value,std::string& error);
     bool set_caption_reference(u16 object,const StarLocaleCaption& caption,std::string& error);
+    bool set_caption_text(u16 object,const std::u16string& text,std::string& error);
+    // DF6D80 passes root rectangle translated to (0,0); 806E00 floors centered local position.
+    bool center_in_root(u16 object,std::string& error);
     bool image_target(u16 window,u16& drawable,std::string& error) const;
     bool current_image(u16 window,spui::ImageBinding& out,std::string& error) const;
     // CF3C4EAE only; override keyed by drawable identity, so windows sharing it share the image

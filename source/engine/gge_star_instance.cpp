@@ -91,6 +91,39 @@ bool StarUiInstance::set_caption_reference(u16 object,const StarLocaleCaption& c
     w.caption.clear(); w.caption_raw.clear(); w.caption_table=caption.table; w.caption_key=caption.key;
     w.caption_is_ref=true; w.caption_key_seen=true; error.clear(); return true;
 }
+bool StarUiInstance::set_caption_text(u16 object,const std::u16string& text,std::string& error) {
+    const auto n=find_object(object);
+    if (!n||text.size()>4096) { error="star caption target/text limit invalid"; return false; }
+    std::string utf8;
+    for (size_t i=0;i<text.size();++i) {
+        u32 c=text[i];
+        if (c>=0xd800&&c<=0xdbff) {
+            if (i+1>=text.size()||text[i+1]<0xdc00||text[i+1]>0xdfff) { error="unpaired UTF-16 caption surrogate"; return false; }
+            c=0x10000+((c-0xd800)<<10)+(text[++i]-0xdc00);
+        } else if (c>=0xdc00&&c<=0xdfff) { error="unpaired UTF-16 caption surrogate"; return false; }
+        if (!c) { error="embedded NUL in caption unsupported by host painter"; return false; }
+        if (c<0x80) utf8+=char(c);
+        else if (c<0x800) { utf8+=char(0xc0|(c>>6)); utf8+=char(0x80|(c&63)); }
+        else if (c<0x10000) { utf8+=char(0xe0|(c>>12)); utf8+=char(0x80|((c>>6)&63)); utf8+=char(0x80|(c&63)); }
+        else { utf8+=char(0xf0|(c>>18)); utf8+=char(0x80|((c>>12)&63)); utf8+=char(0x80|((c>>6)&63)); utf8+=char(0x80|(c&63)); }
+    }
+    auto& w=layout_.windows[*n]; w.caption=std::move(utf8); w.caption_raw.clear();
+    w.caption_table=w.caption_key=0; w.caption_is_ref=w.caption_key_seen=false; error.clear(); return true;
+}
+bool StarUiInstance::center_in_root(u16 object,std::string& error) {
+    const auto n=find_object(object);
+    if (!n||*n==root_||!layout_.windows[*n].has_area||!layout_.windows[*n].area.valid()) {
+        error="star centering target/area unavailable"; return false;
+    }
+    auto windows=layout_.windows; auto& w=windows[*n];
+    const float width=w.area.w(),height=w.area.h();
+    const float x=std::floor((windows[root_].area.w()-width)*.5f);
+    const float y=std::floor((windows[root_].area.h()-height)*.5f);
+    w.area={x,y,x+width,y+height}; // local SetLocation semantics; not an absolute-parent transform
+    if (!w.area.valid()) { error="star centering collapses geometry"; return false; }
+    if (!refresh(windows,root_,error)) return false;
+    layout_.windows=std::move(windows); error.clear(); return true;
+}
 bool StarUiInstance::move_root(const StarUiPlacement& placement,std::string& error) {
     if (!active()||!std::isfinite(placement.x)||!std::isfinite(placement.y)) {
         error="star root move unavailable/invalid"; return false;

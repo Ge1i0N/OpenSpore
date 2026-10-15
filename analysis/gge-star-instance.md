@@ -57,6 +57,8 @@ The [image follow-up](gge-image-bindings.md) now supports explicit CF3C4EAE imag
 inside one instance, including shared drawable identity. It does not mark phase1 or native mount complete.
 The [Animated Icon follow-up](gge-animated-icon.md) adds separate per-window static frame/atlas bindings,
 with explicit object selection, constructor1 and invalid-index no-op results; no playback/mount completion.
+The [host lifecycle owner](gge-star-lifecycle.md) now joins independent action application/retry with
+generation tickets, exact UTF text and floor/local centering; it still does not mount a native card.
 
 ## Separate scene/camera setup
 

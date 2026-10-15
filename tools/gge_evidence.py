@@ -93,6 +93,26 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--lifecycle' in sys.argv:
+        import struct
+        dest=ROOT/'analysis/audit/gge-star-lifecycle'; dest.mkdir(parents=True,exist_ok=True)
+        facts={'oracle_sha256':digest,'authority':'retained GA phase1/config/image evidence; lifecycle orchestration itself is HOST policy, not native runtime',
+               'center_helper':'806E00 obtains target rect, floor(((reference size-target size)*half)+reference origin), SetLocation slot64; DF6D80 reference is zero-origin root extents',
+               'half_constant':{'va':'0x0145BE38','file_bytes':pe.read(0x145be38,4).hex(),'float':struct.unpack('<f',pe.read(0x145be38,4))[0]},
+               'host_scope':['owned immutable input snapshot, generation tickets, synchronous open/apply/close',
+                             'available independent actions in plan order, then separate configuration actions; NOT native dependency execution order',
+                             'applied/observed/reference-bound/known no-op statuses settle; failures remain explicit and retry on later pass',
+                             'one exact-key result per host pass including failures, no cross-pass resource precedence or discovery',
+                             'image versus frame configuration choices validated separately; no first-match duplicate selection',
+                             'reentrant open/close/apply rejected; backend exceptions become failed asset results',
+                             'UTF16-to-UTF8 inline name, bounded malformed/NUL rejection; locale reference binding NOT locale availability'],
+               'unimplemented':['tooltip/userdata native pointers','layer relation/selected terrain services','profile service/name','timestamp/colour service',
+                                'native phase latch/listeners/plugins/mount','automatic GGE caller, catalogue discovery, scene/camera/effects'],
+               'verification':'gge_star_lifecycle_verify: controlled metadata on actual SPUI/PNG; atlas PNG in clearly constructed bounded DBPF carrier; no new live GGE/GPU scene claim'}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        (dest/'local-centering.asm.txt').write_text(header+'\n'.join(disasm(pe,0x806e00,0x806e9e))+'\n',encoding='utf-8',newline='\n')
+        print('retained centering constant/instructions and explicit host lifecycle policy; no target execution')
+        return
     if '--animated' in sys.argv:
         dest=ROOT/'analysis/audit/gge-animated'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'static GA instructions + shipped SPUI/XML; host static selector only',
