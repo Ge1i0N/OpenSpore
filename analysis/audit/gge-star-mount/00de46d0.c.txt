@@ -1,0 +1,66 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE46D0
+
+void __fastcall FUN_00de46d0(int param_1)
+
+{
+  int *piVar1;
+  int *piVar2;
+  undefined4 uVar3;
+
+  FUN_00ddd920();
+  DAT_016a1348 = 1;
+  if (*(int *)(param_1 + 0x15c) == 0) {
+    piVar1 = (int *)FUN_0067dd90();
+    piVar2 = (int *)(**(code **)(*piVar1 + 0x4c))(0x2dda976,"GGE effects world");
+    piVar1 = *(int **)(param_1 + 0x15c);
+    if (piVar2 != piVar1) {
+      if (piVar2 != (int *)0x0) {
+        (**(code **)*piVar2)();
+      }
+      *(int **)(param_1 + 0x15c) = piVar2;
+      if (piVar1 != (int *)0x0) {
+        (**(code **)(*piVar1 + 4))();
+      }
+    }
+  }
+  piVar1 = (int *)FUN_0067dd90();
+  (**(code **)(*piVar1 + 0x98))(10,1);
+  FUN_0067ca90();
+  uVar3 = FUN_0080dd30();
+  *(undefined4 *)(param_1 + 0xcc) = uVar3;
+  uVar3 = DAT_016a0d18;
+  FUN_0067ca90(DAT_016a0d18);
+  FUN_0080dcf0(uVar3);
+  if (*(int **)(param_1 + 0x168) != (int *)0x0) {
+    (**(code **)(**(int **)(param_1 + 0x168) + 0xc))(1);
+  }
+  uVar3 = 0x780786fd;
+  FUN_00b3d330(0x780786fd);
+  FUN_00b5cef0(uVar3);
+  if (*(int *)(param_1 + 0x198) == 0) {
+    piVar1 = (int *)FUN_0067dcd0();
+    piVar1 = (int *)(**(code **)(*piVar1 + 0x50))();
+    piVar2 = (int *)(**(code **)(*piVar1 + 0x38))();
+    piVar1 = *(int **)(param_1 + 0x198);
+    if (piVar2 != piVar1) {
+      if (piVar2 != (int *)0x0) {
+        (**(code **)*piVar2)();
+      }
+      *(int **)(param_1 + 0x198) = piVar2;
+      if (piVar1 != (int *)0x0) {
+        (**(code **)(*piVar1 + 4))();
+      }
+    }
+  }
+  FUN_00b3d5d0();
+  FUN_00ad7d40();
+  FUN_00b3d5d0();
+  FUN_00ad7cc0();
+  FUN_00b3d5d0();
+  FUN_00adff50();
+  return;
+}

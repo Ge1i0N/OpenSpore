@@ -15,8 +15,10 @@ No original runtime observed. Controlled camera inputs + real SPUI corpus, not a
 All observations are explicit. Missing matrix/window/root/current position/saved margins/global
 stage-text flag blocks the relevant helper. There is **no** implicit identity camera, fabricated
 viewport/margins, forced Intro completion or source-readiness signal. Identity matrices are used
-only in controlled tests. The host does not instantiate per-record layouts, run original image-list
-plugins, apply flag requests or create camera/galaxy/effect objects yet.
+only in controlled tests. The host does not run original image-list plugins, create camera/galaxy/effect
+objects or attach entries to runtime GGE yet. Follow-up [owned host instances](gge-star-instance.md)
+now apply explicit object-index window mutations/movement and expose a pixel-layer renderer hook;
+no native phase1/plugin/callback readiness is implied.
 
 **Screen appearance is unchanged.** The visible GGE primary layout is still diagnostic. This moves
 the implementation toward the visual layer without presenting an artwork-only/synthetic galaxy

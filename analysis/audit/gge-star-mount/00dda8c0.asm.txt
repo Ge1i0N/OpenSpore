@@ -1,0 +1,40 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DDA8C0
+
+00dda8c0  PUSH ESI
+00dda8c1  MOV ESI,ECX
+00dda8c3  PUSH EDI
+00dda8c4  XOR EDI,EDI
+00dda8c6  MOV dword ptr [ESI],EDI
+00dda8c8  MOV dword ptr [ESI + 0x4],EDI
+00dda8cb  MOV dword ptr [ESI + 0x8],EDI
+00dda8ce  MOV dword ptr [ESI + 0x14],EDI
+00dda8d1  MOV dword ptr [ESI + 0x18],EDI
+00dda8d4  MOV dword ptr [ESI + 0x1c],EDI
+00dda8d7  MOV dword ptr [ESI + 0x20],EDI
+00dda8da  MOV dword ptr [ESI + 0x24],EDI
+00dda8dd  MOV dword ptr [ESI + 0x28],EDI
+00dda8e0  MOV dword ptr [ESI + 0x2c],EDI
+00dda8e3  XOR ECX,ECX
+00dda8e5  MOV word ptr [ESI + 0x3a],CX
+00dda8e9  XOR EAX,EAX
+00dda8eb  MOV word ptr [ESI + 0x38],AX
+00dda8ef  MOVSS XMM0,dword ptr [0x016a0b0c]
+00dda8f7  MOVSS dword ptr [ESI + 0x3c],XMM0
+00dda8fc  MOVSS XMM0,dword ptr [0x016a0b10]
+00dda904  MOVSS dword ptr [ESI + 0x40],XMM0
+00dda909  MOVSS XMM0,dword ptr [0x016a0b14]
+00dda911  MOVSS dword ptr [ESI + 0x44],XMM0
+00dda916  MOVSS XMM0,dword ptr [0x01453740]
+00dda91e  PUSH 0x16a0b28
+00dda923  LEA ECX,[ESI + 0x4c]
+00dda926  MOVSS dword ptr [ESI + 0x48],XMM0
+00dda92b  CALL 0x0041cb30
+00dda930  MOV dword ptr [ESI + 0x70],EDI
+00dda933  POP EDI
+00dda934  MOV EAX,ESI
+00dda936  POP ESI
+00dda937  RET

@@ -27,6 +27,9 @@ CATALOG_FUNCTIONS = (0xb3d3a0, 0xba6450, 0x5c66d0, 0xba6380, 0xbb61c0, 0xbb24d0,
                      0xbac7b0, 0xbb4d40, 0xbb8c90, 0xb26ce0, 0xb26f90,
                       0xdf95a0, 0xdf7cb0, 0xdf7f30, 0xb27580)
 PRESENT_FUNCTIONS = (0xde3c20,0x7c4250,0x805f90,0xdf6010,0xdf6110,0xdf9200,0xdf7690,0xdf9160)
+MOUNT_FUNCTIONS = (0xdf7690,0xdf6d80,0xdf9160,0xdf82a0,0x812250,0x8121c0,0x812100,
+                   0x811c20,0x811bc0,0x8102a0,0x80f7d0,0xde46d0,0xddd920,0xdda8c0,
+                   0xddd150,0xddb730,0xdda940)
 
 
 def main():
@@ -34,8 +37,9 @@ def main():
     flow = '--flow' in sys.argv
     catalog = '--catalog' in sys.argv
     present = '--present' in sys.argv
-    addresses = PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
+    mount = '--mount' in sys.argv
+    addresses = MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
@@ -83,6 +87,49 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--mount' in sys.argv:
+        dest=ROOT/'analysis/audit/gge-star-mount'
+        dest.mkdir(parents=True,exist_ok=True)
+        facts={'oracle_sha256':digest,'authority':'static GA instructions + shipped star layout, no original runtime',
+               'mount_chain':['0xDF7690 clears local phase +0x2C and tooltip userdata0x037AC490; unloads prior UI',
+                              'layout name ->0x812250: resource tag0x0510A95B, group0x40464100, parent lookup=true, mount0x05B598FA',
+                              '0x8121C0/0x812100/0x811C20 load and parent-attach native root objects',
+                              '0x80F7D0 allocates/retains layered object, stored at game-ui-data +0x8C',
+                              'if load true: 0xDF6D80 phase1; if its result true: attach four controller listeners via window slot+0x104',
+                              'DF7690 returns load result even if later phase initialization failed; not native readiness'],
+               'listener_controls':['0x03753F40','0x04656452','0x046A9CA7','0x0638491D'],
+               'phase1_dependencies':['root/related controls, thumbnail and main image resources',
+                                      'stage-specific image/plugin and locale/name services',
+                                      'current selected star/planet/profile state and UI notifications'],
+               'lookup_boundary':'0x8102A0 enumerates loaded native objects, queries window interface then recursive vtable+0xF0; dynamic order not established by serialized IDs alone',
+               'scene_chain':['0xDE46D0 ->0xDDD920: allocates 0x74 Simulator object, ctor0xDDA8C0, init0xDDD150; global0x16A0B08',
+                              'DDD150 calls factories from0x67DD40/0x67DD50, registers render stages via0x67DD10; exact factory semantics not all recovered',
+                              'DE46D0 separately requests GGE effects world ID0x02DDA976 from0x67DD90; controller +0x15C',
+                              'controller +0x198 acquired via renderer0x67DCD0 slot+0x50 then returned interface slot+0x38; not assumed identical to active projection camera'],
+               'host_instance_scope':['owned decoded-window snapshot, caller-issued nonzero identity and per-instance object indices',
+                                      'window flag/caption overlays and root geometry recomputed without template/sibling mutation',
+                                      'pixel-space picking shares inherited Clip, no whole-layout design-rescale',
+                                      'raw Object properties retained as provenance, NOT rewritten serialization',
+                                      'no native layer/phase1/plugin/listener/tooltip/effect/camera or scene completion',
+                                      'current Main->GGE appearance and Unknown dependencies unchanged']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        corpus=[]
+        for package,record,instance,data in layouts(sorted((ROOT/'build/bin/Debug').rglob('*.package')),0x21df01f2):
+            parsed=BinaryLayout(data).parse()
+            controls={}
+            for index,obj in parsed.windows.items():
+                for prop in obj['properties']:
+                    if prop['id']==0xeec1b001 and prop.get('raw'):
+                        control=int.from_bytes(bytes.fromhex(prop['raw']),'little')
+                        controls.setdefault(hex(control),[]).append(index)
+            corpus.append({'package':package.name,'record':record,'sha256':hashlib.sha256(data).hexdigest(),
+                           'objects':len(parsed.objects),'windows':len(parsed.windows),
+                           'duplicate_controls':{key:ids for key,ids in controls.items() if len(ids)>1},
+                           'positioning_root_objects':controls.get('0x2e5a4a8',[])})
+        (dest/'control-identity-corpus.json').write_text(json.dumps(corpus,indent=2)+'\n',encoding='utf-8',newline='\n')
+        (dest/'scene-creation-call.asm.txt').write_text(header+'\n'.join(disasm(pe,0xddd920,0xddd95c))+'\n',encoding='utf-8',newline='\n')
+        print('retained native mounting/phase1/scene boundary and real duplicate-control identities')
+        return
     if '--present' in sys.argv:
         dest=ROOT/'analysis/audit/gge-star-present'
         dest.mkdir(parents=True,exist_ok=True)

@@ -16,6 +16,8 @@
 
 namespace os::spui {
 struct Layout;
+struct Rect;
+struct Window;
 }  // namespace os::spui
 
 struct IDirect3DTexture9;
@@ -27,6 +29,13 @@ namespace os::states {
 // outcome, for the frame and the log - "state 'DevLauncher' asked for 'E3LaunchScreen'" is a
 // different claim about progress than "state 'X' names no layout".
 const os::spui::Layout* requested_by_state(std::string& why);
+
+// Paint an owned/moved layout into an ALREADY active D3D/Overlay frame in pixel coordinates.
+// No begin/end/clear, design-resolution rescaling, state transition or click dispatch. Clip is reset
+// after drawing. Intended for separately owned per-entry layers; this is a renderer hook, NOT native
+// GGE mounting/camera/scene readiness. hovered, if supplied, must refer to this layout's window.
+int draw_spui_pixel_layer(const os::spui::Layout& lay,const os::spui::Rect& viewport,
+                          const os::spui::Window* hovered=nullptr);
 
 // Draws `lay` scaled to the viewport over an optional full-screen background, presenting a complete
 // frame. Returns the number of windows drawn, or -1 when there is no D3D device or the frame could

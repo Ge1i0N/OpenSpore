@@ -1,0 +1,59 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DDB730
+
+void __fastcall FUN_00ddb730(int *param_1)
+
+{
+  undefined4 *puVar1;
+  int *piVar2;
+
+  puVar1 = (undefined4 *)*param_1;
+  if (puVar1 != (undefined4 *)param_1[1]) {
+    do {
+      FUN_00ddb5a0(*puVar1);
+      puVar1 = (undefined4 *)*param_1;
+    } while (puVar1 != (undefined4 *)param_1[1]);
+  }
+  piVar2 = (int *)FUN_0067dd10();
+  (**(code **)(*piVar2 + 0x50))(0x14);
+  piVar2 = (int *)FUN_0067dd40();
+  (**(code **)(*piVar2 + 0x18))(0x7b6877e);
+  (**(code **)(*piVar2 + 0x18))(0x7d23d13);
+  (**(code **)(*piVar2 + 0x18))(0x7d23d14);
+  (**(code **)(*piVar2 + 0x18))(0x7d23d15);
+  piVar2 = (int *)param_1[6];
+  if (piVar2 != (int *)0x0) {
+    param_1[6] = 0;
+    (**(code **)(*piVar2 + 4))();
+  }
+  piVar2 = (int *)param_1[7];
+  if (piVar2 != (int *)0x0) {
+    param_1[7] = 0;
+    (**(code **)(*piVar2 + 4))();
+  }
+  piVar2 = (int *)FUN_0067dd50();
+  (**(code **)(*piVar2 + 0x20))(0x7b6877f);
+  piVar2 = (int *)param_1[8];
+  if (piVar2 != (int *)0x0) {
+    param_1[8] = 0;
+    (**(code **)(*piVar2 + 4))();
+  }
+  piVar2 = (int *)param_1[5];
+  if (piVar2 != (int *)0x0) {
+    param_1[5] = 0;
+    (**(code **)(*piVar2 + 4))();
+  }
+  (**(code **)(*(int *)param_1[0x1c] + 0x20))();
+  piVar2 = (int *)param_1[0x1c];
+  if (piVar2 == (int *)0x0) {
+    return;
+  }
+  param_1[0x1c] = 0;
+                    /* WARNING: Could not recover jumptable at 0x00ddb814. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+  (**(code **)(*piVar2 + 4))();
+  return;
+}

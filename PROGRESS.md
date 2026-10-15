@@ -35,6 +35,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | Save file-header subset | first root frame, actual major/minor/mode/timestamp/planet key; unsigned major>=33 probe | explicit DBPF only; map/snapshot/root tail opaque, no save discovery/real-save corpus; planet-name subset below |
 | PlanetRecord / saved adapter | nested prefixes/six fields, counted ResourceKeys/filtering and first selected name → typed saved metadata | controlled generation/terrain/header observations; no discovery, real corpus, candidate producer or GGE scene |
 | GGE star presentation calculations | explicit-camera projection, root centering/saved clamp/4px deadband, stage/caption/flag plan; real star-layout controls bound | no camera creation/per-entry mounting/plugins/effects/runtime scene; current screen unchanged |
+| GGE owned host instances | separate window graphs per entry, explicit object-index overlays, recomputed geometry/Clip/pixel picking and shared renderer hook | native mount/phase1/plugins/listeners/camera/scene absent; no automatic GGE instantiation or changed screen |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
 
@@ -64,6 +65,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | Save file-header / GGE boundary | 116 constructed checks: exact field IDs, unsigned guard, versions not identities, explicit DBPF and typed predicate integration | `save_header_verify`, `save_header_inspect`; [evidence/limits](analysis/save-header.md) |
 | Planet selection / saved adapter | 291 constructed checks: prefix boundaries, Unknown/order/flags, exact DBPF keys, decoded fields → typed GGE projection | `planet_record_verify`, `planet_record_inspect`; [evidence/limits](analysis/planet-record.md) |
 | GGE star projection/placement/configuration | 50 checks, two real 152-object/58-window layouts; controlled camera only, no original execution | `gge_star_present_verify <fixtures>`; [evidence/limits](analysis/gge-star-present.md) |
+| GGE host star instances | 167 checks on two real layouts + controlled graph failures; duplicate ControlIDs not collapsed; template/sibling isolation | `gge_star_instance_verify <fixtures>`; [host/native boundary](analysis/gge-star-instance.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

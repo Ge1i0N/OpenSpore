@@ -1,0 +1,22 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  ddd920:	6a 00                	push   0x0
+  ddd922:	6a 00                	push   0x0
+  ddd924:	6a 00                	push   0x0
+  ddd926:	6a 00                	push   0x0
+  ddd928:	68 90 09 3f 01       	push   0x13f0990
+  ddd92d:	6a 74                	push   0x74
+  ddd92f:	e8 0c 99 16 00       	call   0xf47240
+  ddd934:	83 c4 18             	add    esp,0x18
+  ddd937:	85 c0                	test   eax,eax
+  ddd939:	74 13                	je     0xddd94e
+  ddd93b:	8b c8                	mov    ecx,eax
+  ddd93d:	e8 7e cf ff ff       	call   0xdda8c0
+  ddd942:	a3 08 0b 6a 01       	mov    ds:0x16a0b08,eax
+  ddd947:	8b c8                	mov    ecx,eax
+  ddd949:	e9 02 f8 ff ff       	jmp    0xddd150
+  ddd94e:	33 c0                	xor    eax,eax
+  ddd950:	a3 08 0b 6a 01       	mov    ds:0x16a0b08,eax
+  ddd955:	8b c8                	mov    ecx,eax
+  ddd957:	e9 f4 f7 ff ff       	jmp    0xddd150

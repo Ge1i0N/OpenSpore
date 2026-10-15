@@ -86,6 +86,15 @@ test with `-w -devDirs`; retain evidence and commit.
   each 152 objects/58 windows. Camera/window/root/current/margins/global flag Unknown blocks relevant
   helper; no default identity/cull guessed. NO runtime camera creation/mount/effects, screen unchanged.
   `analysis/gge-star-present.md` / `audit/gge-star-present/` retain evidence.
+- `engine/gge_star_instance.*`: owned noncopyable host window graphs, explicit object-index flags/
+  caption refs, atomic root/descendant movement, effective ancestor flags and pixel picking. 167
+  checks on two real layouts plus controlled graph errors. Duplicate ControlID0x026E0002 maps to
+  objects45/55: no first-ID collapse or native dynamic lookup assumption. Shared renderer now has
+  `states::draw_spui_pixel_layer` (1:1 pixels, no state/click dispatch); GGE has no live caller yet.
+  Native mount remains false: load result DF7690 != phase1 DF6D80 completion, plugins/listeners/
+  thumbnail/profile dependencies missing. Scene setup traced DE46D0->DDD920->DDD150 plus separate
+  GGE effects world0x02DDA976; exact factories/camera identities not all recovered.
+  `analysis/gge-star-instance.md` / `audit/gge-star-mount/` retain 17 functions and corpus identities.
 
 ## Next, in order
 
@@ -105,9 +114,12 @@ test with `-w -devDirs`; retain evidence and commit.
     corrected/tested; actual generation/profile/property ports and save-stem producer remain open.
     Planet structural reader/selection + typed saved adapter are implemented; join context saved-list
     references with explicit planet/header/terrain sources, keeping all missing/unsupported statuses.
-    Visible boundary: math/config subset is now ported (gge_star_present); next recover camera/scene
-    creation and per-entry mount0xDF7690 / entry0xDF9200, then actual observed-geometry layout mutation
-    and draw/pick; 0xDF8300 effects. No forced Intro/state2 or fake source/camera readiness.
+    Visible boundary: math/config + owned host geometry/mutation/pick/pixel-layer hook are implemented,
+    but not attached to GGE. Next recover phase1 thumbnail/main-image/plugin/listener ports (DF6D80)
+    and scene factory contracts (DDD150 via67DD40/50, render stages67DD10), actual camera acquisition
+    from renderer67DCD0(+50 -> returned +38 versus active +58). Controller +198 is not proven the
+    same camera as active projection. Effects world separate67DD90. Then source-to-instance lifecycle
+    and real draw/selection; no forced Intro/state2 or fabricated source/camera readiness.
     Header word decoder is implemented but filesystem missing/error
     semantics and actual save-name producer are not. Frame/metadata and wire-shape
     decoding are bounded subsets; do not repeat BSS reads of `0x1689C50` or treat context values as
@@ -123,7 +135,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -139,6 +151,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\save_header_verify.exe
 .\build\Debug\planet_record_verify.exe
 .\build\Debug\gge_star_present_verify.exe $fixtures
+.\build\Debug\gge_star_instance_verify.exe $fixtures
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

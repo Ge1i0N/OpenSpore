@@ -1,0 +1,35 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00811C20
+
+00811c20  PUSH EDI
+00811c21  MOV EDI,ECX
+00811c23  CMP dword ptr [EDI + 0x88],0x0
+00811c2a  JZ 0x00811c69
+00811c2c  PUSH ESI
+00811c2d  MOV ESI,dword ptr [EDI + 0x64]
+00811c30  CMP ESI,dword ptr [EDI + 0x68]
+00811c33  JZ 0x00811c60
+00811c35  MOV ECX,dword ptr [ESI]
+00811c37  MOV EAX,dword ptr [ECX]
+00811c39  MOV EDX,dword ptr [EAX + 0xc]
+00811c3c  PUSH 0xeeee8218
+00811c41  ADD ESI,0x4
+00811c44  CALL EDX
+00811c46  TEST EAX,EAX
+00811c48  JZ 0x00811c5b
+00811c4a  MOV ECX,dword ptr [EDI + 0x88]
+00811c50  MOV EDX,dword ptr [ECX]
+00811c52  PUSH EAX
+00811c53  MOV EAX,dword ptr [EDX + 0xd8]
+00811c59  CALL EAX
+00811c5b  CMP ESI,dword ptr [EDI + 0x68]
+00811c5e  JNZ 0x00811c35
+00811c60  POP ESI
+00811c61  MOV ECX,EDI
+00811c63  POP EDI
+00811c64  JMP 0x008113d0
+00811c69  POP EDI
+00811c6a  RET

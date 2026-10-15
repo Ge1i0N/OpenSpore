@@ -1,6 +1,7 @@
 #include "states/uipresent.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <filesystem>
 #include <map>
@@ -209,47 +210,21 @@ void dispatch_click(const os::spui::Layout& lay, int vw, int vh) {
     }
 }
 
-int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
-                        IDirect3DTexture9* bg, int bg_w, int bg_h) {
+namespace {
+size_t paint_spui_layer(const os::spui::Layout& lay,float sx,float sy,int w,int h,
+                        const os::spui::Rect& layer_clip,const os::spui::Window* hovered) {
     using namespace os::render;
-    Device& dev = device();
     Overlay& ov = overlay();
-    if (!dev.d3d()) return -1;
-    if (!dev.begin_frame()) return -1;
-    const int w = dev.width(), h = dev.height();
-    dev.clear(0xFF0A0C10);
-    ov.begin(w, h);
-    if (bg) ov.image(0.f, 0.f, (float)w, (float)h, bg, bg_w, bg_h, false);
-
-    if (why != g_why_logged) {
-        LOG_INFO("ui", "screen: %s -> %s", why.c_str(), lay.name().c_str());
-        g_why_logged = why;
-    }
-
-    // Design resolution from the layout itself, through the SAME accessor the hit-test uses, so a
-    // click can never land beside the box the user was aiming at.
-    float dw = 0.f, dh = 0.f;
-    lay.design_resolution(dw, dh);
-    const float sx = dw > 1.f ? (float)w / dw : 1.f;
-    const float sy = dh > 1.f ? (float)h / dh : 1.f;
-
-    char head[160];
-    std::snprintf(head, sizeof(head), "spui layout: %s  scaled x%.3f / x%.3f",
-                  lay.name().c_str(), sx, sy);
-    ov.text_fmt(48.f, 22.f, 0xFF8FB8D8, "%s", head);
-    ov.text_fmt(48.f, 38.f, 0xFF6E8FA8, "chosen because: %s", why.c_str());
-
     size_t drawn = 0;
     // Parent before its serialized Children, with ancestor visibility applied by paint_order().
     const std::vector<size_t> order = os::spui::paint_order(lay);
-    const auto* hovered = os::spui::hit_test(lay, (float)input::x(), (float)input::y(), (float)w, (float)h);
     for (size_t oi : order) {
         const auto& win = lay.windows[oi];
         if (!win.has_area) continue;
         const float x = win.placed_area.left * sx, y = win.placed_area.top * sy;
         const float bw = win.placed_area.w() * sx, bh = win.placed_area.h() * sy;
         if (x + bw < 0.f || y + bh < 0.f || x > (float)w || y > (float)h) continue;
-        const auto clip = os::spui::inherited_clip(lay, oi, {0, 0, (float)w/sx, (float)h/sy});
+        const auto clip = os::spui::inherited_clip(lay, oi, layer_clip);
         if (!clip.valid() || !ov.set_clip(clip.left*sx, clip.top*sy, clip.right*sx, clip.bottom*sy)) continue;
         // The window's own colour, used AS STORED including its alpha. Forcing alpha to 0xFF here
         // (which an earlier revision did) turned the layout into opaque slabs: the shipped values
@@ -304,6 +279,48 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
         // over 524 distinct layouts), so it only fires on a corrupt stream.
         if (++drawn >= 4096) break;
     }
+    return drawn;
+}
+} // namespace
+
+int draw_spui_pixel_layer(const os::spui::Layout& lay,const os::spui::Rect& viewport,
+                          const os::spui::Window* hovered) {
+    auto& dev=render::device();
+    if (!dev.d3d()||!viewport.valid()||!std::isfinite(viewport.left)||!std::isfinite(viewport.top)||
+        !std::isfinite(viewport.right)||!std::isfinite(viewport.bottom)) return -1;
+    const os::spui::Rect clip{std::max(0.f,viewport.left),std::max(0.f,viewport.top),
+        std::min((float)dev.width(),viewport.right),std::min((float)dev.height(),viewport.bottom)};
+    if (!clip.valid()) return 0;
+    const auto drawn=paint_spui_layer(lay,1,1,dev.width(),dev.height(),clip,hovered);
+    render::overlay().reset_clip();
+    return (int)drawn;
+}
+
+int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
+                        IDirect3DTexture9* bg, int bg_w, int bg_h) {
+    using namespace os::render;
+    Device& dev = device();
+    Overlay& ov = overlay();
+    if (!dev.d3d()) return -1;
+    if (!dev.begin_frame()) return -1;
+    const int w = dev.width(), h = dev.height();
+    dev.clear(0xFF0A0C10);
+    ov.begin(w, h);
+    if (bg) ov.image(0.f, 0.f, (float)w, (float)h, bg, bg_w, bg_h, false);
+    if (why != g_why_logged) {
+        LOG_INFO("ui", "screen: %s -> %s", why.c_str(), lay.name().c_str());
+        g_why_logged = why;
+    }
+    float dw = 0.f, dh = 0.f;
+    lay.design_resolution(dw, dh);
+    const float sx = dw > 1.f ? (float)w / dw : 1.f;
+    const float sy = dh > 1.f ? (float)h / dh : 1.f;
+    char head[160];
+    std::snprintf(head, sizeof(head), "spui layout: %s  scaled x%.3f / x%.3f",lay.name().c_str(),sx,sy);
+    ov.text_fmt(48.f, 22.f, 0xFF8FB8D8, "%s", head);
+    ov.text_fmt(48.f, 38.f, 0xFF6E8FA8, "chosen because: %s", why.c_str());
+    const auto* hovered=os::spui::hit_test(lay,(float)input::x(),(float)input::y(),(float)w,(float)h);
+    const size_t drawn=paint_spui_layer(lay,sx,sy,w,h,{0,0,(float)w/sx,(float)h/sy},hovered);
     ov.reset_clip(); // diagnostics below are outside the per-window scissor
     if (const auto* gs = os::appstates::instance().find(manager().current_name())) {
         if (os::appmodes::primary_ui(gs->mode.c_str())) {

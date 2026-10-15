@@ -1,0 +1,38 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static GA instructions + shipped star layout, no original runtime",
+  "mount_chain": [
+    "0xDF7690 clears local phase +0x2C and tooltip userdata0x037AC490; unloads prior UI",
+    "layout name ->0x812250: resource tag0x0510A95B, group0x40464100, parent lookup=true, mount0x05B598FA",
+    "0x8121C0/0x812100/0x811C20 load and parent-attach native root objects",
+    "0x80F7D0 allocates/retains layered object, stored at game-ui-data +0x8C",
+    "if load true: 0xDF6D80 phase1; if its result true: attach four controller listeners via window slot+0x104",
+    "DF7690 returns load result even if later phase initialization failed; not native readiness"
+  ],
+  "listener_controls": [
+    "0x03753F40",
+    "0x04656452",
+    "0x046A9CA7",
+    "0x0638491D"
+  ],
+  "phase1_dependencies": [
+    "root/related controls, thumbnail and main image resources",
+    "stage-specific image/plugin and locale/name services",
+    "current selected star/planet/profile state and UI notifications"
+  ],
+  "lookup_boundary": "0x8102A0 enumerates loaded native objects, queries window interface then recursive vtable+0xF0; dynamic order not established by serialized IDs alone",
+  "scene_chain": [
+    "0xDE46D0 ->0xDDD920: allocates 0x74 Simulator object, ctor0xDDA8C0, init0xDDD150; global0x16A0B08",
+    "DDD150 calls factories from0x67DD40/0x67DD50, registers render stages via0x67DD10; exact factory semantics not all recovered",
+    "DE46D0 separately requests GGE effects world ID0x02DDA976 from0x67DD90; controller +0x15C",
+    "controller +0x198 acquired via renderer0x67DCD0 slot+0x50 then returned interface slot+0x38; not assumed identical to active projection camera"
+  ],
+  "host_instance_scope": [
+    "owned decoded-window snapshot, caller-issued nonzero identity and per-instance object indices",
+    "window flag/caption overlays and root geometry recomputed without template/sibling mutation",
+    "pixel-space picking shares inherited Clip, no whole-layout design-rescale",
+    "raw Object properties retained as provenance, NOT rewritten serialization",
+    "no native layer/phase1/plugin/listener/tooltip/effect/camera or scene completion",
+    "current Main->GGE appearance and Unknown dependencies unchanged"
+  ]
+}
