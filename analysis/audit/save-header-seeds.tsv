@@ -1,0 +1,2 @@
+# GA initializer aligned at 0x131B210; descriptors are runtime data, not raw file bytes.
+0x0131b210	function	os_SaveHeader_serialization_descriptors

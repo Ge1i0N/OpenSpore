@@ -1,0 +1,158 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x0131B210
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+void os_SaveHeader_serialization_descriptors(void)
+
+{
+  int iVar1;
+  char **ppcVar2;
+  undefined4 *puVar3;
+  char *apcStack_3c [6];
+  undefined4 uStack_24;
+  undefined1 *puStack_20;
+  undefined1 *puStack_1c;
+  code *pcStack_18;
+  code *pcStack_14;
+  code *pcStack_10;
+  code *pcStack_c;
+  code *pcStack_8;
+  code *pcStack_4;
+
+  apcStack_3c[0] = "mFileVersionMajor";
+  apcStack_3c[1] = (char *)0x4162d88;
+  uStack_24 = 0;
+  puStack_20 = (undefined1 *)0x0;
+  puStack_1c = &LAB_00692c60;
+  pcStack_18 = os_Serializer_uint32_read;
+  pcStack_14 = os_Serializer_uint32_write;
+  pcStack_10 = (code *)&LAB_00693060;
+  pcStack_c = FUN_00694ed0;
+  pcStack_8 = FUN_00b1fb30;
+  pcStack_4 = (code *)&LAB_00675c60;
+  apcStack_3c[2] = (char *)0xc;
+  ppcVar2 = apcStack_3c;
+  puVar3 = &DAT_01568b08;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  apcStack_3c[0] = "mFileVersionMinor";
+  apcStack_3c[1] = (char *)0x4162d89;
+  uStack_24 = 0;
+  puStack_20 = (undefined1 *)0x0;
+  puStack_1c = &LAB_00692c60;
+  pcStack_18 = os_Serializer_uint32_read;
+  pcStack_14 = os_Serializer_uint32_write;
+  pcStack_10 = (code *)&LAB_00693060;
+  pcStack_c = FUN_00694ed0;
+  pcStack_8 = FUN_00b1fb30;
+  pcStack_4 = (code *)&LAB_00675c60;
+  apcStack_3c[2] = (char *)0x10;
+  ppcVar2 = apcStack_3c;
+  puVar3 = &DAT_01568b44;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  apcStack_3c[0] = "mObjectCountMap";
+  apcStack_3c[1] = (char *)0x4162d8a;
+  uStack_24 = 0;
+  puStack_20 = (undefined1 *)0x0;
+  puStack_1c = &LAB_00692c60;
+  pcStack_18 = FUN_00bab7b0;
+  pcStack_14 = FUN_00ba76e0;
+  pcStack_10 = FUN_00c2e640;
+  pcStack_c = (code *)&LAB_00692f70;
+  pcStack_8 = (code *)&LAB_00d01340;
+  pcStack_4 = FUN_00b27ec0;
+  apcStack_3c[2] = (char *)0x14;
+  ppcVar2 = apcStack_3c;
+  puVar3 = &DAT_01568b80;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  apcStack_3c[0] = "mTimeStamp";
+  apcStack_3c[1] = (char *)0x4162d8b;
+  uStack_24 = 0;
+  puStack_20 = (undefined1 *)0x0;
+  puStack_1c = &LAB_00692c60;
+  pcStack_18 = os_Serializer_timestamp_read;
+  pcStack_14 = os_Serializer_timestamp_write;
+  pcStack_10 = FUN_00c2e640;
+  pcStack_c = (code *)&LAB_00692f70;
+  pcStack_8 = FUN_00b1fb30;
+  pcStack_4 = FUN_00ac7f90;
+  apcStack_3c[2] = (char *)0x30;
+  ppcVar2 = apcStack_3c;
+  puVar3 = &DAT_01568bbc;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  apcStack_3c[0] = "mGameMode";
+  apcStack_3c[1] = (char *)0x4162d8c;
+  uStack_24 = 0;
+  puStack_20 = &LAB_00b26990;
+  puStack_1c = &LAB_00692c60;
+  pcStack_18 = os_Serializer_uint32_read;
+  pcStack_14 = os_Serializer_uint32_write;
+  pcStack_10 = (code *)&LAB_00692fb0;
+  pcStack_c = FUN_00694eb0;
+  pcStack_8 = FUN_00b1fb30;
+  pcStack_4 = (code *)&LAB_0057cde0;
+  DAT_0167e064 = &DAT_01654c01;
+  apcStack_3c[2] = (char *)0x54;
+  ppcVar2 = apcStack_3c;
+  puVar3 = &DAT_01568bf8;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  apcStack_3c[0] = "mbSnapshot";
+  apcStack_3c[1] = (char *)0x64bc1cf;
+  uStack_24 = 0;
+  puStack_20 = &LAB_00b269b0;
+  puStack_1c = &LAB_00692c60;
+  pcStack_18 = (code *)&LAB_00ac8690;
+  pcStack_14 = (code *)&LAB_00ac86c0;
+  pcStack_10 = (code *)&LAB_00693060;
+  pcStack_c = FUN_00694f70;
+  pcStack_8 = FUN_00b1fb30;
+  pcStack_4 = (code *)&LAB_0057ce00;
+  apcStack_3c[2] = (char *)0x58;
+  ppcVar2 = apcStack_3c;
+  puVar3 = &DAT_01568c34;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  apcStack_3c[0] = "mCurrentPlanetKey";
+  apcStack_3c[1] = (char *)0x64be534;
+  uStack_24 = 0;
+  puStack_20 = (undefined1 *)0x0;
+  puStack_1c = &LAB_00692c60;
+  pcStack_18 = os_Serializer_resource_key_read;
+  pcStack_14 = os_Serializer_resource_key_write;
+  pcStack_10 = (code *)&LAB_00693120;
+  pcStack_c = FUN_00695060;
+  pcStack_8 = FUN_00b1fb30;
+  pcStack_4 = (code *)&LAB_00ae56a0;
+  apcStack_3c[2] = (char *)0x5c;
+  ppcVar2 = apcStack_3c;
+  puVar3 = &DAT_01568c70;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  DAT_0167e068 = 0;
+  return;
+}

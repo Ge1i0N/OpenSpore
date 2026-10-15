@@ -1,0 +1,59 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  bba710:	8d 4e 74             	lea    ecx,[esi+0x74]
+  bba713:	51                   	push   ecx
+  bba714:	8a d8                	mov    bl,al
+  bba716:	c7 86 80 00 00 00 00 	mov    DWORD PTR [esi+0x80],0x0
+  bba71d:	00 00 00
+  bba720:	e8 6b 69 84 ff       	call   0x401090
+  bba725:	8b c8                	mov    ecx,eax
+  bba727:	e8 94 4e 92 ff       	call   0x4df5c0
+  bba72c:	85 c0                	test   eax,eax
+  bba72e:	75 04                	jne    0xbba734
+  bba730:	c6 46 50 01          	mov    BYTE PTR [esi+0x50],0x1
+  bba734:	8b 56 60             	mov    edx,DWORD PTR [esi+0x60]
+  bba737:	3b 56 64             	cmp    edx,DWORD PTR [esi+0x64]
+  bba73a:	8d 7e 60             	lea    edi,[esi+0x60]
+  bba73d:	75 09                	jne    0xbba748
+  bba73f:	56                   	push   esi
+  bba740:	e8 3b 1a 0d 00       	call   0xc8c180
+  bba745:	83 c4 04             	add    esp,0x4
+  bba748:	8b 0d 94 ac 51 01    	mov    ecx,DWORD PTR ds:0x151ac94
+  bba74e:	8b 07                	mov    eax,DWORD PTR [edi]
+  bba750:	66 8b 10             	mov    dx,WORD PTR [eax]
+  bba753:	66 3b 11             	cmp    dx,WORD PTR [ecx]
+  bba756:	75 1e                	jne    0xbba776
+  bba758:	66 85 d2             	test   dx,dx
+  bba75b:	74 15                	je     0xbba772
+  bba75d:	66 8b 50 02          	mov    dx,WORD PTR [eax+0x2]
+  bba761:	66 3b 51 02          	cmp    dx,WORD PTR [ecx+0x2]
+  bba765:	75 0f                	jne    0xbba776
+  bba767:	83 c0 04             	add    eax,0x4
+  bba76a:	83 c1 04             	add    ecx,0x4
+  bba76d:	66 85 d2             	test   dx,dx
+  bba770:	75 de                	jne    0xbba750
+  bba772:	33 c0                	xor    eax,eax
+  bba774:	eb 05                	jmp    0xbba77b
+  bba776:	1b c0                	sbb    eax,eax
+  bba778:	83 d8 ff             	sbb    eax,0xffffffff
+  bba77b:	85 c0                	test   eax,eax
+  bba77d:	75 21                	jne    0xbba7a0
+  bba77f:	56                   	push   esi
+  bba780:	e8 fb 19 0d 00       	call   0xc8c180
+  bba785:	8b 07                	mov    eax,DWORD PTR [edi]
+  bba787:	83 c4 04             	add    esp,0x4
+  bba78a:	3b 47 04             	cmp    eax,DWORD PTR [edi+0x4]
+  bba78d:	75 09                	jne    0xbba798
+  bba78f:	56                   	push   esi
+  bba790:	e8 eb 19 0d 00       	call   0xc8c180
+  bba795:	83 c4 04             	add    esp,0x4
+  bba798:	57                   	push   edi
+  bba799:	8b ce                	mov    ecx,esi
+  bba79b:	e8 80 fe ff ff       	call   0xbba620
+  bba7a0:	5f                   	pop    edi
+  bba7a1:	5e                   	pop    esi
+  bba7a2:	8a c3                	mov    al,bl
+  bba7a4:	5b                   	pop    ebx
+  bba7a5:	81 c4 14 0a 00 00    	add    esp,0xa14
+  bba7ab:	c2 04 00             	ret    0x4

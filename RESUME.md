@@ -61,9 +61,17 @@ test with `-w -devDirs`; retain evidence and commit.
   `starsdb_dbpf_verify`: 266 constructed checks / 270 with optional explicit-path smoke. No real DB
   found under workspace `**/stars.db`; no profile scan. RefPack now bounds every append by declared
   decoded size. `analysis/starsdb-dbpf.md` retains key-order evidence and host version/size policies.
-- `observe_post_load` / `starsdb_postload_verify`: static `0xBBA6E0` order represented as Unknown/
-  Matched/Missing/Changed profile/name observations plus cache-reset observation; no name injection,
-  resource fallback, cleanup/event or fixup. See `analysis/starsdb-postload.md` / `audit/starsdb/postload/`.
+- `observe_post_load` / `starsdb_postload_verify`: **CORRECTED** 0xBBA6E0. Global name pointer initially
+  points to BAD_DATA; EQUALITY (not mismatch) triggers regeneration; empty name first generates once.
+  15 ordered-call/Unknown/profile checks; no service writes. Previous canonical-name, mismatch-cleanup,
+  position-cache and Unknown->Changed interpretations were wrong and removed. `+0x80` purpose remains
+  unestablished. See `analysis/starsdb-postload.md` / refreshed `audit/starsdb/postload/schema.json`.
+- `engine/save_header.*`: first root frame schema 0x1568B08, initializer 0x131B210. File version IDs
+  0x04162D88/89, unsigned major>=33 predicate (0xB27838 CMP/SETAE), NOT StarRecord saved versions.
+  `save_header_verify`: 116 constructed checks including DBPF and controlled GGE predicate integration;
+  `save_header_inspect` reads caller-selected file only. Timestamp/mode/planet key decoded; map/snapshot/
+  root tail remain opaque; missing version fields block probe rather than become false/zero.
+  `analysis/save-header.md` / `audit/starsdb/save-header/` retain evidence and planet-name boundary.
 
 ## Next, in order
 
@@ -80,7 +88,11 @@ test with `-w -devDirs`; retain evidence and commit.
     package versions not supported. Continue StarRecord name/resource/property fixups and save metadata,
     then grid/record graph and galaxy/star-grid
     generation, before attaching the typed catalog builder to live UI. Post-load observation subset is
-    done; actual profile/name/property fixups and save metadata producer remain open. Frame/metadata and wire-shape
+    corrected/tested; actual generation/profile/property ports and save-stem producer remain open.
+    Recover planet reader 0xB8EFxx / descriptor 0x156B758: 0xBBA7B0 keys star.mKey+i*0x01000000,
+    type 0x05220CB8/group1; 0xBBA900 selects/filter planets; GGE save stem is first selected planet name
+    +0x18, not simply StarRecord name. Header word decoder is implemented but filesystem missing/error
+    semantics and actual save-name producer are not. Frame/metadata and wire-shape
     decoding are bounded subsets; do not repeat BSS reads of `0x1689C50` or treat context values as
     coordinates.
     Controlled test records
@@ -94,7 +106,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -106,6 +118,8 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\starsdb_links_verify.exe
 .\build\Debug\starsdb_context_verify.exe
 .\build\Debug\starsdb_dbpf_verify.exe
+.\build\Debug\starsdb_postload_verify.exe
+.\build\Debug\save_header_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

@@ -1,0 +1,71 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x004DF740
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+004df740  PUSH EBP
+004df741  MOV EBP,ESP
+004df743  SUB ESP,0x6c
+004df746  MOV dword ptr [EBP + -0x6c],ECX
+004df749  MOV EAX,dword ptr [EBP + 0xc]
+004df74c  PUSH EAX
+004df74d  LEA ECX,[EBP + -0x14]
+004df750  PUSH ECX
+004df751  MOV ECX,dword ptr [EBP + 0x8]
+004df754  CALL 0x004e0ff0
+004df759  MOV dword ptr [EBP + -0x60],EAX
+004df75c  MOV EDX,dword ptr [EBP + -0x60]
+004df75f  MOV EAX,dword ptr [EDX + 0x4]
+004df762  MOV dword ptr [EBP + -0x5c],EAX
+004df765  MOV ECX,dword ptr [EBP + -0x60]
+004df768  MOV EDX,dword ptr [ECX]
+004df76a  MOV dword ptr [EBP + -0x58],EDX
+004df76d  MOV EAX,dword ptr [EBP + -0x58]
+004df770  MOV dword ptr [EBP + -0x8],EAX
+004df773  MOV ECX,dword ptr [EBP + -0x5c]
+004df776  MOV dword ptr [EBP + -0x4],ECX
+004df779  MOV EDX,dword ptr [EBP + 0x8]
+004df77c  MOV EAX,dword ptr [EDX + 0x8]
+004df77f  MOV ECX,dword ptr [EBP + 0x8]
+004df782  MOV EDX,dword ptr [ECX + 0x4]
+004df785  LEA EAX,[EDX + EAX*0x4]
+004df788  MOV dword ptr [EBP + -0x68],EAX
+004df78b  MOV ECX,dword ptr [EBP + -0x68]
+004df78e  MOV EDX,dword ptr [ECX]
+004df790  MOV dword ptr [EBP + -0x64],EDX
+004df793  MOV EAX,dword ptr [EBP + -0x64]
+004df796  MOV dword ptr [EBP + -0x1c],EAX
+004df799  MOV ECX,dword ptr [EBP + -0x68]
+004df79c  MOV dword ptr [EBP + -0x18],ECX
+004df79f  MOV EDX,dword ptr [EBP + -0x8]
+004df7a2  XOR EAX,EAX
+004df7a4  CMP EDX,dword ptr [EBP + -0x1c]
+004df7a7  SETNZ AL
+004df7aa  MOVZX ECX,AL
+004df7ad  TEST ECX,ECX
+004df7af  JZ 0x004df7f5
+004df7b1  MOV EDX,dword ptr [EBP + -0x8]
+004df7b4  CMP dword ptr [EDX + 0xc],0x0
+004df7b8  JZ 0x004df7f5
+004df7ba  MOV EAX,dword ptr [EBP + -0x8]
+004df7bd  MOV ECX,dword ptr [EAX + 0xc]
+004df7c0  MOV dword ptr [EBP + -0xc],ECX
+004df7c3  MOV EDX,dword ptr [EBP + -0xc]
+004df7c6  CMP dword ptr [EDX + 0x53c],0x0
+004df7cd  JNZ 0x004df7f0
+004df7cf  CALL 0x004d3550
+004df7d4  MOV EAX,dword ptr [EBP + -0xc]
+004df7d7  ADD EAX,0x504
+004df7dc  PUSH EAX
+004df7dd  MOV ECX,dword ptr [EBP + -0xc]
+004df7e0  CALL 0x004d4f70
+004df7e5  MOVZX ECX,AL
+004df7e8  TEST ECX,ECX
+004df7ea  JNZ 0x004df7f0
+004df7ec  XOR EAX,EAX
+004df7ee  JMP 0x004df7f7
+004df7f0  MOV EAX,dword ptr [EBP + -0xc]
+004df7f3  JMP 0x004df7f7
+004df7f5  XOR EAX,EAX
+004df7f7  MOV ESP,EBP
+004df7f9  POP EBP
+004df7fa  RET 0x8

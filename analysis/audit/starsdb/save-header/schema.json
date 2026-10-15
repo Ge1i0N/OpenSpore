@@ -1,0 +1,59 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "GA static instructions; no real-save replay or profile scan",
+  "initializer": "0x0131b210",
+  "descriptor": "0x01568b08 (runtime constructed)",
+  "fields": [
+    {
+      "name": "mFileVersionMajor",
+      "id": "0x4162d88",
+      "memory_offset": "0xc",
+      "wire": "BE u32"
+    },
+    {
+      "name": "mFileVersionMinor",
+      "id": "0x4162d89",
+      "memory_offset": "0x10",
+      "wire": "BE u32"
+    },
+    {
+      "name": "mObjectCountMap",
+      "id": "0x4162d8a",
+      "memory_offset": "0x14",
+      "wire": "opaque, not decoded"
+    },
+    {
+      "name": "mTimeStamp",
+      "id": "0x4162d8b",
+      "memory_offset": "0x30",
+      "wire": "9 BE u32"
+    },
+    {
+      "name": "mGameMode",
+      "id": "0x4162d8c",
+      "memory_offset": "0x54",
+      "wire": "BE u32"
+    },
+    {
+      "name": "mbSnapshot",
+      "id": "0x64bc1cf",
+      "memory_offset": "0x58",
+      "wire": "opaque, not decoded"
+    },
+    {
+      "name": "mCurrentPlanetKey",
+      "id": "0x64be534",
+      "memory_offset": "0x5c",
+      "wire": "3 BE u32 into memory +8,+4,+0"
+    }
+  ],
+  "probe": "0xB27838 CMP major,0x21 / SETAE => unsigned major>=33; both observed version words required by host",
+  "gge_comparison": "0xDF8180..0xDF81D6 compares file major/minor with static (37,3), NOT star identity or StarRecord saved versions",
+  "save_stem_boundary": "0xBBA7B0 loads planet keys {star mKey+i*0x01000000,0x05220CB8,1}; 0xBBA900 filters when flags bit0x40 via planet +0x2C bit0x100; GGE copies first selected planet name +0x18. Planet resources/save stems NOT loaded by header reader.",
+  "coverage": [
+    "first frame of explicit root resource only; no context/factories/default migration",
+    "missing decoded version words remain unknown, not zero or observed false",
+    "root tail/map/snapshot unvalidated, no full save compatibility/ownership/success claim",
+    "controlled header -> typed catalogue predicate integration only, no live producer"
+  ]
+}

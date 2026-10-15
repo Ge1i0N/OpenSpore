@@ -1,7 +1,7 @@
 # GA aligned post-load/fixup and source projection entries.
 0x00bba6e0	function	os_StarRecord_read_fields_and_fixups
 0x004df5c0	function	os_ResourceManager_species_profile_lookup
-0x00c8c180	function	os_StarRecord_name_mismatch_cleanup
-0x00bba620	function	os_StarRecord_name_container_cleanup
+0x00c8c180	function	os_StarRecord_generate_name
+0x00bba620	function	os_StarRecord_apply_name_and_notify
 0x00df7d20	function	os_GGE_terrain_property_projection
 0x00df7f30	function	os_GGE_saved_catalog_projection

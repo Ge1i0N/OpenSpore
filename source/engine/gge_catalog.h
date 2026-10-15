@@ -6,6 +6,7 @@
 namespace os::gge {
 struct StarPosition { float x = 0, y = 0, z = 0; };
 struct ImageKey { u32 instance = 0, type = 0, group = 0; };
+// GA save-header descriptor 0x1568B08: file major/minor, NOT StarRecord saved versions or identity.
 struct SaveHeaderWords { u32 first = 0, second = 0; };
 
 // Typed metadata supplied by a real catalogue adapter, NOT pointers into a serialized 0xBC record.
@@ -24,7 +25,8 @@ struct SavedGameMetadata {
     u32 stage = 0;                 // source +0x4C, unless flags +0x5C includes 0x80
     u32 source_flags = 0;
     // Observed probe at 0xB27580; two output header words, NOT a save identity key.
-    // Probe return/header semantics beyond these observed predicates are not assumed.
+    // Successful bounded header decode supplies unsigned file major>=33; full probe I/O failure
+    // behavior and missing constructor defaults are NOT inferred by a serialized-field reader.
     bool probe_result = false;
     SaveHeaderWords header;
 };

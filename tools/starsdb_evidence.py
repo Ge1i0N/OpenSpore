@@ -27,6 +27,8 @@ CONTEXT_ADDRESSES=(0x69f1d0,0x69fb90,0x69ec20,0x932cd0,0x932d70,0x571f40,
 DBPF_ADDRESSES=(0x693ca0,0x6938d0,0x69e090,0x69e260,0x8da6f0,0x8db310,0x8dc1c0,
                 0x8dbb20,0x8db6e0,0x8dbe20,0x8dba40)
 POSTLOAD_ADDRESSES=(0xbba6e0,0x401090,0x4df5c0,0xc8c180,0xbba620,0xdf7d20,0xdf7f30)
+SAVE_HEADER_ADDRESSES=(0x131b210,0xb27580,0xb26880,0xbba7b0,0xbba900,0xb8dac0,0xdf7f30,
+                       0x4df740,0x4da400,0xc85390,0x801a60)
 
 
 def main():
@@ -34,7 +36,9 @@ def main():
     pyghidra.start(verbose=False)
     from pyghidra import open_project,program_context
     from ghidra.app.decompiler import DecompInterface
-    if '--postload' in sys.argv:
+    if '--save-header' in sys.argv:
+        dest,addresses=DEST/'save-header',SAVE_HEADER_ADDRESSES
+    elif '--postload' in sys.argv:
         dest,addresses=DEST/'postload',POSTLOAD_ADDRESSES
     elif '--dbpf' in sys.argv:
         dest,addresses=DEST/'dbpf',DBPF_ADDRESSES
@@ -221,11 +225,15 @@ def static_postload():
     value={'oracle_sha256':digest,'authority':'static GA instructions; no runtime/resource manager execution',
            'read_fixup':'0xBBA6E0: deserialize StarRecord, reset +0x80, lookup species profile by +0x74, compare UTF16 name with 0x0151AC94',
            'profile_lookup':'0x4DF5C0 may use record key then default +0xA4 and can instantiate a Simulator/cSpeciesProfile object; host never does this',
-           'name_mismatch':'0xC8C180 cleanup/re-registration path; host exposes Changed observation only',
+           'name_branch':'CORRECTION: global pointer 0x151AC94 initially points to UTF16 BAD_DATA. 0xBBA77D JNZ skips regeneration on mismatch; equality regenerates via 0xC8C180. Empty initial name also calls generator. 0xBBA620 is setter/notification, not cleanup.',
            'terrain_projection':'0xDF7E35/0xDF80FF query property-list type 0xE38475D9 and property 0x2BD4F5AC; missing/wrong type remains absent',
-           'observations':['Unknown, Matched, Missing, Changed','position cache reset is recorded, not executed',
-                          'no canonical-name injection/resource fallback/cleanup/event side effect',
+           'observations':['profile Unknown/Found/Missing; ordered name call requirements with explicit generator-result observations',
+                          '+0x80 runtime-word reset requirement recorded; purpose not established, NOT proven position cache',
+                          'no name generation/profile fallback/setter/notification executed',
                           'no typed catalogue readiness implied']}
+    pointer=pe.u32(0x151ac94)
+    value['sentinel']={'pointer_va':'0x0151ac94','initial_pointee':hex(pointer),'initial_utf16':pe.wstr(pointer),
+                       'runtime_mutability':'initial image value, not original execution observation'}
     (dest/'schema.json').write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8',newline='\n')
     for name,lo,hi in [('name-compare-and-cleanup',0xbba748,0xbba7a0),
                        ('terrain-property-lookup',0xdf7e06,0xdf7e66)]:
@@ -234,8 +242,41 @@ def static_postload():
     print('retained post-load observation evidence; side effects remain disabled')
 
 
+def static_save_header():
+    from tools.pe import PE
+    from tools.find_imm import disasm
+    pe=PE(); dest=DEST/'save-header'; dest.mkdir(parents=True,exist_ok=True)
+    digest=hashlib.sha256(pe.raw).hexdigest()
+    value={'oracle_sha256':digest,'authority':'GA static instructions; no real-save replay or profile scan',
+           'initializer':'0x0131b210','descriptor':'0x01568b08 (runtime constructed)',
+           'fields':[{'name':n,'id':hex(i),'memory_offset':hex(o),'wire':w} for n,i,o,w in [
+               ('mFileVersionMajor',0x04162d88,0xc,'BE u32'),('mFileVersionMinor',0x04162d89,0x10,'BE u32'),
+               ('mObjectCountMap',0x04162d8a,0x14,'opaque, not decoded'),('mTimeStamp',0x04162d8b,0x30,'9 BE u32'),
+               ('mGameMode',0x04162d8c,0x54,'BE u32'),('mbSnapshot',0x064bc1cf,0x58,'opaque, not decoded'),
+               ('mCurrentPlanetKey',0x064be534,0x5c,'3 BE u32 into memory +8,+4,+0')]],
+           'probe':'0xB27838 CMP major,0x21 / SETAE => unsigned major>=33; both observed version words required by host',
+           'gge_comparison':'0xDF8180..0xDF81D6 compares file major/minor with static (37,3), NOT star identity or StarRecord saved versions',
+           'save_stem_boundary':'0xBBA7B0 loads planet keys {star mKey+i*0x01000000,0x05220CB8,1}; 0xBBA900 filters when flags bit0x40 via planet +0x2C bit0x100; GGE copies first selected planet name +0x18. Planet resources/save stems NOT loaded by header reader.',
+           'coverage':['first frame of explicit root resource only; no context/factories/default migration',
+                       'missing decoded version words remain unknown, not zero or observed false',
+                       'root tail/map/snapshot unvalidated, no full save compatibility/ownership/success claim',
+                       'controlled header -> typed catalogue predicate integration only, no live producer']}
+    (dest/'schema.json').write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8',newline='\n')
+    for name,lo,hi in [('probe-output-words-guard',0xb2781e,0xb27849),
+                       ('postload-empty-and-equality',0xbba710,0xbba7ae),
+                       ('planet-resource-key',0xbba806,0xbba85e)]:
+        (dest/(name+'.asm.txt')).write_text('GA-unpacked SHA-256: %s\nBounded static objdump.\n\n'%digest+
+            '\n'.join(disasm(pe,lo,hi))+'\n',encoding='utf-8',newline='\n')
+    print('retained file-header schema, unsigned probe guard and separate planet/save-name boundary')
+
+
 if __name__=='__main__':
     if '--static' in sys.argv:
-        static_postload() if '--postload' in sys.argv else static_dbpf() if '--dbpf' in sys.argv else static_context() if '--context' in sys.argv else static_links() if '--links' in sys.argv else static()
+        if '--save-header' in sys.argv: static_save_header()
+        elif '--postload' in sys.argv: static_postload()
+        elif '--dbpf' in sys.argv: static_dbpf()
+        elif '--context' in sys.argv: static_context()
+        elif '--links' in sys.argv: static_links()
+        else: static()
     else:
         main()

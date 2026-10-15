@@ -36,19 +36,25 @@ struct StarRecord {
     std::optional<std::array<u32,9>> saved_game_timestamp;
     std::optional<u8> planet_count;
 };
-enum class Observation { Unknown, Matched, Missing, Changed };
+enum class ProfileObservation { Unknown, Found, Missing };
+enum class NameCall { GenerateInitialEmpty, GenerateBadData, GenerateRetryEmpty, ApplyGeneratedName };
+struct NameGenerationObservations {
+    std::optional<std::u16string> after_initial, after_bad_data, after_retry;
+};
 struct PostLoadObservation {
-    Observation species_profile=Observation::Unknown;
-    Observation canonical_name=Observation::Unknown;
-    bool position_cache_reset=false; // observed GA reset of +0x80, not a host mutation request
+    ProfileObservation species_profile=ProfileObservation::Unknown;
+    std::vector<NameCall> name_calls; // required calls only; none executed
+    bool name_blocked=true; // requires a name/returned generation result not yet observed
+    bool runtime_word_80_reset_required=true; // +0x80 purpose not established; NOT position cache
+    bool mark_profile_missing_required=false; // GA writes +0x50=1 iff lookup returns null
     bool side_effects_suppressed=true;
 };
 // A standalone serializer frame at an EXPLICIT offset, not a search for embedded magic.
 // A successful parse does not prove that the frame belongs to this class (tag is shared).
 bool inspect_star_record(const std::vector<u8>& bytes, size_t offset, StarRecord& out, std::string& error);
-// Instruction-derived observation model for 0xBBA6E0. No resource manager, canonical-name
-// injection, cache rebuild or cleanup is performed by this function.
+// Corrected 0xBBA6E0 name branch: empty -> generate, equality with BAD_DATA -> regenerate,
+// optional empty retry, then setter. No generator/resource manager/setter is executed.
 PostLoadObservation observe_post_load(const StarRecord& record,
                                       std::optional<bool> profile_lookup,
-                                      std::optional<std::u16string> canonical_name);
+                                      const NameGenerationObservations& generated={});
 }  // namespace os::starsdb

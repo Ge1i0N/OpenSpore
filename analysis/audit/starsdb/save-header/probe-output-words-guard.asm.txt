@@ -1,0 +1,15 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  b2781e:	8b 84 24 dc 0a 00 00 	mov    eax,DWORD PTR [esp+0xadc]
+  b27825:	8b 4c 24 64          	mov    ecx,DWORD PTR [esp+0x64]
+  b27829:	8b 94 24 e0 0a 00 00 	mov    edx,DWORD PTR [esp+0xae0]
+  b27830:	89 08                	mov    DWORD PTR [eax],ecx
+  b27832:	8b 4c 24 68          	mov    ecx,DWORD PTR [esp+0x68]
+  b27836:	89 0a                	mov    DWORD PTR [edx],ecx
+  b27838:	83 38 21             	cmp    DWORD PTR [eax],0x21
+  b2783b:	8b 17                	mov    edx,DWORD PTR [edi]
+  b2783d:	8b 42 04             	mov    eax,DWORD PTR [edx+0x4]
+  b27840:	8b cf                	mov    ecx,edi
+  b27842:	0f 93 44 24 13       	setae  BYTE PTR [esp+0x13]
+  b27847:	ff d0                	call   eax

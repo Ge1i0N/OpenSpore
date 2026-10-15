@@ -127,14 +127,33 @@ bool inspect_star_record(const std::vector<u8>& bytes, size_t offset, StarRecord
 }
 
 PostLoadObservation observe_post_load(const StarRecord& record,std::optional<bool> profile_lookup,
-                                      std::optional<std::u16string> canonical_name) {
+                                      const NameGenerationObservations& generated) {
     PostLoadObservation result;
-    if (profile_lookup) result.species_profile=*profile_lookup ? Observation::Matched : Observation::Missing;
-    if (canonical_name && record.name) result.canonical_name=*canonical_name==*record.name ? Observation::Matched : Observation::Changed;
-    else if (canonical_name || record.name) result.canonical_name=Observation::Changed;
-    // GA writes +0x80 = 0 before its profile lookup. Host records that observation but never
-    // allocates/fills a cache or invokes the cleanup/event path used on canonical-name mismatch.
-    result.position_cache_reset=true;
+    if (profile_lookup) {
+        result.species_profile=*profile_lookup ? ProfileObservation::Found : ProfileObservation::Missing;
+        result.mark_profile_missing_required=!*profile_lookup;
+    }
+    if (!record.name) return result; // serialized omission != observed empty constructed runtime name
+    const std::u16string* name=&*record.name;
+    if (name->empty()) {
+        result.name_calls.push_back(NameCall::GenerateInitialEmpty);
+        if (!generated.after_initial) return result;
+        name=&*generated.after_initial;
+    }
+    // Native wcscmp semantics stop at the first zero code unit; comparison is case-sensitive.
+    const auto zero=name->find(char16_t{0});
+    const bool bad_data=name->compare(0,zero==std::u16string::npos?name->size():zero,u"BAD_DATA")==0;
+    if (bad_data) {
+        result.name_calls.push_back(NameCall::GenerateBadData);
+        if (!generated.after_bad_data) return result;
+        name=&*generated.after_bad_data;
+        if (name->empty()) {
+            result.name_calls.push_back(NameCall::GenerateRetryEmpty);
+            if (!generated.after_retry) return result;
+        }
+        result.name_calls.push_back(NameCall::ApplyGeneratedName);
+    }
+    result.name_blocked=false; // only this decision subset; not original post-load completion
     return result;
 }
 

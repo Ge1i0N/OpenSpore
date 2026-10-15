@@ -3,12 +3,18 @@
   "authority": "static GA instructions; no runtime/resource manager execution",
   "read_fixup": "0xBBA6E0: deserialize StarRecord, reset +0x80, lookup species profile by +0x74, compare UTF16 name with 0x0151AC94",
   "profile_lookup": "0x4DF5C0 may use record key then default +0xA4 and can instantiate a Simulator/cSpeciesProfile object; host never does this",
-  "name_mismatch": "0xC8C180 cleanup/re-registration path; host exposes Changed observation only",
+  "name_branch": "CORRECTION: global pointer 0x151AC94 initially points to UTF16 BAD_DATA. 0xBBA77D JNZ skips regeneration on mismatch; equality regenerates via 0xC8C180. Empty initial name also calls generator. 0xBBA620 is setter/notification, not cleanup.",
   "terrain_projection": "0xDF7E35/0xDF80FF query property-list type 0xE38475D9 and property 0x2BD4F5AC; missing/wrong type remains absent",
   "observations": [
-    "Unknown, Matched, Missing, Changed",
-    "position cache reset is recorded, not executed",
-    "no canonical-name injection/resource fallback/cleanup/event side effect",
+    "profile Unknown/Found/Missing; ordered name call requirements with explicit generator-result observations",
+    "+0x80 runtime-word reset requirement recorded; purpose not established, NOT proven position cache",
+    "no name generation/profile fallback/setter/notification executed",
     "no typed catalogue readiness implied"
-  ]
+  ],
+  "sentinel": {
+    "pointer_va": "0x0151ac94",
+    "initial_pointee": "0x13f9738",
+    "initial_utf16": "BAD_DATA",
+    "runtime_mutability": "initial image value, not original execution observation"
+  }
 }

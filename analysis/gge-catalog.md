@@ -41,8 +41,9 @@ are star positions.
 renames it to **`stars.db`** (`0x145FB30`). `0xBB8C90` initializes/loads that file via serializer
 descriptors, handles a missing/unusable database path, loads planet record containers, then invokes
 candidate refill. The loader has incomplete stack/calling-convention recovery in Ghidra; actual
-instructions are retained. It does **not** establish a sufficiently known byte format to write
-a safe stars.db parser yet. No save/database writes are added to OpenSpore.
+instructions are retained. Follow-up [serializer/DBPF subset](starsdb-dbpf.md) now reads bounded
+structural resources; full graph/fixups, real-save corpus and runtime producer remain missing.
+No save/database writes are added to OpenSpore.
 
 A bounded filename search under `build/bin/Debug` found no stars-named files in this workspace.
 This says nothing about other installations or the user's actual Spore profile; those paths were
@@ -71,8 +72,9 @@ the **separate saved-game thumbnail** around +0x3C, whose hashing/metadata is no
 **Correction found during instruction review:** `0xB27580` produces two header words; the references
 at `0x0145F844/48` are static **.rdata constants (0x25,3)**, not a runtime current-save key. The
 probe body reads through a serializer and its successful read path returns a predicate on the first
-word (`>0x20`). Its calling convention is poorly recovered by Ghidra, so field names for exact
-version/compatibility meaning remain open. The model uses `SaveHeaderWords` and neutral statuses,
+word (`>0x20`, unsigned). Follow-up [file-header descriptors](save-header.md) establish the words as
+`mFileVersionMajor/Minor`, IDs 0x04162D88/89; they are NOT StarRecord saved versions. Full
+compatibility meaning remains open. The model uses `SaveHeaderWords` and neutral statuses,
 not invented Current/Other identity labels. Both words are compared independently. Input is an
 observed probe result/header pair; no filesystem I/O occurs in this helper.
 
