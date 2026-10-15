@@ -26,6 +26,7 @@ CONTEXT_ADDRESSES=(0x69f1d0,0x69fb90,0x69ec20,0x932cd0,0x932d70,0x571f40,
                    0x8d8ca0,0x8da6f0,0x8d8f70,0x69e090)
 DBPF_ADDRESSES=(0x693ca0,0x6938d0,0x69e090,0x69e260,0x8da6f0,0x8db310,0x8dc1c0,
                 0x8dbb20,0x8db6e0,0x8dbe20,0x8dba40)
+POSTLOAD_ADDRESSES=(0xbba6e0,0x401090,0x4df5c0,0xc8c180,0xbba620,0xdf7d20,0xdf7f30)
 
 
 def main():
@@ -33,7 +34,9 @@ def main():
     pyghidra.start(verbose=False)
     from pyghidra import open_project,program_context
     from ghidra.app.decompiler import DecompInterface
-    if '--dbpf' in sys.argv:
+    if '--postload' in sys.argv:
+        dest,addresses=DEST/'postload',POSTLOAD_ADDRESSES
+    elif '--dbpf' in sys.argv:
         dest,addresses=DEST/'dbpf',DBPF_ADDRESSES
     elif '--context' in sys.argv:
         dest,addresses=DEST/'context',CONTEXT_ADDRESSES
@@ -210,8 +213,29 @@ def static_dbpf():
     print('retained ResourceKey-to-DBPF mapping and root constants (not pointer reads)')
 
 
+def static_postload():
+    from tools.pe import PE
+    from tools.find_imm import disasm
+    pe=PE(); dest=DEST/'postload'; dest.mkdir(parents=True,exist_ok=True)
+    digest=hashlib.sha256(pe.raw).hexdigest()
+    value={'oracle_sha256':digest,'authority':'static GA instructions; no runtime/resource manager execution',
+           'read_fixup':'0xBBA6E0: deserialize StarRecord, reset +0x80, lookup species profile by +0x74, compare UTF16 name with 0x0151AC94',
+           'profile_lookup':'0x4DF5C0 may use record key then default +0xA4 and can instantiate a Simulator/cSpeciesProfile object; host never does this',
+           'name_mismatch':'0xC8C180 cleanup/re-registration path; host exposes Changed observation only',
+           'terrain_projection':'0xDF7E35/0xDF80FF query property-list type 0xE38475D9 and property 0x2BD4F5AC; missing/wrong type remains absent',
+           'observations':['Unknown, Matched, Missing, Changed','position cache reset is recorded, not executed',
+                          'no canonical-name injection/resource fallback/cleanup/event side effect',
+                          'no typed catalogue readiness implied']}
+    (dest/'schema.json').write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8',newline='\n')
+    for name,lo,hi in [('name-compare-and-cleanup',0xbba748,0xbba7a0),
+                       ('terrain-property-lookup',0xdf7e06,0xdf7e66)]:
+        (dest/(name+'.asm.txt')).write_text('GA-unpacked SHA-256: %s\nBounded static objdump.\n\n'%digest+
+            '\n'.join(disasm(pe,lo,hi))+'\n',encoding='utf-8',newline='\n')
+    print('retained post-load observation evidence; side effects remain disabled')
+
+
 if __name__=='__main__':
     if '--static' in sys.argv:
-        static_dbpf() if '--dbpf' in sys.argv else static_context() if '--context' in sys.argv else static_links() if '--links' in sys.argv else static()
+        static_postload() if '--postload' in sys.argv else static_dbpf() if '--dbpf' in sys.argv else static_context() if '--context' in sys.argv else static_links() if '--links' in sys.argv else static()
     else:
         main()

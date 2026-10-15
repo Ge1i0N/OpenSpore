@@ -1,0 +1,14 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static GA instructions; no runtime/resource manager execution",
+  "read_fixup": "0xBBA6E0: deserialize StarRecord, reset +0x80, lookup species profile by +0x74, compare UTF16 name with 0x0151AC94",
+  "profile_lookup": "0x4DF5C0 may use record key then default +0xA4 and can instantiate a Simulator/cSpeciesProfile object; host never does this",
+  "name_mismatch": "0xC8C180 cleanup/re-registration path; host exposes Changed observation only",
+  "terrain_projection": "0xDF7E35/0xDF80FF query property-list type 0xE38475D9 and property 0x2BD4F5AC; missing/wrong type remains absent",
+  "observations": [
+    "Unknown, Matched, Missing, Changed",
+    "position cache reset is recorded, not executed",
+    "no canonical-name injection/resource fallback/cleanup/event side effect",
+    "no typed catalogue readiness implied"
+  ]
+}

@@ -1,0 +1,106 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00DF7D20
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+int os_GGE_terrain_property_projection(void)
+
+{
+  int iVar1;
+  int *piVar2;
+  char cVar3;
+  float *pfVar4;
+  undefined4 *puVar5;
+  int *piVar6;
+  undefined4 uVar7;
+  int unaff_EBX;
+  int *in_stack_00000010;
+  int in_stack_00000014;
+  int in_stack_00000018;
+  float in_stack_0000001c;
+  float in_stack_00000020;
+  float in_stack_00000024;
+  int *in_stack_00000028;
+  undefined4 *in_stack_0000002c;
+  int in_stack_00000030;
+  int in_stack_00000038;
+  int in_stack_00000040;
+  int in_stack_00000048;
+  int in_stack_00000050;
+  int in_stack_00000058;
+  undefined4 in_stack_00000060;
+  undefined4 in_stack_00000064;
+  undefined4 in_stack_00000068;
+  undefined4 in_stack_000000ac;
+  float in_stack_000000b0;
+  float in_stack_000000b4;
+  float in_stack_000000b8;
+  undefined4 in_stack_000000d8;
+  undefined4 in_stack_000000dc;
+  int in_stack_000000e4;
+
+  do {
+    uVar7 = *(undefined4 *)(*in_stack_00000028 + unaff_EBX * 4);
+    pfVar4 = (float *)FUN_005c66d0();
+    in_stack_000000b8 = pfVar4[2];
+    in_stack_000000b0 = *pfVar4;
+    in_stack_000000b4 = pfVar4[1];
+    in_stack_0000001c = (in_stack_000000b0 + DAT_0147ea80) * DAT_013f9458;
+    in_stack_00000020 = (in_stack_000000b4 + DAT_0147ea80) * DAT_013f9458;
+    in_stack_00000024 = (in_stack_000000b8 + DAT_0147ea80) * DAT_013f9458;
+    puVar5 = (undefined4 *)FUN_00bb9f50();
+    if (puVar5 != &stack0x00000040) {
+      FUN_00423690(*puVar5,puVar5[1]);
+    }
+    FUN_00b3d3a0(uVar7);
+    in_stack_000000ac = FUN_00ba6380(uVar7);
+    in_stack_00000010 = (int *)0x0;
+    piVar6 = (int *)FUN_0067ddf0();
+    piVar2 = in_stack_00000010;
+    if (in_stack_00000010 != (int *)0x0) {
+      in_stack_00000010 = (int *)0x0;
+      (**(code **)(*piVar2 + 4))();
+    }
+    iVar1 = *piVar6;
+    uVar7 = FUN_00989290(0xe38475d9,&stack0x00000010);
+    cVar3 = (**(code **)(iVar1 + 0x2c))(uVar7);
+    if (cVar3 != '\0') {
+      uVar7 = 0;
+      if (in_stack_00000010 != (int *)0x0) {
+        cVar3 = (**(code **)(*in_stack_00000010 + 0x24))(0x2bd4f5ac,&stack0x0000002c);
+        if ((cVar3 != '\0') && (*(short *)((int)in_stack_0000002c + 0x12) == 10)) {
+          puVar5 = in_stack_0000002c;
+          if ((*(byte *)(in_stack_0000002c + 4) & 0x30) != 0) {
+            puVar5 = (undefined4 *)*in_stack_0000002c;
+          }
+          uVar7 = *puVar5;
+        }
+      }
+      in_stack_00000064 = 0x2f7d0004;
+      in_stack_00000068 = 0x2e9a2ca;
+      in_stack_00000060 = uVar7;
+    }
+    in_stack_000000dc._1_1_ = 1;
+    in_stack_000000d8 = 5;
+    in_stack_000000e4 = unaff_EBX;
+    FUN_00b26f90(&stack0x00000030);
+    if (in_stack_00000010 != (int *)0x0) {
+      (**(code **)(*in_stack_00000010 + 4))();
+    }
+    iVar1 = in_stack_00000014;
+    in_stack_00000018 = in_stack_00000018 + 0xbc;
+    unaff_EBX = unaff_EBX + 1;
+  } while (unaff_EBX < in_stack_00000014);
+  if ((2 < (int)(in_stack_00000058 - in_stack_00000050 & 0xfffffffeU)) && (in_stack_00000050 != 0))
+  {
+    FUN_00f47220();
+  }
+  if ((2 < (int)(in_stack_00000048 - in_stack_00000040 & 0xfffffffeU)) && (in_stack_00000040 != 0))
+  {
+    FUN_00f47220();
+  }
+  if ((2 < (int)(in_stack_00000038 - in_stack_00000030 & 0xfffffffeU)) && (in_stack_00000030 != 0))
+  {
+    FUN_00f47220();
+  }
+  return iVar1;
+}

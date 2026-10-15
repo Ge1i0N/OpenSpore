@@ -126,6 +126,18 @@ bool inspect_star_record(const std::vector<u8>& bytes, size_t offset, StarRecord
     return true;
 }
 
+PostLoadObservation observe_post_load(const StarRecord& record,std::optional<bool> profile_lookup,
+                                      std::optional<std::u16string> canonical_name) {
+    PostLoadObservation result;
+    if (profile_lookup) result.species_profile=*profile_lookup ? Observation::Matched : Observation::Missing;
+    if (canonical_name && record.name) result.canonical_name=*canonical_name==*record.name ? Observation::Matched : Observation::Changed;
+    else if (canonical_name || record.name) result.canonical_name=Observation::Changed;
+    // GA writes +0x80 = 0 before its profile lookup. Host records that observation but never
+    // allocates/fills a cache or invokes the cleanup/event path used on canonical-name mismatch.
+    result.position_cache_reset=true;
+    return result;
+}
+
 const char* manager_field_name(u32 id) {
     // GA static constructor 0x1326120: names label payloads, NOT implemented object decoders.
     switch (id) {

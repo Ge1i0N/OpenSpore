@@ -18,6 +18,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | stars.db serializer | [starsdb](starsdb.md) | bounded prefix, wire references/grid and 14 StarRecord fields; wire-only mode does not resolve identities, no real-save validation or live producer |
 | stars.db context | [starsdb-context](starsdb-context.md) | decoded context index/class stream, envelope CRC and structural reference lookup; fixups/runtime absent |
 | stars.db physical adapter | [starsdb-dbpf](starsdb-dbpf.md) | read-only exact-key DBPF 3.0 subset into root/context/class readers; constructed tests only, no real-save corpus/fixups/runtime |
+| StarRecord post-load | [starsdb-postload](starsdb-postload.md) | observation-only profile/name/cache model; GA cleanup/fixups/resource manager side effects intentionally disabled |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |

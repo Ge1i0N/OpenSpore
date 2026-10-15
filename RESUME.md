@@ -61,6 +61,9 @@ test with `-w -devDirs`; retain evidence and commit.
   `starsdb_dbpf_verify`: 266 constructed checks / 270 with optional explicit-path smoke. No real DB
   found under workspace `**/stars.db`; no profile scan. RefPack now bounds every append by declared
   decoded size. `analysis/starsdb-dbpf.md` retains key-order evidence and host version/size policies.
+- `observe_post_load` / `starsdb_postload_verify`: static `0xBBA6E0` order represented as Unknown/
+  Matched/Missing/Changed profile/name observations plus cache-reset observation; no name injection,
+  resource fallback, cleanup/event or fixup. See `analysis/starsdb-postload.md` / `audit/starsdb/postload/`.
 
 ## Next, in order
 
@@ -76,7 +79,8 @@ test with `-w -devDirs`; retain evidence and commit.
     root `(0x01897C18,0x01897C18,0x01897C18)`). Key translation established at 0x8DB310; older
     package versions not supported. Continue StarRecord name/resource/property fixups and save metadata,
     then grid/record graph and galaxy/star-grid
-    generation, before attaching the typed catalog builder to live UI. Frame/metadata and wire-shape
+    generation, before attaching the typed catalog builder to live UI. Post-load observation subset is
+    done; actual profile/name/property fixups and save metadata producer remain open. Frame/metadata and wire-shape
     decoding are bounded subsets; do not repeat BSS reads of `0x1689C50` or treat context values as
     coordinates.
     Controlled test records

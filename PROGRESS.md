@@ -31,6 +31,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | stars.db serializer subset | bounded frames, six metadata fields, variable-width wire references/grid and 14 StarRecord fields | wire-only modes do not resolve identities; separate context subset below; no real-save validation, producer or runtime integration |
 | stars.db context subset | explicit decoded index/class streams, envelope CRC and class-scoped token lookup into StarRecord fields | no full graph/fixups or real-save corpus; not runtime catalogue availability |
 | stars.db physical subset | one explicit read-only DBPF 3.0, exact root/index/class keys, raw/RefPack decode into structural readers | constructed fixtures only; other versions, real-save compatibility, fixups and live producer unverified |
+| StarRecord post-load subset | observation-only profile/name/cache statuses from GA post-load order; no host side effects | real resource manager, canonical-name cleanup/fixups and save metadata producer remain open |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
 
@@ -56,6 +57,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | Serializer links / StarRecord | 362 constructed checks; wire null/non-null refs, grid bounds, 14 fields and atomic failures; unresolved identities | `starsdb_links_verify`; `starsdb_inspect --links/--star-record`; [evidence and limits](analysis/starsdb.md) |
 | Serializer context / envelopes | 126 constructed checks; literal CRC, bounds/mutations, record confinement, reference lookup and checksum coverage cap | `starsdb_context_verify`, `starsdb_context_inspect`; [evidence and limits](analysis/starsdb-context.md) |
 | Serializer DBPF adapter | 266 constructed checks (270 with optional explicit-path smoke); exact keys, rejection/atomicity, raw/RefPack and full structural chain | `starsdb_dbpf_verify`, `starsdb_dbpf_inspect`; [evidence/limits](analysis/starsdb-dbpf.md) |
+| StarRecord post-load observations | controlled profile/name/cache status checks; no injection, fallback, cleanup or event | `starsdb_postload_verify`; [evidence/limits](analysis/starsdb-postload.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

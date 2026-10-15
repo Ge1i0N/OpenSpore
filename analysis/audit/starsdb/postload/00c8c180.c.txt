@@ -1,0 +1,64 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00C8C180
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+void FUN_00c8c180(int param_1)
+
+{
+  undefined4 uVar1;
+  undefined4 *puVar2;
+  int *piVar3;
+  int local_34 [2];
+  int local_2c;
+  int local_24 [2];
+  int local_1c;
+
+  uVar1 = FUN_00801a60();
+  switch(uVar1) {
+  case 1:
+    FUN_006b5700(0x2db6dad3,0x591bd91,0);
+    uVar1 = FUN_006b5550();
+    FUN_005c3e80(uVar1);
+    FUN_006b51d0();
+    return;
+  case 2:
+    piVar3 = local_24;
+    uVar1 = 0xdeb2d943;
+    FUN_004010a0(piVar3,0xdeb2d943);
+    puVar2 = (undefined4 *)FUN_005ed000(piVar3,uVar1);
+    local_34[0] = local_24[0];
+    local_2c = local_1c;
+    if (puVar2 != (undefined4 *)(param_1 + 0x60)) {
+      FUN_00423690(*puVar2,puVar2[1]);
+      local_34[0] = local_24[0];
+      local_2c = local_1c;
+    }
+    break;
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+  case 7:
+  case 8:
+  case 9:
+  case 10:
+  case 0xb:
+  case 0xc:
+    piVar3 = local_34;
+    uVar1 = 0x7cab064c;
+    FUN_004010a0(piVar3,0x7cab064c);
+    puVar2 = (undefined4 *)FUN_005ed000(piVar3,uVar1);
+    if (puVar2 != (undefined4 *)(param_1 + 0x60)) {
+      FUN_00423690(*puVar2,puVar2[1]);
+    }
+    break;
+  default:
+    goto switchD_00c8c1a0_default;
+  }
+  if ((2 < (int)(local_2c - local_34[0] & 0xfffffffeU)) && (local_34[0] != 0)) {
+    FUN_00f47220(local_34[0]);
+    return;
+  }
+switchD_00c8c1a0_default:
+  return;
+}

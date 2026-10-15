@@ -1,0 +1,36 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  df7e06:	68 d9 75 84 e3       	push   0xe38475d9
+  df7e0b:	8b ce                	mov    ecx,esi
+  df7e0d:	83 c7 2c             	add    edi,0x2c
+  df7e10:	e8 7b 14 b9 ff       	call   0x989290
+  df7e15:	8b 17                	mov    edx,DWORD PTR [edi]
+  df7e17:	50                   	push   eax
+  df7e18:	8b cd                	mov    ecx,ebp
+  df7e1a:	ff d2                	call   edx
+  df7e1c:	84 c0                	test   al,al
+  df7e1e:	74 4a                	je     0xdf7e6a
+  df7e20:	8b 4c 24 10          	mov    ecx,DWORD PTR [esp+0x10]
+  df7e24:	33 f6                	xor    esi,esi
+  df7e26:	85 c9                	test   ecx,ecx
+  df7e28:	74 2a                	je     0xdf7e54
+  df7e2a:	8b 01                	mov    eax,DWORD PTR [ecx]
+  df7e2c:	8b 40 24             	mov    eax,DWORD PTR [eax+0x24]
+  df7e2f:	8d 54 24 2c          	lea    edx,[esp+0x2c]
+  df7e33:	52                   	push   edx
+  df7e34:	68 ac f5 d4 2b       	push   0x2bd4f5ac
+  df7e39:	ff d0                	call   eax
+  df7e3b:	84 c0                	test   al,al
+  df7e3d:	74 15                	je     0xdf7e54
+  df7e3f:	8b 44 24 2c          	mov    eax,DWORD PTR [esp+0x2c]
+  df7e43:	66 83 78 12 0a       	cmp    WORD PTR [eax+0x12],0xa
+  df7e48:	75 0a                	jne    0xdf7e54
+  df7e4a:	f6 40 10 30          	test   BYTE PTR [eax+0x10],0x30
+  df7e4e:	74 02                	je     0xdf7e52
+  df7e50:	8b 00                	mov    eax,DWORD PTR [eax]
+  df7e52:	8b 30                	mov    esi,DWORD PTR [eax]
+  df7e54:	b8 04 00 7d 2f       	mov    eax,0x2f7d0004
+  df7e59:	b9 ca a2 e9 02       	mov    ecx,0x2e9a2ca
+  df7e5e:	89 74 24 60          	mov    DWORD PTR [esp+0x60],esi
+  df7e62:	89 44 24 64          	mov    DWORD PTR [esp+0x64],eax

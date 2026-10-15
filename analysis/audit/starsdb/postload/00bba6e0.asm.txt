@@ -1,0 +1,73 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00BBA6E0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00bba6e0  SUB ESP,0xa14
+00bba6e6  PUSH EBX
+00bba6e7  PUSH ESI
+00bba6e8  PUSH EDI
+00bba6e9  PUSH 0x1a80d26
+00bba6ee  MOV ESI,ECX
+00bba6f0  PUSH 0x156cb70
+00bba6f5  PUSH ESI
+00bba6f6  LEA ECX,[ESP + 0x18]
+00bba6fa  CALL 0x00692f50
+00bba6ff  MOV EAX,dword ptr [ESP + 0xa24]
+00bba706  PUSH EAX
+00bba707  LEA ECX,[ESP + 0x10]
+00bba70b  CALL 0x00693de0
+00bba710  LEA ECX,[ESI + 0x74]
+00bba713  PUSH ECX
+00bba714  MOV BL,AL
+00bba716  MOV dword ptr [ESI + 0x80],0x0
+00bba720  CALL 0x00401090
+00bba725  MOV ECX,EAX
+00bba727  CALL 0x004df5c0
+00bba72c  TEST EAX,EAX
+00bba72e  JNZ 0x00bba734
+00bba730  MOV byte ptr [ESI + 0x50],0x1
+00bba734  MOV EDX,dword ptr [ESI + 0x60]
+00bba737  CMP EDX,dword ptr [ESI + 0x64]
+00bba73a  LEA EDI,[ESI + 0x60]
+00bba73d  JNZ 0x00bba748
+00bba73f  PUSH ESI
+00bba740  CALL 0x00c8c180
+00bba745  ADD ESP,0x4
+00bba748  MOV ECX,dword ptr [0x0151ac94]
+00bba74e  MOV EAX,dword ptr [EDI]
+00bba750  MOV DX,word ptr [EAX]
+00bba753  CMP DX,word ptr [ECX]
+00bba756  JNZ 0x00bba776
+00bba758  TEST DX,DX
+00bba75b  JZ 0x00bba772
+00bba75d  MOV DX,word ptr [EAX + 0x2]
+00bba761  CMP DX,word ptr [ECX + 0x2]
+00bba765  JNZ 0x00bba776
+00bba767  ADD EAX,0x4
+00bba76a  ADD ECX,0x4
+00bba76d  TEST DX,DX
+00bba770  JNZ 0x00bba750
+00bba772  XOR EAX,EAX
+00bba774  JMP 0x00bba77b
+00bba776  SBB EAX,EAX
+00bba778  SBB EAX,-0x1
+00bba77b  TEST EAX,EAX
+00bba77d  JNZ 0x00bba7a0
+00bba77f  PUSH ESI
+00bba780  CALL 0x00c8c180
+00bba785  MOV EAX,dword ptr [EDI]
+00bba787  ADD ESP,0x4
+00bba78a  CMP EAX,dword ptr [EDI + 0x4]
+00bba78d  JNZ 0x00bba798
+00bba78f  PUSH ESI
+00bba790  CALL 0x00c8c180
+00bba795  ADD ESP,0x4
+00bba798  PUSH EDI
+00bba799  MOV ECX,ESI
+00bba79b  CALL 0x00bba620
+00bba7a0  POP EDI
+00bba7a1  POP ESI
+00bba7a2  MOV AL,BL
+00bba7a4  POP EBX
+00bba7a5  ADD ESP,0xa14
+00bba7ab  RET 0x4

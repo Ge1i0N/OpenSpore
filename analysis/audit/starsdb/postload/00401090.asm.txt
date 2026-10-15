@@ -1,0 +1,9 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00401090
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00401090  PUSH EBP
+00401091  MOV EBP,ESP
+00401093  MOV EAX,[0x015d0c24]
+00401098  POP EBP
+00401099  RET

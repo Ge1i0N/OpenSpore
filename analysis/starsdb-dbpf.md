@@ -112,7 +112,8 @@ MoviePlayer remains Unknown. These are host regressions, not a real-save compati
 ## Next
 
 Validate a real **explicitly selected** database when available, without treating the synthetic DBPF
-as one. Recover StarRecord post-load name/resource/property fixups and save-stem/header producer;
+as one. [Post-load observations](starsdb-postload.md) now separate profile/name/cache findings;
+recover the actual name/resource/property fixups and save-stem/header producer;
 resolve the manager's catalogue references with explicit missing/unsupported status. Only then attach
 metadata to the runtime catalogue. New-galaxy generation and MoviePlayer/DBCheck/scene ports remain
 separate dependencies; opening a DBPF does not make Play Spore playable.

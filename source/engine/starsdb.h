@@ -36,7 +36,19 @@ struct StarRecord {
     std::optional<std::array<u32,9>> saved_game_timestamp;
     std::optional<u8> planet_count;
 };
+enum class Observation { Unknown, Matched, Missing, Changed };
+struct PostLoadObservation {
+    Observation species_profile=Observation::Unknown;
+    Observation canonical_name=Observation::Unknown;
+    bool position_cache_reset=false; // observed GA reset of +0x80, not a host mutation request
+    bool side_effects_suppressed=true;
+};
 // A standalone serializer frame at an EXPLICIT offset, not a search for embedded magic.
 // A successful parse does not prove that the frame belongs to this class (tag is shared).
 bool inspect_star_record(const std::vector<u8>& bytes, size_t offset, StarRecord& out, std::string& error);
+// Instruction-derived observation model for 0xBBA6E0. No resource manager, canonical-name
+// injection, cache rebuild or cleanup is performed by this function.
+PostLoadObservation observe_post_load(const StarRecord& record,
+                                      std::optional<bool> profile_lookup,
+                                      std::optional<std::u16string> canonical_name);
 }  // namespace os::starsdb
