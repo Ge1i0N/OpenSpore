@@ -1,0 +1,88 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00BAE0B0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00bae0b0  PUSH ECX
+00bae0b1  PUSH EBP
+00bae0b2  PUSH ESI
+00bae0b3  MOV ESI,dword ptr [ESP + 0x14]
+00bae0b7  MOV EAX,dword ptr [ESI + 0x4]
+00bae0ba  MOV ECX,dword ptr [ESI]
+00bae0bc  PUSH EDI
+00bae0bd  PUSH EAX
+00bae0be  PUSH ECX
+00bae0bf  MOV ECX,ESI
+00bae0c1  CALL 0x00e25bb0
+00bae0c6  MOV EDI,dword ptr [ESP + 0x14]
+00bae0ca  MOV EDX,dword ptr [EDI]
+00bae0cc  MOV EAX,dword ptr [EDX + 0x20]
+00bae0cf  MOV ECX,EDI
+00bae0d1  MOV dword ptr [ESP + 0xc],0x0
+00bae0d9  CALL EAX
+00bae0db  MOV EDX,dword ptr [EAX]
+00bae0dd  MOV ECX,EAX
+00bae0df  MOV EAX,dword ptr [EDX + 0x18]
+00bae0e2  CALL EAX
+00bae0e4  PUSH 0x0
+00bae0e6  PUSH 0x1
+00bae0e8  LEA ECX,[ESP + 0x14]
+00bae0ec  PUSH ECX
+00bae0ed  PUSH EAX
+00bae0ee  CALL 0x0093a6f0
+00bae0f3  MOV EDX,dword ptr [ESP + 0x1c]
+00bae0f7  ADD ESP,0x10
+00bae0fa  PUSH EDX
+00bae0fb  MOV ECX,ESI
+00bae0fd  CALL 0x00d018f0
+00bae102  XOR EBP,EBP
+00bae104  CMP dword ptr [ESP + 0xc],EBP
+00bae108  JBE 0x00bae178
+00bae10a  LEA EBX,[EBX]
+00bae110  MOV EAX,dword ptr [EDI]
+00bae112  MOV EDX,dword ptr [EAX + 0x28]
+00bae115  PUSH 0x0
+00bae117  LEA ECX,[ESP + 0x1c]
+00bae11b  PUSH ECX
+00bae11c  PUSH 0x3e4353b
+00bae121  MOV ECX,EDI
+00bae123  MOV dword ptr [ESP + 0x24],0x0
+00bae12b  CALL EDX
+00bae12d  MOV EAX,dword ptr [ESI + 0x4]
+00bae130  CMP EAX,dword ptr [ESI + 0x8]
+00bae133  JNC 0x00bae155
+00bae135  LEA ECX,[EAX + 0x4]
+00bae138  MOV dword ptr [ESI + 0x4],ECX
+00bae13b  TEST EAX,EAX
+00bae13d  JZ 0x00bae162
+00bae13f  MOV EDX,dword ptr [ESP + 0x18]
+00bae143  MOV dword ptr [EAX],EDX
+00bae145  MOV ECX,dword ptr [ESP + 0x18]
+00bae149  TEST ECX,ECX
+00bae14b  JZ 0x00bae171
+00bae14d  MOV EAX,dword ptr [ECX]
+00bae14f  MOV EDX,dword ptr [EAX]
+00bae151  CALL EDX
+00bae153  JMP 0x00bae162
+00bae155  LEA ECX,[ESP + 0x18]
+00bae159  PUSH ECX
+00bae15a  PUSH EAX
+00bae15b  MOV ECX,ESI
+00bae15d  CALL 0x00aea550
+00bae162  MOV ECX,dword ptr [ESP + 0x18]
+00bae166  TEST ECX,ECX
+00bae168  JZ 0x00bae171
+00bae16a  MOV EDX,dword ptr [ECX]
+00bae16c  MOV EAX,dword ptr [EDX + 0x4]
+00bae16f  CALL EAX
+00bae171  INC EBP
+00bae172  CMP EBP,dword ptr [ESP + 0xc]
+00bae176  JC 0x00bae110
+00bae178  MOV EDX,dword ptr [EDI]
+00bae17a  MOV EAX,dword ptr [EDX + 0x1c]
+00bae17d  MOV ECX,EDI
+00bae17f  CALL EAX
+00bae181  POP EDI
+00bae182  POP ESI
+00bae183  POP EBP
+00bae184  POP ECX
+00bae185  RET

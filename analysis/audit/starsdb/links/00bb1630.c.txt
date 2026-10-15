@@ -1,0 +1,47 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00BB1630
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+int * FUN_00bb1630(int *param_1,int *param_2)
+
+{
+  undefined4 *puVar1;
+  int iVar2;
+  int iVar3;
+  int *piVar4;
+  int *piVar5;
+  int *piVar6;
+  undefined4 uVar7;
+  int iVar8;
+  uint local_4;
+
+  piVar5 = param_1;
+  iVar8 = 0;
+  local_4 = 0;
+  piVar6 = (int *)(**(code **)(*param_1 + 0x20))();
+  uVar7 = (**(code **)(*piVar6 + 0x18))();
+  FUN_0093a6f0(uVar7,&local_4,1,0);
+  piVar6 = param_2;
+  iVar2 = param_2[1];
+  iVar3 = *param_2;
+  if ((uint)(iVar2 - iVar3 >> 2) < local_4) {
+    param_1 = (int *)0x0;
+    FUN_00babd00(iVar2,local_4 - (iVar2 - iVar3 >> 2),&param_1);
+  }
+  else {
+    FUN_00e25bb0(iVar3 + local_4 * 4,iVar2);
+  }
+  if (0 < (int)local_4) {
+    do {
+      piVar4 = *(int **)(*piVar6 + iVar8 * 4);
+      puVar1 = (undefined4 *)(*piVar6 + iVar8 * 4);
+      if (piVar4 != (int *)0x0) {
+        *puVar1 = 0;
+        (**(code **)(*piVar4 + 4))();
+      }
+      (**(code **)(*piVar5 + 0x28))(0x3e4353b,puVar1,0);
+      iVar8 = iVar8 + 1;
+    } while (iVar8 < (int)local_4);
+  }
+  return piVar5;
+}

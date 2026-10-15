@@ -8,8 +8,9 @@ All original-code findings below are **static**; no original save has been repla
 
 `engine/serialized_frame.*` implements a bounded, transactional reader for the field-directory
 frame used by GA's serializer. `engine/starsdb.*` inspects two consecutive frames: the save/generation
-metadata, then opaque StarManager fields. It decodes the six known metadata fields, **not** star
-records, object references, the galaxy grid, a complete save or the catalogue producer.
+metadata, then opaque StarManager fields. That default prefix mode decodes six metadata fields.
+Additional explicit modes decode wire lists/grid and standalone StarRecord fields, **not** object
+resolution, a complete save or the catalogue producer.
 
 `starsdb_inspect` is a read-only tool for an **explicitly selected serializer-stream file**. There is
 no profile scan, no automatic save loading and no save/database writing. The runtime still has no
@@ -83,7 +84,7 @@ retains all nine words without imposing calendar validity or timezone semantics.
 known fields stay optional; the last nonzero duplicate wins. These choices model the inspected
 field-dispatch subset, not original default construction or schema migration.
 
-## StarManager fields and remaining dependency
+## StarManager fields and wire references
 
 The [initializer `0x1326120`](audit/starsdb/01326120.asm.txt) provides 19 descriptor names. Important
 catalogue dependencies are now identified exactly:
@@ -95,15 +96,45 @@ catalogue dependencies are now identified exactly:
 | `mSavedGameStarRecords` | `0x03EA8679` | `+0xF0` | `0xBAE0B0 / 0xACA670` |
 | `mPossibleStartLocations` | `0x0563C450` | `+0x118` | `0xBAE0B0 / 0xACA670` |
 
-The grid reader [0xBB6950](audit/starsdb/00bb6950.c.txt) constructs cells and resolves records through
-serializer context calls. The list writer [0xACA670](audit/starsdb/00aca670.c.txt) writes a BE count,
-then obtains serialized values via context virtual `+0x28`; those are **not established as raw star
-coordinates or file offsets**. Publishing list values as `StarRecord` metadata would be premature.
-The inspector labels all manager payloads opaque even when their descriptor names are known.
+The list reader [0xBAE0B0](audit/starsdb/links/00bae0b0.c.txt) now establishes the wire shape:
+`BE count`, then for every entry a `BE token`; if token is nonzero, a `BE class_id` follows. A null
+reference therefore occupies four bytes, while a non-null reference occupies eight. Starter/Saved
+lists request interface `0x03E4353B`; the StarRecord class ID is `0x03E4353C`. These are wire object
+identities, **not** `mKey`, star IDs or file offsets. The writer actually emits its original object
+pointer word as the token; on reload it is an opaque class-scoped map key, never an address to
+dereference in this process. It is not a stable cross-save star identifier.
 
-Next: retain/resolve list reader `0xBAE0B0`, context reference/object methods and StarRecord descriptors;
-then decode the grid/record graph sufficiently to feed [the typed catalogue builder](gge-catalog.md).
-Also recover the generated-new-galaxy path: absence of a saved database does not mean no stars.
+The context read/write paths [0x6A06A0 / 0x6A05F0](audit/starsdb/links/006a06a0.c.txt) show that GA
+uses a context object to resolve or create referenced objects. The host implementation deliberately
+does not run that protocol. `starsdb_links.*` validates lists and grid cells as unresolved wire
+references only. Empty, absent and unknown fields remain distinct; no reference is dereferenced and
+no catalogue entry is published.
+
+Host limits: at most 1,048,576 references per decoded list/grid, 65,536 grid cells, and aggregate
+references are counted across all cells of one grid. These are allocation safety policies, not GA
+galaxy sizes. Unknown class IDs and duplicate tokens remain inspectable; parsing does not establish
+that they support the requested StarRecord interface. Nonfinite position words remain raw data;
+the separate catalogue builder rejects nonfinite coordinates when projecting typed inputs.
+
+The grid reader [0xBB6950](audit/starsdb/00bb6950.c.txt) constructs cells and calls a nested record
+reader. The list writer [0xACA670](audit/starsdb/00aca670.c.txt) writes a BE count and context
+references; the values are not raw star coordinates.
+
+### StarRecord field subset
+
+The descriptor initializer [0x13277D0](audit/starsdb/links/013277d0.c.txt) provides 14 fields:
+`mKey`, `mPosition`, `mType`, `mTechLevel`, `name`, `mFlags`, `citizenSpeciesKey`, `mStarterWorldID`,
+`empireID`, `lastObservedTime`, `savedGameTimeStamp`, `savedGameVersionMajor`,
+`savedGameVersionMinor` and `planetCount`. The host inspector decodes these fields at an explicit
+frame offset. Position preserves three BE float bit patterns; `citizenSpeciesKey` preserves GA's
+memory-word order (+8,+4,+0). The StarRecord read function [0xBBA6E0](audit/starsdb/links/00bba6e0.c.txt)
+also performs resource/property and side-effect fixups; those are not ported. A shared frame tag does
+not prove that any arbitrary frame is a StarRecord: `starsdb_inspect --star-record` is a caller-selected
+structural decode, not class verification.
+
+Next: resolve the context's object table and nested serializer stream, then decode the grid/record graph
+sufficiently to feed [the typed catalogue builder](gge-catalog.md). Also recover the generated-new-galaxy
+path: absence of a saved database does not mean no stars.
 MoviePlayer/DBCheck adapters and state-2 scene/UI/effects remain separate runtime dependencies.
 
 ## Evidence helper correction
@@ -117,12 +148,17 @@ The evidence exporter also asserts that this descriptor address has no raw-file 
 ## Reproduction and checks
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore starsdb_verify starsdb_inspect
+cmake --build build --config Debug --target OpenSpore starsdb_verify starsdb_inspect starsdb_links_verify
 .\build\Debug\starsdb_verify.exe
+.\build\Debug\starsdb_links_verify.exe
 # Read-only, optional: pass an explicit serializer-stream file; no profile discovery.
 .\build\Debug\starsdb_inspect.exe <explicit-local-file>
+.\build\Debug\starsdb_inspect.exe <explicit-local-file> --links
+.\build\Debug\starsdb_inspect.exe <explicit-StarRecord-frame> --star-record
 refs/ghidra/venv/Scripts/python.exe tools/starsdb_evidence.py
 python tools/starsdb_evidence.py --static
+refs/ghidra/venv/Scripts/python.exe tools/starsdb_evidence.py --links
+python tools/starsdb_evidence.py --static --links
 python -m unittest discover -s tools/tests -p 'test_*.py'
 ```
 
@@ -138,6 +174,10 @@ suites PASS, six Python tests PASS, 44 maintained Markdown link checks PASS. Liv
 `DevLauncher → CreatureEditor` with `-w -devDirs` both exit 0, aborts/asserts 0. The original
 MoviePlayer-Unknown gate remains in place. These runs test host regressions, not database loading.
 
-The exporter retains 23 focused GA functions (C and instructions), four bounded instruction extracts,
-the schema notes and seven [new Ghidra seeds](audit/starsdb-seeds.tsv). No original target execution,
-save discovery, database mutation or game-completion claim is involved.
+`starsdb_links_verify`: **362 constructed checks PASS**. Covers variable-width null/non-null references,
+list/grid bounds and atomic failure, manager dispatch, all 14 StarRecord fields, UTF-16 units, float
+bit patterns, resource-key order, duplicates and explicit offsets. These are instruction-derived
+fixtures, not real saves. The exporter retains 28 focused link/StarRecord functions under
+[audit/starsdb/links](audit/starsdb/links), file-backed vtables, schema notes and the [new Ghidra
+seeds](audit/starsdb-links-seeds.tsv). No original target execution, save discovery, database mutation
+or game-completion claim is involved.

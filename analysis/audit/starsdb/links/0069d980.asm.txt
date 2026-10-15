@@ -1,0 +1,35 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x0069D980
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+0069d980  PUSH EDI
+0069d981  MOV EDI,ECX
+0069d983  CMP byte ptr [EDI + 0xc],0x0
+0069d987  JZ 0x0069d9bd
+0069d989  MOV ECX,dword ptr [EDI + 0x8]
+0069d98c  MOV EAX,dword ptr [ECX]
+0069d98e  MOV EDX,dword ptr [EAX + 0x14]
+0069d991  PUSH ESI
+0069d992  LEA ESI,[EDI + -0x8]
+0069d995  NEG ESI
+0069d997  SBB ESI,ESI
+0069d999  AND ESI,EDI
+0069d99b  CALL EDX
+0069d99d  MOV ECX,dword ptr [ESP + 0xc]
+0069d9a1  MOV EDX,dword ptr [EAX]
+0069d9a3  MOV EDX,dword ptr [EDX + 0x20]
+0069d9a6  PUSH ECX
+0069d9a7  PUSH ESI
+0069d9a8  MOV ECX,EAX
+0069d9aa  CALL EDX
+0069d9ac  POP ESI
+0069d9ad  TEST AL,AL
+0069d9af  JZ 0x0069d9bd
+0069d9b1  MOV EAX,0x1
+0069d9b6  MOV byte ptr [EDI + 0xc],AL
+0069d9b9  POP EDI
+0069d9ba  RET 0x4
+0069d9bd  XOR EAX,EAX
+0069d9bf  MOV byte ptr [EDI + 0xc],AL
+0069d9c2  POP EDI
+0069d9c3  RET 0x4

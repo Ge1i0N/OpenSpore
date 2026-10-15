@@ -1,0 +1,51 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00BA7500
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00ba7500  PUSH EBX
+00ba7501  MOV EBX,dword ptr [ESP + 0x8]
+00ba7505  PUSH ESI
+00ba7506  PUSH EDI
+00ba7507  MOV EDI,dword ptr [ESP + 0x14]
+00ba750b  MOV ECX,dword ptr [EDI + 0x4]
+00ba750e  SUB ECX,dword ptr [EDI]
+00ba7510  MOV EAX,0x66666667
+00ba7515  IMUL ECX
+00ba7517  MOV EAX,dword ptr [EBX]
+00ba7519  SAR EDX,0x3
+00ba751c  MOV ESI,EDX
+00ba751e  SHR ESI,0x1f
+00ba7521  ADD ESI,EDX
+00ba7523  MOV EDX,dword ptr [EAX + 0x20]
+00ba7526  MOV ECX,EBX
+00ba7528  CALL EDX
+00ba752a  MOV EDX,dword ptr [EAX]
+00ba752c  MOV ECX,EAX
+00ba752e  MOV EAX,dword ptr [EDX + 0x18]
+00ba7531  MOV dword ptr [ESP + 0x14],ESI
+00ba7535  CALL EAX
+00ba7537  PUSH 0x0
+00ba7539  PUSH 0x1
+00ba753b  LEA ECX,[ESP + 0x1c]
+00ba753f  PUSH ECX
+00ba7540  PUSH EAX
+00ba7541  CALL 0x0093a9e0
+00ba7546  MOV ESI,dword ptr [EDI]
+00ba7548  MOV EDI,dword ptr [EDI + 0x4]
+00ba754b  ADD ESP,0x10
+00ba754e  CMP ESI,EDI
+00ba7550  JZ 0x00ba7563
+00ba7552  PUSH ESI
+00ba7553  PUSH EBX
+00ba7554  CALL 0x00ba7410
+00ba7559  ADD ESI,0x14
+00ba755c  ADD ESP,0x8
+00ba755f  CMP ESI,EDI
+00ba7561  JNZ 0x00ba7552
+00ba7563  MOV EDX,dword ptr [EBX]
+00ba7565  MOV EAX,dword ptr [EDX + 0x1c]
+00ba7568  POP EDI
+00ba7569  POP ESI
+00ba756a  MOV ECX,EBX
+00ba756c  POP EBX
+00ba756d  JMP EAX

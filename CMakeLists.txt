@@ -120,6 +120,7 @@ set(OS_SOURCES
   source/engine/gge_catalog.cpp
   source/engine/serialized_frame.cpp
   source/engine/starsdb.cpp
+  source/engine/starsdb_links.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
@@ -160,9 +161,11 @@ add_executable(gge_dbcheck_verify EXCLUDE_FROM_ALL tools/gge_dbcheck_verify.cpp
 target_include_directories(gge_dbcheck_verify PRIVATE source)
 add_executable(gge_catalog_verify EXCLUDE_FROM_ALL tools/gge_catalog_verify.cpp source/engine/gge_catalog.cpp)
 target_include_directories(gge_catalog_verify PRIVATE source)
-add_executable(starsdb_verify EXCLUDE_FROM_ALL tools/starsdb_verify.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp)
+add_executable(starsdb_verify EXCLUDE_FROM_ALL tools/starsdb_verify.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_verify PRIVATE source)
-add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp)
+add_executable(starsdb_links_verify EXCLUDE_FROM_ALL tools/starsdb_links_verify.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
+target_include_directories(starsdb_links_verify PRIVATE source)
+add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_inspect PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
   source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
@@ -179,6 +182,7 @@ if(MSVC)
   target_compile_options(gge_dbcheck_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_catalog_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(starsdb_links_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)

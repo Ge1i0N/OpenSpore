@@ -28,7 +28,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE Intro gate | phase-6/movie-idle predicate and DBCheck notification/one-shot requests modelled and tested | runtime explicitly waits for unimplemented MoviePlayer observation; no actual DBCheck/state10 transition |
 | DBCheck executor | recovered bypass/dialog/callback side-effect ordering with explicit backend; actual dialog corpus/root verified | controlled backend only; live content-manager/WinProc adapter missing; Play Spore scene not run |
 | Catalogue projection | saved/new fields, indices, raw positions, stages, image fallback and two-word save-header predicate | typed controlled inputs only; stars.db reader/candidate generation/live catalogue not implemented |
-| stars.db prefix | bounded serializer frames, six metadata fields and named opaque StarManager spans | serializer-stream subset only; no real-save validation, reference/grid decoding or runtime integration |
+| stars.db serializer subset | bounded frames, six metadata fields, variable-width wire references/grid and 14 StarRecord fields | context identity/fixups and nested object stream unresolved; no real-save validation, producer or runtime integration |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
 
@@ -51,6 +51,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | DBCheck branches | real 101-object/24-window dialog fixture; Unknown vs absent, failure/callback/cleanup and Intro integration PASS | `gge_dbcheck_verify <fixtures>`; [state-2/DBCheck evidence](analysis/gge-dbcheck-play.md) |
 | Catalogue field mapping | 19 grouped checks, unknown vs empty sources, ordering, defaults and atomic invalid-input rejection | `gge_catalog_verify`; [source/field evidence](analysis/gge-catalog.md) |
 | Serializer prefix | 240 constructed checks; mixed-endian metadata, bounds/truncation/atomic failure; read-only CLI smoke PASS | `starsdb_verify`, `starsdb_inspect`; [evidence and limits](analysis/starsdb.md) |
+| Serializer links / StarRecord | 362 constructed checks; wire null/non-null refs, grid bounds, 14 fields and atomic failures; unresolved identities | `starsdb_links_verify`; `starsdb_inspect --links/--star-record`; [evidence and limits](analysis/starsdb.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

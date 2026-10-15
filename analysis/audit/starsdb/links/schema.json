@@ -1,0 +1,127 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static GA instructions + analyst transcription, no original runtime or real-save corpus",
+  "star_record_initializer": "0x013277d0",
+  "star_record_descriptor": "0x0156cb70 (runtime constructed)",
+  "star_record_vtable": "0x01466458",
+  "interface_id": "0x03e4353b",
+  "class_id": "0x03e4353c",
+  "wire_reference": "BE original object-pointer token; iff nonzero then BE class_id. Opaque class-scoped map key on reload, not mKey/star ID/file offset or host address",
+  "reference_list": "BE count, count variable-width wire references; interface query is not executed by host",
+  "grid": "BE cell_count, cell_count reference lists; no grid dimensions inferred",
+  "read_context_vtable": {
+    "address": "0x01408750",
+    "reference_slot": "+0x24 => 0x006a06a0"
+  },
+  "write_context_vtable": {
+    "address": "0x01408750",
+    "reference_slot": "+0x20 => 0x006a05f0"
+  },
+  "star_fields": [
+    {
+      "name": "mKey",
+      "id": "0x3d58bf2",
+      "host_offset": "0x70",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "mPosition",
+      "id": "0x3d58bf1",
+      "host_offset": "0x3c",
+      "payload": "3 BE float bit patterns",
+      "read_callback": "0xb6e4a0"
+    },
+    {
+      "name": "mType",
+      "id": "0x3e95e04",
+      "host_offset": "0x48",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "mTechLevel",
+      "id": "0x3d58bf6",
+      "host_offset": "0x4c",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "name",
+      "id": "0x3d58bf4",
+      "host_offset": "0x60",
+      "payload": "BE count + native UTF16LE",
+      "read_callback": "0xac8700"
+    },
+    {
+      "name": "mFlags",
+      "id": "0x3d58bf3",
+      "host_offset": "0x5c",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "citizenSpeciesKey",
+      "id": "0x3d58bf5",
+      "host_offset": "0x74",
+      "payload": "3 BE u32 into memory +8,+4,+0",
+      "read_callback": "0xae33b0"
+    },
+    {
+      "name": "mStarterWorldID",
+      "id": "0x3d58bf7",
+      "host_offset": "0x58",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "empireID",
+      "id": "0x3f1389b",
+      "host_offset": "0x54",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "lastObservedTime",
+      "id": "0x3f1389a",
+      "host_offset": "0xc",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "savedGameTimeStamp",
+      "id": "0x3f1389c",
+      "host_offset": "0x18",
+      "payload": "9 BE u32",
+      "read_callback": "0xb26950"
+    },
+    {
+      "name": "savedGameVersionMajor",
+      "id": "0x3f1389d",
+      "host_offset": "0x10",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "savedGameVersionMinor",
+      "id": "0x3f1389e",
+      "host_offset": "0x14",
+      "payload": "BE u32",
+      "read_callback": "0x572810"
+    },
+    {
+      "name": "planetCount",
+      "id": "0x51a1188",
+      "host_offset": "0xac",
+      "payload": "u8",
+      "read_callback": "0xbb9e40"
+    }
+  ],
+  "limits": [
+    "wire-only, identities unresolved",
+    "frame tag shared across classes",
+    "no constructor defaults or read-fixup reproduction",
+    "outer resource streams/context index and object bodies not attached",
+    "no real save validation/catalogue producer/galaxy readiness"
+  ]
+}

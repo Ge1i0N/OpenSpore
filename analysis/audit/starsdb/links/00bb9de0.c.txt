@@ -1,0 +1,12 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00BB9DE0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+uint __thiscall os_StarRecord_query_interface(uint param_1,int param_2)
+
+{
+  if (param_2 != 0x3e4353b) {
+    param_1 = param_1 & (param_2 != 0x179c807) - 1;
+  }
+  return param_1;
+}
