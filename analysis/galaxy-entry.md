@@ -102,6 +102,8 @@ Its title path, MoviePlayer/phase guard, DBCheck notification and post-intro req
 auto-complete it. The primary frame remains a diagnostic view, not the handler's original visibility
 lifecycle. Next: actual MoviePlayer/no-movie contract, DBCheck consumers and the state-2 scene handler.
 Scene/camera/effects, save selection, zoom composition and messages remain open; no playable claim.
+The state-2 follow-up is now [Play Spore / DBCheck](gge-dbcheck-play.md): its live game-record and
+per-star UI/effect dependencies are identified; they are not replaced with fabricated star data.
 
 Reproduce retained evidence:
 

@@ -1,0 +1,104 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF8300
+
+uint __fastcall FUN_00df8300(int param_1)
+
+{
+  float fVar1;
+  float fVar2;
+  float fVar3;
+  char cVar4;
+  uint uVar5;
+  int *piVar6;
+  int iVar7;
+  int *unaff_EBP;
+  int iVar8;
+  undefined4 *puVar9;
+  undefined4 *puVar10;
+  undefined4 uVar11;
+  int *local_4c;
+  int local_48;
+  uint local_44;
+  int *piStack_40;
+  float local_3c;
+  float fStack_38;
+  undefined4 uStack_34;
+  undefined4 auStack_30 [12];
+
+  FUN_005334a0(*(undefined4 *)(DAT_016a1344 + 0x1d8),*(undefined4 *)(DAT_016a1344 + 0x1dc));
+  local_44 = 0;
+  uVar5 = 0;
+  if ((*(int *)(param_1 + 0xc) - *(int *)(param_1 + 8)) / 0xbc != 0) {
+    local_48 = 0;
+    do {
+      iVar7 = DAT_016a1344;
+      iVar8 = *(int *)(param_1 + 8) + local_48;
+      local_3c = *(float *)(iVar8 + 0xb8);
+      if (*(char *)(iVar8 + 0xad) != '\0') {
+        local_4c = (int *)0x0;
+        if (*(char *)(iVar8 + 0xac) == '\0') {
+          piVar6 = *(int **)(DAT_016a1344 + 0x15c);
+          uVar11 = 0xcc1d3eeb;
+LAB_00df83d7:
+          (**(code **)(*piVar6 + 8))(uVar11,0,&local_4c);
+        }
+        else {
+          cVar4 = FUN_0087da90(iVar8,DAT_016a1344 + 0xd0);
+          piVar6 = *(int **)(iVar7 + 0x15c);
+          if (cVar4 == '\0') {
+            uVar11 = 0xf0eb627c;
+            goto LAB_00df83d7;
+          }
+          (**(code **)(*piVar6 + 8))(0x2283c798,0,&local_4c);
+        }
+        if (local_4c != (int *)0x0) {
+          piStack_40 = local_4c;
+          (**(code **)(*local_4c + 0x48))(8,&piStack_40,1);
+          fVar1 = *(float *)(iVar8 + 0x84);
+          fVar2 = *(float *)(iVar8 + 0x88);
+          fVar3 = *(float *)(iVar8 + 0x80);
+          puVar9 = &DAT_016a1674;
+          puVar10 = auStack_30;
+          for (iVar7 = 9; iVar7 != 0; iVar7 = iVar7 + -1) {
+            *puVar10 = *puVar9;
+            puVar9 = puVar9 + 1;
+            puVar10 = puVar10 + 1;
+          }
+          uStack_34 = DAT_01453740;
+          piStack_40 = (int *)(fVar2 * DAT_016a168c + fVar1 * DAT_016a1680 + fVar3 * DAT_016a1674 +
+                              DAT_016a1698);
+          local_3c = DAT_016a169c +
+                     fVar2 * DAT_016a1690 + fVar1 * DAT_016a1684 + fVar3 * DAT_016a1678;
+          fStack_38 = DAT_016a16a0 +
+                      fVar2 * DAT_016a1694 + fVar1 * DAT_016a1688 + fVar3 * DAT_016a167c;
+          local_44 = 0x10004;
+          (**(code **)(*unaff_EBP + 0x18))(&local_44);
+          FUN_00df6820(local_4c);
+          puVar9 = *(undefined4 **)(DAT_016a1344 + 0x1dc);
+          if (puVar9 < *(undefined4 **)(DAT_016a1344 + 0x1e0)) {
+            *(undefined4 **)(DAT_016a1344 + 0x1dc) = puVar9 + 1;
+            if (puVar9 != (undefined4 *)0x0) {
+              *puVar9 = local_4c;
+              if (local_4c == (int *)0x0) goto LAB_00df8574;
+              (**(code **)*local_4c)();
+            }
+          }
+          else {
+            FUN_00a0a2c0(puVar9,&local_4c);
+          }
+          if (local_4c != (int *)0x0) {
+            (**(code **)(*local_4c + 4))();
+          }
+        }
+      }
+LAB_00df8574:
+      local_48 = local_48 + 0xbc;
+      uVar5 = (*(int *)(param_1 + 0xc) - *(int *)(param_1 + 8)) / 0xbc;
+      local_44 = local_44 + 1;
+    } while (local_44 < uVar5);
+  }
+  return uVar5 & 0xffffff00;
+}

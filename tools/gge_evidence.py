@@ -21,12 +21,16 @@ INTRO_FUNCTIONS = (0xdea4b0, 0xdeb450, 0xdea3d0, 0xdeaf70, 0xdea820, 0xdeb060, 0
                    0xdeac80, 0xdea510, 0xde9550, 0xde8680, 0x60b510, 0x60b400,
                    0x60b6b0, 0x60b6d0, 0x60b340, 0x67cad0, 0xfd8120, 0xfd7b10,
                    0xde5280, 0xde5380, 0xfd90d0, 0x6ab790)
+FLOW_FUNCTIONS = (0xe008b0, 0xdf9620, 0xdf8700, 0xdf85b0, 0xdf95a0, 0xdf7cb0, 0xdf7f30,
+                  0xdf9200, 0xdf8300, 0xdf9740, 0x60b5d0, 0x60b340, 0x60b440, 0x60b470)
 
 
 def main():
     intro = '--intro' in sys.argv
-    addresses = INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
+    flow = '--flow' in sys.argv
+    addresses = FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-flow' if flow else
+                 'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
     header = ('GA-unpacked SHA-256: %s\nStatic analysis only, not original runtime observation.\n'
@@ -73,6 +77,31 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--flow' in sys.argv:
+        dest = ROOT/'analysis/audit/gge-flow'
+        dest.mkdir(parents=True, exist_ok=True)
+        tables = {'oracle_sha256':digest,'state2_name':pe.wstr(0x147efbc),
+                  'state2_vtable':[{'slot':hex(o),'target':hex(pe.u32(0x147ef50+o))}
+                                     for o in range(0,0x6c,4)],
+                  'db_dialog_vtable':[{'slot':hex(o),'target':hex(pe.u32(0x13fb320+o))}
+                                     for o in range(0,0x80,4)]}
+        (dest/'tables.json').write_text(json.dumps(tables,indent=2)+'\n',encoding='utf-8',newline='\n')
+        (dest/'state2-name.asm.txt').write_text(header+'\n'.join(disasm(pe,0xe00930,0xe00936))+'\n',
+                                              encoding='utf-8',newline='\n')
+        corpus=[]
+        for package,record,instance,data in layouts(sorted((ROOT/'build/bin/Debug').rglob('*.package')),0x4b0ac091):
+            parsed=BinaryLayout(data).parse()
+            controls=[]
+            for index,obj in parsed.objects.items():
+                for prop in obj['properties']:
+                    if prop['id']==0xeec1b001 and prop.get('raw'):
+                        controls.append({'object':index,'id':hex(int.from_bytes(bytes.fromhex(prop['raw']),'little'))})
+            corpus.append({'package':package.name,'record':record,'instance':hex(instance),
+                           'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data),
+                           'objects':len(parsed.objects),'windows':len(parsed.windows),'controls':controls})
+        (dest/'db-dialog-corpus.json').write_text(json.dumps(corpus,indent=2)+'\n',encoding='utf-8',newline='\n')
+        print('retained Play Spore state2 / DBCheck UI tables and dialog corpus')
+        return
     if '--intro' in sys.argv:
         dest = ROOT/'analysis/audit/gge-intro'
         dest.mkdir(parents=True, exist_ok=True)

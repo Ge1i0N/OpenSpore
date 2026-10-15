@@ -13,6 +13,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | AppMode registrations | [modes](modes.md) | ten recovered registrations, not implemented driver behavior |
 | GalaxyGameEntry | [galaxy-entry](galaxy-entry.md) | lifecycle/UI-loading evidence and implemented default primary UI subset, not a playable galaxy |
 | GGE Intro | [gge-intro](gge-intro.md) | post-title guard/latch model, MoviePlayer and DBCheck evidence; runtime dependencies still missing |
+| DBCheck / Play Spore | [gge-dbcheck-play](gge-dbcheck-play.md) | explicit-backend DBCheck branch executor tested with real dialog fixtures; state-2 game-list/effect/UI dependencies, no live scene yet |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |

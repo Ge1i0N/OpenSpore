@@ -1,0 +1,47 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00E008B0
+
+00e008b0  PUSH EBX
+00e008b1  PUSH ESI
+00e008b2  XOR EBX,EBX
+00e008b4  MOV ESI,ECX
+00e008b6  PUSH EDI
+00e008b7  MOV byte ptr [ESI + 0x4],BL
+00e008ba  MOV dword ptr [ESI],0x147ef50
+00e008c0  PUSH EBX
+00e008c1  PUSH EBX
+00e008c2  LEA ECX,[ESI + 0x20]
+00e008c5  MOV dword ptr [ESI + 0x8],EBX
+00e008c8  MOV dword ptr [ESI + 0xc],EBX
+00e008cb  MOV dword ptr [ESI + 0x10],EBX
+00e008ce  CALL 0x0093a4d0
+00e008d3  PUSH EBX
+00e008d4  PUSH EBX
+00e008d5  LEA ECX,[ESI + 0x38]
+00e008d8  CALL 0x0093a4d0
+00e008dd  PUSH EBX
+00e008de  LEA EDI,[ESI + 0x70]
+00e008e1  PUSH EBX
+00e008e2  MOV ECX,EDI
+00e008e4  MOV dword ptr [ESI + 0x54],EBX
+00e008e7  MOV dword ptr [ESI + 0x58],EBX
+00e008ea  MOV dword ptr [ESI + 0x5c],EBX
+00e008ed  CALL 0x0093a4d0
+00e008f2  PUSH EBX
+00e008f3  PUSH EBX
+00e008f4  MOV ECX,EDI
+00e008f6  CALL 0x0093a3f0
+00e008fb  MOV dword ptr [ESI + 0x90],EBX
+00e00901  MOV dword ptr [ESI + 0x94],EBX
+00e00907  MOV dword ptr [ESI + 0x98],EBX
+00e0090d  MOV byte ptr [ESI + 0x50],BL
+00e00910  MOV dword ptr [ESI + 0x68],0xffffffff
+00e00917  POP EDI
+00e00918  MOV dword ptr [0x016a15fc],ESI
+00e0091e  MOV EAX,ESI
+00e00920  POP ESI
+00e00921  POP EBX
+00e00922  RET

@@ -1,0 +1,29 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00E008B0
+
+undefined4 * __fastcall FUN_00e008b0(undefined4 *param_1)
+
+{
+  *(undefined1 *)(param_1 + 1) = 0;
+  *param_1 = &PTR_FUN_0147ef50;
+  param_1[2] = 0;
+  param_1[3] = 0;
+  param_1[4] = 0;
+  FUN_0093a4d0(0,0);
+  FUN_0093a4d0(0,0);
+  param_1[0x15] = 0;
+  param_1[0x16] = 0;
+  param_1[0x17] = 0;
+  FUN_0093a4d0(0,0);
+  FUN_0093a3f0(0,0);
+  param_1[0x24] = 0;
+  param_1[0x25] = 0;
+  param_1[0x26] = 0;
+  *(undefined1 *)(param_1 + 0x14) = 0;
+  param_1[0x1a] = 0xffffffff;
+  DAT_016a15fc = param_1;
+  return param_1;
+}

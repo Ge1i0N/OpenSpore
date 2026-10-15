@@ -31,13 +31,22 @@ test with `-w -devDirs`; retain evidence and commit.
   MoviePlayer +0x14 (`0xFD7550`), DBCheck and event `0x08085C4C`. Post-title decision/latch subset
   implemented; `gge_intro_verify`: 2040 controlled-signal checks. Runtime uses explicit Unknown
   MoviePlayer observation and never generates DB completion or state10 transitions. Screenshot
-  shows this block reason; the phase6 input is a model boundary, not an executed original title.
+   shows this block reason; the phase6 input is a model boundary, not an executed original title.
+- DBCheck branch executor `gge_dbcheck.cpp` now exists behind explicit `DbCheckBackend` ports;
+  tested on controlled effects + real dialog fixture `0x4B0AC091` / root `0x0431E538` (101 objects,
+  24 windows). It is NOT attached to live runtime: Unknown services stay blocked. See
+  `analysis/gge-dbcheck-play.md` / evidence `audit/gge-flow/`.
+- State2 handler ctor `0xE008B0` is **Play Spore**, name method `0xE00930`. Enter `0xDF9620` rebuilds
+  live game records (`0xDF95A0`), then marker effects and per-game GGEGameStarUIv4. Source catalog is
+  manager `0xB3D3A0` / second list `0xBA6450`; missing catalog is not an empty-but-ready scene.
 
 ## Next, in order
 
 1. Recover needed drawable tiling/outline and Button capture/release/checked behavior from GA.
 2. Define actual MoviePlayer/no-movie host contract and DBCheck dependencies (`0x60B5D0`), not
    package-count readiness. Handler Intro update is traced; gate is waiting on missing services.
+   The branch executor has been tested but needs actual UI/content-manager/WinProc ports; callback
+   `0x60B470` is not established as per-frame and must not be polled into fake completion.
    Continue state2 constructor `0xE008B0` and state10 (`0xDEC320/0xDEC3B0`) return/effect lifecycle.
    The current primary UI is diagnostic; original Intro hides it. Never force hidden branches visible.
 3. Advance the first playable stage without claiming full UI or full format parity.
@@ -48,12 +57,13 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
 .\build\Debug\mode_ui_verify.exe
 .\build\Debug\gge_intro_verify.exe
+.\build\Debug\gge_dbcheck_verify.exe $fixtures
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

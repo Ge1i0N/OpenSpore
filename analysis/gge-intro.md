@@ -120,3 +120,8 @@ python tools/gge_evidence.py --static --intro
 then the DBCheck missing-manager/UI branches with explicit dependency handling. Follow internal
 state 2's controller (constructed at `0xE008B0`) and state-10 return/effect lifecycle for the first
 real galaxy-scene step; do not replace these dependencies with an unconditional readiness boolean.
+
+**Follow-up:** [DBCheck executor and Play Spore state](gge-dbcheck-play.md) now retain those branch
+bodies, real dialog corpus/root and a tested explicit backend subset. State 2 is named “Play Spore”
+and instantiates per-game UI/effects, not just a hidden SPUI branch. The live adapter is still absent;
+default GGE remains blocked on Unknown movie observation, not auto-advanced by controlled tests.

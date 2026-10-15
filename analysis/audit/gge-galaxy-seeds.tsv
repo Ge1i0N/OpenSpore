@@ -1,0 +1,10 @@
+# Confirmed aligned vtable entry targets in the GA oracle; semantic roles require body evidence.
+0x00df9620	function	os_GGE_state2_enter
+0x00df8700	function	os_GGE_state2_update
+0x00df85b0	function	os_GGE_state2_exit
+0x00df5ec0	function	os_GGE_state2_name
+0x00df5ee0	function	os_GGE_state2_resume
+0x00df5f00	function	os_GGE_state2_query
+0x0060b5d0	function	os_DBCheck_start
+0x00fe7090	function	os_DBCheckUI_callback
+0x0060b470	function	os_DBCheck_dialog_callback

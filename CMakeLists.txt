@@ -116,6 +116,7 @@ set(OS_SOURCES
   source/engine/appmodes.cpp
   source/engine/mode_ui.cpp
   source/engine/gge_intro.cpp
+  source/engine/gge_dbcheck.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
@@ -150,6 +151,10 @@ add_executable(mode_ui_verify EXCLUDE_FROM_ALL tools/mode_ui_verify.cpp source/e
 target_include_directories(mode_ui_verify PRIVATE source)
 add_executable(gge_intro_verify EXCLUDE_FROM_ALL tools/gge_intro_verify.cpp source/engine/gge_intro.cpp)
 target_include_directories(gge_intro_verify PRIVATE source)
+add_executable(gge_dbcheck_verify EXCLUDE_FROM_ALL tools/gge_dbcheck_verify.cpp
+  source/engine/gge_dbcheck.cpp source/engine/gge_intro.cpp source/engine/spui_binary.cpp
+  source/engine/spui_geometry.cpp)
+target_include_directories(gge_dbcheck_verify PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
   source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
 target_include_directories(pkg_lifetime_verify PRIVATE source)
@@ -162,6 +167,7 @@ if(MSVC)
   target_compile_options(spui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(mode_ui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_intro_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(gge_dbcheck_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
 endif()

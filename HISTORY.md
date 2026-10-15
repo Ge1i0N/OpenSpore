@@ -7,6 +7,24 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-15 — DBCheck branch executor and Play Spore state-2 dependencies
+
+State2 constructor `0xE008B0` resolves to wide name Play Spore through `0xE00930`. Traced enter,
+exit, update, game-list rebuild, per-star UI/effects. This is runtime game-record metadata, not a
+static layout whose hidden panels should be forced visible. 14 focused function extracts/tables
+and DB dialog corpus identities retained under `analysis/audit/gge-flow/`.
+
+`gge_dbcheck.cpp` now implements GA branch/side-effect ordering via explicit backend ports.
+Unknown is not original null-manager; bypass continuation and UI failures remain distinguished
+from success. `0x60B470` first arms, later calls manager+20 then notification/cleanup; invocation
+pump is still unresolved. Tests use real 101-object/24-window SPUI fixture/root and a controlled
+side-effect recorder, including cancellation, lost manager/root, failures and Intro integration.
+No live backend attached; GGE runtime remains honestly blocked rather than inventing readiness.
+Final validation: warning-free Debug x86; DBCheck/Intro/binding/SPUI regressions PASS, 544 package
+cycles and D3D9 scissor readback PASS; live Main -> GGE -> DevLauncher -> CreatureEditor exits 0
+with aborts/asserts 0. Attachment/teardown callback safety is tested independently. Dashboard:
+204 done / 34 partial / 53 todo across 291 tracked items; no gameplay-done item added.
+
 ## 2026-10-15 — Intro handler, MoviePlayer/DBCheck gate and explicit missing dependency
 
 Shared GGE handler `0xDEA4B0` is named Intro. Traced enter/update/exit, normal title index-5 exit,
