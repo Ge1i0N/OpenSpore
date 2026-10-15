@@ -22,6 +22,11 @@ public:
     // Only visible/enabled/IgnoreMouse/Clip masks are supported by the current host geometry model.
     bool set_window_flag(u16 object,u32 mask,bool value,std::string& error);
     bool set_caption_reference(u16 object,const StarLocaleCaption& caption,std::string& error);
+    bool image_target(u16 window,u16& drawable,std::string& error) const;
+    bool current_image(u16 window,spui::ImageBinding& out,std::string& error) const;
+    // CF3C4EAE only; override keyed by drawable identity, so windows sharing it share the image
+    // within this instance, as the native setter does. Template/sibling instance remain untouched.
+    bool set_image(u16 window,const spui::ImageBinding& image,std::string& error);
     bool move_root(const StarUiPlacement& placement,std::string& error);
     // Pixel-space layer, no design-resolution rescaling after moving the root. No CommandID dispatch.
     // Returned window pointer is invalidated by successful mutation, instantiate or clear.

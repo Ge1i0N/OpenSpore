@@ -1,0 +1,54 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  97d030:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  97d034:	3d 82 83 c5 ee       	cmp    eax,0xeec58382
+  97d039:	74 1a                	je     0x97d055
+  97d03b:	3d cf 47 3c ef       	cmp    eax,0xef3c47cf
+  97d040:	74 09                	je     0x97d04b
+  97d042:	89 44 24 04          	mov    DWORD PTR [esp+0x4],eax
+  97d046:	e9 55 41 fd ff       	jmp    0x9511a0
+  97d04b:	85 c9                	test   ecx,ecx
+  97d04d:	74 10                	je     0x97d05f
+  97d04f:	8d 41 0c             	lea    eax,[ecx+0xc]
+  97d052:	c2 04 00             	ret    0x4
+  97d055:	85 c9                	test   ecx,ecx
+  97d057:	74 06                	je     0x97d05f
+  97d059:	8d 41 04             	lea    eax,[ecx+0x4]
+  97d05c:	c2 04 00             	ret    0x4
+  97d05f:	33 c0                	xor    eax,eax
+  97d061:	c2 04 00             	ret    0x4
+  97d064:	cc                   	int3
+  97d065:	cc                   	int3
+  97d066:	cc                   	int3
+  97d067:	cc                   	int3
+  97d068:	cc                   	int3
+  97d069:	cc                   	int3
+  97d06a:	cc                   	int3
+  97d06b:	cc                   	int3
+  97d06c:	cc                   	int3
+  97d06d:	cc                   	int3
+  97d06e:	cc                   	int3
+  97d06f:	cc                   	int3
+  97d070:	56                   	push   esi
+  97d071:	57                   	push   edi
+  97d072:	8b 7c 24 0c          	mov    edi,DWORD PTR [esp+0xc]
+  97d076:	8b f1                	mov    esi,ecx
+  97d078:	39 7e 18             	cmp    DWORD PTR [esi+0x18],edi
+  97d07b:	74 1d                	je     0x97d09a
+  97d07d:	85 ff                	test   edi,edi
+  97d07f:	74 08                	je     0x97d089
+  97d081:	8b 07                	mov    eax,DWORD PTR [edi]
+  97d083:	8b 10                	mov    edx,DWORD PTR [eax]
+  97d085:	8b cf                	mov    ecx,edi
+  97d087:	ff d2                	call   edx
+  97d089:	8b 4e 18             	mov    ecx,DWORD PTR [esi+0x18]
+  97d08c:	85 c9                	test   ecx,ecx
+  97d08e:	74 07                	je     0x97d097
+  97d090:	8b 01                	mov    eax,DWORD PTR [ecx]
+  97d092:	8b 50 04             	mov    edx,DWORD PTR [eax+0x4]
+  97d095:	ff d2                	call   edx
+  97d097:	89 7e 18             	mov    DWORD PTR [esi+0x18],edi
+  97d09a:	5f                   	pop    edi
+  97d09b:	5e                   	pop    esi
+  97d09c:	c2 04 00             	ret    0x4

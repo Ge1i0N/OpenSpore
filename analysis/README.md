@@ -24,6 +24,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE per-star presentation | [gge-star-present](gge-star-present.md) | projection/root placement/stage configuration calculations + real asset controls; no camera creation, mounting, effects or live scene |
 | GGE owned star instances | [gge-star-instance](gge-star-instance.md) | per-entry host graph, object-index mutations/pixel picking, renderer hook; native phase1/plugins/listeners/scene still absent |
 | GGE phase-1 bindings | [gge-star-phase1](gge-star-phase1.md) | ordered branch/control/image requirements, Unknown/Missing/Ambiguous retained; corrected always-true native return, no service execution |
+| GGE image application | [gge-image-bindings](gge-image-bindings.md) | explicit DBPF PNG provider + per-instance plain ImageDrawable overrides/resolver/GPU test; not Animated Icon or full phase/scene execution |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |

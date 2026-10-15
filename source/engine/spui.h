@@ -30,6 +30,7 @@
 // the serialized object indexes used by Children and drawable references.
 #include <cstdio>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -102,6 +103,21 @@ struct ExternalResource {
     u32 group = 0;
 };
 
+// Host-owned immutable decoded image. Runtime bindings do not rewrite serialized Objects or
+// use the global first-key package policy; bytes/provenance belong to an explicit provider.
+struct ImagePixels {
+    ExternalResource resource;
+    u32 width=0,height=0;
+    std::vector<u8> bgra;
+    std::string provenance;
+};
+struct ImageBinding {
+    ExternalResource resource;
+    Rect uv{0,0,1,1};
+    i32 logical_width=0,logical_height=0;
+    std::shared_ptr<const ImagePixels> pixels; // null for a serialized/unloaded resource reference
+};
+
 struct Object {
     u16 index = 0;
     u32 class_id = 0, offset = 0, end = 0;
@@ -119,6 +135,7 @@ struct Layout {
     std::vector<Window> windows;
     std::vector<Object> objects;
     std::vector<ExternalResource> external_resources;
+    std::map<u16,ImageBinding> runtime_images; // drawable object index -> host image override
     std::vector<size_t> roots;        // window indexes with no parent
     u16 version = 0;
     u32 consumed = 0;

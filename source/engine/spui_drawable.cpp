@@ -1,6 +1,7 @@
 #include "engine/spui_drawable.h"
 #include <cmath>
 #include <cstring>
+#include <utility>
 
 namespace os::spui {
 namespace {
@@ -35,6 +36,35 @@ float align(float start, float end, float extent, u32 alignment) {
 }
 }  // namespace
 
+bool valid_image_binding(const ImageBinding& image) {
+    if (!finite(image.uv)||image.logical_width<0||image.logical_height<0) return false;
+    if (!image.pixels) return true; // resource descriptor, not proof of decoded availability
+    const auto& p=*image.pixels;
+    return p.width&&p.height&&p.width<=4096&&p.height<=4096&&
+        p.bgra.size()==size_t(p.width)*p.height*4&&p.resource.instance==image.resource.instance&&
+        p.resource.type==image.resource.type&&p.resource.group==image.resource.group;
+}
+bool image_drawable_binding(const Layout& layout,u16 drawable,ImageBinding& out) {
+    const auto* d=object_at(layout,drawable);
+    if (!d||d->class_id!=0xcf3c4eaeu) return false;
+    if (const auto it=layout.runtime_images.find(drawable);it!=layout.runtime_images.end()) {
+        if (!valid_image_binding(it->second)) return false;
+        out=it->second; return true;
+    }
+    const auto* link=property(*d,0x4f3c4a26u);
+    if (!link||link->code!=19||link->refs.size()!=1) return false;
+    const auto* image=object_at(layout,link->refs[0]);
+    if (!image||image->class_id!=0x01be6b15u) return false;
+    const auto* external=property(*image,0x01be0001u);
+    if (!external||external->code!=19||external->refs.size()!=1||external->refs[0]>=layout.external_resources.size()) return false;
+    ImageBinding result; result.resource=layout.external_resources[external->refs[0]];
+    struct Size { i32 width=0,height=0; } size;
+    if (!value(*image,0x01be0002u,16,result.uv)||!value(*image,0x01be0003u,15,size)) return false;
+    result.logical_width=size.width; result.logical_height=size.height;
+    if (!valid_image_binding(result)) return false;
+    out=std::move(result); return true;
+}
+
 bool drawable_quad(const Layout& layout, u16 drawable, const Rect& area, u32 state, ImageQuad& out) {
     if (!finite(area)) return false;
     const auto* d = object_at(layout, drawable);
@@ -43,21 +73,27 @@ bool drawable_quad(const Layout& layout, u16 drawable, const Rect& area, u32 sta
     const bool standard = d->class_id == 0xaf3a9e26u;
     const bool radio = d->class_id == 0x2f3adc5du;
     if (!plain && !standard && !radio) return false;
-    const auto* link = property(*d, plain ? 0x4f3c4a26u : 0x0f3ac75eu);
-    if (!link || link->code != 19 || link->refs.size() != 1) return false;
-    const auto* image = object_at(layout, link->refs[0]);
-    if (!image || image->class_id != 0x01be6b15u) return false;
-    const auto* external = property(*image, 0x01be0001u);
-    if (!external || external->code != 19 || external->refs.size() != 1 ||
-        external->refs[0] >= layout.external_resources.size()) return false;
-
     ImageQuad quad;
-    quad.external = external->refs[0];
     quad.area = area;
     quad.uv = {0, 0, 1, 1};
     struct Size { int width = 0, height = 0; } size;
-    if (!value(*image, 0x01be0002u, 16, quad.uv) || !finite(quad.uv) ||
-        !value(*image, 0x01be0003u, 15, size)) return false;
+    if (plain && layout.runtime_images.count(drawable)) {
+        ImageBinding image;
+        if (!image_drawable_binding(layout,drawable,image)) return false;
+        quad.pixels=image.pixels; quad.uv=image.uv;
+        size.width=image.logical_width; size.height=image.logical_height;
+        // Runtime overrides must be decoded; never fall back to the template/global first-key index.
+        if (!quad.pixels) return false;
+    } else {
+        const auto* link=property(*d,plain?0x4f3c4a26u:0x0f3ac75eu);
+        if (!link||link->code!=19||link->refs.size()!=1) return false;
+        const auto* image=object_at(layout,link->refs[0]);
+        if (!image||image->class_id!=0x01be6b15u) return false;
+        const auto* external=property(*image,0x01be0001u);
+        if (!external||external->code!=19||external->refs.size()!=1||external->refs[0]>=layout.external_resources.size()) return false;
+        quad.external=external->refs[0];
+        if (!value(*image,0x01be0002u,16,quad.uv)||!finite(quad.uv)||!value(*image,0x01be0003u,15,size)) return false;
+    }
     if (plain) {
         u32 flags = 0, horizontal = 3, vertical = 3, tiling = 0;
         float scale = 1.f;

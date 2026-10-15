@@ -1,0 +1,27 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE3DB0
+
+00de3db0  MOV ECX,dword ptr [ESP + 0x4]
+00de3db4  TEST ECX,ECX
+00de3db6  JZ 0x00de3de1
+00de3db8  MOV EAX,dword ptr [ECX]
+00de3dba  MOV EDX,dword ptr [EAX + 0xa8]
+00de3dc0  CALL EDX
+00de3dc2  TEST EAX,EAX
+00de3dc4  JZ 0x00de3de1
+00de3dc6  MOV EDX,dword ptr [EAX]
+00de3dc8  MOV ECX,EAX
+00de3dca  MOV EAX,dword ptr [EDX + 0xc]
+00de3dcd  PUSH 0xef3c47cf
+00de3dd2  CALL EAX
+00de3dd4  TEST EAX,EAX
+00de3dd6  JZ 0x00de3de1
+00de3dd8  MOV EDX,dword ptr [EAX]
+00de3dda  MOV ECX,EAX
+00de3ddc  MOV EAX,dword ptr [EDX + 0x18]
+00de3ddf  JMP EAX
+00de3de1  XOR EAX,EAX
+00de3de3  RET

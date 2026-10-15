@@ -1,0 +1,35 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "GA static instructions; host provider tested separately on actual PNG and controlled failures",
+  "class": "0xCF3C4EAE ImageDrawable",
+  "image_interface": "0xEF3C47CF, this=drawable+0xC",
+  "interface_table": {
+    "va": "0x014431e8",
+    "entries": {
+      "0x0": "0xe246a0",
+      "0x4": "0x805710",
+      "0x8": "0x97d1d0",
+      "0xc": "0x97d1c0",
+      "0x10": "0x96feb0",
+      "0x14": "0x97d070",
+      "0x18": "0x6c0230"
+    }
+  },
+  "setter": "0x97D070 accessed via image interface +0x14; compares current image, retains replacement, releases old image and assigns interface-local+0x18 (drawable+0x24)",
+  "getter": "interface +0x18 ->0x6C0230 returns interface-local+0x18",
+  "bind_path": "DE3EB0 checks window fill drawable interface, supplied image else ResourceKey load, setter then invalidate; null image failure does not replace old image",
+  "host_scope": [
+    "CF3C4EAE only, explicitly resolved window object in caller-owned instance",
+    "runtime_images keyed by drawable identity, immutable shared decoded pixels, UV/logical descriptor kept",
+    "one explicit bounded DBPF PNG provider, exact keys/duplicate failure, GDI+ BGRA decode",
+    "Unknown/Missing/Ambiguous/Unsupported/ReadFailure leave old binding unchanged",
+    "shared getter pixels bypass provider; unloaded atlas descriptor resolves exact resource and retains UV/logical size",
+    "unsupported/null getter shape blocks; no native Animated Icon, arbitrary image fallback or phase completion",
+    "renderer uses supplied pixels, not global first-key cache; no GGE runtime caller/camera/scene readiness"
+  ],
+  "limits": [
+    "existing DBPF3.0/index3 subset,256MiB explicit file/64MiB resource",
+    "PNG IHDR dims1..4096 per axis",
+    "provider not a cache or original resource-priority implementation"
+  ]
+}

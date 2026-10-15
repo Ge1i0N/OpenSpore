@@ -1,0 +1,70 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE3EB0
+
+00de3eb0  PUSH ESI
+00de3eb1  MOV ESI,dword ptr [ESP + 0x8]
+00de3eb5  PUSH EDI
+00de3eb6  TEST ESI,ESI
+00de3eb8  JZ 0x00de3f46
+00de3ebe  MOV EAX,dword ptr [ESI]
+00de3ec0  MOV EDX,dword ptr [EAX + 0xa8]
+00de3ec6  MOV ECX,ESI
+00de3ec8  CALL EDX
+00de3eca  TEST EAX,EAX
+00de3ecc  JZ 0x00de3f46
+00de3ece  MOV EDX,dword ptr [EAX]
+00de3ed0  MOV ECX,EAX
+00de3ed2  MOV EAX,dword ptr [EDX + 0xc]
+00de3ed5  PUSH 0xef3c47cf
+00de3eda  CALL EAX
+00de3edc  MOV EDI,EAX
+00de3ede  TEST EDI,EDI
+00de3ee0  JZ 0x00de3f46
+00de3ee2  MOV ECX,dword ptr [ESP + 0x14]
+00de3ee6  MOV dword ptr [ESP + 0xc],ECX
+00de3eea  TEST ECX,ECX
+00de3eec  JZ 0x00de3efc
+00de3eee  MOV EDX,dword ptr [ECX]
+00de3ef0  MOV EAX,dword ptr [EDX]
+00de3ef2  CALL EAX
+00de3ef4  MOV EAX,dword ptr [ESP + 0xc]
+00de3ef8  TEST EAX,EAX
+00de3efa  JNZ 0x00de3f1c
+00de3efc  MOV EDX,dword ptr [ESP + 0x10]
+00de3f00  PUSH -0x1
+00de3f02  PUSH -0x1
+00de3f04  PUSH 0x0
+00de3f06  LEA ECX,[ESP + 0x18]
+00de3f0a  PUSH ECX
+00de3f0b  PUSH EDX
+00de3f0c  CALL 0x00806320
+00de3f11  MOV EAX,dword ptr [ESP + 0x20]
+00de3f15  ADD ESP,0x14
+00de3f18  TEST EAX,EAX
+00de3f1a  JZ 0x00de3f46
+00de3f1c  MOV EDX,dword ptr [EDI]
+00de3f1e  PUSH EAX
+00de3f1f  MOV EAX,dword ptr [EDX + 0x14]
+00de3f22  MOV ECX,EDI
+00de3f24  CALL EAX
+00de3f26  MOV EDX,dword ptr [ESI]
+00de3f28  MOV EAX,dword ptr [EDX + 0x90]
+00de3f2e  MOV ECX,ESI
+00de3f30  CALL EAX
+00de3f32  MOV ECX,dword ptr [ESP + 0xc]
+00de3f36  TEST ECX,ECX
+00de3f38  JZ 0x00de3f41
+00de3f3a  MOV EDX,dword ptr [ECX]
+00de3f3c  MOV EAX,dword ptr [EDX + 0x4]
+00de3f3f  CALL EAX
+00de3f41  POP EDI
+00de3f42  MOV AL,0x1
+00de3f44  POP ESI
+00de3f45  RET
+00de3f46  POP EDI
+00de3f47  XOR AL,AL
+00de3f49  POP ESI
+00de3f4a  RET

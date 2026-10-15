@@ -116,6 +116,27 @@ CachedTexture& load_external(const os::spui::Layout& lay, u16 ref) {
     return cached;
 }
 
+struct RuntimeTexture {
+    std::weak_ptr<const spui::ImagePixels> image;
+    CachedTexture cached;
+    std::shared_ptr<IDirect3DTexture9> owner;
+};
+std::vector<RuntimeTexture> g_runtime_textures;
+CachedTexture& load_runtime(const std::shared_ptr<const spui::ImagePixels>& pixels) {
+    for (auto it=g_runtime_textures.begin();it!=g_runtime_textures.end();) {
+        if (it->image.expired()) {
+            it=g_runtime_textures.erase(it);
+        } else ++it;
+    }
+    for (auto& entry:g_runtime_textures) if (entry.image.lock()==pixels) return entry.cached;
+    RuntimeTexture entry; entry.image=pixels; entry.cached.attempted=true;
+    entry.cached.width=(int)pixels->width; entry.cached.height=(int)pixels->height;
+    entry.cached.texture=render::device().create_texture_bgra(pixels->bgra.data(),entry.cached.width,entry.cached.height);
+    entry.owner={entry.cached.texture,[](IDirect3DTexture9* texture) { if (texture) texture->Release(); }};
+    g_runtime_textures.push_back(std::move(entry));
+    return g_runtime_textures.back().cached;
+}
+
 }  // namespace
 
 const os::spui::Layout* requested_by_state(std::string& why) {
@@ -237,7 +258,7 @@ size_t paint_spui_layer(const os::spui::Layout& lay,float sx,float sy,int w,int 
         const u32 state = !win.enabled ? 1u : hovered == &win ? (input::left_down() ? 3u : 2u) : 0u;
         os::spui::ImageQuad quad;
         if (os::spui::drawable_quad(lay, win.drawable_object, win.placed_area, state, quad)) {
-            CachedTexture& image = load_external(lay, quad.external);
+            CachedTexture& image = quad.pixels?load_runtime(quad.pixels):load_external(lay, quad.external);
             if (image.texture) ov.image_uv(quad.area.left * sx, quad.area.top * sy,
                 quad.area.w() * sx, quad.area.h() * sy, image.texture,
                 quad.uv.left, quad.uv.top, quad.uv.right, quad.uv.bottom);

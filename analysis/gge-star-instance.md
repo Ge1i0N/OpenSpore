@@ -53,6 +53,8 @@ established merely by serialized order. No native-priority assumption is introdu
 
 `native_mount_complete()` therefore always returns **false** in the host mechanism. Instantiation
 does not execute phase1, callbacks, plugins, tooltip linkage, camera/effects or force hidden branches.
+The [image follow-up](gge-image-bindings.md) now supports explicit CF3C4EAE image get/set overrides
+inside one instance, including shared drawable identity. It does not mark phase1 or native mount complete.
 
 ## Separate scene/camera setup
 

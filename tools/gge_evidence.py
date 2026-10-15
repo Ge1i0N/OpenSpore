@@ -31,6 +31,7 @@ MOUNT_FUNCTIONS = (0xdf7690,0xdf6d80,0xdf9160,0xdf82a0,0x812250,0x8121c0,0x81210
                    0x811c20,0x811bc0,0x8102a0,0x80f7d0,0xde46d0,0xddd920,0xdda8c0,
                    0xddd150,0xddb730,0xdda940)
 PHASE1_FUNCTIONS = (0xdf6d80,0xde3db0,0xde3eb0,0xde3f50,0x806320,0x806e00,0xdf7690,0xdf9200)
+IMAGE_FUNCTIONS = (0x97d030,0x97d070,0x6c0230,0x97d840,0xde3db0,0xde3eb0,0x806320)
 
 
 def main():
@@ -40,8 +41,9 @@ def main():
     present = '--present' in sys.argv
     mount = '--mount' in sys.argv
     phase1 = '--phase1' in sys.argv
-    addresses = PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
+    images = '--images' in sys.argv
+    addresses = IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
@@ -89,6 +91,27 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--images' in sys.argv:
+        dest=ROOT/'analysis/audit/gge-images'; dest.mkdir(parents=True,exist_ok=True)
+        facts={'oracle_sha256':digest,'authority':'GA static instructions; host provider tested separately on actual PNG and controlled failures',
+               'class':'0xCF3C4EAE ImageDrawable','image_interface':'0xEF3C47CF, this=drawable+0xC',
+               'interface_table':{'va':'0x014431e8','entries':{hex(o):hex(pe.u32(0x14431e8+o)) for o in range(0,0x1c,4)}},
+               'setter':'0x97D070 accessed via image interface +0x14; compares current image, retains replacement, releases old image and assigns interface-local+0x18 (drawable+0x24)',
+               'getter':'interface +0x18 ->0x6C0230 returns interface-local+0x18',
+               'bind_path':'DE3EB0 checks window fill drawable interface, supplied image else ResourceKey load, setter then invalidate; null image failure does not replace old image',
+               'host_scope':['CF3C4EAE only, explicitly resolved window object in caller-owned instance',
+                             'runtime_images keyed by drawable identity, immutable shared decoded pixels, UV/logical descriptor kept',
+                             'one explicit bounded DBPF PNG provider, exact keys/duplicate failure, GDI+ BGRA decode',
+                             'Unknown/Missing/Ambiguous/Unsupported/ReadFailure leave old binding unchanged',
+                             'shared getter pixels bypass provider; unloaded atlas descriptor resolves exact resource and retains UV/logical size',
+                             'unsupported/null getter shape blocks; no native Animated Icon, arbitrary image fallback or phase completion',
+                             'renderer uses supplied pixels, not global first-key cache; no GGE runtime caller/camera/scene readiness'],
+               'limits':['existing DBPF3.0/index3 subset,256MiB explicit file/64MiB resource','PNG IHDR dims1..4096 per axis','provider not a cache or original resource-priority implementation']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        for name,start,end in [('qi-and-retained-setter',0x97d030,0x97d09f),('image-getter',0x6c0230,0x6c0234)]:
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(disasm(pe,start,end))+'\n',encoding='utf-8',newline='\n')
+        print('retained ImageDrawable setter/getter/interface evidence, no target execution')
+        return
     if '--phase1' in sys.argv:
         dest=ROOT/'analysis/audit/gge-star-phase1'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'static GA instructions + shipped assets; no native service execution',

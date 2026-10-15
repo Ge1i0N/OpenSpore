@@ -1,4 +1,5 @@
 #include "engine/gge_star_instance.h"
+#include "engine/spui_drawable.h"
 #include <algorithm>
 #include <cmath>
 #include <unordered_set>
@@ -53,6 +54,7 @@ bool StarUiInstance::instantiate(u64 instance_id,const spui::Layout& source,cons
     }
     // Full ownership only after validation; source assets retain their original serialized identity.
     spui::Layout next=source;
+    next.runtime_images.clear(); // only raw template provenance seeds a new host lifetime
     const size_t root=source.roots[0];
     if (!refresh(next.windows,root,error)) return false;
     if (next.windows[root].control_id!=kStarUiRoot||!next.windows[root].has_area||!next.windows[root].area.valid()) {
@@ -100,6 +102,27 @@ bool StarUiInstance::move_root(const StarUiPlacement& placement,std::string& err
     if (!root.area.valid()) { error="star root move collapses window extents"; return false; }
     if (!refresh(windows,root_,error)) return false;
     layout_.windows=std::move(windows); error.clear(); return true;
+}
+bool StarUiInstance::image_target(u16 window,u16& drawable,std::string& error) const {
+    const auto n=find_object(window);
+    if (!n) { error="image target window unavailable"; return false; }
+    const u16 target=layout_.windows[*n].drawable_object;
+    for (const auto& object:layout_.objects) if (object.index==target&&object.class_id==0xcf3c4eaeu) {
+        drawable=target; error.clear(); return true;
+    }
+    error="image target has no supported CF3C4EAE fill drawable (Animated Icon is separate)"; return false;
+}
+bool StarUiInstance::current_image(u16 window,spui::ImageBinding& out,std::string& error) const {
+    u16 drawable=0xffff;
+    if (!image_target(window,drawable,error)) return false;
+    if (!spui::image_drawable_binding(layout_,drawable,out)) { error="drawable image unobserved/absent"; return false; }
+    error.clear(); return true;
+}
+bool StarUiInstance::set_image(u16 window,const spui::ImageBinding& image,std::string& error) {
+    u16 drawable=0xffff;
+    if (!image_target(window,drawable,error)) return false;
+    if (!image.pixels||!spui::valid_image_binding(image)) { error="drawable override requires valid decoded image pixels"; return false; }
+    layout_.runtime_images.insert_or_assign(drawable,image); error.clear(); return true;
 }
 const spui::Window* StarUiInstance::pick(float x,float y,const spui::Rect& viewport) const {
     if (!active()||!finite(viewport)||!std::isfinite(viewport.w())||!std::isfinite(viewport.h())||!viewport.valid()||

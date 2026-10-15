@@ -94,8 +94,9 @@ python tools/gge_evidence.py --static --phase1
 ```
 
 [Evidence](audit/gge-star-phase1/facts.json) retains eight functions plus six focused extracts.
-Next: an explicit image-provider/drawable adapter with resolved targets and actual resource failures,
-then phase-1 action execution/lifecycle, native-like callbacks and scene/camera integration. This plan
+Follow-up [image application](gge-image-bindings.md) now implements one resolved image operation
+with an actual PNG provider, per-instance overrides and resolver path. Other phase-1 actions/lifecycle,
+native-like callbacks and scene/camera integration remain open. This plan
 does not by itself move the original Intro gate, attach a live catalogue or display a galaxy.
 
 Final Debug x86 warning-free; 247 new plan checks and all prior instance/projection/parser/catalogue/

@@ -1,0 +1,4 @@
+# Aligned ImageDrawable QI/setter and interface-local image getter confirmed by objdump.
+0x0097d030	function	os_ImageDrawable_query_interface
+0x0097d070	function	os_ImageDrawable_replace_image
+0x006c0230	function	os_ImageDrawable_interface_image_getter
