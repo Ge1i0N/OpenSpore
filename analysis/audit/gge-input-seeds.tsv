@@ -1,0 +1,4 @@
+# World ray/hover raw callback functions aligned from GA instruction references.
+0x00df7800	function	os_GGE_raw_ui_callback
+0x00df65b0	function	os_GGE_pointer_world_route
+0x00df6490	function	os_GGE_world_ray_pick

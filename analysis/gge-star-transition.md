@@ -127,6 +127,8 @@ was reused without config changes or target execution. These are not REA Evidenc
 Next: real input/callback routes and opaque services, native current-phase/active-camera producer,
 explicit genuine catalogue integration and GPU card validation. Automatic GGE, native factories/
 effects, data discovery and gameplay remain unavailable rather than synthesized.
+The [input follow-up](gge-star-input.md) now ports only explicit world-ray distance selection; UI
+window hits, world hits and raw callbacks remain separate and neither dispatches native routes.
 
 Final Debug x86 warning-free. Transition195 and all prior scene204/lifecycle232/streaming95/
 AnimatedIcon159/image80/phase1/instance/projection/parser/catalogue/DBCheck/Intro/SPUI/package

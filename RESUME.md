@@ -164,6 +164,11 @@ test with `-w -devDirs`; retain evidence and commit.
   unchanged; no controlled IgnoreMouse workaround needed in this new test. Camera/current-phase/
   catalogue observations still controlled, no new GPU native galaxy/live caller.
   analysis/gge-star-transition.md / audit/gge-star-transition/ retain10 functions/corpus/instructions.
+- gge_star_input world/UI seam: actual DF6490→7C45E0/698B30 host point-segment nearest entry,
+  threshold15, explicit ActiveProjection ray token; UI pick remains current-frame layer reverse pick.
+  Handler table +5C DF7BF0 hover/+60 DF7AC0 selected/+64 DF6110 project/+68 DF6010 update retained;
+  raw DF7800 event identities not generalized. 29 checks, no F8/FC/CommandID/tooltip/message dispatch.
+  analysis/gge-star-input.md / audit/gge-input-seeds.tsv / audit/gge-input/.
 
 ## Next, in order
 
@@ -189,8 +194,8 @@ test with `-w -devDirs`; retain evidence and commit.
     plain ImageDrawable only (gge_image_provider). The host lifecycle now joins independent image/
     frame/name/flag/centering actions with explicit outcome/retry, not native services/order/listeners.
     Direct production streaming PNG provider and host scene observation/ownership collector are now present.
-    Explicit show/phase body subset now implemented with separate observed guard, no native latch.
-    Next: actual input/callback/service route, active/current-phase producer and explicit genuine
+    Explicit show/phase body subset now implemented with separate observed guard, no native latch;
+    world/UI input seam is observation-only. Next: actual raw callback/service route, active/current-phase producer and explicit genuine
     catalogue adapter integration/GPU card validation. Native factory/effects/playback/grid normalization
     remain separate. Plan itself executes no
     services and native return1 is not readiness; image-operation success is not phase completion.
@@ -214,7 +219,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify gge_star_input_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures

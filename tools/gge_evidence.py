@@ -36,6 +36,7 @@ ANIMATED_FUNCTIONS = (0x7f5500,0x7f5550,0x7f5a30,0x7f5b50,0x7f5d50,0x7f5e30,0xdf
 SCENE_FUNCTIONS = (0x67dcd0,0x67dec0,0x67dd10,0x67dd40,0x67df50,0x67dd50,0x67df60,
                    0x67dd90,0xde46d0,0xddd920,0xddd150,0xde3c20,0x7c4250,0xdf6110)
 TRANSITION_FUNCTIONS = (0xdf6d80,0xdf7ac0,0xdf7bf0,0x436350,0x436390,0xa20670,0x67ca60,0x95f950,0x95fda0,0x95fe20)
+INPUT_FUNCTIONS = (0xdf6490,0xdf65b0,0xdf7800,0x7c45e0,0x698b30,0xdf6110,0xdf6010)
 
 
 def main():
@@ -49,8 +50,9 @@ def main():
     animated = '--animated' in sys.argv
     scene = '--scene' in sys.argv
     transition = '--transition' in sys.argv
-    addresses = TRANSITION_FUNCTIONS if transition else SCENE_FUNCTIONS if scene else ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-star-transition' if transition else 'analysis/audit/gge-scene' if scene else 'analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
+    input_analysis = '--input' in sys.argv
+    addresses = INPUT_FUNCTIONS if input_analysis else TRANSITION_FUNCTIONS if transition else SCENE_FUNCTIONS if scene else ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-input' if input_analysis else 'analysis/audit/gge-star-transition' if transition else 'analysis/audit/gge-scene' if scene else 'analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
@@ -98,6 +100,23 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--input' in sys.argv:
+        dest=ROOT/'analysis/audit/gge-input'; dest.mkdir(parents=True,exist_ok=True)
+        facts={'oracle_sha256':digest,'authority':'GA static instructions + actual SPUI host verifier; no original input runtime',
+               'handler_table':'0x0147EF50: +0x5C DF7BF0 hover, +0x60 DF7AC0 selected, +0x64 DF6110 projection, +0x68 DF6010 update',
+               'world_picker':'DF6490 renderer+58 -> 7C45E0 unproject -> 698B30 point-to-segment nearest StarRecord+80; initial threshold global0x01400864=15.0',
+               'pointer_route':'DF65B0 calls DF6490 when global+17C clear; same/current hover or pointer geometry guards then slot+5C; full callback scheduling unknown',
+               'raw_callback':'DF7800 event shapes/tags 4F5527E8, type10/subtype1 tooltip userdata, type7 controls 04656452/0638491D, tag287259F6 controls 03C4925E/0375408C/03754098',
+               'host_scope':['world ray requires explicit ActiveProjection token/origin/direction/threshold; no Windows pointer derivation',
+                             'world pick returns host ticket/entry/id/distance only; no F8/FC/controller/phase/CommandID/tooltip dispatch',
+                             'UI window pick is separate current-frame reverse layer pick and value identity',
+                             'raw event records not generalized into generic clicks; no live content manager/message pump'],
+               'verification':'gge_star_input_verify:29 actual layouts + controlled ray positions; no native callback/GPU galaxy claim'}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        for name,start,end in [('world-picker',0xdf6490,0xdf65b0),('pointer-route',0xdf65b0,0xdf66a6),('raw-callback',0xdf7800,0xdf7ab5)]:
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(disasm(pe,start,end))+'\n',encoding='utf-8',newline='\n')
+        print('retained world picker/UI callback boundary evidence, no target execution')
+        return
     if '--transition' in sys.argv:
         dest=ROOT/'analysis/audit/gge-star-transition'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'local Ghidra/objdump static instructions, not original input/phase runtime',

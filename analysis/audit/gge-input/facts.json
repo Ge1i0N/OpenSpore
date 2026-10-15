@@ -1,0 +1,15 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "GA static instructions + actual SPUI host verifier; no original input runtime",
+  "handler_table": "0x0147EF50: +0x5C DF7BF0 hover, +0x60 DF7AC0 selected, +0x64 DF6110 projection, +0x68 DF6010 update",
+  "world_picker": "DF6490 renderer+58 -> 7C45E0 unproject -> 698B30 point-to-segment nearest StarRecord+80; initial threshold global0x01400864=15.0",
+  "pointer_route": "DF65B0 calls DF6490 when global+17C clear; same/current hover or pointer geometry guards then slot+5C; full callback scheduling unknown",
+  "raw_callback": "DF7800 event shapes/tags 4F5527E8, type10/subtype1 tooltip userdata, type7 controls 04656452/0638491D, tag287259F6 controls 03C4925E/0375408C/03754098",
+  "host_scope": [
+    "world ray requires explicit ActiveProjection token/origin/direction/threshold; no Windows pointer derivation",
+    "world pick returns host ticket/entry/id/distance only; no F8/FC/controller/phase/CommandID/tooltip dispatch",
+    "UI window pick is separate current-frame reverse layer pick and value identity",
+    "raw event records not generalized into generic clicks; no live content manager/message pump"
+  ],
+  "verification": "gge_star_input_verify:29 actual layouts + controlled ray positions; no native callback/GPU galaxy claim"
+}

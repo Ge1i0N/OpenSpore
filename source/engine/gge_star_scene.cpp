@@ -117,4 +117,24 @@ std::optional<StarSceneHit> StarUiScene::pick(u64 serial,float x,float y) const 
     }
     return std::nullopt;
 }
+std::optional<StarWorldHit> StarUiScene::world_pick(u64 ticket,const StarWorldRayObservation& ray) const {
+    if (!catalog_available_||!ticket||ticket!=ticket_||ray.source!=SceneCameraSource::ActiveProjection||!ray.token||
+        !std::isfinite(ray.max_distance)||ray.max_distance<=0) return std::nullopt;
+    const float d2=ray.direction.x*ray.direction.x+ray.direction.y*ray.direction.y+ray.direction.z*ray.direction.z;
+    if (!std::isfinite(d2)||d2<=0) return std::nullopt;
+    size_t best=0; float best_distance=ray.max_distance; bool found=false;
+    for (size_t i=0;i<cards_.size();++i) {
+        const auto& p=cards_[i].lifecycle->instance()->entry().position;
+        const float vx=p.x-ray.origin.x,vy=p.y-ray.origin.y,vz=p.z-ray.origin.z;
+        const float t=(vx*ray.direction.x+vy*ray.direction.y+vz*ray.direction.z)/d2;
+        const float cx=ray.origin.x+ray.direction.x*std::max(0.f,t)-p.x;
+        const float cy=ray.origin.y+ray.direction.y*std::max(0.f,t)-p.y;
+        const float cz=ray.origin.z+ray.direction.z*std::max(0.f,t)-p.z;
+        const float distance=std::sqrt(cx*cx+cy*cy+cz*cz);
+        if (!std::isfinite(distance)||distance>=best_distance) continue;
+        best_distance=distance; best=i; found=true;
+    }
+    if (!found) return std::nullopt;
+    const auto& card=*cards_[best].lifecycle->instance(); return StarWorldHit{ticket,best,card.id(),best_distance};
+}
 }  // namespace os::gge

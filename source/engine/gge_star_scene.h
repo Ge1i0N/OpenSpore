@@ -37,6 +37,18 @@ struct StarSceneHit {
     u16 window_object=0xffff;
     u32 control=0,command=0; // observed IDs only; NOT CommandID dispatch/native selected-star change
 };
+struct StarWorldRayObservation {
+    SceneCameraSource source=SceneCameraSource::Unknown;
+    u64 token=0;
+    StarPosition origin, direction;
+    float max_distance=15.f; // GA DF6490 initial selection threshold (0x1400864)
+};
+struct StarWorldHit {
+    u64 ticket=0;
+    size_t entry_index=0;
+    u64 host_id=0;
+    float distance=0;
+};
 // HOST 2D projection/card collection, not native galaxy/effects/scene factory completion.
 // Requires explicit Available saved+candidate catalogue lists; no discovery/generation/default camera.
 // Catalogue order is forward paint/reverse pick HOST policy, not native dynamic/depth/Z ordering.
@@ -65,6 +77,9 @@ public:
     // layers/hits; a paint callback should not mutate this owner while consuming these views.
     std::vector<StarSceneLayer> layers(u64 frame_serial) const;
     std::optional<StarSceneHit> pick(u64 frame_serial,float x,float y) const;
+    // DF6490-like world ray selection with explicit unprojected ray. It never invokes the native
+    // F8 hover/FC selected-entry callbacks, changes phase, or dispatches the returned UI IDs.
+    std::optional<StarWorldHit> world_pick(u64 ticket,const StarWorldRayObservation& ray) const;
     bool native_scene_ready() const { return false; }
 private:
     struct Card { std::unique_ptr<StarUiLifecycle> lifecycle; std::optional<SavedInsets> insets; };

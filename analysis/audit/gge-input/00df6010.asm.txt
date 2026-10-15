@@ -1,0 +1,91 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF6010
+
+00df6010  SUB ESP,0x14
+00df6013  PUSH EBX
+00df6014  PUSH ESI
+00df6015  MOV ESI,ECX
+00df6017  MOV ECX,dword ptr [ESI + 0xc]
+00df601a  SUB ECX,dword ptr [ESI + 0x8]
+00df601d  MOV EAX,0xae4c415d
+00df6022  IMUL ECX
+00df6024  ADD EDX,ECX
+00df6026  SAR EDX,0x7
+00df6029  MOV EAX,EDX
+00df602b  SHR EAX,0x1f
+00df602e  XOR EBX,EBX
+00df6030  ADD EAX,EDX
+00df6032  JZ 0x00df6095
+00df6034  PUSH EBP
+00df6035  PUSH EDI
+00df6036  XOR EBP,EBP
+00df6038  MOV EDI,dword ptr [ESI + 0x8]
+00df603b  LEA ECX,[ESP + 0x14]
+00df603f  PUSH ECX
+00df6040  LEA EDX,[ESP + 0x14]
+00df6044  ADD EDI,EBP
+00df6046  PUSH EDX
+00df6047  LEA EAX,[EDI + 0x80]
+00df604d  PUSH EAX
+00df604e  CALL 0x00de3c20
+00df6053  FLD float ptr [ESP + 0x20]
+00df6057  MOV EDX,dword ptr [ESI]
+00df6059  FSTP float ptr [ESP + 0x8]
+00df605d  FLD float ptr [ESP + 0x1c]
+00df6061  MOV EAX,dword ptr [EDX + 0x64]
+00df6064  ADD ESP,0x4
+00df6067  FSTP float ptr [ESP]
+00df606a  PUSH EDI
+00df606b  MOV ECX,ESI
+00df606d  CALL EAX
+00df606f  MOV ECX,dword ptr [ESI + 0xc]
+00df6072  SUB ECX,dword ptr [ESI + 0x8]
+00df6075  MOV EAX,0xae4c415d
+00df607a  IMUL ECX
+00df607c  ADD EDX,ECX
+00df607e  SAR EDX,0x7
+00df6081  MOV ECX,EDX
+00df6083  SHR ECX,0x1f
+00df6086  INC EBX
+00df6087  ADD ECX,EDX
+00df6089  ADD EBP,0xbc
+00df608f  CMP EBX,ECX
+00df6091  JC 0x00df6038
+00df6093  POP EDI
+00df6094  POP EBP
+00df6095  XORPS XMM0,XMM0
+00df6098  LEA EDX,[ESP + 0xc]
+00df609c  PUSH EDX
+00df609d  LEA EAX,[ESP + 0xc]
+00df60a1  PUSH EAX
+00df60a2  LEA ECX,[ESP + 0x18]
+00df60a6  PUSH ECX
+00df60a7  MOVSS dword ptr [ESP + 0x1c],XMM0
+00df60ad  MOVSS dword ptr [ESP + 0x20],XMM0
+00df60b3  MOVSS dword ptr [ESP + 0x24],XMM0
+00df60b9  CALL 0x00de3c20
+00df60be  FLD float ptr [0x016a16a8]
+00df60c4  FSUB float ptr [ESP + 0x14]
+00df60c8  ADD ESP,0xc
+00df60cb  POP ESI
+00df60cc  POP EBX
+00df60cd  FABS
+00df60cf  FLD float ptr [0x014852f8]
+00df60d5  FXCH
+00df60d7  FCOMIP ST0,ST1
+00df60d9  JBE 0x00df60e8
+00df60db  MOVSS XMM0,dword ptr [ESP]
+00df60e0  MOVSS dword ptr [0x016a16a8],XMM0
+00df60e8  FLD float ptr [0x016a16a4]
+00df60ee  FSUB float ptr [ESP + 0x4]
+00df60f2  FABS
+00df60f4  FCOMIP ST0,ST1
+00df60f6  FSTP ST0
+00df60f8  JBE 0x00df6108
+00df60fa  MOVSS XMM0,dword ptr [ESP + 0x4]
+00df6100  MOVSS dword ptr [0x016a16a4],XMM0
+00df6108  ADD ESP,0x14
+00df610b  RET

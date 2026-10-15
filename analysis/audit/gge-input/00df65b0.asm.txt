@@ -1,0 +1,72 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF65B0
+
+00df65b0  MOV EAX,[0x016a1344]
+00df65b5  SUB ESP,0x18
+00df65b8  CMP byte ptr [EAX + 0x17c],0x0
+00df65bf  PUSH ESI
+00df65c0  MOV ESI,ECX
+00df65c2  JNZ 0x00df669d
+00df65c8  FLD float ptr [0x01400864]
+00df65ce  SUB ESP,0xc
+00df65d1  FSTP float ptr [ESP + 0x8]
+00df65d5  FLD float ptr [ESP + 0x30]
+00df65d9  FSTP float ptr [ESP + 0x4]
+00df65dd  FLD float ptr [ESP + 0x2c]
+00df65e1  FSTP float ptr [ESP]
+00df65e4  CALL 0x00df6490
+00df65e9  MOV EDX,dword ptr [0x016a1344]
+00df65ef  MOV ECX,dword ptr [EDX + 0xf8]
+00df65f5  TEST ECX,ECX
+00df65f7  JZ 0x00df6693
+00df65fd  CMP ECX,EAX
+00df65ff  JZ 0x00df6693
+00df6605  MOV ECX,dword ptr [ECX + 0xb8]
+00df660b  TEST ECX,ECX
+00df660d  JZ 0x00df669d
+00df6613  PUSH 0x1
+00df6615  PUSH 0x2e5a4a8
+00df661a  CALL 0x00810650
+00df661f  TEST EAX,EAX
+00df6621  JZ 0x00df669d
+00df6623  MOV EDX,dword ptr [EAX]
+00df6625  MOV ECX,EAX
+00df6627  MOV EAX,dword ptr [EDX + 0x38]
+00df662a  CALL EAX
+00df662c  MOVSS XMM0,dword ptr [EAX]
+00df6630  MOVSS dword ptr [ESP + 0xc],XMM0
+00df6636  MOVSS XMM0,dword ptr [EAX + 0x4]
+00df663b  MOVSS dword ptr [ESP + 0x10],XMM0
+00df6641  MOVSS XMM0,dword ptr [EAX + 0x8]
+00df6646  MOVSS dword ptr [ESP + 0x14],XMM0
+00df664c  MOVSS XMM0,dword ptr [EAX + 0xc]
+00df6651  MOVSS dword ptr [ESP + 0x18],XMM0
+00df6657  MOVSS XMM0,dword ptr [ESP + 0x20]
+00df665d  LEA ECX,[ESP + 0x4]
+00df6661  MOVSS dword ptr [ESP + 0x4],XMM0
+00df6667  MOVSS XMM0,dword ptr [ESP + 0x24]
+00df666d  PUSH ECX
+00df666e  LEA ECX,[ESP + 0x10]
+00df6672  MOVSS dword ptr [ESP + 0xc],XMM0
+00df6678  CALL 0x005f23d0
+00df667d  TEST AL,AL
+00df667f  JNZ 0x00df669d
+00df6681  MOV EDX,dword ptr [ESI]
+00df6683  MOV EAX,dword ptr [EDX + 0x5c]
+00df6686  PUSH 0x0
+00df6688  MOV ECX,ESI
+00df668a  CALL EAX
+00df668c  POP ESI
+00df668d  ADD ESP,0x18
+00df6690  RET 0xc
+00df6693  MOV EDX,dword ptr [ESI]
+00df6695  PUSH EAX
+00df6696  MOV EAX,dword ptr [EDX + 0x5c]
+00df6699  MOV ECX,ESI
+00df669b  CALL EAX
+00df669d  POP ESI
+00df669e  ADD ESP,0x18
+00df66a1  RET 0xc

@@ -1,0 +1,102 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF6490
+
+00df6490  SUB ESP,0x24
+00df6493  PUSH ESI
+00df6494  MOV ESI,ECX
+00df6496  CALL 0x0067dcd0
+00df649b  MOV EDX,dword ptr [EAX]
+00df649d  MOV ECX,EAX
+00df649f  MOV EAX,dword ptr [EDX + 0x58]
+00df64a2  CALL EAX
+00df64a4  FLD float ptr [ESP + 0x30]
+00df64a8  LEA ECX,[ESP + 0x4]
+00df64ac  PUSH ECX
+00df64ad  LEA EDX,[ESP + 0x14]
+00df64b1  PUSH EDX
+00df64b2  SUB ESP,0x8
+00df64b5  FSTP float ptr [ESP + 0x4]
+00df64b9  MOV ECX,EAX
+00df64bb  FLD float ptr [ESP + 0x3c]
+00df64bf  FSTP float ptr [ESP]
+00df64c2  CALL 0x007c45e0
+00df64c7  TEST AL,AL
+00df64c9  JNZ 0x00df64d4
+00df64cb  XOR EAX,EAX
+00df64cd  POP ESI
+00df64ce  ADD ESP,0x24
+00df64d1  RET 0xc
+00df64d4  MOV ECX,dword ptr [ESI + 0xc]
+00df64d7  SUB ECX,dword ptr [ESI + 0x8]
+00df64da  MOVSS XMM0,dword ptr [ESP + 0x34]
+00df64e0  MOV EAX,0xae4c415d
+00df64e5  IMUL ECX
+00df64e7  ADD EDX,ECX
+00df64e9  SAR EDX,0x7
+00df64ec  PUSH EBP
+00df64ed  MOV EAX,EDX
+00df64ef  PUSH EDI
+00df64f0  XOR EBP,EBP
+00df64f2  SHR EAX,0x1f
+00df64f5  XOR EDI,EDI
+00df64f7  ADD EAX,EDX
+00df64f9  MOV dword ptr [ESP + 0x38],EBP
+00df64fd  MOVSS dword ptr [ESP + 0x34],XMM0
+00df6503  JZ 0x00df659a
+00df6509  PUSH EBX
+00df650a  LEA EBX,[EBX]
+00df6510  MOV EBX,dword ptr [ESI + 0x8]
+00df6513  LEA ECX,[ESP + 0x10]
+00df6517  PUSH ECX
+00df6518  LEA EDX,[ESP + 0x20]
+00df651c  ADD EBX,EBP
+00df651e  PUSH EDX
+00df651f  LEA EAX,[EBX + 0x80]
+00df6525  PUSH EAX
+00df6526  CALL 0x00698b30
+00df652b  FST float ptr [ESP + 0x4c]
+00df652f  FLD float ptr [ESP + 0x44]
+00df6533  ADD ESP,0xc
+00df6536  FCOMIP ST0,ST1
+00df6538  FSTP ST0
+00df653a  JBE 0x00df654c
+00df653c  MOVSS XMM0,dword ptr [ESP + 0x40]
+00df6542  MOV dword ptr [ESP + 0x3c],EBX
+00df6546  MOVSS dword ptr [ESP + 0x38],XMM0
+00df654c  MOV ECX,dword ptr [ESI + 0xc]
+00df654f  SUB ECX,dword ptr [ESI + 0x8]
+00df6552  MOV EAX,0xae4c415d
+00df6557  IMUL ECX
+00df6559  ADD EDX,ECX
+00df655b  SAR EDX,0x7
+00df655e  MOV ECX,EDX
+00df6560  SHR ECX,0x1f
+00df6563  INC EDI
+00df6564  ADD ECX,EDX
+00df6566  ADD EBP,0xbc
+00df656c  CMP EDI,ECX
+00df656e  JC 0x00df6510
+00df6570  CMP dword ptr [ESP + 0x3c],0x0
+00df6575  POP EBX
+00df6576  JZ 0x00df659a
+00df6578  CALL 0x0067dcd0
+00df657d  MOV EDX,dword ptr [EAX]
+00df657f  MOV ECX,EAX
+00df6581  MOV EAX,dword ptr [EDX + 0x58]
+00df6584  CALL EAX
+00df6586  MOV ECX,dword ptr [ESP + 0x38]
+00df658a  SUB ECX,-0x80
+00df658d  PUSH ECX
+00df658e  LEA EDX,[ESP + 0x28]
+00df6592  PUSH EDX
+00df6593  MOV ECX,EAX
+00df6595  CALL 0x007c4250
+00df659a  MOV EAX,dword ptr [ESP + 0x38]
+00df659e  POP EDI
+00df659f  POP EBP
+00df65a0  POP ESI
+00df65a1  ADD ESP,0x24
+00df65a4  RET 0xc

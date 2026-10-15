@@ -1,0 +1,52 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00698B30
+
+float10 FUN_00698b30(float *param_1,float *param_2,float *param_3)
+
+{
+  float fVar1;
+  float fVar2;
+  float fVar3;
+  float fVar4;
+  float10 fVar5;
+  float10 fVar6;
+  float10 fVar7;
+  float fVar8;
+  float fVar9;
+  float fVar10;
+  float fVar11;
+  float fVar12;
+  float local_c;
+  float local_8;
+  float local_4;
+
+  fVar1 = param_1[1];
+  fVar2 = *param_1;
+  fVar3 = *param_2;
+  local_8 = fVar1 - param_2[1];
+  fVar11 = param_3[1] - param_2[1];
+  fVar4 = param_1[2];
+  local_4 = fVar4 - param_2[2];
+  local_c = fVar2 - fVar3;
+  fVar12 = param_3[2] - param_2[2];
+  fVar10 = *param_3 - fVar3;
+  fVar8 = local_4 * fVar12 + local_8 * fVar11 + local_c * fVar10;
+  if (0.0 < fVar8) {
+    fVar9 = fVar12 * fVar12 + fVar11 * fVar11 + fVar10 * fVar10;
+    if (fVar9 <= fVar8) {
+      fVar5 = (float10)fVar2 - (float10)*param_3;
+      fVar6 = (float10)fVar1 - (float10)param_3[1];
+      fVar7 = (float10)fVar4 - (float10)param_3[2];
+      return SQRT(fVar7 * fVar7 + fVar6 * fVar6 + fVar5 * fVar5);
+    }
+    fVar8 = fVar8 / fVar9;
+    local_c = fVar2 - (fVar3 + fVar10 * fVar8);
+    local_8 = fVar1 - (fVar11 * fVar8 + param_2[1]);
+    local_4 = fVar4 - (param_2[2] + fVar12 * fVar8);
+  }
+  return SQRT((float10)local_c * (float10)local_c +
+              (float10)local_8 * (float10)local_8 + (float10)local_4 * (float10)local_4);
+}
