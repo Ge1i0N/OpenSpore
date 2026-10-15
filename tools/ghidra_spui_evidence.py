@@ -5,6 +5,7 @@ pseudocode alone has calling-convention/stack recovery ambiguities in this execu
 """
 import hashlib
 import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,11 +19,12 @@ def main():
     from ghidra.app.decompiler import DecompInterface
 
     target = ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe'
-    dest = ROOT/'analysis/audit/spui-binary'
+    drawables = '--drawables' in sys.argv
+    dest = ROOT/('analysis/audit/spui-drawables' if drawables else 'analysis/audit/spui-binary')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     proj = open_project(str(ROOT/'refs/ghidra/proj'), 'OpenSporeOracle')
-    addresses = (0x82ce10, 0x82b3f0, 0x82b240, 0x13005a0)
+    addresses = (0x97d1e0,) if drawables else (0x82ce10, 0x82b3f0, 0x82b240, 0x13005a0)
     with program_context(proj, '/SporeApp.exe.unpacked.exe') as prog:
         af = prog.getAddressFactory()
         decompiler = DecompInterface()

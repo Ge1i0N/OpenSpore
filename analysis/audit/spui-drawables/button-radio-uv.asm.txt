@@ -1,0 +1,52 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+VA range: 0x00966AD0..0x00966B68 (end exclusive)
+Provider: objdump Intel x86, original file bytes; static evidence only.
+
+  966ad0:	83 79 10 00          	cmp    DWORD PTR [ecx+0x10],0x0
+  966ad4:	0f 84 86 00 00 00    	je     0x966b60
+  966ada:	8b 4c 24 04          	mov    ecx,DWORD PTR [esp+0x4]
+  966ade:	8b d1                	mov    edx,ecx
+  966ae0:	83 e2 07             	and    edx,0x7
+  966ae3:	33 c0                	xor    eax,eax
+  966ae5:	83 fa 03             	cmp    edx,0x3
+  966ae8:	77 36                	ja     0x966b20
+  966aea:	ff 24 95 68 6b 96 00 	jmp    DWORD PTR [edx*4+0x966b68]
+  966af1:	80 e1 08             	and    cl,0x8
+  966af4:	0f b6 c1             	movzx  eax,cl
+  966af7:	f7 d8                	neg    eax
+  966af9:	1b c0                	sbb    eax,eax
+  966afb:	83 e0 03             	and    eax,0x3
+  966afe:	eb 20                	jmp    0x966b20
+  966b00:	80 e1 08             	and    cl,0x8
+  966b03:	0f b6 c1             	movzx  eax,cl
+  966b06:	f7 d8                	neg    eax
+  966b08:	1b c0                	sbb    eax,eax
+  966b0a:	83 e0 03             	and    eax,0x3
+  966b0d:	40                   	inc    eax
+  966b0e:	eb 10                	jmp    0x966b20
+  966b10:	80 e1 08             	and    cl,0x8
+  966b13:	0f b6 c1             	movzx  eax,cl
+  966b16:	f7 d8                	neg    eax
+  966b18:	1b c0                	sbb    eax,eax
+  966b1a:	83 e0 03             	and    eax,0x3
+  966b1d:	83 c0 02             	add    eax,0x2
+  966b20:	f3 0f 10 15 4c 11 44 	movss  xmm2,DWORD PTR ds:0x144114c
+  966b27:	01
+  966b28:	f3 0f 2a c0          	cvtsi2ss xmm0,eax
+  966b2c:	40                   	inc    eax
+  966b2d:	f3 0f 2a c8          	cvtsi2ss xmm1,eax
+  966b31:	8b 44 24 08          	mov    eax,DWORD PTR [esp+0x8]
+  966b35:	f3 0f 59 c2          	mulss  xmm0,xmm2
+  966b39:	f3 0f 11 00          	movss  DWORD PTR [eax],xmm0
+  966b3d:	0f 57 c0             	xorps  xmm0,xmm0
+  966b40:	f3 0f 11 40 04       	movss  DWORD PTR [eax+0x4],xmm0
+  966b45:	f3 0f 10 05 40 37 45 	movss  xmm0,DWORD PTR ds:0x1453740
+  966b4c:	01
+  966b4d:	f3 0f 59 ca          	mulss  xmm1,xmm2
+  966b51:	f3 0f 11 48 08       	movss  DWORD PTR [eax+0x8],xmm1
+  966b56:	f3 0f 11 40 0c       	movss  DWORD PTR [eax+0xc],xmm0
+  966b5b:	b0 01                	mov    al,0x1
+  966b5d:	c2 08 00             	ret    0x8
+  966b60:	32 c0                	xor    al,al
+  966b62:	c2 08 00             	ret    0x8
+  966b65:	8d 49 00             	lea    ecx,[ecx+0x0]

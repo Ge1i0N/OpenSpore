@@ -1,0 +1,42 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+VA range: 0x00966A40..0x00966AC0 (end exclusive)
+Provider: objdump Intel x86, original file bytes; static evidence only.
+
+  966a40:	83 79 10 00          	cmp    DWORD PTR [ecx+0x10],0x0
+  966a44:	74 75                	je     0x966abb
+  966a46:	8b 54 24 04          	mov    edx,DWORD PTR [esp+0x4]
+  966a4a:	8b ca                	mov    ecx,edx
+  966a4c:	83 e1 07             	and    ecx,0x7
+  966a4f:	33 c0                	xor    eax,eax
+  966a51:	83 f9 03             	cmp    ecx,0x3
+  966a54:	77 25                	ja     0x966a7b
+  966a56:	ff 24 8d c0 6a 96 00 	jmp    DWORD PTR [ecx*4+0x966ac0]
+  966a5d:	0f b6 c2             	movzx  eax,dl
+  966a60:	83 e0 08             	and    eax,0x8
+  966a63:	83 c8 04             	or     eax,0x4
+  966a66:	c1 e8 02             	shr    eax,0x2
+  966a69:	eb 10                	jmp    0x966a7b
+  966a6b:	33 c0                	xor    eax,eax
+  966a6d:	eb 0c                	jmp    0x966a7b
+  966a6f:	b8 02 00 00 00       	mov    eax,0x2
+  966a74:	eb 05                	jmp    0x966a7b
+  966a76:	b8 03 00 00 00       	mov    eax,0x3
+  966a7b:	f3 0f 10 15 a0 b8 3e 	movss  xmm2,DWORD PTR ds:0x13eb8a0
+  966a82:	01
+  966a83:	f3 0f 2a c0          	cvtsi2ss xmm0,eax
+  966a87:	40                   	inc    eax
+  966a88:	f3 0f 2a c8          	cvtsi2ss xmm1,eax
+  966a8c:	8b 44 24 08          	mov    eax,DWORD PTR [esp+0x8]
+  966a90:	f3 0f 59 c2          	mulss  xmm0,xmm2
+  966a94:	f3 0f 11 00          	movss  DWORD PTR [eax],xmm0
+  966a98:	0f 57 c0             	xorps  xmm0,xmm0
+  966a9b:	f3 0f 11 40 04       	movss  DWORD PTR [eax+0x4],xmm0
+  966aa0:	f3 0f 10 05 40 37 45 	movss  xmm0,DWORD PTR ds:0x1453740
+  966aa7:	01
+  966aa8:	f3 0f 59 ca          	mulss  xmm1,xmm2
+  966aac:	f3 0f 11 48 08       	movss  DWORD PTR [eax+0x8],xmm1
+  966ab1:	f3 0f 11 40 0c       	movss  DWORD PTR [eax+0xc],xmm0
+  966ab6:	b0 01                	mov    al,0x1
+  966ab8:	c2 08 00             	ret    0x8
+  966abb:	32 c0                	xor    al,al
+  966abd:	c2 08 00             	ret    0x8

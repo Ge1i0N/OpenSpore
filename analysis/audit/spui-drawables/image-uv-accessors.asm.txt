@@ -1,0 +1,38 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+VA range: 0x00957710..0x0095777F (end exclusive)
+Provider: objdump Intel x86, original file bytes; static evidence only.
+
+  957710:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  957714:	f3 0f 10 41 0c       	movss  xmm0,DWORD PTR [ecx+0xc]
+  957719:	f3 0f 10 51 14       	movss  xmm2,DWORD PTR [ecx+0x14]
+  95771e:	f3 0f 10 49 10       	movss  xmm1,DWORD PTR [ecx+0x10]
+  957723:	f3 0f 58 d0          	addss  xmm2,xmm0
+  957727:	f3 0f 11 00          	movss  DWORD PTR [eax],xmm0
+  95772b:	f3 0f 10 41 18       	movss  xmm0,DWORD PTR [ecx+0x18]
+  957730:	f3 0f 58 c1          	addss  xmm0,xmm1
+  957734:	f3 0f 11 48 04       	movss  DWORD PTR [eax+0x4],xmm1
+  957739:	f3 0f 11 50 08       	movss  DWORD PTR [eax+0x8],xmm2
+  95773e:	f3 0f 11 40 0c       	movss  DWORD PTR [eax+0xc],xmm0
+  957743:	c2 04 00             	ret    0x4
+  957746:	cc                   	int3
+  957747:	cc                   	int3
+  957748:	cc                   	int3
+  957749:	cc                   	int3
+  95774a:	cc                   	int3
+  95774b:	cc                   	int3
+  95774c:	cc                   	int3
+  95774d:	cc                   	int3
+  95774e:	cc                   	int3
+  95774f:	cc                   	int3
+  957750:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  957754:	d9 00                	fld    DWORD PTR [eax]
+  957756:	d9 59 0c             	fstp   DWORD PTR [ecx+0xc]
+  957759:	d9 40 04             	fld    DWORD PTR [eax+0x4]
+  95775c:	d9 59 10             	fstp   DWORD PTR [ecx+0x10]
+  95775f:	f3 0f 10 40 08       	movss  xmm0,DWORD PTR [eax+0x8]
+  957764:	f3 0f 5c 00          	subss  xmm0,DWORD PTR [eax]
+  957768:	f3 0f 11 41 14       	movss  DWORD PTR [ecx+0x14],xmm0
+  95776d:	f3 0f 10 40 0c       	movss  xmm0,DWORD PTR [eax+0xc]
+  957772:	f3 0f 5c 40 04       	subss  xmm0,DWORD PTR [eax+0x4]
+  957777:	f3 0f 11 41 18       	movss  DWORD PTR [ecx+0x18],xmm0
+  95777c:	c2 04 00             	ret    0x4

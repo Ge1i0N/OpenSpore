@@ -117,6 +117,11 @@ struct SharedFields {
 
 class Package {
 public:
+    Package() = default;
+    ~Package() { close(); }
+    Package(const Package&) = delete;
+    Package& operator=(const Package&) = delete;
+
     // Opens and validates the header. On failure, ok()==false and why() says which of the
     // validator's clauses rejected it - never a dialog, never a throw (PROMPT.md).
     bool open(const std::string& path);

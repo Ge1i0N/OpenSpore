@@ -105,7 +105,7 @@ void Reader::load(size_t limit) {
     }
     m_loaded = failed == 0;
     LOG_ONCE_INFO("spui", "sequential parse %zu/%zu resources, %zu failed: %zu objects, %zu windows, "
-                  "%zu Areas, %zu properties (%zu multi), %zu child links, %zu ImageDrawable external refs; %zu distinct instances, "
+                  "%zu Areas, %zu properties (%zu multi), %zu child links, %zu Image external refs; %zu distinct instances, "
                   "%zu shadowed (%zu size differs); captions %zu inline / %zu references",
                   m_layouts.size(), scanned, failed, objects, windows, areas, props, multi, links, drawable,
                   m_distinct, m_shadowed, m_shadowed_diff, inline_caps, refs);

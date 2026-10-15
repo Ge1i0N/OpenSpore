@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.spui_objects import BinaryLayout, layouts
 
 ROOT = Path(__file__).resolve().parents[1]
-IDS = {0x4f3c4eae:'ImageDrawable',0xaf3a9e26:'ButtonDrawableStandard',
+IDS = {0xcf3c4eae:'ImageDrawable',0xaf3a9e26:'ButtonDrawableStandard',
        0x2f3adc5d:'ButtonDrawableRadio',0x6f0c7aea:'DialogDrawable'}
 PROPS = {0x4f3c4a26:'Image',0x0f3ac75e:'StdImage',0x2f42e1a1:'DialogImages',
          0x2f591e33:'ComboImages',0xaf42d91c:'ScrollbarImages',0x6f42d5cd:'SliderImages',

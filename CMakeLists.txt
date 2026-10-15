@@ -125,6 +125,7 @@ set(OS_SOURCES
   source/engine/spui.cpp
   source/engine/spui_binary.cpp
   source/engine/spui_geometry.cpp
+  source/engine/spui_drawable.cpp
   source/engine/text.cpp
   source/render/device.cpp
   source/render/overlay.cpp
@@ -141,10 +142,14 @@ target_include_directories(OpenSpore PRIVATE source ${OS_GENERATED_DIR})
 
 # Offline parser verification against decoded fixtures from tools/spui_objects.py --extract.
 add_executable(spui_verify EXCLUDE_FROM_ALL tools/spui_verify.cpp
-  source/engine/spui_binary.cpp source/engine/spui_geometry.cpp)
+  source/engine/spui_binary.cpp source/engine/spui_geometry.cpp source/engine/spui_drawable.cpp)
 target_include_directories(spui_verify PRIVATE source)
+add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
+  source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
+target_include_directories(pkg_lifetime_verify PRIVATE source)
 if(MSVC)
   target_compile_options(spui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
 endif()
 
 set(OS_DEV_COMMANDS OFF)

@@ -33,6 +33,9 @@ def names():
             nm = re.search(r'name="([^"]*)"', attrs)
             if pm and nm:
                 out[int(pm.group(1), 16)] = (kind, nm.group(1))
+    # Several Window subclasses override this same property ID (ButtonDrawable, DialogDrawable).
+    # The alias is a property name, never evidence of an intermediate object class.
+    out[DRAWABLE] = ('Property', 'FillDrawable')
     return out
 
 

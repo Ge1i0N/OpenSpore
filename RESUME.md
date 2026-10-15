@@ -3,10 +3,16 @@
 Hand-off snapshot. Rewritten at the end of every session, **before** context compaction.
 Last update: 2026-10-15. Current hand-off below supersedes the retained historical snapshot.
 
-## CURRENT HAND-OFF — 2026-10-15: sequential SPUI and actual child graph
+## CURRENT HAND-OFF — 2026-10-15: atlas-aware launcher drawables
 
 This block supersedes older snapshots below. Push is the user's via GitHub Desktop.
 Read `analysis/spui-binary.md` for the format, retained evidence, validation and limitations.
+Read `analysis/spui-drawables.md` for the new atlas/state/geometry evidence and corrections.
+Current drawable subset: None-tiling ImageDrawable, non-tileable Standard/Radio, explicit class
+links, atlas UV/logical size, fixed-axis scale/alignment and state-frame selection. Live launcher
+art capture: `analysis/shots/spui_e3launch_uv.png`. Window outlines/text remain diagnostic.
+Package FILE ownership is now RAII; `pkg_lifetime_verify` exceeds the CRT limit without leaking.
+Next: tiling/outline/scissor, Button capture/checked events, then GalaxyGameEntry AppMode behavior.
 
 **Done:** found GA binary reader (0x82ce10), property dispatch (0x82b3f0), skip logic (0x82b240).
 Implemented bounded C++ `spui_binary.cpp`, independently checked against Python `spui_objects.py`
@@ -32,10 +38,10 @@ cd build\bin\Debug
 ```
 
 Expect `-> CreatureEditor [0x022d9e01]`, exit 0. `spui:-tree` reports the object graph;
-`spui:-dump,<instance>,<n>` reports exact properties. Rendering remains diagnostic rectangles/text.
+`spui:-dump,<instance>,<n>` reports exact properties. Rendering includes atlas-aware game art.
 Tree replaces area-size heuristics, but forward sibling order, ancestor-origin placement and the
-ControlID/state bridge are presentation policies. Dynamic Z/layout WinProcs, drawables and commands
-remain open.
+ControlID/state bridge are presentation policies. Dynamic Z/layout WinProcs, remaining drawable modes
+and general commands remain open.
 
 Feature checklist map is now 83.2% engine / 76.6% overall; these are internal checklist ratios,
 not a measured percentage of gameplay completeness.

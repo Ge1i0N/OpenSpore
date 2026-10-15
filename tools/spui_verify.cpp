@@ -1,5 +1,8 @@
 // Compare the C++ parser against independently decoded corpus fixtures; test rejection atomically.
 #include "engine/spui.h"
+#include "engine/spui_drawable.h"
+#include <cmath>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -56,6 +59,69 @@ int main(int argc, char** argv) {
             const auto* selected = spui::hit_test(layout, 311.25f, 549.84f, 1280.f, 720.f);
             if (!selected || selected->control_id != 0x022d9e01)
                 { std::cerr << "visible CreatureEditor tile not pickable\n"; return 1; }
+            // Independent Python fixture: object 43 has logical 688x173 and the atlas rect below.
+            // Button 44 selects 1/4 normal, 0/4 disabled, 2/4 hover, 3/4 pressed (GA 0x966a40).
+            const spui::Rect bounds{10, 20, 210, 120};
+            const float u0 = -0.022461000829935074f, u1 = 0.6494140028953552f;
+            const auto near = [](float a, float b) { return std::abs(a-b) < 0.00001f; };
+            for (u32 state = 0; state < 4; ++state) {
+                const u32 frame = state == 0 ? 1u : state == 1 ? 0u : state;
+                spui::ImageQuad q;
+                if (!spui::drawable_quad(layout, 44, bounds, state, q) ||
+                    !near(q.uv.left, u0+(u1-u0)*(float)frame/4.f) ||
+                    !near(q.uv.right, u0+(u1-u0)*(float)(frame+1)/4.f) ||
+                    !near(q.uv.bottom, 0.6757810115814209f) || q.area.w() != 200.f)
+                    { std::cerr << "button atlas state mismatch\n"; return 1; }
+            }
+            spui::ImageQuad plain;
+            if (!spui::drawable_quad(layout, 41, bounds, 0, plain) ||
+                !near(plain.uv.top, 0.24023400247097015f) || plain.area.w() != 200.f ||
+                plain.area.h() != 100.f)
+                { std::cerr << "plain atlas/stretch mismatch\n"; return 1; }
+            auto fixed = layout;
+            for (auto& o : fixed.objects) if (o.index == 41) {
+                for (auto& p : o.properties) {
+                    if (p.id == 0x4f3c4a27) p.raw = {3, 0, 0, 0};
+                    if (p.id == 0x4f3c4a2b) p.raw = {0, 0, 0, 0x3f}; // 0.5f
+                }
+            }
+            if (!spui::drawable_quad(fixed, 41, bounds, 0, plain) ||
+                plain.area.w() != 176.5f || plain.area.h() != 49.f ||
+                plain.area.left != 21.75f || plain.area.top != 45.5f)
+                { std::cerr << "fixed scale/center mismatch\n"; return 1; }
+            for (u8 alignment : {u8(1), u8(2), u8(3)}) {
+                for (auto& o : fixed.objects) if (o.index == 41)
+                    for (auto& p : o.properties)
+                        if (p.id == 0x4f3c4a29 || p.id == 0x4f3c4a28)
+                            p.raw = {alignment, 0, 0, 0};
+                const float left = alignment == 1 ? 10.f : alignment == 2 ? 33.5f : 21.75f;
+                const float top = alignment == 1 ? 20.f : alignment == 2 ? 71.f : 45.5f;
+                if (!spui::drawable_quad(fixed, 41, bounds, 0, plain) ||
+                    plain.area.left != left || plain.area.top != top)
+                    { std::cerr << "fixed alignment mismatch\n"; return 1; }
+            }
+            // Radio uses six horizontal cells, selection adds three (0x966ad0).
+            spui::Rect radio_uv;
+            for (const auto& o : layout.objects) if (o.index == 240)
+                for (const auto& p : o.properties) if (p.id == 0x01be0002)
+                    std::memcpy(&radio_uv, p.raw.data(), sizeof(radio_uv));
+            for (u32 state : {0u, 1u, 2u, 3u, 8u, 9u, 10u, 11u}) {
+                const u32 base = state & 7;
+                const u32 frame = (base >= 2 ? base-1 : 0) + ((state & 8) ? 3 : 0);
+                spui::ImageQuad q;
+                if (!spui::drawable_quad(layout, 241, bounds, state, q) ||
+                    !near(q.uv.left, radio_uv.left+radio_uv.w()*(float)frame/6.f) ||
+                    !near(q.uv.w(), radio_uv.w()/6.f))
+                    { std::cerr << "radio atlas state mismatch\n"; return 1; }
+            }
+            for (auto& o : fixed.objects) if (o.index == 41)
+                for (auto& p : o.properties) if (p.id == 0x4f3c4a2a) p.raw = {1, 0, 0, 0};
+            plain.external = 0x1234;
+            if (spui::drawable_quad(fixed, 41, bounds, 0, plain) || plain.external != 0x1234)
+                { std::cerr << "unsupported tiling accepted or changed output\n"; return 1; }
+            if (spui::drawable_quad(layout, 0xffff, bounds, 0, plain) ||
+                spui::drawable_quad(layout, 41, {0,0,0,1}, 0, plain) || plain.external != 0x1234)
+                { std::cerr << "missing drawable/invalid bounds accepted\n"; return 1; }
             if (spui::hit_test(layout, 0, 0, 0, 720) ||
                 spui::hit_test(layout, -1, 0, 1280, 720))
                 { std::cerr << "invalid viewport accepted\n"; return 1; }
@@ -115,5 +181,6 @@ int main(int argc, char** argv) {
     if (!passed || !negative_done) { std::cerr << "incomplete fixture corpus\n"; return 1; }
     std::cout << passed << " corpus layouts match; " << negative
               << " malformed inputs rejected with output unchanged\n";
+    std::cout << "drawable atlas/state/fixed-scale/alignment/unsupported-mode checks passed\n";
     return 0;
 }

@@ -1,0 +1,37 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+VA range: 0x0097D840..0x0097D8BF (end exclusive)
+Provider: objdump Intel x86, original file bytes; static evidence only.
+
+  97d840:	f3 0f 10 05 40 37 45 	movss  xmm0,DWORD PTR ds:0x1453740
+  97d847:	01
+  97d848:	33 c0                	xor    eax,eax
+  97d84a:	56                   	push   esi
+  97d84b:	8b f1                	mov    esi,ecx
+  97d84d:	c7 46 04 40 4c 44 01 	mov    DWORD PTR [esi+0x4],0x1444c40
+  97d854:	89 46 08             	mov    DWORD PTR [esi+0x8],eax
+  97d857:	c7 46 0c a0 31 44 01 	mov    DWORD PTR [esi+0xc],0x14431a0
+  97d85e:	f3 0f 11 46 10       	movss  DWORD PTR [esi+0x10],xmm0
+  97d863:	0f 57 c0             	xorps  xmm0,xmm0
+  97d866:	8d 4e 28             	lea    ecx,[esi+0x28]
+  97d869:	c7 06 48 32 44 01    	mov    DWORD PTR [esi],0x1443248
+  97d86f:	c7 46 04 30 32 44 01 	mov    DWORD PTR [esi+0x4],0x1443230
+  97d876:	c7 46 0c e8 31 44 01 	mov    DWORD PTR [esi+0xc],0x14431e8
+  97d87d:	89 46 14             	mov    DWORD PTR [esi+0x14],eax
+  97d880:	89 46 18             	mov    DWORD PTR [esi+0x18],eax
+  97d883:	89 46 24             	mov    DWORD PTR [esi+0x24],eax
+  97d886:	ba 03 00 00 00       	mov    edx,0x3
+  97d88b:	89 56 1c             	mov    DWORD PTR [esi+0x1c],edx
+  97d88e:	89 56 20             	mov    DWORD PTR [esi+0x20],edx
+  97d891:	6a 02                	push   0x2
+  97d893:	89 01                	mov    DWORD PTR [ecx],eax
+  97d895:	c7 41 04 02 00 00 00 	mov    DWORD PTR [ecx+0x4],0x2
+  97d89c:	89 51 08             	mov    DWORD PTR [ecx+0x8],edx
+  97d89f:	f3 0f 11 41 14       	movss  DWORD PTR [ecx+0x14],xmm0
+  97d8a4:	f3 0f 11 41 18       	movss  DWORD PTR [ecx+0x18],xmm0
+  97d8a9:	f3 0f 11 41 0c       	movss  DWORD PTR [ecx+0xc],xmm0
+  97d8ae:	f3 0f 11 41 10       	movss  DWORD PTR [ecx+0x10],xmm0
+  97d8b3:	89 41 24             	mov    DWORD PTR [ecx+0x24],eax
+  97d8b6:	e8 75 29 eb ff       	call   0x830230
+  97d8bb:	8b c6                	mov    eax,esi
+  97d8bd:	5e                   	pop    esi
+  97d8be:	c3                   	ret

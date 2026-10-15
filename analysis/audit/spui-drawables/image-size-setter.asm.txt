@@ -1,0 +1,10 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+VA range: 0x009576F0..0x00957702 (end exclusive)
+Provider: objdump Intel x86, original file bytes; static evidence only.
+
+  9576f0:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  9576f4:	8b 10                	mov    edx,DWORD PTR [eax]
+  9576f6:	89 51 1c             	mov    DWORD PTR [ecx+0x1c],edx
+  9576f9:	8b 40 04             	mov    eax,DWORD PTR [eax+0x4]
+  9576fc:	89 41 20             	mov    DWORD PTR [ecx+0x20],eax
+  9576ff:	c2 04 00             	ret    0x4

@@ -109,13 +109,14 @@ several windows in one file deliberately share ControlID values.
 External tables are retained in `Layout::external_resources`. E3LaunchScreen drawable image objects
 use external indexes whose records are PNG resources (`type=0x2F7D0004`, group `0x31A44893`); all 16
 sampled image instances resolve once in `Spore_Graphics.package`. Across the complete corpus, **15,489
-ImageDrawable external references** validate against their owning external tables. Remaining drawable
-work is interpreting class-specific Image/Button/Dialog scaling and state selection.
+Image-object external references** validate against their owning external tables. Atlas UV/logical size,
+None-tiling ImageDrawable fixed-axis scale/alignment and non-tileable Standard/Radio frame selection
+are now implemented; see `analysis/spui-drawables.md` and its retained GA evidence.
 
-`tools/spui_drawables.py` shows the next rendering boundary without claiming that raw words are image
-instances: `Window -> DialogDrawable -> ImageDrawable`, `Button -> DialogDrawable ->
-ButtonDrawableStandard`, and WinProcs resolve to `Fade`, `Glide`, or `Inflate`. Class-specific property
-payloads still need reverse engineering before PNG/raster lookup is safe.
+Correction to the earlier graph report: `DialogDrawable` was an overwritten name for property
+`0xEEC1B007`, not an intermediate class. E3 windows reference ImageDrawable or ButtonDrawableStandard
+directly; those reference Image objects (`0x01BE6B15`), which hold the PNG external index and UV.
+WinProcs include `Fade`, `Glide`, or `Inflate`; their runtime behavior is still open.
 
 E3LaunchScreen (`0xE932BD44`) in each shipped copy:
 

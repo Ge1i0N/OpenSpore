@@ -27,7 +27,7 @@ public:
         out.external_resources.clear();
         out.external_resources.reserve(counts[0] + counts[1]);
         // GA reader evidence: external triples are instance, type, group. E3LaunchScreen's group-1
-        // records are PNG type 0x2F7D0004, and code-19 ImageDrawable refs index these triples.
+        // records are PNG type 0x2F7D0004, and code-19 Image refs index these triples.
         for (u32 n = 0; n < counts[0] + counts[1]; ++n) {
             ExternalResource ext;
             ext.instance = u32le();
@@ -87,7 +87,7 @@ public:
         for (const Object& obj : out.objects) {
             out.drawable_links += obj.external_refs.size();
             for (u16 ref : obj.external_refs)
-                if (ref >= out.external_resources.size()) fail("ImageDrawable external index out of range");
+                if (ref >= out.external_resources.size()) fail("Image external index out of range");
         }
         std::vector<int> windows(total, -1);
         for (size_t n = 0; n < out.windows.size(); ++n)
@@ -228,6 +228,7 @@ private:
                     p.id == 0xeec1b00b)) *is_window = true;
         if (const size_t elem = width(p.code)) {
             skip(elem * p.count);
+            p.raw.assign(d.begin() + value, d.begin() + pos);
             if (top && p.count == 1) {
                 if (p.code == 9) {
                     const size_t end = pos;

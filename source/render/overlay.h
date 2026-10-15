@@ -46,6 +46,8 @@ public:
     // or wider than the box, it is letterboxed inside it.
     void image(float x, float y, float w, float h, IDirect3DTexture9* tex, int tex_w, int tex_h,
                bool keep_aspect = true);
+    void image_uv(float x, float y, float w, float h, IDirect3DTexture9* tex,
+                 float u0, float v0, float u1, float v1);
 
     int font_height() const { return m_cell_h; }
 

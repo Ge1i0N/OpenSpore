@@ -1,0 +1,80 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+VA range: 0x009655F0..0x009656CB (end exclusive)
+Provider: objdump Intel x86, original file bytes; static evidence only.
+
+  9655f0:	55                   	push   ebp
+  9655f1:	8b ec                	mov    ebp,esp
+  9655f3:	83 e4 f8             	and    esp,0xfffffff8
+  9655f6:	81 ec f0 03 00 00    	sub    esp,0x3f0
+  9655fc:	56                   	push   esi
+  9655fd:	8b f1                	mov    esi,ecx
+  9655ff:	83 7e 10 00          	cmp    DWORD PTR [esi+0x10],0x0
+  965603:	57                   	push   edi
+  965604:	8b 7d 10             	mov    edi,DWORD PTR [ebp+0x10]
+  965607:	0f 84 be 00 00 00    	je     0x9656cb
+  96560d:	8b 06                	mov    eax,DWORD PTR [esi]
+  96560f:	8b 17                	mov    edx,DWORD PTR [edi]
+  965611:	8b 40 20             	mov    eax,DWORD PTR [eax+0x20]
+  965614:	8d 8c 24 d8 03 00 00 	lea    ecx,[esp+0x3d8]
+  96561b:	51                   	push   ecx
+  96561c:	52                   	push   edx
+  96561d:	8b ce                	mov    ecx,esi
+  96561f:	ff d0                	call   eax
+  965621:	84 c0                	test   al,al
+  965623:	0f 84 a2 00 00 00    	je     0x9656cb
+  965629:	8b 4d 08             	mov    ecx,DWORD PTR [ebp+0x8]
+  96562c:	6a 00                	push   0x0
+  96562e:	e8 3d 65 ff ff       	call   0x95bb70
+  965633:	8b f8                	mov    edi,eax
+  965635:	8b 17                	mov    edx,DWORD PTR [edi]
+  965637:	8b 42 04             	mov    eax,DWORD PTR [edx+0x4]
+  96563a:	6a ff                	push   0xffffffff
+  96563c:	8b cf                	mov    ecx,edi
+  96563e:	ff d0                	call   eax
+  965640:	80 7e 14 00          	cmp    BYTE PTR [esi+0x14],0x0
+  965644:	74 64                	je     0x9656aa
+  965646:	f3 0f 10 05 40 37 45 	movss  xmm0,DWORD PTR ds:0x1453740
+  96564d:	01
+  96564e:	83 ec 08             	sub    esp,0x8
+  965651:	8b c4                	mov    eax,esp
+  965653:	f3 0f 11 00          	movss  DWORD PTR [eax],xmm0
+  965657:	f3 0f 11 40 04       	movss  DWORD PTR [eax+0x4],xmm0
+  96565c:	8b 56 10             	mov    edx,DWORD PTR [esi+0x10]
+  96565f:	f3 0f 10 05 cc 26 3f 	movss  xmm0,DWORD PTR ds:0x13f26cc
+  965666:	01
+  965667:	8d 4c 24 10          	lea    ecx,[esp+0x10]
+  96566b:	51                   	push   ecx
+  96566c:	8b 4d 0c             	mov    ecx,DWORD PTR [ebp+0xc]
+  96566f:	52                   	push   edx
+  965670:	8d 84 24 e8 03 00 00 	lea    eax,[esp+0x3e8]
+  965677:	50                   	push   eax
+  965678:	51                   	push   ecx
+  965679:	f3 0f 11 44 24 20    	movss  DWORD PTR [esp+0x20],xmm0
+  96567f:	f3 0f 11 44 24 24    	movss  DWORD PTR [esp+0x24],xmm0
+  965685:	f3 0f 10 05 a4 e8 40 	movss  xmm0,DWORD PTR ds:0x140e8a4
+  96568c:	01
+  96568d:	57                   	push   edi
+  96568e:	f3 0f 11 44 24 2c    	movss  DWORD PTR [esp+0x2c],xmm0
+  965694:	f3 0f 11 44 24 30    	movss  DWORD PTR [esp+0x30],xmm0
+  96569a:	e8 c1 78 ff ff       	call   0x95cf60
+  96569f:	83 c4 1c             	add    esp,0x1c
+  9656a2:	5f                   	pop    edi
+  9656a3:	5e                   	pop    esi
+  9656a4:	8b e5                	mov    esp,ebp
+  9656a6:	5d                   	pop    ebp
+  9656a7:	c2 0c 00             	ret    0xc
+  9656aa:	8b 4e 10             	mov    ecx,DWORD PTR [esi+0x10]
+  9656ad:	8b 17                	mov    edx,DWORD PTR [edi]
+  9656af:	8b 52 58             	mov    edx,DWORD PTR [edx+0x58]
+  9656b2:	8d 84 24 d8 03 00 00 	lea    eax,[esp+0x3d8]
+  9656b9:	50                   	push   eax
+  9656ba:	8b 45 0c             	mov    eax,DWORD PTR [ebp+0xc]
+  9656bd:	51                   	push   ecx
+  9656be:	50                   	push   eax
+  9656bf:	8b cf                	mov    ecx,edi
+  9656c1:	ff d2                	call   edx
+  9656c3:	5f                   	pop    edi
+  9656c4:	5e                   	pop    esi
+  9656c5:	8b e5                	mov    esp,ebp
+  9656c7:	5d                   	pop    ebp
+  9656c8:	c2 0c 00             	ret    0xc

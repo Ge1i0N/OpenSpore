@@ -319,16 +319,23 @@ void Overlay::image(float x, float y, float w, float h, IDirect3DTexture9* tex, 
             w = nw;
         }
     }
+    image_uv(x, y, w, h, tex, 0.f, 0.f, 1.f, 1.f);
+}
+
+void Overlay::image_uv(float x, float y, float w, float h, IDirect3DTexture9* tex,
+                       float u0, float v0, float u1, float v1) {
+    if (!m_dev || !tex || w <= 0.f || h <= 0.f) return;
+    flush_text();
     set_text_states(m_dev, tex);
     Vert v[6];
     const float x1 = x + w, y1 = y + h;
     const u32 white = 0xFFFFFFFFu;
-    v[0] = {x, y, 0, 1, white, 0, 0};
-    v[1] = {x, y1, 0, 1, white, 0, 1};
-    v[2] = {x1, y, 0, 1, white, 1, 0};
-    v[3] = {x1, y, 0, 1, white, 1, 0};
-    v[4] = {x, y1, 0, 1, white, 0, 1};
-    v[5] = {x1, y1, 0, 1, white, 1, 1};
+    v[0] = {x, y, 0, 1, white, u0, v0};
+    v[1] = {x, y1, 0, 1, white, u0, v1};
+    v[2] = {x1, y, 0, 1, white, u1, v0};
+    v[3] = {x1, y, 0, 1, white, u1, v0};
+    v[4] = {x, y1, 0, 1, white, u0, v1};
+    v[5] = {x1, y1, 0, 1, white, u1, v1};
     m_dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 2, v, sizeof(Vert));
     m_flat_drawn = true;  // next text() must re-arm the font atlas
 }

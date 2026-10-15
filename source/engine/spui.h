@@ -93,6 +93,7 @@ struct Property {
     u16 code = 0, count = 0;
     u16 depth = 0;                  // 0=object property; >0=member inside code-20 structure
     std::vector<u16> refs;          // code-19 object/external references
+    std::vector<u8> raw;            // scalar/tuple bytes, retained for drawable properties
 };
 
 struct ExternalResource {
@@ -107,7 +108,7 @@ struct Object {
     bool root = false;               // object property-count word's high bit (GA 0x82ce10)
     int window = -1;
     std::vector<Property> properties; // includes nested struct fields, preserving their offsets
-    std::vector<u16> external_refs;   // ImageDrawable's object 0x01BE0001 -> external table indexes
+    std::vector<u16> external_refs;   // Image (0x01BE6B15), property 0x01BE0001 -> external indexes
 };
 
 struct Layout {

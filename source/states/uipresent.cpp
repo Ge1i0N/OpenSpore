@@ -14,6 +14,7 @@
 #include "engine/fs.h"
 #include "engine/pkg.h"
 #include "engine/spui.h"
+#include "engine/spui_drawable.h"
 #include "engine/text.h"
 #include "render/device.h"
 #include "render/imgfile.h"
@@ -110,31 +111,6 @@ CachedTexture& load_external(const os::spui::Layout& lay, u16 ref) {
     LOG_WARN("ui", "drawable external unresolved: instance=0x%08X type=0x%08X group=0x%08X",
              e.instance, e.type, e.group);
     return cached;
-}
-
-const os::spui::Object* object_at(const os::spui::Layout& lay, u16 index) {
-    for (const auto& object : lay.objects) if (object.index == index) return &object;
-    return nullptr;
-}
-
-bool image_reference(const os::spui::Layout& lay, u16 index, u32 depth, u16& external) {
-    if (depth > 16 || index == 0xffff) return false;
-    const auto* object = object_at(lay, index);
-    if (!object) return false;
-    if (!object->external_refs.empty()) {
-        external = object->external_refs.front();
-        return true;
-    }
-    // Dialog/Button drawable classes wrap ImageDrawable objects. Follow code-19 object links until
-    // an ImageDrawable's 0x01BE0001 external-table reference is reached; do not assume one wrapper
-    // level, because the same schema supports Dialog (10 images), Button (4/6), and arrays.
-    for (const auto& property : object->properties) {
-        if (property.code != 19) continue;
-        for (u16 ref : property.refs) {
-            if (image_reference(lay, ref, depth + 1, external)) return true;
-        }
-    }
-    return false;
 }
 
 }  // namespace
@@ -258,6 +234,7 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
     size_t drawn = 0;
     // Parent before its serialized Children, with ancestor visibility applied by paint_order().
     const std::vector<size_t> order = os::spui::paint_order(lay);
+    const auto* hovered = os::spui::hit_test(lay, (float)input::x(), (float)input::y(), (float)w, (float)h);
     for (size_t oi : order) {
         const auto& win = lay.windows[oi];
         if (!win.has_area) continue;
@@ -271,13 +248,14 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
         const u32 cbg = win.bg_color;
         const f32 x2 = x + bw, y2 = y + bh;
         if ((cbg >> 24) != 0) ov.rect(x, y, bw, bh, cbg);
-        // First real drawable: ImageDrawable's `Image` object points to one external PNG entry.
-        // We deliberately handle only the plain image class here; Button/Dialog state selection,
-        // tiling and nine-slice scaling remain separate behaviors and are not silently approximated.
-        u16 external = 0xffff;
-        if (image_reference(lay, win.drawable_object, 0, external)) {
-            CachedTexture& image = load_external(lay, external);
-            if (image.texture) ov.image(x, y, bw, bh, image.texture, image.width, image.height, true);
+        // Host input -> drawable state is our adapter; the frame selection and geometry are GA's.
+        const u32 state = !win.enabled ? 1u : hovered == &win ? (input::left_down() ? 3u : 2u) : 0u;
+        os::spui::ImageQuad quad;
+        if (os::spui::drawable_quad(lay, win.drawable_object, win.placed_area, state, quad)) {
+            CachedTexture& image = load_external(lay, quad.external);
+            if (image.texture) ov.image_uv(quad.area.left * sx, quad.area.top * sy,
+                quad.area.w() * sx, quad.area.h() * sy, image.texture,
+                quad.uv.left, quad.uv.top, quad.uv.right, quad.uv.bottom);
         }
         // Always outline, so a transparent window is still visible as the box the designer placed.
         const u32 edge = (win.shade_color >> 24) != 0 ? (win.shade_color & 0xFFFFFFu) | 0x90000000u
