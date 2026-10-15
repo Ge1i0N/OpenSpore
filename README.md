@@ -165,6 +165,9 @@ $streamDir = Join-Path $env:TEMP ('OpenSpore-stream-' + [guid]::NewGuid())
 .\build\Debug\gge_star_scene_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package
 .\build\Debug\gge_star_transition_verify.exe $fixtures
 .\build\Debug\gge_star_input_verify.exe $fixtures
+
+# controlled clickable host-card preview (Debug/dev only; not native GGE)
+.\build\bin\Debug\OpenSpore.exe -w -devDirs -state:GGEHostPreview
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
@@ -228,6 +231,9 @@ draw/pick frames; native factories/effects/видимая галактика и 
 case4 не записывает native latch даже при return1. Сервисы/input dispatch/latch и GGE runtime не подменяются.
 Отдельный [input seam](analysis/gge-star-input.md) добавляет **29** проверок world-ray picker:
 он отделён от UI-window hit и не вызывает F8/FC, phase или CommandID.
+Для ручного тыканья есть явно маркированный [GGEHostPreview](analysis/gge-host-preview.md): три
+карточки, реальный SPUI/atlas и настоящий input latch. Это controlled reconstruction, не live GGE state.
+Проверенный unattended запуск пишет `picked host card 20481 (host only)` и завершает работу с exit code 0.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI

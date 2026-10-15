@@ -169,6 +169,12 @@ test with `-w -devDirs`; retain evidence and commit.
   Handler table +5C DF7BF0 hover/+60 DF7AC0 selected/+64 DF6110 project/+68 DF6010 update retained;
   raw DF7800 event identities not generalized. 29 checks, no F8/FC/CommandID/tooltip/message dispatch.
   analysis/gge-star-input.md / audit/gge-input-seeds.tsv / audit/gge-input/.
+- Debug-only `GGEHostPreview` provides the first physically clickable host-card screen:
+  source/states/ggehostpreview.*, registered only under OS_ENABLE_DEV_COMMANDS. Explicit three typed
+  candidates/positions, actual GGE SPUI/direct Graphics atlas, explicit camera, case2 host transition,
+  draw_gge_star_scene and normal input latch. `-state:GGEHostPreview`; `-exec spui:-click,640,360
+  -execAfter 10` logs `picked host card 20481 (host only)`. Clean smoke exit0/aborts0. Controlled
+  reconstruction only; no live catalogue/native camera/F8/FC/CommandID. analysis/gge-host-preview.md.
 
 ## Next, in order
 

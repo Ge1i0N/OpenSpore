@@ -154,6 +154,7 @@ set(OS_SOURCES
   source/states/loader.cpp
   source/states/title.cpp
   source/states/uipresent.cpp
+  source/states/ggehostpreview.cpp
 )
 
 add_executable(OpenSpore WIN32 ${OS_SOURCES} ${OS_RC_FILE})

@@ -16,6 +16,7 @@
 #include "engine/pkg.h"
 #include "states/statemgr.h"
 #include "states/uipresent.h"  // present_ui_screen: the layout a state names, drawn
+#include "states/ggehostpreview.h"
 
 namespace os::appstates {
 namespace {
@@ -436,6 +437,7 @@ void install(os::states::Manager& mgr) {
     }
     LOG_INFO("appstates", "installed %zu game states into the state manager (%zu skipped: ours or "
                           "duplicate id)", added, skipped);
+    install_gge_host_preview(mgr);
 }
 
 }  // namespace os::appstates
