@@ -1,0 +1,138 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  df6110:	83 ec 3c             	sub    esp,0x3c
+  df6113:	56                   	push   esi
+  df6114:	57                   	push   edi
+  df6115:	8b 7c 24 48          	mov    edi,DWORD PTR [esp+0x48]
+  df6119:	8b 8f b8 00 00 00    	mov    ecx,DWORD PTR [edi+0xb8]
+  df611f:	85 c9                	test   ecx,ecx
+  df6121:	0f 84 99 01 00 00    	je     0xdf62c0
+  df6127:	6a 00                	push   0x0
+  df6129:	68 a8 a4 e5 02       	push   0x2e5a4a8
+  df612e:	e8 1d a5 a1 ff       	call   0x810650
+  df6133:	8b f0                	mov    esi,eax
+  df6135:	85 f6                	test   esi,esi
+  df6137:	0f 84 74 01 00 00    	je     0xdf62b1
+  df613d:	8d 44 24 24          	lea    eax,[esp+0x24]
+  df6141:	50                   	push   eax
+  df6142:	e8 49 fe a0 ff       	call   0x805f90
+  df6147:	8b 16                	mov    edx,DWORD PTR [esi]
+  df6149:	8b 42 38             	mov    eax,DWORD PTR [edx+0x38]
+  df614c:	83 c4 04             	add    esp,0x4
+  df614f:	8b ce                	mov    ecx,esi
+  df6151:	ff d0                	call   eax
+  df6153:	f3 0f 10 00          	movss  xmm0,DWORD PTR [eax]
+  df6157:	8b 16                	mov    edx,DWORD PTR [esi]
+  df6159:	f3 0f 11 44 24 14    	movss  DWORD PTR [esp+0x14],xmm0
+  df615f:	f3 0f 10 40 04       	movss  xmm0,DWORD PTR [eax+0x4]
+  df6164:	f3 0f 11 44 24 18    	movss  DWORD PTR [esp+0x18],xmm0
+  df616a:	f3 0f 10 40 08       	movss  xmm0,DWORD PTR [eax+0x8]
+  df616f:	f3 0f 11 44 24 1c    	movss  DWORD PTR [esp+0x1c],xmm0
+  df6175:	f3 0f 10 40 0c       	movss  xmm0,DWORD PTR [eax+0xc]
+  df617a:	8b 42 34             	mov    eax,DWORD PTR [edx+0x34]
+  df617d:	8b ce                	mov    ecx,esi
+  df617f:	f3 0f 11 44 24 20    	movss  DWORD PTR [esp+0x20],xmm0
+  df6185:	ff d0                	call   eax
+  df6187:	80 bf ac 00 00 00 00 	cmp    BYTE PTR [edi+0xac],0x0
+  df618e:	f3 0f 10 00          	movss  xmm0,DWORD PTR [eax]
+  df6192:	f3 0f 10 0d 38 be 45 	movss  xmm1,DWORD PTR ds:0x145be38
+  df6199:	01
+  df619a:	f3 0f 10 5c 24 4c    	movss  xmm3,DWORD PTR [esp+0x4c]
+  df61a0:	f3 0f 10 54 24 50    	movss  xmm2,DWORD PTR [esp+0x50]
+  df61a6:	f3 0f 11 44 24 34    	movss  DWORD PTR [esp+0x34],xmm0
+  df61ac:	f3 0f 10 40 04       	movss  xmm0,DWORD PTR [eax+0x4]
+  df61b1:	f3 0f 11 44 24 38    	movss  DWORD PTR [esp+0x38],xmm0
+  df61b7:	f3 0f 10 44 24 1c    	movss  xmm0,DWORD PTR [esp+0x1c]
+  df61bd:	f3 0f 5c 44 24 14    	subss  xmm0,DWORD PTR [esp+0x14]
+  df61c3:	f3 0f 59 c1          	mulss  xmm0,xmm1
+  df61c7:	f3 0f 5c d8          	subss  xmm3,xmm0
+  df61cb:	f3 0f 10 44 24 20    	movss  xmm0,DWORD PTR [esp+0x20]
+  df61d1:	f3 0f 5c 44 24 18    	subss  xmm0,DWORD PTR [esp+0x18]
+  df61d7:	f3 0f 59 c1          	mulss  xmm0,xmm1
+  df61db:	f3 0f 5c d0          	subss  xmm2,xmm0
+  df61df:	f3 0f 11 5c 24 48    	movss  DWORD PTR [esp+0x48],xmm3
+  df61e5:	f3 0f 11 54 24 4c    	movss  DWORD PTR [esp+0x4c],xmm2
+  df61eb:	0f 84 90 00 00 00    	je     0xdf6281
+  df61f1:	f3 0f 10 44 24 30    	movss  xmm0,DWORD PTR [esp+0x30]
+  df61f7:	f3 0f 10 4c 24 2c    	movss  xmm1,DWORD PTR [esp+0x2c]
+  df61fd:	f3 0f 5c 44 24 28    	subss  xmm0,DWORD PTR [esp+0x28]
+  df6203:	f3 0f 5c 05 c8 0e 6a 	subss  xmm0,DWORD PTR ds:0x16a0ec8
+  df620a:	01
+  df620b:	0f 2f d0             	comiss xmm2,xmm0
+  df620e:	f3 0f 5c 4c 24 24    	subss  xmm1,DWORD PTR [esp+0x24]
+  df6214:	f3 0f 10 2d 98 0e 6a 	movss  xmm5,DWORD PTR ds:0x16a0e98
+  df621b:	01
+  df621c:	f3 0f 5c 0d a8 0e 6a 	subss  xmm1,DWORD PTR ds:0x16a0ea8
+  df6223:	01
+  df6224:	f3 0f 10 25 b8 0e 6a 	movss  xmm4,DWORD PTR ds:0x16a0eb8
+  df622b:	01
+  df622c:	f3 0f 11 6c 24 10    	movss  DWORD PTR [esp+0x10],xmm5
+  df6232:	f3 0f 11 4c 24 0c    	movss  DWORD PTR [esp+0xc],xmm1
+  df6238:	f3 0f 11 64 24 08    	movss  DWORD PTR [esp+0x8],xmm4
+  df623e:	f3 0f 11 44 24 50    	movss  DWORD PTR [esp+0x50],xmm0
+  df6244:	8d 44 24 50          	lea    eax,[esp+0x50]
+  df6248:	77 04                	ja     0xdf624e
+  df624a:	8d 44 24 4c          	lea    eax,[esp+0x4c]
+  df624e:	0f 2f 20             	comiss xmm4,DWORD PTR [eax]
+  df6251:	76 04                	jbe    0xdf6257
+  df6253:	8d 44 24 08          	lea    eax,[esp+0x8]
+  df6257:	0f 2f d9             	comiss xmm3,xmm1
+  df625a:	f3 0f 10 00          	movss  xmm0,DWORD PTR [eax]
+  df625e:	f3 0f 11 44 24 4c    	movss  DWORD PTR [esp+0x4c],xmm0
+  df6264:	8d 44 24 0c          	lea    eax,[esp+0xc]
+  df6268:	77 04                	ja     0xdf626e
+  df626a:	8d 44 24 48          	lea    eax,[esp+0x48]
+  df626e:	0f 2f 28             	comiss xmm5,DWORD PTR [eax]
+  df6271:	76 04                	jbe    0xdf6277
+  df6273:	8d 44 24 10          	lea    eax,[esp+0x10]
+  df6277:	f3 0f 10 00          	movss  xmm0,DWORD PTR [eax]
+  df627b:	f3 0f 11 44 24 48    	movss  DWORD PTR [esp+0x48],xmm0
+  df6281:	d9 44 24 34          	fld    DWORD PTR [esp+0x34]
+  df6285:	d9 44 24 48          	fld    DWORD PTR [esp+0x48]
+  df6289:	dc e9                	fsub   st(1),st
+  df628b:	d9 c9                	fxch   st(1)
+  df628d:	d9 e1                	fabs
+  df628f:	d9 05 1c 53 48 01    	fld    DWORD PTR ds:0x148531c
+  df6295:	d9 c9                	fxch   st(1)
+  df6297:	df f1                	fcomip st,st(1)
+  df6299:	d9 44 24 4c          	fld    DWORD PTR [esp+0x4c]
+  df629d:	77 32                	ja     0xdf62d1
+  df629f:	d9 44 24 38          	fld    DWORD PTR [esp+0x38]
+  df62a3:	d8 e1                	fsub   st,st(1)
+  df62a5:	d9 e1                	fabs
+  df62a7:	df f2                	fcomip st,st(2)
+  df62a9:	dd d9                	fstp   st(1)
+  df62ab:	77 26                	ja     0xdf62d3
+  df62ad:	dd d8                	fstp   st(0)
+  df62af:	dd d8                	fstp   st(0)
+  df62b1:	33 c0                	xor    eax,eax
+  df62b3:	85 f6                	test   esi,esi
+  df62b5:	5f                   	pop    edi
+  df62b6:	0f 95 c0             	setne  al
+  df62b9:	5e                   	pop    esi
+  df62ba:	83 c4 3c             	add    esp,0x3c
+  df62bd:	c2 0c 00             	ret    0xc
+  df62c0:	33 f6                	xor    esi,esi
+  df62c2:	33 c0                	xor    eax,eax
+  df62c4:	85 f6                	test   esi,esi
+  df62c6:	5f                   	pop    edi
+  df62c7:	0f 95 c0             	setne  al
+  df62ca:	5e                   	pop    esi
+  df62cb:	83 c4 3c             	add    esp,0x3c
+  df62ce:	c2 0c 00             	ret    0xc
+  df62d1:	dd d9                	fstp   st(1)
+  df62d3:	8b 16                	mov    edx,DWORD PTR [esi]
+  df62d5:	8b 42 64             	mov    eax,DWORD PTR [edx+0x64]
+  df62d8:	83 ec 08             	sub    esp,0x8
+  df62db:	d9 5c 24 04          	fstp   DWORD PTR [esp+0x4]
+  df62df:	8b ce                	mov    ecx,esi
+  df62e1:	d9 1c 24             	fstp   DWORD PTR [esp]
+  df62e4:	ff d0                	call   eax
+  df62e6:	33 c0                	xor    eax,eax
+  df62e8:	85 f6                	test   esi,esi
+  df62ea:	5f                   	pop    edi
+  df62eb:	0f 95 c0             	setne  al
+  df62ee:	5e                   	pop    esi
+  df62ef:	83 c4 3c             	add    esp,0x3c
+  df62f2:	c2 0c 00             	ret    0xc

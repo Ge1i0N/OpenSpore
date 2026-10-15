@@ -1,0 +1,56 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static instructions + real SPUI fixtures, not original runtime",
+  "layout": {
+    "name": "GGEGameStarUIv4",
+    "initializer": "0x136bc90",
+    "global": "0x16a0d08 (BSS)",
+    "instance": "0x21df01f2",
+    "root_control": "0x02e5a4a8"
+  },
+  "projection": "camera memory +C0..FC; w=m11*z+m7*y+m3*x+m15; xyz divided by w; X=window_width*(ndcX+1)*0.5, Y=(1-(ndcY+1)*0.5)*window_height; NO origin addition/cull",
+  "placement": "0xDF6110 centers root, clamps saved x/y using window extents and observed runtime margins; move iff abs(deltaX)>4 or abs(deltaY)>4",
+  "constants": {
+    "0x145be38": 0.5,
+    "0x1453740": 1.0,
+    "0x148531c": 4.0
+  },
+  "saved_insets_bss": [
+    "0x16a0e98 left",
+    "0x16a0eb8 top",
+    "0x16a0ea8 right",
+    "0x16a0ec8 bottom"
+  ],
+  "stage_icons": "saved only: stages1,2,4,5 => indices1,2,3,4; other stages0; controls0x026E0001/2",
+  "stage_caption": "saved and !observed global 0x16A0F88: table0x2B7A0311, stage5 key0x067735D5 else0x067735D4; control0x03C4925E",
+  "status3_flags": [
+    [
+      "0x060a1102",
+      1,
+      true
+    ],
+    [
+      "0x060a1103",
+      1,
+      true
+    ],
+    [
+      "0x0375408c",
+      2,
+      false
+    ],
+    [
+      "0x05944088",
+      1,
+      false
+    ]
+  ],
+  "host_limits": [
+    "missing camera/root/current/insets/global blocks relevant helper; no fabricated defaults",
+    "nonfinite/zero-w/invalid-extent/inverted-clamp rejection is host safety policy",
+    "no original x87/SSE bit-parity claim",
+    "negative w/offscreen output is not culled",
+    "configuration is required raw calls, not executed plugins/locale/flags",
+    "no per-entry mounting, original camera/effects/live scene or ready catalogue"
+  ]
+}

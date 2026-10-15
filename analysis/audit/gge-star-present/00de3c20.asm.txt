@@ -1,0 +1,42 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE3C20
+
+00de3c20  SUB ESP,0x1c
+00de3c23  CALL 0x0067dcd0
+00de3c28  MOV EDX,dword ptr [EAX]
+00de3c2a  MOV ECX,EAX
+00de3c2c  MOV EAX,dword ptr [EDX + 0x58]
+00de3c2f  CALL EAX
+00de3c31  MOV ECX,dword ptr [ESP + 0x20]
+00de3c35  PUSH ECX
+00de3c36  LEA EDX,[ESP + 0x4]
+00de3c3a  PUSH EDX
+00de3c3b  MOV ECX,EAX
+00de3c3d  CALL 0x007c4250
+00de3c42  LEA EAX,[ESP + 0xc]
+00de3c46  PUSH EAX
+00de3c47  CALL 0x00805f90
+00de3c4c  MOVSS XMM0,dword ptr [0x01453740]
+00de3c54  MOVSS XMM2,dword ptr [ESP + 0x18]
+00de3c5a  SUBSS XMM2,dword ptr [ESP + 0x10]
+00de3c60  MOVSS XMM1,dword ptr [ESP + 0x4]
+00de3c66  MOV ECX,dword ptr [ESP + 0x28]
+00de3c6a  MOV EDX,dword ptr [ESP + 0x2c]
+00de3c6e  ADDSS XMM1,XMM0
+00de3c72  MULSS XMM2,XMM1
+00de3c76  MOVSS XMM1,dword ptr [0x0145be38]
+00de3c7e  MULSS XMM2,XMM1
+00de3c82  MOVSS dword ptr [ECX],XMM2
+00de3c86  MOVSS XMM2,dword ptr [ESP + 0x8]
+00de3c8c  ADDSS XMM2,XMM0
+00de3c90  MULSS XMM2,XMM1
+00de3c94  MOVSS XMM1,dword ptr [ESP + 0x1c]
+00de3c9a  SUBSS XMM1,dword ptr [ESP + 0x14]
+00de3ca0  SUBSS XMM0,XMM2
+00de3ca4  MULSS XMM0,XMM1
+00de3ca8  MOVSS dword ptr [EDX],XMM0
+00de3cac  ADD ESP,0x20
+00de3caf  RET

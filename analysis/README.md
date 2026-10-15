@@ -21,6 +21,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | StarRecord post-load | [starsdb-postload](starsdb-postload.md) | corrected empty/BAD_DATA equality decision model; no canonical-name comparison, actual generation/profile/setter services disabled |
 | Saved-game file header | [save-header](save-header.md) | actual file version fields from explicit root resource, unsigned probe guard; not StarRecord saved versions or a complete live save producer |
 | PlanetRecord / saved adapter | [planet-record](planet-record.md) | sequential nested prefixes + six fields, counted planet selection and typed saved metadata; no native services, real corpus or live GGE scene |
+| GGE per-star presentation | [gge-star-present](gge-star-present.md) | projection/root placement/stage configuration calculations + real asset controls; no camera creation, mounting, effects or live scene |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |

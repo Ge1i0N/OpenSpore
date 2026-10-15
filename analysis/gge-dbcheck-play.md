@@ -110,6 +110,10 @@ Next: bind a real host MoviePlayer/no-movie contract and DBCheck backend without
 capability as success. Trace the game-list manager through `0xB3D3A0` and `0xBA6450`, then the
 camera/marker dependencies of `0xDF8300/0xDF6010`. No playable stage is completed by this pass.
 
+**Presentation follow-up:** [per-star calculations](gge-star-present.md) now port projection,
+centering/saved clamp and stage-configuration plans, verified against the real star-layout controls.
+They still require observed camera/window/margins and do not execute per-entry mounting or effects.
+
 **Catalogue follow-up:** [source trace and typed projection](gge-catalog.md) now establish
 saved-then-candidate output placement, source index namespaces, record fields and source population
 `0xBB61C0`. A bounded field builder is tested on controlled metadata; no live catalogue, stars.db

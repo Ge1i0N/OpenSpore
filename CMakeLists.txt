@@ -126,6 +126,7 @@ set(OS_SOURCES
   source/engine/save_header.cpp
   source/engine/planet_record.cpp
   source/engine/gge_saved_adapter.cpp
+  source/engine/gge_star_present.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
@@ -192,6 +193,9 @@ add_executable(planet_record_verify EXCLUDE_FROM_ALL tools/planet_record_verify.
 target_include_directories(planet_record_verify PRIVATE source)
 add_executable(planet_record_inspect EXCLUDE_FROM_ALL tools/planet_record_inspect.cpp source/engine/planet_record.cpp ${OS_SAVE_HEADER_SOURCES})
 target_include_directories(planet_record_inspect PRIVATE source)
+add_executable(gge_star_present_verify EXCLUDE_FROM_ALL tools/gge_star_present_verify.cpp source/engine/gge_star_present.cpp
+  source/engine/spui_binary.cpp source/engine/spui_geometry.cpp)
+target_include_directories(gge_star_present_verify PRIVATE source)
 add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_inspect PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
@@ -219,6 +223,7 @@ if(MSVC)
   target_compile_options(save_header_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(planet_record_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(planet_record_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(gge_star_present_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)

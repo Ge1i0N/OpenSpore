@@ -1,0 +1,20 @@
+[
+  {
+    "package": "PatchData.package",
+    "record": 19201,
+    "instance": "0x21df01f2",
+    "bytes": 24812,
+    "sha256": "23087d7ae97793db2e9c550fa0ffdd27f5b4738ea90d5f8b43c25ecac22f01f5",
+    "objects": 152,
+    "windows": 58
+  },
+  {
+    "package": "Spore_Graphics.package",
+    "record": 18791,
+    "instance": "0x21df01f2",
+    "bytes": 24812,
+    "sha256": "6fe95d3998eacbfcfd8747d152709a0e45650cff10d0d85f15f4b6393d96fe61",
+    "objects": 152,
+    "windows": 58
+  }
+]

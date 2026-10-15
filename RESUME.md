@@ -80,6 +80,12 @@ test with `-w -devDirs`; retain evidence and commit.
   `gge_saved_adapter.*` joins these decoded values + explicit HeaderProbe/terrain observations into
   typed saved metadata, no catalogue availability publication. `planet_record_verify`: 291 constructed
   checks, read-only CLI smoke. No real planet/save corpus or services. `analysis/planet-record.md`.
+- `engine/gge_star_present.*`: observed camera +0xC0 matrix -> project via 0x7C4250/0xDE3C20;
+  root 0x02E5A4A8 center/saved clamp and >4px deadband via0xDF6110; stage/caption/raw flag plans via
+  0xDF9200. `gge_star_present_verify`: 50 checks binding both real GGEGameStarUIv4 (0x21DF01F2),
+  each 152 objects/58 windows. Camera/window/root/current/margins/global flag Unknown blocks relevant
+  helper; no default identity/cull guessed. NO runtime camera creation/mount/effects, screen unchanged.
+  `analysis/gge-star-present.md` / `audit/gge-star-present/` retain evidence.
 
 ## Next, in order
 
@@ -99,8 +105,9 @@ test with `-w -devDirs`; retain evidence and commit.
     corrected/tested; actual generation/profile/property ports and save-stem producer remain open.
     Planet structural reader/selection + typed saved adapter are implemented; join context saved-list
     references with explicit planet/header/terrain sources, keeping all missing/unsupported statuses.
-    Then prioritize the visible boundary: 0xDF9200 per-entry GGEGameStarUIv4; 0xDF6010 -> 0xDE3C20
-    world-to-screen; 0xDF8300 marker effects, without forcing Intro/state2 or fake source readiness.
+    Visible boundary: math/config subset is now ported (gge_star_present); next recover camera/scene
+    creation and per-entry mount0xDF7690 / entry0xDF9200, then actual observed-geometry layout mutation
+    and draw/pick; 0xDF8300 effects. No forced Intro/state2 or fake source/camera readiness.
     Header word decoder is implemented but filesystem missing/error
     semantics and actual save-name producer are not. Frame/metadata and wire-shape
     decoding are bounded subsets; do not repeat BSS reads of `0x1689C50` or treat context values as
@@ -116,7 +123,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -131,6 +138,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\starsdb_postload_verify.exe
 .\build\Debug\save_header_verify.exe
 .\build\Debug\planet_record_verify.exe
+.\build\Debug\gge_star_present_verify.exe $fixtures
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

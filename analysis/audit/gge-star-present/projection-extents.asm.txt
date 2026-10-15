@@ -1,0 +1,41 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  de3c20:	83 ec 1c             	sub    esp,0x1c
+  de3c23:	e8 a8 a0 89 ff       	call   0x67dcd0
+  de3c28:	8b 10                	mov    edx,DWORD PTR [eax]
+  de3c2a:	8b c8                	mov    ecx,eax
+  de3c2c:	8b 42 58             	mov    eax,DWORD PTR [edx+0x58]
+  de3c2f:	ff d0                	call   eax
+  de3c31:	8b 4c 24 20          	mov    ecx,DWORD PTR [esp+0x20]
+  de3c35:	51                   	push   ecx
+  de3c36:	8d 54 24 04          	lea    edx,[esp+0x4]
+  de3c3a:	52                   	push   edx
+  de3c3b:	8b c8                	mov    ecx,eax
+  de3c3d:	e8 0e 06 9e ff       	call   0x7c4250
+  de3c42:	8d 44 24 0c          	lea    eax,[esp+0xc]
+  de3c46:	50                   	push   eax
+  de3c47:	e8 44 23 a2 ff       	call   0x805f90
+  de3c4c:	f3 0f 10 05 40 37 45 	movss  xmm0,DWORD PTR ds:0x1453740
+  de3c53:	01
+  de3c54:	f3 0f 10 54 24 18    	movss  xmm2,DWORD PTR [esp+0x18]
+  de3c5a:	f3 0f 5c 54 24 10    	subss  xmm2,DWORD PTR [esp+0x10]
+  de3c60:	f3 0f 10 4c 24 04    	movss  xmm1,DWORD PTR [esp+0x4]
+  de3c66:	8b 4c 24 28          	mov    ecx,DWORD PTR [esp+0x28]
+  de3c6a:	8b 54 24 2c          	mov    edx,DWORD PTR [esp+0x2c]
+  de3c6e:	f3 0f 58 c8          	addss  xmm1,xmm0
+  de3c72:	f3 0f 59 d1          	mulss  xmm2,xmm1
+  de3c76:	f3 0f 10 0d 38 be 45 	movss  xmm1,DWORD PTR ds:0x145be38
+  de3c7d:	01
+  de3c7e:	f3 0f 59 d1          	mulss  xmm2,xmm1
+  de3c82:	f3 0f 11 11          	movss  DWORD PTR [ecx],xmm2
+  de3c86:	f3 0f 10 54 24 08    	movss  xmm2,DWORD PTR [esp+0x8]
+  de3c8c:	f3 0f 58 d0          	addss  xmm2,xmm0
+  de3c90:	f3 0f 59 d1          	mulss  xmm2,xmm1
+  de3c94:	f3 0f 10 4c 24 1c    	movss  xmm1,DWORD PTR [esp+0x1c]
+  de3c9a:	f3 0f 5c 4c 24 14    	subss  xmm1,DWORD PTR [esp+0x14]
+  de3ca0:	f3 0f 5c c2          	subss  xmm0,xmm2
+  de3ca4:	f3 0f 59 c1          	mulss  xmm0,xmm1
+  de3ca8:	f3 0f 11 02          	movss  DWORD PTR [edx],xmm0
+  de3cac:	83 c4 20             	add    esp,0x20
+  de3caf:	c3                   	ret
