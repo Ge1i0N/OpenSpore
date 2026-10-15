@@ -55,7 +55,9 @@ stars.db `savedGameVersionOnSave/Generate` (`0x03F140B6/B7`) are not substitutio
 selects a filtered vector when star flags have `0x40`, excluding planets whose `+0x2C` bit `0x100`
 is set (`0xB8DAC0`). GGE then copies the **first selected planet's name at +0x18** into the string
 later used with `.spo` and the save probe. Therefore a StarRecord name alone is not a complete
-save-stem producer. Planet-record decoding/naming and catalogue discovery are not implemented here.
+save-stem producer. Follow-up [PlanetRecord subset](planet-record.md) now decodes the structural
+prefix/needed fields and selection into a typed saved adapter; actual naming/query services and
+catalogue discovery remain absent.
 
 Stage remains `StarRecord.mTechLevel +0x4C`, except star flags `0x80` force 0 in the GGE entry; new
 candidates use stage 5. Header `mGameMode` is not used to replace that stage. StarRecord timestamp

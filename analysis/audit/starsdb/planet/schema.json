@@ -1,0 +1,68 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "GA static instructions + constructed tests, no real save/planet corpus",
+  "reader": "0x00b8ebf0",
+  "writer": "0x00b8dcc0",
+  "initializer": "0x01322a30",
+  "descriptor": "0x0156b758 (runtime built)",
+  "prefix": [
+    "BE civilization_count; each civilization: BE city_count, cities*(28 raw bytes + frame), BE vehicle_count, vehicles*frame, civilization frame",
+    "BE tribe_count, tribes*frame",
+    "BE event_count, events*frame",
+    "BE commodity_node_count, nodes*frame",
+    "PlanetRecord field frame"
+  ],
+  "fields": [
+    {
+      "name": "mKey",
+      "id": "0x4164f8e",
+      "memory_offset": "0x184",
+      "wire": "BE u32"
+    },
+    {
+      "name": "name",
+      "id": "0x3d58b9a",
+      "memory_offset": "0x18",
+      "wire": "BE count + native UTF16LE"
+    },
+    {
+      "name": "type",
+      "id": "0x3d58b9e",
+      "memory_offset": "0x28",
+      "wire": "BE u32"
+    },
+    {
+      "name": "techLevel",
+      "id": "0x3d58b9f",
+      "memory_offset": "0x194",
+      "wire": "BE u32"
+    },
+    {
+      "name": "flags",
+      "id": "0x3d58b99",
+      "memory_offset": "0x2c",
+      "wire": "BE u32"
+    },
+    {
+      "name": "mGeneratedTerrainKey",
+      "id": "0x3d58b9b",
+      "memory_offset": "0x1a4",
+      "wire": "3 BE u32 into memory +8,+4,+0"
+    }
+  ],
+  "resource_key": "{instance=star.mKey+i*0x01000000 modulo2^32,type=0x05220cb8,group=1}, i<planetCount",
+  "selection": "if star.flags&0x40, exclude planets with flags&0x100; preserve order; first selected name +0x18 feeds GGE display/save stem",
+  "planet_bad_data": "0xB8EF9E..D4: equality with BAD_DATA calls name source 0x07e1310a; assign only nonempty generation result and !(flags&1). Empty raw name alone does NOT trigger that branch.",
+  "adapter": "decoded StarRecord + selected planet name + explicit file HeaderProbe + explicit terrain query result -> SavedGameMetadata, then existing GGE projector; no CatalogAvailability publication",
+  "host_policies": [
+    "4096 aggregate nested nodes/4096 UTF16 name units/64 MiB decoded planet batch",
+    "validate complete counted ResourceKey observations, missing/ambiguous resource is error",
+    "unknown fields and nested frame payloads opaque; no planet simulation validation",
+    "read_record reports tail; selected DBPF resource reader rejects unsupported tail",
+    "no selected planet blocks saved adapter; original shared-string carry behavior not ported"
+  ],
+  "coverage": [
+    "constructed planet DBPF only; resource-manager wrappers/version variants unverified on original saves",
+    "no actual name generation, terrain/profile service, candidate generation, save scan/path construction or GGE scene readiness"
+  ]
+}

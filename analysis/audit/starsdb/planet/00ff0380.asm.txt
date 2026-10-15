@@ -1,0 +1,45 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00FF0380
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00ff0380  SUB ESP,0xa14
+00ff0386  PUSH EBX
+00ff0387  PUSH EBP
+00ff0388  PUSH ESI
+00ff0389  MOV ESI,dword ptr [ESP + 0xa24]
+00ff0390  MOV EBP,ECX
+00ff0392  PUSH EDI
+00ff0393  LEA EDI,[EBP + 0x60]
+00ff0396  MOV EBX,0xe
+00ff039b  JMP 0x00ff03a0
+00ff03a0  MOV EAX,dword ptr [ESI]
+00ff03a2  MOV EDX,dword ptr [EAX + 0x20]
+00ff03a5  MOV ECX,ESI
+00ff03a7  CALL EDX
+00ff03a9  MOV EDX,dword ptr [EAX]
+00ff03ab  MOV ECX,EAX
+00ff03ad  MOV EAX,dword ptr [EDX + 0x18]
+00ff03b0  CALL EAX
+00ff03b2  PUSH 0x0
+00ff03b4  PUSH 0x1
+00ff03b6  PUSH EDI
+00ff03b7  PUSH EAX
+00ff03b8  CALL 0x0093a670
+00ff03bd  ADD ESP,0x10
+00ff03c0  ADD EDI,0x2
+00ff03c3  SUB EBX,0x1
+00ff03c6  JNZ 0x00ff03a0
+00ff03c8  PUSH 0x1a80d26
+00ff03cd  PUSH 0x15b5510
+00ff03d2  PUSH EBP
+00ff03d3  LEA ECX,[ESP + 0x1c]
+00ff03d7  CALL 0x00692f50
+00ff03dc  PUSH ESI
+00ff03dd  LEA ECX,[ESP + 0x14]
+00ff03e1  CALL 0x00693de0
+00ff03e6  POP EDI
+00ff03e7  POP ESI
+00ff03e8  POP EBP
+00ff03e9  POP EBX
+00ff03ea  ADD ESP,0xa14
+00ff03f0  RET 0x4

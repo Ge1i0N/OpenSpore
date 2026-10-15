@@ -98,8 +98,9 @@ this helper does not discover scripts/stars, generate names, decode saves or exe
 It is not ABI-compatible with the pointer-bearing 0xBC original and must not be `memcpy`ed to/from
 a stars.db file. No fake binary fixture is called original-runtime evidence.
 
-**No live catalogue producer is attached yet.** The helper is compiled into OpenSpore for the next
-integration step but only the verification target supplies controlled metadata today. GGE's existing
+**No live catalogue producer is attached yet.** A [saved metadata adapter](planet-record.md) now joins
+decoded StarRecord/planet name with explicit file-header and terrain observations; only verification
+supplies complete observations today. GGE's existing
 MoviePlayer/DBCheck wait is unchanged; no star UI, galaxy scene or game stage is made ready.
 
 ## Validation / continuation

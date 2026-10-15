@@ -1,0 +1,460 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x01322A30
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+void FUN_01322a30(void)
+
+{
+  int iVar1;
+  char **ppcVar2;
+  undefined4 *puVar3;
+  char *local_3c [6];
+  undefined4 local_24;
+  undefined4 local_20;
+  undefined1 *local_1c;
+  code *local_18;
+  code *local_14;
+  code *local_10;
+  code *local_c;
+  code *local_8;
+  code *local_4;
+
+  local_3c[0] = "mKey";
+  local_3c[1] = (char *)0x4164f8e;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = os_Serializer_uint32_write;
+  local_10 = (code *)&LAB_00693060;
+  local_c = FUN_00694ed0;
+  local_3c[2] = (char *)0x184;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00675c60;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b758;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "name";
+  local_3c[1] = (char *)0x3d58b9a;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_wstring_read;
+  local_14 = os_Serializer_wstring_write;
+  local_10 = FUN_00694c50;
+  local_c = FUN_00694be0;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00acbb00;
+  local_3c[2] = (char *)0x18;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b794;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "type";
+  local_3c[1] = (char *)0x3d58b9e;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = os_Serializer_uint32_write;
+  local_10 = (code *)&LAB_00692fb0;
+  local_c = FUN_00694eb0;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_0057cde0;
+  local_3c[2] = (char *)0x28;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b7d0;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "techLevel";
+  local_3c[1] = (char *)0x3d58b9f;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = os_Serializer_uint32_write;
+  local_10 = (code *)&LAB_00692fb0;
+  local_c = FUN_00694eb0;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_0057cde0;
+  local_3c[2] = (char *)0x194;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b80c;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "flags";
+  local_3c[1] = (char *)0x3d58b99;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = os_Serializer_uint32_write;
+  local_10 = (code *)&LAB_00693060;
+  local_c = FUN_00694ed0;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00675c60;
+  local_3c[2] = (char *)0x2c;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b848;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "orbit";
+  local_3c[1] = (char *)0x3f6d6ba;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = (code *)&LAB_00b8dc80;
+  local_14 = (code *)&LAB_00b8dca0;
+  local_10 = FUN_00c2e640;
+  local_c = (code *)&LAB_00692f70;
+  local_8 = (code *)&LAB_00b8dc60;
+  local_4 = FUN_00ac7f90;
+  local_3c[2] = (char *)0x30;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b884;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "rotationIsNull";
+  local_3c[1] = (char *)0x417a8ca;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = (code *)&LAB_00ac8690;
+  local_14 = (code *)&LAB_00ac86c0;
+  local_10 = (code *)&LAB_00693060;
+  local_c = FUN_00694f70;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_0057ce00;
+  local_3c[2] = (char *)0x98;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b8c0;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "rotationAxis";
+  local_3c[1] = (char *)0x417a8e9;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_vector3_read;
+  local_14 = os_Serializer_vector3_write;
+  local_10 = (code *)&LAB_006930c0;
+  local_c = FUN_00694ff0;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00acbae0;
+  local_3c[2] = (char *)0x9c;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b8fc;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "rotationPeriod";
+  local_3c[1] = (char *)0x417a902;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = (code *)&LAB_00ac8830;
+  local_10 = (code *)&LAB_00693080;
+  local_c = FUN_00694f90;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00acbac0;
+  local_3c[2] = (char *)0xa8;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b938;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "ringType";
+  local_3c[1] = (char *)0x3f6d514;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_StarRecord_planet_count_read;
+  local_14 = os_StarRecord_planet_count_write;
+  local_10 = (code *)&LAB_00693020;
+  local_c = FUN_00694f30;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00b8e990;
+  local_3c[2] = (char *)0xac;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b974;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "gasGiantType";
+  local_3c[1] = (char *)0x3f6d526;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_StarRecord_planet_count_read;
+  local_14 = os_StarRecord_planet_count_write;
+  local_10 = (code *)&LAB_00693020;
+  local_c = FUN_00694f30;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00b8e990;
+  local_3c[2] = (char *)0xad;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b9b0;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "mGeneratedTerrainKey";
+  local_3c[1] = (char *)0x3d58b9b;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_resource_key_read;
+  local_14 = os_Serializer_resource_key_write;
+  local_10 = (code *)&LAB_00693120;
+  local_c = FUN_00695060;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00ae56a0;
+  local_3c[2] = (char *)0x1a4;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156b9ec;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "mSpiceGen";
+  local_3c[1] = (char *)0x3d58b9c;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_resource_key_read;
+  local_14 = os_Serializer_resource_key_write;
+  local_10 = (code *)&LAB_00693120;
+  local_c = FUN_00695060;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00ae56a0;
+  local_3c[2] = (char *)0x198;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156ba28;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "atmosphereScore";
+  local_3c[1] = (char *)0x415fbbe;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = (code *)&LAB_00ac8830;
+  local_10 = (code *)&LAB_00693080;
+  local_c = FUN_00694f90;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00acbac0;
+  local_3c[2] = (char *)0xb0;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156ba64;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "temperatureScore";
+  local_3c[1] = (char *)0x415fbcd;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = (code *)&LAB_00ac8830;
+  local_10 = (code *)&LAB_00693080;
+  local_c = FUN_00694f90;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00acbac0;
+  local_3c[2] = (char *)0xb4;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156baa0;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "waterScore";
+  local_3c[1] = (char *)0x415fbdf;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = (code *)&LAB_00ac8830;
+  local_10 = (code *)&LAB_00693080;
+  local_c = FUN_00694f90;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00acbac0;
+  local_3c[2] = (char *)0xb8;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156badc;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "numDefenderUFOs";
+  local_3c[1] = (char *)0x5c19861;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = os_Serializer_uint32_write;
+  local_10 = (code *)&LAB_00692fb0;
+  local_c = FUN_00694eb0;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_0057cde0;
+  local_3c[2] = (char *)0x124;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156bb18;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "timeLastBuiltUFOs";
+  local_3c[1] = (char *)0x5c1a01b;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = (code *)&LAB_00ac8830;
+  local_10 = (code *)&LAB_00693080;
+  local_c = FUN_00694f90;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00acbac0;
+  local_3c[2] = (char *)0x128;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156bb54;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "timeCalledReinforcements";
+  local_3c[1] = (char *)0x5c1a027;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = os_Serializer_uint32_read;
+  local_14 = (code *)&LAB_00ac8830;
+  local_10 = (code *)&LAB_00693080;
+  local_c = FUN_00694f90;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_00acbac0;
+  local_3c[2] = (char *)0x12c;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156bb90;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "homeWorld";
+  local_3c[1] = (char *)0x5c1a028;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = (code *)&LAB_00ac8690;
+  local_14 = (code *)&LAB_00ac86c0;
+  local_10 = (code *)&LAB_00693060;
+  local_c = FUN_00694f70;
+  local_8 = FUN_00b1fb30;
+  local_4 = (code *)&LAB_0057ce00;
+  local_3c[2] = (char *)0x130;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156bbcc;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_8 = FUN_00b1fb30;
+  local_4 = FUN_00c6c680;
+  local_3c[0] = "plantSpecies";
+  local_3c[1] = (char *)0x4164f63;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = FUN_00c95910;
+  local_14 = FUN_00c6af60;
+  local_10 = FUN_00c2e640;
+  local_c = (code *)&LAB_00692f70;
+  local_3c[2] = (char *)0xbc;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156bc08;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_8 = FUN_00b1fb30;
+  local_4 = FUN_00c6c680;
+  local_3c[0] = "animalSpecies";
+  local_3c[1] = (char *)0x4164f8d;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = FUN_00c95910;
+  local_14 = FUN_00c6af60;
+  local_10 = FUN_00c2e640;
+  local_c = (code *)&LAB_00692f70;
+  local_3c[2] = (char *)0xd0;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156bc44;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  local_3c[0] = "mTerrainStampsToRemove";
+  local_3c[1] = (char *)0x4164f9e;
+  local_24 = 0;
+  local_20 = 0;
+  local_1c = &LAB_00692c60;
+  local_18 = FUN_00b04d60;
+  local_14 = FUN_00c76360;
+  local_10 = FUN_00c2e640;
+  local_c = (code *)&LAB_00692f70;
+  local_8 = FUN_00b1fb30;
+  local_4 = FUN_00eafe10;
+  local_3c[2] = (char *)0x148;
+  ppcVar2 = local_3c;
+  puVar3 = &DAT_0156bc80;
+  for (iVar1 = 0xf; iVar1 != 0; iVar1 = iVar1 + -1) {
+    *puVar3 = *ppcVar2;
+    ppcVar2 = ppcVar2 + 1;
+    puVar3 = puVar3 + 1;
+  }
+  return;
+}

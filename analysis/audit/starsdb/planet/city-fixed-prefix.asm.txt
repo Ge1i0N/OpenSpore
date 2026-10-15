@@ -1,0 +1,45 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  ff0380:	81 ec 14 0a 00 00    	sub    esp,0xa14
+  ff0386:	53                   	push   ebx
+  ff0387:	55                   	push   ebp
+  ff0388:	56                   	push   esi
+  ff0389:	8b b4 24 24 0a 00 00 	mov    esi,DWORD PTR [esp+0xa24]
+  ff0390:	8b e9                	mov    ebp,ecx
+  ff0392:	57                   	push   edi
+  ff0393:	8d 7d 60             	lea    edi,[ebp+0x60]
+  ff0396:	bb 0e 00 00 00       	mov    ebx,0xe
+  ff039b:	eb 03                	jmp    0xff03a0
+  ff039d:	8d 49 00             	lea    ecx,[ecx+0x0]
+  ff03a0:	8b 06                	mov    eax,DWORD PTR [esi]
+  ff03a2:	8b 50 20             	mov    edx,DWORD PTR [eax+0x20]
+  ff03a5:	8b ce                	mov    ecx,esi
+  ff03a7:	ff d2                	call   edx
+  ff03a9:	8b 10                	mov    edx,DWORD PTR [eax]
+  ff03ab:	8b c8                	mov    ecx,eax
+  ff03ad:	8b 42 18             	mov    eax,DWORD PTR [edx+0x18]
+  ff03b0:	ff d0                	call   eax
+  ff03b2:	6a 00                	push   0x0
+  ff03b4:	6a 01                	push   0x1
+  ff03b6:	57                   	push   edi
+  ff03b7:	50                   	push   eax
+  ff03b8:	e8 b3 a2 94 ff       	call   0x93a670
+  ff03bd:	83 c4 10             	add    esp,0x10
+  ff03c0:	83 c7 02             	add    edi,0x2
+  ff03c3:	83 eb 01             	sub    ebx,0x1
+  ff03c6:	75 d8                	jne    0xff03a0
+  ff03c8:	68 26 0d a8 01       	push   0x1a80d26
+  ff03cd:	68 10 55 5b 01       	push   0x15b5510
+  ff03d2:	55                   	push   ebp
+  ff03d3:	8d 4c 24 1c          	lea    ecx,[esp+0x1c]
+  ff03d7:	e8 74 2b 6a ff       	call   0x692f50
+  ff03dc:	56                   	push   esi
+  ff03dd:	8d 4c 24 14          	lea    ecx,[esp+0x14]
+  ff03e1:	e8 fa 39 6a ff       	call   0x693de0
+  ff03e6:	5f                   	pop    edi
+  ff03e7:	5e                   	pop    esi
+  ff03e8:	5d                   	pop    ebp
+  ff03e9:	5b                   	pop    ebx
+  ff03ea:	81 c4 14 0a 00 00    	add    esp,0xa14
+  ff03f0:	c2 04 00             	ret    0x4

@@ -1,0 +1,80 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00BBA900
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00bba900  PUSH ECX
+00bba901  PUSH EDI
+00bba902  MOV EDI,ECX
+00bba904  CALL 0x00bba7b0
+00bba909  MOV EAX,dword ptr [EDI + 0x5c]
+00bba90c  SHR EAX,0x6
+00bba90f  TEST AL,0x1
+00bba911  JNZ 0x00bba91c
+00bba913  LEA EAX,[EDI + 0x84]
+00bba919  POP EDI
+00bba91a  POP ECX
+00bba91b  RET
+00bba91c  MOV ECX,dword ptr [EDI + 0x9c]
+00bba922  MOV EDX,dword ptr [EDI + 0x98]
+00bba928  PUSH EBP
+00bba929  PUSH ESI
+00bba92a  LEA ESI,[EDI + 0x98]
+00bba930  PUSH ECX
+00bba931  PUSH EDX
+00bba932  MOV ECX,ESI
+00bba934  CALL 0x00e25bb0
+00bba939  MOV EAX,dword ptr [EDI + 0x88]
+00bba93f  SUB EAX,dword ptr [EDI + 0x84]
+00bba945  MOV ECX,ESI
+00bba947  SAR EAX,0x2
+00bba94a  PUSH EAX
+00bba94b  CALL 0x00d018f0
+00bba950  MOV EBP,dword ptr [EDI + 0x88]
+00bba956  SUB EBP,dword ptr [EDI + 0x84]
+00bba95c  MOV dword ptr [ESP + 0xc],0x0
+00bba964  SAR EBP,0x2
+00bba967  TEST EBP,EBP
+00bba969  JLE 0x00bba9cb
+00bba96b  PUSH EBX
+00bba96c  LEA ESP,[ESP]
+00bba970  MOV EBX,dword ptr [ESP + 0x10]
+00bba974  MOV ECX,dword ptr [EDI + 0x84]
+00bba97a  ADD EBX,EBX
+00bba97c  ADD EBX,EBX
+00bba97e  MOV ECX,dword ptr [EBX + ECX*0x1]
+00bba981  CALL 0x00b8dac0
+00bba986  TEST AL,AL
+00bba988  JNZ 0x00bba9bd
+00bba98a  MOV ECX,dword ptr [EDI + 0x84]
+00bba990  MOV EAX,dword ptr [ESI + 0x4]
+00bba993  ADD ECX,EBX
+00bba995  CMP EAX,dword ptr [ESI + 0x8]
+00bba998  JNC 0x00bba9b4
+00bba99a  LEA EDX,[EAX + 0x4]
+00bba99d  MOV dword ptr [ESI + 0x4],EDX
+00bba9a0  TEST EAX,EAX
+00bba9a2  JZ 0x00bba9bd
+00bba9a4  MOV ECX,dword ptr [ECX]
+00bba9a6  MOV dword ptr [EAX],ECX
+00bba9a8  TEST ECX,ECX
+00bba9aa  JZ 0x00bba9bd
+00bba9ac  MOV EAX,dword ptr [ECX]
+00bba9ae  MOV EDX,dword ptr [EAX]
+00bba9b0  CALL EDX
+00bba9b2  JMP 0x00bba9bd
+00bba9b4  PUSH ECX
+00bba9b5  PUSH EAX
+00bba9b6  MOV ECX,ESI
+00bba9b8  CALL 0x00aea550
+00bba9bd  MOV EAX,dword ptr [ESP + 0x10]
+00bba9c1  INC EAX
+00bba9c2  CMP EAX,EBP
+00bba9c4  MOV dword ptr [ESP + 0x10],EAX
+00bba9c8  JL 0x00bba970
+00bba9ca  POP EBX
+00bba9cb  MOV EAX,ESI
+00bba9cd  POP ESI
+00bba9ce  POP EBP
+00bba9cf  POP EDI
+00bba9d0  POP ECX
+00bba9d1  RET

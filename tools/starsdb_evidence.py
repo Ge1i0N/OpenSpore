@@ -29,6 +29,8 @@ DBPF_ADDRESSES=(0x693ca0,0x6938d0,0x69e090,0x69e260,0x8da6f0,0x8db310,0x8dc1c0,
 POSTLOAD_ADDRESSES=(0xbba6e0,0x401090,0x4df5c0,0xc8c180,0xbba620,0xdf7d20,0xdf7f30)
 SAVE_HEADER_ADDRESSES=(0x131b210,0xb27580,0xb26880,0xbba7b0,0xbba900,0xb8dac0,0xdf7f30,
                        0x4df740,0x4da400,0xc85390,0x801a60)
+PLANET_ADDRESSES=(0x1322a30,0xb8ebf0,0xb8dcc0,0xff2d30,0xff0380,0xff0440,0xbc33a0,
+                  0xbfe410,0xff0cd0,0xff0300,0xbba7b0,0xbba900,0xb8dac0,0xba6300,0xdf7f30)
 
 
 def main():
@@ -36,7 +38,9 @@ def main():
     pyghidra.start(verbose=False)
     from pyghidra import open_project,program_context
     from ghidra.app.decompiler import DecompInterface
-    if '--save-header' in sys.argv:
+    if '--planet' in sys.argv:
+        dest,addresses=DEST/'planet',PLANET_ADDRESSES
+    elif '--save-header' in sys.argv:
         dest,addresses=DEST/'save-header',SAVE_HEADER_ADDRESSES
     elif '--postload' in sys.argv:
         dest,addresses=DEST/'postload',POSTLOAD_ADDRESSES
@@ -270,9 +274,43 @@ def static_save_header():
     print('retained file-header schema, unsigned probe guard and separate planet/save-name boundary')
 
 
+def static_planet():
+    from tools.pe import PE
+    from tools.find_imm import disasm
+    pe=PE(); dest=DEST/'planet'; dest.mkdir(parents=True,exist_ok=True)
+    digest=hashlib.sha256(pe.raw).hexdigest()
+    value={'oracle_sha256':digest,'authority':'GA static instructions + constructed tests, no real save/planet corpus',
+           'reader':'0x00b8ebf0','writer':'0x00b8dcc0','initializer':'0x01322a30','descriptor':'0x0156b758 (runtime built)',
+           'prefix':['BE civilization_count; each civilization: BE city_count, cities*(28 raw bytes + frame), BE vehicle_count, vehicles*frame, civilization frame',
+                     'BE tribe_count, tribes*frame','BE event_count, events*frame',
+                     'BE commodity_node_count, nodes*frame','PlanetRecord field frame'],
+           'fields':[{'name':n,'id':hex(i),'memory_offset':hex(o),'wire':w} for n,i,o,w in [
+               ('mKey',0x04164f8e,0x184,'BE u32'),('name',0x03d58b9a,0x18,'BE count + native UTF16LE'),
+               ('type',0x03d58b9e,0x28,'BE u32'),('techLevel',0x03d58b9f,0x194,'BE u32'),
+               ('flags',0x03d58b99,0x2c,'BE u32'),('mGeneratedTerrainKey',0x03d58b9b,0x1a4,'3 BE u32 into memory +8,+4,+0')]],
+           'resource_key':'{instance=star.mKey+i*0x01000000 modulo2^32,type=0x05220cb8,group=1}, i<planetCount',
+           'selection':'if star.flags&0x40, exclude planets with flags&0x100; preserve order; first selected name +0x18 feeds GGE display/save stem',
+           'planet_bad_data':'0xB8EF9E..D4: equality with BAD_DATA calls name source 0x07e1310a; assign only nonempty generation result and !(flags&1). Empty raw name alone does NOT trigger that branch.',
+           'adapter':'decoded StarRecord + selected planet name + explicit file HeaderProbe + explicit terrain query result -> SavedGameMetadata, then existing GGE projector; no CatalogAvailability publication',
+           'host_policies':['4096 aggregate nested nodes/4096 UTF16 name units/64 MiB decoded planet batch',
+                            'validate complete counted ResourceKey observations, missing/ambiguous resource is error',
+                            'unknown fields and nested frame payloads opaque; no planet simulation validation',
+                            'read_record reports tail; selected DBPF resource reader rejects unsupported tail',
+                            'no selected planet blocks saved adapter; original shared-string carry behavior not ported'],
+           'coverage':['constructed planet DBPF only; resource-manager wrappers/version variants unverified on original saves',
+                       'no actual name generation, terrain/profile service, candidate generation, save scan/path construction or GGE scene readiness']}
+    (dest/'schema.json').write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8',newline='\n')
+    for name,lo,hi in [('planet-name-assignment',0xb8ef66,0xb8efd4),('city-fixed-prefix',0xff0380,0xff03f3),
+                       ('resource-key-materialization',0xbba806,0xbba85e)]:
+        (dest/(name+'.asm.txt')).write_text('GA-unpacked SHA-256: %s\nBounded static objdump.\n\n'%digest+
+            '\n'.join(disasm(pe,lo,hi))+'\n',encoding='utf-8',newline='\n')
+    print('retained planet prefix/schema, first-selected save-name and explicit adapter boundaries')
+
+
 if __name__=='__main__':
     if '--static' in sys.argv:
-        if '--save-header' in sys.argv: static_save_header()
+        if '--planet' in sys.argv: static_planet()
+        elif '--save-header' in sys.argv: static_save_header()
         elif '--postload' in sys.argv: static_postload()
         elif '--dbpf' in sys.argv: static_dbpf()
         elif '--context' in sys.argv: static_context()

@@ -1,0 +1,16 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00BFE410
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+00bfe410  SUB ESP,0xa14
+00bfe416  PUSH 0x1a80d26
+00bfe41b  PUSH 0x1570e20
+00bfe420  PUSH ECX
+00bfe421  LEA ECX,[ESP + 0xc]
+00bfe425  CALL 0x00692f50
+00bfe42a  MOV EAX,dword ptr [ESP + 0xa18]
+00bfe431  PUSH EAX
+00bfe432  LEA ECX,[ESP + 0x4]
+00bfe436  CALL 0x00693de0
+00bfe43b  ADD ESP,0xa14
+00bfe441  RET 0x4

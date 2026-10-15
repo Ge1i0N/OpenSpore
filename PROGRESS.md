@@ -32,7 +32,8 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | stars.db context subset | explicit decoded index/class streams, envelope CRC and class-scoped token lookup into StarRecord fields | no full graph/fixups or real-save corpus; not runtime catalogue availability |
 | stars.db physical subset | one explicit read-only DBPF 3.0, exact root/index/class keys, raw/RefPack decode into structural readers | constructed fixtures only; other versions, real-save compatibility, fixups and live producer unverified |
 | StarRecord post-load subset | corrected empty/BAD_DATA equality + ordered generation/setter requirements, profile Unknown/Found/Missing | no canonical-name/cache-purpose inference; real generation/profile/notification services and live producer missing |
-| Save file-header subset | first root frame, actual major/minor/mode/timestamp/planet key; unsigned major>=33 probe | explicit DBPF only; map/snapshot/root tail opaque, no save discovery/planet-name producer/real-save corpus |
+| Save file-header subset | first root frame, actual major/minor/mode/timestamp/planet key; unsigned major>=33 probe | explicit DBPF only; map/snapshot/root tail opaque, no save discovery/real-save corpus; planet-name subset below |
+| PlanetRecord / saved adapter | nested prefixes/six fields, counted ResourceKeys/filtering and first selected name → typed saved metadata | controlled generation/terrain/header observations; no discovery, real corpus, candidate producer or GGE scene |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
 
@@ -60,6 +61,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | Serializer DBPF adapter | 266 constructed checks (270 with optional explicit-path smoke); exact keys, rejection/atomicity, raw/RefPack and full structural chain | `starsdb_dbpf_verify`, `starsdb_dbpf_inspect`; [evidence/limits](analysis/starsdb-dbpf.md) |
 | StarRecord post-load decisions | 15 corrected checks; BAD_DATA equality, Unknown distinct from empty, ordered calls and no mutation | `starsdb_postload_verify`; [correction/evidence](analysis/starsdb-postload.md) |
 | Save file-header / GGE boundary | 116 constructed checks: exact field IDs, unsigned guard, versions not identities, explicit DBPF and typed predicate integration | `save_header_verify`, `save_header_inspect`; [evidence/limits](analysis/save-header.md) |
+| Planet selection / saved adapter | 291 constructed checks: prefix boundaries, Unknown/order/flags, exact DBPF keys, decoded fields → typed GGE projection | `planet_record_verify`, `planet_record_inspect`; [evidence/limits](analysis/planet-record.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

@@ -98,7 +98,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect
 ```
 
 Расположение данных рядом с собранным executable:
@@ -151,6 +151,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\starsdb_dbpf_verify.exe
 .\build\Debug\starsdb_postload_verify.exe
 .\build\Debug\save_header_verify.exe
+.\build\Debug\planet_record_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
@@ -182,6 +183,9 @@ Read-only [DBPF-адаптер](analysis/starsdb-dbpf.md) подключает �
 `mFileVersionMajor/Minor` из явно выбранного DBPF: **116** контролируемых проверок, без поиска сохранений.
 Post-load модель исправлена: **15** проверок ветки пустого имени / маркера `BAD_DATA`; прежнее
 описание «canonical-name mismatch cleanup» было ошибочным. Генератор и сервисы пока не выполняются.
+[Planet-record reader и saved adapter](analysis/planet-record.md) связывают имя выбранной планеты,
+поля звезды и header/terrain-наблюдения с типизированной GGE-записью: **291** контролируемая проверка.
+Это ещё не галактика на экране: camera/effects/per-star UI и реальные источники не подключены.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI

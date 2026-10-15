@@ -1,0 +1,50 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00FF0CD0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
+
+void __thiscall FUN_00ff0cd0(int param_1,int *param_2)
+
+{
+  int *piVar1;
+  undefined4 uVar2;
+  int iVar3;
+  int iVar4;
+  int aiStack_142c [1290];
+  undefined4 uStack_4;
+
+  uStack_4 = 0xff0cda;
+  FUN_00692f50(param_1,&DAT_015b59c0,0x1a80d26);
+  iVar3 = *(int *)(param_1 + 0x40);
+  iVar4 = *(int *)(param_1 + 0x3c);
+  piVar1 = (int *)(**(code **)(*param_2 + 0x20))();
+  aiStack_142c[0] = iVar3 - iVar4 >> 2;
+  uVar2 = (**(code **)(*piVar1 + 0x18))();
+  FUN_0093a9e0(uVar2,aiStack_142c,1,0);
+  iVar4 = *(int *)(param_1 + 0x40) - *(int *)(param_1 + 0x3c) >> 2;
+  iVar3 = 0;
+  if (0 < iVar4) {
+    do {
+      FUN_00ff0300(param_2);
+      iVar3 = iVar3 + 1;
+    } while (iVar3 < iVar4);
+  }
+  iVar3 = *(int *)(param_1 + 0x2c);
+  iVar4 = *(int *)(param_1 + 0x28);
+  piVar1 = (int *)(**(code **)(*param_2 + 0x20))();
+  aiStack_142c[0] = iVar3 - iVar4 >> 2;
+  uVar2 = (**(code **)(*piVar1 + 0x18))();
+  FUN_0093a9e0(uVar2,aiStack_142c,1,0);
+  iVar4 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
+  iVar3 = 0;
+  if (0 < iVar4) {
+    do {
+      FUN_00692f50(*(undefined4 *)(*(int *)(param_1 + 0x28) + iVar3 * 4),&DAT_015b4f28,0x1a80d26);
+      FUN_006928c0(param_2);
+      iVar3 = iVar3 + 1;
+    } while (iVar3 < iVar4);
+  }
+  FUN_006928c0(param_2);
+  return;
+}

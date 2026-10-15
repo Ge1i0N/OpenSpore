@@ -72,6 +72,14 @@ test with `-w -devDirs`; retain evidence and commit.
   `save_header_inspect` reads caller-selected file only. Timestamp/mode/planet key decoded; map/snapshot/
   root tail remain opaque; missing version fields block probe rather than become false/zero.
   `analysis/save-header.md` / `audit/starsdb/save-header/` retain evidence and planet-name boundary.
+- `engine/planet_record.*` walks the real structural prefix (civs/cities/vehicles/tribes/events/nodes)
+  before six PlanetRecord fields; city has 28 raw bytes before its frame. Exact counted keys from
+  star.mKey+i*0x01000000/type0x05220CB8/group1; star flags0x40 filters planet flags0x100; first selected
+  planet name is saved display/save-stem. Planet BAD_DATA generation differs from StarRecord (no
+  empty-name branch; only assigns nonempty generation result when !(flags&1)).
+  `gge_saved_adapter.*` joins these decoded values + explicit HeaderProbe/terrain observations into
+  typed saved metadata, no catalogue availability publication. `planet_record_verify`: 291 constructed
+  checks, read-only CLI smoke. No real planet/save corpus or services. `analysis/planet-record.md`.
 
 ## Next, in order
 
@@ -89,9 +97,11 @@ test with `-w -devDirs`; retain evidence and commit.
     then grid/record graph and galaxy/star-grid
     generation, before attaching the typed catalog builder to live UI. Post-load observation subset is
     corrected/tested; actual generation/profile/property ports and save-stem producer remain open.
-    Recover planet reader 0xB8EFxx / descriptor 0x156B758: 0xBBA7B0 keys star.mKey+i*0x01000000,
-    type 0x05220CB8/group1; 0xBBA900 selects/filter planets; GGE save stem is first selected planet name
-    +0x18, not simply StarRecord name. Header word decoder is implemented but filesystem missing/error
+    Planet structural reader/selection + typed saved adapter are implemented; join context saved-list
+    references with explicit planet/header/terrain sources, keeping all missing/unsupported statuses.
+    Then prioritize the visible boundary: 0xDF9200 per-entry GGEGameStarUIv4; 0xDF6010 -> 0xDE3C20
+    world-to-screen; 0xDF8300 marker effects, without forcing Intro/state2 or fake source readiness.
+    Header word decoder is implemented but filesystem missing/error
     semantics and actual save-name producer are not. Frame/metadata and wire-shape
     decoding are bounded subsets; do not repeat BSS reads of `0x1689C50` or treat context values as
     coordinates.
@@ -106,7 +116,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -120,6 +130,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\starsdb_dbpf_verify.exe
 .\build\Debug\starsdb_postload_verify.exe
 .\build\Debug\save_header_verify.exe
+.\build\Debug\planet_record_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture

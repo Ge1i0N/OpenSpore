@@ -1,0 +1,147 @@
+# PlanetRecord → saved-game name → typed GGE metadata
+
+Reviewed **2026-10-15**. Static GA-unpacked SHA-256
+`086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
+Constructed fixtures only; **no original planet-record/save corpus or original runtime replay**.
+
+## What this closes — and what is still invisible
+
+`engine/planet_record.*` now structurally reads PlanetRecord payloads, selects the first eligible
+planet in original order, and obtains the name used by the saved GGE entry. `engine/gge_saved_adapter.*`
+joins decoded StarRecord fields, planet observations, a decoded file-header probe and **explicit**
+terrain-query observations into the existing typed saved metadata. Tests send that metadata into
+the actual [catalogue projector](gge-catalog.md).
+
+This is a producer **subset**, not runtime discovery or a complete catalogue. It does not publish
+`CatalogAvailability`, generate candidates/names, query live services, create a camera, markers,
+per-star UI or buttons. GGE on screen is still the diagnostic primary layout. No artwork-only
+starfield or fake saved game is used to claim a working galaxy.
+
+The next visible path is already traced: `0xDF9200` creates per-entry `GGEGameStarUIv4`, while
+`0xDF6010 → 0xDE3C20` projects world positions; `0xDF8300` creates marker effects. These require
+scene/camera/effect services and a genuinely available catalogue. Do not force serialized hidden
+panels visible as a substitute. [State-2 dependencies](gge-dbcheck-play.md) remain authoritative.
+
+## Prefix before the PlanetRecord field frame
+
+[`0xB8EBF0`](audit/starsdb/planet/00b8ebf0.asm.txt), its writer
+[`0xB8DCC0`](audit/starsdb/planet/00b8dcc0.asm.txt), and nested readers establish this exact order:
+
+```text
+BE civilization_count
+  each civilization:
+    BE city_count
+      each city: 14 BE u16 words (28 bytes), then a field frame
+    BE vehicle_count
+      each vehicle: field frame
+    civilization field frame
+BE tribe_count; tribe_count field frames
+BE event_count; event_count field frames
+BE commodity_node_count; commodity_node_count field frames
+PlanetRecord field frame
+```
+
+The city prefix comes from `0xFF0380`; `0xFF2D30` supplies the two civilization collections.
+`0xFF0440`, `0xBC33A0`, `0xBFE410` dispatch the remaining standalone frames. The host walks these
+payloads **sequentially**, bounds each frame and leaves its field contents opaque. It does not
+validate a civilization/city simulation or reconstruct native pointers. Magic bytes in the city
+prefix or an unknown field cannot redirect the reader.
+
+Host limits are 4096 aggregate collection nodes (including cities/vehicles), 128 fields per frame
+from the shared bounded parser, 4096 UTF-16 units per planet name, and 64 MiB decoded bytes per
+selected planet batch. These are host allocation policies, not GA world quotas. Direct `read_record`
+reports an unvalidated tail; the DBPF batch/selection boundary rejects such tails. Failure keeps
+the caller's output unchanged even if earlier records were valid.
+
+## Decoded PlanetRecord field subset
+
+Initializer [`0x1322A30`](audit/starsdb/planet/01322a30.asm.txt) constructs descriptor `0x156B758`.
+Six fields needed here are decoded; other properties remain bounded opaque spans:
+
+| Field | ID | Runtime offset | Serialized payload |
+|---|---|---|---|
+| `mKey` | `0x04164F8E` | `+0x184` | BE u32 |
+| `name` | `0x03D58B9A` | `+0x18` | BE count + native UTF-16LE units |
+| `type` | `0x03D58B9E` | `+0x28` | BE u32 |
+| `techLevel` | `0x03D58B9F` | `+0x194` | BE u32 |
+| `flags` | `0x03D58B99` | `+0x2C` | BE u32 |
+| `mGeneratedTerrainKey` | `0x03D58B9B` | `+0x1A4` | three BE words into memory +8,+4,+0 |
+
+Fields remain optional until observed; zero-size fields do not establish constructor defaults.
+Last nonzero duplicate wins. Names preserve all UTF-16 units, including embedded zeroes; this is
+not path validation or permission to use that raw text as a filesystem path.
+
+## Counted resource identity and planet selection
+
+`0xBBA7B0` lazily materializes planet records using
+`{instance=star.mKey + i*0x01000000 (uint32 wrap), type=0x05220CB8, group=1}` for `i < planetCount`.
+The factory [`0xBA6300`](audit/starsdb/planet/00ba6300.asm.txt) assigns this resource identity separately
+from the serialized planet `mKey`. Neither is the context's pointer-shaped object token.
+
+`read_selected_records` reads **one explicitly selected DBPF** via exact keys; no fallback/merge,
+resource-manager wrapper emulation or profile scan. This adapter is tested on constructed DBPFs;
+its physical transport/version coverage is not yet verified on original planetRecords packages.
+
+`0xBBA900` uses the unfiltered list unless star flags include `0x40`. With that flag it excludes
+planets whose `flags +0x2C` include `0x100` (`0xB8DAC0`). Order is retained; GGE `0xDF7F30` takes the
+**first selected planet name +0x18** as the display/save-stem string. This is not the StarRecord name
+and planet tech level does not replace StarRecord stage.
+
+The host requires a complete counted vector with matching resource identities. Unknown later
+filter flags cannot be ignored just because an earlier selected name exists. Explicit zero/all-filtered
+selection is represented separately from Unknown. The saved metadata adapter blocks no-selection
+cases: original shared-string carry behavior in GGE's reused scratch record is not reproduced as
+an invented empty save name.
+
+## Planet BAD_DATA rule differs from StarRecord
+
+After field loading, [`0xB8EF9E..D4`](audit/starsdb/planet/planet-name-assignment.asm.txt) calls name source
+`0x07E1310A` only when the zero-terminated name equals `BAD_DATA`. It assigns the generated result
+only if that result is nonempty **and flags bit0 is clear**. A serialized empty planet name does not
+by itself enter this branch; do not apply [the StarRecord empty-name rule](starsdb-postload.md) here.
+
+The host never calls the generator. For an assignable selected BAD_DATA name, a supplied generation
+observation is required; Unknown blocks selection, observed empty keeps BAD_DATA. If bit0 prevents
+assignment, BAD_DATA remains the selected value without inventing a generator output. No original
+record is mutated and no setter/notification runs.
+
+## Typed saved adapter
+
+`adapt_saved_metadata` requires observed StarRecord key, finite raw position, flags, stage (unless
+`0x80` overrides it), selected planet name, [file-header probe](save-header.md), and terrain status:
+
+- **Unknown** (including invalid enum) blocks the adapter.
+- **QueryFailed** means an actual observed property-list failure; the GGE saved placeholder remains.
+- **Loaded** requires an explicit image-property result, including zero for observed missing/wrong type.
+
+The adapter sets both saved display name and save-stem from the selected planet name. It does not
+construct `.spo` paths, open derived filenames, equate header versions with identity or attach a live
+producer. The test's explicit catalogue Available observations belong only to controlled verification.
+
+## Checks / reproduction
+
+`planet_record_verify`: **291 constructed checks PASS**. Literal independent name fixture, all
+prefix/field truncations, every collection route, city prefix and exact node cap, field/text bounds,
+duplicate fields, no magic scanning, counted resource identity/wrap, missing/duplicate DBPF entries,
+filter/order/Unknown distinctions, BAD_DATA rules, atomic rejection and decoded fields → typed
+saved adapter → real GGE projector. Optional new path writes only a labelled synthetic DBPF and
+refuses an existing destination. CLI smoke selects index 1 / `Planet Save` after filtering index 0.
+
+```powershell
+cmake --build build --config Debug --target OpenSpore planet_record_verify planet_record_inspect
+.\build\Debug\planet_record_verify.exe
+# Caller supplies an explicit planet-record DBPF and observed star key/count/flags, not a profile.
+.\build\Debug\planet_record_inspect.exe <explicit-planet-DBPF> <star-key-hex> <count-decimal> <flags-hex>
+refs/ghidra/venv/Scripts/python.exe tools/starsdb_evidence.py --planet
+python tools/starsdb_evidence.py --static --planet
+```
+
+Evidence: 15 focused functions (C + instructions), three extracts and [schema notes](audit/starsdb/planet/schema.json).
+Next: join saved-list context references with selected planet resources and explicit observations,
+then focus on state-2 camera/per-entry UI boundaries. Real sources, candidate generation and live
+services must remain explicit prerequisites rather than synthetic data or forced completion.
+
+Final Debug x86 build warning-free; all parser/catalogue/DBCheck/Intro/binding/SPUI/package/scissor
+regressions PASS, six Python tests and 49 maintained Markdown link checks PASS. Main → GGE and
+launcher → CreatureEditor with `-w -devDirs` both exit 0, aborts/asserts 0; the MoviePlayer-Unknown
+gate and diagnostic GGE appearance are unchanged. These checks do not demonstrate a rendered galaxy.

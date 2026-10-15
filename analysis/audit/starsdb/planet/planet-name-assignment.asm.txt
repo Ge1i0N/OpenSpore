@@ -1,0 +1,43 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  b8ef66:	8b 0d 94 ac 51 01    	mov    ecx,DWORD PTR ds:0x151ac94
+  b8ef6c:	8d 77 18             	lea    esi,[edi+0x18]
+  b8ef6f:	8a d8                	mov    bl,al
+  b8ef71:	8b 06                	mov    eax,DWORD PTR [esi]
+  b8ef73:	66 8b 10             	mov    dx,WORD PTR [eax]
+  b8ef76:	66 3b 11             	cmp    dx,WORD PTR [ecx]
+  b8ef79:	75 1e                	jne    0xb8ef99
+  b8ef7b:	66 85 d2             	test   dx,dx
+  b8ef7e:	74 15                	je     0xb8ef95
+  b8ef80:	66 8b 50 02          	mov    dx,WORD PTR [eax+0x2]
+  b8ef84:	66 3b 51 02          	cmp    dx,WORD PTR [ecx+0x2]
+  b8ef88:	75 0f                	jne    0xb8ef99
+  b8ef8a:	83 c0 04             	add    eax,0x4
+  b8ef8d:	83 c1 04             	add    ecx,0x4
+  b8ef90:	66 85 d2             	test   dx,dx
+  b8ef93:	75 de                	jne    0xb8ef73
+  b8ef95:	33 c0                	xor    eax,eax
+  b8ef97:	eb 05                	jmp    0xb8ef9e
+  b8ef99:	1b c0                	sbb    eax,eax
+  b8ef9b:	83 d8 ff             	sbb    eax,0xffffffff
+  b8ef9e:	85 c0                	test   eax,eax
+  b8efa0:	75 51                	jne    0xb8eff3
+  b8efa2:	8d 44 24 48          	lea    eax,[esp+0x48]
+  b8efa6:	68 0a 31 e1 07       	push   0x7e1310a
+  b8efab:	50                   	push   eax
+  b8efac:	e8 ef 20 87 ff       	call   0x4010a0
+  b8efb1:	8b c8                	mov    ecx,eax
+  b8efb3:	e8 48 e0 a5 ff       	call   0x5ed000
+  b8efb8:	8b 48 04             	mov    ecx,DWORD PTR [eax+0x4]
+  b8efbb:	8b 10                	mov    edx,DWORD PTR [eax]
+  b8efbd:	3b d1                	cmp    edx,ecx
+  b8efbf:	74 13                	je     0xb8efd4
+  b8efc1:	f6 47 2c 01          	test   BYTE PTR [edi+0x2c],0x1
+  b8efc5:	75 0d                	jne    0xb8efd4
+  b8efc7:	3b c6                	cmp    eax,esi
+  b8efc9:	74 09                	je     0xb8efd4
+  b8efcb:	51                   	push   ecx
+  b8efcc:	52                   	push   edx
+  b8efcd:	8b ce                	mov    ecx,esi
+  b8efcf:	e8 bc 46 89 ff       	call   0x423690

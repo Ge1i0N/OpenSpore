@@ -1,0 +1,33 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  bba806:	8b 73 70             	mov    esi,DWORD PTR [ebx+0x70]
+  bba809:	03 74 24 14          	add    esi,DWORD PTR [esp+0x14]
+  bba80d:	89 44 24 10          	mov    DWORD PTR [esp+0x10],eax
+  bba811:	e8 7a 34 ac ff       	call   0x67dc90
+  bba816:	8b 4c 24 10          	mov    ecx,DWORD PTR [esp+0x10]
+  bba81a:	8b f8                	mov    edi,eax
+  bba81c:	85 c9                	test   ecx,ecx
+  bba81e:	74 0f                	je     0xbba82f
+  bba820:	c7 44 24 10 00 00 00 	mov    DWORD PTR [esp+0x10],0x0
+  bba827:	00
+  bba828:	8b 11                	mov    edx,DWORD PTR [ecx]
+  bba82a:	8b 42 04             	mov    eax,DWORD PTR [edx+0x4]
+  bba82d:	ff d0                	call   eax
+  bba82f:	6a 00                	push   0x0
+  bba831:	6a 00                	push   0x0
+  bba833:	6a 00                	push   0x0
+  bba835:	6a 00                	push   0x0
+  bba837:	8d 44 24 20          	lea    eax,[esp+0x20]
+  bba83b:	89 74 24 30          	mov    DWORD PTR [esp+0x30],esi
+  bba83f:	c7 44 24 34 b8 0c 22 	mov    DWORD PTR [esp+0x34],0x5220cb8
+  bba846:	05
+  bba847:	c7 44 24 38 01 00 00 	mov    DWORD PTR [esp+0x38],0x1
+  bba84e:	00
+  bba84f:	8b 17                	mov    edx,DWORD PTR [edi]
+  bba851:	8b 52 0c             	mov    edx,DWORD PTR [edx+0xc]
+  bba854:	50                   	push   eax
+  bba855:	8d 4c 24 34          	lea    ecx,[esp+0x34]
+  bba859:	51                   	push   ecx
+  bba85a:	8b cf                	mov    ecx,edi
+  bba85c:	ff d2                	call   edx
