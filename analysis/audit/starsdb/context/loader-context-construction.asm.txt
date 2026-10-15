@@ -1,0 +1,61 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Bounded static objdump.
+
+  bb8fa7:	6a 00                	push   0x0
+  bb8fa9:	6a 00                	push   0x0
+  bb8fab:	8b c8                	mov    ecx,eax
+  bb8fad:	e8 ee 12 d2 ff       	call   0x8da2a0
+  bb8fb2:	8b f0                	mov    esi,eax
+  bb8fb4:	89 74 24 10          	mov    DWORD PTR [esp+0x10],esi
+  bb8fb8:	85 f6                	test   esi,esi
+  bb8fba:	74 0a                	je     0xbb8fc6
+  bb8fbc:	8b 46 04             	mov    eax,DWORD PTR [esi+0x4]
+  bb8fbf:	8b 10                	mov    edx,DWORD PTR [eax]
+  bb8fc1:	8d 4e 04             	lea    ecx,[esi+0x4]
+  bb8fc4:	ff d2                	call   edx
+  bb8fc6:	6a 00                	push   0x0
+  bb8fc8:	6a 00                	push   0x0
+  bb8fca:	6a 00                	push   0x0
+  bb8fcc:	6a 00                	push   0x0
+  bb8fce:	68 90 09 3f 01       	push   0x13f0990
+  bb8fd3:	6a 24                	push   0x24
+  bb8fd5:	e8 d6 d2 d6 ff       	call   0x9262b0
+  bb8fda:	83 c4 18             	add    esp,0x18
+  bb8fdd:	85 c0                	test   eax,eax
+  bb8fdf:	0f 84 3c 01 00 00    	je     0xbb9121
+  bb8fe5:	56                   	push   esi
+  bb8fe6:	8b c8                	mov    ecx,eax
+  bb8fe8:	e8 73 6a ae ff       	call   0x69fa60
+  bb8fed:	8b f0                	mov    esi,eax
+  bb8fef:	89 74 24 18          	mov    DWORD PTR [esp+0x18],esi
+  bb8ff3:	85 f6                	test   esi,esi
+  bb8ff5:	74 08                	je     0xbb8fff
+  bb8ff7:	8b 06                	mov    eax,DWORD PTR [esi]
+  bb8ff9:	8b 10                	mov    edx,DWORD PTR [eax]
+  bb8ffb:	8b ce                	mov    ecx,esi
+  bb8ffd:	ff d2                	call   edx
+  bb8fff:	8b 46 04             	mov    eax,DWORD PTR [esi+0x4]
+  bb9002:	8b 50 04             	mov    edx,DWORD PTR [eax+0x4]
+  bb9005:	8d 5e 04             	lea    ebx,[esi+0x4]
+  bb9008:	8b cb                	mov    ecx,ebx
+  bb900a:	ff d2                	call   edx
+  bb900c:	8b 4c 24 78          	mov    ecx,DWORD PTR [esp+0x78]
+  bb9010:	8b 03                	mov    eax,DWORD PTR [ebx]
+  bb9012:	8b 50 2c             	mov    edx,DWORD PTR [eax+0x2c]
+  bb9015:	51                   	push   ecx
+  bb9016:	8b cb                	mov    ecx,ebx
+  bb9018:	ff d2                	call   edx
+  bb901a:	8b 06                	mov    eax,DWORD PTR [esi]
+  bb901c:	8b 50 3c             	mov    edx,DWORD PTR [eax+0x3c]
+  bb901f:	6a 00                	push   0x0
+  bb9021:	6a 01                	push   0x1
+  bb9023:	8b ce                	mov    ecx,esi
+  bb9025:	ff d2                	call   edx
+  bb9027:	68 18 7c 89 01       	push   0x1897c18
+  bb902c:	68 18 7c 89 01       	push   0x1897c18
+  bb9031:	68 18 7c 89 01       	push   0x1897c18
+  bb9036:	56                   	push   esi
+  bb9037:	8d 4c 24 38          	lea    ecx,[esp+0x38]
+  bb903b:	e8 60 ac ad ff       	call   0x693ca0
+  bb9040:	8d 4c 24 28          	lea    ecx,[esp+0x28]
+  bb9044:	e8 17 9e ad ff       	call   0x692e60

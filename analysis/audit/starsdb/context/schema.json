@@ -1,0 +1,37 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static GA instructions + analyst transcription; no original runtime/save corpus",
+  "index_resource_key_memory_words": [
+    "0x0179d304",
+    "0x0179d310",
+    "0"
+  ],
+  "class_resource_key_memory_words": [
+    "0x0179d304",
+    "class_id",
+    "0"
+  ],
+  "index_payload": "BE version=1, BE class_count, BE total_objects, class_count*(BE class_id,BE count)",
+  "object_envelope": "BE total_record_bytes including 12-byte header, BE crc, BE token, body",
+  "crc": {
+    "polynomial": "0x04c11db7",
+    "reflected": false,
+    "initial": "0xffffffff",
+    "final_xor": "0xffffffff",
+    "span": "record+8, min(total_record_bytes-8,1000000) bytes",
+    "check_123456789": "0xfc891918"
+  },
+  "context_map": "class_id -> token -> object; NOT mKey/star ID",
+  "outer_container": "loader constructs DBPF implementation at 0x8da2a0, context resource forwarding retained",
+  "coverage": [
+    "explicit DECODED resource streams only, no physical stars.db package adapter",
+    "one class at a time; other classes not loaded by selected-class success",
+    "unknown classes remain opaque, StarRecord read-fixups/factories not run",
+    "no catalogue readiness/runtime integration or original save corpus"
+  ],
+  "host_policies": [
+    "exact stream EOF, count sum equality, unique class IDs/tokens",
+    "4096 classes / 1048576 aggregate objects, zero body tokens rejected",
+    "StarRecord frame must consume exactly its envelope body; failure atomic"
+  ]
+}

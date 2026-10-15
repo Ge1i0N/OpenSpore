@@ -132,8 +132,10 @@ also performs resource/property and side-effect fixups; those are not ported. A 
 not prove that any arbitrary frame is a StarRecord: `starsdb_inspect --star-record` is a caller-selected
 structural decode, not class verification.
 
-Next: resolve the context's object table and nested serializer stream, then decode the grid/record graph
-sufficiently to feed [the typed catalogue builder](gge-catalog.md). Also recover the generated-new-galaxy
+[Context index/object envelopes](starsdb-context.md) now have an explicit decoded-stream reader,
+CRC checks and structural `(class_id, token)` lookup. This does not load a physical DBPF save or run
+StarRecord post-load fixups. Next: attach the actual resource adapter and complete the grid/record
+graph sufficiently to feed [the typed catalogue builder](gge-catalog.md). Also recover the generated-new-galaxy
 path: absence of a saved database does not mean no stars.
 MoviePlayer/DBCheck adapters and state-2 scene/UI/effects remain separate runtime dependencies.
 
@@ -170,7 +172,7 @@ An optional new destination argument writes only a labelled synthetic fixture fo
 it refuses an existing destination. The engine is not wired to this inspector or those fixtures.
 
 Final regression: Debug x86 build warning-free; catalogue/DBCheck/Intro/binding/SPUI/package/scissor
-suites PASS, six Python tests PASS, 44 maintained Markdown link checks PASS. Live `Main → GGE` and
+suites PASS, six Python tests PASS, 45 maintained Markdown link checks PASS. Live `Main → GGE` and
 `DevLauncher → CreatureEditor` with `-w -devDirs` both exit 0, aborts/asserts 0. The original
 MoviePlayer-Unknown gate remains in place. These runs test host regressions, not database loading.
 

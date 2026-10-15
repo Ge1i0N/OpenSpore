@@ -1,0 +1,5 @@
+# GA aligned entries checked with objdump. Port-forwarding methods, not independent DBPF parsers.
+0x0069ddb0	function	os_SerializerManager_open_container_forward
+0x0069dde0	function	os_SerializerManager_commit_container_forward
+0x0069de00	function	os_SerializerManager_set_container_path_forward
+0x0069de20	function	os_SerializerManager_open_resource_forward

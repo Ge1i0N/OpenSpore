@@ -98,7 +98,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect
 ```
 
 Расположение данных рядом с собранным executable:
@@ -147,6 +147,7 @@ python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.
 .\build\Debug\gge_catalog_verify.exe
 .\build\Debug\starsdb_verify.exe
 .\build\Debug\starsdb_links_verify.exe
+.\build\Debug\starsdb_context_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
@@ -169,8 +170,10 @@ Live backend ещё не подключён; [state 2 Play Spore](analysis/gge-d
 индексы, позиции, стадии, image fallback и сравнение двух полей заголовка сохранения. Проверена на контролируемых входах;
 producer каталога и live-галактика ещё не реализованы. Для [сериализатора `stars.db`](analysis/starsdb.md)
 добавлен read-only инспектор префикса и caller-selected wire subset: framing, шесть полей метаданных,
-ссылки/ячейки и 14 полей StarRecord. **240 + 362** синтетических проверок проходят; ссылки остаются
-неразрешёнными, настоящие сохранения этим тестом не проверены.
+ссылки/ячейки и 14 полей StarRecord. [Контекст объектов](analysis/starsdb-context.md) теперь читает
+индекс и class stream, проверяет envelope CRC и связывает `(class_id, token)` с записью.
+**240 + 362 + 126** синтетических проверок проходят; физический DBPF save adapter и post-load fixups
+не подключены, настоящие сохранения этим тестом не проверены.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI

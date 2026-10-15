@@ -1,0 +1,30 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x0069ECC0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+int FUN_0069ecc0(undefined4 *param_1)
+
+{
+  int iVar1;
+  undefined4 *unaff_FS_OFFSET;
+  undefined4 local_c;
+  undefined1 *puStack_8;
+  undefined4 local_4;
+
+  local_4 = 0xffffffff;
+  puStack_8 = &LAB_0120ca24;
+  local_c = *unaff_FS_OFFSET;
+  *unaff_FS_OFFSET = &local_c;
+  iVar1 = FUN_00f47240(0x38,&DAT_013ebc48,0,0,
+                       "c:\\BuildAgent\\max-spore001-spore\\CMBuild\\SporeEP1_RL\\Core\\UTFKernel\\EASTL\\include\\EASTL/allocator.h"
+                       ,0xd1);
+  local_4 = 0;
+  if ((undefined4 *)(iVar1 + 0x10) != (undefined4 *)0x0) {
+    *(undefined4 *)(iVar1 + 0x10) = *param_1;
+    *(undefined4 *)(iVar1 + 0x14) = param_1[1];
+    *(undefined4 *)(iVar1 + 0x18) = param_1[2];
+    FUN_0069e880(param_1 + 3);
+  }
+  *unaff_FS_OFFSET = local_c;
+  return iVar1;
+}

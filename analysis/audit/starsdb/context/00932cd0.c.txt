@@ -1,0 +1,65 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x00932CD0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+void FUN_00932cd0(void)
+
+{
+  uint uVar1;
+  int iVar2;
+
+  iVar2 = 0;
+  do {
+    if (iVar2 << 0x18 < 0) {
+      uVar1 = iVar2 << 0x19 ^ 0x4c11db7;
+    }
+    else {
+      uVar1 = iVar2 << 0x19;
+    }
+    if ((int)uVar1 < 0) {
+      uVar1 = uVar1 * 2 ^ 0x4c11db7;
+    }
+    else {
+      uVar1 = uVar1 * 2;
+    }
+    if ((int)uVar1 < 0) {
+      uVar1 = uVar1 * 2 ^ 0x4c11db7;
+    }
+    else {
+      uVar1 = uVar1 * 2;
+    }
+    if ((int)uVar1 < 0) {
+      uVar1 = uVar1 * 2 ^ 0x4c11db7;
+    }
+    else {
+      uVar1 = uVar1 * 2;
+    }
+    if ((int)uVar1 < 0) {
+      uVar1 = uVar1 * 2 ^ 0x4c11db7;
+    }
+    else {
+      uVar1 = uVar1 * 2;
+    }
+    if ((int)uVar1 < 0) {
+      uVar1 = uVar1 * 2 ^ 0x4c11db7;
+    }
+    else {
+      uVar1 = uVar1 * 2;
+    }
+    if ((int)uVar1 < 0) {
+      uVar1 = uVar1 * 2 ^ 0x4c11db7;
+    }
+    else {
+      uVar1 = uVar1 * 2;
+    }
+    if ((int)uVar1 < 0) {
+      uVar1 = uVar1 * 2 ^ 0x4c11db7;
+    }
+    else {
+      uVar1 = uVar1 * 2;
+    }
+    (&DAT_01669530)[iVar2] = uVar1;
+    iVar2 = iVar2 + 1;
+  } while (iVar2 < 0x100);
+  return;
+}

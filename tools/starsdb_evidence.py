@@ -20,6 +20,10 @@ LINK_ADDRESSES=(0xbae0b0,0xaca670,0x69e170,0x69d4f0,0x69d980,0x6a06a0,0x6a05f0,
                 0x69e9e0,0x6a0110,0x6a0360,0x69f1d0,0x69fb90,0xbb1630,0xba7410,0xba7500,
                 0x13277d0,0xbb9be0,0xbba6e0,0xbb9de0,0xbba370,0xb6e4a0,0xac8800,
                 0xae33b0,0xae33d0,0xae2e50,0xae2dc0,0xbb9e40,0xbb9e70)
+CONTEXT_ADDRESSES=(0x69f1d0,0x69fb90,0x69ec20,0x932cd0,0x932d70,0x571f40,
+                   0x69f950,0x69e9e0,0x6a0110,0x69ecc0,0x69e770,0x69f7b0,
+                   0x69fa60,0x69f840,0x8da2a0,0x69ddb0,0x69dde0,0x69de00,0x69de20,
+                   0x8d8ca0,0x8da6f0,0x8d8f70,0x69e090)
 
 
 def main():
@@ -27,8 +31,8 @@ def main():
     pyghidra.start(verbose=False)
     from pyghidra import open_project,program_context
     from ghidra.app.decompiler import DecompInterface
-    dest=DEST/'links' if '--links' in sys.argv else DEST
-    addresses=LINK_ADDRESSES if '--links' in sys.argv else ADDRESSES
+    dest=DEST/'context' if '--context' in sys.argv else DEST/'links' if '--links' in sys.argv else DEST
+    addresses=CONTEXT_ADDRESSES if '--context' in sys.argv else LINK_ADDRESSES if '--links' in sys.argv else ADDRESSES
     dest.mkdir(parents=True,exist_ok=True)
     digest=hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
     project=open_project(str(ROOT/'refs/ghidra/proj'),'OpenSporeOracle')
@@ -134,8 +138,43 @@ def static_links():
     print('retained reference/StarRecord schema and file-backed vtables; no BSS descriptor reads')
 
 
+def static_context():
+    from tools.pe import PE
+    from tools.find_imm import disasm
+    pe=PE()
+    dest=DEST/'context'
+    dest.mkdir(parents=True,exist_ok=True)
+    digest=hashlib.sha256(pe.raw).hexdigest()
+    value={'oracle_sha256':digest,'authority':'static GA instructions + analyst transcription; no original runtime/save corpus',
+           'index_resource_key_memory_words':['0x0179d304','0x0179d310','0'],
+           'class_resource_key_memory_words':['0x0179d304','class_id','0'],
+           'index_payload':'BE version=1, BE class_count, BE total_objects, class_count*(BE class_id,BE count)',
+           'object_envelope':'BE total_record_bytes including 12-byte header, BE crc, BE token, body',
+           'crc':{'polynomial':'0x04c11db7','reflected':False,'initial':'0xffffffff','final_xor':'0xffffffff',
+                  'span':'record+8, min(total_record_bytes-8,1000000) bytes','check_123456789':'0xfc891918'},
+           'context_map':'class_id -> token -> object; NOT mKey/star ID',
+           'outer_container':'loader constructs DBPF implementation at 0x8da2a0, context resource forwarding retained',
+           'coverage':['explicit DECODED resource streams only, no physical stars.db package adapter',
+                       'one class at a time; other classes not loaded by selected-class success',
+                       'unknown classes remain opaque, StarRecord read-fixups/factories not run',
+                       'no catalogue readiness/runtime integration or original save corpus'],
+           'host_policies':['exact stream EOF, count sum equality, unique class IDs/tokens',
+                            '4096 classes / 1048576 aggregate objects, zero body tokens rejected',
+                            'StarRecord frame must consume exactly its envelope body; failure atomic']}
+    (dest/'schema.json').write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8',newline='\n')
+    tables={hex(va):{hex(o):hex(pe.u32(va+o)) for o in range(0,size,4)}
+            for va,size in [(0x1408710,0x40),(0x14086c0,0x38),(0x1436938,0x38)]}
+    (dest/'vtables.json').write_text(json.dumps(tables,indent=2)+'\n',encoding='utf-8',newline='\n')
+    for name,lo,hi in [('loader-context-construction',0xbb8fa7,0xbb9049),
+                       ('writer-context-final-index',0x69ff58,0x6a0026),
+                       ('checksum-length-cap',0x69f5a8,0x69f5dd)]:
+        (dest/(name+'.asm.txt')).write_text('GA-unpacked SHA-256: %s\nBounded static objdump.\n\n'%digest+
+            '\n'.join(disasm(pe,lo,hi))+'\n',encoding='utf-8',newline='\n')
+    print('retained context/index/envelope/CRC notes and forwarding tables; decoded-stream subset only')
+
+
 if __name__=='__main__':
     if '--static' in sys.argv:
-        static_links() if '--links' in sys.argv else static()
+        static_context() if '--context' in sys.argv else static_links() if '--links' in sys.argv else static()
     else:
         main()

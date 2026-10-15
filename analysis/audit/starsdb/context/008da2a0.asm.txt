@@ -1,0 +1,104 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x008DA2A0
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+008da2a0  PUSH EBX
+008da2a1  PUSH ESI
+008da2a2  MOV ESI,ECX
+008da2a4  MOV dword ptr [ESI + 0x4],0x13f1aa0
+008da2ab  PUSH EDI
+008da2ac  MOV dword ptr [ESI],0x1408528
+008da2b2  MOV dword ptr [ESI + 0x4],0x1408518
+008da2b9  XOR EAX,EAX
+008da2bb  LEA ECX,[ESI + 0x8]
+008da2be  XCHG dword ptr [ECX],EAX
+008da2c0  MOV EAX,dword ptr [ESP + 0x14]
+008da2c4  XOR EBX,EBX
+008da2c6  MOV dword ptr [ESI],0x1436938
+008da2cc  MOV dword ptr [ESI + 0x4],0x1436924
+008da2d3  MOV byte ptr [ESI + 0xc],BL
+008da2d6  CMP EAX,EBX
+008da2d8  JNZ 0x008da2df
+008da2da  CALL 0x00925f40
+008da2df  MOV dword ptr [ESI + 0x10],EAX
+008da2e2  MOV dword ptr [ESI + 0x14],EBX
+008da2e5  MOV dword ptr [ESI + 0x18],EBX
+008da2e8  MOV byte ptr [ESI + 0x1c],BL
+008da2eb  MOV byte ptr [ESI + 0x1d],0x1
+008da2ef  MOV EAX,0x1667bac
+008da2f4  LEA EDI,[ESI + 0x30]
+008da2f7  PUSH EBX
+008da2f8  MOV ECX,EDI
+008da2fa  MOV dword ptr [ESI + 0x20],EAX
+008da2fd  MOV dword ptr [ESI + 0x24],EAX
+008da300  MOV dword ptr [ESI + 0x28],0x1667bae
+008da307  CALL 0x00931d70
+008da30c  PUSH 0x1
+008da30e  MOV dword ptr [ESI + 0x25c],EBX
+008da314  MOV dword ptr [ESI + 0x260],EBX
+008da31a  PUSH EBX
+008da31b  LEA ECX,[ESI + 0x270]
+008da321  MOV dword ptr [ESI + 0x264],EBX
+008da327  MOV dword ptr [ESI + 0x268],EBX
+008da32d  MOV dword ptr [ESI + 0x26c],EBX
+008da333  CALL 0x00922530
+008da338  PUSH 0x1
+008da33a  PUSH EBX
+008da33b  LEA ECX,[ESI + 0x2a0]
+008da341  CALL 0x00922530
+008da346  MOV ECX,dword ptr [ESI + 0x10]
+008da349  MOVSS XMM0,dword ptr [0x01436920]
+008da351  MOVSS dword ptr [ESI + 0x2e4],XMM0
+008da359  MOV dword ptr [ESI + 0x2d0],EBX
+008da35f  MOV byte ptr [ESI + 0x2d4],BL
+008da365  MOV dword ptr [ESI + 0x2d8],EBX
+008da36b  MOV dword ptr [ESI + 0x2dc],EBX
+008da371  MOV byte ptr [ESI + 0x2e0],0x1
+008da378  MOV dword ptr [ESI + 0x2f0],EBX
+008da37e  MOV dword ptr [ESI + 0x2f4],EBX
+008da384  MOV dword ptr [ESI + 0x2f8],EBX
+008da38a  MOVSS XMM0,dword ptr [0x0143691c]
+008da392  MOV dword ptr [ESI + 0x300],ECX
+008da398  MOV dword ptr [ESI + 0x304],EBX
+008da39e  LEA EAX,[ESI + 0x2ec]
+008da3a4  MOV dword ptr [EAX],EAX
+008da3a6  MOV dword ptr [ESI + 0x2f0],EAX
+008da3ac  MOV dword ptr [ESI + 0x2f4],EBX
+008da3b2  MOV byte ptr [ESI + 0x2f8],BL
+008da3b8  MOV dword ptr [ESI + 0x2fc],EBX
+008da3be  XOR EAX,EAX
+008da3c0  MOV dword ptr [ESI + 0x308],EAX
+008da3c6  MOV dword ptr [ESI + 0x30c],EAX
+008da3cc  MOV dword ptr [ESI + 0x310],EAX
+008da3d2  MOV dword ptr [ESI + 0x314],EAX
+008da3d8  MOV dword ptr [ESI + 0x318],EAX
+008da3de  MOV dword ptr [ESI + 0x31c],EAX
+008da3e4  MOV dword ptr [ESI + 0x320],EAX
+008da3ea  MOV dword ptr [ESI + 0x324],EAX
+008da3f0  MOV dword ptr [ESI + 0x328],EAX
+008da3f6  MOV dword ptr [ESI + 0x32c],EAX
+008da3fc  LEA ECX,[ESI + 0x33c]
+008da402  MOV byte ptr [ESI + 0x330],BL
+008da408  MOV dword ptr [ESI + 0x334],0x13
+008da412  MOVSS dword ptr [ESI + 0x338],XMM0
+008da41a  CALL 0x008dbbd0
+008da41f  LEA ECX,[ESI + 0x35c]
+008da425  CALL 0x008dbbd0
+008da42a  MOV EDX,dword ptr [EDI]
+008da42c  MOV EAX,dword ptr [EDX + 0x4]
+008da42f  MOV ECX,EDI
+008da431  MOV byte ptr [ESI + 0x37c],BL
+008da437  MOV byte ptr [ESI + 0x37d],BL
+008da43d  MOV dword ptr [ESI + 0x380],EBX
+008da443  CALL EAX
+008da445  MOV EAX,dword ptr [ESP + 0x10]
+008da449  CMP EAX,EBX
+008da44b  JZ 0x008da455
+008da44d  PUSH EAX
+008da44e  MOV ECX,ESI
+008da450  CALL 0x008d9ce0
+008da455  POP EDI
+008da456  MOV EAX,ESI
+008da458  POP ESI
+008da459  POP EBX
+008da45a  RET 0x8

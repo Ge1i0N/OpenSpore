@@ -1,0 +1,71 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Function VA 0x0069EC20
+Persistent Ghidra 12.1.4, static only. Pseudocode stack/calling-convention recovery may be incomplete.
+
+0069ec20  PUSH EBX
+0069ec21  PUSH EBP
+0069ec22  MOV EBP,dword ptr [ESP + 0x10]
+0069ec26  XOR BL,BL
+0069ec28  PUSH EDI
+0069ec29  MOV EDI,ECX
+0069ec2b  CMP EBP,0xf4240
+0069ec31  JA 0x0069ecaf
+0069ec33  PUSH ESI
+0069ec34  MOV ESI,dword ptr [ESP + 0x14]
+0069ec38  MOV EAX,dword ptr [ESI]
+0069ec3a  MOV EDX,dword ptr [EAX + 0x18]
+0069ec3d  MOV ECX,ESI
+0069ec3f  CALL EDX
+0069ec41  MOV EDX,dword ptr [EAX]
+0069ec43  MOV ECX,EAX
+0069ec45  MOV EAX,dword ptr [EDX + 0x24]
+0069ec48  PUSH 0x0
+0069ec4a  CALL EAX
+0069ec4c  LEA ECX,[EBP + 0x1]
+0069ec4f  ADD EDI,0x54
+0069ec52  PUSH ECX
+0069ec53  MOV ECX,EDI
+0069ec55  MOV dword ptr [ESP + 0x1c],EAX
+0069ec59  CALL 0x004c0950
+0069ec5e  MOV EDX,dword ptr [ESI]
+0069ec60  MOV EAX,dword ptr [EDX + 0x18]
+0069ec63  MOV ECX,ESI
+0069ec65  CALL EAX
+0069ec67  MOV ECX,dword ptr [EDI]
+0069ec69  MOV EDX,dword ptr [EAX]
+0069ec6b  PUSH EBP
+0069ec6c  PUSH ECX
+0069ec6d  MOV ECX,EAX
+0069ec6f  MOV EAX,dword ptr [EDX + 0x30]
+0069ec72  CALL EAX
+0069ec74  TEST EAX,EAX
+0069ec76  JZ 0x0069ec95
+0069ec78  MOV ECX,dword ptr [EDI]
+0069ec7a  PUSH 0x1
+0069ec7c  PUSH -0x1
+0069ec7e  MOV byte ptr [ECX + EBP*0x1],BL
+0069ec81  MOV EDI,dword ptr [EDI]
+0069ec83  PUSH EBP
+0069ec84  PUSH EDI
+0069ec85  CALL 0x00932d70
+0069ec8a  MOV EDX,dword ptr [ESP + 0x2c]
+0069ec8e  ADD ESP,0x10
+0069ec91  MOV dword ptr [EDX],EAX
+0069ec93  MOV BL,0x1
+0069ec95  MOV EAX,dword ptr [ESI]
+0069ec97  MOV EDX,dword ptr [EAX + 0x18]
+0069ec9a  MOV ECX,ESI
+0069ec9c  CALL EDX
+0069ec9e  MOV ECX,dword ptr [ESP + 0x18]
+0069eca2  MOV EDX,dword ptr [EAX]
+0069eca4  MOV EDX,dword ptr [EDX + 0x28]
+0069eca7  PUSH 0x0
+0069eca9  PUSH ECX
+0069ecaa  MOV ECX,EAX
+0069ecac  CALL EDX
+0069ecae  POP ESI
+0069ecaf  POP EDI
+0069ecb0  POP EBP
+0069ecb1  MOV AL,BL
+0069ecb3  POP EBX
+0069ecb4  RET 0xc
