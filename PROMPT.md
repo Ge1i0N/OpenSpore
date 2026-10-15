@@ -34,9 +34,10 @@ Disassembly stays the first tool (it overrides habit and third-party docs). On t
   (`0xf47e90`) -> AppMode (`0x7e8a00`) -> window class (`0x849b20`) -> **main loop (`0x8482f0`)** ->
   config (`Config/*.txt`) -> content load (resource manager) -> `gmdl`/`raster`/`png`/`locale` draw.
    **UI update 2026-10-15:** sequential parser and child graph work on 748/748 resources (GA reader
-   0x82ce10 / property dispatch 0x82b3f0). Rendering is diagnostic geometry/text. A visible launcher
-   tile enters CreatureEditor; editor/game AppModes are unimplemented. **Next:** drawable references
-   for a coherent screen, then GalaxyGameEntry behavior. See `analysis/spui-binary.md`.
+   0x82ce10 / property dispatch 0x82b3f0). Atlas-aware ImageDrawable and non-tileable Standard/Radio
+   draw real launcher art; diagnostic outlines remain. A visible tile enters CreatureEditor,
+   but editor/game AppModes are unimplemented. **Next:** clipping/events and GalaxyGameEntry behavior.
+   See `analysis/spui-drawables.md`; the progress checklist is not a game-completion percentage.
 - Read `RESUME.md` first, then `PROGRESS.md`, `VERIFY.md`, `MEMORY.md`, `IDEAS.md`, `HISTORY.md`.
 
 ## The brief (verbatim)

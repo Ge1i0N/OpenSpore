@@ -1,271 +1,260 @@
-r"""Feature-map renderer: analysis/features.json -> a progress PNG + a text list.
+"""Generate the feature dashboard, Markdown ledger and machine-readable stats.
 
-Inspired by decomp/recomp projects' progress maps: a grid of small squares grouped by subsystem,
-green = done, amber = partial, grey = todo. The JSON is the single source of truth; this script
-generates BOTH the picture (analysis/shots/reverse_map.png) and the text list (analysis/features.md)
-so they can never drift apart. Edit the JSON, then run this.
-
-Requires Pillow (present on this machine: PIL 10.x) and a system TTF for labels; it degrades to
-PIL's default font if the TTF is missing. It is an analysis tool, not part of the engine.
-
-Usage:
-    python tools/feature_map.py                       # writes both outputs
-    python tools/feature_map.py --png out.png --md out.md
+The dashboard measures a bounded, unweighted checklist, NOT game/engine completion.
+Partial credit is shown only as a secondary, explicitly defined index. Outputs use the
+source's review date instead of today's date so --check is reproducible.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
 import json
+import math
 import sys
 from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-
-# categories that make up "the engine" (reversal of the runtime + asset formats), as opposed to
-# gameplay features which are a product target rather than a reversal milestone.
-ENGINE_CATS = {"harness", "startup", "launch args", "packages (DBPF)", "gmdl (meshes)",
-               "rw4 (models)", "render", "formats"}
-
+STATUSES = ("done", "partial", "todo")
+SCOPES = {"engine": "Engine / data", "ui": "UI / navigation", "gameplay": "Gameplay",
+          "tooling": "Tooling", "platform": "Platform"}
 GLYPH = {"done": "✅", "partial": "🚧", "todo": "⬜"}
 SCORE = {"done": 1.0, "partial": 0.5, "todo": 0.0}
+BG, PANEL, EDGE = "#0c1420", "#152131", "#293b51"
+TEXT, DIM, ACCENT = "#ecf3fa", "#a6b8cc", "#79c4ff"
+COLORS = {"done": "#51d1a1", "partial": "#f2bb60", "todo": "#52647c"}
 
-# palette (dark, like the decomp.dev maps)
-BG = (24, 27, 31)
-PANEL = (34, 39, 45)
-PANEL_EDGE = (58, 64, 72)
-DONE = (76, 175, 80)
-PARTIAL = (214, 170, 52)
-TODO = (74, 80, 88)
-TEXT = (232, 238, 242)
-DIM = (150, 160, 168)
-ACCENT = (255, 200, 80)
+
+def validate(data: dict) -> dict:
+    for field in ("title", "subtitle", "status_note", "updated", "categories"):
+        if field not in data:
+            raise ValueError(f"missing field: {field}")
+    date.fromisoformat(data["updated"])
+    if not data["categories"]:
+        raise ValueError("empty category list")
+    names = set()
+    for cat in data["categories"]:
+        if cat["name"] in names:
+            raise ValueError(f"duplicate category: {cat['name']}")
+        names.add(cat["name"])
+        if cat.get("scope") not in SCOPES:
+            raise ValueError(f"invalid scope: {cat.get('scope')}")
+        if not cat["features"]:
+            raise ValueError(f"empty category: {cat['name']}")
+        feature_names = set()
+        for feature in cat["features"]:
+            if feature.get("status") not in STATUSES:
+                raise ValueError(f"invalid feature status: {feature.get('status')}")
+            if not feature.get("name") or feature["name"] in feature_names:
+                raise ValueError(f"empty/duplicate feature in {cat['name']}")
+            feature_names.add(feature["name"])
+    return data
 
 
 def load(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return validate(json.loads(path.read_text(encoding="utf-8")))
 
 
-def pct(feats) -> float:
-    if not feats:
-        return 0.0
-    return 100.0 * sum(SCORE[f["status"]] for f in feats) / len(feats)
+def all_features(data: dict) -> list:
+    return [f for cat in data["categories"] for f in cat["features"]]
 
 
-def counts(feats):
-    c = {"done": 0, "partial": 0, "todo": 0}
-    for f in feats:
-        c[f["status"]] += 1
-    return c
+def counts(features) -> dict:
+    result = dict.fromkeys(STATUSES, 0)
+    for feature in features:
+        result[feature["status"]] += 1
+    return result
 
 
-def all_features(data: dict):
-    out = []
+def pct(features) -> float:
+    """Secondary checklist index; never a completion percentage for the game."""
+    return 100 * sum(SCORE[f["status"]] for f in features) / len(features) if features else 0.0
+
+
+def metrics(features) -> dict:
+    c = counts(features)
+    return {"total": len(features), **c,
+            "done_pct": round(100 * c["done"] / len(features), 2) if features else 0.0,
+            "weighted_checklist_index": round(pct(features), 2)}
+
+
+def statistics(data: dict, function_stats: dict | None = None) -> dict:
+    canonical = json.dumps(data, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    stats = {"updated": data["updated"], "source_sha256": hashlib.sha256(canonical).hexdigest(),
+             "method": "Equal-weight tracked items; done=1, partial=0.5, todo=0. Not game or code coverage.",
+             "overall": metrics(all_features(data)),
+             "scopes": {scope: metrics([f for c in data["categories"] if c["scope"] == scope
+                                        for f in c["features"]]) for scope in SCOPES},
+             "categories": [{"name": c["name"], "scope": c["scope"], **metrics(c["features"])}
+                            for c in data["categories"]]}
+    if function_stats:
+        # Named catalogue entries and matches in a heuristic candidate set are different numerators.
+        stats["function_catalogue"] = {key: function_stats[key] for key in
+            ("named", "named_on_candidate", "candidate_starts")}
+        stats["function_catalogue"]["note"] = "Manual catalogue, not all discoveries or decoded code coverage."
+    return stats
+
+
+def markdown(data: dict, stats: dict) -> str:
+    def escape(text):
+        return str(text).replace("|", "\\|").replace("\n", " ")
+    total = stats["overall"]
+    lines = ["# OpenSpore — feature ledger", "",
+        "> Generated by `tools/feature_map.py` from `analysis/features.json`. Edit the JSON, not this file.",
+        f"> Last reviewed: **{data['updated']}**. Check freshness with `python tools/feature_map.py --check`.", "",
+        f"**{total['done']} done · {total['partial']} partial · {total['todo']} todo / {total['total']} tracked items.**", "",
+        "![Feature dashboard](shots/reverse_map.png)", "", "## How to read this", "",
+        "- Counts describe our chosen checklist, **not the percentage of Spore that is playable**.",
+        "- `done` means the bounded item is implemented/verified, or a stated evidence-only result is verified.",
+        "- Harness code, file-field discoveries and a complete game stage are not equal amounts of work.",
+        "- `partial` includes incomplete implementation or static-only evidence; `todo` is not implemented.",
+        "- The optional index is `(done + 0.5 × partial) / total`; it is not code coverage or a release forecast.",
+        "- UI navigation is separate from gameplay: entering CreatureEditor does not implement the editor.", "",
+        "## By scope", "", "| Scope | Done / total | Partial | Todo | Done only | Checklist index |",
+        "|---|---:|---:|---:|---:|---:|"]
+    for scope, label in SCOPES.items():
+        m = stats["scopes"][scope]
+        lines.append(f"| {label} | {m['done']} / {m['total']} | {m['partial']} | {m['todo']} | "
+                     f"{m['done_pct']:.1f}% | {m['weighted_checklist_index']:.1f}% |")
+    lines += ["", "## By subsystem", "", "| Subsystem | Scope | Done | Partial | Todo | Total |",
+              "|---|---|---:|---:|---:|---:|"]
+    for c in stats["categories"]:
+        lines.append(f"| {escape(c['name'])} | {SCOPES[c['scope']]} | {c['done']} | {c['partial']} | {c['todo']} | {c['total']} |")
+    if "function_catalogue" in stats:
+        f = stats["function_catalogue"]
+        lines += ["", "## Separate metric: manual function catalogue", "",
+                  f"{f['named']} catalogue entries; {f['named_on_candidate']} match {f['candidate_starts']:,} "
+                  "heuristic function-start candidates. This catalogue is not exhaustive and its ratio is "
+                  "**not the fraction of code reversed**. See [functions.md](functions.md)."]
     for cat in data["categories"]:
-        out.extend(cat["features"])
-    return out
+        c = counts(cat["features"])
+        lines += ["", f"## {escape(cat['name'])}", "",
+                  f"{SCOPES[cat['scope']]} · {c['done']} done / {c['partial']} partial / {c['todo']} todo", "",
+                  "| Status | Tracked item | Evidence / limits |", "|---|---|---|"]
+        for feature in cat["features"]:
+            lines.append(f"| {GLYPH[feature['status']]} {feature['status']} | {escape(feature['name'])} | {escape(feature.get('note', ''))} |")
+    return "\n".join(lines) + "\n"
 
 
-# --------------------------------------------------------------------------- picture
-def render_png(data: dict, out: Path) -> None:
-    try:
-        from PIL import Image, ImageDraw, ImageFont
-    except ImportError:  # noqa: BLE001
-        print("Pillow is required for the picture: pip install pillow", file=sys.stderr)
-        raise SystemExit(2)
-    import math
+def png_bytes(data: dict, stats: dict) -> bytes:
+    from PIL import Image, ImageDraw, ImageFont
 
-    fd = Path("C:/Windows/Fonts")
-    def font(name: str, size: int):
-        p = fd / name
-        if p.exists():
-            return ImageFont.truetype(str(p), size)
-        return ImageFont.load_default()
+    def font(size, bold=False):
+        candidates = [Path("C:/Windows/Fonts") / ("segoeuib.ttf" if bold else "segoeui.ttf"),
+                      Path("/usr/share/fonts/truetype/dejavu") / ("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf")]
+        for path in candidates:
+            if path.exists():
+                return ImageFont.truetype(str(path), size)
+        return ImageFont.load_default(size=size)
 
-    f_title = font("consolab.ttf", 26)
-    f_sub = font("consola.ttf", 13)
-    f_label = font("consolab.ttf", 13)
-    f_small = font("consola.ttf", 12)
+    width, margin, gap, cols = 1600, 40, 20, 3
+    card_w = (width - margin*2 - gap*(cols-1)) // cols
+    card_h = max(208, 156 + math.ceil(max(len(c["features"]) for c in data["categories"])/24)*19)
+    top = 400
+    rows = math.ceil(len(data["categories"]) / cols)
+    footer = top + rows*(card_h+gap)
+    image = Image.new("RGB", (width, footer+170), BG)
+    draw = ImageDraw.Draw(image)
+    title, h2, body, small, number = font(38, True), font(23, True), font(21), font(17), font(42, True)
 
-    # a scratch draw just to measure text
-    scratch = ImageDraw.Draw(Image.new("RGB", (1, 1)))
-    def tw(s: str, f) -> float:
-        return scratch.textlength(s, font=f)
+    def text(x, y, value, face=body, color=TEXT):
+        draw.text((x, y), str(value), font=face, fill=color)
 
-    feats = all_features(data)
-    engine = [f for cat in data["categories"] if cat["name"] in ENGINE_CATS for f in cat["features"]]
-    overall = pct(feats)
-    eng = pct(engine)
+    def fitted(x, y, value, max_w, face=body, color=TEXT):
+        while draw.textlength(value, font=face) > max_w and len(value) > 1:
+            value = value[:-2].rstrip() + "…"
+        text(x, y, value, face, color)
 
-    # layout constants
-    MARGIN = 22
-    WIDTH = 1400
-    CELL, GAP = 15, 3
-    PITCH = CELL + GAP
-    GPAD = 9
-    LABEL_H = 22
-    HGAP, VGAP = 16, 16
-    MAXW = WIDTH - 2 * MARGIN
+    def bar(x, y, w, h, c):
+        draw.rectangle((x, y, x+w, y+h), fill=COLORS["todo"])
+        total = sum(c[s] for s in STATUSES)
+        if not total:
+            return
+        for status in STATUSES:
+            next_x = x + w*c[status]/total
+            if next_x > x:
+                draw.rectangle((x, y, next_x, y+h), fill=COLORS[status])
+            x = next_x
 
-    def group_box(cat):
-        n = len(cat["features"])
-        min_w = tw(cat["name"], f_label) + 2 * GPAD + 30  # + room for the % on the right
-        cols = min(n, max(int(math.ceil(math.sqrt(n))), int((min_w - 2 * GPAD + GAP) // PITCH)))
-        cols = max(1, cols)
-        rows = (n + cols - 1) // cols
-        w = max(min_w, 2 * GPAD + cols * PITCH - GAP)
-        h = GPAD + LABEL_H + rows * PITCH - GAP + GPAD
-        return cols, rows, w, h
-
-    # pack groups into rows
-    place = []
-    x = y = 0
-    row_h = 0
-    for cat in data["categories"]:
-        cols, rows, w, h = group_box(cat)
-        if x + w > MAXW and x > 0:
-            x = 0
-            y += row_h + VGAP
-            row_h = 0
-        place.append((cat, cols, rows, x, y, w, h))
-        x += w + HGAP
-        row_h = max(row_h, h)
-    content_h = y + row_h
-
-    title_h = 176  # header block (title + two gauges + legend); content starts with a clear gap
-    img = Image.new("RGB", (WIDTH, MARGIN + title_h + content_h + MARGIN), BG)
-    d = ImageDraw.Draw(img)
-
-    # title
-    d.text((MARGIN, MARGIN - 2), data["title"], font=f_title, fill=TEXT)
-    d.text((MARGIN, MARGIN + 38), data["subtitle"], font=f_sub, fill=DIM)
-    d.text((MARGIN, MARGIN + 58), f"generated {date.today().isoformat()} by tools/feature_map.py",
-           font=f_small, fill=DIM)
-
-    # headline percentages (right aligned)
-    head = f"engine {eng:5.1f}%    overall {overall:5.1f}%"
-    d.text((WIDTH - MARGIN - tw(head, f_title), MARGIN - 2), head, font=f_title, fill=ACCENT)
-
-    # overall progress bar
-    bar_y = MARGIN + 82
-    bar_w = WIDTH - 2 * MARGIN
-    d.rectangle([MARGIN, bar_y, MARGIN + bar_w, bar_y + 12], fill=(40, 45, 51))
-    d.rectangle([MARGIN, bar_y, MARGIN + int(bar_w * overall / 100.0), bar_y + 12], fill=DONE)
-    d.text((MARGIN, bar_y - 15), "features (scope we chose)", font=f_small, fill=DIM)
-
-    # second gauge: how much of the oracle's CODE is reversed (a hard, small number)
-    fstats_path = ROOT / "analysis" / "functions_stats.json"
-    if fstats_path.exists():
-        fs = json.loads(fstats_path.read_text(encoding="utf-8"))
-        fy = bar_y + 30
-        d.rectangle([MARGIN, fy, MARGIN + bar_w, fy + 12], fill=(40, 45, 51))
-        wpx = int(bar_w * min(1.0, fs["coverage_pct"] / 100.0))
-        if fs["coverage_pct"] > 0:
-            wpx = max(wpx, 3)  # keep a visible sliver
-        d.rectangle([MARGIN, fy, MARGIN + wpx, fy + 12], fill=(90, 150, 220))
-        d.text((MARGIN, fy - 15), "functions of the oracle reversed", font=f_small, fill=DIM)
-        d.text((MARGIN + wpx + 8, fy), f"{fs['named']} / {fs['candidate_starts']:,} "
-               f"({fs['coverage_pct']:.3f}%)", font=f_small, fill=(150, 190, 240))
-
-    # legend (below both gauges)
-    lx = MARGIN
-    ly = bar_y + 62
-    c = counts(feats)
-    for st, col in (("done", DONE), ("partial", PARTIAL), ("todo", TODO)):
-        d.rectangle([lx, ly, lx + 11, ly + 11], fill=col)
-        s = f"{st} {c[st]}"
-        d.text((lx + 16, ly - 1), s, font=f_small, fill=DIM)
-        lx += 16 + int(tw(s, f_small)) + 24
-
-    top = MARGIN + title_h
-    for cat, cols, rows, gx, gy, w, h in place:
-        px, py = MARGIN + gx, top + gy
-        d.rounded_rectangle([px, py, px + w, py + h], radius=5, fill=PANEL, outline=PANEL_EDGE)
-        cp = pct(cat["features"])
-        d.text((px + GPAD, py + GPAD - 1), cat["name"], font=f_label, fill=TEXT)
-        cptxt = f"{cp:.0f}%"
-        d.text((px + w - GPAD - tw(cptxt, f_small), py + GPAD), cptxt, font=f_small,
-               fill=DONE if cp >= 99.5 else (PARTIAL if cp > 0 else DIM))
-        cx0 = px + GPAD
-        cy0 = py + GPAD + LABEL_H
-        for i, f in enumerate(cat["features"]):
-            r, cc = divmod(i, cols)
-            fx = cx0 + cc * PITCH
-            fy = cy0 + r * PITCH
-            d.rectangle([fx, fy, fx + CELL - 1, fy + CELL - 1],
-                        fill={"done": DONE, "partial": PARTIAL, "todo": TODO}[f["status"]])
-
-    out.parent.mkdir(parents=True, exist_ok=True)
-    img.save(out)
-    print(f"wrote {out.relative_to(ROOT)} ({WIDTH}x{img.height})  engine {eng:.1f}%  overall {overall:.1f}%")
-
-
-# --------------------------------------------------------------------------- text list
-def render_md(data: dict, out: Path) -> None:
-    feats = all_features(data)
-    engine = [f for cat in data["categories"] if cat["name"] in ENGINE_CATS for f in cat["features"]]
-    c = counts(feats)
-    lines = [
-        "# OpenSpore feature map",
-        "",
-        "> **Generated** from `analysis/features.json` by `tools/feature_map.py` - do not edit by hand.",
-        "> Edit the JSON (add a feature, change a `status`), then run the script to refresh this list",
-        "> AND the picture `analysis/shots/reverse_map.png`. Both come from the same source, so they",
-        "> cannot drift apart.",
-        "",
-        f"**Engine reversal: {pct(engine):.1f}%** | **Overall: {pct(feats):.1f}%** | "
-        f"done {c['done']} / partial {c['partial']} / todo {c['todo']} ({len(feats)} features)",
-        "",
-        "**Legend**",
-        "",
-        "| | status | meaning |",
-        "|:---:|---|---|",
-        "| ✅ | done | reversed **and** implemented **and** verified |",
-        "| 🚧 | partial | reversed or implemented in part |",
-        "| ⬜ | todo | not started |",
-        "",
-        "The picture (`analysis/shots/reverse_map.png`) shows the same data as a grid of squares.",
-        "",
-        "## Summary",
-        "",
-        "| category | progress | done | partial | todo |",
-        "|---|:---:|:---:|:---:|:---:|",
-    ]
-    for cat in data["categories"]:
-        cc = counts(cat["features"])
-        lines.append(f"| {cat['name']} | **{pct(cat['features']):.0f}%** | {cc['done']} | "
-                     f"{cc['partial']} | {cc['todo']} |")
-    lines.append("")
-    for cat in data["categories"]:
-        cc = counts(cat["features"])
-        lines += [
-            "---",
-            "",
-            f"## {cat['name']} — {pct(cat['features']):.0f}%",
-            "",
-            f"*{cc['done']} done · {cc['partial']} partial · {cc['todo']} todo*",
-            "",
-            "| | status | feature | notes |",
-            "|:---:|---|---|---|",
-        ]
-        for f in cat["features"]:
-            lines.append(f"| {GLYPH[f['status']]} | {f['status']} | {f['name']} | {f.get('note', '')} |")
-        lines.append("")
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"wrote {out.relative_to(ROOT)}")
+    fitted(margin, 25, data["title"], width-margin*2-310, title)
+    text(margin, 82, "Spore: Galactic Adventures · Windows x86 · disassembly-driven", body, DIM)
+    text(width-300, 40, f"REVIEWED  {data['updated']}", small, ACCENT)
+    text(margin, 116, "A real-art launcher works. Full game stages and editors are not playable yet.", body, ACCENT)
+    total = stats["overall"]
+    metric_w = (width-margin*2-gap*3)//4
+    for n, (label, value, color) in enumerate([
+        ("TRACKED ITEMS", total["total"], TEXT), ("DONE", total["done"], COLORS["done"]),
+        ("PARTIAL", total["partial"], COLORS["partial"]), ("TODO", total["todo"], DIM)]):
+        x, y = margin+n*(metric_w+gap), 171
+        draw.rounded_rectangle((x,y,x+metric_w,y+108), radius=12, fill=PANEL, outline=EDGE)
+        text(x+20, y+12, label, small, DIM)
+        text(x+20, y+36, value, number, color)
+    scope_w = (width-margin*2-gap*4)//5
+    for n, (scope, label) in enumerate(SCOPES.items()):
+        x, y = margin+n*(scope_w+gap), 300
+        m = stats["scopes"][scope]
+        text(x, y, label, h2, TEXT)
+        text(x, y+32, f"{m['done']}/{m['total']} done · {m['partial']} partial", small, DIM)
+        bar(x, y+67, scope_w, 7, m)
+    for index, (cat, m) in enumerate(zip(data["categories"], stats["categories"])):
+        col, row = index % cols, index // cols
+        x, y = margin+col*(card_w+gap), top+row*(card_h+gap)
+        draw.rounded_rectangle((x,y,x+card_w,y+card_h), radius=12, fill=PANEL, outline=EDGE)
+        fitted(x+18, y+13, cat["name"], card_w-36, h2)
+        text(x+18,y+48,SCOPES[cat["scope"]].upper(),small,DIM)
+        text(x+18,y+78,f"{m['done']} done   {m['partial']} partial   {m['todo']} todo",body)
+        bar(x+18,y+116,card_w-36,8,m)
+        # A cell is one bounded checklist item, not a function or fixed amount of work.
+        for n, feature in enumerate(cat["features"]):
+            gx, gy = x+18+(n%24)*19, y+140+(n//24)*19
+            draw.rounded_rectangle((gx,gy,gx+13,gy+13),radius=2,fill=COLORS[feature["status"]])
+    text(margin, footer+5, "Each square = one tracked item. Equal visual weight does NOT mean equal work.", body)
+    text(margin, footer+41, "Counts are checklist status — not % of Spore completed, code reversed, or time remaining.", body, DIM)
+    text(margin, footer+77, "Sources: analysis/features.json  →  tools/feature_map.py  →  PNG + Markdown + stats JSON", small, DIM)
+    text(margin, footer+107, "Details / evidence / limits: analysis/features.md · PROGRESS.md · VERIFY.md", small, ACCENT)
+    out = io.BytesIO()
+    image.save(out, format="PNG")
+    return out.getvalue()
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--json", default=str(ROOT / "analysis" / "features.json"))
-    ap.add_argument("--png", default=str(ROOT / "analysis" / "shots" / "reverse_map.png"))
-    ap.add_argument("--md", default=str(ROOT / "analysis" / "features.md"))
-    a = ap.parse_args()
-    data = load(Path(a.json))
-    render_png(data, Path(a.png))
-    render_md(data, Path(a.md))
-    return 0
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--json", type=Path, default=ROOT/"analysis/features.json")
+    ap.add_argument("--png", type=Path, default=ROOT/"analysis/shots/reverse_map.png")
+    ap.add_argument("--md", type=Path, default=ROOT/"analysis/features.md")
+    ap.add_argument("--stats", type=Path, default=ROOT/"analysis/features_stats.json")
+    ap.add_argument("--check", action="store_true", help="compare outputs without writing; nonzero if stale")
+    args = ap.parse_args()
+    try:
+        data = load(args.json)
+        function_path = ROOT/"analysis/functions_stats.json"
+        function_stats = json.loads(function_path.read_text(encoding="utf-8")) if function_path.exists() else None
+        stats = statistics(data, function_stats)
+        outputs = {args.png: png_bytes(data, stats), args.md: markdown(data, stats).encode("utf-8"),
+                   args.stats: (json.dumps(stats, ensure_ascii=False, indent=2)+"\n").encode("utf-8")}
+        stale = []
+        for path, content in outputs.items():
+            if args.check:
+                # Git autocrlf may change a checked-out text artifact, never the PNG.
+                existing = path.read_bytes() if path.exists() else b""
+                if path.suffix != ".png":
+                    existing = existing.replace(b"\r\n", b"\n")
+                if existing != content:
+                    stale.append(str(path))
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(content)
+                print(f"wrote {path}")
+        if stale:
+            print("stale generated artifacts:\n"+"\n".join(stale), file=sys.stderr)
+            return 1
+        m = stats["overall"]
+        print(f"{m['done']} done / {m['partial']} partial / {m['todo']} todo; {m['total']} tracked items")
+        return 0
+    except (ValueError, KeyError, ImportError) as exc:
+        print(f"feature map: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

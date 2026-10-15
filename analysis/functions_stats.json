@@ -4,6 +4,7 @@
   "named": 61,
   "named_on_candidate": 52,
   "coverage_pct": 0.0494,
+  "coverage_note": "Legacy field name: named_on_candidate / candidate_starts; NOT reversed-code coverage. Catalogue is incomplete.",
   "by_area": {
     "rw4": 17,
     "startup": 29,
@@ -11,5 +12,5 @@
     "core": 2,
     "render": 1
   },
-  "denominator_note": "candidate starts = union of E8/E9 rel32 targets in .text, .rdata/.data pointers into .text, and prologues (55 8B EC / 8B FF). An upper bound: a jump into a function body also counts."
+  "denominator_note": "candidate starts = union of E8/E9 rel32 targets in .text, .rdata/.data pointers into .text, and prologues (55 8B EC / 8B FF). Heuristic only: includes body jumps and can miss real functions; not a certified bound."
 }

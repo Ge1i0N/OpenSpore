@@ -1,5 +1,12 @@
 # IDEAS — deferred work, stubs, bug classes, and things explicitly disproven
 
+> **Current roadmap, 2026-10-15:** renderer clipping → needed drawable/Button event behavior →
+> GalaxyGameEntry AppMode → first playable stage. See [RESUME](RESUME.md).
+> The numbered research notes below preserve their original chronology/proposals; "now" inside an
+> older section is not a current task. Do not reimplement the already working package reader/unpacker.
+> Beta/runtime names missing in a search do not prove absent classes. [Current VERIFY](VERIFY.md)
+> supersedes older stronger claims; [feature ledger](analysis/features.md) owns status counts.
+
 Rules for this file (from `reimplementation-field-guide.md` §1):
 - Record **disproven hypotheses** with "⚠️ do not repeat" + the evidence. Losing a disproven
   idea costs a week.

@@ -1,0 +1,183 @@
+{
+  "updated": "2026-10-15",
+  "source_sha256": "a376ca34d382f7cec82a717b953d02462e7235fc4dac86f90b8146c1b54222d0",
+  "method": "Equal-weight tracked items; done=1, partial=0.5, todo=0. Not game or code coverage.",
+  "overall": {
+    "total": 288,
+    "done": 203,
+    "partial": 31,
+    "todo": 54,
+    "done_pct": 70.49,
+    "weighted_checklist_index": 75.87
+  },
+  "scopes": {
+    "engine": {
+      "total": 224,
+      "done": 176,
+      "partial": 24,
+      "todo": 24,
+      "done_pct": 78.57,
+      "weighted_checklist_index": 83.93
+    },
+    "ui": {
+      "total": 21,
+      "done": 11,
+      "partial": 4,
+      "todo": 6,
+      "done_pct": 52.38,
+      "weighted_checklist_index": 61.9
+    },
+    "gameplay": {
+      "total": 17,
+      "done": 0,
+      "partial": 0,
+      "todo": 17,
+      "done_pct": 0.0,
+      "weighted_checklist_index": 0.0
+    },
+    "tooling": {
+      "total": 16,
+      "done": 14,
+      "partial": 1,
+      "todo": 1,
+      "done_pct": 87.5,
+      "weighted_checklist_index": 90.62
+    },
+    "platform": {
+      "total": 10,
+      "done": 2,
+      "partial": 2,
+      "todo": 6,
+      "done_pct": 20.0,
+      "weighted_checklist_index": 30.0
+    }
+  },
+  "categories": [
+    {
+      "name": "harness",
+      "scope": "engine",
+      "total": 14,
+      "done": 13,
+      "partial": 0,
+      "todo": 1,
+      "done_pct": 92.86,
+      "weighted_checklist_index": 92.86
+    },
+    {
+      "name": "startup",
+      "scope": "engine",
+      "total": 36,
+      "done": 33,
+      "partial": 3,
+      "todo": 0,
+      "done_pct": 91.67,
+      "weighted_checklist_index": 95.83
+    },
+    {
+      "name": "launch args",
+      "scope": "engine",
+      "total": 30,
+      "done": 28,
+      "partial": 2,
+      "todo": 0,
+      "done_pct": 93.33,
+      "weighted_checklist_index": 96.67
+    },
+    {
+      "name": "packages (DBPF)",
+      "scope": "engine",
+      "total": 39,
+      "done": 33,
+      "partial": 4,
+      "todo": 2,
+      "done_pct": 84.62,
+      "weighted_checklist_index": 89.74
+    },
+    {
+      "name": "gmdl (meshes)",
+      "scope": "engine",
+      "total": 28,
+      "done": 25,
+      "partial": 3,
+      "todo": 0,
+      "done_pct": 89.29,
+      "weighted_checklist_index": 94.64
+    },
+    {
+      "name": "rw4 (models)",
+      "scope": "engine",
+      "total": 16,
+      "done": 7,
+      "partial": 3,
+      "todo": 6,
+      "done_pct": 43.75,
+      "weighted_checklist_index": 53.12
+    },
+    {
+      "name": "render",
+      "scope": "engine",
+      "total": 24,
+      "done": 20,
+      "partial": 0,
+      "todo": 4,
+      "done_pct": 83.33,
+      "weighted_checklist_index": 83.33
+    },
+    {
+      "name": "formats",
+      "scope": "engine",
+      "total": 37,
+      "done": 17,
+      "partial": 9,
+      "todo": 11,
+      "done_pct": 45.95,
+      "weighted_checklist_index": 58.11
+    },
+    {
+      "name": "UI / SPUI behavior",
+      "scope": "ui",
+      "total": 21,
+      "done": 11,
+      "partial": 4,
+      "todo": 6,
+      "done_pct": 52.38,
+      "weighted_checklist_index": 61.9
+    },
+    {
+      "name": "gameplay",
+      "scope": "gameplay",
+      "total": 17,
+      "done": 0,
+      "partial": 0,
+      "todo": 17,
+      "done_pct": 0.0,
+      "weighted_checklist_index": 0.0
+    },
+    {
+      "name": "tooling",
+      "scope": "tooling",
+      "total": 16,
+      "done": 14,
+      "partial": 1,
+      "todo": 1,
+      "done_pct": 87.5,
+      "weighted_checklist_index": 90.62
+    },
+    {
+      "name": "platform",
+      "scope": "platform",
+      "total": 10,
+      "done": 2,
+      "partial": 2,
+      "todo": 6,
+      "done_pct": 20.0,
+      "weighted_checklist_index": 30.0
+    }
+  ],
+  "function_catalogue": {
+    "named": 61,
+    "named_on_candidate": 52,
+    "candidate_starts": 105239,
+    "note": "Manual catalogue, not all discoveries or decoded code coverage."
+  }
+}

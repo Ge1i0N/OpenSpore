@@ -8,11 +8,11 @@ fields open · **TODO** = only the type id / count known.
 
 | type | id | count | status | notes |
 |---|---|---|---|---|
-| `spui` | 0x250FE9A2 | 748 resources / 524 instance ids | **SOLVED framing / PARTIAL behavior** | GA 0x82ce10/0x82b3f0; 748/748 exact EOF; code 19 object refs, code 20 structs; 20,659 links. Drawables/WinProcs open; `analysis/spui-binary.md` |
-| `png` | 0x… | 14,549 | **SOLVED** | real PNG; GDI+ decodes; drawn by the engine |
-| `raster` | 0x2f4e681c | 5,931 | **SOLVED** | header `{ver,dim,dim,code,8,tag,base}`; DXT1/DXT5/raw; `analysis/…`, drawn by the engine |
-| `gmdl` | 0x00e6bce5 | 11,041 | **SOLVED** (positions) | stride 36, position = first float3, bbox exact; UV at offset 16; drawn by the engine |
-| `locale` | 0x024a0e52-ish | 2,944 | **SOLVED** | localized text; unpacked to files |
+| `spui` | 0x250FE9A2 | 748 resources / 524 instance ids | **Framing verified / behavior partial** | [binary reader](spui-binary.md); [atlas-aware drawable subset](spui-drawables.md); full WinProcs/events not implemented |
+| `png` | 0x2F7D0004 | 14,549 | **Decoded/rendered** | standard PNG, GDI+ decoder; Image atlas UV now applied |
+| `raster` | 0x2F4E681C | 5,931 | **Supported subset** | header + DXT1/DXT5/raw in `source/engine/raster.cpp`; recorded 5,747 exports, not every resource variant |
+| `gmdl` | 0x00E6BCE5 | 11,041 | **Supported subset** | variable stride 24/28/36 for supported declarations; float3 positions; recorded 6,979 exports; unsupported variants remain raw |
+| `locale` | 0x02FAC0B6 | 2,944 flat resources | **Parsed/displayed** | nested corpus also read; 265 en-us tables / 23,933 distinct table-key texts; full font renderer remains open |
 | `trigger` | 0x024a0e52 | — | **PARTIAL** | text scripts; groups resolve to `properties`/`ConfigManager`/`SporeAppStates` |
 | `prop` | 0x00b1b104 | 30,645 | **PARTIAL** | big-endian `count` + `{key,type,count,size,data}` for the FIRST section; a SECOND section then diverges (keys `0x03xxxxxx`/`0x04xxxxxx`, 1-byte offset shift). Addressed by **instance id**: the binary builds `{instance, 0xb1b104}` descriptors for 19 specific props at `.text 0xdd1f2f..` (ids `0xf0329031`, `0x128b5d9`, `0x210a32f5`, ...). Keys are NOT FNV-1-lower of `reg_file.txt` names |
 | `blockdata` | 0x5caa5e28 | 3,141 | **PARTIAL** | an array of `vec3` (size always a multiple of 12); the first two `vec3` are a **min/max bounding box** (verified min<=max on samples); the rest is open |

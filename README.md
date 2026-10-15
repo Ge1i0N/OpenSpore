@@ -1,318 +1,191 @@
 # OpenSpore
 
-> **TL;DR (RU):** Реверс-реимплемент Spore: Galactic Adventures (x86, Windows) по документации
-> в `.md` и по дизассемблеру оригинального бинарника. Сейчас это **Proof of Concept, который
-> уже читает и РИСУЕТ настоящие данные игры**: грузится окно с иконкой, рендерится Loader-состояние,
-> вскрываются **все 57 реальных `.package`** (≈5.7 ГБ данных EA) без единого отказа, а на своём
-> D3D9-рендере выводятся **настоящая 3D-модель Spore** (`gmdl`, позиции сходятся с bbox файла точно)
-> и **собственный формат текстур движка** (`raster`: DXT1/DXT5/raw). Движок (RenderWare/`rw4`) ещё
-> не тронут. Дальше — по документам.
+### Spore: Galactic Adventures — от бинарника к самостоятельной игре
 
-A from-scratch reimplementation of **Spore: Galactic Adventures**, driven by disassembly of
-the shipped 32-bit binary rather than by wiki knowledge.
+**Windows · x86 · Debug · C++20 · Direct3D 9 · CMake / MSVC**
 
-**UI update (2026-10-15):** all **748 SPUI resources** parse sequentially with actual child graphs
-(20,659 links), from GA disassembly. A visible launcher tile can enter an editor state; widgets still
-render as diagnostic geometry/text and gameplay is unfinished. See [evidence and validation](analysis/spui-binary.md).
+OpenSpore — самостоятельная реимплементация **Spore: Galactic Adventures** на основе
+дизассемблирования GA-бинарника и проверки shipped data. Цель — восстановить путь от `Main`
+до полностью играбельной игры, а не только открыть её ресурсы.
 
-![OpenSpore Loader: the game inventory plus a 2x2 grid of four real Spore models, each with its own texture, drawn by our engine](analysis/shots/model_grid.png)
+> **Сейчас:** приложение загружается, читает игровые пакеты, показывает настоящий launcher
+> из SPUI и атласов, обрабатывает выбор видимой плитки и переходит в нужное состояние.
+> **Но:** редакторы и игровые стадии ещё не работают. Это исследовательская сборка, не замена Spore.
+>
+> Последняя сверка: **15 октября 2026**. [Текущий статус](PROGRESS.md) ·
+> [Чеклист функций](analysis/features.md) · [Доказательства](VERIFY.md) · [План продолжения](RESUME.md)
 
-That screenshot is not a mock-up: it is an in-engine capture of our own exe. The left side is the
-game's own inventory (**150,945 resources across 57 packages, 10.27 GB decoded, 112,155 names
-resolved**) read through the reversed index, RefPack and FNV-1 hashing. On the right, our renderer
-draws **four real Spore models decoded from the shipped `.package` files**, each with **its own
-texture** (a model's texture is the `raster` resource with the same instance id — 865/865 match):
-a creature, two `floraModels_*` plants and a second creature. Earlier captures:
-`analysis/shots/mesh_textured.png` (one textured model), `analysis/shots/raster_engine.png`
-(native texture + mesh), `analysis/shots/hero_real_asset.png`.
+## Уже не просто прямоугольники
 
-## Status
+![Настоящий E3LaunchScreen: логотип Spore, иконки стадий и плитки редакторов, отрисованные OpenSpore](analysis/shots/spui_e3launch_uv.png)
 
-| | |
-|---|---|
-| Builds | MSVC x86 Debug, 0 errors, 0 warnings |
-| Boots | **10/10** boot-chain markers with `-w -devDirs` |
-| Renders | D3D9 window + icon + font atlas + Loader state, **33 fps**, machine-captured |
-| Reads EA's data | **57/57 `.package` opened, 0 rejected**; 150,945 resources, 10.27 GB, 0 invariant violations |
-| Decodes EA's data | **RefPack solved**: 30,000/30,000 real records decode to exactly `memSize` |
-| Names EA's data | **112,155 / 150,945 resource names resolved** (type + group + instance) |
-| Writes EA's data | **unpacker**: 2,944 locale + 14,549 png files written under real names, 0 failed; solved formats export as **BMP/OBJ** (whole game: 5,747 textures + 6,979 models, 0 failed) |
-| **Renders EA's data** | a real decoded `.png` **and a real decoded `gmdl` mesh** (creature, 3,765 verts) **and the engine's own `raster` texture format** (DXT1/DXT5/raw) drawn on our own D3D9 renderer (see the screenshot) |
-| `gmdl` (meshes) | **solved** — variable stride (vertex_bytes/count; N=3/4/6 -> 24/28/36), position = first float3; **55% of the game parses** (bbox-validated) |
-| **Model + texture** | a model's texture is the `raster` with the **same instance id** (865/865 match); the engine draws a 2x2 grid of four real models, each textured |
-| **Textured model** | the engine draws a real `gmdl` mesh **with its real `raster` texture** (UVs + MODULATE) |
-| `rw4` (models) | header pinned down; object table not reversed (12,987 resources) |
-| First real content | Czech name/place lexicon, decoded end-to-end (`LexiconPlanets_CS.trigger`) |
-| Fault tolerance | proven: 5 aborts recovered inside the frame loop, 6th in 1 s → storm exit |
-| Crash diagnostics | live symbolised stacks (`file:line`) via our own dbghelp harness |
-| RenderWare bridge | **not started** — this is the next big piece |
+Это **capture нашего `OpenSpore.exe`**, а не макет и не окно оригинальной игры.
+Экран выбирается командой `uilayout -load E3LaunchScreen` из игрового состояния `DevLauncher`.
+Рендерер использует реальную иерархию окон, UV-области атласов и кадры состояний кнопок.
+Светлые рамки и диагностические подписи пока намеренно оставлены.
 
-Full, current numbers: [`PROGRESS.md`](PROGRESS.md) · what is actually verified against the
-binary: [`VERIFY.md`](VERIFY.md).
+**Проверенная цепочка:**
 
-## How the original boots (reversed from the entry point)
-
-Full trace with addresses and instructions: [`analysis/startup.md`](analysis/startup.md).
-
-```
-PE entry 0x011e11e1 -> CRT init -> __tmainCRTStartup 0x011e0f21
-  -> WinMain 0x00f489e0 -> app_main 0x00f48810 -> run 0x00f47e90
-       app_main: -multipleInstances guard (named object Global\SporeEditorOrGame)
-       run:      -demo/-devDirs/-shipDirs/-baseGame/-automation/-mouse/-hostIP/-clientIP/-isHost
-                 creates the AppMode/config object (0x7e8a00, vtable 0x1413b50)
-                 calls its vtable: init subsystems, plugins, create device, shader config
-                 creates the window (0x849b20) and the renderer
-  -> MAIN LOOP 0x008482f0  (window vtable +0x84)
-       PeekMessageW -> WM_QUIT check -> dispatch to window handlers
-         -> TranslateMessage -> DispatchMessageW -> repeat
+```text
+boot → DevLauncher → E3LaunchScreen → видимая плитка → CreatureEditor
+                                                       └─ состояние есть; редактор ещё не реализован
 ```
 
-The game's AppMode starts in the state **`AppModePluginLoader`** and drives a state machine
-(`app`, `quit`, `UIWorld_Loading`, `EventLoadScreenBufferPercentage`). The **mouse/input pump** is
-`0x84a050` (the only `PeekMessageA` user; window vtable `+0x88`).
+Детали и GA-адреса: [SPUI binary](analysis/spui-binary.md) · [drawables](analysis/spui-drawables.md).
 
-## Progress map
+## Что работает — и где граница
 
-![OpenSpore reversal progress: engine 80.2%, overall 73.1%](analysis/shots/reverse_map.png)
-
-Green = reversed **and** implemented **and** verified, amber = partial, grey = not started. The
-same data as a text list (with a per-feature note and status) lives in
-[`analysis/features.md`](analysis/features.md). Both come from one source of truth,
-`analysis/features.json`, and are regenerated by `tools/feature_map.py`, so the picture and the
-list can never drift apart:
-
-```powershell
-python tools/feature_map.py        # refresh analysis/shots/reverse_map.png AND analysis/features.md
-```
-
-Add a feature (or flip a `status`) in the JSON and re-run; that is how the map grows with the
-project.
-
-### Function map (how much of the binary's CODE is reversed)
-
-The feature map above measures the **scope we chose** (boot chain + asset formats) and is high.
-The hard number is different: `tools/functions.py` counts candidate function starts in the
-oracle's own `.text` and how many we have actually reversed.
-
-| | |
-|---|---|
-| candidate function starts in `.text` (upper bound) | **105,239** |
-| functions reversed/named | **29** |
-| code coverage | **0.021%** |
-
-Text list: [`analysis/functions.md`](analysis/functions.md). The **beta PDB is a different link**
-(0/12 addresses match the GA target — `analysis/build_identity.md`), so its addresses are *not*
-usable for the oracle; it can only supply names where function identity matches, which is a
-separate, larger effort. That is why the denominator comes from the binary, not the PDB.
-
-The PDB is still valuable as a **name** source — it is not stripped. `tools/pdb_symbols.py`
-harvests **136,433** unique function/method name paths and groups them by subsystem, which is the
-engine's own vocabulary (and what makes a disassembly readable):
-
-| subsystem (from the PDB) | functions |
-|---|---|
-| `SP` (the Spore engine) | 63,246 |
-| `EA` | 24,214 |
-| `eastl` | 9,874 |
-| `rw` (RenderWare) | 6,582 |
-| `nSPCreatureAnim` | 2,423 |
-| `nSPSkinner` | 1,561 |
-
-Full breakdown: [`analysis/pdb_symbols.md`](analysis/pdb_symbols.md).
-
-### Can we guess addresses from the PDB? Partially.
-
-A full "PDB name → oracle address" map is **not derivable**, for three verified reasons: there is no
-beta **binary** (only the PDB, so no code to fingerprint); no reference build matches the oracle (all
-`Also*` have different CodeView GUIDs); and the GA build is **/GR− (RTTI off)** with almost no assert
-function-name strings.
-
-What *does* work is a **string-reference guesser**: `tools/name_guess.py` attributes each `.rdata`
-string referenced by a `push imm32` / `mov r32, imm32` to its enclosing function (strict starts:
-prologues + `E8` targets), then matches distinctive strings to PDB name tokens (scored by string
-length, token rarity, and how many functions use the string). It yields **220 candidate
-address→name guesses, 39 HIGH-confidence**:
-
-| address | proposed name | driving string |
+| Область | Реализовано и проверено | Ещё не готово |
 |---|---|---|
-| `0x007f6160` | `SPUICreateAnimationTimerRamp` | `SPUICreateAnimationTimerRamp` |
-| `0x0089f060` | `EA::Allocator::StackAllocatorCoreAllocate` | `StackAllocatorCoreAllocate` |
-| `0x00845710` | `EA::ArgScript::cParser::CommandExists` | `commandExists` |
-| `0x00a73c10` | `SP::EffectsManager` | `effectsManager` |
-| `0x00ea66b0` | `SP::cPlanetModel::IsUnderWater` | `isunderwater` |
-| `0x01028655` | `SP::cCreatureModeStrategy::RunCinematic` | `runcinematic` |
+| Запуск | x86 Debug, окно, консоль/лог, **10/10** boot markers, capture и fault-tolerance harness | x64 и выпуск для обычных игроков |
+| Пакеты | **57/57 DBPF**, **150 945** записей; RefPack; CLI-распаковка; вложенные пакеты | запись/repack, полная оригинальная приоритизация ресурсов |
+| SPUI | **748/748** файлов до EOF, **93 726** объектов, **22 384** окна, **20 659** связей Children | WinProcs, динамическая раскладка/Z-порядок, общий command dispatcher |
+| UI art | UV и логические размеры Image; None-tiling ImageDrawable; нетайловые Standard/Radio; scale/alignment | tiling, outline/shadow, Dialog pieces и полный event lifecycle кнопок |
+| Текст | locale-таблицы, в том числе вложенные; **1 384 / 1 426** caption refs разрешаются | оригинальный шрифтовой renderer, полный Unicode/layout |
+| Модели | поддерживаемый subset `gmdl`, UV, `raster` DXT1/DXT5/raw; галерея настоящих моделей | полноценные RW4, материалы, анимация и игровой мир |
+| Навигация | видимый клик `(311,550)` → `CreatureEditor [0x022D9E01]` | сам Creature Editor и playable stages |
 
-Every row is a **guess to check by disassembly**, not truth. Two honest limits: the guesser keys on
-**self-describing** functions (registrars, `GetName`, factories), so it does *not* overlap much with
-the workhorse routines we hand-reversed (byte loops, decoders); and when one string matches several
-PDB names (e.g. `Refpack` → 15 `EA::Refpack::*` methods) it identifies the **family** reliably but the
-specific member shown is arbitrary. Full list: [`analysis/name_guesses.md`](analysis/name_guesses.md).
+<details>
+<summary><strong>Ранее достигнуто: модели и их текстуры</strong></summary>
 
-## Quick start
+![Loader с инвентарём игровых пакетов и четырьмя текстурированными моделями](analysis/shots/model_grid.png)
+
+Это отдельная диагностическая галерея. Она подтверждает чтение и отрисовку поддерживаемых ассетов,
+**не** игровую симуляцию или полноту `gmdl`/RenderWare. Подробности: [форматы](analysis/formats.md).
+
+</details>
+
+## Прогресс без «игра готова на 80%»
+
+![Чеклист OpenSpore: точные количества done, partial и todo, отдельно engine/data, UI, gameplay, tooling и platform](analysis/shots/reverse_map.png)
+
+Каждая клетка — **один пункт нашего чеклиста**, а не функция бинарника и не одинаковый объём работы.
+Открытое поле заголовка, готовый диагностический инструмент и игровая стадия имеют разную сложность.
+Навигация UI отделена от gameplay: переход в редактор не делает редактор готовым.
+
+В [полном списке](analysis/features.md) есть статусы, границы и ссылки на evidence.
+Взвешенный индекс `(done + 0.5 × partial) / total` — лишь вспомогательная метрика чеклиста,
+**не процент готовности игры, покрытия кода или оценка оставшегося времени**.
 
 ```powershell
-# 1. configure + build (x86 Debug; the icon comes from assets/OpenSpore.ico)
+python tools/feature_map.py          # PNG + Markdown + machine-readable stats
+python tools/feature_map.py --check  # проверка актуальности без перезаписи
+```
+
+Источник: [`analysis/features.json`](analysis/features.json). Результаты:
+[`features.md`](analysis/features.md), [`features_stats.json`](analysis/features_stats.json), PNG выше.
+Дата на картинке — дата сверки исходного списка, а не просто дата запуска скрипта.
+
+## Сборка и запуск
+
+### Нужно
+
+- Windows и Visual Studio 2022 / Build Tools с **Desktop development with C++** и Windows SDK.
+- CMake 3.25+, генератор **Win32**, конфигурация **Debug**.
+- Собственные легально полученные данные Spore + Galactic Adventures. Бинарники и `.package`
+  в Git не включены; `.exe` оригинала нужен для исследования, а не для запуска нашей программы.
+- Python 3.11+ для исследовательских инструментов; **Pillow** для прогресс-картинки.
+  Сама C++-сборка Python не требует.
+
+```powershell
+# Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug
-
-# 2. run it the way the reversal asks (windowed, loose dev dirs)
-cd build\bin\Debug
-.\OpenSpore.exe -w -devDirs
-
-# 3. watch the log while it runs (it is opened share-readable on purpose)
-$fs=[IO.File]::Open("$PWD\OpenSpore.log",'Open','Read',[IO.FileShare]::ReadWrite)
-$sr=New-Object IO.StreamReader($fs); $sr.ReadToEnd(); $sr.Close(); $fs.Close()
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify
 ```
 
-Game data goes in `build/bin/Debug/Data/` (base game) and `DataEP1/` (Galactic Adventures),
-exactly where the original looks for it. It is **not** in this repo — `refs/` and the assets
-are gitignored; only our own evidence is committed.
+Расположение данных рядом с собранным executable:
 
-The unpacker (the PROMPT.md wish) writes the game's resources out under their real names, decoded.
-Solved formats come out as **standard files**: `raster` textures as `.bmp`, `gmdl` models as `.obj`
-**together with their paired `.bmp` texture and a `.mtl`** (a model's texture is the `raster` with
-the same instance id), so exported models open textured in any 3D tool.
+```text
+build/bin/Debug/
+  OpenSpore.exe
+  Data/                 # базовые .package, Locale/<lang>/, Config/
+  DataEP1/              # пакеты и Config Galactic Adventures
+  UserData/             # создаётся приложением
+```
+
+Данные нужны в их собственной структуре; **не** переименовывайте `.package` в `.package.big`.
+Числа в тестах относятся к конкретному проверенному набору из 57 пакетов, а не к любой установке.
 
 ```powershell
-# every resource of every package, filtered by type
-.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,locale   # all localized text
-.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,png      # 14,549 real PNGs
-.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,raster   # textures -> BMP (DXT decoded)
-.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,gmdl     # models -> OBJ
+cd build/bin/Debug
 
-# the same, with NO window and NO D3D9 device (no display / CI / a server):
-.\OpenSpore.exe -headless -devDirs -exec pkg:-unpack,all,C:\dump,png -quitAfter 8
+# Настоящий launcher; закройте окно вручную
+.\OpenSpore.exe -w -devDirs -state:DevLauncher
+
+# Короткий unattended-прогон со screenshot
+.\OpenSpore.exe -w -devDirs -state:DevLauncher -quitAfter 30 -capture launcher.bmp -captureAfter 20
+
+# Регрессия видимого перехода; редактор после перехода пока не работает
+.\OpenSpore.exe -w -devDirs -state:DevLauncher -quitAfter 18 -exec spui:-click,311,550
 ```
 
-`-headless` (alias `-noWindow`) skips the window, the device and the font atlas but keeps everything
-else (logging, the harness, the search paths, the naming registry, the console). The unpack above
-produces **bit-for-bit the same output as the windowed run** (2,944 files for `locale`), so the
-unpacker is usable as a standalone tool.
+`-quitAfter` задаётся **в кадрах**, не секундах. Для автоматических запусков задавайте его явно.
+Лог — `build/bin/Debug/OpenSpore.log`, открыт для параллельного чтения и дописывается между запусками.
 
-Unattended / scripting hooks we added for testing. Arguments use `name:arg,args` so **no shell
-quoting is involved** (PowerShell mangles `"-abortNow 9"` into `"._abortNow 9\`, and a harness
-must not depend on that):
+### Проверки
+
+Из корня репозитория:
 
 ```powershell
-.\OpenSpore.exe -w -devDirs -exec state:-list                       # the reversed `state` verb
-.\OpenSpore.exe -w -devDirs -exec pkg:-hdr,0                        # header of package #0
-.\OpenSpore.exe -w -devDirs -exec pkg:-rec,0,3                      # one index record
-.\OpenSpore.exe -w -devDirs -exec pkg:-dump,0,3,res0.bin            # first real EA resource (packed)
-.\OpenSpore.exe -w -devDirs -exec pkg:-decode,0,2,dec.bin           # RefPack-decoded game text
-.\OpenSpore.exe -w -devDirs -exec pkg:-unpack,all,C:\dump,png       # unpack 14,549 real PNGs
-.\OpenSpore.exe -w -devDirs -capture out.bmp -captureAfter 20 -quitAfter 60
-.\OpenSpore.exe -w -devDirs -exec _abortNow:9 -quitAfter 80         # fault-tolerance test
+$fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
+python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
+.\build\Debug\spui_verify.exe $fixtures
+.\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
+python tools/pkg_kinds.py
+python -m unittest discover -s tools/tests -p 'test_*.py'
+python tools/feature_map.py --check
+python tools/docs_check.py
 ```
 
-All five `pkg:` subcommands above were run in this session and their output is in `HISTORY.md`.
+Последняя проверка: **748** corpus matches, **486** malformed inputs rejected атомарно,
+drawable UV/state/scale/alignment checks PASS; **544** scoped package cycles при CRT-лимите **512**.
+Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
-## What it is made of
+### Полезный CLI
 
-```
-source/
-  main.cpp                 wWinMain -> diag::early_neutralise() -> app::run
-  app.h/.cpp               the 10-step boot chain (the yardstick) + the frame loop
-  common.h                 u8..u64 + FNV-1 exactly as the original computes it
-  engine/log.*             share-readable file, per-call-site consolidation ledger
-  engine/diag.*            non-fatal asserts, abort interception, symbolised stacks,
-                           run_guarded() = the fault-tolerance primitive
-  engine/cmdline.*         the reversed argument contract (devDirs/shipDirs/state/preload)
-  engine/fs.*              the reversed search paths; shipDirs wins over devDirs
-  engine/console.*         command registry + stdin worker (help/logLevel/echo/state/pkg/capture)
-  engine/pkg.*             the DBPF reader, built only on fields proven below
-  render/device.*          Direct3DCreate9 (the original's single d3d9 import) + frame capture
-  render/overlay.*         GDI font atlas -> staging texture -> UpdateSurface, batched text
-  states/statemgr.*        AppStateManager analog: FNV ids, no nesting, onEnter/Exit/Tick/Render
-  states/loader.cpp        our Loader state; it lists the real packages on screen
-tools/                     24 Python/PowerShell reversal tools (see RESUME.md)
-analysis/                  generated evidence: recon, build identity, verification, screenshots
-upstream/                  third-party RE knowledge we copied in, with its errors recorded
+Из `build/bin/Debug`:
+
+```powershell
+.\OpenSpore.exe -headless -devDirs -quitAfter 8 -exec state:-list
+.\OpenSpore.exe -headless -devDirs -quitAfter 8 -exec pkg:-unpack,all,C:\SporeDump,png
+.\OpenSpore.exe -headless -devDirs -quitAfter 8 -exec pkg:-unpack,all,C:\SporeDump,raster
+.\OpenSpore.exe -headless -devDirs -quitAfter 8 -exec pkg:-unpack,all,C:\SporeDump,gmdl
 ```
 
-Everything here is ours; no EA code or asset is shipped in the repository.
+Поддерживаемые raster экспортируются в BMP, gmdl — в OBJ с парной текстурой/MTL;
+неподдерживаемые варианты не становятся автоматически пригодными моделями. `-headless` не создаёт
+окно и D3D-устройство. Путь вывода выбирайте самостоятельно: распаковка может занимать много места.
 
-## The reversal oracle (the thing that made this possible)
+## Как ведётся реверс
 
-The retail `SporeApp.exe` ships with an **encrypted `.text`** (entropy 8.000) — it cannot be
-disassembled at all. The decrypted dump `SporeApp.exe.unpacked.exe` **is** the same link:
-every other section is byte-identical, and the proof is a cross-section test (the decrypted
-code references 7 known `.rdata` string addresses that the encrypted original references 0/7
-of), run against the encrypted `.text` as a **control**. 9/9 metrics pass.
-Details: `analysis/unpacked_verification.md`.
+1. **Адресный oracle — только GA-unpacked:** `refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe`.
+2. Инструкции/декомпиляция → проверка shipped data → ограниченная реализация → тест/capture.
+3. Persistent Ghidra и REA используются для binary evidence; результаты сохраняются в `analysis/audit/`.
+4. Beta EXE/PDB — семантический ориентир, **не источник GA-адресов**.
+5. Наблюдения, гипотезы и наши presentation policies обозначаются отдельно.
 
-So authority order #1 (disassembly of the original binary) is usable again, and every claim in
-`VERIFY.md` carries the instructions it was based on.
+Необходимые инструкции: [исходный brief](PROMPT.md), [field guide](reimplementation-field-guide.md),
+[toolchain](analysis/toolchain-rea.md). Границы регистра функций объяснены в
+[functions.md](analysis/functions.md): ручной каталог **не является** полной оценкой покрытия бинарника.
 
-## What we already know for certain
+## Документация и следующий шаг
 
-A few highlights, all with addresses in [`VERIFY.md`](VERIFY.md):
-
-* **The game's state machine is real and reachable in the retail build** — `AppStateManager`,
-  a `state` console verb with `-list^-next^-prev^-reload^`, and state identity is a
-  **FNV-1 hash of the name** stored at `[state+0x28]`, with duplicate IDs rejected and
-  nesting forbidden ("can't nest states or transitions"). The state *names* are `.eBT` script
-  data, so until packages parse we own the mechanism and ship our own `Loader`.
-* **`-devDirs` / `-shipDirs`** are looked up through one helper (`0x0092b570`); `shipDirs`
-  wins, and the result is `[configObj+0x159]`. The whole launch vocabulary is enumerated
-  mechanically: 76 call sites → 56 names in `analysis/arg_vocab.md`.
-* **DBPF**: 0x60-byte header whose validator we replay clause-by-clause; the index's first
-  dword is a **shared-field bit mask**, so `prefix = 4 + 4·popcount(K)` and
-  `stride = 32 − 4·popcount(K)`; a record's last u32 is really `compression:u16 + flags:u16`,
-  and splitting it explains every value ever seen (0xFFFF = RefPack in 98,407 records,
-  0x0000 = raw in 52,538, with payload bytes confirming both).
-* **The engine is RenderWare on D3D9, statically linked** — one single `d3d9.dll` import, so
-  the RW seam is inside `.text` and the plugin-registration family is the next target.
-
-## Method
-
-This project follows two documents that came with it, and they are the rules, not decoration:
-
-* [`PROMPT.md`](PROMPT.md) — what the user asked for.
-* [`reimplementation-field-guide.md`](reimplementation-field-guide.md) — the playbook.
-* [`ai-brief-and-commands.md`](ai-brief-and-commands.md) — the authority order and the tooling.
-
-Non-negotiables we hold ourselves to:
-
-1. **Disassembly is the primary tool.** We read the original's instructions before we look at
-   its data files, and we quote the instructions inline in any code they justify.
-2. **Every metric gets a chance baseline and a control.** Three early revisions of our own
-   verifier were wrong because they had neither; that is written down in `IDEAS.md` §5 so it
-   is not repeated.
-3. **Nothing is stubbed unless its consumers and their guards are named.**
-4. **No modal dialog may ever block the process** — asserts log and continue, `abort()` is
-   intercepted and recovered from, and the crash harness is installed before anything that
-   could need it.
-5. **Disproven hypotheses are recorded, with evidence**, because losing one costs a week.
-
-## Documentation map
-
-| file | what it answers |
+| Документ | Для чего |
 |---|---|
-| [`RESUME.md`](RESUME.md) | start here: current state, exact commands, next actions |
-| [`PROGRESS.md`](PROGRESS.md) | the boot/load chain, one row per step, ✅/🚧/❌ |
-| [`VERIFY.md`](VERIFY.md) | feature × address × disasm-status, plus the ordered next actions |
-| [`MEMORY.md`](MEMORY.md) | durable facts: layouts, the DBPF format, and every trap we hit |
-| [`IDEAS.md`](IDEAS.md) | deferred work, open questions, and ⚠️ things we disproved |
-| [`HISTORY.md`](HISTORY.md) | what changed each session **and how it was verified** |
+| [PROGRESS.md](PROGRESS.md) | текущие возможности, ограничения и повторяемые проверки |
+| [RESUME.md](RESUME.md) | короткий hand-off и ближайшие задачи |
+| [VERIFY.md](VERIFY.md) | evidence ledger: адреса, тип доказательства, опровержения |
+| [analysis/README.md](analysis/README.md) | навигация по исследованиям, генераторам и архивам |
+| [MEMORY.md](MEMORY.md) | устойчивые выводы и ловушки; старые секции явно исторические |
+| [IDEAS.md](IDEAS.md) | roadmap, отложенные идеи и опровергнутые гипотезы |
+| [HISTORY.md](HISTORY.md) | хронология: что проверялось в тот момент, не текущий статус |
 
-## Honest limits
+Ближайший путь: согласовать renderer clipping с hit testing, восстановить недостающие drawable/event
+ветки, затем идти в `GalaxyGameEntry` и поведение `AppMode`. Подробный план — в [RESUME.md](RESUME.md).
 
-* **No RenderWare, no meshes yet.** We can open, index and **decompress** any resource, but we
-  have not decoded a mesh, a texture or a behaviour tree. The `rw4` type (0x2F4E681B, 12,987
-  records) is the RenderWare container and is the next target. The Loader screen is our own art.
-* **RefPack is solved and verified** (30,000/30,000 real records decode to exactly `memSize`,
-  `tools/refpack.py --verify`), and `pkg:-decode` writes real game data. The first decoded
-  assets are the Czech name/place lexicon.
-* **`-w` is our own convention.** It is *not* in the original's argument vocabulary; we say so
-  instead of pretending we reversed it (`VERIFY.md` row 15).
-* **x64 exists only as a CMake switch** and has never been compiled.
-* Third-party RE knowledge (`upstream/SporeMaster3/`) was **tested before being used**, and it
-  was wrong in **three** places now (RefPack endianness, "type id = FNV(name)", and its prose
-  generally - though its *source code* was accurate where the summary was not). All recorded in
-  `MEMORY.md` and `IDEAS.md` §5 rather than quietly adopted.
+## Происхождение материалов
 
-## Licence / provenance
-
-Reimplementation for study. No EA code, binaries or assets are distributed here — `refs/`
-(reference binaries) and the game data are gitignored by design. The icon in
-`assets/OpenSpore.ico` is the user's own artwork for this project.
+Исследовательский проект, не связанный с EA/Maxis и не одобренный ими. Оригинальные executable,
+PDB и игровые пакеты не включены в репозиторий. В документации есть captures с игровым artwork и
+статические фрагменты анализа; это не утверждение о владении контентом EA и не лицензия на него.
+Иконка `assets/OpenSpore.ico` — предоставленная пользователем работа для проекта.

@@ -1,5 +1,9 @@
 # The reverse-engineering toolchain (session 13)
 
+> Environment/installation notes below are a retained session snapshot, not a request to reinstall
+> or reconfigure anything. Discover the currently available REA tool schemas, reuse the persistent
+> GA project, and diagnose only observed blockers. See [current hand-off](../RESUME.md).
+
 Two instruments over the same Ghidra 12.1.4 engine, deliberately kept side by side.
 
 ## Primary: REA (`rea` CLI + its MCP server)

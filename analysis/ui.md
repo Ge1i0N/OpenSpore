@@ -2,6 +2,12 @@
 
 Authority: disassembly of `refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe` + the shipped packages.
 
+**Current implementation, 2026-10-15:** the parser is no longer missing. All 748 resources parse
+through EOF with object-index child graphs; the launcher now renders atlas-aware real art and
+visible selection enters CreatureEditor. This does not implement the editor, full WinProcs or
+general command dispatch. See [binary framing](spui-binary.md), [drawables](spui-drawables.md) and
+[the capture](shots/spui_e3launch_uv.png). Registry/loading observations below remain static evidence.
+
 ## The UI is data-driven: `spui` layouts
 
 Menus/screens are not code — they are `spui` resources (type **`0x250fe9a2`**), binary UI layouts.
@@ -39,14 +45,12 @@ sources are not present in our packages; `spui` is).
 (`call 0x804f10` / `0x80cfb0` / ...), and registers it against a name string and a class id (e.g.
 `push 0x1416c50` = `UTFWin/cSPUIFrameSequencer`, then `[obj+0x8]->vtable+0xc`).
 
-## Path to "the Loader shows the menu"
+## Current rendering path and next work
 
-1. Parse the `spui` binary layout (the screen tree: windows, their classes from the table above,
-   positions, and referenced image/font resources). This is the missing piece — like `gmdl`, it must
-   be derived from the data + the reader.
-2. Implement the small set of SPUI window classes the title/launch screens use (buttons, images,
-   text), with the UTFWin/immediate 2D path.
-3. Feed them the decoded `png`/`raster` UI art and the `locale` strings we already decode.
+State script → named SPUI → object graph → typed drawable → Image UV/logical size → indexed PNG →
+Overlay quad. None-tiling ImageDrawable fixed scale/alignment and non-tileable four/six-frame
+Standard/Radio selection are implemented and tested. Diagnostic outlines and ASCII text remain.
 
-Our engine already has the 2D overlay (rects + text + images), the `png`/`raster` decoders and the
-`locale` text; the remaining work is the `spui` layout parser and the window-class behaviours.
+Next: renderer Clip/scissor consistent with picking, needed tiling/outline branches and original
+Button events, then GalaxyGameEntry AppMode behavior. Dynamic Z/layout, Dialog pieces, font layout,
+radio checked-state mutation and CommandID dispatch are not complete.

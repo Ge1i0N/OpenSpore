@@ -1,5 +1,9 @@
 # Audit review: did we start reversing correctly? (session 13, Ghidra 12.1.4)
 
+> Historical selected-claim audit review. Its failures, unknowns and totals describe that audit,
+> not all present-day code. [Current VERIFY](../VERIFY.md) resolves later corrections; in particular
+> binary SPUI and atlas-aware drawables now have focused evidence.
+
 The user's request: check **everything we have reversed, starting from WinMain**, to see whether we
 started correctly at all. This is the human reading of the machine-generated `analysis/audit.md`
 (which `tools/ghidra_audit.py verify` overwrites on every run).

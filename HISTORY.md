@@ -3,6 +3,29 @@
 Every entry ends with its verification. If a change has no measurable delta it is labelled
 **hypothesis**, per the output contract in `ai-brief-and-commands.md`.
 
+> Chronological record, not current instructions. Historical counts, percentages, hidden GGE
+> demos and disproven hypotheses are retained as such. Start with [README](README.md),
+> [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
+
+## 2026-10-15 — atlas-aware launcher and documentation/dashboard refresh
+
+GA Image UV/logical dimensions, ImageDrawable fixed-axis scale/alignment and Standard/Radio
+four/six-frame selection now produce the real-art launcher capture
+[spui_e3launch_uv.png](analysis/shots/spui_e3launch_uv.png). Evidence retained under
+`analysis/audit/spui-drawables/`; implementation `source/engine/spui_drawable.cpp`.
+The old "DialogDrawable wrapper" was a property alias, not an actual intermediate class.
+
+The repeated missing PNGs exposed a host FILE leak, not missing data: `Package` now closes on
+destruction. Regression: 544 scoped open/read/destruct cycles at CRT limit 512.
+Parser verification remains 748 matches / 486 malformed rejections, plus atlas/state/scale/alignment
+checks. Live click `(311,550)` still enters CreatureEditor; the editor itself remains unimplemented.
+
+Documentation refresh makes counts explicit, splits UI navigation from gameplay, removes the claim
+that the function-start catalogue measures reversed-code coverage, and preserves old root snapshots
+in `docs/archive/`. Dashboard source remains `analysis/features.json`; the new generator emits PNG,
+Markdown and stats JSON, validates data and supports a no-write freshness check. Counts are not
+directly comparable to old percentages: scope/grouping and the tracked task list changed.
+
 ---
 
 ## 2026-10-15 — actual SPUI binary reader; 748/748 exact parses and child graphs

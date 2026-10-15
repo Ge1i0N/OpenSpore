@@ -1,10 +1,12 @@
 {
-  "title": "OpenSpore - reversal progress",
+  "title": "OpenSpore / implementation ledger",
   "subtitle": "Spore: Galactic Adventures (x86) - disassembly-driven reimplementation",
-  "status_note": "done = reversed AND implemented AND verified; partial = reversed or implemented in part; todo = not started. Single source of truth for the map AND analysis/features.md; edit here, then run tools/feature_map.py.",
+  "updated": "2026-10-15",
+  "status_note": "Bounded checklist, not game completion. done = implemented/verified or an explicitly evidence-only finding verified; partial = incomplete implementation or evidence; todo = not implemented. Counts have unequal task sizes. UI transitions do not count as gameplay. Regenerate PNG, Markdown and stats with tools/feature_map.py.",
   "categories": [
     {
       "name": "harness",
+      "scope": "engine",
       "features": [
         {
           "name": "diag install",
@@ -80,6 +82,7 @@
     },
     {
       "name": "startup",
+      "scope": "engine",
       "features": [
         {
           "name": "wWinMain",
@@ -239,7 +242,7 @@
         {
           "name": "reversal audit (Ghidra/REA)",
           "status": "done",
-          "note": "30 claims / 104 checks from WinMain forward: 17 PASS / 1 FAIL / 11 UNKNOWN / 1 SKIP; 9 of 10 first-run FAILs were checker bugs"
+          "note": "Retained audit snapshot in analysis/audit.md; its counts cover only analysis/claims.json, not all current runtime features. First-run checker failures/corrections retained in analysis/audit-review.md."
         },
         {
           "name": "vtable-only function wall",
@@ -265,6 +268,7 @@
     },
     {
       "name": "launch args",
+      "scope": "engine",
       "features": [
         {
           "name": "-w windowed",
@@ -420,6 +424,7 @@
     },
     {
       "name": "packages (DBPF)",
+      "scope": "engine",
       "features": [
         {
           "name": "magic",
@@ -589,7 +594,7 @@
         {
           "name": "export gmdl->OBJ",
           "status": "done",
-          "note": "pkg:-unpack ...,gmdl writes OBJ; ~53% parse, rest raw"
+          "note": "pkg:-unpack ...,gmdl writes OBJ; recorded whole-corpus run exported 6979/11041, unsupported inputs retained raw. No full-format claim."
         },
         {
           "name": "type registry",
@@ -620,6 +625,7 @@
     },
     {
       "name": "gmdl (meshes)",
+      "scope": "engine",
       "features": [
         {
           "name": "version dword",
@@ -699,7 +705,7 @@
         {
           "name": "vertex bytes",
           "status": "done",
-          "note": "== count*36"
+          "note": "vertex_bytes / vertex_count determines stride; 36 only for one supported declaration family."
         },
         {
           "name": "variable stride",
@@ -758,13 +764,14 @@
         },
         {
           "name": "multiple meshes",
-          "status": "todo",
-          "note": "one mesh on screen now"
+          "status": "done",
+          "note": "Bounded model gallery: four real models with their paired textures in the Loader capture analysis/shots/model_grid.png; not a game-world scene renderer."
         }
       ]
     },
     {
       "name": "rw4 (models)",
+      "scope": "engine",
       "features": [
         {
           "name": "header 28B",
@@ -850,6 +857,7 @@
     },
     {
       "name": "render",
+      "scope": "engine",
       "features": [
         {
           "name": "windowed",
@@ -970,16 +978,12 @@
           "name": "shaders",
           "status": "todo",
           "note": ""
-        },
-        {
-          "name": "UI (UTFWin)",
-          "status": "partial",
-          "note": "748/748 sequential SPUI files and child graphs; visibility and pointer picking use the graph. Rendering remains diagnostic geometry/text; drawables, layout/Z WinProcs, general commands and game modes remain incomplete. analysis/spui-binary.md"
         }
       ]
     },
     {
       "name": "formats",
+      "scope": "engine",
       "features": [
         {
           "name": "png",
@@ -1004,7 +1008,7 @@
         {
           "name": "dxt / bc",
           "status": "partial",
-          "note": "DXT1/DXT5 decode (raster_decode.py); not in the engine yet"
+          "note": "DXT1/DXT5/raw implemented in source/engine/raster.cpp and rendered; full BC family/format parity not claimed."
         },
         {
           "name": "tga",
@@ -1059,7 +1063,7 @@
         {
           "name": "spui drawn on screen",
           "status": "done",
-          "note": "Title renders the real layout at real coordinates with the game's own captions (Create a New Game / color picker / Selected Color) over the real UI atlas"
+          "note": "DevLauncher renders real atlas-aware launcher art; analysis/shots/spui_e3launch_uv.png. Diagnostic outlines/captions remain; original full widget behavior is not claimed."
         },
         {
           "name": "spui alphas",
@@ -1133,18 +1137,13 @@
         },
         {
           "name": "texture atlas",
-          "status": "todo",
-          "note": ""
+          "status": "partial",
+          "note": "Image atlas UV/logical dimensions and Standard/Radio slices now render; atlas creation/packing and all UI modes remain open. analysis/spui-drawables.md"
         },
         {
           "name": "model (rw4)",
           "status": "todo",
           "note": "gates the whole content set"
-        },
-        {
-          "name": "state drives the UI",
-          "status": "done",
-          "note": "unchanged from today's first half: DevLauncher's `uilayout -load E3LaunchScreen` executed; 65.9% of pixels differ from our own largest-layout pick. Now with a pointer on top."
         },
         {
           "name": "uilayout's two trailing ids",
@@ -1154,7 +1153,7 @@
         {
           "name": "spui precedence (resource cache)",
           "status": "partial",
-          "note": "ASSUMED, not reversed: spui takes the FIRST container (so PatchData overrides base content), text takes the LAST parsed - two different rules in one engine. Measured surface: 18 spui layouts and 3 of 23,933 locale strings could differ. EP1 beating PatchData on locale is provably right (EP1 fixes the patch's typo), so the real rule is not simply 'earliest wins'."
+          "note": "Presentation policies, not recovered priority: SPUI/PNG keep first key, locale uses last parsed. Surface: 18 SPUI layout size differences and 3 locale text conflicts. A spelling fix does not establish original precedence."
         },
         {
           "name": "locale at three depths",
@@ -1170,26 +1169,39 @@
           "name": "intra-resource repeated key",
           "status": "done",
           "note": "10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original)."
-        },
-        {
-          "name": "input -> widget",
-          "status": "done",
-          "note": "Pointer uses actual parent graph, ancestor visibility/enabled and IgnoreMouse. Visible CreatureEditor tile at (311,550) verified; old GGE point hit a hidden child and is superseded."
-        },
-        {
-          "name": "z-order (paint order)",
-          "status": "partial",
-          "note": "Actual Children graph replaces area sorting. Parent-before-children and reverse picking share visibility, Enabled, IgnoreMouse and parent Clip. Forward sibling order is our current policy; original dynamic Z order/layout WinProcs and renderer scissor remain incomplete."
-        },
-        {
-          "name": "control id == state id (manual id space)",
-          "status": "done",
-          "note": "the widget control ids, the state script's manual -id values, and the layout names share ONE manual id space, exactly as the script's author commented (\"assign manual IDs just so I can fill in the UI layout stuff more easily\"). Measured by spui -xref: 4,187 distinct control ids x 60 states, 9 real hits, <0.001 expected. Discount 0x00000001 - ids below 0x1000 are block-scoped member indices, the standing trap."
         }
       ]
     },
     {
+      "name": "UI / SPUI behavior",
+      "scope": "ui",
+      "features": [
+        {"name": "state selects layout", "status": "done", "note": "DevLauncher -> E3LaunchScreen from the shipped state script. source/states/uipresent.cpp"},
+        {"name": "visible widget picking", "status": "done", "note": "Parent visibility/enabled, IgnoreMouse and ancestor Clip apply to hit testing; original dynamic Z rules remain open."},
+        {"name": "manual control/state ID evidence", "status": "done", "note": "Nine observed state/control ID matches; reconstructed bridge only, not general command dispatch."},
+        {"name": "click -> state transition", "status": "done", "note": "Live (311,550) -> CreatureEditor 0x022D9E01, exit 0. Does NOT implement the editor. Old hidden GGE point superseded."},
+        {"name": "Image atlas UV / logical size", "status": "done", "note": "Image 0x01BE6B15 properties 0x01BE0002/3; GA 0x13004A0, 0x957710/750, 0x9576F0. spui_verify + live art capture."},
+        {"name": "None-tiling ImageDrawable", "status": "done", "note": "Bounded branch: explicit ImageDrawable -> Image -> PNG, free axes stretch independently. GA 0x97D1E0."},
+        {"name": "fixed scale / alignment", "status": "done", "note": "FixedWidth/FixedHeight, logical dimensions * scale, left/right/center and top/bottom/middle tested."},
+        {"name": "standard button frame selection", "status": "done", "note": "Non-tileable four-frame branch: disabled/normal/hover/active from GA 0x966A40; tested."},
+        {"name": "radio button frame selection", "status": "done", "note": "Non-tileable six-frame branch incl selected bit; unit-tested. Checked-state mutation is a separate TODO."},
+        {"name": "drawable PNG index", "status": "done", "note": "57 packages / 150945 records / 14549 PNG entries / 14450 keys. First-key priority is a policy, not full original semantics."},
+        {"name": "package lifetime regression", "status": "done", "note": "RAII closes FILE handles; pkg_lifetime_verify: 544 open/read/destruct cycles at CRT limit 512."},
+        {"name": "dynamic sibling Z / layout", "status": "partial", "note": "Actual Children links; forward sibling traversal and translated origins are presentation policies. WinProcs not executed."},
+        {"name": "renderer ancestor clipping", "status": "todo", "note": "Hit-test Clip works; renderer scissor not yet connected."},
+        {"name": "Standard / Edge image tiling", "status": "partial", "note": "GA branches identified at 0x97D1E0; renderer intentionally rejects unsupported modes."},
+        {"name": "tileable button edges", "status": "partial", "note": "GA Tileable branch identified; only non-tileable branch implemented."},
+        {"name": "image outline / shadow", "status": "partial", "note": "Static render branches identified; not reproduced by our renderer."},
+        {"name": "Dialog drawable pieces", "status": "todo", "note": "Background/title/borders not implemented. A property alias is not an intermediate wrapper class."},
+        {"name": "button capture / release events", "status": "todo", "note": "Pointer-to-visual-state adapter only; original capture/release semantics open."},
+        {"name": "radio checked-state mutation", "status": "todo", "note": "Quad resolver accepts selected bit; host events do not toggle it yet."},
+        {"name": "general command dispatch", "status": "todo", "note": "command_id 0x00E1132F not reversed; control/state bridge is not a substitute."},
+        {"name": "original text/font rendering", "status": "todo", "note": "Locale captions are real; ASCII GDI atlas, clipping and text layout are scaffolding."}
+      ]
+    },
+    {
       "name": "gameplay",
+      "scope": "gameplay",
       "features": [
         {
           "name": "simulation",
@@ -1272,19 +1284,15 @@
           "note": ""
         },
         {
-          "name": "click -> state transition",
-          "status": "done",
-          "note": "Reconstructed launcher bridge: visible click (311,550) -> control 022D9E01 / command 00E1132F -> CreatureEditor state, exit 0. The old GGE demo activated an invisible descendant and is corrected. Original general command dispatcher and editor behavior are not implemented."
-        },
-        {
-          "name": "state enters but cannot act",
+          "name": "AppMode execution",
           "status": "todo",
-          "note": "the honest remainder: entering GalaxyGameEntry logs `mode GalaxyGameEntry not executed`, because a mode is a named AppMode CLASS in code, not data (analysis/modes.md: 11 of 17 names are standalone strings in the oracle, each registered by a per-class factory; 5 do not exist in this build at all). So the next step after this is the AppMode* classes, and it is now REACHABLE BY CLICKING, which it was not before."
+          "note": "Ten binary registrations are represented in engine/appmodes.cpp; their enter/tick/render behavior is not implemented. Missing strings are bounded negative evidence, not proof of absent classes. analysis/modes.md"
         }
       ]
     },
     {
       "name": "tooling",
+      "scope": "tooling",
       "features": [
         {
           "name": "feature map",
@@ -1370,6 +1378,7 @@
     },
     {
       "name": "platform",
+      "scope": "platform",
       "features": [
         {
           "name": "x86 build",
@@ -1409,7 +1418,7 @@
         {
           "name": "localization",
           "status": "partial",
-          "note": "en-us locale tables parsed (18,441 entries) and displayed; per-table key space enforced; other 14 langs unparsed"
+          "note": "Current en-us corpus: 265 tables / 23933 distinct table-key texts, nested containers included. Full original text/font rendering and other-language runtime validation remain incomplete."
         },
         {
           "name": "crash reporting",

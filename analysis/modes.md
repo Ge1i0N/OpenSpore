@@ -1,4 +1,10 @@
-# The `mode` table: it is CODE, not data — and 5 of the 17 modes are not in this build at all
+# AppMode registration table — code, names and execution boundaries
+
+> **Current verdict, 2026-10-15:** ten GA binary registrations are represented in
+> `source/engine/appmodes.cpp`; their enter/tick/render behavior is not implemented. Script mode
+> names and binary tag objects are different namespaces. The older string-search negatives below
+> are bounded observations, **not proof that a class does not exist**. Input/visible launcher
+> navigation now works; next runtime work is described in [RESUME](../RESUME.md).
 
 Measured 2026-10-14 with `tools/mode_where.py`, `tools/ghidra_xref.py` and `tools/mode_absent.py`.
 This settles a question that was about to be attacked from the wrong side.
@@ -202,7 +208,7 @@ Those are the very state names our script defines, so the original's flow is
 manual `-id` values and the mode enum's object addresses are different namespaces, and conflating
 them would be the classic "confident garbage" error.
 
-## What this changes in the plan
+## What this changed in the plan (historical; superseded by current header)
 
 The next step on Main→playable is **not** modes. It is **input driving the UI**: we already read each
 widget's `Area` rect and its `command_id`, so a click can be hit-tested and dispatched into the state
