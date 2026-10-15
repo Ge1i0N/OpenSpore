@@ -1,0 +1,77 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00FD7B10
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+undefined4 * __fastcall FUN_00fd7b10(undefined4 *param_1)
+
+{
+  undefined4 *puVar1;
+  undefined4 uVar2;
+
+  param_1[1] = &PTR_purecall_013f1aa0;
+  param_1[2] = &PTR_FUN_013eb394;
+  *param_1 = &PTR_FUN_01493a50;
+  param_1[1] = &PTR_LAB_01493a40;
+  param_1[2] = &PTR_LAB_01493a38;
+  param_1[3] = 0;
+  param_1[4] = 0;
+  param_1[5] = 0;
+  param_1[6] = 0;
+  param_1[7] = 0;
+  *(undefined1 *)(param_1 + 8) = 0;
+  param_1[0xd] = 0;
+  param_1[0xe] = 0;
+  param_1[0xf] = 0;
+  param_1[0x10] = 0;
+  param_1[0x11] = 0;
+  param_1[0x12] = 0;
+  *(undefined1 *)(param_1 + 0x13) = 0;
+  *(undefined1 *)((int)param_1 + 0x4d) = 1;
+  param_1[0x14] = &DAT_01667bac;
+  param_1[0x15] = &DAT_01667bac;
+  param_1[0x16] = &DAT_01667bad;
+  param_1[0x18] = 0;
+  param_1[0x19] = 0;
+  param_1[0x1a] = 0;
+  FUN_00922530(0,1);
+  uVar2 = _DAT_01400864;
+  *(undefined1 *)(param_1 + 0x28) = 0;
+  *(undefined1 *)((int)param_1 + 0xa1) = 1;
+  param_1[0x29] = &DAT_01667bac;
+  param_1[0x2a] = &DAT_01667bac;
+  param_1[0x2b] = &DAT_01667bae;
+  param_1[0x2d] = 0;
+  param_1[0x30] = uVar2;
+  param_1[0x31] = 0;
+  uVar2 = DAT_01485484;
+  param_1[0x2e] = 0x140;
+  param_1[0x2f] = 0xf0;
+  param_1[0x32] = uVar2;
+  *(undefined1 *)(param_1 + 0x33) = 1;
+  *(undefined1 *)((int)param_1 + 0xcd) = 0;
+  *(undefined1 *)((int)param_1 + 0xce) = 1;
+  FUN_00931d70(0);
+  param_1[0xbf] = 0;
+  param_1[0xc0] = 0;
+  param_1[0xc1] = 0xffffffff;
+  param_1[0xc2] = 0xffffffff;
+  param_1[0xc3] = 0;
+  param_1[0xc4] = 0;
+  param_1[0xc5] = 0;
+  param_1[0xc6] = 0;
+  puVar1 = param_1 + 199;
+  *puVar1 = puVar1;
+  param_1[200] = puVar1;
+  *(undefined1 *)(param_1 + 0xcb) = 0;
+  *(undefined1 *)((int)param_1 + 0x32d) = 0;
+  param_1[0xca] = 0x5622;
+  param_1[9] = 0;
+  param_1[10] = 0;
+  param_1[0xb] = 0;
+  param_1[0xc] = 0;
+  return param_1;
+}

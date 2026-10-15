@@ -1,0 +1,32 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DEABD0
+
+/* WARNING: Removing unreachable block (ram,0x00deac22) */
+
+void FUN_00deabd0(void)
+
+{
+  int *piVar1;
+  int *piVar2;
+
+  piVar1 = DAT_015fd918;
+  if (DAT_015fd918 != (int *)0x0) {
+    (**(code **)*DAT_015fd918)();
+    FUN_00dea760(piVar1);
+  }
+  FUN_00dea6e0();
+  FUN_00dea510();
+  *(undefined4 *)(DAT_016a1344 + 0x1ec) = 6;
+  piVar2 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar2 + 0x18))(0x66f8f25,0,0,0);
+  if (piVar1 == (int *)0x0) {
+    return;
+  }
+                    /* WARNING: Could not recover jumptable at 0x00deac78. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+  (**(code **)(*piVar1 + 4))();
+  return;
+}

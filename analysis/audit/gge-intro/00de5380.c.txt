@@ -1,0 +1,45 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE5380
+
+void __thiscall FUN_00de5380(int param_1,char param_2)
+
+{
+  int *piVar1;
+  int *piVar2;
+  int *piVar3;
+  char cVar4;
+
+  if (param_2 == '\0') {
+    if (*(int **)(param_1 + 0x1b0) != (int *)0x0) {
+      (**(code **)(**(int **)(param_1 + 0x1b0) + 0xc))(0);
+      piVar1 = *(int **)(param_1 + 0x1b0);
+      if (piVar1 != (int *)0x0) {
+        *(undefined4 *)(param_1 + 0x1b0) = 0;
+        (**(code **)(*piVar1 + 4))();
+        return;
+      }
+    }
+  }
+  else {
+    piVar1 = (int *)(param_1 + 0x1b0);
+    if ((*(int *)(param_1 + 0x1b0) == 0) &&
+       (piVar2 = *(int **)(param_1 + 0x15c), piVar2 != (int *)0x0)) {
+      piVar3 = (int *)*piVar1;
+      if (piVar3 != (int *)0x0) {
+        *piVar1 = 0;
+        (**(code **)(*piVar3 + 4))();
+      }
+      cVar4 = (**(code **)(*piVar2 + 8))(0x4c4ba0a9,0,piVar1);
+      if (cVar4 != '\0') {
+                    /* WARNING: Could not recover jumptable at 0x00de53dd. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+        (**(code **)(*(int *)*piVar1 + 8))(0);
+        return;
+      }
+    }
+  }
+  return;
+}

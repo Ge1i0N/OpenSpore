@@ -1,0 +1,59 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DEA510
+
+00dea510  XORPS XMM0,XMM0
+00dea513  PUSH ESI
+00dea514  MOV ESI,ECX
+00dea516  MOV byte ptr [ESI + 0x24],0x6
+00dea51a  MOVSS dword ptr [ESI + 0x18],XMM0
+00dea51f  MOV EAX,[0x016a1344]
+00dea524  CMP byte ptr [EAX + 0x1f3],0x0
+00dea52b  JZ 0x00dea54d
+00dea52d  MOV byte ptr [EAX + 0x1f3],0x0
+00dea534  CALL 0x0067dc80
+00dea539  MOV EDX,dword ptr [EAX]
+00dea53b  PUSH 0x0
+00dea53d  PUSH 0x0
+00dea53f  PUSH 0x0
+00dea541  MOV ECX,EAX
+00dea543  MOV EAX,dword ptr [EDX + 0x18]
+00dea546  PUSH 0x66f6b6f
+00dea54b  CALL EAX
+00dea54d  MOV ECX,dword ptr [ESI + 0x14]
+00dea550  TEST ECX,ECX
+00dea552  JZ 0x00dea5a9
+00dea554  PUSH 0x1
+00dea556  PUSH 0x6776fe0
+00dea55b  CALL 0x00810650
+00dea560  MOV EDX,dword ptr [EAX]
+00dea562  PUSH 0x0
+00dea564  MOV ECX,EAX
+00dea566  MOV EAX,dword ptr [EDX + 0x7c]
+00dea569  PUSH 0x1
+00dea56b  CALL EAX
+00dea56d  MOV ECX,dword ptr [ESI + 0x14]
+00dea570  PUSH 0x1
+00dea572  PUSH 0x6776fe1
+00dea577  CALL 0x00810650
+00dea57c  MOV EDX,dword ptr [EAX]
+00dea57e  PUSH 0x0
+00dea580  MOV ECX,EAX
+00dea582  MOV EAX,dword ptr [EDX + 0x7c]
+00dea585  PUSH 0x1
+00dea587  CALL EAX
+00dea589  MOV ECX,dword ptr [ESI + 0x14]
+00dea58c  PUSH 0x1
+00dea58e  CALL 0x00811bc0
+00dea593  MOV ECX,dword ptr [ESI + 0x14]
+00dea596  TEST ECX,ECX
+00dea598  JZ 0x00dea5a9
+00dea59a  MOV dword ptr [ESI + 0x14],0x0
+00dea5a1  MOV EDX,dword ptr [ECX]
+00dea5a3  MOV EAX,dword ptr [EDX + 0x8]
+00dea5a6  POP ESI
+00dea5a7  JMP EAX
+00dea5a9  POP ESI
+00dea5aa  RET

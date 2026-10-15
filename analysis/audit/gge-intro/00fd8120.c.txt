@@ -1,0 +1,19 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00FD8120
+
+undefined4 FUN_00fd8120(void)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+
+  iVar1 = FUN_00f47240(0x330,"Graphics",0,0,0,0);
+  if (iVar1 != 0) {
+    uVar2 = FUN_00fd7b10();
+    return uVar2;
+  }
+  return 0;
+}

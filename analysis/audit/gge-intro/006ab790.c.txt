@@ -1,0 +1,41 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x006AB790
+
+undefined4 FUN_006ab790(undefined4 *param_1,int *param_2)
+
+{
+  short sVar1;
+  int *piVar2;
+  int iVar3;
+  uint uVar4;
+  int *piVar5;
+
+  sVar1 = (short)*param_2;
+  piVar2 = param_2;
+  while (sVar1 != 0) {
+    piVar2 = (int *)((int)piVar2 + 2);
+    sVar1 = *(short *)piVar2;
+  }
+  piVar5 = (int *)*param_1;
+  iVar3 = (int)piVar2 - (int)param_2 >> 1;
+  if (param_1[1] - (int)piVar5 >> 1 == iVar3) {
+    for (uVar4 = iVar3 * 2; 3 < uVar4; uVar4 = uVar4 - 4) {
+      if (*piVar5 != *param_2) {
+        return 0;
+      }
+      param_2 = param_2 + 1;
+      piVar5 = piVar5 + 1;
+    }
+    if ((uVar4 == 0) ||
+       (((char)*param_2 == (char)*piVar5 &&
+        ((uVar4 < 2 ||
+         ((*(char *)((int)param_2 + 1) == *(char *)((int)piVar5 + 1) &&
+          ((uVar4 < 3 || (*(char *)((int)param_2 + 2) == *(char *)((int)piVar5 + 2))))))))))) {
+      return 1;
+    }
+  }
+  return 0;
+}

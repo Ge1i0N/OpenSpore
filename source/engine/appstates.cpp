@@ -1,5 +1,6 @@
 #include "engine/appmodes.h"  // the recovered mode table, so the log can name what a mode IS
 #include "engine/appstates.h"
+#include "engine/gge_intro.h"
 
 #include <algorithm>
 #include <cctype>
@@ -367,6 +368,22 @@ void install(os::states::Manager& mgr) {
                 os::states::present_ui_screen(false);
             };
         }
+        if (mode_ui) {
+            // GGE only: probe the recovered POST-TITLE decision subset, not an actual title runner
+            // or complete controller. Missing MoviePlayer is explicitly Unknown, never fake idle.
+            st.on_tick = [](f32) {
+                auto& gate = os::gge::intro_subset();
+                const auto previous = gate.waiting();
+                gate.update(6, os::gge::MovieObservation::Unknown);
+                if (gate.waiting() != previous)
+                    LOG_INFO("gge", "post-title gate model: %s; no DBCheck completion or state-10 transition synthesized",
+                             os::gge::wait_description(gate.waiting()));
+            };
+            st.on_exit = []() {
+                os::gge::intro_subset().leave();
+                LOG_INFO("gge", "post-title gate model deactivated; host latches cleared");
+            };
+        }
         const size_t n_cheat_unrun = n_cheat > n_ui_load ? n_cheat - n_ui_load : 0;
         st.on_enter = [chain = std::move(chain), mode = std::move(mode), n_msg, n_cheat_unrun,
                        n_ui_load, n_effect, name = gs.name]() {
@@ -384,6 +401,7 @@ void install(os::states::Manager& mgr) {
                              name.c_str(), mode.c_str());
                 }
                 if (const auto* binding = appmodes::primary_ui(mode.c_str())) {
+                    os::gge::intro_subset().enter();
                     LOG_INFO("appstates", "%s: mode-owned primary UI '%s' [0x%08X] enabled from GA "
                              "0x%08X; %s", name.c_str(), binding->layout, binding->instance,
                              binding->load_function, binding->limitation);

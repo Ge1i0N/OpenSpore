@@ -1,0 +1,127 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00FD90D0
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+undefined4 __fastcall FUN_00fd90d0(int param_1)
+
+{
+  int *piVar1;
+  int iVar2;
+  undefined4 uVar3;
+  int iVar4;
+  undefined4 uVar5;
+  uint uVar6;
+  undefined *puVar7;
+  undefined1 auStack_1c [28];
+
+  piVar1 = (int *)FUN_0067dd30();
+  iVar4 = param_1 + 0x24;
+  puVar7 = &DAT_01493960;
+  uVar5 = 4;
+  (**(code **)(*piVar1 + 0x2c))();
+  iVar2 = FUN_00f47240(0x20,"Graphics",0,0,0,0,uVar5,puVar7,iVar4);
+  if (iVar2 == 0) {
+    uVar3 = 0;
+  }
+  else {
+    uVar3 = FUN_00fcd900(4);
+  }
+  *(undefined4 *)(param_1 + 0xc) = uVar3;
+  iVar4 = FUN_00f47240(0x3c,"Graphics",0,0,0,0,uVar5,puVar7,iVar4);
+  if (iVar4 == 0) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = FUN_00fd9670();
+  }
+  *(undefined4 *)(param_1 + 0x10) = uVar5;
+  iVar4 = FUN_00f47240(0x1c,"Graphics",0,0,0,0);
+  if (iVar4 == 0) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = FUN_00925f40();
+    uVar5 = FUN_00fc7d90(uVar5);
+  }
+  *(undefined4 *)(param_1 + 0x18) = uVar5;
+  iVar4 = FUN_00f47240(0x24,"Graphics",0,0,0,0);
+  if (iVar4 == 0) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = FUN_00fc8040();
+  }
+  *(undefined4 *)(param_1 + 0x1c) = uVar5;
+  iVar4 = FUN_00f47240(0xc,"Graphics",0,0,0,0);
+  if (iVar4 == 0) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = FUN_00fd95f0();
+  }
+  *(undefined4 *)(param_1 + 0x14) = uVar5;
+  if (DAT_016f4b10 == 0) {
+    uVar5 = FUN_011e5900();
+    FUN_011e64e0(0,uVar5);
+    FUN_011e5d10(auStack_1c);
+  }
+  iVar4 = FUN_00f47240(0x3c,"Graphics",0,0,0,0);
+  if (iVar4 == 0) {
+    piVar1 = (int *)0x0;
+  }
+  else {
+    piVar1 = (int *)FUN_00fcde60();
+  }
+  uVar5 = _DAT_01400864;
+  *(int **)(param_1 + 100) = piVar1;
+  (**(code **)(*piVar1 + 0x34))(uVar5);
+  (**(code **)(**(int **)(param_1 + 100) + 0x44))(9000);
+  (**(code **)(**(int **)(param_1 + 100) + 0x24))(0x140);
+  (**(code **)(**(int **)(param_1 + 100) + 0x2c))(0xf0);
+  if (DAT_016e61a8 != 0) {
+    uVar6 = (uint)(longlong)ROUND(*(float *)(DAT_016e61a8 + 0xc0));
+    *(uint *)(param_1 + 0x328) = uVar6;
+    if (0x5622 < uVar6) {
+      *(uint *)(param_1 + 0x328) = uVar6 >> 1;
+    }
+  }
+  piVar1 = (int *)FUN_00f47240(0x20,"Graphics",0,0,0,0);
+  if (piVar1 == (int *)0x0) {
+    piVar1 = (int *)0x0;
+  }
+  else {
+    FUN_00fc7ef0();
+    *piVar1 = (int)&PTR_FUN_014939b8;
+  }
+  *(int **)(param_1 + 0x68) = piVar1;
+  iVar4 = *piVar1;
+  uVar5 = FUN_00925f40();
+  (**(code **)(iVar4 + 4))(uVar5);
+  (**(code **)(**(int **)(param_1 + 0x68) + 0x24))(*(undefined4 *)(param_1 + 0x328));
+  (**(code **)(**(int **)(param_1 + 0x68) + 0x2c))(2);
+  iVar4 = FUN_00f47240(0x110,&DAT_013ebc48,0,0,0,0);
+  if (iVar4 == 0) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = FUN_00fd8c20(param_1);
+  }
+  piVar1 = (int *)FUN_0067dde0();
+  (**(code **)(*piVar1 + 0x18))("movie",uVar5,0);
+  param_1 = param_1 + 8;
+  piVar1 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar1 + 0x24))(param_1,0x1ee1008);
+  piVar1 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar1 + 0x24))(param_1,0x1ee100e);
+  piVar1 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar1 + 0x24))(param_1,0x1ee100f);
+  piVar1 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar1 + 0x24))(param_1,0x44edd9a);
+  piVar1 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar1 + 0x24))(param_1,0x44edd9c);
+  return 1;
+}

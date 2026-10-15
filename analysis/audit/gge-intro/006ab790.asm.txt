@@ -1,0 +1,56 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x006AB790
+
+006ab790  MOV ECX,dword ptr [ESP + 0x8]
+006ab794  CMP word ptr [ECX],0x0
+006ab798  MOV EAX,ECX
+006ab79a  JZ 0x006ab7a9
+006ab79c  LEA ESP,[ESP]
+006ab7a0  ADD EAX,0x2
+006ab7a3  CMP word ptr [EAX],0x0
+006ab7a7  JNZ 0x006ab7a0
+006ab7a9  MOV EDX,dword ptr [ESP + 0x4]
+006ab7ad  PUSH ESI
+006ab7ae  MOV ESI,dword ptr [EDX]
+006ab7b0  MOV EDX,dword ptr [EDX + 0x4]
+006ab7b3  SUB EAX,ECX
+006ab7b5  SUB EDX,ESI
+006ab7b7  SAR EAX,0x1
+006ab7b9  SAR EDX,0x1
+006ab7bb  CMP EDX,EAX
+006ab7bd  JNZ 0x006ab805
+006ab7bf  ADD EAX,EAX
+006ab7c1  CMP EAX,0x4
+006ab7c4  JC 0x006ab7da
+006ab7c6  MOV EDX,dword ptr [ESI]
+006ab7c8  CMP EDX,dword ptr [ECX]
+006ab7ca  JNZ 0x006ab805
+006ab7cc  SUB EAX,0x4
+006ab7cf  ADD ECX,0x4
+006ab7d2  ADD ESI,0x4
+006ab7d5  CMP EAX,0x4
+006ab7d8  JNC 0x006ab7c6
+006ab7da  TEST EAX,EAX
+006ab7dc  JZ 0x006ab7fe
+006ab7de  MOV DL,byte ptr [ECX]
+006ab7e0  CMP DL,byte ptr [ESI]
+006ab7e2  JNZ 0x006ab805
+006ab7e4  CMP EAX,0x1
+006ab7e7  JBE 0x006ab7fe
+006ab7e9  MOV DL,byte ptr [ECX + 0x1]
+006ab7ec  CMP DL,byte ptr [ESI + 0x1]
+006ab7ef  JNZ 0x006ab805
+006ab7f1  CMP EAX,0x2
+006ab7f4  JBE 0x006ab7fe
+006ab7f6  MOV AL,byte ptr [ECX + 0x2]
+006ab7f9  CMP AL,byte ptr [ESI + 0x2]
+006ab7fc  JNZ 0x006ab805
+006ab7fe  MOV EAX,0x1
+006ab803  POP ESI
+006ab804  RET
+006ab805  XOR EAX,EAX
+006ab807  POP ESI
+006ab808  RET

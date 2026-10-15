@@ -1,0 +1,17 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x0060B510
+
+0060b510  MOV EAX,ECX
+0060b512  MOV dword ptr [EAX + 0x8],0x13eb394
+0060b519  MOV dword ptr [EAX + 0xc],0x13ec438
+0060b520  XOR ECX,ECX
+0060b522  MOV dword ptr [EAX + 0x10],ECX
+0060b525  MOV dword ptr [EAX],0x13fb3c4
+0060b52b  MOV dword ptr [EAX + 0x4],0x13fb3b8
+0060b532  MOV dword ptr [EAX + 0x8],0x13fb3b0
+0060b539  MOV dword ptr [EAX + 0xc],0x13fb3a0
+0060b540  MOV dword ptr [EAX + 0x14],ECX
+0060b543  RET

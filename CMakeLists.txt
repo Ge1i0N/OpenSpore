@@ -115,6 +115,7 @@ set(OS_SOURCES
   source/engine/input.cpp
   source/engine/appmodes.cpp
   source/engine/mode_ui.cpp
+  source/engine/gge_intro.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
@@ -147,6 +148,8 @@ add_executable(spui_verify EXCLUDE_FROM_ALL tools/spui_verify.cpp
 target_include_directories(spui_verify PRIVATE source)
 add_executable(mode_ui_verify EXCLUDE_FROM_ALL tools/mode_ui_verify.cpp source/engine/mode_ui.cpp)
 target_include_directories(mode_ui_verify PRIVATE source)
+add_executable(gge_intro_verify EXCLUDE_FROM_ALL tools/gge_intro_verify.cpp source/engine/gge_intro.cpp)
+target_include_directories(gge_intro_verify PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
   source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
 target_include_directories(pkg_lifetime_verify PRIVATE source)
@@ -158,6 +161,7 @@ target_link_libraries(overlay_clip_verify PRIVATE d3d9 user32 gdi32)
 if(MSVC)
   target_compile_options(spui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(mode_ui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(gge_intro_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
 endif()

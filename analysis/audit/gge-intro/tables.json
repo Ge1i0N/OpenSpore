@@ -1,0 +1,166 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "handler_name": "Intro",
+  "handler_vtable": [
+    {
+      "slot": "0x0",
+      "target": "0x1082a20"
+    },
+    {
+      "slot": "0x4",
+      "target": "0xb267d0"
+    },
+    {
+      "slot": "0x8",
+      "target": "0xdea7e0"
+    },
+    {
+      "slot": "0xc",
+      "target": "0xdeb450"
+    },
+    {
+      "slot": "0x10",
+      "target": "0xdea3d0"
+    },
+    {
+      "slot": "0x14",
+      "target": "0xdeaf70"
+    },
+    {
+      "slot": "0x18",
+      "target": "0xdea5b0"
+    },
+    {
+      "slot": "0x1c",
+      "target": "0xe00630"
+    },
+    {
+      "slot": "0x20",
+      "target": "0xa6c9a0"
+    },
+    {
+      "slot": "0x24",
+      "target": "0xa6c990"
+    },
+    {
+      "slot": "0x28",
+      "target": "0xa6c990"
+    },
+    {
+      "slot": "0x2c",
+      "target": "0xc2e640"
+    },
+    {
+      "slot": "0x30",
+      "target": "0xc2e640"
+    },
+    {
+      "slot": "0x34",
+      "target": "0xdea820"
+    }
+  ],
+  "movie_vtable": [
+    {
+      "slot": "0x0",
+      "target": "0xfd8150"
+    },
+    {
+      "slot": "0x4",
+      "target": "0xfd90d0"
+    },
+    {
+      "slot": "0x8",
+      "target": "0xfd77e0"
+    },
+    {
+      "slot": "0xc",
+      "target": "0xfd7d60"
+    },
+    {
+      "slot": "0x10",
+      "target": "0xfd87a0"
+    },
+    {
+      "slot": "0x14",
+      "target": "0xfd7550"
+    },
+    {
+      "slot": "0x18",
+      "target": "0xfd7560"
+    },
+    {
+      "slot": "0x1c",
+      "target": "0xfd7570"
+    },
+    {
+      "slot": "0x20",
+      "target": "0xfd79c0"
+    },
+    {
+      "slot": "0x24",
+      "target": "0xfd7580"
+    },
+    {
+      "slot": "0x28",
+      "target": "0xfd75f0"
+    },
+    {
+      "slot": "0x2c",
+      "target": "0xfd8170"
+    },
+    {
+      "slot": "0x30",
+      "target": "0xa1aee0"
+    },
+    {
+      "slot": "0x34",
+      "target": "0xfd7a70"
+    },
+    {
+      "slot": "0x38",
+      "target": "0xfd7f60"
+    },
+    {
+      "slot": "0x3c",
+      "target": "0x5dc490"
+    },
+    {
+      "slot": "0x40",
+      "target": "0xfd7630"
+    },
+    {
+      "slot": "0x44",
+      "target": "0xfd86d0"
+    }
+  ],
+  "dbcheck_vtable": [
+    {
+      "slot": "0x0",
+      "target": "0x670090"
+    },
+    {
+      "slot": "0x4",
+      "target": "0x651c10"
+    },
+    {
+      "slot": "0x8",
+      "target": "0x60b820"
+    },
+    {
+      "slot": "0xc",
+      "target": "0x60b3d0"
+    },
+    {
+      "slot": "0x10",
+      "target": "0x60b400"
+    },
+    {
+      "slot": "0x14",
+      "target": "0x60b580"
+    },
+    {
+      "slot": "0x18",
+      "target": "0x60b5d0"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00FD7B10
+
+00fd7b10  XORPS XMM0,XMM0
+00fd7b13  PUSH EBX
+00fd7b14  XOR EBX,EBX
+00fd7b16  PUSH ESI
+00fd7b17  MOV ESI,ECX
+00fd7b19  MOV dword ptr [ESI + 0x4],0x13f1aa0
+00fd7b20  MOV dword ptr [ESI + 0x8],0x13eb394
+00fd7b27  MOV dword ptr [ESI],0x1493a50
+00fd7b2d  MOV dword ptr [ESI + 0x4],0x1493a40
+00fd7b34  MOV dword ptr [ESI + 0x8],0x1493a38
+00fd7b3b  MOV dword ptr [ESI + 0xc],EBX
+00fd7b3e  MOV dword ptr [ESI + 0x10],EBX
+00fd7b41  MOV dword ptr [ESI + 0x14],EBX
+00fd7b44  MOV dword ptr [ESI + 0x18],EBX
+00fd7b47  MOV dword ptr [ESI + 0x1c],EBX
+00fd7b4a  MOV byte ptr [ESI + 0x20],BL
+00fd7b4d  MOV dword ptr [ESI + 0x34],EBX
+00fd7b50  PUSH EDI
+00fd7b51  MOV dword ptr [ESI + 0x38],EBX
+00fd7b54  MOVSS dword ptr [ESI + 0x3c],XMM0
+00fd7b59  MOVSS dword ptr [ESI + 0x40],XMM0
+00fd7b5e  MOVSS dword ptr [ESI + 0x44],XMM0
+00fd7b63  MOVSS dword ptr [ESI + 0x48],XMM0
+00fd7b68  MOV byte ptr [ESI + 0x4c],BL
+00fd7b6b  MOV byte ptr [ESI + 0x4d],0x1
+00fd7b6f  MOV EDI,0x1667bac
+00fd7b74  MOV dword ptr [ESI + 0x50],EDI
+00fd7b77  MOV dword ptr [ESI + 0x54],EDI
+00fd7b7a  MOV dword ptr [ESI + 0x58],0x1667bad
+00fd7b81  PUSH 0x1
+00fd7b83  PUSH EBX
+00fd7b84  LEA ECX,[ESI + 0x70]
+00fd7b87  MOVSS dword ptr [ESI + 0x60],XMM0
+00fd7b8c  MOV dword ptr [ESI + 0x64],EBX
+00fd7b8f  MOV dword ptr [ESI + 0x68],EBX
+00fd7b92  CALL 0x00922530
+00fd7b97  MOVSS XMM0,dword ptr [0x01400864]
+00fd7b9f  MOV byte ptr [ESI + 0xa0],BL
+00fd7ba5  MOV byte ptr [ESI + 0xa1],0x1
+00fd7bac  MOV dword ptr [ESI + 0xa4],EDI
+00fd7bb2  MOV dword ptr [ESI + 0xa8],EDI
+00fd7bb8  MOV dword ptr [ESI + 0xac],0x1667bae
+00fd7bc2  MOV dword ptr [ESI + 0xb4],EBX
+00fd7bc8  MOVSS dword ptr [ESI + 0xc0],XMM0
+00fd7bd0  XORPS XMM0,XMM0
+00fd7bd3  MOVSS dword ptr [ESI + 0xc4],XMM0
+00fd7bdb  MOVSS XMM0,dword ptr [0x01485484]
+00fd7be3  PUSH EBX
+00fd7be4  LEA ECX,[ESI + 0xd0]
+00fd7bea  MOV dword ptr [ESI + 0xb8],0x140
+00fd7bf4  MOV dword ptr [ESI + 0xbc],0xf0
+00fd7bfe  MOVSS dword ptr [ESI + 0xc8],XMM0
+00fd7c06  MOV byte ptr [ESI + 0xcc],0x1
+00fd7c0d  MOV byte ptr [ESI + 0xcd],BL
+00fd7c13  MOV byte ptr [ESI + 0xce],0x1
+00fd7c1a  CALL 0x00931d70
+00fd7c1f  XORPS XMM0,XMM0
+00fd7c22  MOV dword ptr [ESI + 0x2fc],EBX
+00fd7c28  MOV dword ptr [ESI + 0x300],EBX
+00fd7c2e  OR EAX,0xffffffff
+00fd7c31  MOV dword ptr [ESI + 0x304],EAX
+00fd7c37  MOV dword ptr [ESI + 0x308],EAX
+00fd7c3d  MOV dword ptr [ESI + 0x30c],EBX
+00fd7c43  MOVSS dword ptr [ESI + 0x310],XMM0
+00fd7c4b  MOVSS dword ptr [ESI + 0x314],XMM0
+00fd7c53  MOV dword ptr [ESI + 0x318],EBX
+00fd7c59  LEA EAX,[ESI + 0x31c]
+00fd7c5f  MOV dword ptr [EAX],EAX
+00fd7c61  MOV dword ptr [EAX + 0x4],EAX
+00fd7c64  MOV byte ptr [ESI + 0x32c],BL
+00fd7c6a  MOV byte ptr [ESI + 0x32d],BL
+00fd7c70  MOV dword ptr [ESI + 0x328],0x5622
+00fd7c7a  MOV dword ptr [ESI + 0x24],EBX
+00fd7c7d  MOV dword ptr [ESI + 0x28],EBX
+00fd7c80  MOV dword ptr [ESI + 0x2c],EBX
+00fd7c83  POP EDI
+00fd7c84  MOV dword ptr [ESI + 0x30],EBX
+00fd7c87  MOV EAX,ESI
+00fd7c89  POP ESI
+00fd7c8a  POP EBX
+00fd7c8b  RET

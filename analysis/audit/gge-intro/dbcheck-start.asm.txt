@@ -1,0 +1,66 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  60b5d0:	57                   	push   edi
+  60b5d1:	8b f9                	mov    edi,ecx
+  60b5d3:	e8 28 15 07 00       	call   0x67cb00
+  60b5d8:	85 c0                	test   eax,eax
+  60b5da:	74 78                	je     0x60b654
+  60b5dc:	e8 1f 15 07 00       	call   0x67cb00
+  60b5e1:	8b 10                	mov    edx,DWORD PTR [eax]
+  60b5e3:	8b c8                	mov    ecx,eax
+  60b5e5:	8b 42 1c             	mov    eax,DWORD PTR [edx+0x1c]
+  60b5e8:	ff d0                	call   eax
+  60b5ea:	84 c0                	test   al,al
+  60b5ec:	75 66                	jne    0x60b654
+  60b5ee:	83 7f 14 00          	cmp    DWORD PTR [edi+0x14],0x0
+  60b5f2:	56                   	push   esi
+  60b5f3:	8d 77 14             	lea    esi,[edi+0x14]
+  60b5f6:	75 35                	jne    0x60b62d
+  60b5f8:	e8 23 5c 34 00       	call   0x951220
+  60b5fd:	50                   	push   eax
+  60b5fe:	68 e0 b3 3f 01       	push   0x13fb3e0
+  60b603:	6a 04                	push   0x4
+  60b605:	6a 28                	push   0x28
+  60b607:	e8 24 5c 34 00       	call   0x951230
+  60b60c:	83 c4 10             	add    esp,0x10
+  60b60f:	85 c0                	test   eax,eax
+  60b611:	74 09                	je     0x60b61c
+  60b613:	8b c8                	mov    ecx,eax
+  60b615:	e8 26 fe ff ff       	call   0x60b440
+  60b61a:	eb 02                	jmp    0x60b61e
+  60b61c:	33 c0                	xor    eax,eax
+  60b61e:	50                   	push   eax
+  60b61f:	8b ce                	mov    ecx,esi
+  60b621:	e8 8a 44 55 00       	call   0xb5fab0
+  60b626:	8b 0e                	mov    ecx,DWORD PTR [esi]
+  60b628:	e8 13 fd ff ff       	call   0x60b340
+  60b62d:	8b 06                	mov    eax,DWORD PTR [esi]
+  60b62f:	6a 01                	push   0x1
+  60b631:	68 38 e5 31 04       	push   0x431e538
+  60b636:	8d 48 10             	lea    ecx,[eax+0x10]
+  60b639:	83 c7 04             	add    edi,0x4
+  60b63c:	e8 0f 50 20 00       	call   0x810650
+  60b641:	5e                   	pop    esi
+  60b642:	85 c0                	test   eax,eax
+  60b644:	74 2e                	je     0x60b674
+  60b646:	6a 01                	push   0x1
+  60b648:	57                   	push   edi
+  60b649:	50                   	push   eax
+  60b64a:	e8 01 e4 1f 00       	call   0x809a50
+  60b64f:	83 c4 0c             	add    esp,0xc
+  60b652:	5f                   	pop    edi
+  60b653:	c3                   	ret
+  60b654:	e8 27 26 07 00       	call   0x67dc80
+  60b659:	85 c0                	test   eax,eax
+  60b65b:	74 17                	je     0x60b674
+  60b65d:	e8 1e 26 07 00       	call   0x67dc80
+  60b662:	8b 10                	mov    edx,DWORD PTR [eax]
+  60b664:	6a 00                	push   0x0
+  60b666:	6a 00                	push   0x0
+  60b668:	8b c8                	mov    ecx,eax
+  60b66a:	8b 42 14             	mov    eax,DWORD PTR [edx+0x14]
+  60b66d:	68 4c 5c 08 08       	push   0x8085c4c
+  60b672:	ff d0                	call   eax
+  60b674:	5f                   	pop    edi
+  60b675:	c3                   	ret

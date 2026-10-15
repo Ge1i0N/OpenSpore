@@ -9,6 +9,7 @@
 
 #include "engine/appstates.h"  // the state's own script, which names the screen
 #include "engine/appmodes.h"
+#include "engine/gge_intro.h"
 #include "engine/input.h"      // the pointer, latched once per frame
 #include "engine/log.h"
 #include "engine/naming.h"     // hash_lower: a layout NAME becomes a resource INSTANCE
@@ -311,6 +312,8 @@ int present_spui_layout(const os::spui::Layout& lay, const std::string& why,
             ov.rect(32.f, (float)h - 116.f, (float)w - 64.f, 40.f, 0xe0101820u);
             ov.text(48.f, (float)h - 106.f, 0xffffce80u,
                     "GGE PRIMARY UI ONLY - galaxy scene, zoom panels and controller events are not implemented");
+            ov.text(48.f, (float)h - 89.f, 0xffffce80u,
+                    os::gge::wait_description(os::gge::intro_subset().waiting()));
         }
     }
     char foot[180];

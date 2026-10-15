@@ -7,6 +7,23 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-15 — Intro handler, MoviePlayer/DBCheck gate and explicit missing dependency
+
+Shared GGE handler `0xDEA4B0` is named Intro. Traced enter/update/exit, normal title index-5 exit,
+MoviePlayer global/vtable predicate and DBCheck notification paths. Retained 23 Ghidra function
+extracts plus bounded assembly/tables under `analysis/audit/gge-intro/`.
+
+`gge_intro.cpp` implements only the post-title phase6/idle predicate and one-shot request latches.
+2040 controlled-signal tests cover missing/playing service, other phases, delayed and early events,
+duplicate events and host reset. Unknown service is a host safety guard, not an original enum.
+Runtime probes the post-title model with explicit Unknown movie observation: it does NOT claim the
+title actually ran, does not emit DB completion and does not enter state10. Main's diagnostic GGE
+frame now names the missing dependency; 60-frame live run exits 0 with no aborts/asserts.
+
+Important correction: the original Intro hides GlobalUI and zoom UI. Our sparse primary frame is
+a diagnostic view, not that visibility lifecycle. `0x08085C4C` can also be posted on absent-manager
+or layout-failure branches, so it is a continuation notification, not proof that a DB load succeeded.
+
 ## 2026-10-15 — GGE driver trace and default primary UI subset
 
 From registrar `0xDDDE30` / vtable `0x147D2B0`, followed setup/controller/activation/UI loading.

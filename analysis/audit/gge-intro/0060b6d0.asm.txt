@@ -1,0 +1,34 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x0060B6D0
+
+0060b6d0  PUSH ESI
+0060b6d1  MOV ESI,dword ptr [ESP + 0x8]
+0060b6d5  TEST ESI,ESI
+0060b6d7  JZ 0x0060b6e1
+0060b6d9  MOV EAX,dword ptr [ESI]
+0060b6db  MOV EDX,dword ptr [EAX]
+0060b6dd  MOV ECX,ESI
+0060b6df  CALL EDX
+0060b6e1  MOV ECX,dword ptr [0x015f3f80]
+0060b6e7  TEST ECX,ECX
+0060b6e9  JZ 0x0060b6fc
+0060b6eb  MOV EAX,dword ptr [ECX]
+0060b6ed  MOV EDX,dword ptr [EAX + 0x4]
+0060b6f0  CALL EDX
+0060b6f2  MOV dword ptr [0x015f3f80],0x0
+0060b6fc  TEST ESI,ESI
+0060b6fe  JZ 0x0060b715
+0060b700  MOV EAX,dword ptr [ESI]
+0060b702  MOV EDX,dword ptr [EAX + 0xc]
+0060b705  PUSH 0x8085c57
+0060b70a  MOV ECX,ESI
+0060b70c  CALL EDX
+0060b70e  MOV [0x015f3f80],EAX
+0060b713  POP ESI
+0060b714  RET
+0060b715  MOV dword ptr [0x015f3f80],0x0
+0060b71f  POP ESI
+0060b720  RET

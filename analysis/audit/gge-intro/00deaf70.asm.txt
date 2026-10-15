@@ -1,0 +1,87 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DEAF70
+
+00deaf70  FLD float ptr [ESP + 0x4]
+00deaf74  SUB ESP,0x8
+00deaf77  PUSH ESI
+00deaf78  PUSH EDI
+00deaf79  PUSH ECX
+00deaf7a  FSTP float ptr [ESP]
+00deaf7d  MOV ESI,ECX
+00deaf7f  CALL 0x00deac80
+00deaf84  MOV EAX,[0x016a1344]
+00deaf89  MOV EDI,dword ptr [EAX + 0x1ec]
+00deaf8f  CALL 0x0067cad0
+00deaf94  MOV EDX,dword ptr [EAX]
+00deaf96  MOV ECX,EAX
+00deaf98  MOV EAX,dword ptr [EDX + 0x14]
+00deaf9b  CALL EAX
+00deaf9d  TEST AL,AL
+00deaf9f  JNZ 0x00deb019
+00deafa1  CMP EDI,0x6
+00deafa4  JNZ 0x00deb019
+00deafa6  CMP byte ptr [ESI + 0x11],AL
+00deafa9  JNZ 0x00deaffe
+00deafab  CALL 0x0060b6b0
+00deafb0  TEST EAX,EAX
+00deafb2  JNZ 0x00deafea
+00deafb4  PUSH EAX
+00deafb5  PUSH EAX
+00deafb6  PUSH EAX
+00deafb7  PUSH EAX
+00deafb8  PUSH 0x147e258
+00deafbd  PUSH 0x18
+00deafbf  CALL 0x00f47240
+00deafc4  ADD ESP,0x18
+00deafc7  TEST EAX,EAX
+00deafc9  JZ 0x00deafd6
+00deafcb  MOV ECX,EAX
+00deafcd  CALL 0x0060b510
+00deafd2  MOV EDI,EAX
+00deafd4  JMP 0x00deafd8
+00deafd6  XOR EDI,EDI
+00deafd8  MOV EDX,dword ptr [EDI]
+00deafda  MOV EAX,dword ptr [EDX + 0x10]
+00deafdd  MOV ECX,EDI
+00deafdf  CALL EAX
+00deafe1  PUSH EDI
+00deafe2  CALL 0x0060b6d0
+00deafe7  ADD ESP,0x4
+00deafea  CALL 0x0060b6b0
+00deafef  MOV EDX,dword ptr [EAX]
+00deaff1  MOV ECX,EAX
+00deaff3  MOV EAX,dword ptr [EDX + 0x18]
+00deaff6  CALL EAX
+00deaff8  MOV byte ptr [ESI + 0x11],0x1
+00deaffc  JMP 0x00deb019
+00deaffe  CMP byte ptr [ESI + 0x12],0x0
+00deb002  JZ 0x00deb019
+00deb004  CMP byte ptr [ESI + 0xd],0x0
+00deb008  JNZ 0x00deb019
+00deb00a  MOV ECX,dword ptr [0x016a1344]
+00deb010  CALL 0x00de9550
+00deb015  MOV byte ptr [ESI + 0xd],0x1
+00deb019  CALL 0x00b3d5d0
+00deb01e  FLD float ptr [ESP + 0x14]
+00deb022  FMUL float ptr [0x0148ba68]
+00deb028  LEA ECX,[EAX + 0x4]
+00deb02b  FNSTCW word ptr [ESP + 0x14]
+00deb02f  MOVZX EAX,word ptr [ESP + 0x14]
+00deb034  OR EAX,0xc00
+00deb039  MOV dword ptr [ESP + 0x8],EAX
+00deb03d  FLDCW word ptr [ESP + 0x8]
+00deb041  FISTP qword ptr [ESP + 0x8]
+00deb045  MOV EAX,dword ptr [ESP + 0x8]
+00deb049  MOV EDX,dword ptr [ECX]
+00deb04b  PUSH EAX
+00deb04c  FLDCW word ptr [ESP + 0x18]
+00deb050  PUSH EAX
+00deb051  MOV EAX,dword ptr [EDX + 0x38]
+00deb054  CALL EAX
+00deb056  POP EDI
+00deb057  POP ESI
+00deb058  ADD ESP,0x8
+00deb05b  RET 0x4

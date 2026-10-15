@@ -17,10 +17,16 @@ os.environ.setdefault('GHIDRA_INSTALL_DIR', r'C:\Users\DartPower\scoop\apps\ghid
 
 FUNCTIONS = (0xddde30, 0xdddbe0, 0xdddf80, 0xdddc50, 0xddd960, 0xddd9e0, 0xdddb80,
              0xde6b90, 0xde5900, 0xdea1b0, 0xde8710, 0xe035f0, 0xe02ac0, 0x8121c0, 0x812100)
+INTRO_FUNCTIONS = (0xdea4b0, 0xdeb450, 0xdea3d0, 0xdeaf70, 0xdea820, 0xdeb060, 0xdeabd0,
+                   0xdeac80, 0xdea510, 0xde9550, 0xde8680, 0x60b510, 0x60b400,
+                   0x60b6b0, 0x60b6d0, 0x60b340, 0x67cad0, 0xfd8120, 0xfd7b10,
+                   0xde5280, 0xde5380, 0xfd90d0, 0x6ab790)
 
 
 def main():
-    dest = ROOT/'analysis/audit/galaxy-entry'
+    intro = '--intro' in sys.argv
+    addresses = INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
     header = ('GA-unpacked SHA-256: %s\nStatic analysis only, not original runtime observation.\n'
@@ -37,7 +43,7 @@ def main():
         if not dec.openProgram(prog):
             raise RuntimeError('could not open decompiler')
         try:
-            for va in FUNCTIONS:
+            for va in addresses:
                 fn = prog.getFunctionManager().getFunctionAt(af.getAddress('%08x' % va))
                 if not fn:
                     raise RuntimeError('function not carved: %08x' % va)
@@ -54,7 +60,7 @@ def main():
                                                      encoding='utf-8', newline='\n')
         finally:
             dec.dispose()
-    print('retained %d GGE functions' % len(FUNCTIONS))
+    print('retained %d GGE functions in %s' % (len(addresses), dest.name))
 
 
 def retain_static():
@@ -67,6 +73,26 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--intro' in sys.argv:
+        dest = ROOT/'analysis/audit/gge-intro'
+        dest.mkdir(parents=True, exist_ok=True)
+        for name, start, end in [('movie-playing-guard',0xfd7550,0xfd7559),
+                                  ('movie-global-install',0xf4838c,0xf483ad),
+                                  ('dbcheck-start',0x60b5d0,0x60b676),
+                                  ('state10-enter',0xdec320,0xdec36a),
+                                  ('state10-update',0xdec3b0,0xdec3ee)]:
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(disasm(pe,start,end))+'\n',
+                                              encoding='utf-8',newline='\n')
+        tables = {'oracle_sha256':digest, 'handler_name':pe.wstr(0x147e234),
+                  'handler_vtable':[{'slot':hex(o),'target':hex(pe.u32(0x147e1d8+o))}
+                                     for o in range(0,0x38,4)],
+                  'movie_vtable':[{'slot':hex(o),'target':hex(pe.u32(0x1493a50+o))}
+                                   for o in range(0,0x48,4)],
+                  'dbcheck_vtable':[{'slot':hex(o),'target':hex(pe.u32(0x13fb3c4+o))}
+                                     for o in range(0,0x1c,4)]}
+        (dest/'tables.json').write_text(json.dumps(tables,indent=2)+'\n',encoding='utf-8',newline='\n')
+        print('retained Intro/movie/DBCheck static tables and bounded instructions')
+        return
     # Default name constructors are tiny and not all carved in Ghidra; keep exact bounded objdump.
     for name, start, end in [('ui-name-defaults', 0x136bce0, 0x136bd3b),
                               ('default-property-overrides', 0xdde05c, 0xdde18c)]:

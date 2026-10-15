@@ -1,0 +1,110 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DEB450
+
+00deb450  PUSH EDI
+00deb451  MOV EDI,ECX
+00deb453  CALL 0x0067dde0
+00deb458  TEST EAX,EAX
+00deb45a  JZ 0x00deb467
+00deb45c  MOV EDX,dword ptr [EAX]
+00deb45e  MOV ECX,EAX
+00deb460  MOV EAX,dword ptr [EDX + 0x4c]
+00deb463  PUSH 0x0
+00deb465  CALL EAX
+00deb467  CALL 0x0067cad0
+00deb46c  TEST EAX,EAX
+00deb46e  JZ 0x00deb47b
+00deb470  MOV EDX,dword ptr [EAX]
+00deb472  MOV ECX,EAX
+00deb474  MOV EAX,dword ptr [EDX + 0x40]
+00deb477  PUSH 0x0
+00deb479  CALL EAX
+00deb47b  PUSH ESI
+00deb47c  CALL 0x0067dc80
+00deb481  MOV ESI,EAX
+00deb483  TEST ESI,ESI
+00deb485  JZ 0x00deb50d
+00deb48b  TEST EDI,EDI
+00deb48d  JZ 0x00deb494
+00deb48f  LEA EAX,[EDI + 0x8]
+00deb492  JMP 0x00deb496
+00deb494  XOR EAX,EAX
+00deb496  MOV EDX,dword ptr [ESI]
+00deb498  PUSH 0x67c75bd6
+00deb49d  PUSH EAX
+00deb49e  MOV EAX,dword ptr [EDX + 0x24]
+00deb4a1  MOV ECX,ESI
+00deb4a3  CALL EAX
+00deb4a5  TEST EDI,EDI
+00deb4a7  JZ 0x00deb4ae
+00deb4a9  LEA EAX,[EDI + 0x8]
+00deb4ac  JMP 0x00deb4b0
+00deb4ae  XOR EAX,EAX
+00deb4b0  MOV EDX,dword ptr [ESI]
+00deb4b2  PUSH 0x634297ad
+00deb4b7  PUSH EAX
+00deb4b8  MOV EAX,dword ptr [EDX + 0x24]
+00deb4bb  MOV ECX,ESI
+00deb4bd  CALL EAX
+00deb4bf  TEST EDI,EDI
+00deb4c1  JZ 0x00deb4c8
+00deb4c3  LEA EAX,[EDI + 0x8]
+00deb4c6  JMP 0x00deb4ca
+00deb4c8  XOR EAX,EAX
+00deb4ca  MOV EDX,dword ptr [ESI]
+00deb4cc  PUSH 0x275a9c8c
+00deb4d1  PUSH EAX
+00deb4d2  MOV EAX,dword ptr [EDX + 0x24]
+00deb4d5  MOV ECX,ESI
+00deb4d7  CALL EAX
+00deb4d9  TEST EDI,EDI
+00deb4db  JZ 0x00deb4e2
+00deb4dd  LEA EAX,[EDI + 0x8]
+00deb4e0  JMP 0x00deb4e4
+00deb4e2  XOR EAX,EAX
+00deb4e4  MOV EDX,dword ptr [ESI]
+00deb4e6  PUSH 0xeda117de
+00deb4eb  PUSH EAX
+00deb4ec  MOV EAX,dword ptr [EDX + 0x24]
+00deb4ef  MOV ECX,ESI
+00deb4f1  CALL EAX
+00deb4f3  TEST EDI,EDI
+00deb4f5  JZ 0x00deb4fc
+00deb4f7  LEA EAX,[EDI + 0x8]
+00deb4fa  JMP 0x00deb4fe
+00deb4fc  XOR EAX,EAX
+00deb4fe  MOV EDX,dword ptr [ESI]
+00deb500  PUSH 0x8085c4c
+00deb505  PUSH EAX
+00deb506  MOV EAX,dword ptr [EDX + 0x24]
+00deb509  MOV ECX,ESI
+00deb50b  CALL EAX
+00deb50d  MOV byte ptr [EDI + 0xd],0x0
+00deb511  MOV ECX,dword ptr [0x016a1344]
+00deb517  CMP dword ptr [ECX + 0x1ec],0x1
+00deb51e  POP ESI
+00deb51f  JNZ 0x00deb528
+00deb521  MOV ECX,EDI
+00deb523  CALL 0x00deb060
+00deb528  MOV EDX,dword ptr [0x016a1344]
+00deb52e  MOV ECX,dword ptr [EDX + 0x184]
+00deb534  PUSH 0x0
+00deb536  CALL 0x00e01320
+00deb53b  CALL 0x00b3d5d0
+00deb540  MOV ECX,EAX
+00deb542  CALL 0x00ad7da0
+00deb547  POP EDI
+00deb548  TEST AL,AL
+00deb54a  JNZ 0x00deb55a
+00deb54c  PUSH 0x1
+00deb54e  CALL 0x00b3d5d0
+00deb553  MOV ECX,EAX
+00deb555  CALL 0x00ad7dc0
+00deb55a  MOV ECX,dword ptr [0x016a1344]
+00deb560  PUSH 0x0
+00deb562  ADD ECX,0x144
+00deb568  CALL 0x00810630
+00deb56d  RET

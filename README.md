@@ -37,6 +37,9 @@ boot → DevLauncher → E3LaunchScreen → видимая плитка → Crea
 GA-кодом primary layout `GlobalUIGGE-9`. Это пока **почти пустой диагностический UI без галактики**,
 zoom-панелей и runtime-контроллера, не готовый экран выбора игры.
 [Разбор и ограничения](analysis/galaxy-entry.md) · [capture](analysis/shots/gge_primary_ui.png).
+Разобран также [Intro handler](analysis/gge-intro.md): C++-модель post-title gate проверяет
+условия MoviePlayer/DBCheck. В runtime пока нет этих сервисов, поэтому показано явное ожидание,
+а не фиктивная готовность галактики.
 
 ## Что работает — и где граница
 
@@ -95,7 +98,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify
 ```
 
 Расположение данных рядом с собранным executable:
@@ -139,6 +142,7 @@ $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
 .\build\Debug\mode_ui_verify.exe
+.\build\Debug\gge_intro_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
@@ -151,6 +155,8 @@ python tools/docs_check.py
 Последняя проверка: **748** corpus matches, **486** malformed inputs rejected атомарно,
 drawable UV/state/scale/alignment и ancestor Clip checks PASS; **544** scoped package cycles при CRT-лимите **512**.
 Отдельный D3D9 readback проверяет реальные пиксели flat/image quad, text flush и scissor reset.
+Post-title gate GGE проходит **2040** проверок на контролируемых сигналах; это не наблюдение
+оригинальной игры и не реализация MoviePlayer/DBCheck.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI

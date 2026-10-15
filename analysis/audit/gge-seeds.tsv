@@ -8,3 +8,8 @@
 0x00dddac0	function	os_GGE_input_2c
 0x00dddb50	function	os_GGE_input_34
 0x00dddb80	function	os_GGE_tick_candidate
+0x00deb450	function	os_GGE_boot_handler_enter
+0x00deaf70	function	os_GGE_boot_handler_update
+0x00dea5b0	function	os_GGE_boot_handler_key
+0x00dea820	function	os_GGE_boot_handler_message
+0x00dea510	function	os_GGE_boot_handler_release_ui

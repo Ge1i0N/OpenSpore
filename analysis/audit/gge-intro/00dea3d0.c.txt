@@ -1,0 +1,57 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DEA3D0
+
+void __fastcall FUN_00dea3d0(int param_1)
+
+{
+  int *piVar1;
+  int iVar2;
+
+  piVar1 = (int *)FUN_0067dde0();
+  if (piVar1 != (int *)0x0) {
+    (**(code **)(*piVar1 + 0x4c))(1);
+  }
+  piVar1 = (int *)FUN_0067dc80();
+  if (piVar1 != (int *)0x0) {
+    if (param_1 == 0) {
+      iVar2 = 0;
+    }
+    else {
+      iVar2 = param_1 + 8;
+    }
+    (**(code **)(*piVar1 + 0x2c))(iVar2,0x67c75bd6,0xffffd8f1);
+    if (param_1 == 0) {
+      iVar2 = 0;
+    }
+    else {
+      iVar2 = param_1 + 8;
+    }
+    (**(code **)(*piVar1 + 0x2c))(iVar2,0x634297ad,0xffffd8f1);
+    if (param_1 == 0) {
+      iVar2 = 0;
+    }
+    else {
+      iVar2 = param_1 + 8;
+    }
+    (**(code **)(*piVar1 + 0x2c))(iVar2,0x275a9c8c,0xffffd8f1);
+    if (param_1 == 0) {
+      iVar2 = 0;
+    }
+    else {
+      iVar2 = param_1 + 8;
+    }
+    (**(code **)(*piVar1 + 0x2c))(iVar2,0xeda117de,0xffffd8f1);
+    if (param_1 == 0) {
+      param_1 = 0;
+    }
+    else {
+      param_1 = param_1 + 8;
+    }
+    (**(code **)(*piVar1 + 0x2c))(param_1,0x8085c4c,0xffffd8f1);
+  }
+  FUN_00810630(1);
+  return;
+}

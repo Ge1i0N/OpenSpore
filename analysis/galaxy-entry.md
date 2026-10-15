@@ -96,11 +96,12 @@ not an approximation of a working galaxy selector.
   CreatureEditor passes, with no stale GGE screen, aborts or asserts. Full GGE driver teardown
   is not simulated: this checks our stateless primary-UI binding only.
 
-Next target is the controller's internal state map (`0xDE7660`), especially shared handlers for
-states **0/1/8/9** (constructed at `0xDEA4B0`). `0xDE8710` selects handler 1 while +0x1EC is 1..5.
-Its actual update/enter/exit side effects, scene/camera/effects dependencies, save selection,
-ZoomPanel composition, options/WinProc wiring and original messages must be understood before
-claiming a playable GGE. A registration or visible frame is not that claim.
+**Follow-up:** the shared handler for states 0/1/8/9 (`0xDEA4B0`) is now identified as **Intro**.
+Its title path, MoviePlayer/phase guard, DBCheck notification and post-intro request are traced in
+[gge-intro.md](gge-intro.md). A bounded gate model is tested; missing runtime services do not
+auto-complete it. The primary frame remains a diagnostic view, not the handler's original visibility
+lifecycle. Next: actual MoviePlayer/no-movie contract, DBCheck consumers and the state-2 scene handler.
+Scene/camera/effects, save selection, zoom composition and messages remain open; no playable claim.
 
 Reproduce retained evidence:
 

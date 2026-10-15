@@ -27,14 +27,19 @@ test with `-w -devDirs`; retain evidence and commit.
   **Not the galaxy scene or driver lifecycle**: only 9 serialized windows currently visible.
   `analysis/galaxy-entry.md` and `audit/galaxy-entry/` retain lifecycle slots, constructor defaults,
   property overrides and exact UI-loading path. `mode_ui_verify` tests binding/hash boundaries.
+- Handler at `0xDEA4B0` is Intro, not galaxy loading. `analysis/gge-intro.md` traces title,
+  MoviePlayer +0x14 (`0xFD7550`), DBCheck and event `0x08085C4C`. Post-title decision/latch subset
+  implemented; `gge_intro_verify`: 2040 controlled-signal checks. Runtime uses explicit Unknown
+  MoviePlayer observation and never generates DB completion or state10 transitions. Screenshot
+  shows this block reason; the phase6 input is a model boundary, not an executed original title.
 
 ## Next, in order
 
 1. Recover needed drawable tiling/outline and Button capture/release/checked behavior from GA.
-2. Continue GGE controller state map `0xDE7660`: states 0/1/8/9 share handler constructed at
-   `0xDEA4B0`; update `0xDE8710` forces handler 1 while +0x1EC is 1..5. Driver lifecycle/UI path
-   is now statically traced, primary UI defaults only are presented. Follow handler enter/tick/exit,
-   scene/camera dependencies and WinProc behavior, not forced visibility. A UI binding is not gameplay.
+2. Define actual MoviePlayer/no-movie host contract and DBCheck dependencies (`0x60B5D0`), not
+   package-count readiness. Handler Intro update is traced; gate is waiting on missing services.
+   Continue state2 constructor `0xE008B0` and state10 (`0xDEC320/0xDEC3B0`) return/effect lifecycle.
+   The current primary UI is diagnostic; original Intro hides it. Never force hidden branches visible.
 3. Advance the first playable stage without claiming full UI or full format parity.
 
 Dynamic sibling Z-order and layout WinProcs are still open. Forward serialized sibling traversal,
@@ -43,11 +48,12 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
 .\build\Debug\mode_ui_verify.exe
+.\build\Debug\gge_intro_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
