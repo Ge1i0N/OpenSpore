@@ -43,12 +43,13 @@ def main():
                 result = decompiler.decompileFunction(fn, 120, pyghidra.task_monitor())
                 if not result.decompileCompleted():
                     raise RuntimeError(result.getErrorMessage())
-                code = result.getDecompiledFunction().getC()
-                (dest/('%08x.c.txt' % va)).write_text(header+code, encoding='utf-8')
+                code = result.getDecompiledFunction().getC().replace('\r', '')
+                code = '\n'.join(line.rstrip() for line in code.split('\n')).strip() + '\n'
+                (dest/('%08x.c.txt' % va)).write_text(header+code, encoding='utf-8', newline='\n')
                 lines = []
                 for ins in prog.getListing().getInstructions(fn.getBody(), True):
                     lines.append('%s  %s' % (ins.getAddress(), ins))
-                (dest/('%08x.asm.txt' % va)).write_text(header+'\n'.join(lines)+'\n', encoding='utf-8')
+                (dest/('%08x.asm.txt' % va)).write_text(header+'\n'.join(lines)+'\n', encoding='utf-8', newline='\n')
                 print('retained 0x%08X: %d instructions' % (va, len(lines)))
         finally:
             decompiler.dispose()
