@@ -41,8 +41,10 @@ public:
     bool close(std::string& error);
     // A true return means the pass was accepted, NOT that all actions/assets/services succeeded.
     // nullptr provider yields Unknown asset results, not fake Missing/Found. Provider exceptions
-    // become per-action failures. Reentrant open/close/apply rejected before mutation.
+    // become per-action failures. Reentrant open/close/apply/place rejected before mutation.
     bool apply_available(u64 ticket,ImageProvider* provider,std::string& error);
+    // Scene-owned pixel placement only; no camera acquisition, native phase or move notifications.
+    bool place(u64 ticket,const StarUiPlacement& placement,std::string& error);
     // Borrowed view: invalidated by successful open/close or destruction of this owner.
     const StarUiInstance* instance() const { return instance_.get(); }
     const StarHostReport& report() const { return report_; }

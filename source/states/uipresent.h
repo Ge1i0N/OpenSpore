@@ -21,6 +21,7 @@ struct Window;
 }  // namespace os::spui
 
 struct IDirect3DTexture9;
+namespace os::gge { class StarUiScene; }
 
 namespace os::states {
 
@@ -35,7 +36,10 @@ const os::spui::Layout* requested_by_state(std::string& why);
 // after drawing. Intended for separately owned per-entry layers; this is a renderer hook, NOT native
 // GGE mounting/camera/scene readiness. hovered, if supplied, must refer to this layout's window.
 int draw_spui_pixel_layer(const os::spui::Layout& lay,const os::spui::Rect& viewport,
-                          const os::spui::Window* hovered=nullptr);
+                           const os::spui::Window* hovered=nullptr);
+// Consume only a current projected host scene frame, in catalogue paint order. No native mount,
+// camera acquisition, begin/end/clear or CommandID dispatch; no automatic GGE caller attached.
+int draw_gge_star_scene(const os::gge::StarUiScene& scene,unsigned long long frame_serial);
 
 // Draws `lay` scaled to the viewport over an optional full-screen background, presenting a complete
 // frame. Returns the number of windows drawn, or -1 when there is no D3D device or the frame could

@@ -138,6 +138,9 @@ This step reuses retained local Ghidra/objdump evidence; it does not introduce n
 Next: scene/active-camera ownership contracts, then real Available catalogue input and per-star
 projection/selection integration. Native service
 callbacks/listeners and phase ordering remain separate work, not inferred from this host pass.
+The [host scene follow-up](gge-star-scene.md) now owns multiple lifecycles, applies guarded pixel
+placement and publishes current layers/hits only from explicit Available catalogue/active-camera
+observations. It does not turn this independent-action policy into native phase/mount completion.
 
 Final Debug x86 warning-free. The lifecycle checks and all prior phase1/instance/projection/
 parser/catalogue/DBCheck/Intro/SPUI/package suites PASS; image80, AnimatedIcon and D3D9 scissor

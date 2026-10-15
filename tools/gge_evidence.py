@@ -33,6 +33,8 @@ MOUNT_FUNCTIONS = (0xdf7690,0xdf6d80,0xdf9160,0xdf82a0,0x812250,0x8121c0,0x81210
 PHASE1_FUNCTIONS = (0xdf6d80,0xde3db0,0xde3eb0,0xde3f50,0x806320,0x806e00,0xdf7690,0xdf9200)
 IMAGE_FUNCTIONS = (0x97d030,0x97d070,0x6c0230,0x97d840,0xde3db0,0xde3eb0,0x806320)
 ANIMATED_FUNCTIONS = (0x7f5500,0x7f5550,0x7f5a30,0x7f5b50,0x7f5d50,0x7f5e30,0xdf9200)
+SCENE_FUNCTIONS = (0x67dcd0,0x67dec0,0x67dd10,0x67dd40,0x67df50,0x67dd50,0x67df60,
+                   0x67dd90,0xde46d0,0xddd920,0xddd150,0xde3c20,0x7c4250,0xdf6110)
 
 
 def main():
@@ -44,8 +46,9 @@ def main():
     phase1 = '--phase1' in sys.argv
     images = '--images' in sys.argv
     animated = '--animated' in sys.argv
-    addresses = ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
-    dest = ROOT/('analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
+    scene = '--scene' in sys.argv
+    addresses = SCENE_FUNCTIONS if scene else ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
+    dest = ROOT/('analysis/audit/gge-scene' if scene else 'analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
@@ -93,6 +96,35 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--scene' in sys.argv:
+        dest=ROOT/'analysis/audit/gge-scene'; dest.mkdir(parents=True,exist_ok=True)
+        facts={'oracle_sha256':digest,'authority':'local Ghidra/objdump static evidence; host projection collection is separate design, not native scene execution',
+               'service_globals':{'67DCD0':'015FD8B0 renderer service; setter67DEC0','67DD10':'015FD8C0 render-stage service',
+                                  '67DD40':'015FD8CC factory service; setter67DF50','67DD50':'015FD8D0 factory service; setter67DF60',
+                                  '67DD90':'015FD8E8 effects service'},
+               'projection':'DE3C20 obtains renderer67DCD0 slot58 active projection camera, then7C4250; width/height-only pixel mapping with no window-origin addition',
+               'retained_controller':'DE46D0 controller+198 obtains renderer slot50 then returned interface slot38; NOT established identical to active slot58 camera',
+               'scene_chain':'DE46D0->DDD920 allocates0x74 Simulator/DDA8C0/global16A0B08 thenDDD150',
+               'factory_requests':[{'owner_offset':'20','service':'67DD50','slot':'18','tag':'07B6877F'},
+                                   {'owner_offset':'18','service':'67DD40','slot':'14','tag':'07B6877E','render_stage':'14'},
+                                   {'owner_offset':'1C','service':'67DD40','slot':'14','tag':'07D23D15','render_stage':'1A'},
+                                   {'owner_offset':'14','service':'67DD40','slot':'14','tag':'07D23D13','render_stage':'0D'}],
+               'effects':'DE46D0 effects service67DD90 slot4C requests key02DDA976 GGE effects world, retained atcontroller+15C',
+               'unresolved':['concrete factory types/complete native registration semantics','active projection camera producer/updates/ownership','controller198 alias relationship',
+                             'native effects/render stage execution and scene readiness'],
+               'host_policy':['Available saved+candidate catalogue required, order/duplicates retained with unique caller-issued host IDs',
+                              'unavailable catalogue refresh retains diagnostic ownership only, suspends old frame/assets/update/layers/picking until successful Available reopen',
+                              'explicit ActiveProjection observation only, no fabricated camera; invalid/lost camera retires prior draw/pick frame',
+                              'per-card projection->saved clamp/4px placement->owned lifecycle, failed cards excluded, no rollback of other independent cards',
+                              'forward catalogue painter/reverse picker, no native depth/Z or CommandID dispatch',
+                              'bounds128cards/65536aggregate objects/32768windows, no native population limit inferred',
+                              'projection success NOT image availability, native scene/mount/listener readiness or live catalogue discovery'],
+               'verification_boundary':'controlled metadata/camera on actual UI/PNG; untouched template remains hidden/IgnoreMouse after current phase subset; picking fixture clears ONLY root177 IgnoreMouse in controlled copy. No new GPU/native galaxy capture.'}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8',newline='\n')
+        (dest/'service-getters.asm.txt').write_text(header+'\n'.join(disasm(pe,0x67dcd0,0x67dcda))+'\n'+
+            '\n'.join(disasm(pe,0x67dd10,0x67dd9a))+'\n',encoding='utf-8',newline='\n')
+        print('retained scene service globals and distinct active/retained camera boundaries; no target execution')
+        return
     if '--lifecycle' in sys.argv:
         import struct
         dest=ROOT/'analysis/audit/gge-star-lifecycle'; dest.mkdir(parents=True,exist_ok=True)

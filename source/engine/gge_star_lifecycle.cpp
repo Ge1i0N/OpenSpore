@@ -158,6 +158,10 @@ bool StarUiLifecycle::close(std::string& error) {
     if (busy_) { error="cannot close during synchronous host pass"; return false; }
     instance_.reset(); report_={}; error.clear(); return true;
 }
+bool StarUiLifecycle::place(u64 ticket,const StarUiPlacement& placement,std::string& error) {
+    if (busy_||!instance_||!ticket||ticket!=report_.ticket) { error="inactive/stale/reentrant host placement"; return false; }
+    return instance_->move_root(placement,error);
+}
 bool StarUiLifecycle::apply_available(u64 ticket,ImageProvider* provider,std::string& error) {
     if (busy_||!instance_||!ticket||ticket!=report_.ticket) { error="inactive/stale/reentrant host pass"; return false; }
     struct Guard { bool& busy; ~Guard() { busy=false; } } guard{busy_}; busy_=true;

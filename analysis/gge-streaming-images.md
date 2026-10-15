@@ -124,6 +124,8 @@ and [Animated Icon](gge-animated-icon.md) evidence; these host bounds are not ne
 
 Next: scene/active-camera ownership, explicit catalogue input and actual per-star placement/selection
 integration. The normal GGE screen, MoviePlayer Unknown gate and native mount completion are unchanged.
+The [host scene collection](gge-star-scene.md) now consumes explicit catalogue/camera observations
+and these original atlas pixels through owned lifecycles; native factories and a live producer remain absent.
 
 Final Debug x86 warning-free. Streaming95/lifecycle232/AnimatedIcon159/image80 and all prior
 phase1/instance/projection/parser/catalogue/DBCheck/Intro/SPUI/package suites PASS; controlled image/

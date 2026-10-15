@@ -1,0 +1,60 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "local Ghidra/objdump static evidence; host projection collection is separate design, not native scene execution",
+  "service_globals": {
+    "67DCD0": "015FD8B0 renderer service; setter67DEC0",
+    "67DD10": "015FD8C0 render-stage service",
+    "67DD40": "015FD8CC factory service; setter67DF50",
+    "67DD50": "015FD8D0 factory service; setter67DF60",
+    "67DD90": "015FD8E8 effects service"
+  },
+  "projection": "DE3C20 obtains renderer67DCD0 slot58 active projection camera, then7C4250; width/height-only pixel mapping with no window-origin addition",
+  "retained_controller": "DE46D0 controller+198 obtains renderer slot50 then returned interface slot38; NOT established identical to active slot58 camera",
+  "scene_chain": "DE46D0->DDD920 allocates0x74 Simulator/DDA8C0/global16A0B08 thenDDD150",
+  "factory_requests": [
+    {
+      "owner_offset": "20",
+      "service": "67DD50",
+      "slot": "18",
+      "tag": "07B6877F"
+    },
+    {
+      "owner_offset": "18",
+      "service": "67DD40",
+      "slot": "14",
+      "tag": "07B6877E",
+      "render_stage": "14"
+    },
+    {
+      "owner_offset": "1C",
+      "service": "67DD40",
+      "slot": "14",
+      "tag": "07D23D15",
+      "render_stage": "1A"
+    },
+    {
+      "owner_offset": "14",
+      "service": "67DD40",
+      "slot": "14",
+      "tag": "07D23D13",
+      "render_stage": "0D"
+    }
+  ],
+  "effects": "DE46D0 effects service67DD90 slot4C requests key02DDA976 GGE effects world, retained atcontroller+15C",
+  "unresolved": [
+    "concrete factory types/complete native registration semantics",
+    "active projection camera producer/updates/ownership",
+    "controller198 alias relationship",
+    "native effects/render stage execution and scene readiness"
+  ],
+  "host_policy": [
+    "Available saved+candidate catalogue required, order/duplicates retained with unique caller-issued host IDs",
+    "unavailable catalogue refresh retains diagnostic ownership only, suspends old frame/assets/update/layers/picking until successful Available reopen",
+    "explicit ActiveProjection observation only, no fabricated camera; invalid/lost camera retires prior draw/pick frame",
+    "per-card projection->saved clamp/4px placement->owned lifecycle, failed cards excluded, no rollback of other independent cards",
+    "forward catalogue painter/reverse picker, no native depth/Z or CommandID dispatch",
+    "bounds128cards/65536aggregate objects/32768windows, no native population limit inferred",
+    "projection success NOT image availability, native scene/mount/listener readiness or live catalogue discovery"
+  ],
+  "verification_boundary": "controlled metadata/camera on actual UI/PNG; untouched template remains hidden/IgnoreMouse after current phase subset; picking fixture clears ONLY root177 IgnoreMouse in controlled copy. No new GPU/native galaxy capture."
+}

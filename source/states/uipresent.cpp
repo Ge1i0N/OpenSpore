@@ -18,6 +18,7 @@
 #include "engine/pkg.h"
 #include "engine/spui.h"
 #include "engine/spui_drawable.h"
+#include "engine/gge_star_scene.h"
 #include "engine/text.h"
 #include "render/device.h"
 #include "render/imgfile.h"
@@ -320,6 +321,15 @@ int draw_spui_pixel_layer(const os::spui::Layout& lay,const os::spui::Rect& view
     const auto drawn=paint_spui_layer(lay,1,1,dev.width(),dev.height(),clip,hovered);
     render::overlay().reset_clip();
     return (int)drawn;
+}
+int draw_gge_star_scene(const os::gge::StarUiScene& scene,unsigned long long frame_serial) {
+    int drawn=0;
+    for (const auto& layer:scene.layers(frame_serial)) {
+        const int count=draw_spui_pixel_layer(*layer.layout,scene.frame().viewport);
+        if (count<0) return -1;
+        drawn+=count;
+    }
+    return drawn;
 }
 
 int present_spui_layout(const os::spui::Layout& lay, const std::string& why,

@@ -41,6 +41,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE static Animated Icon | explicit window index → separate frame state → atlas-composed quad/shared painter; actual five-frame descriptors | AutoPlay=false/positive grid only; no native normalization/playback/automatic GGE caller; QI0106F146 returns object, caller takes+20C |
 | GGE star host lifecycle | owned open/apply/close + generation-scoped immutable plans; independent flags/centering/name/refs/image/frame application and retries | host policy, not native dependency/order/phase/listener completion; Unsupported services explicit; no automatic GGE caller |
 | GGE direct streaming PNG provider | same-handle bounded file/index/resource reads, exact keys, shared decoder, 64-bit file seeks; large original atlas feeds lifecycle directly | one explicitly selected DBPF3.0/index3 file, no precedence/discovery; old memory adapter unchanged; not native scene readiness |
+| GGE host scene collection | explicit Available catalogue + tagged active camera → per-card projection/clamp/owned placement → current layer/pick views/shared draw hook | host ordering/limits, stale-frame suspension; native factories/controller camera/show/effects/live source not implemented; no forced visibility |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
 
@@ -76,6 +77,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE Animated Icon static frame | 159 checks (carrier assertions removed), direct original atlas PNG and controlled multi-row GPU/scissor readback; frame/image/window isolation | `gge_animated_verify <fixtures> <explicit-atlas-package> <new-bmp>`; [evidence](analysis/gge-animated-icon.md) |
 | GGE star host lifecycle | 232 checks; direct package provider/real layouts/PNG + controlled metadata, per-action retries/cache/reentry/stale tickets/UTF/local centering | `gge_star_lifecycle_verify <fixtures> <main-package> <atlas-package>`; [host policy/evidence](analysis/gge-star-lifecycle.md) |
 | GGE streaming image provider | 95 checks: large original atlas, raw/RefPack/all masks, bounded index/resource/PNG failures, sparse data/index >2GiB and >4GiB rejection, sharing protection, 544 ownership cycles | `gge_streaming_image_verify <original-Graphics.package> <NEW-test-dir>`; [bounds/evidence](analysis/gge-streaming-images.md) |
+| GGE host scene | 204 checks; Available-vs-Unknown/empty, active-vs-retained camera, stale frames, projection/4px/clamp/layer/pick/budgets/reentry; raw hidden template unchanged | `gge_star_scene_verify <fixtures> <original-Graphics.package>`; [controlled visibility/native boundary](analysis/gge-star-scene.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

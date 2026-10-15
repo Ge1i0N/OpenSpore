@@ -98,7 +98,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify
 ```
 
 Расположение данных рядом с собранным executable:
@@ -162,6 +162,7 @@ $frameCapture = Join-Path $env:TEMP ('OpenSpore-frame-' + [guid]::NewGuid() + '.
 .\build\Debug\gge_star_lifecycle_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package .\build\bin\Debug\Data\Spore_Graphics.package
 $streamDir = Join-Path $env:TEMP ('OpenSpore-stream-' + [guid]::NewGuid())
 .\build\Debug\gge_streaming_image_verify.exe .\build\bin\Debug\Data\Spore_Graphics.package $streamDir
+.\build\Debug\gge_star_scene_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
@@ -217,6 +218,9 @@ Auto Play/native-нормализация/полная GGE-сцена остаю
 Теперь [streaming provider](analysis/gge-streaming-images.md) подаёт atlas прямо из большого оригинального
 `Spore_Graphics.package`, без тестового DBPF-carrier: **95** проверок, bounded index/resource reads и
 64-битные смещения (проверены sparse data/index выше 2 ГиБ). Старый memory-adapter лимиты не меняет.
+Добавлен [host scene collector](analysis/gge-star-scene.md): **204** проверки явного Available-каталога,
+active-camera observation, размещения/layer views и picking. Потеря камеры/каталога отключает старые
+draw/pick frames; native factories/effects/видимая галактика и автоматический GGE caller не реализованы.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI

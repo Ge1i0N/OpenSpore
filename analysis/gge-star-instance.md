@@ -70,6 +70,9 @@ then calls `0xDDD150`. Factories come from `0x67DD40/0x67DD50`; render stages re
 `0x67DD90`, controller `+0x15C`. Controller `+0x198` is acquired through renderer `0x67DCD0`
 slot `+0x50`, then that returned interface's slot `+0x38`. It is not assumed identical to the active
 projection camera at renderer slot `+0x58`.
+The [scene follow-up](gge-star-scene.md) retains those distinct service globals/call paths and now
+joins explicit catalogue/camera observations to host placement/layers/pick. Native factories/effects
+and automatic GGE mounting remain unresolved; no hidden panel is forced visible by the collector.
 
 ## Validation / reproduction
 
