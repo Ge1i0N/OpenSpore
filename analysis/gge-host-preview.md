@@ -58,3 +58,7 @@ IgnoreMouse, force every panel visible or synthesize a native phase latch. Norma
 
 Next: attach genuine catalogue and active-camera/input owners, then compare against original
 phase/callback behavior. MoviePlayer/DBCheck, factories, effects and gameplay remain unresolved.
+
+Final Debug x86 warning-free. The controlled preview smoke entered the state, rendered 30 frames,
+processed `spui:-click,640,360`, logged host card20481 and exited code0 with aborts/asserts0.
+The full prior suites remain passing; this state is deliberately excluded from release registration.
