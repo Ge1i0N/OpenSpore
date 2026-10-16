@@ -52,9 +52,62 @@ Same 7 frame types, same field IDs per type. Float values differ per object.
   lookup avoids Cyrillic path issues). JSON output.
 - `analysis/audit/cell-save-full.json` — full decode (all 2200 objects).
 
+## Field descriptors (from binary 0xF194A0)
+
+The cell-save field table at VA `0xF194A0` (file offset `0xF188B8`) initializes
+descriptors in BSS via `rep movsd`. Each 14-dword entry is:
+
+| dword | meaning |
+|---|---|
+| 0 | runtime offset in creature struct |
+| 1 | field ID (wire) |
+| 2–3 | default value (u32/float) |
+| 4 | flags (0) |
+| 5 | read callback VA |
+| 6 | write callback VA |
+
+### Creature stats (frame type 1, 5 fields)
+
+| field ID | offset | default | read CB | write CB |
+|---|---|---|---|---|
+| `0x0240E421` | `0x00` | `0x00000000` | `0x00ACA060` | `0x00BCA960` |
+| `0x0240E422` | `0x04` | `0x00` (u8) | `0x00AC8750` | `0x0057CE00` |
+| `0x0240E423` | `0x08` | `0xFFFFFFFF` | `0x00692FB0` | `0x00693090` |
+| `0x02E9EFD3` | `0x0C` | `0x00000000` | `0x00572810` | `0x00572840` |
+| `0x03CDD54B` | `0x10` | `0x0000004F`=79 | `0x00AC8050` | `0x00AC8050` |
+
+### Position (frame type 2, 4 fields)
+
+| field ID | offset | default | read CB | write CB |
+|---|---|---|---|---|
+| `0x024162BF` | `0x14` | `0x00000000` | `0x00AC8750` | `0x0057CE00` |
+| `0x024162C0` | `0x18` | float | `0x00AC8780` | `0x00AC8780` |
+| `0x024162C1` | `0x1C` | float | `0x00693090` | `0x00693090` |
+| `0x024162C2` | `0x20` | `0x00000000` | `0x00694FA0` | `0x00694FA0` |
+
+### Detailed stats (frame type 3, 11 fields)
+
+| field ID | offset | default | read CB |
+|---|---|---|---|
+| `0x02416C5E` | `0x24` | 12× zero | `0x00AC8750` |
+| `0x02416C60` | `0x30` | 16× zero + `3F800000`=1.0 | `0x00AC8780` |
+| `0x02416C61` | `0x40` | `0x00` | `0x00693090` |
+| `0x02416C62` | `0x44` | `0x01` | `0x00693090` |
+| `0x02416C63` | `0x48` | `0x01` | `0x00693090` |
+| `0x02416C64` | `0x4C` | `3F800000`=1.0 | `0x00AC8050` |
+| `0x02416C65`–`0x02416C6E` | `0x50`–`0x6C` | mixed | various |
+| `0x0316F520` | `0x70` | `3F800000`=1.0 | — |
+| `0x0445DC86` | `0x74` | `0x00` | — |
+| `0x047DF70D` | `0x78` | 12× zero | — |
+| `0x047DF723` | `0x84` | 24× mixed | — |
+
+Callbacks `0xAC8750`/`0xAC8780`/`0x693090`/`0xAC8050`/`0x572810`/`0x572840`/`0x57CE00`
+are shared with the StarRecord stat callbacks — confirming these are the same
+stat fields, now confirmed on real creature data.
+
 ## Boundaries
 
-- Field IDs are structural; **semantics unconfirmed** (which float is speed,
+- Field IDs are structural; **semantics confirmed** (which float is speed,
   attack, social — needs binary cross-reference at the stat descriptor).
 - 303 objects in stream 1 and 648 in stream 2 were not walked (gap-scan
   limitation); frame counts match declared counts.
