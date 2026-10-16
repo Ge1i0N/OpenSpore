@@ -127,6 +127,15 @@ and are superseded by the JSON audit.
   float is speed, attack, social). Callback chains now type each field by
   size class (1/4/12/16/24/92 B); naming individual stats needs the
   registration functions (`0x1469990` etc.) or gameplay cross-references.
+- **Semantic naming via property-strings is closed as a dead end.** The 107
+  registration blocks contain **no string pointers** (scan of `mov[esp]/push/lea`
+  immediates → zero name candidates). Each wire id appears **exactly once** in
+  `.text` (its own registration), so consumers read fields by object offset,
+  not by id — there is no lookup-by-id table to cross-reference. `0x5242896A`
+  (4 B, present on all 250) is the only other varying field besides the
+  packed-int coordinates and the sequence id; it is not a gameplay stat (it
+  tracks the coordinate blocks). Naming needs consumer-side offset analysis,
+  not registration-side strings.
 - Gap-scan lossiness is resolved: the walk is now group-based (8 frames +
   24-byte trailer per creature) and recovers all 250 objects (150 + 100);
   the exact-frame validation rejects in-payload tag collisions instead of
@@ -136,3 +145,13 @@ and are superseded by the JSON audit.
   or encoded differently from StarRecord names.
 - The coordinate packing (`0x024162BF..C2`) is raw u32; int16-pair decoding
   is plausible but not confirmed.
+- **Variation census over all 250 objects** (both streams): aside from the
+  sequence id (`0x03CDD54B`) and the packed-int coordinates
+  (`0x024162C0/C1`), the only other field varying per object is
+  `0x5242896A` (4 B), and it moves with the coordinate blocks — a movement /
+  animation vector, not a discrete gameplay stat. Every other one of the ~107
+  wire fields is constant across this save (e.g. `0x05501F64`=100.0,
+  `0x05501F65`=−0.333, `0x021D1BA5`=50.0, `0x02416C64`=1.0). So this save has
+  **no per-object stat spread** to correlate against gameplay; the
+  speed/attack/social values are constants (creature defaults), and their
+  meaning cannot be recovered from value correlation.
