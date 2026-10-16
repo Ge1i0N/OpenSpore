@@ -113,6 +113,10 @@ The broader REA call chain is `00812100/00811C70 → 00811C20 → 008113D0 → 0
 `00811C20` invokes the active display/layout object's `+0xD8` for each provider exposing
 `0xEEEE8218`. This confirms provider synchronization, but still does not identify which provider
 satisfies `0x02E5A4A8`.
+REA resolves the lifecycle around that registry: `00812100` replaces the display/layout owner at
+`+0x88` through `008106C0` and calls `00811C20`; `00811C70` syncs the providers, invokes owner
+callback `+0x8C`, and initializes resource key `0x2FBF2058`. This remains a display/layout path;
+no projection-camera identity is inferred from it.
 This is static shipped-artifact evidence, not an observation of a running GA process.
 The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
 `DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence

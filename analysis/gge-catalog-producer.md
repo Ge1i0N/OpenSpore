@@ -135,6 +135,15 @@ is called by `00811C20`, and `00811C20` is called by `00811C70` and `00812100`
 the active display/layout object's `+0xD8` with every provider exposing `0xEEEE8218`; this is a
 provider synchronization path, not a recovered concrete provider identity.
 
+REA resolves the two upstream display-object transitions. `00812100` selects/replaces the object at
+owner `+0x88` (using `008106C0` for a non-null lookup key), releases the previous object, retains the
+new one, and calls `00811C20`; `00811C70` likewise begins with `00811C20`, invokes the owner callback
+at `+0x8C` when present, and then initializes a resource keyed by `0x2FBF2058` through the selected
+object. These are display/layout lifecycle transitions, not evidence that the selected object is the
+GGE projection camera. `008106C0` resolves a registry/container entry to its object at `+0x1C`
+(`ev_62ebde9afbbd72c37c53c9e1eb0807c99da9a73ca3680fb202120d34097bb0a1`,
+`ev_54eabf869ff3a10ac284973e41a2f241730e2afc927b4b6c79fd19319128cf63`).
+
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
 (`ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714`); the reference-only
