@@ -80,6 +80,7 @@
       "layout_object_factory": "0x008121c0 -> 0x00811070 -> UI/LayoutObjects; owner switch via +0x88",
       "layout_object_resource_key": "0x022568e7",
       "layout_object_lookup_key": "caller-supplied/indirect; relation to 0x02e5a4a8 unknown",
+      "layout_command_handler": "0x00812590 lists/loads/unloads UI layouts and forwards to 0x00812250; not provider registration",
       "gge_layout_callers": {
         "zoom_panel": "0x00de5900 -> 0x00812250 -> 0x008121c0",
         "global_ui": "0x00e035f0 -> 0x008121c0 with 0x2edd95ca"
@@ -126,6 +127,9 @@
         "gge_layout_bridge": "ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452",
         "global_ui_layout": "ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14",
         "gge_layout_key_parser": "ev_1774a78a641dee54932082d8e71e8772f970dde3def6d9faccd4b2e5476ab3c3"
+        ,"layout_command_assembly": "ev_3c8284d4d0a73a9441ea9657942c0b91e8bede6bf2d418cb38b79c74aff9c49a",
+        "layout_command_callees": "ev_b4b177ba74aa2280d66904471eb58a6683316d6d41fb048f2d5fcc7a7eca809b",
+        "layout_command_value_flow": "ev_dcea6f959caf6ac5dd61ac3987b488b73f2b3ee160829f80060ad4a36c82b8b5"
       }
     },
     "evidence_ids": {

@@ -169,6 +169,13 @@ REA also resolves the key framing used by the zoom-panel path: `0068D830` hashes
 name into word 0, stores tag `0x0510A95B` in word 1, and descriptor `0x40464100` in word 2;
 optional suffix text is parsed independently (`ev_1774a78a641dee54932082d8e71e8772f970dde3def6d9faccd4b2e5476ab3c3`).
 These values frame a layout lookup and remain distinct from SPUI root IDs and PNG resource IDs.
+REA's `00812590` caller is a layout command/diagnostic path rather than provider registration: its
+strings and control flow list loaded UI layouts, accept `load`/`unload`, parse the layout name and
+hex arguments, and call `812250` with tag/descriptor values (`ev_3c8284d4d0a73a9441ea9657942c0b91e8bede6bf2d418cb38b79c74aff9c49a`,
+`ev_b4b177ba74aa2280d66904471eb58a6683316d6d41fb048f2d5fcc7a7eca809b`,
+`ev_dcea6f959caf6ac5dd61ac3987b488b73f2b3ee160829f80060ad4a36c82b8b5`). It has no resolved
+direct callers. Therefore this path explains layout command ingestion but does not reveal the
+concrete provider behind registry ID `0x02E5A4A8`.
 
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target

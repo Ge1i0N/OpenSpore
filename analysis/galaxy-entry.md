@@ -72,6 +72,10 @@ calls `8121C0(param_1,1,0x2EDD95CA)` while constructing/loading `UI/GGE/GlobalUI
 (`ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`). Thus the native
 `UI/LayoutObjects` owner path is confirmed for GGE layouts, while the concrete provider for registry
 ID `0x02E5A4A8` remains a separate unresolved service identity.
+The broader layout command path is not a provider-registration shortcut: REA identifies `812590`
+as the UI layout console/diagnostic handler, with list/load/unload behavior and parsed hex arguments;
+it forwards layout requests to `812250`, but has no resolved direct callers. This preserves the
+distinction between layout loading and runtime `0xEEEE8218` provider registration.
 The key parser `0068D830` is now independently corroborated: it hashes the name before the first
 dot into word 0, writes caller tag `0x0510A95B` into word 1, and writes descriptor `0x40464100`
 into word 2; suffixes after a dot are parsed separately when present
