@@ -35,6 +35,8 @@ The click is injected by `input::inject_click`, latched by the normal frame loop
 `StarUiScene::pick`; it is not a parallel test-only hit function. The selected card receives a
 visible host-only border and identity label. The result intentionally ends at host identity: no
 DF7BF0/DF7AC0, CommandID, selected StarRecord or state transition is called.
+Hover is shown separately with a cyan host-only border; click selection is yellow. This tests pointer
+feedback without treating hover as the native F8 route or selection as native FC.
 
 ## Boundary
 
