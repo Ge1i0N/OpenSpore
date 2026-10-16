@@ -41,7 +41,7 @@ ggepreview:status
 
 The command reloads the controlled host scene only after the snapshot parses with explicit Available
 saved/candidate sources. It uses the real explicitly selected Graphics atlas. Failed load preserves
-the current preview. This is a host capture bridge, not proof that the input came from the original
+the current preview and the rendered preview displays the caller-selected source path. This is a host capture bridge, not proof that the input came from the original
 producer; input provenance and authorization remain the caller's responsibility.
 
 ## Verification
