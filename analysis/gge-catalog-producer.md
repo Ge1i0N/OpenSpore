@@ -75,6 +75,17 @@ The retained REA value-flow summaries are complete within their requested views:
 47 def-use links and 15 effects (`ev_ff9bfadc94685eb96712bc0323a7f1795b76f2c2deb84a2a09faf3934e6791c3`).
 These counts describe recovered static data flow, not runtime execution or semantic field types.
 
+REA also confirms the projection seam used after records/UI data exist. `DF6010` iterates the
+`0xBC` record array, reads each record's position at `+0x80`, calls `DE3C20`, then invokes the
+owning object's virtual slot `+0x64` with the record pointer and the projected values
+(`ev_0dd3607a175f4fb9f1f1d193d4a7a379de07ca3f5f15f99f7d3497972d0ac353`). `DE3C20` obtains a
+renderer/camera-related service through a virtual slot `+0x58`, transforms the point with
+`7C4250`/`805F90`, and computes normalized screen placement (`ev_bab6284c95703cb10880ebb4965a7d5d941375eb9cd7b3975445768f22847836`). The direct caller set for
+`DF6010` is empty (`ev_645b43829cc52e50b5780dddd67b6ae73c8fd9a8771113e6ac75e88257129e6b`), which
+is consistent with the function being reached through a state-handler/vtable boundary rather than
+an ordinary resolved call. Camera ownership, the concrete `+0x64` implementation and runtime
+message that triggers this path remain Unknown.
+
 The GGE/UI boundary is separate from record construction. REA confirms that `DF9200` is called only
 by `DF95A0` in the resolved direct-caller set (`ev_90969d84c07b8ad3fd8e1a86452d960db52c781831be3c9bfaf698f5a62e4a2c`):
 it allocates one `0x90`-byte `UI/GGE_game_ui_data` object per `0xBC` record, stores the record pointer

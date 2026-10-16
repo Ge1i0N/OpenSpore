@@ -88,6 +88,13 @@ flags at **+0xAC/+0xAD**, per-entry UI pointer at **+0xB8** (roles partly inferr
 - `0xDF6010` calls `0xDE3C20` for world-to-screen placement. Original camera/UI transforms, effects
   manager and metadata dependencies are not available in the host yet.
 
+REA static corroboration makes the projection contract more precise: `DF6010` reads each record's
+position from `record +0x80`, calls `DE3C20`, then forwards the record pointer and projected values
+through its owning object's virtual slot `+0x64`; `DE3C20` obtains a renderer/camera-related service
+through virtual slot `+0x58` before computing normalized screen placement. No resolved direct caller
+of `DF6010` was found, so the state-handler/vtable dispatch and concrete camera owner remain Unknown.
+This is static shipped-artifact evidence, not an observation of a running GA process.
+
 This explains why forcing the primary layout's hidden windows visible cannot recreate game choice:
 the actual star UI is instantiated **per live game record** and driven by scene projection.
 
