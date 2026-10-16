@@ -25,9 +25,12 @@ bool StarUiScene::open(const CatalogInput& catalog,const spui::Layout& source,co
         frame_.ticket=ticket_; frame_.error=error; return false;
     }
     if (!catalog.source_label.empty() &&
-        (catalog.producer.manager!=CatalogProducerStatus::Available||catalog.producer.starsdb!=CatalogProducerStatus::Available||
-         catalog.producer.planet_records!=CatalogProducerStatus::Available||catalog.producer.candidate_refill!=CatalogProducerStatus::Available)) {
-        catalog_available_=false; catalog_source_.clear(); producer_={}; retire_frame(); error="caller catalogue producer observations are not fully Available"; return false;
+        (catalog.producer.manager!=CatalogProducerStatus::Available||
+         catalog.producer.starsdb!=CatalogProducerStatus::Available||
+         catalog.producer.planet_records!=CatalogProducerStatus::Available||
+         catalog.producer.candidate_refill!=CatalogProducerStatus::Available)) {
+        catalog_available_=false; catalog_source_.clear(); producer_={}; retire_frame();
+        error="caller catalogue producer observations are not fully Available"; return false;
     }
     // Aggregate HOST presentation bounds, NOT recovered galaxy population limits.
     if (catalog.saved.size()>128||catalog.candidates.size()>128-catalog.saved.size()) { error="host scene exceeds 128-card limit"; return false; }
