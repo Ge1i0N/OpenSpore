@@ -1,0 +1,144 @@
+{
+  "file": "C:\\Users\\gelion\\AppData\\Roaming\\SPORE\\Games\\Game0\\\u041a\u0430\u043c\u0437\u0430.spo",
+  "size": 19683,
+  "records": [
+    {
+      "key": "0x01897c18,0x01897c18,0x01897c18",
+      "packed": 4189,
+      "mem": 14356,
+      "error": "frame length overruns payload"
+    },
+    {
+      "key": "0x0179d304,0x0179d310,0x00000000",
+      "packed": 85,
+      "mem": 92,
+      "error": "frame directory overruns payload"
+    },
+    {
+      "key": "0x0179d304,0x01906183,0x00000000",
+      "packed": 69,
+      "mem": 84,
+      "error": "frame directory overruns payload"
+    },
+    {
+      "key": "0x0179d304,0x018eb5c7,0x00000000",
+      "packed": 56,
+      "mem": 56,
+      "error": "frame directory overruns payload"
+    },
+    {
+      "key": "0x0179d304,0x018eb4b7,0x00000000",
+      "packed": 6627,
+      "mem": 225450,
+      "error": "frame directory overruns payload"
+    },
+    {
+      "key": "0x0179d304,0x018eb45e,0x00000000",
+      "packed": 5670,
+      "mem": 164800,
+      "error": "frame directory overruns payload"
+    },
+    {
+      "key": "0x0179d304,0x02c21781,0x00000000",
+      "packed": 361,
+      "mem": 719,
+      "error": "frame directory overruns payload"
+    },
+    {
+      "key": "0x0179d304,0x03275728,0x00000000",
+      "packed": 431,
+      "mem": 681,
+      "format": "single_envelope",
+      "total": 681,
+      "crc": "0x9a730c3e",
+      "token": "0x1bb694e4",
+      "obj_token": "0x017f243b",
+      "frame": {
+        "tag": "0x01a80d26",
+        "is_object_tag": true,
+        "length": 61,
+        "count": 5,
+        "field_ids": [
+          "0x0240e421",
+          "0x0240e422",
+          "0x0240e423",
+          "0x02e9efd3",
+          "0x03cdd54b"
+        ]
+      }
+    },
+    {
+      "key": "0x0179d304,0x0355c93a,0x00000000",
+      "packed": 83,
+      "mem": 90,
+      "error": "frame directory overruns payload"
+    },
+    {
+      "key": "0x0179d304,0x03a3ac9f,0x00000000",
+      "packed": 1373,
+      "mem": 2332,
+      "format": "single_envelope",
+      "total": 2332,
+      "crc": "0xb2ee4c77",
+      "token": "0x221da748",
+      "obj_token": "0x03a3aa3a",
+      "frame": {
+        "tag": "0x01a80d26",
+        "is_object_tag": true,
+        "length": 2308,
+        "count": 3,
+        "field_ids": [
+          "0x03a3b30d",
+          "0x03a3b3d4",
+          "0x06676971"
+        ]
+      }
+    },
+    {
+      "key": "0x0179d304,0x04238ecc,0x00000000",
+      "packed": 86,
+      "mem": 98,
+      "error": "frame directory overruns payload"
+    },
+    {
+      "key": "0x0179d304,0xabcdef00,0x00000000",
+      "packed": 213,
+      "mem": 619,
+      "format": "single_envelope",
+      "total": 619,
+      "crc": "0xd11606b6",
+      "token": "0x1c15aaa8",
+      "obj_token": "0xabcdef00",
+      "frame": {
+        "tag": "0x01a80d26",
+        "is_object_tag": true,
+        "length": 595,
+        "count": 22,
+        "field_ids": [
+          "0x06947316",
+          "0x06947317",
+          "0x35875139",
+          "0xabcd0000",
+          "0xabcd0001",
+          "0xabcd0002",
+          "0xabcd0004",
+          "0xabcd0005",
+          "0xabcd0009",
+          "0xabcd0010",
+          "0xabcd0011",
+          "0xabcd0012",
+          "0xabcd0013",
+          "0xabcd0014",
+          "0xabcd0015",
+          "0xabcd0016",
+          "0xabcd0017",
+          "0xabcd0018",
+          "0xabcd0019",
+          "0xabcd0020",
+          "0xabcd0021",
+          "0xabcd0022"
+        ]
+      }
+    }
+  ]
+}
