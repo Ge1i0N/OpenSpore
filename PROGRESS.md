@@ -52,7 +52,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 
 | Check | Recorded result | Command / evidence |
 |---|---|---|
-| Build | 0 compiler warnings/errors, x86 Debug | `cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify` |
+| Build | 0 compiler warnings/errors, x86 Debug (MSVC 19.44.35229 verified 2026-10-16; MinGW x86 logic build also green) | `cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify` |
 | Boot | 10/10 markers | `-w -devDirs`, newest section of `OpenSpore.log` |
 | Independent SPUI parse | 748/748 through EOF | `python tools/spui_objects.py --parse --all ...` |
 | C++ corpus + malformed inputs | 748 matches; 486 rejected atomically | `spui_verify <fixtures>` |

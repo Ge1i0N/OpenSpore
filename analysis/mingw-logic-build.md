@@ -3,10 +3,12 @@
 > **Current verdict, 2026-10-16:** the full tree (OpenSpore.exe + all 29 verify
 > tools) compiles and links under 32-bit GCC with **zero repository source
 > changes**, and every check passes except one environmental errno-mapping case.
-> This verifies program *logic* on this machine. It does **not** replace the
-> MSVC Win32 Debug target: no warning parity, no CRT-behavior parity, no
-> performance claims. The day a machine with Visual Studio Build Tools appears,
-> the MSVC build commands in [README](../README.md) are still the ones that count.
+> This verifies program *logic* on this machine. **Update 2026-10-16 evening:
+> the MSVC Win32 Debug target now builds warning-free (MSVC 19.44.35229) and the
+> full suite passes on it too — including `gge_streaming_image_verify` (95 checks),
+> which proves the errno deviation below is UCRT-only, and `gge_star_instance_verify`
+> (167 checks), which confirms the SSE2 diagnosis.** The MSVC build is the target;
+> this document stays as the logic-build recipe and deviation record.
 
 ## Why this exists
 

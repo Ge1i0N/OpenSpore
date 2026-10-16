@@ -31,6 +31,7 @@ point. [Full historical notebook](docs/archive/MEMORY-2026-10-15.md) is retained
 | Supported drawables | ImageDrawable None branch + non-tileable Standard/Radio; scale/alignment and state slices tested |
 | Locale | key space is per table; use `(u64(table)<<32)|key`, never narrow it to u32 |
 | Game states / modes | 60 script states / 17 mode names, 10 recovered binary registrations; five playable-stage rows held; only Game_Cell has a skeleton driver (tick counter, no simulation) |
+| Toolchain | MSVC 19.44.35229 (BuildTools 17.14) Win32 Debug, 0 warnings, full suite PASS 2026-10-16; MinGW i686 logic build (build/mingw, gitignored) for environments without admin |
 
 Deep evidence: [binary SPUI](analysis/spui-binary.md), [drawables](analysis/spui-drawables.md),
 [locale](analysis/text-locale.md), [formats](analysis/formats.md), [current VERIFY](VERIFY.md).

@@ -7,6 +7,19 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — MSVC Win32 Debug builds warning-free, full suite green
+
+User installed BuildTools 17.14 (MSVC 19.44.35229) after two silent CLI failures
+(workload checkbox state vs payload confusion; resolved via GUI Modify + Repair
+awareness). `cmake -S . -B build -G "Visual Studio 17 2022" -A Win32` configures
+clean; all 30 targets build with **0 warnings / 0 errors**. All 29 verify tools
+PASS on MSVC binaries — notably `gge_streaming_image_verify` (95) and
+`gge_star_instance_verify` (167), which closes both MinGW deviation investigations
+(SSE2 FP model and UCRT errno mapping confirmed environmental). Six app smokes
+exit 0 with aborts/asserts 0: headless list (10/10 boot), CellGame skeleton +
+capture, DevLauncher + capture, click → CreatureEditor, Main → GGE + capture,
+host card pick. Python suite 21/21, `feature_map --check`, `docs_check` PASS.
+
 ## 2026-10-16 — MinGW x86 logic-verification build, zero source changes
 
 No admin for MSVC, so: user-local WinLibs i686 GCC 16.1.0 + present Ninja, out-of-tree

@@ -199,6 +199,12 @@ test with `-w -devDirs`; retain evidence and commit.
   environmental errno case, app runs headless/windowed with exit 0 (incl. CellGame
   skeleton + captures). Two deviations root-caused (x87→SSE2 flags; EACCES vs
   SHARING_VIOLATION mapping). MSVC build still pending. `analysis/mingw-logic-build.md`.
+- MSVC Win32 Debug verified 2026-10-16 evening (BuildTools 17.14, MSVC 19.44.35229):
+  full target set builds with **0 warnings / 0 errors**; all 29 verify tools PASS
+  (incl. streaming 95 and instance 167 — both MinGW deviations confirmed
+  environmental); 6/6 app smokes exit 0, aborts/asserts 0 (headless list, CellGame
+  skeleton + capture, DevLauncher + capture, click → CreatureEditor, Main → GGE +
+  capture, host card pick).
 - StarRecord values (`--star-values` on both later saves): 42,010/42,010 bodies pass
   every `inspect_star_record` shape check; mKeys unique; positions all finite on a
   thin disk (X/Y ±700, Z ±9); all named; planet histogram {0: ~41980, …} moves with
