@@ -75,15 +75,17 @@ The retained REA value-flow summaries are complete within their requested views:
 47 def-use links and 15 effects (`ev_ff9bfadc94685eb96712bc0323a7f1795b76f2c2deb84a2a09faf3934e6791c3`).
 These counts describe recovered static data flow, not runtime execution or semantic field types.
 
-REA also confirms the projection seam used after records/UI data exist. `DF6010` iterates the
+REA also confirms the projection seam used after records/UI data exist. `DF6010` is the concrete
+`Play Spore` vtable `0x147EF50` slot `+0x68` method: the vtable bytes contain `0x00DF6010` at
+`0x147EFB8` (`ev_296c1dc2cda30113dbcaa14de914acc9a90a6c634a41314dc5bb8e954427e564`). It iterates the
 `0xBC` record array, reads each record's position at `+0x80`, calls `DE3C20`, then invokes the
 owning object's virtual slot `+0x64` with the record pointer and the projected values
 (`ev_0dd3607a175f4fb9f1f1d193d4a7a379de07ca3f5f15f99f7d3497972d0ac353`). `DE3C20` obtains a
 renderer/camera-related service through a virtual slot `+0x58`, transforms the point with
 `7C4250`/`805F90`, and computes normalized screen placement (`ev_bab6284c95703cb10880ebb4965a7d5d941375eb9cd7b3975445768f22847836`). The direct caller set for
-`DF6010` is empty (`ev_645b43829cc52e50b5780dddd67b6ae73c8fd9a8771113e6ac75e88257129e6b`), which
-is consistent with the function being reached through a state-handler/vtable boundary rather than
-an ordinary resolved call. The concrete `+0x64` target is now resolved statically: `E008B0` installs
+`DF6010` is empty (`ev_645b43829cc52e50b5780dddd67b6ae73c8fd9a8771113e6ac75e88257129e6b`) because
+the function is reached through the vtable boundary rather than an ordinary direct call. The concrete
+`+0x64` target is now resolved statically: `E008B0` installs
 vtable `0x147EF50` (`ev_2baa4b86c3d9685492da403fa1232e9bc49e08efc13d5089e3bd70d7a4889c1e`), and REA
 read/xref evidence maps `vtable +0x64` to `DF6110` (`ev_d9798b85c18d1c40463e43d25bc45d40d4750d2e268d22fb3abfee3af18a172b`).
 `DF6110` checks `record +0xB8`, reads UI bounds/current point and clamps the projected target

@@ -88,11 +88,12 @@ flags at **+0xAC/+0xAD**, per-entry UI pointer at **+0xB8** (roles partly inferr
 - `0xDF6010` calls `0xDE3C20` for world-to-screen placement. Original camera/UI transforms, effects
   manager and metadata dependencies are not available in the host yet.
 
-REA static corroboration makes the projection contract more precise: `DF6010` reads each record's
-position from `record +0x80`, calls `DE3C20`, then forwards the record pointer and projected values
-through its owning object's virtual slot `+0x64`; `DE3C20` obtains a renderer/camera-related service
-through virtual slot `+0x58` before computing normalized screen placement. No resolved direct caller
-of `DF6010` was found, so the state-handler/vtable dispatch and concrete camera owner remain Unknown.
+REA static corroboration makes the projection contract more precise: `DF6010` is the `Play Spore`
+vtable `0x147EF50` slot `+0x68` method. It reads each record's position from `record +0x80`, calls
+`DE3C20`, then forwards the record pointer and projected values through the owning object's virtual
+slot `+0x64`, which resolves to `DF6110`; `DE3C20` obtains a renderer/camera-related service
+through virtual slot `+0x58` before computing normalized screen placement. The direct-call list is
+empty because this is vtable dispatch; the concrete camera owner and runtime trigger remain Unknown.
 This is static shipped-artifact evidence, not an observation of a running GA process.
 The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
 `DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence
