@@ -54,6 +54,8 @@ not only a UI status string.
 
 For a non-UI report, use `gge_catalog_snapshot_inspect <snapshot>`; it prints source statuses, row
 counts/order, duplicate star IDs, positions, names and terrain observations without writes or search.
+It also prints `source_label` and `producer_gate=READY|BLOCKED`; READY requires both list statuses
+and all four upstream producer statuses to be Available, matching the StarScene admission gate.
 
 ## Verification
 
