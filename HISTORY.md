@@ -7,6 +7,17 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — successive saves: galaxy fixed, progress classes grow
+
+The user played on: the slot now spans fresh → `Game0.old` → `Game0` plus six
+creature `.spo`. All three `stars.db` decode clean with identical shapes; the galaxy
+is fixed at 42,010 StarRecords (same bytes size) while class `0x042232A1` grows
+1 → 4 → 5, class `0x018EB9D2` gains 4, root mem grows, and planet rows go 65 → 97 →
+114 in the confirmed type/group space. All six `.spo` are DBPF 3.0/index3 kind 4
+(12–43 records); their stage mapping is unknown. Reports `game0-old.json` /
+`game0.json` retained; class-ID semantics not decoded (counts only).
+Verification: three DECODED_STRUCTURE verdicts, no notes; suite stays 20/20.
+
 ## 2026-10-16 — stars.db payload decode on the fresh save
 
 `tools/starsdb_real_decode.py` structurally decodes the fresh `stars.db` read-only:

@@ -194,6 +194,10 @@ test with `-w -devDirs`; retain evidence and commit.
   46,225/46,225 envelopes CRC-clean; root frame carries the six metadata IDs and the
   first StarRecord body is a 14-field frame. `analysis/starsdb-real.md`, report in
   `analysis/audit/starsdb-real/`. Field semantics still static-only.
+- Successive saves (fresh → Game0.old → Game0): same 5 classes, all decodes clean;
+  StarRecords fixed at 42,010 while classes `0x042232A1` (1 → 5) and `0x018EB9D2`
+  (+4) and planet rows (65 → 97 → 114) grow with play. Six creature `.spo` are
+  3.0-shaped (12–43 records); stage mapping unknown.
 
 ## Next, in order
 
