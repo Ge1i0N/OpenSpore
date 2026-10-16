@@ -35,6 +35,14 @@ time/header fields and service-owned serializer state. A successful initializati
 proof that `stars.db` was present, usable, complete or post-load fixed up: the absent/branch paths
 and several service results remain distinct.
 
+Independent REA/Ghidra corroboration identifies `BB8C90` as a non-contiguous native body
+`0x00BB8C90–0x00BB9939` plus `0x00BB9940–0x00BB9ABA` (Ghidra12.1.4, same GA SHA-256). Its
+instructions confirm the early `BA9D50` return, two serializer setup passes, reset via `BB6510`,
+`PlanetScripts`/`planetRecords.pkp` setup, descriptor roots `0x01689C50`/`0x0156C668` with tag
+`0x01A80D26`, and later `BB61C0` refill. They also preserve a branch where no database/resource
+result is accepted and initialization continues with defaults; that branch is not a valid Available
+catalogue. The original function was not executed by REA.
+
 For a caller-supplied native capture, the minimum useful observation bundle is therefore:
 `BA9D50` gate result; manager `+0x64/+0x50` path flags; explicit serializer root/manager/planet
 resource outcomes; root/index/context/class resource keys and decoded frame statuses; saved/candidate
