@@ -95,10 +95,11 @@ through virtual slot `+0x58` before computing normalized screen placement. No re
 of `DF6010` was found, so the state-handler/vtable dispatch and concrete camera owner remain Unknown.
 This is static shipped-artifact evidence, not an observation of a running GA process.
 The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
-`DF606D`; REA cannot resolve its target from the provider reference graph. A related `DF6110`
-helper checks that `record +0xB8` is populated and uses the UI object's bounds to clamp a target,
-but its lifecycle caller is likewise unresolved. These are explicit Unknowns, not permission to
-route host selection through a guessed native slot.
+`DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence
+shows that the `Play Spore` constructor installs vtable `0x147EF50` and slot `+0x64` points to
+`DF6110`. `DF6110` checks `record +0xB8` and uses the UI object's bounds to clamp the projected
+target. The camera owner behind `DE3C20` slot `+0x58` and runtime trigger remain Unknown; host
+selection still must not route through an invented camera/controller path.
 
 This explains why forcing the primary layout's hidden windows visible cannot recreate game choice:
 the actual star UI is instantiated **per live game record** and driven by scene projection.

@@ -83,17 +83,19 @@ renderer/camera-related service through a virtual slot `+0x58`, transforms the p
 `7C4250`/`805F90`, and computes normalized screen placement (`ev_bab6284c95703cb10880ebb4965a7d5d941375eb9cd7b3975445768f22847836`). The direct caller set for
 `DF6010` is empty (`ev_645b43829cc52e50b5780dddd67b6ae73c8fd9a8771113e6ac75e88257129e6b`), which
 is consistent with the function being reached through a state-handler/vtable boundary rather than
-an ordinary resolved call. Camera ownership, the concrete `+0x64` implementation and runtime
-message that triggers this path remain Unknown.
+an ordinary resolved call. The concrete `+0x64` target is now resolved statically: `E008B0` installs
+vtable `0x147EF50` (`ev_2baa4b86c3d9685492da403fa1232e9bc49e08efc13d5089e3bd70d7a4889c1e`), and REA
+read/xref evidence maps `vtable +0x64` to `DF6110` (`ev_d9798b85c18d1c40463e43d25bc45d40d4750d2e268d22fb3abfee3af18a172b`).
+`DF6110` checks `record +0xB8`, reads UI bounds/current point and clamps the projected target
+(`ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a`). The camera owner through
+`DE3C20` slot `+0x58` and the runtime message that triggers this path remain Unknown.
 
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
-(`ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714`); this is why the concrete
-record/UI implementation cannot be named from the shipped static graph. A nearby `DF6110` helper
-checks that `record +0xB8` contains UI data, reads a UI object's bounds/current point, and clamps a
-projected target to those bounds (`ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a`).
-It has no resolved direct callers, so its lifecycle relationship is also Unknown rather than an
-assumed picker implementation.
+(`ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714`); the reference-only
+resolver does not perform vtable reasoning. Combining that explicit limitation with the constructor's
+vtable write and xref to `DF6110` resolves this slot without claiming that REA resolved the computed
+call itself. `DF6110` has no ordinary direct callers; its dispatch is the vtable edge observed above.
 
 The GGE/UI boundary is separate from record construction. REA confirms that `DF9200` is called only
 by `DF95A0` in the resolved direct-caller set (`ev_90969d84c07b8ad3fd8e1a86452d960db52c781831be3c9bfaf698f5a62e4a2c`):
