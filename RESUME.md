@@ -82,11 +82,14 @@ test with `-w -devDirs`; retain evidence and commit.
   checks, read-only CLI smoke. No real planet/save corpus or services. `analysis/planet-record.md`.
 - `engine/cell_save.*`: cell-stage `.spo` decoder built on `Package` + RefPack (read-only). Real save
   (19,683 B, kind=4 index) holds two BE multi-object streams `0x018EB4B7`/`0x018EB45E` with BE field
-  payloads (`3f800000`=1.0, `00000200`=512, `0000004f`=79); `0x02416C60` is 16 B (0,0,0,1.0). Creature
-  stat/pos/detailed fields mapped from the binary descriptor table at VA `0xF194A0`; callbacks shared
-  with StarRecord stats. `cell_save_verify`: 5 constructed-input checks; `cell_save_dump` on the real
-  save walks 2000/3151 objects, values identical to the Python reference; gap-scan still misses tails
-  (known). No gameplay wiring. `analysis/cell-save.md` / `audit/cell-save-full.json`.
+  payloads (`3f800000`=1.0, `00000200`=512, `0000004f`=79); `0x02416C60` is 16 B (0,0,0,1.0). One
+  creature = a GROUP of 8 field frames (`[5][4][25][11][4][2][35][8|13]`) closed by a 24-byte trailer;
+  envelope count words 1503/1648 are block byte sizes, true counts 150 + 100 = **250**, all recovered.
+  `0x024162BF..C2` are raw u32 packed ints (int16 pairs), not floats. `cell_save_verify`: 5
+  constructed-input checks; `cell_save_dump` walks all 250 with values identical to the Python
+  reference. No gameplay wiring; per-stat semantics (speed/attack/social) still unnamed — next step
+  is disassembling the registration fns (`0x1469990` etc.).
+  `analysis/cell-save.md` / `audit/cell-save-full.json`.
 - `tools/cell_field_descriptors.py`: the field registration is inline code (stack descriptor
   `mov [esp+off], imm32` stores), not a static table; all 107 wire ids from the real save recover a
   descriptor with a callback chain that **types the field by wire size** (1/4/12/16/24/92 B groups;

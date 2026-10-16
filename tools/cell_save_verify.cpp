@@ -59,7 +59,8 @@ static std::vector<u8> make_stream(u32 count,
         put32(0x01A80D26u); put32(length); put32(static_cast<u32>(fields.size()));
         for (auto& [fid, val] : fields) { put32(fid); put32(static_cast<u32>(val.size())); }
         for (auto& [fid, val] : fields) stream.insert(stream.end(), val.begin(), val.end());
-        put32(0xABCDEF00u + count);
+        // 24-byte object trailer closes the group (mirrors the real save)
+        for (int i = 0; i < 6; ++i) put32(0);
     }
     return stream;
 }
@@ -84,10 +85,10 @@ int main() {
         check(info.objects_decoded == 1, "info count");
     }
 
-    // Test 2: position fields (big-endian floats: 1.5=0x3FC00000, -2.0=0xC0000000)
+    // Test 2: packed int coordinates (u32 wire values, not floats)
     {
-        auto xval = be_bytes(0x3FC00000);
-        auto yval = be_bytes(0xC0000000);
+        auto xval = be_bytes(0x04F30503);
+        auto yval = be_bytes(0xEE0F01F4);
         auto payload = make_stream(1, {{{0x024162BFu, xval}, {0x024162C0u, yval}}});
         auto dbpf = make_dbpf(payload);
         std::vector<cell::CreatureStats> out;
@@ -96,8 +97,8 @@ int main() {
         bool ok = cell::decode_save_from_memory(dbpf, out, info, err);
         check(ok, "decode position");
         check(out.size() == 1, "one creature");
-        check(out[0].pos_x == 1.5f, "pos_x == 1.5");
-        check(out[0].pos_y == -2.0f, "pos_y == -2.0");
+        check(out[0].pos_x == 0x04F30503u, "pos_x raw");
+        check(out[0].pos_y == 0xEE0F01F4u, "pos_y raw");
     }
 
     // Test 3: empty stream

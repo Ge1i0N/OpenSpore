@@ -1,12 +1,12 @@
 # Cell-stage save decode — creature data structure
 
 > **Verdict 2026-10-16:** the cell-stage `.spo` (19,683 B, 12 records) decodes
-> to full field-level values. Two multi-object class streams hold 1503 + 1648
-> declared objects in 7 frame types each. Float stats (1.0, π), position data
-> and a dev-marker class `0xABCDEF00` are present. The engine decoder
-> `source/engine/cell_save.cpp` reproduces the decode from C++ and matches the
-> Python reference on the real save (stat4=79, stat9=1.0, stat18=512).
-> This is **structural decode** — field *semantics* (which float is speed vs.
+> to full field-level values. Two multi-object class streams hold **150 + 100
+> creature objects**; each object is a GROUP of 8 serialized field frames
+> with field counts `[5][4][25][11][4][2][35][8|13]`, closed by a 24-byte
+> object trailer. The engine decoder `source/engine/cell_save.cpp` walks all
+> 250 groups and matches the Python reference byte-for-byte on the stats.
+> This is **structural decode** — field *semantics* (which word is speed vs.
 > attack) need binary confirmation.
 
 ## Stream layout
@@ -14,31 +14,42 @@
 The file is a standard DBPF: header/index little-endian with a kind-selected
 index (this save: kind=4 — prefix 8, stride 28, per-record type/group words),
 parsed by `engine/pkg.cpp`. Inside, both big streams use
-`[count BE u32][crc][token][12-byte header][frames...]` and **field payload
-bytes are big-endian** (verified: `3f800000`=1.0, `00000200`=512,
-`0000004f`=79 — the descriptor-table default).
-Frames are found by tag scan at offset 24; gaps between frames vary (0–346 B).
+`[count BE u32][crc][token][12-byte header][creature groups...]` and
+**field payload bytes are big-endian** (verified: `3f800000`=1.0,
+`00000200`=512, `0000004f`=79 — the descriptor-table word).
 Stream types: `0x018EB4B7` (refpacked 6627→225450) and `0x018EB45E`
 (refpacked 5670→164800), both records in the same save.
 
-### 0x018EB4B7 — creature stats (1503 objects, 1200 walked)
+### One creature = one group of frames
 
-| frame type | len | cnt | field IDs |
-|---|---|---|---|
-| 1 | 61 | 5 | `0240e421 0240e422 0240e423 02e9efd3 03cdd54b` |
-| 2 | 52 | 4 | `024162bf 024162c0 024162c1 024162c2` |
-| 3 | 149 | 11 | `02416c5e..02416c6e 0316f520 0445dc86 047df70d 047df723 049100ec 05e8faa8 0771d7b4 b1a64f7b d24b464b` |
-| 4 | 330 | 25 | (larger stat block) |
-| 5 | 28 | 2 | (minimal) |
-| 6 | 622 | 35 | (full stat block) |
-| 7 | 97 | 8 | (medium) |
+Each creature is a GROUP of 8 serialized field frames (tag `0x01A80D26`),
+separated by 0–8 B and closed by a **24-byte object trailer** (first dword =
+the envelope count word). Observed exactly 150 groups in `0x018EB4B7` and
+100 in `0x018EB45E`; the envelope `count` words (1503 / 1648) are NOT the
+group count. Frame field-count pattern and ids (group 0 of stream A):
 
-Type-3 float samples: `3f800000`=1.0, `40490fdb`≈π, `3f000000`=0.5, `42c80000`=100.0,
-`bf000000`=−0.5, `beaa7efa`≈−0.333. These are typical creature-stat values.
+| # | cnt | content |
+|---|---|---|
+| 0 | 5 | stat ids `0240e421 0240e422 0240e423 02e9efd3 03cdd54b` |
+| 1 | 4 | packed coordinates `024162bf..c2` (**not floats**) |
+| 2 | 25 | detailed stats `02416c5e..02416c6e` + 11 larger blocks |
+| 3 | 11 | `02415689..02415693` + `037d3df5 039a844f 049489a3 04c919ab` |
+| 4 | 4 | `02415eb8..bb` |
+| 5 | 2 | `043c4ab2 04bfed68` |
+| 6 | 35 | big mixed block incl. the 92-byte `076c8f46/4d` blobs |
+| 7 | 8 (A) / 13 (B) | `02e6e1ab..b2 05f0d6f3 06a814a9` (stream B adds 5) |
 
-### 0x018EB45E — secondary stats (1648 objects, 1000 walked)
+`0x03cdd54b` is the object **sequence id** (79, 80, 81 … in stream A;
+stream B continues 0xac=172…). Type-3-style float samples in the detailed
+block (`3f800000`=1.0, `40490fdb`≈π, `3f000000`=0.5, `42c80000`=100.0,
+`beaa7efa`≈−0.333) are real creature-stat values.
 
-Same 7 frame types, same field IDs per type. Float values differ per object.
+### `0x024162BF..C2` are packed ints, not floats
+
+Wire values like `04f30503` / `ee0f01f4` decode as int16 pairs
+(1267/1283, −4337/500) — consistent with the cell stage's 2D integer world.
+Their callback chains are the u32 families (see the descriptor section),
+not the float one. Kept as raw u32 until the packing is fully decoded.
 
 ## Single-envelope streams
 
@@ -51,10 +62,14 @@ Same 7 frame types, same field IDs per type. Float values differ per object.
 | `0x0179D310` | 1 | context index (92 B raw) |
 | `0x01906183` | 1 | frame: 1 field |
 | `0x018EB5C7` | 1 | frame: 1 field |
-| `0x018EB4B7` | 1503 | multi-object stats |
-| `0x018EB45E` | 1648 | multi-object secondary |
+| `0x018EB4B7` | 1503* | multi-object stats — 150 creature groups |
+| `0x018EB45E` | 1648* | multi-object secondary — 100 creature groups |
 | `0x0355C93A` | 1 | frame: 1 field |
 | `0x04238ECC` | 1 | frame: 1 field |
+
+\* envelope `count` word — NOT the object count (it equals the byte size of
+one group block: stream A blob = 150 blocks × 1503 B, B = 100 × 1648 B).
+The true counts are 150 + 100 creature groups (8 frames each).
 
 ## Tools
 
@@ -112,10 +127,12 @@ and are superseded by the JSON audit.
   float is speed, attack, social). Callback chains now type each field by
   size class (1/4/12/16/24/92 B); naming individual stats needs the
   registration functions (`0x1469990` etc.) or gameplay cross-references.
-- Gap-scan walk is lossy: the C++ decoder walks 2000 objects total
-  (Python reference: 1200 + 1000); declared 1503 + 1648. Tail objects after
-  long gaps are still missed; frame counts match declared counts in the
-  envelope headers.
+- Gap-scan lossiness is resolved: the walk is now group-based (8 frames +
+  24-byte trailer per creature) and recovers all 250 objects (150 + 100);
+  the exact-frame validation rejects in-payload tag collisions instead of
+  stopping the walk.
 - `0x02416C60` is 16 B on the wire (3×zero + 1.0), treated as 4 floats.
 - No creature *name* strings visible — names may be in single-envelope streams
   or encoded differently from StarRecord names.
+- The coordinate packing (`0x024162BF..C2`) is raw u32; int16-pair decoding
+  is plausible but not confirmed.

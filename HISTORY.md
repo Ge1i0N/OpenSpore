@@ -7,6 +7,22 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — cell-save creature = group of 8 frames; 250 objects recovered
+
+The gap-scan "lossy walk" is resolved: each creature is a GROUP of 8
+serialized field frames with count pattern `[5][4][25][11][4][2][35][8|13]`
+separated by 0–8 B and closed by a **24-byte object trailer** (first dword =
+envelope count word). Exact-frame validation (field sizes must sum to the
+frame length) rejects in-payload tag collisions instead of stopping the walk.
+Envelope `count` words 1503/1648 are NOT object counts — they equal the byte
+size of one group block (A blob = 150×1503 B, B = 100×1648 B); true counts
+are **150 + 100 = 250 creatures**, all recovered by `cell_save_dump`.
+`0x024162BF..C2` retyped from float to **raw u32 packed ints** (wire
+`04f30503`/`ee0f01f4` = int16 pairs 1267/1283, −4337/500; CB chains are the
+u32 families). `0x03CDD54B` identified as the object sequence id
+(79,80,81… A; B continues 0xac=172…). `cell_save_verify` 5/5 PASS,
+MSVC 0 warnings, `analysis/cell-save.md` updated.
+
 ## 2026-10-16 — cell-save field ids: 107/107 inline descriptors, callback type signatures
 
 `tools/cell_field_descriptors.py` proves the field registration is inline

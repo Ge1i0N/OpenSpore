@@ -25,9 +25,9 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < shown; ++i) {
         const auto& c = out[i];
         printf("  [%zu] stat0=%u stat1=%u stat2=0x%08x stat3=%u stat4=%u "
-               "pos=(%.3f, %.3f, %.3f, %.3f)",
+               "pos=(0x%08x, 0x%08x, 0x%08x, 0x%08x)",
                i, c.stat0, c.stat1, c.stat2, c.stat3, c.stat4,
-               (double)c.pos_x, (double)c.pos_y, (double)c.pos_z, (double)c.pos_w);
+               c.pos_x, c.pos_y, c.pos_z, c.pos_w);
         if (c.stat9) printf(" stat9=%.3f", (double)*c.stat9);
         if (c.stat18) printf(" stat18=%u", *c.stat18);
         printf("\n");

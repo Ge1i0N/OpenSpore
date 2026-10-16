@@ -33,7 +33,7 @@ point. [Full historical notebook](docs/archive/MEMORY-2026-10-15.md) is retained
 | Game states / modes | 60 script states / 17 mode names, 10 recovered binary registrations; five playable-stage rows held; only Game_Cell has a skeleton driver (tick counter, no simulation) |
 | Toolchain | MSVC 19.44.35229 (BuildTools 17.14) Win32 Debug, 0 warnings, full suite PASS 2026-10-16; MinGW i686 logic build (build/mingw, gitignored) for environments without admin |
 | Planet saves | pkp resources are prefix(00250003) + nested DBPF v3 / 1 record; C++ reader branches on fixed offsets; 211 real records decode clean |
-| Cell saves | `.spo` is DBPF (LE header, kind=4 index) holding two BE multi-object streams; field payloads BE; C++ `cell_save.*` decodes 2000/3151 objects, values match Python reference |
+| Cell saves | `.spo` is DBPF (LE header, kind=4 index) holding two BE multi-object streams; field payloads BE; one creature = group of 8 frames + 24-B trailer; C++ `cell_save.*` decodes all 250 creatures, values match Python reference |
 
 Deep evidence: [binary SPUI](analysis/spui-binary.md), [drawables](analysis/spui-drawables.md),
 [locale](analysis/text-locale.md), [formats](analysis/formats.md), [current VERIFY](VERIFY.md).

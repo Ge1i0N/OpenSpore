@@ -5,8 +5,11 @@
 //
 // Stream format (discovered 2026-10-16):
 //   [count BE u32][crc BE u32][token BE u32][12-byte header]
-//   then [frame][token(4)] repeated count times.
-// Frames use the standard serialized field frame (tag 0x01A80D26).
+//   then creature groups. One creature = a GROUP of serialized field frames
+//   (tag 0x01A80D26) with field-count pattern [5][4][25][11][4][2][35][8|13]
+//   separated by 0-8 B, closed by a 24-byte object trailer (150 groups in
+//   stream 0x018EB4B7, 100 in 0x018EB45E on the real save). The envelope
+//   `count` word is NOT the group count.
 //
 // Field IDs and their meaning (from binary descriptor table).
 // Field payload values are big-endian (verified: 3f800000=1.0, 0000004f=79).
@@ -40,11 +43,14 @@ struct CreatureStats {
     u8 stat1 = 0;          // 0x0240E422
     u32 stat2 = 0xFFFFFFFF; // 0x0240E423
     u32 stat3 = 0;         // 0x02E9EFD3
-    u32 stat4 = 79;        // 0x03CDD54B
-    float pos_x = 0.f;     // 0x024162BF
-    float pos_y = 0.f;     // 0x024162C0
-    float pos_z = 0.f;     // 0x024162C1
-    float pos_w = 0.f;     // 0x024162C2
+    u32 stat4 = 79;        // 0x03CDD54B — object sequence id (79,80,81…)
+    // 0x024162BF..C2: NOT floats — packed int coordinates (CB chains are
+    // the u32 families; wire values like 04f30503 = int16 pairs 1267/1283).
+    // Kept raw until the packing is decoded.
+    u32 pos_x = 0;         // 0x024162BF
+    u32 pos_y = 0;         // 0x024162C0
+    u32 pos_z = 0;         // 0x024162C1
+    u32 pos_w = 0;         // 0x024162C2
     // Detailed stats (frame type 3+), all big-endian payloads
     std::optional<std::array<float, 3>> detailed_pos;  // 0x02416C5E, 12 B
     std::optional<std::array<float, 4>> stat5;   // 0x02416C60, 16 B (0,0,0,1.0)
