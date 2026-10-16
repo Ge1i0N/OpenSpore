@@ -92,6 +92,19 @@ read/xref evidence maps `vtable +0x64` to `DF6110` (`ev_d9798b85c18d1c40463e43d2
 (`ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a`). The camera owner through
 `DE3C20` slot `+0x58` and the runtime message that triggers this path remain Unknown.
 
+REA now separates the two native camera acquisition paths instead of merging them by field name.
+`DE3C20` calls `0067DCD0`, then the returned service's virtual slot `+0x58`; `7C4250` applies the
+matrix/vector transform and `805F90` supplies the viewport/rectangle state
+(`ev_ba2f5a2d4cab60b689c15a3692dee19a26c74435d0cdbc96146c25a8b080bda7`,
+`ev_03f235d4936e9170ece6a22e251dc7b2bbf5513cf5ac5e00963b3b03c6c8220a`,
+`ev_5a64ad464337eea4c1d5be08a2abfea4b4fd511b5d988efe8e976f79e550be90`,
+`ev_00b0590ad36b8bdc1d71b8f38177ec593a29fd459378413eb42fc21e5d967f06`). Separately, `DE46D0`
+acquires the controller's `+0x198` object through `0067DCD0` slot `+0x50` and that object's slot
+`+0x38` (`ev_7fd0e4f59184119cd1ab9c128942586067b6e77967905ff23e9728419adb8c58`). `DF6490` uses
+the `+0x58` service for nearest-record selection/picking
+(`ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1`). The static binary
+therefore does not establish that controller `+0x198` and the projection service are identical.
+
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
 (`ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714`); the reference-only

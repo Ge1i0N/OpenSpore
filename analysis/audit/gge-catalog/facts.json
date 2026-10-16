@@ -60,6 +60,10 @@
       "projection_handler_vtable_slot": "0x68",
       "record_ui_virtual_slot": "0x64",
       "camera_service_virtual_slot": "0x58",
+      "controller_camera_acquisition": "0x0067dcd0 +0x50 -> returned object +0x38 -> controller +0x198",
+      "projection_camera_acquisition": "0x0067dcd0 returned service +0x58",
+      "camera_identity": "not established; separate static acquisition paths",
+      "nearest_record_picker": "0x00df6490 uses projection service +0x58",
       "direct_df6010_callers": "none resolved; Play Spore vtable +0x68 dispatch observed",
       "computed_record_ui_call": "0x00df606d",
       "computed_record_ui_call_status": "vtable-resolved-to-0x00df6110; reference-only resolver remains unresolved",
@@ -72,7 +76,13 @@
         "df6110": "ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a",
         "play_spore_constructor": "ev_2baa4b86c3d9685492da403fa1232e9bc49e08efc13d5089e3bd70d7a4889c1e",
         "vtable_df6110_xref": "ev_d9798b85c18d1c40463e43d25bc45d40d4750d2e268d22fb3abfee3af18a172b",
-        "play_spore_vtable_bytes": "ev_296c1dc2cda30113dbcaa14de914acc9a90a6c634a41314dc5bb8e954427e564"
+        "play_spore_vtable_bytes": "ev_296c1dc2cda30113dbcaa14de914acc9a90a6c634a41314dc5bb8e954427e564",
+        "camera_projection": "ev_ba2f5a2d4cab60b689c15a3692dee19a26c74435d0cdbc96146c25a8b080bda7",
+        "camera_service_getter": "ev_03f235d4936e9170ece6a22e251dc7b2bbf5513cf5ac5e00963b3b03c6c8220a",
+        "matrix_transform": "ev_5a64ad464337eea4c1d5be08a2abfea4b4fd511b5d988efe8e976f79e550be90",
+        "viewport_state": "ev_00b0590ad36b8bdc1d71b8f38177ec593a29fd459378413eb42fc21e5d967f06",
+        "controller_camera": "ev_7fd0e4f59184119cd1ab9c128942586067b6e77967905ff23e9728419adb8c58",
+        "nearest_record_picker": "ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1"
       }
     },
     "evidence_ids": {

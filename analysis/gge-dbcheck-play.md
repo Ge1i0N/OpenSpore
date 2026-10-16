@@ -94,6 +94,10 @@ vtable `0x147EF50` slot `+0x68` method. It reads each record's position from `re
 slot `+0x64`, which resolves to `DF6110`; `DE3C20` obtains a renderer/camera-related service
 through virtual slot `+0x58` before computing normalized screen placement. The direct-call list is
 empty because this is vtable dispatch; the concrete camera owner and runtime trigger remain Unknown.
+REA distinguishes this projection service from the controller's stored active-camera field:
+`DE46D0` obtains controller `+0x198` through `0067DCD0` slot `+0x50`, then returned-object slot
+`+0x38`, while `DE3C20` uses the getter's `+0x58` path. `DF6490` also uses `+0x58` for nearest
+record selection. Their identity is therefore not assumed equivalent in the host.
 This is static shipped-artifact evidence, not an observation of a running GA process.
 The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
 `DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence
