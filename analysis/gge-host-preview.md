@@ -18,6 +18,10 @@ The screen labels itself **GGE HOST PREVIEW (CONTROLLED)** and says that no nati
 callback is attached. It is registered only when `OS_ENABLE_DEV_COMMANDS` is set; release builds do
 not register it.
 
+`ggepreview:status` reports the current host status, structural catalog source, card count and
+producer observations in order `manager,starsdb,planet,refill`. Built-in entries have empty source
+and Unknown producer statuses; caller snapshots report their explicit path and statuses.
+
 Automated click through the same frame input path:
 
 ```powershell

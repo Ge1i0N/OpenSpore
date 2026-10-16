@@ -43,7 +43,13 @@ bool build(const os::gge::CatalogInput& catalog,const std::filesystem::path& pac
 void enter(){std::string old;if(g_preview.scene)g_preview.scene->close(old);if(g_preview.images)g_preview.images->close();g_preview.ticket=0;g_preview.status="starting";g_preview.source="built-in controlled entries";g_preview.selected.reset();g_preview.hovered.reset();g_preview.open=false;std::string e;os::gge::CatalogInput catalog;catalog.saved_status=catalog.candidate_status=os::gge::CatalogAvailability::Available;for(int n=0;n<3;++n){os::gge::StarMetadata s;s.star_id=0x7000+n;s.position={-.62f+.62f*n,0,0};s.name=u"Controlled host star";s.terrain_loaded=true;s.terrain_image=kPreviewImage.instance;catalog.candidates.push_back(std::move(s));}auto p=os::fs::resolve("Data/Spore_Graphics.package");std::unique_ptr<os::gge::StarUiScene> scene;std::unique_ptr<os::gge::StreamingImageProvider> images;if(p.empty()||!build(catalog,p,scene,images,e)){g_preview.status="blocked: "+(p.empty()?std::string("selected Graphics package unavailable"):e);LOG_WARN("gge-preview","%s",g_preview.status.c_str());return;}g_preview.scene=std::move(scene);g_preview.images=std::move(images);g_preview.ticket=g_preview.scene->ticket();g_preview.status="controlled catalogue / real atlas / explicit camera";g_preview.open=true;LOG_INFO("gge-preview","GGEHostPreview active: CONTROLLED, not native GGE");}
 void exit(){if(g_preview.scene){std::string e;g_preview.scene->close(e);}if(g_preview.images)g_preview.images->close();g_preview.scene.reset();g_preview.images.reset();g_preview.open=false;LOG_INFO("gge-preview","GGEHostPreview closed");}
 std::string command(const os::console::CmdContext& c) {
-    if(c.args.size()<2||c.args[1]=="status") return g_preview.status;
+    if(c.args.size()<2||c.args[1]=="status") {
+        if(!g_preview.scene) return g_preview.status+" cards=0";
+        const auto& p=g_preview.scene->producer_observations();
+        auto label=[](os::gge::CatalogProducerStatus s){return s==os::gge::CatalogProducerStatus::Available?"Available":s==os::gge::CatalogProducerStatus::Failed?"Failed":"Unknown";};
+        return g_preview.status+" source="+g_preview.scene->catalog_source()+" cards="+std::to_string(g_preview.scene->size())+
+            " producer="+label(p.manager)+","+label(p.starsdb)+","+label(p.planet_records)+","+label(p.candidate_refill);
+    }
     if(c.args[1]!="load"||c.args.size()<3) return "usage: ggepreview:load,<explicit-snapshot-path>";
     os::gge::CatalogInput catalog; std::string error;
     if(!os::gge::load_catalog_snapshot(c.args[2],catalog,error)) return "snapshot blocked: "+error;
