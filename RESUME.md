@@ -185,7 +185,7 @@ test with `-w -devDirs`; retain evidence and commit.
   Atomic parse, 16MiB/path/finite/count/row/END bounds; malformed/Unknown preserves prior output or
   blocks build_catalog. Debug `ggepreview:load,<path>` reloads GGEHostPreview only after explicit
   Available snapshot; failed load preserves current scene, no fallback/search/profile.
-  `gge_catalog_snapshot_verify`:8 checks. analysis/gge-catalog-snapshot.md.
+  `gge_catalog_snapshot_verify`:10 checks including loaded-terrain/image-key pairing. analysis/gge-catalog-snapshot.md.
 
 ## Next, in order
 

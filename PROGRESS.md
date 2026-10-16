@@ -86,7 +86,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE explicit phase transitions | 195 checks; ordered cases/guard/events/flags/name/rect, duplicates/ancestor state, transactional failures, actual untouched-panel picking and scene-frame retirement | `gge_star_transition_verify <fixtures>`; [case4 no-latch correction/callers](analysis/gge-star-transition.md) |
 | GGE world/UI input seam | 29 checks; real layouts + controlled positions/rays, threshold/camera/ticket isolation and transition separation | `gge_star_input_verify <fixtures>`; [evidence/limits](analysis/gge-star-input.md) |
 | GGEHostPreview smoke | state entered, real frame loop/atlas/camera setup, `spui:-click,640,360` → host card20481, clean exit | controlled manual screen, no native catalogue/callback/scene readiness; [evidence](analysis/gge-host-preview.md) |
-| GGE catalogue snapshot schema | 8 checks: UTF-8/BOM hex names, Available/Unknown status, counts/rows, malformed/nonfinite/atomic failures | `gge_catalog_snapshot_verify <NEW-test-dir>`; [format/limits](analysis/gge-catalog-snapshot.md) |
+| GGE catalogue snapshot schema | 10 checks: UTF-8/BOM hex names, Available/Unknown status, counts/rows, loaded-terrain/image pairing, malformed/nonfinite/atomic failures | `gge_catalog_snapshot_verify <NEW-test-dir>`; [format/limits](analysis/gge-catalog-snapshot.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

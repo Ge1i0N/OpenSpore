@@ -14,14 +14,16 @@ saved_status<TAB>Available|Unknown
 candidate_status<TAB>Available|Unknown
 saved_count<TAB>N
 candidate_count<TAB>N
-saved<TAB>id<TAB>x<TAB>y<TAB>z<TAB>stage<TAB>source_flags<TAB>name_hex<TAB>save_stem_hex<TAB>probe<TAB>header_major<TAB>header_minor<TAB>terrain_loaded
-candidate<TAB>id<TAB>x<TAB>y<TAB>z<TAB>stage_ignored<TAB>flags_ignored<TAB>name_hex<TAB>terrain_loaded
+saved<TAB>id<TAB>x<TAB>y<TAB>z<TAB>stage<TAB>source_flags<TAB>name_hex<TAB>save_stem_hex<TAB>probe<TAB>header_major<TAB>header_minor<TAB>terrain_loaded<TAB>terrain_image_instance
+candidate<TAB>id<TAB>x<TAB>y<TAB>z<TAB>stage_ignored<TAB>flags_ignored<TAB>name_hex<TAB>terrain_loaded<TAB>terrain_image_instance
 END
 ```
 
 Names are hex-encoded UTF-8. Candidate stage/flags fields are retained framing fields; candidate
-projection uses native builder defaults. All numeric fields are bounded and finite; counts must match
-rows exactly.
+projection uses native builder defaults. `terrain_image_instance` is the exact terrain property
+instance observed by the producer; zero is allowed when `terrain_loaded=0`. The terrain flag must be
+0 or 1 and never authorizes an invented ResourceKey. All numeric fields are bounded and finite;
+counts must match rows exactly.
 
 The loader accepts only a caller-selected path and a 16MiB file bound. It parses into a temporary
 `CatalogInput` and publishes atomically. Unknown source status remains Unknown and blocks
@@ -44,7 +46,7 @@ producer; input provenance and authorization remain the caller's responsibility.
 
 ## Verification
 
-`gge_catalog_snapshot_verify`: **8 checks PASS**: valid saved/candidate rows and header/terrain fields,
+`gge_catalog_snapshot_verify`: **10 checks PASS**: valid saved/candidate rows and header/terrain fields,
 UTF-8 hex names, BOM, Unknown status, malformed row/unknown line/nonfinite input and atomic output
 preservation. No user profile or save directory is searched.
 

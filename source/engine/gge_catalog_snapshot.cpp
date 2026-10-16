@@ -10,7 +10,7 @@ namespace {
 constexpr size_t kMaxBytes=16*1024*1024,kMaxRows=4096,kMaxText=4096;
 std::string trim(std::string s) { const auto a=s.find_first_not_of(" \t\r"),b=s.find_last_not_of(" \t\r"); return a==std::string::npos?std::string():s.substr(a,b-a+1); }
 bool u32v(const std::string& s,u32& out) {
-    if(s.empty()||s.size()>10)return false;
+    if(s.empty()||s.size()>10||s[0]=='-')return false;
     errno=0; char* end=nullptr; const unsigned long value=std::strtoul(s.c_str(),&end,0);
     if(errno==ERANGE||end==s.c_str()||!end||*end!='\0'||value>0xfffffffful)return false;
     out=(u32)value; return true;
@@ -20,13 +20,14 @@ bool hexbytes(const std::string& s,std::string& out) { if(s.size()>kMaxText*8||(
 bool utf8u16(const std::string& s,std::u16string& out) { out.clear(); for(size_t i=0;i<s.size();){u8 c=(u8)s[i++];u32 cp=0;int n=0;if(c<0x80)cp=c;else if((c&0xe0)==0xc0){cp=c&31;n=1;}else if((c&0xf0)==0xe0){cp=c&15;n=2;}else if((c&0xf8)==0xf0){cp=c&7;n=3;}else return false;if(i+n>s.size())return false;for(int j=0;j<n;++j){u8 q=(u8)s[i++];if((q&0xc0)!=0x80)return false;cp=(cp<<6)|(q&63);}if((cp>0x10ffff)||(cp>=0xd800&&cp<=0xdfff)||(cp<0x80&&n)|| (cp<0x800&&n>1)||(cp<0x10000&&n>2))return false;if(cp<=0xffff)out.push_back((char16_t)cp);else{cp-=0x10000;out.push_back((char16_t)(0xd800+(cp>>10)));out.push_back((char16_t)(0xdc00+(cp&1023)));}if(out.size()>kMaxText)return false;}return true; }
 bool status(const std::string& s,CatalogAvailability& out) { if(s=="Available"){out=CatalogAvailability::Available;return true;}if(s=="Unknown"){out=CatalogAvailability::Unknown;return true;}return false; }
 bool row(const std::vector<std::string>& t,bool saved,SavedGameMetadata* sp,StarMetadata* cp,std::string& e) {
-    if(t.size()!=static_cast<size_t>(saved?12:8)) {e="catalog snapshot row field count";return false;} size_t n=0;u32 id=0,stage=0,flags=0,probe=0,h1=0,h2=0,terrain=0;float x=0,y=0,z=0;
+    if(t.size()!=static_cast<size_t>(saved?13:9)) {e="catalog snapshot row field count";return false;} size_t n=0;u32 id=0,stage=0,flags=0,probe=0,h1=0,h2=0,terrain=0,terrain_image=0;float x=0,y=0,z=0;
     if(!u32v(t[n++],id)||!floatv(t[n++],x)||!floatv(t[n++],y)||!floatv(t[n++],z)||!u32v(t[n++],stage)||!u32v(t[n++],flags)) {e="catalog snapshot numeric row field";return false;}
     std::string name,stem; if(!hexbytes(t[n++],name)||!utf8u16(name,saved?sp->star.name:cp->name)) {e="catalog snapshot name UTF8/hex invalid";return false;}
-    if(saved) { if(!hexbytes(t[n++],stem)||!utf8u16(stem,sp->save_stem)){e="catalog snapshot save stem invalid";return false;} if(!u32v(t[n++],probe)||!u32v(t[n++],h1)||!u32v(t[n++],h2)||!u32v(t[n++],terrain)){e="catalog snapshot saved fields invalid";return false;} }
-    else if(!u32v(t[n++],terrain)) {e="catalog snapshot candidate terrain field invalid";return false;}
-    if(saved){sp->star.star_id=id;sp->star.position={x,y,z};sp->stage=stage;sp->source_flags=flags;sp->probe_result=probe!=0;sp->header={h1,h2};sp->star.terrain_loaded=terrain!=0;sp->star.terrain_image=terrain;}
-    else{cp->star_id=id;cp->position={x,y,z};cp->terrain_loaded=terrain!=0;cp->terrain_image=terrain;}
+    if(saved) { if(!hexbytes(t[n++],stem)||!utf8u16(stem,sp->save_stem)){e="catalog snapshot save stem invalid";return false;} if(!u32v(t[n++],probe)||!u32v(t[n++],h1)||!u32v(t[n++],h2)||!u32v(t[n++],terrain)||!u32v(t[n++],terrain_image)){e="catalog snapshot saved fields invalid";return false;} }
+    else if(!u32v(t[n++],terrain)||!u32v(t[n++],terrain_image)) {e="catalog snapshot candidate terrain fields invalid";return false;}
+    if(terrain>1||(terrain&&terrain_image==0)){e="catalog snapshot terrain observation invalid (loaded requires image instance)";return false;}
+    if(saved){sp->star.star_id=id;sp->star.position={x,y,z};sp->stage=stage;sp->source_flags=flags;sp->probe_result=probe!=0;sp->header={h1,h2};sp->star.terrain_loaded=terrain!=0;sp->star.terrain_image=terrain_image;}
+    else{cp->star_id=id;cp->position={x,y,z};cp->terrain_loaded=terrain!=0;cp->terrain_image=terrain_image;}
     return true;
 }
 }
