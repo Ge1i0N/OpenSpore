@@ -138,6 +138,9 @@ REA vtable evidence places `DF9740` at `Play Spore` slot `+0x38` and `DF6010` at
 `DF9740` gates on internal state `2`, then calls `DF95A0` to rebuild records/UI data before continuing
 to `DF6C10`; this is the native lifecycle seam for catalogue publication. The external state/message
 dispatcher that enters this vtable method remains unresolved.
+The secondary rebuild route is a separate controller/data vtable: REA bytes place `DE32B0` at
+`0x147DC60 +0x00`, not in the `Play Spore` vtable. This preserves two native entry routes to
+`DF95A0` without assigning either one a guessed outer phase/message ID.
 
 ## Verification and next boundary
 

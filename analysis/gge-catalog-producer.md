@@ -206,6 +206,9 @@ continues to `DF6C10` (`ev_afab93e38887cae99c9d8e4b4729acd6012b4fcb01be06b889eee
 `ev_86dfdc43893984891a70e03d44ac23d2879456d3065e7def195db0507d9fb97d`). This links catalogue
 rebuild to the native Play Spore lifecycle without claiming that the outer message/phase dispatcher
 or runtime entry into either method has been recovered.
+The controller/data vtable bytes themselves corroborate `0x147DC60 +0x00 = DE32B0`
+(`ev_2a8ea1d1ebf19f92fe3968adaa425e01819c251aa1c6c859f12d4a6eac7fb8da`). This is a separate
+vtable from `0x147EF50`: do not merge controller slot `+0x00` with Play Spore slots `+0x38/+0x68`.
 
 The registrar is initialized from `F473F0` (`ev_ab2c2ad005b3f43fead96c8df28456dd217091dd0a08a5cf7a6dfff7aa385558`),
 which registers `GalaxyGameEntry` and other drivers. The controller activation path `DEA1B0`

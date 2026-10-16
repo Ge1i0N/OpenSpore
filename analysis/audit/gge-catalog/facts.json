@@ -99,6 +99,7 @@
         "post_rebuild": "0x00df6c10",
         "secondary_rebuild_entry": "0x00de32b0 via 0x0147dc60 +0x00"
       },
+      "controller_data_vtable": "0x0147dc60 +0x00 -> 0x00de32b0",
       "evidence_ids": {
         "df6010": "ev_0dd3607a175f4fb9f1f1d193d4a7a379de07ca3f5f15f99f7d3497972d0ac353",
         "de3c20": "ev_bab6284c95703cb10880ebb4965a7d5d941375eb9cd7b3975445768f22847836",
@@ -112,6 +113,7 @@
         "play_spore_rebuild_method": "ev_afab93e38887cae99c9d8e4b4729acd6012b4fcb01be06b889eeec7eb3567a7b",
         "secondary_rebuild_method": "ev_2d3705a750f23425888ef7cdda8b40f859fff8af90cc3e4ce4fb081dc3dd824b",
         "secondary_rebuild_data_block": "ev_86dfdc43893984891a70e03d44ac23d2879456d3065e7def195db0507d9fb97d",
+        "controller_data_vtable_bytes": "ev_2a8ea1d1ebf19f92fe3968adaa425e01819c251aa1c6c859f12d4a6eac7fb8da",
         "camera_projection": "ev_ba2f5a2d4cab60b689c15a3692dee19a26c74435d0cdbc96146c25a8b080bda7",
         "camera_projection_assembly": "ev_270d12ef48ecc412deb9cb6b2344ef553f2f824b1c7a4ed04ca9733203a06727",
         "camera_service_getter": "ev_03f235d4936e9170ece6a22e251dc7b2bbf5513cf5ac5e00963b3b03c6c8220a",
