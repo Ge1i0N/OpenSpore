@@ -210,6 +210,11 @@ The controller/data vtable bytes themselves corroborate `0x147DC60 +0x00 = DE32B
 (`ev_2a8ea1d1ebf19f92fe3968adaa425e01819c251aa1c6c859f12d4a6eac7fb8da`). This is a separate
 vtable from `0x147EF50`: do not merge controller slot `+0x00` with Play Spore slots `+0x38/+0x68`.
 
+The post-`DF95A0` continuation remains a retained REA unknown, not an omitted conclusion:
+`unk_62a04a0f821caf905e18ac86c10eeff41d3e79597e2165afa62a07039ccab2cc`. The failed new
+`DF6C10` analysis did not produce runtime evidence; the next safe probe is assembly/references-only
+against retained evidence after the Ghidra session is healthy. No new broad decompilation is required.
+
 The registrar is initialized from `F473F0` (`ev_ab2c2ad005b3f43fead96c8df28456dd217091dd0a08a5cf7a6dfff7aa385558`),
 which registers `GalaxyGameEntry` and other drivers. The controller activation path `DEA1B0`
 (`ev_83f03f72a363a0e940fa109ec5415508a44114d757b4b7e3e06da26c50f52bbe`) calls `DE5900`, which

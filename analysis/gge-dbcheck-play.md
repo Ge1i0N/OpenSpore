@@ -141,6 +141,9 @@ dispatcher that enters this vtable method remains unresolved.
 The secondary rebuild route is a separate controller/data vtable: REA bytes place `DE32B0` at
 `0x147DC60 +0x00`, not in the `Play Spore` vtable. This preserves two native entry routes to
 `DF95A0` without assigning either one a guessed outer phase/message ID.
+The exact post-rebuild continuation and its outer dispatch are retained as REA unknown
+`unk_62a04a0f821caf905e18ac86c10eeff41d3e79597e2165afa62a07039ccab2cc`; the next probe should be
+bounded assembly/reference inspection, not another broad Ghidra decompilation.
 
 ## Verification and next boundary
 
