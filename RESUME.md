@@ -149,7 +149,7 @@ test with `-w -devDirs`; retain evidence and commit.
   retains old cards for diagnostics ONLY; Available-empty distinct. Unique host IDs, duplicate star
   IDs/source ordinal resets retained, tickets/frame serials/reentry guards,128cards/65536objects/32768windows.
   states::draw_gge_star_scene uses shared pixel-layer hook, no begin/end/clear or automatic caller.
-  gge_star_scene_verify:204 checks on actual layouts/PNG with controlled camera/metadata; untouched
+  gge_star_scene_verify:208 checks on actual layouts/PNG with controlled camera/metadata; caller producer-status gate; untouched
   template remains hidden/IgnoreMouse after current phase subset. Picking test clears ONLY root177
   IgnoreMouse in controlled copy, not native show behavior. No new GPU galaxy/native mount readiness.
   analysis/gge-star-scene.md / audit/gge-scene/ retain14 functions, globals and separate camera paths.
