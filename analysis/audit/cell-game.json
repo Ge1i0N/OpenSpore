@@ -1,0 +1,3322 @@
+{
+  "packages": [
+    "S:\\Games\\Other\\Spore\\Data\\CellGame.package",
+    "S:\\Games\\Other\\Spore\\Data\\CellGame_Layers.package"
+  ],
+  "types": {
+    "cell": 189,
+    "world": 13,
+    "loottable": 48,
+    "structure": 144,
+    "populate": 23,
+    "look_table": 9,
+    "random_creature": 10,
+    "look_algorithm": 1,
+    "effectMap": 1,
+    "prop": 1,
+    "backgroundMap": 1,
+    "xls": 1,
+    "globals": 1,
+    "advect": 28,
+    "density": 5
+  },
+  "prop": {
+    "0xc951eb63": [
+      {
+        "key": 61560990,
+        "type": 3145884,
+        "count": 2,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "key": 285649378,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.5,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            2.0,
+            0.5
+          ],
+          [
+            4.0,
+            0.05
+          ],
+          [
+            8.0,
+            0.05
+          ],
+          [
+            16.0,
+            0.05
+          ]
+        ]
+      },
+      {
+        "key": 414669895,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.5,
+            4.0
+          ],
+          [
+            1.0,
+            2.0
+          ],
+          [
+            2.0,
+            2.0
+          ],
+          [
+            4.0,
+            1.0
+          ],
+          [
+            8.0,
+            1.0
+          ],
+          [
+            16.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "key": 743917382,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            0.05
+          ],
+          [
+            4.0,
+            0.07
+          ],
+          [
+            6.0,
+            0.08
+          ],
+          [
+            8.0,
+            0.09
+          ],
+          [
+            10.0,
+            0.1
+          ]
+        ]
+      },
+      {
+        "key": 787907697,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            0.2
+          ],
+          [
+            4.0,
+            0.25
+          ],
+          [
+            6.0,
+            0.28
+          ],
+          [
+            8.0,
+            0.3
+          ],
+          [
+            10.0,
+            0.31
+          ]
+        ]
+      },
+      {
+        "key": 955029584,
+        "type": 3145884,
+        "count": 4,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            0.1,
+            1.0
+          ],
+          [
+            0.2,
+            1.0
+          ],
+          [
+            0.3,
+            1.0
+          ]
+        ]
+      },
+      {
+        "key": 1909164640,
+        "type": 3145884,
+        "count": 3,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            480.0,
+            0.7
+          ],
+          [
+            960.0,
+            0.5
+          ]
+        ]
+      },
+      {
+        "key": 2001996852,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            2.0
+          ],
+          [
+            4.0,
+            4.0
+          ],
+          [
+            6.0,
+            6.0
+          ],
+          [
+            8.0,
+            8.5
+          ],
+          [
+            10.0,
+            10.0
+          ]
+        ]
+      },
+      {
+        "key": 2059592863,
+        "type": 3145884,
+        "count": 5,
+        "size": 8,
+        "floats": [
+          [
+            0.5,
+            0.5
+          ],
+          [
+            1.0,
+            0.75
+          ],
+          [
+            2.0,
+            1.0
+          ],
+          [
+            4.0,
+            2.0
+          ],
+          [
+            8.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "key": 2063793331,
+        "type": 3145884,
+        "count": 5,
+        "size": 8,
+        "floats": [
+          [
+            1.0,
+            20.0
+          ],
+          [
+            2.0,
+            40.0
+          ],
+          [
+            3.0,
+            60.0
+          ],
+          [
+            4.0,
+            80.0
+          ],
+          [
+            5.0,
+            100.0
+          ]
+        ]
+      },
+      {
+        "key": 2067919849,
+        "type": 3145884,
+        "count": 10,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            3.0
+          ],
+          [
+            1.0,
+            4.0
+          ],
+          [
+            2.0,
+            4.0
+          ],
+          [
+            4.0,
+            9.0
+          ],
+          [
+            6.0,
+            12.0
+          ],
+          [
+            8.0,
+            14.0
+          ],
+          [
+            10.0,
+            16.0
+          ],
+          [
+            12.0,
+            18.0
+          ],
+          [
+            16.0,
+            24.0
+          ],
+          [
+            32.0,
+            32.0
+          ]
+        ]
+      },
+      {
+        "key": 2461707801,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            1.5
+          ],
+          [
+            4.0,
+            1.5
+          ],
+          [
+            6.0,
+            1.5
+          ],
+          [
+            8.0,
+            1.5
+          ],
+          [
+            10.0,
+            1.5
+          ]
+        ]
+      },
+      {
+        "key": 2934080350,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            1.0
+          ],
+          [
+            4.0,
+            2.0
+          ],
+          [
+            6.0,
+            3.0
+          ],
+          [
+            8.0,
+            3.0
+          ],
+          [
+            10.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "key": 3148553205,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            5.0
+          ],
+          [
+            4.0,
+            7.0
+          ],
+          [
+            6.0,
+            7.5
+          ],
+          [
+            8.0,
+            7.75
+          ],
+          [
+            10.0,
+            8.0
+          ]
+        ]
+      },
+      {
+        "key": 3459380897,
+        "type": 3145884,
+        "count": 10,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            2.5
+          ],
+          [
+            1.0,
+            2.5
+          ],
+          [
+            2.0,
+            1.75
+          ],
+          [
+            4.0,
+            1.1
+          ],
+          [
+            6.0,
+            0.85
+          ],
+          [
+            8.0,
+            0.85
+          ],
+          [
+            10.0,
+            0.85
+          ],
+          [
+            12.0,
+            0.85
+          ],
+          [
+            16.0,
+            0.9
+          ],
+          [
+            32.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "key": 3532746469,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.5,
+            0.5
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            2.0,
+            2.0
+          ],
+          [
+            4.0,
+            4.0
+          ],
+          [
+            8.0,
+            8.0
+          ],
+          [
+            16.0,
+            16.0
+          ]
+        ]
+      },
+      {
+        "key": 3842071820,
+        "type": 3145884,
+        "count": 6,
+        "size": 8,
+        "floats": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            2.0,
+            10.0
+          ],
+          [
+            4.0,
+            8.0
+          ],
+          [
+            6.0,
+            6.0
+          ],
+          [
+            8.0,
+            4.0
+          ],
+          [
+            10.0,
+            2.0
+          ]
+        ]
+      }
+    ]
+  },
+  "look_tables": {
+    "NPC_idle": [
+      [
+        "forward",
+        1.0
+      ],
+      [
+        "left",
+        1.0
+      ],
+      [
+        "right",
+        1.0
+      ],
+      [
+        "object",
+        1.0
+      ],
+      [
+        "food",
+        1.0
+      ]
+    ],
+    "player_moving": [
+      [
+        "destination",
+        5.0
+      ],
+      [
+        "food",
+        1.0
+      ]
+    ],
+    "npc_move_scared": [
+      [
+        "destination",
+        5.0
+      ],
+      [
+        "flee_target",
+        1.0
+      ]
+    ],
+    "npc_moving": [
+      [
+        "destination",
+        5.0
+      ],
+      [
+        "food",
+        1.0
+      ]
+    ],
+    "npc_scared": [
+      [
+        "flee_target",
+        1.0
+      ]
+    ],
+    "npc_mad": [
+      [
+        "pursue_target",
+        1.0
+      ]
+    ],
+    "default_look_table": [
+      [
+        "up",
+        1.0
+      ],
+      [
+        "forward",
+        1.0
+      ],
+      [
+        "left",
+        1.0
+      ],
+      [
+        "right",
+        1.0
+      ],
+      [
+        "object",
+        1.0
+      ],
+      [
+        "food",
+        1.0
+      ],
+      [
+        "predator",
+        1.0
+      ],
+      [
+        "pursue_target",
+        1.0
+      ],
+      [
+        "flee_target",
+        1.0
+      ],
+      [
+        "destination",
+        1.0
+      ]
+    ],
+    "look_up": [
+      [
+        "up",
+        1.0
+      ]
+    ],
+    "player_idle": [
+      [
+        "up",
+        5.0
+      ],
+      [
+        "forward",
+        1.0
+      ],
+      [
+        "left",
+        1.0
+      ],
+      [
+        "right",
+        1.0
+      ],
+      [
+        "object",
+        1.0
+      ],
+      [
+        "food",
+        10.0
+      ]
+    ]
+  },
+  "loottables": {
+    "loot_bonesb": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 5.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 5.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 0.2,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 0.2,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_electric",
+          "table": null,
+          "weight": 0.1,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_booster": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 90.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_grubby": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": []
+    },
+    "loot_eggkid": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_shysterAlpha": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_jetster": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_rock_chunk": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 4.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "0x6316609b",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "0x63166098",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "0x63166099",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "0x6316609e",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_eggdad": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 60.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 40.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_beach": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 0.14,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_electric",
+          "table": null,
+          "weight": 0.09,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_food_L0",
+          "table": null,
+          "weight": 0.01,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "egg_eggbaby",
+          "table": null,
+          "weight": 0.01,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_random": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_electric",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_rock_chunks": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "table",
+          "cell": "packageSignature",
+          "table": "loot_rock_chunk",
+          "weight": 1.0,
+          "count": 3,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_puffish": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 80.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_death_poison",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_placeholder": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": []
+    },
+    "loot_megamouth": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 60.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 40.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "0xdfd2adee": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 4.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "0x86ca169a",
+          "table": null,
+          "weight": 0.1,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_squid": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 0.6,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jaw",
+          "table": null,
+          "weight": 0.4,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_nosey": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 90.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_BuzzyAlpha": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 90.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_electric",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_poker": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 0.5,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 0.5,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_unlocks": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_electric",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_eggmom": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "egg_eggbaby",
+          "table": null,
+          "weight": 0.2,
+          "count": 2,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "egg_eggbaby",
+          "table": null,
+          "weight": 0.5,
+          "count": 3,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "egg_eggbaby",
+          "table": null,
+          "weight": 0.2,
+          "count": 4,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "0xb46bfe42": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "nothing",
+          "cell": "packageSignature",
+          "table": null,
+          "weight": 0.8,
+          "count": 0,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_food_L0",
+          "table": null,
+          "weight": 0.1,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_spikey": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_ice_chunk": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 1.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "0x0e09bb74",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "0x0e09bb75",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "0x0e09bb72",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_Buzzy": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_electric",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_stabber": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_rock": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 0.3,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 0.3,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 0.24,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_food_L0",
+          "table": null,
+          "weight": 0.01,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_goldy": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": []
+    },
+    "0x9c3778a2": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "nothing",
+          "cell": "packageSignature",
+          "table": null,
+          "weight": 0.4,
+          "count": 0,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "0xfb090ddc",
+          "table": null,
+          "weight": 0.4,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_chomper": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_jawhead": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 60.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 40.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "0x65f06d91": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_food_L0",
+          "table": null,
+          "weight": 0.1,
+          "count": 3,
+          "countDelta": 1,
+          "levelOffset": -3
+        }
+      ]
+    },
+    "solid_pieces": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "table",
+          "cell": "packageSignature",
+          "table": "0xdfd2adee",
+          "weight": 0.1,
+          "count": 5,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_pinkyAlpha": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 50.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 50.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_ducky": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_poisoner": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 90.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_death_poison",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_plant": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 0.22,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 0.2,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 0.17,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 0.1,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_food_L0",
+          "table": null,
+          "weight": 0.01,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_shyster": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": []
+    },
+    "0x161dcd8b": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "0xd93ee013",
+          "table": null,
+          "weight": 0.1,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_stabberalpha": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_ice_chunks": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "table",
+          "cell": "packageSignature",
+          "table": "loot_ice_chunk",
+          "weight": 1.0,
+          "count": 3,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_pinky": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_water": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 0.15,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_electric",
+          "table": null,
+          "weight": 0.09,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        },
+        {
+          "type": "cell",
+          "cell": "cell_food_L0",
+          "table": null,
+          "weight": 0.01,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 0
+        }
+      ]
+    },
+    "loot_ice": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_electric",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_bonesw": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 5.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 5.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_cilia",
+          "table": null,
+          "weight": 0.2,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_proboscis",
+          "table": null,
+          "weight": 0.2,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_bonesp": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 1.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_jet",
+          "table": null,
+          "weight": 0.2,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_chemical",
+          "table": null,
+          "weight": 0.2,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_bonesr": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_mandible",
+          "table": null,
+          "weight": 0.5,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        },
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 0.5,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    },
+    "loot_squiggly": {
+      "minRadius": 0.0,
+      "maxRadius": 0.0,
+      "initialAlpha": 1.0,
+      "expelForce": 0.0,
+      "effect": "packageSignature",
+      "delay": 0.0,
+      "entries": [
+        {
+          "type": "cell",
+          "cell": "cell_unlock_spike",
+          "table": null,
+          "weight": 10.0,
+          "count": 1,
+          "countDelta": 0,
+          "levelOffset": 1
+        }
+      ]
+    }
+  },
+  "cells": {
+    "cell_bubble_L0": {
+      "instance": "0xbb9c4f19",
+      "display": "",
+      "size": 400
+    },
+    "0x981a5369": {
+      "instance": "0x981a5369",
+      "display": "",
+      "size": 400
+    },
+    "0x981a536a": {
+      "instance": "0x981a536a",
+      "display": "",
+      "size": 400
+    },
+    "0x981a536b": {
+      "instance": "0x981a536b",
+      "display": "",
+      "size": 400
+    },
+    "0x981a536c": {
+      "instance": "0x981a536c",
+      "display": "",
+      "size": 400
+    },
+    "0x981a536d": {
+      "instance": "0x981a536d",
+      "display": "",
+      "size": 400
+    },
+    "0x981a536e": {
+      "instance": "0x981a536e",
+      "display": "",
+      "size": 400
+    },
+    "Cell_DuckyMed": {
+      "instance": "0xfe073db6",
+      "display": "Ducky",
+      "size": 400
+    },
+    "0x201c2477": {
+      "instance": "0x201c2477",
+      "display": "",
+      "size": 400
+    },
+    "0xf1690a08": {
+      "instance": "0xf1690a08",
+      "display": "",
+      "size": 400
+    },
+    "cell_flora_clover_L1": {
+      "instance": "0x0fcde81c",
+      "display": "",
+      "size": 400
+    },
+    "cell_flora_clover_L0": {
+      "instance": "0x0fcde81d",
+      "display": "",
+      "size": 400
+    },
+    "cell_flora_clover_L2": {
+      "instance": "0x0fcde81f",
+      "display": "",
+      "size": 400
+    },
+    "cell_death_poison": {
+      "instance": "0xf5998dcd",
+      "display": "",
+      "size": 400
+    },
+    "cell_poisonerMed": {
+      "instance": "0x2a8f07e9",
+      "display": "Squirty",
+      "size": 400
+    },
+    "cell_poison_L0": {
+      "instance": "0x56507d07",
+      "display": "",
+      "size": 400
+    },
+    "0x2793be8a": {
+      "instance": "0x2793be8a",
+      "display": "",
+      "size": 400
+    },
+    "cell_hero_L0": {
+      "instance": "0xcbcd1287",
+      "display": "",
+      "size": 400
+    },
+    "0xfb090ddc": {
+      "instance": "0xfb090ddc",
+      "display": "",
+      "size": 400
+    },
+    "cell_ocatmouth": {
+      "instance": "0x042f3f56",
+      "display": "",
+      "size": 400
+    },
+    "beaker": {
+      "instance": "0xab4e230f",
+      "display": "",
+      "size": 400
+    },
+    "cell_hero_lay_egg": {
+      "instance": "0xe2b09d79",
+      "display": "",
+      "size": 400
+    },
+    "0xb716c401": {
+      "instance": "0xb716c401",
+      "display": "",
+      "size": 400
+    },
+    "0x41d56159": {
+      "instance": "0x41d56159",
+      "display": "",
+      "size": 400
+    },
+    "0x0e09bb72": {
+      "instance": "0x0e09bb72",
+      "display": "",
+      "size": 400
+    },
+    "0x0e09bb74": {
+      "instance": "0x0e09bb74",
+      "display": "",
+      "size": 400
+    },
+    "0x0e09bb75": {
+      "instance": "0x0e09bb75",
+      "display": "",
+      "size": 400
+    },
+    "0x0e09bb77": {
+      "instance": "0x0e09bb77",
+      "display": "",
+      "size": 400
+    },
+    "egg_eggkid": {
+      "instance": "0xf8410462",
+      "display": "3",
+      "size": 400
+    },
+    "0x516748d4": {
+      "instance": "0x516748d4",
+      "display": "",
+      "size": 400
+    },
+    "0x064ab050": {
+      "instance": "0x064ab050",
+      "display": "",
+      "size": 400
+    },
+    "cell_hummingbird": {
+      "instance": "0xf85b6398",
+      "display": "",
+      "size": 400
+    },
+    "cell_nosey": {
+      "instance": "0x657bc506",
+      "display": "Nosey",
+      "size": 400
+    },
+    "cell_booster": {
+      "instance": "0xff36748c",
+      "display": "Booster",
+      "size": 400
+    },
+    "0x5a5c0f00": {
+      "instance": "0x5a5c0f00",
+      "display": "",
+      "size": 400
+    },
+    "0x5a5c0f01": {
+      "instance": "0x5a5c0f01",
+      "display": "",
+      "size": 400
+    },
+    "0x5a5c0f03": {
+      "instance": "0x5a5c0f03",
+      "display": "",
+      "size": 400
+    },
+    "0x7b3640d0": {
+      "instance": "0x7b3640d0",
+      "display": "",
+      "size": 400
+    },
+    "0x7b3640d1": {
+      "instance": "0x7b3640d1",
+      "display": "",
+      "size": 400
+    },
+    "0x7b3640d2": {
+      "instance": "0x7b3640d2",
+      "display": "",
+      "size": 400
+    },
+    "cell_weapon_poison_npc": {
+      "instance": "0x00500257",
+      "display": "",
+      "size": 400
+    },
+    "cell_squid": {
+      "instance": "0x4bc16582",
+      "display": "Snorf",
+      "size": 400
+    },
+    "0xfb3dc619": {
+      "instance": "0xfb3dc619",
+      "display": "",
+      "size": 400
+    },
+    "0xfb3dc61a": {
+      "instance": "0xfb3dc61a",
+      "display": "",
+      "size": 400
+    },
+    "0xfb3dc61b": {
+      "instance": "0xfb3dc61b",
+      "display": "",
+      "size": 400
+    },
+    "0x86ca169a": {
+      "instance": "0x86ca169a",
+      "display": "",
+      "size": 400
+    },
+    "Cell_GrubbySmall": {
+      "instance": "0x3596bed6",
+      "display": "Grubby",
+      "size": 400
+    },
+    "0xb8f26683": {
+      "instance": "0xb8f26683",
+      "display": "",
+      "size": 400
+    },
+    "cell_waterballoon": {
+      "instance": "0x1d32aa42",
+      "display": "",
+      "size": 400
+    },
+    "cell_leggy": {
+      "instance": "0xf6627bcc",
+      "display": "Leggy",
+      "size": 400
+    },
+    "cle_cll15": {
+      "instance": "0xf29c08a5",
+      "display": "",
+      "size": 400
+    },
+    "cle_cll16": {
+      "instance": "0xf29c08a6",
+      "display": "",
+      "size": 400
+    },
+    "0xde81e5e0": {
+      "instance": "0xde81e5e0",
+      "display": "",
+      "size": 400
+    },
+    "Cell_StabberAlphaMed": {
+      "instance": "0xbdf967e9",
+      "display": "Alpha Stabber",
+      "size": 400
+    },
+    "cell_minno3": {
+      "instance": "0xbaf6df94",
+      "display": "Minno",
+      "size": 400
+    },
+    "cell_minno2": {
+      "instance": "0xbaf6df95",
+      "display": "Minno",
+      "size": 400
+    },
+    "cell_minno1": {
+      "instance": "0xbaf6df96",
+      "display": "Minno",
+      "size": 400
+    },
+    "cell_flora_clover3_l0": {
+      "instance": "0xbd8cd7ac",
+      "display": "",
+      "size": 400
+    },
+    "cell_flora_clover3_l1": {
+      "instance": "0xbd8cd7ad",
+      "display": "",
+      "size": 400
+    },
+    "cell_flora_clover3_l2": {
+      "instance": "0xbd8cd7ae",
+      "display": "",
+      "size": 400
+    },
+    "cell_unlock_proboscis": {
+      "instance": "0x3c33494b",
+      "display": "",
+      "size": 400
+    },
+    "Cell_SquigglySmall": {
+      "instance": "0xfdd9ec2e",
+      "display": "Squiggly",
+      "size": 400
+    },
+    "Cell_SquigglyMed": {
+      "instance": "0x5e83e5b1",
+      "display": "Squiggly",
+      "size": 400
+    },
+    "cell_GoldySpecial": {
+      "instance": "0x41620994",
+      "display": "Pokey",
+      "size": 400
+    },
+    "0xd045b5c7": {
+      "instance": "0xd045b5c7",
+      "display": "",
+      "size": 400
+    },
+    "cell_simple_ai_L0": {
+      "instance": "0xcbb3a526",
+      "display": "",
+      "size": 400
+    },
+    "0xc2f1274c": {
+      "instance": "0xc2f1274c",
+      "display": "",
+      "size": 400
+    },
+    "0x29d2b3b0": {
+      "instance": "0x29d2b3b0",
+      "display": "",
+      "size": 400
+    },
+    "0x29d2b3b1": {
+      "instance": "0x29d2b3b1",
+      "display": "",
+      "size": 400
+    },
+    "Cell_JawheadMed": {
+      "instance": "0xdf84d1c6",
+      "display": "Jawhead",
+      "size": 400
+    },
+    "0x29d2b3b3": {
+      "instance": "0x29d2b3b3",
+      "display": "",
+      "size": 400
+    },
+    "0x29d2b3b6": {
+      "instance": "0x29d2b3b6",
+      "display": "",
+      "size": 400
+    },
+    "0x29d2b3b7": {
+      "instance": "0x29d2b3b7",
+      "display": "",
+      "size": 400
+    },
+    "cell_stabberSmall": {
+      "instance": "0xcc3d1aec",
+      "display": "Stabber",
+      "size": 400
+    },
+    "0x63166098": {
+      "instance": "0x63166098",
+      "display": "",
+      "size": 400
+    },
+    "Cell_ChomperMed": {
+      "instance": "0x1dc6c020",
+      "display": "Chomper",
+      "size": 400
+    },
+    "0x63166099": {
+      "instance": "0x63166099",
+      "display": "",
+      "size": 400
+    },
+    "0x6316609b": {
+      "instance": "0x6316609b",
+      "display": "",
+      "size": 400
+    },
+    "0x0640bb9e": {
+      "instance": "0x0640bb9e",
+      "display": "",
+      "size": 400
+    },
+    "0x6316609e": {
+      "instance": "0x6316609e",
+      "display": "",
+      "size": 400
+    },
+    "0xccfb2542": {
+      "instance": "0xccfb2542",
+      "display": "",
+      "size": 400
+    },
+    "BadData": {
+      "instance": "0x7a638526",
+      "display": "",
+      "size": 400
+    },
+    "poolball": {
+      "instance": "0x32b6b95c",
+      "display": "",
+      "size": 400
+    },
+    "cell_ducky": {
+      "instance": "0x9b100a94",
+      "display": "Ducky",
+      "size": 400
+    },
+    "cell_stabberalpha": {
+      "instance": "0xefe530a1",
+      "display": "Alpha Stabber",
+      "size": 400
+    },
+    "cell_creeper": {
+      "instance": "0x5933fb5a",
+      "display": "",
+      "size": 400
+    },
+    "cell_poolball": {
+      "instance": "0xf6ff85f9",
+      "display": "",
+      "size": 400
+    },
+    "0x69ba0694": {
+      "instance": "0x69ba0694",
+      "display": "",
+      "size": 400
+    },
+    "cell_jetster": {
+      "instance": "0x2df442e1",
+      "display": "Jetster",
+      "size": 400
+    },
+    "0xdf3b5b4c": {
+      "instance": "0xdf3b5b4c",
+      "display": "",
+      "size": 400
+    },
+    "0xdf3b5b4e": {
+      "instance": "0xdf3b5b4e",
+      "display": "",
+      "size": 400
+    },
+    "0xdf3b5b4f": {
+      "instance": "0xdf3b5b4f",
+      "display": "",
+      "size": 400
+    },
+    "cell_goldy3": {
+      "instance": "0x6e991f2a",
+      "display": "Goldy",
+      "size": 400
+    },
+    "cell_goldy2": {
+      "instance": "0x6e991f2b",
+      "display": "Goldy",
+      "size": 400
+    },
+    "cell_charger": {
+      "instance": "0xe377d6d2",
+      "display": "",
+      "size": 400
+    },
+    "cell_eyeGuy": {
+      "instance": "0x6d03ccec",
+      "display": "",
+      "size": 400
+    },
+    "0xcbdb0a9a": {
+      "instance": "0xcbdb0a9a",
+      "display": "",
+      "size": 400
+    },
+    "cell_parasiteA": {
+      "instance": "0x6c6e45c8",
+      "display": "",
+      "size": 400
+    },
+    "cell_parasiteB": {
+      "instance": "0x6c6e45cb",
+      "display": "",
+      "size": 400
+    },
+    "cell_poker": {
+      "instance": "0x7712e0bb",
+      "display": "Bloato",
+      "size": 400
+    },
+    "0xd145fedc": {
+      "instance": "0xd145fedc",
+      "display": "",
+      "size": 400
+    },
+    "0xa2ad2799": {
+      "instance": "0xa2ad2799",
+      "display": "",
+      "size": 400
+    },
+    "0x5542725c": {
+      "instance": "0x5542725c",
+      "display": "",
+      "size": 400
+    },
+    "bolt": {
+      "instance": "0x65fe5a08",
+      "display": "",
+      "size": 400
+    },
+    "cell_duckySmall": {
+      "instance": "0xc25bd431",
+      "display": "Ducky",
+      "size": 400
+    },
+    "0x5c1083fa": {
+      "instance": "0x5c1083fa",
+      "display": "",
+      "size": 400
+    },
+    "cell_unlock_electric": {
+      "instance": "0xf534d1d2",
+      "display": "",
+      "size": 400
+    },
+    "0xdf2e8fb8": {
+      "instance": "0xdf2e8fb8",
+      "display": "",
+      "size": 400
+    },
+    "0xdf2e8fb9": {
+      "instance": "0xdf2e8fb9",
+      "display": "",
+      "size": 400
+    },
+    "0x9d14a758": {
+      "instance": "0x9d14a758",
+      "display": "",
+      "size": 400
+    },
+    "0xdf2e8fbb": {
+      "instance": "0xdf2e8fbb",
+      "display": "",
+      "size": 400
+    },
+    "cell_pinky": {
+      "instance": "0x34aa6561",
+      "display": "Blooty",
+      "size": 400
+    },
+    "cell_Poisoner": {
+      "instance": "0x1a8210a1",
+      "display": "Squirty",
+      "size": 400
+    },
+    "Cell_NoseySmall": {
+      "instance": "0xc46d801b",
+      "display": "Nosey",
+      "size": 400
+    },
+    "cell_jawheadSmall": {
+      "instance": "0xa475ad21",
+      "display": "Jawhead",
+      "size": 400
+    },
+    "cell_unlock_chemical": {
+      "instance": "0x240d3563",
+      "display": "",
+      "size": 400
+    },
+    "0xefecf755": {
+      "instance": "0xefecf755",
+      "display": "",
+      "size": 400
+    },
+    "cell_flora_clover2_L2": {
+      "instance": "0x33046925",
+      "display": "",
+      "size": 400
+    },
+    "cell_flora_clover2_L1": {
+      "instance": "0x33046926",
+      "display": "",
+      "size": 400
+    },
+    "cell_jawhead": {
+      "instance": "0x7d00e384",
+      "display": "Jawhead",
+      "size": 400
+    },
+    "cell_flora_clover2_L0": {
+      "instance": "0x33046927",
+      "display": "",
+      "size": 400
+    },
+    "Cell_GoldySmall": {
+      "instance": "0xb20ba910",
+      "display": "Goldy",
+      "size": 400
+    },
+    "cell_unlock_spike": {
+      "instance": "0x579dfc2f",
+      "display": "",
+      "size": 400
+    },
+    "creeper": {
+      "instance": "0xf3b07a4d",
+      "display": "",
+      "size": 400
+    },
+    "0x7a3376cd": {
+      "instance": "0x7a3376cd",
+      "display": "",
+      "size": 400
+    },
+    "0x7a3376ce": {
+      "instance": "0x7a3376ce",
+      "display": "",
+      "size": 400
+    },
+    "cell_goldy3Med": {
+      "instance": "0xa535c060",
+      "display": "Goldy",
+      "size": 400
+    },
+    "cell_megamouth": {
+      "instance": "0x4bc9336f",
+      "display": "Megamouth",
+      "size": 400
+    },
+    "0xcb94b824": {
+      "instance": "0xcb94b824",
+      "display": "",
+      "size": 400
+    },
+    "cell_dragon": {
+      "instance": "0x5905cc05",
+      "display": "",
+      "size": 400
+    },
+    "cell_puffish": {
+      "instance": "0x2dfc83cf",
+      "display": "Puffish",
+      "size": 400
+    },
+    "cell_cannon": {
+      "instance": "0x9353e08b",
+      "display": "",
+      "size": 400
+    },
+    "0x293af179": {
+      "instance": "0x293af179",
+      "display": "",
+      "size": 400
+    },
+    "Cell_NoseyMed": {
+      "instance": "0x459c001c",
+      "display": "Nosey",
+      "size": 400
+    },
+    "Cell_Goldy2Med": {
+      "instance": "0x21b38b47",
+      "display": "Goldy",
+      "size": 400
+    },
+    "Cell_PinkyAlpha": {
+      "instance": "0xc8bf1b57",
+      "display": "Blitey",
+      "size": 400
+    },
+    "0x4e17a715": {
+      "instance": "0x4e17a715",
+      "display": "",
+      "size": 400
+    },
+    "cell_eggdad": {
+      "instance": "0x82d2f84e",
+      "display": "Paa",
+      "size": 400
+    },
+    "cell_goldy": {
+      "instance": "0xc3347823",
+      "display": "Goldy",
+      "size": 400
+    },
+    "cell_chomper": {
+      "instance": "0x9198f1ea",
+      "display": "Chomper",
+      "size": 400
+    },
+    "Cell_ShysterAlpha": {
+      "instance": "0x014a2ef2",
+      "display": "Spiked Shyster",
+      "size": 400
+    },
+    "Cell_boosterSmall": {
+      "instance": "0x8f4d4e89",
+      "display": "Booster",
+      "size": 400
+    },
+    "0x2e342903": {
+      "instance": "0x2e342903",
+      "display": "",
+      "size": 400
+    },
+    "0xf101bbb8": {
+      "instance": "0xf101bbb8",
+      "display": "",
+      "size": 400
+    },
+    "0x51ab47fd": {
+      "instance": "0x51ab47fd",
+      "display": "",
+      "size": 400
+    },
+    "cell_unlock_mandible": {
+      "instance": "0xfdf6cfdb",
+      "display": "",
+      "size": 400
+    },
+    "cell_sleeper": {
+      "instance": "0xce461424",
+      "display": "",
+      "size": 400
+    },
+    "cell_shyster": {
+      "instance": "0x5118741a",
+      "display": "Shyster",
+      "size": 400
+    },
+    "cell_unlock_cilia": {
+      "instance": "0x19641c23",
+      "display": "",
+      "size": 400
+    },
+    "Cell_GoldyMed": {
+      "instance": "0x29b3c09f",
+      "display": "Goldy",
+      "size": 400
+    },
+    "Cell_BuzzyAlpha": {
+      "instance": "0xba195b78",
+      "display": "Needle Buzzy",
+      "size": 400
+    },
+    "Cell_ChomperSmall": {
+      "instance": "0x9f564caf",
+      "display": "Chomper",
+      "size": 400
+    },
+    "cell_food_L0": {
+      "instance": "0xfd24574b",
+      "display": "",
+      "size": 400
+    },
+    "Cell_BoosterMed": {
+      "instance": "0x1658bcae",
+      "display": "Booster",
+      "size": 400
+    },
+    "0x620d8c55": {
+      "instance": "0x620d8c55",
+      "display": "",
+      "size": 400
+    },
+    "0x8b463f67": {
+      "instance": "0x8b463f67",
+      "display": "",
+      "size": 400
+    },
+    "ce_prarylane": {
+      "instance": "0x620d8c56",
+      "display": "",
+      "size": 400
+    },
+    "cell_grubby": {
+      "instance": "0x87fc2271",
+      "display": "Grubby",
+      "size": 400
+    },
+    "0xa68c15b6": {
+      "instance": "0xa68c15b6",
+      "display": "",
+      "size": 400
+    },
+    "cell_spikey": {
+      "instance": "0x9d6ecfc3",
+      "display": "Pokey",
+      "size": 400
+    },
+    "0x37938d91": {
+      "instance": "0x37938d91",
+      "display": "",
+      "size": 400
+    },
+    "0x37938d92": {
+      "instance": "0x37938d92",
+      "display": "",
+      "size": 400
+    },
+    "cell_ground_L5": {
+      "instance": "0x5a314eb9",
+      "display": "",
+      "size": 400
+    },
+    "0xd6c8f725": {
+      "instance": "0xd6c8f725",
+      "display": "",
+      "size": 400
+    },
+    "cell_ground_L1": {
+      "instance": "0x5a314ebd",
+      "display": "",
+      "size": 400
+    },
+    "0xd6c8f726": {
+      "instance": "0xd6c8f726",
+      "display": "",
+      "size": 400
+    },
+    "cell_ground_L2": {
+      "instance": "0x5a314ebe",
+      "display": "",
+      "size": 400
+    },
+    "cell_eggmom": {
+      "instance": "0x94e45dcc",
+      "display": "Maa",
+      "size": 400
+    },
+    "cell_buzzy": {
+      "instance": "0x8685b7fc",
+      "display": "Buzzy",
+      "size": 400
+    },
+    "0x0feb4d84": {
+      "instance": "0x0feb4d84",
+      "display": "",
+      "size": 400
+    },
+    "0x0feb4d91": {
+      "instance": "0x0feb4d91",
+      "display": "",
+      "size": 400
+    },
+    "0x0feb4d94": {
+      "instance": "0x0feb4d94",
+      "display": "",
+      "size": 400
+    },
+    "0x0feb4d96": {
+      "instance": "0x0feb4d96",
+      "display": "",
+      "size": 400
+    },
+    "cell_parasite": {
+      "instance": "0x61411153",
+      "display": "",
+      "size": 400
+    },
+    "cell_parasiteEgg": {
+      "instance": "0xf916091e",
+      "display": "",
+      "size": 400
+    },
+    "cell_Squiggly": {
+      "instance": "0x9678d5a9",
+      "display": "Squiggly",
+      "size": 400
+    },
+    "cute1": {
+      "instance": "0x766d2b31",
+      "display": "",
+      "size": 400
+    },
+    "cell_spikeySmall": {
+      "instance": "0x5d464d30",
+      "display": "Pokey",
+      "size": 400
+    },
+    "egg_eggbaby": {
+      "instance": "0x78f434da",
+      "display": "3",
+      "size": 400
+    },
+    "cell_weapon_poison_player": {
+      "instance": "0x4eb70df1",
+      "display": "",
+      "size": 400
+    },
+    "cell_unlock_jet": {
+      "instance": "0x32bdf704",
+      "display": "",
+      "size": 400
+    },
+    "0x3bb05a58": {
+      "instance": "0x3bb05a58",
+      "display": "",
+      "size": 400
+    },
+    "0x3bb05a5b": {
+      "instance": "0x3bb05a5b",
+      "display": "",
+      "size": 400
+    },
+    "Cell_ShysterSmall": {
+      "instance": "0x5b68821f",
+      "display": "Shyster",
+      "size": 400
+    },
+    "Cell_MegamouthMed": {
+      "instance": "0x71d1356b",
+      "display": "Megamouth",
+      "size": 400
+    },
+    "0xd93ee013": {
+      "instance": "0xd93ee013",
+      "display": "",
+      "size": 400
+    },
+    "cell_eggkid": {
+      "instance": "0x7ade24e1",
+      "display": "Junior",
+      "size": 400
+    },
+    "Cell_StabberMed": {
+      "instance": "0x2e7b174b",
+      "display": "Stabber",
+      "size": 400
+    },
+    "0x611db7bf": {
+      "instance": "0x611db7bf",
+      "display": "",
+      "size": 400
+    }
+  },
+  "world": {
+    "world_water": {
+      "size": 64
+    },
+    "world_beach_bg": {
+      "size": 28
+    },
+    "world_ice_bg": {
+      "size": 136
+    },
+    "world_random": {
+      "size": 64
+    },
+    "world_water_bg": {
+      "size": 28
+    },
+    "world_plant": {
+      "size": 64
+    },
+    "world_ice": {
+      "size": 544
+    },
+    "cell_empty": {
+      "size": 16
+    },
+    "world_rock_bg": {
+      "size": 28
+    },
+    "world_rock": {
+      "size": 64
+    },
+    "world_beach": {
+      "size": 64
+    },
+    "world_plant_bg": {
+      "size": 28
+    },
+    "world_random_bg": {
+      "size": 28
+    }
+  },
+  "random_creature": {
+    "0xbc092044": {
+      "size": 36
+    },
+    "0xbc092047": {
+      "size": 36
+    },
+    "0x4122e50c": {
+      "size": 36
+    },
+    "0x4122e50f": {
+      "size": 36
+    },
+    "neutralCells": {
+      "size": 120
+    },
+    "0xd7e124a4": {
+      "size": 36
+    },
+    "0xd7e124a7": {
+      "size": 36
+    },
+    "0x6beab167": {
+      "size": 36
+    },
+    "0xb17debcc": {
+      "size": 36
+    },
+    "0xb17debcf": {
+      "size": 36
+    }
+  }
+}

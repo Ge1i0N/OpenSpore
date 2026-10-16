@@ -7,6 +7,23 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-17 — Cell stage is fully data-defined: CellGame.package decoded
+
+Located the Spore installs (`S:\Games\Other\Spore`, `S:\Games\Steam\...\spore`) and decoded
+`Data/CellGame.package` (442 resources). Confirmed the Spore name hash is **FNV-1 over the
+lower-cased name** (`tools/spore_hash.py`): `cell`→`0xDFAD9F51`, `structure`, `world`,
+`look_table`, `loottable`, `globals`, plus instance names (`cell_squid`→`0x4BC16582`) and
+property keys (`time_dilation`→`0x18B75C47`). The cell stage is **entirely data-defined**:
+189 `cell` archetypes (400-B records with UTF-16 display names: `cell_squid`="Snorf",
+`Cell_ChomperMed`="Chomper"), 48 `loottable` part-unlock/drop tables (`cell_unlock_mandible`
+…), 9 `look_table` steering tables, 13 `world` biomes, 10 `random_creature`, 23 `populate`,
+144 `structure`, 28 `advect`, the `cell_properties` globals (17 named tuning curves:
+`evo_points`, `cilia_count`, `flagella_count`, `jet_count`, `eye_count`, `poison_count`,
+`electric_*`, `time_dilation`, `camera_*`, `mouse_zoom`, …) and an OLE2 `xls` animation table
+(74 rows). New tools `tools/spore_hash.py` + `tools/cell_game.py`; audit
+`analysis/audit/cell-game.json`; doc `analysis/cell-game.md`. The 107 cell-save field ids are
+**not** in any FNV registry (they look like per-class sequential property indices).
+
 ## 2026-10-16 — cell-stage gameplay vocabulary + FNV-1 hash; save-field names proven external
 
 Continued the semantic hunt for the 107 cell-save field ids. Established:
