@@ -377,7 +377,7 @@ Gameplay · 0 done / 2 partial / 15 todo
 | ⬜ todo | terraforming |  |
 | ⬜ todo | missions |  |
 | ⬜ todo | traits/abilities |  |
-| ⬜ todo | save/load | Real key spaces confirmed on a fresh GA save (stars.db 3.0 root+context+5 classes; planetRecords 65 x type 0x05220CB8/group 1 on the exact stride). No payload decoding or load path yet. analysis/real-saves.md |
+| ⬜ todo | save/load | Real key spaces confirmed on a fresh GA save (stars.db 3.0 root+context+5 classes; planetRecords 65 x type 0x05220CB8/group 1 on the exact stride). Per-stage creature corpus: cell/creature/tribe/auto/civ/space .spo mapped. No payload decoding or load path yet. analysis/real-saves.md |
 | ⬜ todo | galaxy gen |  |
 | ⬜ todo | multiplayer | hostIP/clientIP/isHost args |
 | ⬜ todo | Sporepedia | pollen_metadata resources |

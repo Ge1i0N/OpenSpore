@@ -26,7 +26,8 @@ in three type families: minimal (#1, marker class `0xABCDEF00`), editor menageri
 (#2/#3, 31 shared types), snapshot-shaped (#4 `snapshot.spo`, #5 with an identical
 40-type set — same DB shape, different creature: a transition auto-save reused seconds
 later). #6 embeds StarRecord `0x03E4353C`. Keys only, payloads untouched; stage names
-per file await player confirmation.
+per file confirmed by the player as cell → creature → tribe → civ → space
+(`snapshot.spo` = transition auto-save), docs updated accordingly.
 
 ## 2026-10-16 — stars.db payload decode on the fresh save
 

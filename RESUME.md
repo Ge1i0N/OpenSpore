@@ -197,10 +197,11 @@ test with `-w -devDirs`; retain evidence and commit.
 - Successive saves (fresh → Game0.old → Game0): same 5 classes, all decodes clean;
   StarRecords fixed at 42,010 while classes `0x042232A1` (1 → 5) and `0x018EB9D2`
   (+4) and planet rows (65 → 97 → 114) grow with play. Six creature `.spo` in
-  creation order (player: stage by stage): 12/39/43/40/40/26 records in three
-  structural families; `snapshot.spo` identical in shape to the next file
-  (transition auto-save); first file carries marker class `0xABCDEF00`. Stage
-  names per file unconfirmed. `analysis/real-saves.md`.
+  creation order, player-confirmed stage order cell → creature → tribe → civ →
+  space plus a transition auto-save: 12/39/43/40/40/26 records in three
+  structural families; `snapshot.spo` identical in shape to the civ save;
+  cell save carries marker class `0xABCDEF00`, space save embeds its StarRecord.
+  `analysis/real-saves.md`.
 
 ## Next, in order
 

@@ -76,22 +76,25 @@ CRCs, frame headers): [starsdb-real](starsdb-real.md), report
 ## Creature saves in creation order
 
 Six `.spo` in `%APPDATA%/SPORE/Games/Game0/`, created 21:39 → 21:46; the player
-states they follow stage order, first to last. All are DBPF 3.0/index3 with root +
-context records; only the class-type sets are compared here (payloads untouched).
+confirms they follow stage order: cell → creature → tribe → civilisation → space
+(the 4th file, `snapshot.spo`, is the transition auto-save). All are DBPF 3.0/index3
+with root + context records; only the class-type sets are compared here (payloads
+untouched).
 
-| # | size | records | fingerprint |
+| stage | size | records | fingerprint |
 |---|---|---|---|
-| 1 | 19,683 B | 12 | minimal set; unique marker class `0xABCDEF00`; no editor menagerie |
-| 2 | 173,834 B | 39 | editor menagerie (`0x05599E3B..0x05599F83` block, `0x0609EEDF`, `0x06ABEE7E`, `0x14D9597F`, `0x3226D7D4`, `0x34066DBA`, `0x52AA6122`, `0xD406729F`) |
-| 3 | 199,943 B | 43 | same family as #2: 31 shared types, 8 only-in-#2, 12 only-in-#3 |
-| 4 | 75,484 B (`snapshot.spo`) | 40 | different shape: `0x018C40BC..` block, `0x0244FB08/0x02E1923C/0x032229FF/0x03D5C325`, class `0x042232A1` (the same ID growing in `stars.db`); **no StarRecord class** |
-| 5 | 78,191 B | 40 | **identical 40-type set to #4** — same DB shape, different creature |
-| 6 | 20,845 B | 26 | another shape: embeds StarRecord `0x03E4353C` + `0x03A3AC9F`; shares only 9 types with #1 |
+| cell | 19,683 B | 12 | minimal set; unique marker class `0xABCDEF00`; no editor menagerie |
+| creature | 173,834 B | 39 | editor menagerie (`0x05599E3B..0x05599F83` block, `0x0609EEDF`, `0x06ABEE7E`, `0x14D9597F`, `0x3226D7D4`, `0x34066DBA`, `0x52AA6122`, `0xD406729F`) |
+| tribe | 199,943 B | 43 | same family as creature: 31 shared types, 8 only-in-creature, 12 only-in-tribe |
+| auto (`snapshot.spo`) | 75,484 B | 40 | different shape: `0x018C40BC..` block, `0x0244FB08/0x02E1923C/0x032229FF/0x03D5C325`, class `0x042232A1` (the same ID growing in `stars.db`); **no StarRecord class** |
+| civilisation | 78,191 B | 40 | **identical 40-type set to the snapshot** — same DB shape, different creature |
+| space | 20,845 B | 26 | another shape: embeds StarRecord `0x03E4353C` + `0x03A3AC9F`; shares only 9 types with cell |
 
-Readings (structural only): #4 is plausibly the transition auto-save (identical shape
-reused by the manual #5 seconds later); #1's `0xABCDEF00` reads like a dev/test marker
-class, retained as an observation, not a claim about its role. Which stage each file
-belongs to is the player's mapping to confirm — not asserted here.
+Readings (structural only): the snapshot sits between the tribe and civilisation
+saves, so it reads as the tribe→civ transition auto-save, reused by the manual
+civilisation save seconds later; the space save carries its home star. The cell
+save's `0xABCDEF00` reads like a dev/test marker class, retained as an observation,
+not a claim about its role.
 
 ## Tool
 
