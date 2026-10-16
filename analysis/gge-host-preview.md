@@ -21,6 +21,9 @@ not register it.
 `ggepreview:status` reports the current host status, structural catalog source, card count and
 producer observations in order `manager,starsdb,planet,refill`. Built-in entries have empty source
 and Unknown producer statuses; caller snapshots report their explicit path and statuses.
+The status command also reports optional capture observations in order
+`resource_root,resource_index,resource_context,resource_class` and `refill_append`; absent optional
+fields remain `Unknown`. The Debug overlay shows the same values compactly as `R/I/C/K` plus append.
 An explicit snapshot with any producer status other than Available is rejected with
 `caller catalogue producer observations are not fully Available`; the existing built-in scene remains
 active rather than being replaced by a blocked or empty scene.
