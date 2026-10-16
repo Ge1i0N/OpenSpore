@@ -35,6 +35,7 @@ enum class CatalogAvailability { Unknown, Available };
 struct CatalogInput {
     CatalogAvailability saved_status = CatalogAvailability::Unknown;
     CatalogAvailability candidate_status = CatalogAvailability::Unknown;
+    std::string source_label; // caller-supplied provenance label; empty means producer not identified
     std::vector<SavedGameMetadata> saved; // manager +0xF0/+0xF4
     std::vector<StarMetadata> candidates; // manager +0xDC/+0xE0, already selected by StarManager
 };

@@ -49,6 +49,6 @@ bool load_catalog_snapshot(const std::string& path,CatalogInput& out,std::string
         if(t.size()==1&&t[0]=="END"){end=true;break;} error="catalog snapshot unknown line";return false;
     }
     if(!saw_saved||!saw_candidate||!saw_saved_count||!saw_candidate_count||!end||saved_rows!=saved_count||candidate_rows!=candidate_count){error="catalog snapshot incomplete/status/count mismatch";return false;}
-    out=std::move(result);error.clear();return true;
+    result.source_label=path; out=std::move(result);error.clear();return true;
 }
 } // namespace os::gge

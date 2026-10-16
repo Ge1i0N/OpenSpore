@@ -43,6 +43,8 @@ The command reloads the controlled host scene only after the snapshot parses wit
 saved/candidate sources. It uses the real explicitly selected Graphics atlas. Failed load preserves
 the current preview and the rendered preview displays the caller-selected source path. This is a host capture bridge, not proof that the input came from the original
 producer; input provenance and authorization remain the caller's responsibility.
+The scene also retains this source label structurally through `StarUiScene::catalog_source()`; it is
+not only a UI status string.
 
 For a non-UI report, use `gge_catalog_snapshot_inspect <snapshot>`; it prints source statuses, row
 counts/order, duplicate star IDs, positions, names and terrain observations without writes or search.

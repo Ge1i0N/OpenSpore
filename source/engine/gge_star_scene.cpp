@@ -20,7 +20,7 @@ const StarUiLifecycle* StarUiScene::card(size_t index) const { return index<card
 bool StarUiScene::open(const CatalogInput& catalog,const spui::Layout& source,const std::vector<StarSceneCardInput>& inputs,std::string& error) {
     if (busy_||generation_==std::numeric_limits<u64>::max()) { error="host scene busy/generation exhausted"; return false; }
     if (catalog.saved_status!=CatalogAvailability::Available||catalog.candidate_status!=CatalogAvailability::Available) {
-        catalog_available_=false; retire_frame();
+        catalog_available_=false; catalog_source_.clear(); retire_frame();
         error="host scene catalogue observations unavailable; prior cards retained for diagnostics only";
         frame_.ticket=ticket_; frame_.error=error; return false;
     }
@@ -42,11 +42,11 @@ bool StarUiScene::open(const CatalogInput& catalog,const spui::Layout& source,co
         if (!c.lifecycle->open(inputs[i].host_id,source,entries[i],inputs[i].lifecycle,error)) return false;
         next.push_back(std::move(c));
     }
-    cards_=std::move(next); ticket_=++generation_; catalog_available_=true; retire_frame(); error.clear(); return true;
+    cards_=std::move(next); ticket_=++generation_; catalog_available_=true; catalog_source_=catalog.source_label; retire_frame(); error.clear(); return true;
 }
 bool StarUiScene::close(std::string& error) {
     if (busy_) { error="cannot close host scene during asset pass"; return false; }
-    cards_.clear(); ticket_=0; catalog_available_=false; retire_frame(); error.clear(); return true;
+    cards_.clear(); ticket_=0; catalog_available_=false; catalog_source_.clear(); retire_frame(); error.clear(); return true;
 }
 bool StarUiScene::apply_available(u64 ticket,ImageProvider* provider,std::string& error) {
     if (busy_||!catalog_available_||!ticket||ticket!=ticket_) { error="inactive/unavailable/stale/reentrant host scene asset pass"; return false; }
