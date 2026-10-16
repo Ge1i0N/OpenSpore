@@ -70,6 +70,7 @@
       "ui_bounds_service_identity": "Unknown",
       "registry_callers": ["0x00810650", "0x008113d0", "0x00812590"],
       "registry_no_match_behavior": "008113d0 enumerates providers exposing 0xeeee8218 and combines +0x38 rectangles",
+      "registry_provider_sync": "0x00811c20 invokes active display/layout +0xd8 for 0xeeee8218 providers",
       "direct_df6010_callers": "none resolved; Play Spore vtable +0x68 dispatch observed",
       "computed_record_ui_call": "0x00df606d",
       "computed_record_ui_call_status": "vtable-resolved-to-0x00df6110; reference-only resolver remains unresolved",
@@ -92,7 +93,10 @@
         "nearest_record_picker": "ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1",
         "service_registry_lookup": "ev_d2b10723dab7915c5fb7ecb22a4c7d132a0df5ffa003d1792dd8fdc968ec13c8",
         "service_registry_wrapper": "ev_a8cf6c11bc9c47ccba1819b66f0a798e410315bff6845c2ab36ff099356d25ff",
-        "service_registry_dossier": "ev_c3381178aca22c37b095a19b9387700d91e6537776569f645c862e4787823e48"
+        "service_registry_dossier": "ev_c3381178aca22c37b095a19b9387700d91e6537776569f645c862e4787823e48",
+        "registry_callers_latest": "ev_914b77ace5048cc0224e6a298cd0b7436f678d46390b4d938e0918812f21e8ac",
+        "registry_display_sync_callers": "ev_4871815c0c0827cad1bab36b921a0a82232c491db33e80ddd54076a159ccbdf2",
+        "registry_provider_sync_callers": "ev_d87f299f55916acf12ddda64a9c89eac9bbda90e92cb84c691ac443708d456e6"
         ,"registry_callers": "ev_182693150ec2aca09aca6eda83664ce25962446a7f1fe1d7683ce2ae9db31b2f",
         "registry_display_consumer": "ev_059d4b922486de4e38ad78a79eef526f05fd34590b13ef28c7cb627189c9341f",
         "registry_value_flow_summary": "ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2"

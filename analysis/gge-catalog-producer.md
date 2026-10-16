@@ -127,6 +127,13 @@ shared UI/display-service registry, but does not reveal which provider satisfies
 `008102A0` has no resolved direct callees because its provider calls are indirect; its High-Pcode
 summary is complete at 48 operations, 46 def-use links and 19 effects
 (`ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2`).
+The higher-level registry path is also resolved: `008102A0` is called by `00810650`, `008113D0`,
+and `00812590` (`ev_914b77ace5048cc0224e6a298cd0b7436f678d46390b4d938e0918812f21e8ac`); `008113D0`
+is called by `00811C20`, and `00811C20` is called by `00811C70` and `00812100`
+(`ev_4871815c0c0827cad1bab36b921a0a82232c491db33e80ddd54076a159ccbdf2`,
+`ev_d87f299f55916acf12ddda64a9c89eac9bbda90e92cb84c691ac443708d456e6`). `00811C20` invokes
+the active display/layout object's `+0xD8` with every provider exposing `0xEEEE8218`; this is a
+provider synchronization path, not a recovered concrete provider identity.
 
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target

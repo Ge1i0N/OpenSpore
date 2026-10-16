@@ -109,6 +109,10 @@ The registry is shared more broadly: REA reports callers `00810650`, `008113D0`,
 `008113D0`'s no-match branch enumerates providers implementing `0xEEEE8218`, combines their
 `+0x38` rectangles, and applies provider `+0x64`; the concrete provider for `0x02E5A4A8` remains
 Unknown. This supports a UI/display-service registry interpretation, not a camera identity claim.
+The broader REA call chain is `00812100/00811C70 → 00811C20 → 008113D0 → 008102A0`;
+`00811C20` invokes the active display/layout object's `+0xD8` for each provider exposing
+`0xEEEE8218`. This confirms provider synchronization, but still does not identify which provider
+satisfies `0x02E5A4A8`.
 This is static shipped-artifact evidence, not an observation of a running GA process.
 The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
 `DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence
