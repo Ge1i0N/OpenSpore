@@ -440,6 +440,36 @@
       "0x03f140bb"
     ]
   },
+  "root_metadata": {
+    "saved_game_version_on_save": 2424835,
+    "saved_game_version_on_generate": 2424835,
+    "build_version_on_save": "3.1.0.29",
+    "build_version_on_generate": "3.1.0.29",
+    "timestamp_on_save": [
+      44,
+      46,
+      21,
+      16,
+      9,
+      126,
+      5,
+      288,
+      0
+    ],
+    "timestamp_on_generate": [
+      23,
+      57,
+      7,
+      27,
+      8,
+      126,
+      0,
+      269,
+      0
+    ],
+    "manager_frame_tag": "0x01a80d26",
+    "manager_fields": 19
+  },
   "notes": [],
   "verdict": "DECODED_STRUCTURE"
 }

@@ -299,6 +299,63 @@ def decode_star_values(stream: bytes, envs: list) -> dict:
     return agg
 
 
+def decode_wide_field(payload: bytes, at: int, size: int):
+    # Mirrors decode_wide: BE count, then native UTF-16LE units, exact size match.
+    if size < 4:
+        return None, "truncated wide length"
+    count = be32(payload, at)
+    if count > 1048576 or count != (size - 4) // 2 or (size - 4) % 2:
+        return None, "wide length/size mismatch"
+    units = struct.unpack("<%dH" % count, payload[at + 4:at + 4 + 2 * count]) if count else ()
+    return ascii_safe(units), ""
+
+
+def decode_metadata(root: bytes):
+    # Two consecutive frames (inspect_prefix): metadata, then manager. Values mirror
+    # decode_header: BE u32 versions, wide build strings, nine-word stamps.
+    frames, at, out_meta = [], 0, {}
+    for _ in range(2):
+        frame, err = parse_frame_header(root, at)
+        if frame is None:
+            return None, err
+        frames.append(frame)
+        at += 8 + frame["length"]
+    meta = frames[0]
+    pos = 12 + 8 * meta["count"]
+    # Walk the directory with real sizes.
+    spans = []
+    pos = 12 + 8 * meta["count"]
+    for i in range(meta["count"]):
+        fid = be32(root, 12 + 8 * i)
+        size = be32(root, 16 + 8 * i)
+        if pos + size > len(root):
+            return None, "metadata payload overruns frame"
+        spans.append((fid, pos, size))
+        pos += size
+    for fid, fat, size in spans:
+        if size == 0:
+            continue
+        if fid in (0x03F140B6, 0x03F140B7):
+            if size != 4:
+                return None, "version field must contain exactly one BE word"
+            out_meta["saved_game_version_on_save" if fid == 0x03F140B6
+                     else "saved_game_version_on_generate"] = be32(root, fat)
+        elif fid in (0x03F140B8, 0x03F140B9):
+            text, err = decode_wide_field(root, fat, size)
+            if text is None:
+                return None, err
+            out_meta["build_version_on_save" if fid == 0x03F140B8
+                     else "build_version_on_generate"] = text[:120]
+        elif fid in (0x03F140BA, 0x03F140BB):
+            if size != 36:
+                return None, "timestamp field must contain nine BE words"
+            out_meta["timestamp_on_save" if fid == 0x03F140BA
+                     else "timestamp_on_generate"] = [be32(root, fat + 4 * i) for i in range(9)]
+    out_meta["manager_frame_tag"] = frames[1]["tag"]
+    out_meta["manager_fields"] = frames[1]["count"]
+    return out_meta, ""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="structural decode of one real stars.db")
     ap.add_argument("file", help="explicitly selected stars.db; nothing is scanned")
@@ -397,6 +454,14 @@ def main() -> int:
     frame, ferr = parse_frame_header(root, 0)
     rep["root_frame"] = frame if frame else {"error": ferr}
     out(f"root first frame: {frame if frame else ferr}")
+    meta, merr = decode_metadata(root)
+    if meta is None:
+        notes.append(f"root metadata: {merr}")
+    else:
+        rep["root_metadata"] = meta
+        out(f"root metadata: versions={meta.get('saved_game_version_on_save')}/"
+            f"{meta.get('saved_game_version_on_generate')} "
+            f"build={meta.get('build_version_on_save', '')[:40]!r}")
     rep["notes"] = notes
     rep["verdict"] = "DECODED_STRUCTURE" if not notes else "DECODED_WITH_NOTES"
     out(f"verdict={rep['verdict']}")

@@ -1,0 +1,53 @@
+{
+  "stars_db": "C:/Users/gelion/AppData/Roaming/SPORE/Games/Game0/stars.db",
+  "planet_records": "C:/Users/gelion/AppData/Roaming/SPORE/Games/Game0/planetRecords.pkp",
+  "aggregate": {
+    "stars_total": 42010,
+    "stars_with_planets": 30,
+    "stars_planet_count_distribution": {
+      "0": 41980,
+      "5": 12,
+      "3": 12,
+      "12": 1,
+      "1": 5
+    },
+    "matched": 30,
+    "unmatched": 0,
+    "planet_records_total": 114,
+    "planet_unique_keys": 114,
+    "star_keys_in_planet_set": 30,
+    "unmatched_sample": []
+  },
+  "matched_star_keys": [
+    11952163,
+    13488197,
+    11980807,
+    13488130,
+    7659558,
+    4587573,
+    11714582,
+    8585227,
+    4325406,
+    11968515,
+    3788854,
+    11952128,
+    11890777,
+    4309027,
+    11980837,
+    4587532,
+    8192002,
+    12451840,
+    11968528,
+    10305536,
+    3788806,
+    11968544,
+    5173313,
+    5169158,
+    11968547,
+    4308996,
+    7921729,
+    11968521,
+    11890704,
+    10305568
+  ]
+}
