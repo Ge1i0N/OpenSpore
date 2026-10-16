@@ -1,0 +1,18 @@
+{
+  "file": "S:\\Games\\Other\\Spore\\UserData\\Games\\planetRecords.pkp",
+  "size": 96,
+  "header": {
+    "magic": "0x46504244",
+    "version": 2,
+    "minor": 0,
+    "count": 0,
+    "alt_offset": 0,
+    "index_size": 0,
+    "field_3c": 3,
+    "index_offset_raw": 0
+  },
+  "index_offset": 0,
+  "strict_3_0_index3": false,
+  "verdict": "DBPF_OK_NOT_STARSDB",
+  "reason": "version=2 minor=0 field_3c=3 (adapter requires 3.0/index3)"
+}

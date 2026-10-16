@@ -7,6 +7,20 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — real-save probe on beta UserData
+
+Staged Steam data reproduces the corpus exactly (`pkg_kinds.py`: 57 files / 150,945
+records, RULE HOLDS, 0 violations). New `tools/real_save_probe.py` replays the pkg.cpp
+header validator and the strict starsdb 3.0/index3 gate against one explicit file
+(read-only, no scans). All four beta saves are DBPF 2.0 and correctly refused; the
+single record of `EditorOfflineUser.db` carries the documented root triple
+`(0x01897C18 x3)` as raw index dwords (2.0/3.0 layout equivalence not claimed);
+`planetRecords.pkp/.pkt` are valid empty DBs; no `stars.db` on either disk. Reports in
+`analysis/audit/save-probe/`, findings in `analysis/real-saves.md`.
+Verification: 5 new constructed-input tests PASS (15/15 suite green, no game data needed);
+`feature_map.py --check` and `docs_check.py` PASS. A kind_info(8) expectation was
+disproven during testing (C++ masks to 3 bits, so 8 is accepted there too) and corrected.
+
 ## 2026-10-16 — cell stage skeleton driver, data staging, RE skills
 
 First gameplay step, kept out of the GGE files: `source/engine/game_stages.*` holds the five

@@ -179,7 +179,12 @@ test with `-w -devDirs`; retain evidence and commit.
   (mode/tag/registrar/object size/state/next, cross-checked against binary and script);
   `Game_Cell` owns a skeleton driver attached to `CellGame` (enter/tick/exit counter,
   no simulation). Other stages keep the honest not-implemented path.
-  `analysis/game-stages.md`; `game_stages_verify` checks table/chain/lifecycle.
+   `analysis/game-stages.md`; `game_stages_verify` checks table/chain/lifecycle.
+- Real-save probe: `tools/real_save_probe.py` replays the pkg validator and the
+  strict 3.0/index3 gate against one explicit file. All four beta saves are DBPF 2.0
+  (adapter correctly refuses); `EditorOfflineUser.db`'s single record carries the
+  documented root triple `(0x01897C18 x3)`. Reports in `analysis/audit/save-probe/`.
+  `analysis/real-saves.md`; constructed-input tests pass without game data.
 
 ## Next, in order
 

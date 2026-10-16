@@ -1,0 +1,28 @@
+{
+  "file": "S:\\Games\\Other\\Spore\\UserData\\Games\\EditorOfflineUser.db",
+  "size": 180,
+  "header": {
+    "magic": "0x46504244",
+    "version": 2,
+    "minor": 0,
+    "count": 1,
+    "alt_offset": 0,
+    "index_size": 36,
+    "field_3c": 3,
+    "index_offset_raw": 144
+  },
+  "index_offset": 144,
+  "verdict": "DBPF_OK_NOT_STARSDB",
+  "reason": "version=2 minor=0 field_3c=3 (adapter requires 3.0/index3)",
+  "raw_dwords": [
+    "0x00000007",
+    "0x01897c18",
+    "0x01897c18",
+    "0x00000000",
+    "0x01897c18",
+    "0x00000060",
+    "0x80000030",
+    "0x0000004a"
+  ],
+  "raw_note": "unparsed layout: dwords, not keys"
+}

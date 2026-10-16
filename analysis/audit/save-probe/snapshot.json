@@ -1,0 +1,28 @@
+{
+  "file": "S:\\Games\\Other\\Spore\\UserData\\Games\\snapshot.snp.pld",
+  "size": 1386805,
+  "header": {
+    "magic": "0x46504244",
+    "version": 2,
+    "minor": 0,
+    "count": 285,
+    "alt_offset": 0,
+    "index_size": 6852,
+    "field_3c": 3,
+    "index_offset_raw": 1379953
+  },
+  "index_offset": 1379953,
+  "verdict": "DBPF_OK_NOT_STARSDB",
+  "reason": "version=2 minor=0 field_3c=3 (adapter requires 3.0/index3)",
+  "raw_dwords": [
+    "0x00000005",
+    "0x00b1b104",
+    "0x00000000",
+    "0x4084b000",
+    "0x278361c2",
+    "0x000e22d6",
+    "0x80000a49",
+    "0x00000e20"
+  ],
+  "raw_note": "unparsed layout: dwords, not keys"
+}
