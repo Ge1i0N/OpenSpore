@@ -1,8 +1,10 @@
 # stars.db — recovered serializer prefix, not a galaxy reader
 
-Reviewed **2026-10-15**. Authority: GA unpacked executable, SHA-256
+Reviewed **2026-10-16**. Authority: GA unpacked executable, SHA-256
 `086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
-All original-code findings below are **static**; no original save has been replayed or validated.
+All original-code findings below are **static**; no original save has been replayed.
+One fresh save has since been structurally cross-checked read-only (keys, frames,
+envelopes, CRCs) in [starsdb-real](starsdb-real.md) — field semantics stay static-only.
 
 ## Result and boundary
 

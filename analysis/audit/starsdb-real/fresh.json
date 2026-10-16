@@ -1,0 +1,194 @@
+{
+  "file": "C:\\Users\\gelion\\AppData\\Roaming\\SPORE\\Games\\Game0\\stars.db",
+  "size": 2407399,
+  "records": [
+    {
+      "key": "0x01897c18,0x01897c18,0x01897c18",
+      "packed": 204880,
+      "mem": 408184,
+      "comp": "0xffff",
+      "decoded": true,
+      "error": ""
+    },
+    {
+      "key": "0x0179d304,0x0179d310,0x00000000",
+      "packed": 52,
+      "mem": 52,
+      "comp": "0x0000",
+      "decoded": true,
+      "error": ""
+    },
+    {
+      "key": "0x0179d304,0x0424ea07,0x00000000",
+      "packed": 25533,
+      "mem": 101088,
+      "comp": "0xffff",
+      "decoded": true,
+      "error": ""
+    },
+    {
+      "key": "0x0179d304,0x018eb9d2,0x00000000",
+      "packed": 75184,
+      "mem": 811986,
+      "comp": "0xffff",
+      "decoded": true,
+      "error": ""
+    },
+    {
+      "key": "0x0179d304,0x03a3ac9f,0x00000000",
+      "packed": 125,
+      "mem": 166,
+      "comp": "0xffff",
+      "decoded": true,
+      "error": ""
+    },
+    {
+      "key": "0x0179d304,0x03e4353c,0x00000000",
+      "packed": 2101117,
+      "mem": 10531246,
+      "comp": "0xffff",
+      "decoded": true,
+      "error": ""
+    },
+    {
+      "key": "0x0179d304,0x042232a1,0x00000000",
+      "packed": 208,
+      "mem": 432,
+      "comp": "0xffff",
+      "decoded": true,
+      "error": ""
+    }
+  ],
+  "context_index": {
+    "version": 1,
+    "class_count": 5,
+    "total": 46227,
+    "classes": [
+      [
+        "0x018eb9d2",
+        2108
+      ],
+      [
+        "0x03a3ac9f",
+        1
+      ],
+      [
+        "0x03e4353c",
+        42010
+      ],
+      [
+        "0x042232a1",
+        2
+      ],
+      [
+        "0x0424ea07",
+        2106
+      ]
+    ]
+  },
+  "classes": [
+    {
+      "class_id": "0x018eb9d2",
+      "declared": 2108,
+      "record": "FOUND",
+      "envelopes": 2108,
+      "crc_fail": 0,
+      "max_envelope": 19706,
+      "tokens_head": [
+        "0x19e218e8",
+        "0x19e21a60",
+        "0x1a4cd868",
+        "0x1a51a890"
+      ]
+    },
+    {
+      "class_id": "0x03a3ac9f",
+      "declared": 1,
+      "record": "FOUND",
+      "envelopes": 1,
+      "crc_fail": 0,
+      "max_envelope": 166,
+      "tokens_head": [
+        "0x1a765420"
+      ]
+    },
+    {
+      "class_id": "0x03e4353c",
+      "declared": 42010,
+      "record": "FOUND",
+      "envelopes": 42010,
+      "crc_fail": 0,
+      "max_envelope": 267,
+      "tokens_head": [
+        "0x1a4cd740",
+        "0x1a4cda30",
+        "0x1a4cdb80",
+        "0x1a4cdc58"
+      ],
+      "first_starrecord_frame": {
+        "tag": "0x01a80d26",
+        "is_object_tag": true,
+        "length": 231,
+        "count": 14,
+        "field_ids": [
+          "0x03d58bf1",
+          "0x03d58bf2",
+          "0x03d58bf3",
+          "0x03d58bf4",
+          "0x03d58bf5",
+          "0x03d58bf6",
+          "0x03d58bf7",
+          "0x03e95e04",
+          "0x03f1389a",
+          "0x03f1389b",
+          "0x03f1389c",
+          "0x03f1389d",
+          "0x03f1389e",
+          "0x051a1188"
+        ]
+      }
+    },
+    {
+      "class_id": "0x042232a1",
+      "declared": 2,
+      "record": "FOUND",
+      "envelopes": 2,
+      "crc_fail": 0,
+      "max_envelope": 228,
+      "tokens_head": [
+        "0x19c89920",
+        "0x1a764e50"
+      ]
+    },
+    {
+      "class_id": "0x0424ea07",
+      "declared": 2106,
+      "record": "FOUND",
+      "envelopes": 2106,
+      "crc_fail": 0,
+      "max_envelope": 48,
+      "tokens_head": [
+        "0x1a4cd818",
+        "0x1a4cdb08",
+        "0x1a5d6370",
+        "0x1a5d6768"
+      ]
+    }
+  ],
+  "root_frame": {
+    "tag": "0x01a80d26",
+    "is_object_tag": true,
+    "length": 172,
+    "count": 6,
+    "field_ids": [
+      "0x03f140b6",
+      "0x03f140b7",
+      "0x03f140b8",
+      "0x03f140b9",
+      "0x03f140ba",
+      "0x03f140bb"
+    ]
+  },
+  "notes": [],
+  "verdict": "DECODED_STRUCTURE"
+}

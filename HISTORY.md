@@ -7,6 +7,22 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — stars.db payload decode on the fresh save
+
+`tools/starsdb_real_decode.py` structurally decodes the fresh `stars.db` read-only:
+7/7 records decompress to their index `memSize` (RefPack via the instruction-derived
+decoder); context index version 1, 5 classes, total 46,225 with exact count-sum
+equality; envelope counts match declarations 5/5 with **zero CRC-32/BZIP2 failures**
+across 46,225 envelopes (largest 19,706 bytes, under the cap); root opens with tag
+`0x01A80D26` and exactly the six metadata field IDs in documented order; the first
+StarRecord body is a 14-field `0x01A80D26` frame ending in the version pair the C++
+reader handles. Findings in `analysis/starsdb-real.md`, report retained in
+`analysis/audit/starsdb-real/fresh.json`; the "no real-save corpus" caveats in
+`starsdb.md`/`starsdb-context.md` corrected to structural-only validation.
+Verification: 5 new constructed-input tests PASS (CRC pinned by the published
+`123456789 → 0xFC891918` vector); suite 20/20, `feature_map.py --check` and
+`docs_check.py` PASS. Field-value decoding and reader execution still need MSVC work.
+
 ## 2026-10-16 — fresh GA save confirms the adapter key spaces
 
 The user created a new save in-game; `%APPDATA%/SPORE/Games/Game0/` now holds a real

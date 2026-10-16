@@ -189,6 +189,11 @@ test with `-w -devDirs`; retain evidence and commit.
   `stars.db` has the exact root + context keys plus five class records; fresh
   `planetRecords.pkp` holds 65 records of type `0x05220CB8`/group 1 on the exact
   `mKey + i·0x01000000` instance stride. Reports in `analysis/audit/save-probe/`.
+- Payload decode of the fresh `stars.db` (`tools/starsdb_real_decode.py`): 7/7 records
+  decompress to `memSize`; index version 1 / 5 classes / 46,225 with exact count-sum;
+  46,225/46,225 envelopes CRC-clean; root frame carries the six metadata IDs and the
+  first StarRecord body is a 14-field frame. `analysis/starsdb-real.md`, report in
+  `analysis/audit/starsdb-real/`. Field semantics still static-only.
 
 ## Next, in order
 

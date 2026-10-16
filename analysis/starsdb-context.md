@@ -1,8 +1,10 @@
 # stars.db context — index, object envelopes and structural lookup
 
-Reviewed **2026-10-15**. GA unpacked SHA-256:
+Reviewed **2026-10-16**. GA unpacked SHA-256:
 `086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
-Static instructions only; no original target execution or real-save corpus validation.
+Static instructions only; no original target execution. One fresh save has since been
+structurally cross-checked read-only in [starsdb-real](starsdb-real.md); field semantics
+and the live protocol stay static-only.
 
 ## Implemented boundary
 
@@ -126,7 +128,9 @@ does not turn these immediate key values into a descriptor pointer.
 ## Next dependency
 
 The [explicit read-only DBPF adapter](starsdb-dbpf.md) now supplies these streams on constructed
-fixtures. Validate a real selected database when available. Require all
-needed classes/objects and resource/name fixups before feeding typed catalogue metadata. Missing
-classes or unsupported versions stay Unknown/error, not observed-empty or ready. New-galaxy
-generation, save discovery/probing, MoviePlayer/DBCheck and scene/UI/effects remain separate work.
+fixtures. Structural validation of a real selected database is done in
+[starsdb-real](starsdb-real.md) (index/envelopes/CRCs/frame headers, one fresh save).
+Require all needed classes/objects and resource/name fixups before feeding typed catalogue
+metadata. Missing classes or unsupported versions stay Unknown/error, not observed-empty
+or ready. Field-value decoding, new-galaxy generation, save discovery/probing,
+MoviePlayer/DBCheck and scene/UI/effects remain separate work.

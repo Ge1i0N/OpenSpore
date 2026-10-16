@@ -27,6 +27,9 @@
 | `Game0/*.spo` creature (GA fresh) | 19,683 B | 3.0/index3 | 12 | STARSDB_SHAPED |
 
 Machine-readable reports: [audit/save-probe/](audit/save-probe/) (one JSON per file).
+Payload-level structural decode of the fresh `stars.db` (records, index, envelopes,
+CRCs, frame headers): [starsdb-real](starsdb-real.md), report
+[audit/starsdb-real/fresh.json](audit/starsdb-real/fresh.json).
 
 ## What the bytes say
 
