@@ -86,6 +86,15 @@ is consistent with the function being reached through a state-handler/vtable bou
 an ordinary resolved call. Camera ownership, the concrete `+0x64` implementation and runtime
 message that triggers this path remain Unknown.
 
+The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
+classifies it as `computed/unresolved` with no static target
+(`ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714`); this is why the concrete
+record/UI implementation cannot be named from the shipped static graph. A nearby `DF6110` helper
+checks that `record +0xB8` contains UI data, reads a UI object's bounds/current point, and clamps a
+projected target to those bounds (`ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a`).
+It has no resolved direct callers, so its lifecycle relationship is also Unknown rather than an
+assumed picker implementation.
+
 The GGE/UI boundary is separate from record construction. REA confirms that `DF9200` is called only
 by `DF95A0` in the resolved direct-caller set (`ev_90969d84c07b8ad3fd8e1a86452d960db52c781831be3c9bfaf698f5a62e4a2c`):
 it allocates one `0x90`-byte `UI/GGE_game_ui_data` object per `0xBC` record, stores the record pointer

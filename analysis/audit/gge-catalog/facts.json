@@ -60,10 +60,15 @@
       "projection_virtual_slot": "0x64",
       "camera_service_virtual_slot": "0x58",
       "direct_df6010_callers": "none resolved; likely state-handler/vtable dispatch",
+      "computed_record_ui_call": "0x00df606d",
+      "computed_record_ui_call_status": "unresolved",
+      "df6110_ui_bounds_helper": "0x00df6110",
       "evidence_ids": {
         "df6010": "ev_0dd3607a175f4fb9f1f1d193d4a7a379de07ca3f5f15f99f7d3497972d0ac353",
         "de3c20": "ev_bab6284c95703cb10880ebb4965a7d5d941375eb9cd7b3975445768f22847836",
-        "df6010_callers": "ev_645b43829cc52e50b5780dddd67b6ae73c8fd9a8771113e6ac75e88257129e6b"
+        "df6010_callers": "ev_645b43829cc52e50b5780dddd67b6ae73c8fd9a8771113e6ac75e88257129e6b",
+        "df606d_target_resolution": "ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714",
+        "df6110": "ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a"
       }
     },
     "evidence_ids": {

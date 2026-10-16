@@ -94,6 +94,11 @@ through its owning object's virtual slot `+0x64`; `DE3C20` obtains a renderer/ca
 through virtual slot `+0x58` before computing normalized screen placement. No resolved direct caller
 of `DF6010` was found, so the state-handler/vtable dispatch and concrete camera owner remain Unknown.
 This is static shipped-artifact evidence, not an observation of a running GA process.
+The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
+`DF606D`; REA cannot resolve its target from the provider reference graph. A related `DF6110`
+helper checks that `record +0xB8` is populated and uses the UI object's bounds to clamp a target,
+but its lifecycle caller is likewise unresolved. These are explicit Unknowns, not permission to
+route host selection through a guessed native slot.
 
 This explains why forcing the primary layout's hidden windows visible cannot recreate game choice:
 the actual star UI is instantiated **per live game record** and driven by scene projection.
