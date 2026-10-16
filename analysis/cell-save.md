@@ -65,64 +65,53 @@ Same 7 frame types, same field IDs per type. Float values differ per object.
   `engine/pkg.cpp` + RefPack). `decode_save(path)` / `decode_save_from_memory`.
 - `tools/cell_save_verify` — 5 constructed-input tests, no game data needed.
 - `tools/cell_save_dump <path.spo>` — CLI dump of a real save.
+- `tools/cell_field_descriptors.py` — recovers all wire-id registration
+  descriptors from the binary; writes `audit/cell-field-descriptors.json`.
 
-## Field descriptors (from binary 0xF194A0)
+## Field descriptors (inline code, 107/107 ids found)
 
-The cell-save field table at VA `0xF194A0` (file offset `0xF188B8`) initializes
-descriptors in BSS via `rep movsd`. Each 14-dword entry is:
+Registration is **inline code, not a static table**: each field is written
+into a stack descriptor by `mov dword [esp+off], imm32` stores
+(`tools/cell_field_descriptors.py` recovers all 107 wire ids from the real
+save; audit in `analysis/audit/cell-field-descriptors.json`). Two shapes:
 
-| dword | meaning |
-|---|---|
-| 0 | runtime offset in creature struct |
-| 1 | field ID (wire) |
-| 2–3 | default value (u32/float) |
-| 4 | flags (0) |
-| 5 | read callback VA |
-| 6 | write callback VA |
+- shape A: id at `[esp+0x14]`, callbacks at `[esp+0x34..0x48]`, value word
+  at `[esp+0x18]`, registry fn at `[esp+0x10]` (VA `0x1469990` / `0x146AEAC`
+  / `0x146A930` / `0x1473900`… — one per block)
+- shape B: id at `[esp+0x0C]`, callbacks at `[esp+0x2C..0x40]`, value word
+  at `[esp+0x10]` (frame-type-1 block starts at file `0xF188B4`, VA `0xF194B4`)
 
-### Creature stats (frame type 1, 5 fields)
+The word each callback chain ends in is size-correlated, not a default: the
+12-byte fields (`0x02416C5E`, `0x02415692`, `0x049489A3`) share one chain,
+the two 24-byte fields (`0x047DF723`, `0x05E8FAA8`) share another, the two
+92-byte blobs (`0x076C8F46/4D`) share a third, the 16-byte `0x02416C60` has
+a unique chain. 23 one-byte fields share the `AC8750/AC8780/693090/694FA0`
+chain. A callback chain is therefore a **type signature**:
 
-| field ID | offset | default | read CB | write CB |
-|---|---|---|---|---|
-| `0x0240E421` | `0x00` | `0x00000000` | `0x00ACA060` | `0x00BCA960` |
-| `0x0240E422` | `0x04` | `0x00` (u8) | `0x00AC8750` | `0x0057CE00` |
-| `0x0240E423` | `0x08` | `0xFFFFFFFF` | `0x00692FB0` | `0x00693090` |
-| `0x02E9EFD3` | `0x0C` | `0x00000000` | `0x00572810` | `0x00572840` |
-| `0x03CDD54B` | `0x10` | `0x0000004F`=79 | `0x00AC8050` | `0x00AC8050` |
-
-### Position (frame type 2, 4 fields)
-
-| field ID | offset | default | read CB | write CB |
-|---|---|---|---|---|
-| `0x024162BF` | `0x14` | `0x00000000` | `0x00AC8750` | `0x0057CE00` |
-| `0x024162C0` | `0x18` | float | `0x00AC8780` | `0x00AC8780` |
-| `0x024162C1` | `0x1C` | float | `0x00693090` | `0x00693090` |
-| `0x024162C2` | `0x20` | `0x00000000` | `0x00694FA0` | `0x00694FA0` |
-
-### Detailed stats (frame type 3, 11 fields)
-
-| field ID | offset | default | read CB |
+| chain (first 2 cbs) | count | wire size | example ids |
 |---|---|---|---|
-| `0x02416C5E` | `0x24` | 12× zero (vec3-sized, 12 B on wire) | `0x00AC8750` |
-| `0x02416C60` | `0x30` | 16 B on wire: 0,0,0,`3F800000`=1.0 (vec4/quat-sized) | `0x00AC8780` |
-| `0x02416C61` | `0x40` | `0x00` | `0x00693090` |
-| `0x02416C62` | `0x44` | `0x01` | `0x00693090` |
-| `0x02416C63` | `0x48` | `0x01` | `0x00693090` |
-| `0x02416C64` | `0x4C` | `3F800000`=1.0 | `0x00AC8050` |
-| `0x02416C65`–`0x02416C6E` | `0x50`–`0x6C` | mixed | various |
-| `0x0316F520` | `0x70` | `3F800000`=1.0 | — |
-| `0x0445DC86` | `0x74` | `0x00` | — |
-| `0x047DF70D` | `0x78` | 12× zero | — |
-| `0x047DF723` | `0x84` | 24× mixed | — |
+| `AC8750 AC8780 …` | 23 | 1 B | `0x0240E422`, `0x02416C61..63`, `0x02415EBC..` |
+| `572810 AC88F0 …` | 13+6+1 | 4 B | `0x02415EB8/9/BB`, `0x024162C1`, `0x02416C64` |
+| `572810 572840 …` | 12+10+2+1 | 4 B | `0x0240E423`, `0x02E9EFD3`, `0x03CDD54B`, `0x024162C0` |
+| `ACA060 BCA960 …` | 2 | 4 B | `0x0240E421`, `0x024162BF` |
+| `B6E3A0 AC88C0 …` | 3 | 12 B | `0x02416C5E`, `0x02415692`, `0x049489A3` |
+| `AE33D0 AE3400 …` | 1 | 16 B | `0x02416C60` (0,0,0,1.0 on wire) |
+| `AE3430 AE3450 …` | 3 | 12/24 B | `0x03F64A78`, `0x047DF70D`, `0x03F6565D` |
+| `C88B60 C88B80 …` | 2 | 24 B | `0x047DF723`, `0x05E8FAA8` |
+| `C143C0 C143E0 …` | 2 | 92 B | `0x076C8F46`, `0x076C8F4D` |
 
-Callbacks `0xAC8750`/`0xAC8780`/`0x693090`/`0xAC8050`/`0x572810`/`0x572840`/`0x57CE00`
-are shared with the StarRecord stat callbacks — confirming these are the same
-stat fields, now confirmed on real creature data.
+Field ids are **not unique across classes**: `0x024162BF` registers with the
+type-1 stat chain at VA `0xF60778` (another class) while the cell-save
+position block uses other chains. Earlier per-frame-type tables in this file
+that assigned single offsets/defaults to ids were an over-read of this code
+and are superseded by the JSON audit.
 
 ## Boundaries
 
-- Field IDs are structural; **semantics not yet confirmed** (which float is
-  speed, attack, social — needs binary cross-reference at the stat descriptor).
+- Field IDs are structural; **per-id semantics not yet confirmed** (which
+  float is speed, attack, social). Callback chains now type each field by
+  size class (1/4/12/16/24/92 B); naming individual stats needs the
+  registration functions (`0x1469990` etc.) or gameplay cross-references.
 - Gap-scan walk is lossy: the C++ decoder walks 2000 objects total
   (Python reference: 1200 + 1000); declared 1503 + 1648. Tail objects after
   long gaps are still missed; frame counts match declared counts in the

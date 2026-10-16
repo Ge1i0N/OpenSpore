@@ -7,6 +7,21 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — cell-save field ids: 107/107 inline descriptors, callback type signatures
+
+`tools/cell_field_descriptors.py` proves the field registration is inline
+code (`mov [esp+off], imm32` descriptor stores), not a static table, and
+recovers descriptors for **all 107 wire ids** seen in the decoded real save.
+Two stack shapes (id at `[esp+0x14]` / `[esp+0x0C]`), callback VAs
+correlated with wire size: 23 one-byte fields share one chain, the 12-byte
+vectors (`0x02416C5E`), the 16-byte `0x02416C60`, the 24-byte pairs and the
+92-byte blobs each have their own — a callback chain is a type signature.
+Field ids are not unique across classes (`0x024162BF` registers twice).
+Supersedes the earlier per-frame-type offset/default tables, which were an
+over-read of this code. Audit in `analysis/audit/cell-field-descriptors.json`;
+`analysis/cell-save.md` rewritten accordingly. Python suite 24/24,
+`feature_map --check`, `docs_check` PASS.
+
 ## 2026-10-16 — cell-stage save: C++ engine decoder, BE payloads confirmed
 
 `engine/cell_save.*` now decodes the real cell-stage `.spo` (19,683 B) through

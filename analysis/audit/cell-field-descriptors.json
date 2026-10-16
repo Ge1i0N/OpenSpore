@@ -1,0 +1,1600 @@
+{
+ "binary": "refs\\bins\\ReleaseGA\\SporeApp.exe.unpacked.exe",
+ "note": "field ids from the decoded real cell save; inline code descriptors",
+ "entries": [
+  {
+   "fid": "0x021D1BA5",
+   "file": "0xF34964",
+   "va": "0xF35564",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000B84",
+   "registry_fn": "0x0146A930"
+  },
+  {
+   "fid": "0x021D1BAA",
+   "file": "0xF345F0",
+   "va": "0xF351F0",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x00000CC4",
+   "registry_fn": "0x0146A990"
+  },
+  {
+   "fid": "0x021D1BAB",
+   "file": "0xF34654",
+   "va": "0xF35254",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x00000CC0",
+   "registry_fn": "0x0146A97C"
+  },
+  {
+   "fid": "0x021D1BAC",
+   "file": "0xF34A24",
+   "va": "0xF35624",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x00000B88",
+   "registry_fn": "0x0146A910"
+  },
+  {
+   "fid": "0x021D2388",
+   "file": "0xF33DF4",
+   "va": "0xF349F4",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x0000167C",
+   "registry_fn": "0x0146A254"
+  },
+  {
+   "fid": "0x021D239F",
+   "file": "0xF34B50",
+   "va": "0xF35750",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000E8C",
+   "registry_fn": "0x0146A8E0"
+  },
+  {
+   "fid": "0x0240E421",
+   "file": "0xF188B8",
+   "va": "0xF194B8",
+   "shape": "B",
+   "cbs": [
+    "0x00ACA060",
+    "0x00BCA960",
+    "0x00C2E4E0",
+    "0x00692FB0",
+    "0x00B6F550",
+    "0x00AC8050"
+   ],
+   "default": "0x0000002C"
+  },
+  {
+   "fid": "0x0240E422",
+   "file": "0xF1891C",
+   "va": "0xF1951C",
+   "shape": "B",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0",
+    "0x00B1FBF0",
+    "0x0057CE00"
+   ],
+   "default": "0x00000021"
+  },
+  {
+   "fid": "0x0240E423",
+   "file": "0xF18980",
+   "va": "0xF19580",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000030"
+  },
+  {
+   "fid": "0x02415689",
+   "file": "0xF39944",
+   "va": "0xF3A544",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0",
+    "0x00B1FBF0",
+    "0x0057CE00"
+   ],
+   "default": "0x00000268",
+   "registry_fn": "0x0146D0CC"
+  },
+  {
+   "fid": "0x0241568A",
+   "file": "0xF397D4",
+   "va": "0xF3A3D4",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0"
+   ],
+   "default": "0x000001E0",
+   "registry_fn": "0x0146D108"
+  },
+  {
+   "fid": "0x0241568C",
+   "file": "0xF39830",
+   "va": "0xF3A430",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0"
+   ],
+   "default": "0x000001E4",
+   "registry_fn": "0x0146D0F8"
+  },
+  {
+   "fid": "0x0241568F",
+   "file": "0xF3988C",
+   "va": "0xF3A48C",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0"
+   ],
+   "default": "0x000001E8",
+   "registry_fn": "0x0146D0EC"
+  },
+  {
+   "fid": "0x02415690",
+   "file": "0xF399A8",
+   "va": "0xF3A5A8",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0"
+   ],
+   "default": "0x0000026C",
+   "registry_fn": "0x0146D0B4"
+  },
+  {
+   "fid": "0x02415692",
+   "file": "0xF39A04",
+   "va": "0xF3A604",
+   "shape": "A",
+   "cbs": [
+    "0x00B6E3A0",
+    "0x00AC88C0",
+    "0x006930F0",
+    "0x00695010",
+    "0x00B1FBF0",
+    "0x00ACBBA0"
+   ],
+   "default": "0x000001C8",
+   "registry_fn": "0x0146D0A8"
+  },
+  {
+   "fid": "0x02415693",
+   "file": "0xF39B9A",
+   "va": "0xF3A79A",
+   "shape": "A",
+   "cbs": [
+    "0x00BF50F0",
+    "0x00C43790",
+    "0x00C2E4E0",
+    "0x00692FB0",
+    "0x00B6F860",
+    "0x00C6C390"
+   ],
+   "default": "0x00000278",
+   "registry_fn": "0x0146D064"
+  },
+  {
+   "fid": "0x02415EB8",
+   "file": "0xF31AD8",
+   "va": "0xF326D8",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000038"
+  },
+  {
+   "fid": "0x02415EB9",
+   "file": "0xF31B3C",
+   "va": "0xF3273C",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x0000002C"
+  },
+  {
+   "fid": "0x02415EBA",
+   "file": "0xF31BA0",
+   "va": "0xF327A0",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x0000003C"
+  },
+  {
+   "fid": "0x02415EBB",
+   "file": "0xF31C12",
+   "va": "0xF32812",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000040"
+  },
+  {
+   "fid": "0x02415EBC",
+   "file": "0xF34480",
+   "va": "0xF35080",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000B5E",
+   "registry_fn": "0x0146A9EC"
+  },
+  {
+   "fid": "0x02415EBD",
+   "file": "0xF344DC",
+   "va": "0xF350DC",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000B60",
+   "registry_fn": "0x0146A9D0"
+  },
+  {
+   "fid": "0x02415EBE",
+   "file": "0xF34538",
+   "va": "0xF35138",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A9B8"
+  },
+  {
+   "fid": "0x02415EC6",
+   "file": "0xF34424",
+   "va": "0xF35024",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000B5D",
+   "registry_fn": "0x0146A9F4"
+  },
+  {
+   "fid": "0x02415EC8",
+   "file": "0xF3471C",
+   "va": "0xF3531C",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A970"
+  },
+  {
+   "fid": "0x02415ECA",
+   "file": "0xF34A88",
+   "va": "0xF35688",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x00000F98",
+   "registry_fn": "0x0146A904"
+  },
+  {
+   "fid": "0x024162BF",
+   "file": "0xF5FB78",
+   "va": "0xF60778",
+   "shape": "B",
+   "cbs": [
+    "0x00ACA060",
+    "0x00BCA960",
+    "0x00C2E4E0",
+    "0x00692FB0",
+    "0x00B6F550",
+    "0x00AC8050"
+   ],
+   "default": "0x00000018"
+  },
+  {
+   "fid": "0x024162C0",
+   "file": "0xF5FBDC",
+   "va": "0xF607DC",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x0000001C"
+  },
+  {
+   "fid": "0x024162C1",
+   "file": "0xF5FC40",
+   "va": "0xF60840",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000020"
+  },
+  {
+   "fid": "0x024162C2",
+   "file": "0xF5FCB2",
+   "va": "0xF608B2",
+   "shape": "B",
+   "cbs": [
+    "0x00CEE6C0",
+    "0x00ACA730",
+    "0x00C2E4E0",
+    "0x00692FB0",
+    "0x00B6F860",
+    "0x00C6C390"
+   ],
+   "default": "0x00000004"
+  },
+  {
+   "fid": "0x02416C5E",
+   "file": "0xF531AA",
+   "va": "0xF53DAA",
+   "shape": "A",
+   "cbs": [
+    "0x00B6E3A0",
+    "0x00AC88C0",
+    "0x006930F0",
+    "0x00695010",
+    "0x00B1FBF0",
+    "0x00ACBBA0"
+   ],
+   "default": "0x00000004",
+   "registry_fn": "0x0145BC18"
+  },
+  {
+   "fid": "0x02416C60",
+   "file": "0xF5320E",
+   "va": "0xF53E0E",
+   "shape": "A",
+   "cbs": [
+    "0x00AE33D0",
+    "0x00AE3400",
+    "0x00693120",
+    "0x00695040",
+    "0x00B1FBF0",
+    "0x00AE5700"
+   ],
+   "default": "0x00000010",
+   "registry_fn": "0x0145BC08"
+  },
+  {
+   "fid": "0x02416C61",
+   "file": "0xF53398",
+   "va": "0xF53F98",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x0000006C",
+   "registry_fn": "0x0147392C"
+  },
+  {
+   "fid": "0x02416C62",
+   "file": "0xF533F4",
+   "va": "0xF53FF4",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x0000006F",
+   "registry_fn": "0x01473920"
+  },
+  {
+   "fid": "0x02416C63",
+   "file": "0xF53450",
+   "va": "0xF54050",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000070",
+   "registry_fn": "0x01473910"
+  },
+  {
+   "fid": "0x02416C64",
+   "file": "0xF534AC",
+   "va": "0xF540AC",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0"
+   ],
+   "default": null,
+   "registry_fn": "0x01473900"
+  },
+  {
+   "fid": "0x02416C65",
+   "file": "0xF53574",
+   "va": "0xF54174",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000072",
+   "registry_fn": "0x014738DC"
+  },
+  {
+   "fid": "0x02416C66",
+   "file": "0xF535D0",
+   "va": "0xF541D0",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000073",
+   "registry_fn": "0x014738CC"
+  },
+  {
+   "fid": "0x02416C67",
+   "file": "0xF5362C",
+   "va": "0xF5422C",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000074",
+   "registry_fn": "0x014738B8"
+  },
+  {
+   "fid": "0x02416C68",
+   "file": "0xF53688",
+   "va": "0xF54288",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": null,
+   "registry_fn": "0x014738B0"
+  },
+  {
+   "fid": "0x02416C69",
+   "file": "0xF536E4",
+   "va": "0xF542E4",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000075",
+   "registry_fn": "0x01471E74"
+  },
+  {
+   "fid": "0x02416C6A",
+   "file": "0xF53740",
+   "va": "0xF54340",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000076",
+   "registry_fn": "0x014738A4"
+  },
+  {
+   "fid": "0x02416C6B",
+   "file": "0xF5379C",
+   "va": "0xF5439C",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000068",
+   "registry_fn": "0x01473890"
+  },
+  {
+   "fid": "0x02416C6C",
+   "file": "0xF53800",
+   "va": "0xF54400",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000077",
+   "registry_fn": "0x01473884"
+  },
+  {
+   "fid": "0x02416C6D",
+   "file": "0xF5385C",
+   "va": "0xF5445C",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000050",
+   "registry_fn": "0x0145CA9C"
+  },
+  {
+   "fid": "0x02416C6E",
+   "file": "0xF538C0",
+   "va": "0xF544C0",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000054",
+   "registry_fn": "0x01473874"
+  },
+  {
+   "fid": "0x024CD902",
+   "file": "0xF347E4",
+   "va": "0xF353E4",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000B67",
+   "registry_fn": "0x0146A95C"
+  },
+  {
+   "fid": "0x02E6E1AB",
+   "file": "0xF35584",
+   "va": "0xF36184",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0",
+    "0x00B1FBF0",
+    "0x0057CE00"
+   ],
+   "default": "0x00001000",
+   "registry_fn": "0x0146AEAC"
+  },
+  {
+   "fid": "0x02E6E1AD",
+   "file": "0xF355FA",
+   "va": "0xF361FA",
+   "shape": "A",
+   "cbs": [
+    "0x00AE9E00",
+    "0x00BCA960",
+    "0x00C2E4E0",
+    "0x00B6F550"
+   ],
+   "default": "0x00001010",
+   "registry_fn": "0x01467D98"
+  },
+  {
+   "fid": "0x02E6E1AF",
+   "file": "0xF35656",
+   "va": "0xF36256",
+   "shape": "A",
+   "cbs": [
+    "0x00ACA090",
+    "0x00BCA960",
+    "0x00C2E4E0",
+    "0x00B6F550"
+   ],
+   "default": "0x00001014",
+   "registry_fn": "0x0146AE9C"
+  },
+  {
+   "fid": "0x02E6E1B0",
+   "file": "0xF353FA",
+   "va": "0xF35FFA",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x00000FF4",
+   "registry_fn": "0x0146AF18"
+  },
+  {
+   "fid": "0x02E6E1B1",
+   "file": "0xF3545E",
+   "va": "0xF3605E",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00"
+   ],
+   "default": null,
+   "registry_fn": "0x0146AEF8"
+  },
+  {
+   "fid": "0x02E6E1B2",
+   "file": "0xF35520",
+   "va": "0xF36120",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146AEC4"
+  },
+  {
+   "fid": "0x02E9EFD3",
+   "file": "0xF189E4",
+   "va": "0xF195E4",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000028"
+  },
+  {
+   "fid": "0x0303FB98",
+   "file": "0xF34594",
+   "va": "0xF35194",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000B62",
+   "registry_fn": "0x0146A9A8"
+  },
+  {
+   "fid": "0x0316F520",
+   "file": "0xF53272",
+   "va": "0xF53E72",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000064",
+   "registry_fn": "0x01473954"
+  },
+  {
+   "fid": "0x037D3DF5",
+   "file": "0xF398E8",
+   "va": "0xF3A4E8",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146D0DC"
+  },
+  {
+   "fid": "0x039A844F",
+   "file": "0xF39ACC",
+   "va": "0xF3A6CC",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146D084"
+  },
+  {
+   "fid": "0x03CDD54B",
+   "file": "0xF18A48",
+   "va": "0xF19648",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000024"
+  },
+  {
+   "fid": "0x03D97B19",
+   "file": "0xF34AEC",
+   "va": "0xF356EC",
+   "shape": "A",
+   "cbs": [
+    "0x00AC87C0",
+    "0x00AC87F0",
+    "0x00694C80",
+    "0x00694C10",
+    "0x00B1FBF0",
+    "0x00ACBBC0"
+   ],
+   "default": "0x00000B38",
+   "registry_fn": "0x0146A8F4"
+  },
+  {
+   "fid": "0x03F64A78",
+   "file": "0xF346B8",
+   "va": "0xF352B8",
+   "shape": "A",
+   "cbs": [
+    "0x00AE3430",
+    "0x00AE3450",
+    "0x00693150",
+    "0x00695080",
+    "0x00B1FBF0",
+    "0x00AE5720"
+   ],
+   "default": "0x00000B28",
+   "registry_fn": "0x0145C8D0"
+  },
+  {
+   "fid": "0x03F6565D",
+   "file": "0xF33C0E",
+   "va": "0xF3480E",
+   "shape": "A",
+   "cbs": [
+    "0x00AE3430",
+    "0x00AE3450",
+    "0x00693150",
+    "0x00695080",
+    "0x00B1FBF0",
+    "0x00AE5720"
+   ],
+   "default": "0x00001004",
+   "registry_fn": "0x0146A2AC"
+  },
+  {
+   "fid": "0x042A2B01",
+   "file": "0xF33F20",
+   "va": "0xF34B20",
+   "shape": "A",
+   "cbs": [
+    "0x00B6E3A0",
+    "0x00AC88C0",
+    "0x00C2E4E0",
+    "0x00B1FBF0"
+   ],
+   "default": "0x00001010",
+   "registry_fn": "0x0146A22C"
+  },
+  {
+   "fid": "0x042A2B0E",
+   "file": "0xF34C20",
+   "va": "0xF35820",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000B65",
+   "registry_fn": "0x0146A8B4"
+  },
+  {
+   "fid": "0x043C4AB2",
+   "file": "0xF28C2A",
+   "va": "0xF2982A",
+   "shape": "B",
+   "cbs": [
+    "0x00BCB730",
+    "0x00BCA990",
+    "0x00C2E4E0",
+    "0x00692FB0",
+    "0x00BCA7A0",
+    "0x00BCB160"
+   ],
+   "default": "0x0000060C"
+  },
+  {
+   "fid": "0x0445DC86",
+   "file": "0xF53924",
+   "va": "0xF54524",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x000000A6",
+   "registry_fn": "0x0147385C"
+  },
+  {
+   "fid": "0x04653B60",
+   "file": "0xF34D40",
+   "va": "0xF35940",
+   "shape": "A",
+   "cbs": [
+    "0x00AE3470",
+    "0x00AE3490",
+    "0x00AE3310",
+    "0x00AC8050"
+   ],
+   "default": "0x00000B90",
+   "registry_fn": "0x0146A888"
+  },
+  {
+   "fid": "0x047DF70D",
+   "file": "0xF53980",
+   "va": "0xF54580",
+   "shape": "A",
+   "cbs": [
+    "0x00AE3430",
+    "0x00AE3450",
+    "0x00693150",
+    "0x00695080",
+    "0x00B1FBF0",
+    "0x00AE5720"
+   ],
+   "default": "0x00000090",
+   "registry_fn": "0x01473850"
+  },
+  {
+   "fid": "0x047DF723",
+   "file": "0xF539E4",
+   "va": "0xF545E4",
+   "shape": "A",
+   "cbs": [
+    "0x00C88B60",
+    "0x00C88B80",
+    "0x00C2E4E0",
+    "0x00692FB0",
+    "0x00B1FBF0",
+    "0x00AC8050"
+   ],
+   "default": "0x00000038",
+   "registry_fn": "0x01473840"
+  },
+  {
+   "fid": "0x049100EC",
+   "file": "0xF53510",
+   "va": "0xF54110",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000060",
+   "registry_fn": "0x014738EC"
+  },
+  {
+   "fid": "0x049489A3",
+   "file": "0xF39A68",
+   "va": "0xF3A668",
+   "shape": "A",
+   "cbs": [
+    "0x00B6E3A0",
+    "0x00AC88C0",
+    "0x006930F0",
+    "0x00695010",
+    "0x00B1FBF0",
+    "0x00ACBBA0"
+   ],
+   "default": "0x000001D4",
+   "registry_fn": "0x0146D094"
+  },
+  {
+   "fid": "0x04BFED68",
+   "file": "0xF28BB8",
+   "va": "0xF297B8",
+   "shape": "B",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x000005FC"
+  },
+  {
+   "fid": "0x04C919AB",
+   "file": "0xF39B28",
+   "va": "0xF3A728",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x000001F0",
+   "registry_fn": "0x0146D070"
+  },
+  {
+   "fid": "0x051B38FF",
+   "file": "0xF34E00",
+   "va": "0xF35A00",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000B58",
+   "registry_fn": "0x0146A86C"
+  },
+  {
+   "fid": "0x0521E608",
+   "file": "0xF350A4",
+   "va": "0xF35CA4",
+   "shape": "A",
+   "cbs": [
+    "0x00C1B8C0",
+    "0x00C0FBA0",
+    "0x00B1FBF0",
+    "0x00CA8710"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A7C4"
+  },
+  {
+   "fid": "0x0528933E",
+   "file": "0xF34EC8",
+   "va": "0xF35AC8",
+   "shape": "A",
+   "cbs": [
+    "0x00AFF840",
+    "0x00AFF870",
+    "0x00692FD0",
+    "0x00694EC0",
+    "0x00B1FBF0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A838"
+  },
+  {
+   "fid": "0x0535A140",
+   "file": "0xF34F2C",
+   "va": "0xF35B2C",
+   "shape": "A",
+   "cbs": [
+    "0x00AFF840",
+    "0x00AFF870",
+    "0x00692FD0",
+    "0x00694EC0",
+    "0x00B1FBF0",
+    "0x00595A70"
+   ],
+   "default": "0x00000C10",
+   "registry_fn": "0x0146A818"
+  },
+  {
+   "fid": "0x0547C1BF",
+   "file": "0xF34BB4",
+   "va": "0xF357B4",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000E90",
+   "registry_fn": "0x0146A8C8"
+  },
+  {
+   "fid": "0x05501F64",
+   "file": "0xF34C86",
+   "va": "0xF35886",
+   "shape": "A",
+   "cbs": [
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000BBC",
+   "registry_fn": "0x0146A8AC"
+  },
+  {
+   "fid": "0x05501F65",
+   "file": "0xF34CE2",
+   "va": "0xF358E2",
+   "shape": "A",
+   "cbs": [
+    "0x006930B0",
+    "0x00694FC0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A89C"
+  },
+  {
+   "fid": "0x05675535",
+   "file": "0xF35048",
+   "va": "0xF35C48",
+   "shape": "A",
+   "cbs": [
+    "0x00C7E9F0",
+    "0x00CD44E0",
+    "0x00B1FBF0",
+    "0x00B1FBF0"
+   ],
+   "default": "0x00000B74",
+   "registry_fn": "0x0146A7D4"
+  },
+  {
+   "fid": "0x05C02449",
+   "file": "0xF33CD8",
+   "va": "0xF348D8",
+   "shape": "A",
+   "cbs": [
+    "0x00AE3470",
+    "0x00AE3490",
+    "0x00C2E4E0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A294"
+  },
+  {
+   "fid": "0x05E8FAA8",
+   "file": "0xF53A48",
+   "va": "0xF54648",
+   "shape": "A",
+   "cbs": [
+    "0x00C88B60",
+    "0x00C88B80",
+    "0x00C2E4E0",
+    "0x00692FB0",
+    "0x00B1FBF0",
+    "0x00AC8050"
+   ],
+   "default": "0x00000020",
+   "registry_fn": "0x01473828"
+  },
+  {
+   "fid": "0x05EE740C",
+   "file": "0xF33D34",
+   "va": "0xF34934",
+   "shape": "A",
+   "cbs": [
+    "0x00AE3470",
+    "0x00AE3490",
+    "0x00C2E4E0",
+    "0x00AE3310"
+   ],
+   "default": "0x00000FE0",
+   "registry_fn": "0x0146A27C"
+  },
+  {
+   "fid": "0x05EF360E",
+   "file": "0xF35100",
+   "va": "0xF35D00",
+   "shape": "A",
+   "cbs": [
+    "0x00C21260",
+    "0x00C15F60",
+    "0x00C0FC10",
+    "0x00C19B60"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A7B4"
+  },
+  {
+   "fid": "0x05F0D6F3",
+   "file": "0xF354C4",
+   "va": "0xF360C4",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00"
+   ],
+   "default": "0x00000FC8",
+   "registry_fn": "0x0146AED8"
+  },
+  {
+   "fid": "0x0666441B",
+   "file": "0xF33F7C",
+   "va": "0xF34B7C",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00001694",
+   "registry_fn": "0x0146A21C"
+  },
+  {
+   "fid": "0x06664451",
+   "file": "0xF33FE0",
+   "va": "0xF34BE0",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x0000169C",
+   "registry_fn": "0x0146A210"
+  },
+  {
+   "fid": "0x06664454",
+   "file": "0xF3405A",
+   "va": "0xF34C5A",
+   "shape": "A",
+   "cbs": [
+    "0x00BD0D50",
+    "0x00BD17B0",
+    "0x00C2E4E0",
+    "0x00BCD450"
+   ],
+   "default": "0x00001698",
+   "registry_fn": "0x0146A204"
+  },
+  {
+   "fid": "0x06948B64",
+   "file": "0xF348A4",
+   "va": "0xF354A4",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000BB1",
+   "registry_fn": "0x0146A950"
+  },
+  {
+   "fid": "0x06A814A9",
+   "file": "0xF356C0",
+   "va": "0xF362C0",
+   "shape": "A",
+   "cbs": [
+    "0x00BD0CB0",
+    "0x00BCA960",
+    "0x00C2E4E0",
+    "0x00B6F550"
+   ],
+   "default": "0x00001030",
+   "registry_fn": "0x01467DAC"
+  },
+  {
+   "fid": "0x076C8F46",
+   "file": "0xF34FEC",
+   "va": "0xF35BEC",
+   "shape": "A",
+   "cbs": [
+    "0x00C143C0",
+    "0x00C143E0",
+    "0x00B1FBF0",
+    "0x00AC8050"
+   ],
+   "default": "0x00000BEC",
+   "registry_fn": "0x0146A7EC"
+  },
+  {
+   "fid": "0x076C8F4D",
+   "file": "0xF34F90",
+   "va": "0xF35B90",
+   "shape": "A",
+   "cbs": [
+    "0x00C143C0",
+    "0x00C143E0",
+    "0x00B1FBF0",
+    "0x00AC8050"
+   ],
+   "default": "0x00000BF8",
+   "registry_fn": "0x0146A800"
+  },
+  {
+   "fid": "0x0771D7B4",
+   "file": "0xF53AAC",
+   "va": "0xF546AC",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000078",
+   "registry_fn": "0x0147381C"
+  },
+  {
+   "fid": "0x33ACE6B5",
+   "file": "0xF34D9C",
+   "va": "0xF3599C",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00000E80",
+   "registry_fn": "0x0146A87C"
+  },
+  {
+   "fid": "0x5242896A",
+   "file": "0xF34E64",
+   "va": "0xF35A64",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": "0x00000B78",
+   "registry_fn": "0x0146A85C"
+  },
+  {
+   "fid": "0x52709079",
+   "file": "0xF33D90",
+   "va": "0xF34990",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x00001678",
+   "registry_fn": "0x0146A26C"
+  },
+  {
+   "fid": "0x52773F6F",
+   "file": "0xF34780",
+   "va": "0xF35380",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x00000B34",
+   "registry_fn": "0x0146A968"
+  },
+  {
+   "fid": "0x72709236",
+   "file": "0xF33EBC",
+   "va": "0xF34ABC",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A234"
+  },
+  {
+   "fid": "0x72774074",
+   "file": "0xF349C8",
+   "va": "0xF355C8",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x00000B5F",
+   "registry_fn": "0x0146A920"
+  },
+  {
+   "fid": "0x72AE9FE0",
+   "file": "0xF33C7C",
+   "va": "0xF3487C",
+   "shape": "A",
+   "cbs": [
+    "0x00B20540",
+    "0x00BCA960",
+    "0x00C2E4E0",
+    "0x00B6F550"
+   ],
+   "default": "0x00001674",
+   "registry_fn": "0x0146A2A4"
+  },
+  {
+   "fid": "0x92709161",
+   "file": "0xF33E58",
+   "va": "0xF34A58",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00693090",
+    "0x00694F00",
+    "0x00B1FBF0",
+    "0x00675CA0"
+   ],
+   "default": "0x00001680",
+   "registry_fn": "0x0146A244"
+  },
+  {
+   "fid": "0xB1A64F7B",
+   "file": "0xF5333C",
+   "va": "0xF53F3C",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": "0x0000006D",
+   "registry_fn": "0x01473938"
+  },
+  {
+   "fid": "0xB2774021",
+   "file": "0xF34840",
+   "va": "0xF35440",
+   "shape": "A",
+   "cbs": [
+    "0x00B02540",
+    "0x00BCA960",
+    "0x00C2E4E0",
+    "0x00692FB0",
+    "0x00B6F550",
+    "0x00AC8050"
+   ],
+   "default": "0x00000B50",
+   "registry_fn": "0x0145C8DC"
+  },
+  {
+   "fid": "0xD24B464B",
+   "file": "0xF532E0",
+   "va": "0xF53EE0",
+   "shape": "A",
+   "cbs": [
+    "0x00AC8750",
+    "0x00AC8780",
+    "0x00693090",
+    "0x00694FA0"
+   ],
+   "default": null,
+   "registry_fn": "0x01473948"
+  },
+  {
+   "fid": "0xD2708C85",
+   "file": "0xF33BAA",
+   "va": "0xF347AA",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00572840",
+    "0x00692FF0",
+    "0x00694EE0",
+    "0x00B1FBF0",
+    "0x0057CDE0"
+   ],
+   "default": "0x0000101C",
+   "registry_fn": "0x0146A2BC"
+  },
+  {
+   "fid": "0xD277405A",
+   "file": "0xF34900",
+   "va": "0xF35500",
+   "shape": "A",
+   "cbs": [
+    "0x00572810",
+    "0x00AC88F0",
+    "0x006930B0",
+    "0x00694FC0",
+    "0x00B1FBF0",
+    "0x00ACBB80"
+   ],
+   "default": null,
+   "registry_fn": "0x0146A93C"
+  }
+ ]
+}

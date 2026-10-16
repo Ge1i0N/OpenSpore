@@ -87,6 +87,12 @@ test with `-w -devDirs`; retain evidence and commit.
   with StarRecord stats. `cell_save_verify`: 5 constructed-input checks; `cell_save_dump` on the real
   save walks 2000/3151 objects, values identical to the Python reference; gap-scan still misses tails
   (known). No gameplay wiring. `analysis/cell-save.md` / `audit/cell-save-full.json`.
+- `tools/cell_field_descriptors.py`: the field registration is inline code (stack descriptor
+  `mov [esp+off], imm32` stores), not a static table; all 107 wire ids from the real save recover a
+  descriptor with a callback chain that **types the field by wire size** (1/4/12/16/24/92 B groups;
+  23 one-byte fields share `AC8750/AC8780/693090/694FA0`). Ids are not unique across classes.
+  Supersedes the earlier per-frame-type offset/default tables (over-read of this code).
+  Audit `audit/cell-field-descriptors.json`.
 - `engine/gge_star_present.*`: observed camera +0xC0 matrix -> project via 0x7C4250/0xDE3C20;
   root 0x02E5A4A8 center/saved clamp and >4px deadband via0xDF6110; stage/caption/raw flag plans via
   0xDF9200. `gge_star_present_verify`: 50 checks binding both real GGEGameStarUIv4 (0x21DF01F2),
