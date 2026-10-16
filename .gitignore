@@ -451,6 +451,9 @@ scratch/
 tmp/
 *.bak
 
+# Agent config/skills (opencode): local environment, never committed.
+.opencode/
+
 # NOTE: analysis/ IS tracked (generated evidence, incl. analysis/strings/*.txt and
 # analysis/shots/*.png). assets/ IS tracked (our own icon). Do not widen the patterns above
 # to cover either.
