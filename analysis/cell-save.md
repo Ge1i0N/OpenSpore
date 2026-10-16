@@ -1,15 +1,25 @@
 # Cell-stage save decode — creature data structure
 
 > **Verdict 2026-10-16:** the cell-stage `.spo` (19,683 B, 12 records) decodes
-> to full field-level values. Two multi-object class streams hold 1500 + 1000
-> objects in 7 frame types each. Float stats (1.0, π), position data and a
-> dev-marker class `0xABCDEF00` are present. This is **structural decode** —
-> field *semantics* (which float is speed vs. attack) need binary confirmation.
+> to full field-level values. Two multi-object class streams hold 1503 + 1648
+> declared objects in 7 frame types each. Float stats (1.0, π), position data
+> and a dev-marker class `0xABCDEF00` are present. The engine decoder
+> `source/engine/cell_save.cpp` reproduces the decode from C++ and matches the
+> Python reference on the real save (stat4=79, stat9=1.0, stat18=512).
+> This is **structural decode** — field *semantics* (which float is speed vs.
+> attack) need binary confirmation.
 
 ## Stream layout
 
-Both big streams use `[count BE u32][crc][token][12-byte header][frames...]`.
+The file is a standard DBPF: header/index little-endian with a kind-selected
+index (this save: kind=4 — prefix 8, stride 28, per-record type/group words),
+parsed by `engine/pkg.cpp`. Inside, both big streams use
+`[count BE u32][crc][token][12-byte header][frames...]` and **field payload
+bytes are big-endian** (verified: `3f800000`=1.0, `00000200`=512,
+`0000004f`=79 — the descriptor-table default).
 Frames are found by tag scan at offset 24; gaps between frames vary (0–346 B).
+Stream types: `0x018EB4B7` (refpacked 6627→225450) and `0x018EB45E`
+(refpacked 5670→164800), both records in the same save.
 
 ### 0x018EB4B7 — creature stats (1503 objects, 1200 walked)
 
@@ -50,7 +60,11 @@ Same 7 frame types, same field IDs per type. Float values differ per object.
 
 - `tools/cell_save_decode.py <size-in-bytes>` — full field-value dump (size
   lookup avoids Cyrillic path issues). JSON output.
-- `analysis/audit/cell-save-full.json` — full decode (all 2200 objects).
+- `analysis/audit/cell-save-full.json` — full decode (all walked objects).
+- `source/engine/cell_save.h/.cpp` — engine decoder (read-only; built on
+  `engine/pkg.cpp` + RefPack). `decode_save(path)` / `decode_save_from_memory`.
+- `tools/cell_save_verify` — 5 constructed-input tests, no game data needed.
+- `tools/cell_save_dump <path.spo>` — CLI dump of a real save.
 
 ## Field descriptors (from binary 0xF194A0)
 
@@ -89,8 +103,8 @@ descriptors in BSS via `rep movsd`. Each 14-dword entry is:
 
 | field ID | offset | default | read CB |
 |---|---|---|---|
-| `0x02416C5E` | `0x24` | 12× zero | `0x00AC8750` |
-| `0x02416C60` | `0x30` | 16× zero + `3F800000`=1.0 | `0x00AC8780` |
+| `0x02416C5E` | `0x24` | 12× zero (vec3-sized, 12 B on wire) | `0x00AC8750` |
+| `0x02416C60` | `0x30` | 16 B on wire: 0,0,0,`3F800000`=1.0 (vec4/quat-sized) | `0x00AC8780` |
 | `0x02416C61` | `0x40` | `0x00` | `0x00693090` |
 | `0x02416C62` | `0x44` | `0x01` | `0x00693090` |
 | `0x02416C63` | `0x48` | `0x01` | `0x00693090` |
@@ -107,9 +121,12 @@ stat fields, now confirmed on real creature data.
 
 ## Boundaries
 
-- Field IDs are structural; **semantics confirmed** (which float is speed,
-  attack, social — needs binary cross-reference at the stat descriptor).
-- 303 objects in stream 1 and 648 in stream 2 were not walked (gap-scan
-  limitation); frame counts match declared counts.
+- Field IDs are structural; **semantics not yet confirmed** (which float is
+  speed, attack, social — needs binary cross-reference at the stat descriptor).
+- Gap-scan walk is lossy: the C++ decoder walks 2000 objects total
+  (Python reference: 1200 + 1000); declared 1503 + 1648. Tail objects after
+  long gaps are still missed; frame counts match declared counts in the
+  envelope headers.
+- `0x02416C60` is 16 B on the wire (3×zero + 1.0), treated as 4 floats.
 - No creature *name* strings visible — names may be in single-envelope streams
   or encoded differently from StarRecord names.

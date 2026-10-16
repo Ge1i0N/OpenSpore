@@ -134,6 +134,7 @@ set(OS_SOURCES
   source/engine/gge_star_lifecycle.cpp
   source/engine/gge_star_scene.cpp
   source/engine/game_stages.cpp
+  source/engine/cell_save.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
@@ -264,6 +265,22 @@ target_compile_definitions(gge_star_input_verify PRIVATE WIN32_LEAN_AND_MEAN NOM
 target_link_libraries(gge_star_input_verify PRIVATE user32 gdi32 ole32)
 add_executable(game_stages_verify EXCLUDE_FROM_ALL tools/game_stages_verify.cpp source/engine/game_stages.cpp)
 target_include_directories(game_stages_verify PRIVATE source)
+add_executable(cell_save_verify EXCLUDE_FROM_ALL tools/cell_save_verify.cpp
+  source/engine/cell_save.cpp source/engine/refpack.cpp source/engine/log.cpp
+  source/engine/starsdb_dbpf.cpp source/engine/starsdb_context.cpp
+  source/engine/starsdb_links.cpp source/engine/starsdb.cpp
+  source/engine/serialized_frame.cpp source/engine/pkg.cpp)
+target_include_directories(cell_save_verify PRIVATE source)
+target_compile_definitions(cell_save_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_link_libraries(cell_save_verify PRIVATE user32 gdi32)
+add_executable(cell_save_dump EXCLUDE_FROM_ALL tools/cell_save_dump.cpp
+  source/engine/cell_save.cpp source/engine/refpack.cpp source/engine/log.cpp
+  source/engine/starsdb_dbpf.cpp source/engine/starsdb_context.cpp
+  source/engine/starsdb_links.cpp source/engine/starsdb.cpp
+  source/engine/serialized_frame.cpp source/engine/pkg.cpp)
+target_include_directories(cell_save_dump PRIVATE source)
+target_compile_definitions(cell_save_dump PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_link_libraries(cell_save_dump PRIVATE user32 gdi32)
 add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_inspect PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp

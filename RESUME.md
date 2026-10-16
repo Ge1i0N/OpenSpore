@@ -1,6 +1,6 @@
 # RESUME — current hand-off
 
-Last reviewed: **2026-10-15**. Work from the actual `git status` / `git log`, not an old SHA here.
+Last reviewed: **2026-10-16**. Work from the actual `git status` / `git log`, not an old SHA here.
 Commit locally; the user pushes through GitHub Desktop. Do not rewrite their changes.
 
 ## Goal and rules
@@ -80,6 +80,13 @@ test with `-w -devDirs`; retain evidence and commit.
   `gge_saved_adapter.*` joins these decoded values + explicit HeaderProbe/terrain observations into
   typed saved metadata, no catalogue availability publication. `planet_record_verify`: 291 constructed
   checks, read-only CLI smoke. No real planet/save corpus or services. `analysis/planet-record.md`.
+- `engine/cell_save.*`: cell-stage `.spo` decoder built on `Package` + RefPack (read-only). Real save
+  (19,683 B, kind=4 index) holds two BE multi-object streams `0x018EB4B7`/`0x018EB45E` with BE field
+  payloads (`3f800000`=1.0, `00000200`=512, `0000004f`=79); `0x02416C60` is 16 B (0,0,0,1.0). Creature
+  stat/pos/detailed fields mapped from the binary descriptor table at VA `0xF194A0`; callbacks shared
+  with StarRecord stats. `cell_save_verify`: 5 constructed-input checks; `cell_save_dump` on the real
+  save walks 2000/3151 objects, values identical to the Python reference; gap-scan still misses tails
+  (known). No gameplay wiring. `analysis/cell-save.md` / `audit/cell-save-full.json`.
 - `engine/gge_star_present.*`: observed camera +0xC0 matrix -> project via 0x7C4250/0xDE3C20;
   root 0x02E5A4A8 center/saved clamp and >4px deadband via0xDF6110; stage/caption/raw flag plans via
   0xDF9200. `gge_star_present_verify`: 50 checks binding both real GGEGameStarUIv4 (0x21DF01F2),

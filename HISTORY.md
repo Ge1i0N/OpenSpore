@@ -7,6 +7,20 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — cell-stage save: C++ engine decoder, BE payloads confirmed
+
+`engine/cell_save.*` now decodes the real cell-stage `.spo` (19,683 B) through
+`Package` + RefPack, read-only. Wire facts pinned: DBPF header/index are
+little-endian with a kind-selected index (this save kind=4), the two
+multi-object streams (`0x018EB4B7`/`0x018EB45E`) are big-endian, and field
+payload bytes are big-endian (`3f800000`=1.0, `00000200`=512, `0000004f`=79 —
+matches the binary descriptor default). `0x02416C60` is 16 B on the wire
+(0,0,0,1.0), typed as 4 floats. `cell_save_verify`: 5 constructed-input
+checks PASS; `cell_save_dump` on the real save yields 2000 walked creatures
+with stat4=79, stat9=1.0, stat18=512 identical to the Python reference.
+MSVC Win32 Debug 0 warnings; Python suite 24/24, `feature_map --check` and
+`docs_check` PASS. Findings in `analysis/cell-save.md`.
+
 ## 2026-10-16 — planet transport gap closed: pkp resources are wrapped DBPFs
 
 Python value-decode of `planetRecords.pkp` failed on all 211 records at the first
