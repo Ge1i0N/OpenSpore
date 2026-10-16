@@ -186,6 +186,8 @@ test with `-w -devDirs`; retain evidence and commit.
   blocks build_catalog. Debug `ggepreview:load,<path>` reloads GGEHostPreview only after explicit
   Available snapshot; failed load preserves current scene, no fallback/search/profile.
   `gge_catalog_snapshot_verify`:10 checks including loaded-terrain/image-key pairing. analysis/gge-catalog-snapshot.md.
+  `gge_catalog_snapshot_inspect <snapshot>` prints parsed statuses/counts/order/duplicate star IDs,
+  positions/names/terrain without UI, writes, search or native readiness.
 
 ## Next, in order
 

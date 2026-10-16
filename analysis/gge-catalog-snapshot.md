@@ -44,10 +44,13 @@ saved/candidate sources. It uses the real explicitly selected Graphics atlas. Fa
 the current preview and the rendered preview displays the caller-selected source path. This is a host capture bridge, not proof that the input came from the original
 producer; input provenance and authorization remain the caller's responsibility.
 
+For a non-UI report, use `gge_catalog_snapshot_inspect <snapshot>`; it prints source statuses, row
+counts/order, duplicate star IDs, positions, names and terrain observations without writes or search.
+
 ## Verification
 
 `gge_catalog_snapshot_verify`: **10 checks PASS**: valid saved/candidate rows and header/terrain fields,
-UTF-8 hex names, BOM, Unknown status, malformed row/unknown line/nonfinite input and atomic output
+UTF-8 hex names, BOM, Unknown status, terrain image pairing, malformed row/unknown line/nonfinite input and atomic output
 preservation. No user profile or save directory is searched.
 
 Next: accept explicitly authorized real manager/`stars.db` capture and compare source fields against

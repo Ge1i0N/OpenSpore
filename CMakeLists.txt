@@ -265,6 +265,9 @@ target_link_libraries(gge_star_input_verify PRIVATE user32 gdi32 ole32)
 add_executable(gge_catalog_snapshot_verify EXCLUDE_FROM_ALL tools/gge_catalog_snapshot_verify.cpp
   source/engine/gge_catalog_snapshot.cpp source/engine/gge_catalog.cpp)
 target_include_directories(gge_catalog_snapshot_verify PRIVATE source)
+add_executable(gge_catalog_snapshot_inspect EXCLUDE_FROM_ALL tools/gge_catalog_snapshot_inspect.cpp
+  source/engine/gge_catalog_snapshot.cpp source/engine/gge_catalog.cpp)
+target_include_directories(gge_catalog_snapshot_inspect PRIVATE source)
 add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_inspect PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
@@ -303,6 +306,7 @@ if(MSVC)
   target_compile_options(gge_star_transition_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_star_input_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_catalog_snapshot_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(gge_catalog_snapshot_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
