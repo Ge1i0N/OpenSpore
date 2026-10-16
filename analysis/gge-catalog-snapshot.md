@@ -12,6 +12,10 @@ UTF-8 text, optionally with a UTF-8 BOM:
 GGE_CATALOG_V1
 saved_status<TAB>Available|Unknown
 candidate_status<TAB>Available|Unknown
+manager_status<TAB>Available|Unknown|Failed
+starsdb_status<TAB>Available|Unknown|Failed
+planet_status<TAB>Available|Unknown|Failed
+refill_status<TAB>Available|Unknown|Failed
 saved_count<TAB>N
 candidate_count<TAB>N
 saved<TAB>id<TAB>x<TAB>y<TAB>z<TAB>stage<TAB>source_flags<TAB>name_hex<TAB>save_stem_hex<TAB>probe<TAB>header_major<TAB>header_minor<TAB>terrain_loaded<TAB>terrain_image_instance
@@ -24,6 +28,8 @@ projection uses native builder defaults. `terrain_image_instance` is the exact t
 instance observed by the producer; zero is allowed when `terrain_loaded=0`. The terrain flag must be
 0 or 1 and never authorizes an invented ResourceKey. All numeric fields are bounded and finite;
 counts must match rows exactly.
+The four producer status lines are required. They describe upstream observations only; `Available`
+does not make rows original or complete, and `Unknown` is preserved rather than inferred from counts.
 
 The loader accepts only a caller-selected path and a 16MiB file bound. It parses into a temporary
 `CatalogInput` and publishes atomically. Unknown source status remains Unknown and blocks
@@ -51,7 +57,7 @@ counts/order, duplicate star IDs, positions, names and terrain observations with
 
 ## Verification
 
-`gge_catalog_snapshot_verify`: **10 checks PASS**: valid saved/candidate rows and header/terrain fields,
+`gge_catalog_snapshot_verify`: **10 checks PASS**: valid saved/candidate rows, producer statuses and header/terrain fields,
 UTF-8 hex names, BOM, Unknown status, terrain image pairing, malformed row/unknown line/nonfinite input and atomic output
 preservation. No user profile or save directory is searched.
 

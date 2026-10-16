@@ -32,10 +32,18 @@ struct SavedGameMetadata {
 };
 
 enum class CatalogAvailability { Unknown, Available };
+enum class CatalogProducerStatus { Unknown, Available, Failed };
+struct CatalogProducerObservations {
+    CatalogProducerStatus manager=CatalogProducerStatus::Unknown;
+    CatalogProducerStatus starsdb=CatalogProducerStatus::Unknown;
+    CatalogProducerStatus planet_records=CatalogProducerStatus::Unknown;
+    CatalogProducerStatus candidate_refill=CatalogProducerStatus::Unknown;
+};
 struct CatalogInput {
     CatalogAvailability saved_status = CatalogAvailability::Unknown;
     CatalogAvailability candidate_status = CatalogAvailability::Unknown;
     std::string source_label; // caller-supplied provenance label; empty means producer not identified
+    CatalogProducerObservations producer;
     std::vector<SavedGameMetadata> saved; // manager +0xF0/+0xF4
     std::vector<StarMetadata> candidates; // manager +0xDC/+0xE0, already selected by StarManager
 };
