@@ -143,6 +143,11 @@ object. These are display/layout lifecycle transitions, not evidence that the se
 GGE projection camera. `008106C0` resolves a registry/container entry to its object at `+0x1C`
 (`ev_62ebde9afbbd72c37c53c9e1eb0807c99da9a73ca3680fb202120d34097bb0a1`,
 `ev_54eabf869ff3a10ac284973e41a2f241730e2afc927b4b6c79fd19319128cf63`).
+The direct lifecycle callers are bounded as well: `00812100` is called by `008121C0` and `008122A0`
+(`ev_127d3eefd901589373b362845d6b57f8744677820181fbf2e4209e4480249fbe`), while `00811C20` is
+called only by `00811C70` and `00812100`. `00811C70` has no resolved direct callers, so its entry
+into synchronization is itself an indirect/object-lifecycle boundary. No retained static caller
+names a concrete `0xEEEE8218` provider; this is the remaining registration gap.
 
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
