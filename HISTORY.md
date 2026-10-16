@@ -7,6 +7,22 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — MinGW x86 logic-verification build, zero source changes
+
+No admin for MSVC, so: user-local WinLibs i686 GCC 16.1.0 + present Ninja, out-of-tree
+`build/mingw` (toolchain/shim/project-include, all gitignored; recipe retained in
+`analysis/mingw-logic-build.md`). Full tree compiles/links (346 steps): OpenSpore.exe
++ all 29 verify tools. Every check PASSes except `gge_streaming_image_verify`'s
+truncate case (EACCES vs expected SHARING_VIOLATION — standalone probes confirm the
+file stays protected; UCRT errno mapping, not engine logic). Along the way the MinGW
+build caught a real sensitivity: `gge_star_instance_verify` failed under x87 excess
+precision and passes with `-mfpmath=sse -msse2 -ffp-contract=off`, independently
+confirming `/fp:precise` is load-bearing. App runs: headless 10/10 boot, CellGame
+skeleton active + 1280x720 capture, DevLauncher/Main→GGE captures, visible click →
+CreatureEditor, GGEHostPreview card pick — all exit 0, aborts/asserts 0.
+Verification: previously Python-only claims (boot chain, skeleton, transitions) now
+also executed as compiled x86 code. MSVC warning-free build still pending.
+
 ## 2026-10-16 — StarRecord values decode clean on 84,020 real records
 
 `--star-values` value-decodes every StarRecord body of `Game0.old` and `Game0` with

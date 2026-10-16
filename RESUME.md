@@ -194,6 +194,11 @@ test with `-w -devDirs`; retain evidence and commit.
   46,225/46,225 envelopes CRC-clean; root frame carries the six metadata IDs and the
   first StarRecord body is a 14-field frame. `analysis/starsdb-real.md`, report in
   `analysis/audit/starsdb-real/`. Field semantics still static-only.
+- MinGW x86 logic-verification build (no admin for MSVC; zero repo source changes):
+  full tree compiles/links under i686 GCC, all verify tools PASS except one
+  environmental errno case, app runs headless/windowed with exit 0 (incl. CellGame
+  skeleton + captures). Two deviations root-caused (x87→SSE2 flags; EACCES vs
+  SHARING_VIOLATION mapping). MSVC build still pending. `analysis/mingw-logic-build.md`.
 - StarRecord values (`--star-values` on both later saves): 42,010/42,010 bodies pass
   every `inspect_star_record` shape check; mKeys unique; positions all finite on a
   thin disk (X/Y ±700, Z ±9); all named; planet histogram {0: ~41980, …} moves with
