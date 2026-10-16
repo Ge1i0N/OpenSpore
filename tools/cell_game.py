@@ -179,6 +179,36 @@ def decode_loottable(data: bytes, names: dict[int, str] | None = None):
             "delay": delay, "entries": rows}
 
 
+def decode_populate(data: bytes, names: dict[int, str] | None = None):
+    """Spawn population: 16-byte header {type, ?, entryCount, 16} then entryCount 64-B
+    entries; each entry holds a cell archetype id at +0x18 and a spawn count at +0x2C."""
+    names = names or {}
+    typ, _pad, cnt, _h = struct.unpack_from("<4I", data, 0)
+    stride = (len(data) - 16) // cnt if cnt else 0
+    rows = []
+    for k in range(cnt):
+        off = 16 + k * stride
+        if off + 0x30 > len(data):
+            break
+        cell, = struct.unpack_from("<I", data, off + 0x18)
+        count, = struct.unpack_from("<f", data, off + 0x2C)
+        rows.append({"cell": names.get(cell, "0x%08x" % cell), "count": round(count, 3)})
+    return {"type": typ, "entries": rows}
+
+
+def decode_random_creature(data: bytes, names: dict[int, str] | None = None):
+    """Random spawn table: an id/weight pair list (neutralCells -> NeutralCell_01..03)."""
+    names = names or {}
+    pairs = []
+    for o in range(0, len(data) - 4, 4):
+        v, = struct.unpack_from("<I", data, o)
+        if v in names:
+            w, = struct.unpack_from("<f", data, o + 4)
+            if 0.0 < w <= 1000.0:
+                pairs.append({"cell": names[v], "weight": round(w, 3)})
+    return {"size": len(data), "cells": pairs}
+
+
 def display_name(data: bytes) -> str:
     """First UTF-16LE printable run in a cell archetype (the creature's display name)."""
     i = 4
@@ -217,7 +247,7 @@ def main() -> int:
     names = build_name_map()
     report: dict = {"packages": [str(p) for p in pkgs], "types": {}, "prop": {},
                     "look_tables": {}, "loottables": {}, "cells": {}, "world": {},
-                    "random_creature": {}}
+                    "populate": {}, "random_creature": {}}
 
     for pkg in pkgs:
         for t, g, i, data in iter_resources(pkg):
@@ -244,8 +274,10 @@ def main() -> int:
                     "instance": "0x%08x" % i, "display": display_name(data), "size": len(data)}
             elif t == WORLD:
                 report["world"][iname or "0x%08x" % i] = {"size": len(data)}
+            elif t == POPULATE:
+                report["populate"][iname or "0x%08x" % i] = decode_populate(data, names)
             elif t == RANDOM_CREATURE:
-                report["random_creature"][iname or "0x%08x" % i] = {"size": len(data)}
+                report["random_creature"][iname or "0x%08x" % i] = decode_random_creature(data, names)
 
     # summary
     print("# CellGame packages: %d" % len(pkgs))
@@ -258,6 +290,10 @@ def main() -> int:
     print("# look_tables: %d   loottables: %d   worlds: %d   random_creature: %d" % (
         len(report["look_tables"]), len(report["loottables"]),
         len(report["world"]), len(report["random_creature"])))
+    print("# populations: %d" % len(report["populate"]))
+    for nm_, pop in sorted(report["populate"].items()):
+        cells = ", ".join("%s x%g" % (e["cell"], e["count"]) for e in pop["entries"][:6])
+        print("   %-18s %s" % (nm_, cells))
 
     if a.anims:
         for pkg in pkgs:

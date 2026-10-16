@@ -3287,36 +3287,1237 @@
       "size": 28
     }
   },
+  "populate": {
+    "level_plant": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 5.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "0x6316609e",
+          "count": 8.0
+        },
+        {
+          "cell": "0x6316609e",
+          "count": 16.0
+        },
+        {
+          "cell": "0x63166099",
+          "count": 24.0
+        },
+        {
+          "cell": "0x63166098",
+          "count": 32.0
+        },
+        {
+          "cell": "0x6316609b",
+          "count": 40.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 4.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 6.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 3.0
+        },
+        {
+          "cell": "Cell_GrubbySmall",
+          "count": 1.0
+        },
+        {
+          "cell": "Cell_boosterSmall",
+          "count": 1.0
+        },
+        {
+          "cell": "cell_pinky",
+          "count": 12.0
+        },
+        {
+          "cell": "Cell_PinkyAlpha",
+          "count": 4.0
+        },
+        {
+          "cell": "cell_poisonerMed",
+          "count": 2.0
+        },
+        {
+          "cell": "cell_nosey",
+          "count": 8.0
+        },
+        {
+          "cell": "cell_stabberalpha",
+          "count": 10.0
+        },
+        {
+          "cell": "cell_ducky",
+          "count": 15.0
+        }
+      ]
+    },
+    "level_rock": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 4.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "0x6316609e",
+          "count": 8.0
+        },
+        {
+          "cell": "0x6316609e",
+          "count": 16.0
+        },
+        {
+          "cell": "0x63166099",
+          "count": 24.0
+        },
+        {
+          "cell": "0x63166098",
+          "count": 30.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "cell_spikeySmall",
+          "count": 1.0
+        },
+        {
+          "cell": "Cell_GoldySmall",
+          "count": 1.0
+        },
+        {
+          "cell": "cell_shyster",
+          "count": 9.0
+        },
+        {
+          "cell": "Cell_ShysterAlpha",
+          "count": 2.0
+        },
+        {
+          "cell": "Cell_ChomperMed",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_booster",
+          "count": 10.0
+        }
+      ]
+    },
+    "level_beach_2": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 3.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "0x0feb4d91",
+          "count": 2.0
+        },
+        {
+          "cell": "0x5a5c0f01",
+          "count": 10.0
+        },
+        {
+          "cell": "0x5a5c0f00",
+          "count": 35.0
+        },
+        {
+          "cell": "0x5a5c0f03",
+          "count": 50.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 4.0
+        },
+        {
+          "cell": "cell_jetster",
+          "count": 1.0
+        },
+        {
+          "cell": "egg_eggkid",
+          "count": 1.0
+        },
+        {
+          "cell": "cell_eggmom",
+          "count": 6.0
+        },
+        {
+          "cell": "cell_eggdad",
+          "count": 4.0
+        },
+        {
+          "cell": "Cell_MegamouthMed",
+          "count": 5.0
+        },
+        {
+          "cell": "cell_poker",
+          "count": 20.0
+        },
+        {
+          "cell": "cell_squid",
+          "count": 20.0
+        }
+      ]
+    },
+    "level_ice": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "0x0e09bb75",
+          "count": 10.0
+        },
+        {
+          "cell": "0x0e09bb75",
+          "count": 10.0
+        },
+        {
+          "cell": "0x0e09bb72",
+          "count": 20.0
+        },
+        {
+          "cell": "0x0e09bb74",
+          "count": 40.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_minno1",
+          "count": 6.0
+        },
+        {
+          "cell": "cell_minno2",
+          "count": 6.0
+        },
+        {
+          "cell": "cell_minno3",
+          "count": 6.0
+        },
+        {
+          "cell": "cell_goldy",
+          "count": 5.0
+        },
+        {
+          "cell": "cell_goldy2",
+          "count": 5.0
+        },
+        {
+          "cell": "cell_goldy3",
+          "count": 5.0
+        }
+      ]
+    },
+    "level_plant_2": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 4.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "0x0feb4d96",
+          "count": 2.0
+        },
+        {
+          "cell": "0x6316609e",
+          "count": 8.0
+        },
+        {
+          "cell": "0x63166099",
+          "count": 16.0
+        },
+        {
+          "cell": "0x63166098",
+          "count": 24.0
+        },
+        {
+          "cell": "0x6316609b",
+          "count": 32.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 4.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 6.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 10.0
+        },
+        {
+          "cell": "cell_pinky",
+          "count": 1.0
+        },
+        {
+          "cell": "Cell_PinkyAlpha",
+          "count": 1.0
+        },
+        {
+          "cell": "Cell_StabberAlphaMed",
+          "count": 2.0
+        },
+        {
+          "cell": "Cell_NoseyMed",
+          "count": 6.0
+        },
+        {
+          "cell": "Cell_StabberMed",
+          "count": 10.0
+        },
+        {
+          "cell": "cell_ducky",
+          "count": 10.0
+        },
+        {
+          "cell": "cell_jawhead",
+          "count": 20.0
+        }
+      ]
+    },
+    "level_random": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_food_L0",
+          "count": 2.0
+        },
+        {
+          "cell": "cell_food_L0",
+          "count": 8.0
+        },
+        {
+          "cell": "cell_food_L0",
+          "count": 50.0
+        },
+        {
+          "cell": "cell_food_L0",
+          "count": 50.0
+        },
+        {
+          "cell": "0x981a536c",
+          "count": 5.0
+        },
+        {
+          "cell": "0x981a536b",
+          "count": 5.0
+        },
+        {
+          "cell": "0x981a536a",
+          "count": 40.0
+        },
+        {
+          "cell": "0x981a5369",
+          "count": 20.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 4.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 6.0
+        },
+        {
+          "cell": "0x620d8c55",
+          "count": 2.0
+        },
+        {
+          "cell": "ce_prarylane",
+          "count": 12.0
+        },
+        {
+          "cell": "0x7a3376cd",
+          "count": 2.0
+        },
+        {
+          "cell": "0x7a3376ce",
+          "count": 2.0
+        },
+        {
+          "cell": "cle_cll15",
+          "count": 12.0
+        },
+        {
+          "cell": "cle_cll16",
+          "count": 25.0
+        },
+        {
+          "cell": "0xd6c8f726",
+          "count": 4.0
+        }
+      ]
+    },
+    "level_rock_bg_2": {
+      "type": 3,
+      "entries": [
+        {
+          "cell": "cell_ducky",
+          "count": 600.0
+        },
+        {
+          "cell": "cell_stabberalpha",
+          "count": 200.0
+        }
+      ]
+    },
+    "level_plant_bg_2": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_ducky",
+          "count": 50.0
+        },
+        {
+          "cell": "cell_jawhead",
+          "count": 100.0
+        },
+        {
+          "cell": "cell_puffish",
+          "count": 600.0
+        }
+      ]
+    },
+    "level_beach_bg_2": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_poker",
+          "count": 100.0
+        },
+        {
+          "cell": "cell_squid",
+          "count": 200.0
+        },
+        {
+          "cell": "cell_leggy",
+          "count": 150.0
+        }
+      ]
+    },
+    "level_random_bg": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_food_L0",
+          "count": 2.0
+        },
+        {
+          "cell": "cell_food_L0",
+          "count": 8.0
+        },
+        {
+          "cell": "cell_food_L0",
+          "count": 50.0
+        },
+        {
+          "cell": "cell_food_L0",
+          "count": 50.0
+        },
+        {
+          "cell": "0x981a536c",
+          "count": 50.0
+        },
+        {
+          "cell": "0x981a536b",
+          "count": 50.0
+        },
+        {
+          "cell": "0x981a536a",
+          "count": 400.0
+        },
+        {
+          "cell": "0x981a5369",
+          "count": 200.0
+        },
+        {
+          "cell": "cle_cll15",
+          "count": 120.0
+        },
+        {
+          "cell": "cle_cll16",
+          "count": 250.0
+        },
+        {
+          "cell": "0xd6c8f726",
+          "count": 40.0
+        },
+        {
+          "cell": "0xd6c8f725",
+          "count": 40.0
+        }
+      ]
+    },
+    "0x4822fbed": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 50.0
+        }
+      ]
+    },
+    "level_beach_bg": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_megamouth",
+          "count": 50.0
+        },
+        {
+          "cell": "cell_poker",
+          "count": 100.0
+        },
+        {
+          "cell": "cell_squid",
+          "count": 800.0
+        }
+      ]
+    },
+    "level_ice_bg_2": {
+      "type": 3,
+      "entries": [
+        {
+          "cell": "cell_booster",
+          "count": 700.0
+        },
+        {
+          "cell": "cell_chomper",
+          "count": 100.0
+        }
+      ]
+    },
+    "level_ice_2": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 5.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "0x0e09bb75",
+          "count": 10.0
+        },
+        {
+          "cell": "0x0e09bb72",
+          "count": 10.0
+        },
+        {
+          "cell": "0x0e09bb74",
+          "count": 10.0
+        },
+        {
+          "cell": "0x0e09bb77",
+          "count": 10.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_minno1",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_spikey",
+          "count": 10.0
+        },
+        {
+          "cell": "Cell_GoldyMed",
+          "count": 3.0
+        },
+        {
+          "cell": "Cell_Goldy2Med",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_goldy3Med",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_chomper",
+          "count": 10.0
+        }
+      ]
+    },
+    "level_beach": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 5.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "0x5a5c0f01",
+          "count": 10.0
+        },
+        {
+          "cell": "0x5a5c0f01",
+          "count": 30.0
+        },
+        {
+          "cell": "0x5a5c0f00",
+          "count": 35.0
+        },
+        {
+          "cell": "0x5a5c0f03",
+          "count": 45.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 7.0
+        },
+        {
+          "cell": "cell_jawheadSmall",
+          "count": 1.0
+        },
+        {
+          "cell": "Cell_SquigglySmall",
+          "count": 1.0
+        },
+        {
+          "cell": "cell_jetster",
+          "count": 12.0
+        },
+        {
+          "cell": "egg_eggkid",
+          "count": 5.0
+        },
+        {
+          "cell": "cell_puffish",
+          "count": 1.0
+        },
+        {
+          "cell": "cell_eggmom",
+          "count": 8.0
+        },
+        {
+          "cell": "cell_eggdad",
+          "count": 2.0
+        },
+        {
+          "cell": "Cell_MegamouthMed",
+          "count": 4.0
+        },
+        {
+          "cell": "cell_poker",
+          "count": 20.0
+        }
+      ]
+    },
+    "level_water": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 5.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "0x5a5c0f03",
+          "count": 8.0
+        },
+        {
+          "cell": "0x5a5c0f01",
+          "count": 20.0
+        },
+        {
+          "cell": "0x5a5c0f00",
+          "count": 30.0
+        },
+        {
+          "cell": "0x5a5c0f03",
+          "count": 40.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 6.0
+        },
+        {
+          "cell": "Cell_NoseySmall",
+          "count": 1.0
+        },
+        {
+          "cell": "cell_stabberSmall",
+          "count": 1.0
+        },
+        {
+          "cell": "Cell_DuckyMed",
+          "count": 5.0
+        },
+        {
+          "cell": "cell_buzzy",
+          "count": 12.0
+        },
+        {
+          "cell": "Cell_BuzzyAlpha",
+          "count": 3.0
+        },
+        {
+          "cell": "cell_jawhead",
+          "count": 6.0
+        },
+        {
+          "cell": "cell_Squiggly",
+          "count": 8.0
+        },
+        {
+          "cell": "cell_puffish",
+          "count": 20.0
+        }
+      ]
+    },
+    "level_plant_bg": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_stabberalpha",
+          "count": 0.0
+        },
+        {
+          "cell": "cell_ducky",
+          "count": 200.0
+        },
+        {
+          "cell": "cell_jawhead",
+          "count": 600.0
+        }
+      ]
+    },
+    "level_water_bg": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_jawhead",
+          "count": 50.0
+        },
+        {
+          "cell": "cell_puffish",
+          "count": 200.0
+        },
+        {
+          "cell": "cell_megamouth",
+          "count": 300.0
+        }
+      ]
+    },
+    "level_water_bg_2": {
+      "type": 0,
+      "entries": [
+        {
+          "cell": "cell_puffish",
+          "count": 50.0
+        },
+        {
+          "cell": "cell_megamouth",
+          "count": 60.0
+        },
+        {
+          "cell": "cell_poker",
+          "count": 400.0
+        }
+      ]
+    },
+    "level_water_2": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "0x0feb4d91",
+          "count": 5.0
+        },
+        {
+          "cell": "0x5a5c0f03",
+          "count": 8.0
+        },
+        {
+          "cell": "0x5a5c0f01",
+          "count": 20.0
+        },
+        {
+          "cell": "0x5a5c0f00",
+          "count": 30.0
+        },
+        {
+          "cell": "0x5a5c0f03",
+          "count": 40.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 5.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 14.0
+        },
+        {
+          "cell": "cell_duckySmall",
+          "count": 1.0
+        },
+        {
+          "cell": "cell_buzzy",
+          "count": 1.0
+        },
+        {
+          "cell": "Cell_JawheadMed",
+          "count": 5.0
+        },
+        {
+          "cell": "Cell_SquigglyMed",
+          "count": 12.0
+        },
+        {
+          "cell": "cell_puffish",
+          "count": 10.0
+        },
+        {
+          "cell": "cell_megamouth",
+          "count": 20.0
+        }
+      ]
+    },
+    "level_rock_2": {
+      "type": 4,
+      "entries": [
+        {
+          "cell": "cell_food_L0",
+          "count": 4.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 1.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 0.0
+        },
+        {
+          "cell": "0x0feb4d94",
+          "count": 2.0
+        },
+        {
+          "cell": "0x6316609e",
+          "count": 8.0
+        },
+        {
+          "cell": "0x63166099",
+          "count": 16.0
+        },
+        {
+          "cell": "0x63166098",
+          "count": 24.0
+        },
+        {
+          "cell": "0x6316609b",
+          "count": 60.0
+        },
+        {
+          "cell": "0x63166099",
+          "count": 30.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 2.0
+        },
+        {
+          "cell": "packageSignature",
+          "count": 10.0
+        },
+        {
+          "cell": "Cell_ShysterSmall",
+          "count": 1.0
+        },
+        {
+          "cell": "Cell_ChomperSmall",
+          "count": 1.0
+        },
+        {
+          "cell": "cell_grubby",
+          "count": 15.0
+        },
+        {
+          "cell": "Cell_BoosterMed",
+          "count": 5.0
+        },
+        {
+          "cell": "cell_Poisoner",
+          "count": 8.0
+        },
+        {
+          "cell": "cell_stabberalpha",
+          "count": 20.0
+        }
+      ]
+    },
+    "level_rock_bg": {
+      "type": 3,
+      "entries": [
+        {
+          "cell": "cell_booster",
+          "count": 50.0
+        },
+        {
+          "cell": "cell_stabberalpha",
+          "count": 600.0
+        }
+      ]
+    },
+    "level_ice_bg": {
+      "type": 3,
+      "entries": [
+        {
+          "cell": "cell_chomper",
+          "count": 500.0
+        }
+      ]
+    }
+  },
   "random_creature": {
     "0xbc092044": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "weight": 1.0
+        },
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        }
+      ]
     },
     "0xbc092047": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "weight": 1.0
+        },
+        {
+          "cell": "renderTerrain",
+          "weight": 0.0
+        },
+        {
+          "cell": "renderEffects",
+          "weight": 0.0
+        }
+      ]
     },
     "0x4122e50c": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "weight": 1.0
+        }
+      ]
     },
     "0x4122e50f": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "weight": 1.0
+        }
+      ]
     },
     "neutralCells": {
-      "size": 120
+      "size": 120,
+      "cells": [
+        {
+          "cell": "renderTerrain",
+          "weight": 0.0
+        },
+        {
+          "cell": "NeutralCell",
+          "weight": 1.0
+        },
+        {
+          "cell": "NeutralCell_01",
+          "weight": 1.0
+        },
+        {
+          "cell": "NeutralCell_02",
+          "weight": 1.0
+        },
+        {
+          "cell": "NeutralCell_03",
+          "weight": 1.0
+        }
+      ]
     },
     "0xd7e124a4": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "weight": 1.0
+        },
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        }
+      ]
     },
     "0xd7e124a7": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "weight": 1.0
+        },
+        {
+          "cell": "renderTerrain",
+          "weight": 0.0
+        },
+        {
+          "cell": "renderUI",
+          "weight": 0.0
+        }
+      ]
     },
     "0x6beab167": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "NeutralCell_cilia_01",
+          "weight": 1.0
+        }
+      ]
     },
     "0xb17debcc": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "weight": 1.0
+        },
+        {
+          "cell": "renderTerrain",
+          "weight": 0.0
+        },
+        {
+          "cell": "renderUI",
+          "weight": 0.0
+        }
+      ]
     },
     "0xb17debcf": {
-      "size": 36
+      "size": 36,
+      "cells": [
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        },
+        {
+          "cell": "packageSignature",
+          "weight": 1.0
+        },
+        {
+          "cell": "renderTerrain",
+          "weight": 0.0
+        },
+        {
+          "cell": "showFPS",
+          "weight": 0.0
+        }
+      ]
     }
   }
 }

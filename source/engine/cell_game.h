@@ -92,20 +92,45 @@ struct Archetype {
     u32 dword(u32 offset) const;
 };
 
-// Named resources that are decoded as counts only (world/random_creature/populate/structure).
+// Named resources that are decoded as counts only (world/structure).
 struct NamedResource {
     u32 id = 0;
     std::string name;
     u32 size = 0;
 };
 
+// A single spawn line: which cell archetype, and how many / at what weight.
+struct SpawnEntry {
+    u32 cell = 0;      // cell archetype id (populate) or referenced id (random spawn)
+    float count = 0;   // populate: spawn count; random_creature: weight
+};
+
+// Spawn population (Data/CellGame.package type `populate`, e.g. level_water).
+// 16-byte header {type, ?, entryCount, 16}; entryCount 64-byte entries each with a cell
+// archetype id at +0x18 and a spawn count at +0x2C.
+struct Population {
+    u32 id = 0;
+    std::string name;
+    u32 type = 0;  // header +0x00: 0 background, 3, 4 creature level
+    std::vector<SpawnEntry> entries;
+};
+
+// Random spawn table (`random_creature`, e.g. neutralCells -> NeutralCell_01..03).
+// A list of id/weight pairs; weight is the f32 following each known archetype id.
+struct RandomSpawn {
+    u32 id = 0;
+    std::string name;
+    u32 size = 0;
+    std::vector<SpawnEntry> entries;
+};
+
 struct GameData {
     std::vector<Archetype> archetypes;
     std::vector<LookTable> look_tables;
     std::vector<LootTable> loot_tables;
+    std::vector<Population> populations;
+    std::vector<RandomSpawn> random_spawns;
     std::vector<NamedResource> worlds;
-    std::vector<NamedResource> random_creatures;
-    std::vector<NamedResource> populations;
     std::vector<NamedResource> structures;
     std::map<u32, u32> type_counts;  // type id -> resource count (every type in the package)
     u32 total_resources = 0;

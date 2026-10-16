@@ -90,6 +90,18 @@ static std::vector<u8> make_loot_table() {
     return d;
 }
 
+static std::vector<u8> make_population() {
+    std::vector<u8> d(16 + 2 * 64, 0);
+    auto put = [&](size_t at, u32 x) { memcpy(d.data() + at, &x, 4); };
+    put(0, 4); put(8, 2);                 // header: type 4, 2 entries
+    put(16 + 0x18, fnv1_lower("cell_food_L0")); put(16 + 0x2C, 0);   // count 5.0 below
+    float c5 = 5.0f, c9 = 9.0f;
+    memcpy(d.data() + 16 + 0x2C, &c5, 4);
+    put(16 + 64 + 0x18, fnv1_lower("cell_pinky"));
+    memcpy(d.data() + 16 + 64 + 0x2C, &c9, 4);
+    return d;
+}
+
 int main(int argc, char** argv) {
     const u32 squid = fnv1_lower("cell_squid");
     const u32 booster = fnv1_lower("loot_booster");
@@ -164,6 +176,22 @@ int main(int argc, char** argv) {
         check(!err.empty(), "error present");
     }
 
+    // 6: spawn population
+    {
+        std::vector<Rec> recs = {{cell::kTypePopulate, 0, fnv1_lower("level_water"), make_population()}};
+        auto dbpf = make_dbpf(recs);
+        cell::GameData g; std::string err;
+        bool ok = cell::decode_from_memory(dbpf.data(), dbpf.size(), "test", g, err);
+        check(ok, "decode population");
+        check(g.populations.size() == 1, "one population");
+        check(g.populations[0].type == 4, "population type");
+        check(g.populations[0].entries.size() == 2, "two spawn entries");
+        check(g.populations[0].entries[0].cell == fnv1_lower("cell_food_L0"), "spawn cell 0");
+        check(g.populations[0].entries[0].count == 5.0f, "spawn count 0");
+        check(g.populations[0].entries[1].count == 9.0f, "spawn count 1");
+        check(g.populations[0].name.empty() || g.populations[0].name == "level_water", "pop name");
+    }
+
     // Optional: real package.
     if (argc > 1 && argv[1] && argv[1][0]) {
         cell::GameData g; std::string err;
@@ -171,7 +199,8 @@ int main(int argc, char** argv) {
             std::cout << "real package: " << g.total_resources << " resources, "
                       << g.archetypes.size() << " archetypes, " << g.look_tables.size()
                       << " look_tables, " << g.loot_tables.size() << " loottables, "
-                      << g.worlds.size() << " worlds\n";
+                      << g.populations.size() << " populations, " << g.random_spawns.size()
+                      << " random_spawns, " << g.worlds.size() << " worlds\n";
         } else {
             std::cerr << "real package decode failed: " << err << "\n";
             ++failures;
@@ -182,6 +211,6 @@ int main(int argc, char** argv) {
         std::cerr << failures << " cell_game_verify check(s) failed\n";
         return 1;
     }
-    std::cout << "cell_game_verify: 5 constructed-input checks PASS\n";
+    std::cout << "cell_game_verify: 6 constructed-input checks PASS\n";
     return 0;
 }

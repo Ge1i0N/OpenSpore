@@ -101,6 +101,40 @@ NamedResource named_resource(u32 id, const std::vector<u8>& d) {
     return r;
 }
 
+Population parse_population(u32 id, const std::vector<u8>& d) {
+    Population p;
+    p.id = id;
+    if (const char* n = naming::instance_name(id)) p.name = n;
+    if (d.size() < 16) return p;
+    p.type = le32(d.data());
+    u32 cnt = le32(d.data() + 8);
+    if (cnt == 0) return p;
+    size_t stride = (d.size() - 16) / cnt;
+    for (u32 k = 0; k < cnt; ++k) {
+        size_t at = 16 + static_cast<size_t>(k) * stride;
+        if (at + 0x30 > d.size()) break;
+        SpawnEntry e;
+        e.cell = le32(d.data() + at + 0x18);
+        e.count = le_f32(d.data() + at + 0x2C);
+        p.entries.push_back(e);
+    }
+    return p;
+}
+
+RandomSpawn parse_random_spawn(u32 id, const std::vector<u8>& d) {
+    RandomSpawn r;
+    r.id = id;
+    r.size = static_cast<u32>(d.size());
+    if (const char* n = naming::instance_name(id)) r.name = n;
+    for (size_t o = 0; o + 8 <= d.size(); o += 4) {
+        u32 v = le32(d.data() + o);
+        if (!naming::instance_name(v)) continue;
+        float w = le_f32(d.data() + o + 4);
+        if (w > 0.0f && w <= 1000.0f) r.entries.push_back(SpawnEntry{v, w});
+    }
+    return r;
+}
+
 bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
     naming::load();
     const auto& recs = p.records();
@@ -130,9 +164,9 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
         case kTypeCell: out.archetypes.push_back(parse_archetype(id, d)); break;
         case kTypeLootTable: out.loot_tables.push_back(parse_loot_table(id, d)); break;
         case kTypeLookTable: out.look_tables.push_back(parse_look_table(id, d)); break;
+        case kTypePopulate: out.populations.push_back(parse_population(id, d)); break;
+        case kTypeRandomCreature: out.random_spawns.push_back(parse_random_spawn(id, d)); break;
         case kTypeWorld: out.worlds.push_back(named_resource(id, d)); break;
-        case kTypeRandomCreature: out.random_creatures.push_back(named_resource(id, d)); break;
-        case kTypePopulate: out.populations.push_back(named_resource(id, d)); break;
         case kTypeStructure: out.structures.push_back(named_resource(id, d)); break;
         default: break;
         }

@@ -112,6 +112,32 @@ Steering weights (`docs/LOOKTABLE_FORMAT.md`), one per behaviour:
 `player_moving`, `look_up`, `default_look_table`. Entry types:
 `up/forward/left/right/pursue_target/flee_target/object/food/predator/destination/cursor/player`.
 
+## Spawn model — `populate` + `random_creature`
+
+These define **what cells appear in a level** — the direct input a playable stage needs.
+
+`populate` (23 resources, one per level: `level_water`, `level_plant`, `level_ice`,
+`level_rock`, `level_beach`, `level_random` and `_2`/`_bg` variants) is a 16-byte header
+`{type, ?, entryCount, 16}` followed by `entryCount` **64-byte entries**; each entry names a
+cell archetype id at `+0x18` and a spawn **count** (f32) at `+0x2C`:
+
+```
+level_water  entries: cell_food_L0 x5, 0x5a5c0f03 x8, 0x5a5c0f01 x20, 0x5a5c0f00 x30,
+                      0x5a5c0f03 x40, ...
+level_plant  entries: cell_food_L0 x5, 0x6316609e x8, 0x63166099 x16, 0x63166098 x24, ...
+level_water_bg entries: cell_jawhead x50, cell_puffish x200, cell_megamouth x300
+```
+
+`random_creature` (10) is an id/weight list; `neutralCells` names
+`NeutralCell_01/02/03` at weight 1.0.
+
+The unnamed ids (`0x5a5c0f00..03`, `0x63166098..9e`, `0x0e09bb72..75`, `0x0feb4d91..96`,
+`0x981a536c`) are real `cell` archetypes with **no display name and no registry name**.
+They come in **consecutive runs** (`…0F00/01/02/03`), so — like the cell-save field ids — they
+are **assigned ids, not FNV hashes** (FNV is not linear, so a suffix change cannot produce
+consecutive hashes). They are the food/plant/bubble prop tiers; their names are not recoverable
+from the shipped data.
+
 ## World biomes — `world` (13)
 
 `world_water`, `world_beach`, `world_ice`, `world_rock`, `world_plant`, `world_random`
@@ -134,8 +160,8 @@ CellGame.package
 ├── loottable        48  unlock/drop tables  → cell_unlock_* parts
 ├── look_table        9  steering weights per behaviour
 ├── world            13  biomes (water/beach/ice/rock/plant/random)
-├── random_creature  10  random spawn tables
-├── populate         23  spawn populations
+├── populate         23  per-level spawn lists (cell archetype id + count)
+├── random_creature  10  random spawn tables (NeutralCell_01..03)
 ├── structure       144  part layout records
 ├── advect           28  flow maps
 ├── prop              1  cell_properties   (17 named tuning curves)

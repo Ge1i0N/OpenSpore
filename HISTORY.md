@@ -29,7 +29,12 @@ A C++ reader now mirrors the Python decoder: `source/engine/cell_game.{h,cpp}` p
 look_tables, loottables, worlds/random_creature/populate/structure counts; names via
 `os::naming`). `cell_game_verify` (5 constructed-input checks) plus a real-package run decode
 442 resources / 189 archetypes / 9 look_tables / 48 loottables / 13 worlds — identical to the
-Python tool. Builds in the main target with 0 warnings.
+Python tool. Builds in the main target with 0 warnings. The spawn model is now decoded too:
+`populate` (23 per-level lists; 16-byte header + N×64 entries with a cell archetype id at
++0x18 and a spawn count at +0x2C) and `random_creature` (`neutralCells` -> NeutralCell_01..03).
+The unnamed spawn ids (`0x5a5c0f00..03`, `0x63166098..9e`, …) are real `cell` archetypes with
+no name in any registry and come in consecutive runs, so they are **assigned ids, not FNV** —
+their names are not in the shipped data.
 
 ## 2026-10-16 — cell-stage gameplay vocabulary + FNV-1 hash; save-field names proven external
 
