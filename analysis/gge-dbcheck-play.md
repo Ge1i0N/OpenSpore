@@ -94,6 +94,8 @@ vtable `0x147EF50` slot `+0x68` method. It reads each record's position from `re
 slot `+0x64`, which resolves to `DF6110`; `DE3C20` obtains a renderer/camera-related service
 through virtual slot `+0x58` before computing normalized screen placement. The direct-call list is
 empty because this is vtable dispatch; the concrete camera owner and runtime trigger remain Unknown.
+Instruction-level REA evidence shows the returned `+0x58` result is passed as the `this` object to
+`7C4250`; `805F90` supplies viewport state, and `DE3C20` applies the normalized screen transform.
 REA distinguishes this projection service from the controller's stored active-camera field:
 `DE46D0` obtains controller `+0x198` through `0067DCD0` slot `+0x50`, then returned-object slot
 `+0x38`, while `DE3C20` uses the getter's `+0x58` path. `DF6490` also uses `+0x58` for nearest

@@ -93,8 +93,10 @@ read/xref evidence maps `vtable +0x64` to `DF6110` (`ev_d9798b85c18d1c40463e43d2
 `DE3C20` slot `+0x58` and the runtime message that triggers this path remain Unknown.
 
 REA now separates the two native camera acquisition paths instead of merging them by field name.
-`DE3C20` calls `0067DCD0`, then the returned service's virtual slot `+0x58`; `7C4250` applies the
-matrix/vector transform and `805F90` supplies the viewport/rectangle state
+Instruction-level evidence shows `DE3C20` calls `0067DCD0`, loads the returned object's vtable,
+reads slot `+0x58`, and calls it; the returned camera/matrix result becomes the `this` object for
+`7C4250`. `805F90` then supplies the viewport/rectangle state. `DE3C20` combines those values into
+normalized screen coordinates with the observed `(+1)*0.5` and `0.5*(1-y)` style transforms
 (`ev_ba2f5a2d4cab60b689c15a3692dee19a26c74435d0cdbc96146c25a8b080bda7`,
 `ev_03f235d4936e9170ece6a22e251dc7b2bbf5513cf5ac5e00963b3b03c6c8220a`,
 `ev_5a64ad464337eea4c1d5be08a2abfea4b4fd511b5d988efe8e976f79e550be90`,
