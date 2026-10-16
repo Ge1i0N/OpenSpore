@@ -26,6 +26,23 @@ evidence now clarifies exactly what must produce that metadata:
 - `BB8C90` initializes serializer-backed `stars.db`, planet records and refill. `BB4D40` writes
   `stars.db.tmp` and renames it to `stars.db`; OpenSpore performs no such writes.
 
+`BB8C90`'s initialization checklist is now explicit: `BA9D50` gate first; obtain the wide
+`PlanetScripts` root through service `0x006B1F20`/slot28; choose a path/config branch from manager
+state (`+0x64` and path flag `+0x50`); configure metadata and manager serializers with descriptor
+roots `0x01689C50` / `0x0156C668`, tag `0x01A80D26`; obtain the planet-record path and configure
+the `planetRecords.pkp` service; then call `BB61C0` candidate refill. The function also initializes
+time/header fields and service-owned serializer state. A successful initialization body is not a
+proof that `stars.db` was present, usable, complete or post-load fixed up: the absent/branch paths
+and several service results remain distinct.
+
+For a caller-supplied native capture, the minimum useful observation bundle is therefore:
+`BA9D50` gate result; manager `+0x64/+0x50` path flags; explicit serializer root/manager/planet
+resource outcomes; root/index/context/class resource keys and decoded frame statuses; saved/candidate
+vector spans after refill; terrain/name/save/header observations; and whether `BB61C0` actually
+appended records. Missing any producer service is **Unknown**, not an empty Available list. The host
+snapshot format can carry the final typed rows, but it does not claim to carry these upstream
+service provenance facts yet.
+
 ## Why this is not attached
 
 The workspace has no original `stars.db` or save corpus, and requirements prohibit scanning user
