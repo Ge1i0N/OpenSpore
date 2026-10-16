@@ -7,6 +7,19 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — StarRecord values decode clean on 84,020 real records
+
+`--star-values` value-decodes every StarRecord body of `Game0.old` and `Game0` with
+`inspect_star_record` shapes: 42,010/42,010 pass, zero failures on both; mKeys all
+unique; positions all finite on a thin disk (X ±748.6/686.2, Y ±667.9, Z ±9.2);
+all 42,010 named, none empty; planet histogram {0: 41980, 5: 12, 3: 12, 12: 1, 1: 5}
+shifts with play, consistent with player-relevant `planetRecords.pkp` growth;
+7 distinct species keys; version pair present everywhere but opaque (hundreds of
+distinct wide u32 pairs, no semantics claimed); all 14 field IDs present on every
+record with zero unknown IDs — the schema is closed on real data.
+Verification: 6 constructed-input tests PASS; suite 21/21; `feature_map.py --check`
+and `docs_check.py` PASS. Reference resolution and catalogue publication untouched.
+
 ## 2026-10-16 — successive saves: galaxy fixed, progress classes grow
 
 The user played on: the slot now spans fresh → `Game0.old` → `Game0` plus six

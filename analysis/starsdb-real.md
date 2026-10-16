@@ -7,9 +7,10 @@
 > class stream walks envelope-to-envelope with **zero CRC-32/BZIP2 failures**
 > (46,225 envelopes checked), the root opens with the `0x01A80D26` tag and exactly
 > the six documented metadata field IDs, and the first StarRecord body is a
-> 14-field `0x01A80D26` frame. Field *semantics* (links resolution, StarRecord
-> values, catalogue publication) are still static-only: nothing here executes the
-> C++ readers or the original game.
+> 14-field `0x01A80D26` frame. All 42,010 StarRecord bodies of the two later saves
+> value-decode with zero shape failures (see below); reference *resolution* and
+> catalogue publication are still static-only: nothing here executes the C++
+> readers or the original game.
 
 ## How it was read
 
@@ -54,6 +55,34 @@ here — counts only, no field values. Reports: [audit/starsdb-real/](audit/star
 
 The StarRecord tail (`0x03F1389D/9E`) is the pair the C++ reader decodes as
 saved-game version major/minor; the other twelve are spans, not values, at this step.
+
+## StarRecord values (`--star-values`, aggregates only)
+
+Decoded on `Game0.old` and `Game0` (42,010 envelopes each); shapes mirror
+`inspect_star_record` field for field. No per-record retention beyond samples.
+
+| check | Game0.old | Game0 |
+|---|---|---|
+| bodies passing all shape checks | 42,010 / 42,010 | 42,010 / 42,010 |
+| `mKey` unique | 42,010 | 42,010 |
+| positions finite | all; disk X ±748.6/686.2, Y ±667.9, Z ±9.2 (Game0) | all |
+| names present / empty | 42,010 + 0 | 42,010 + 0 |
+| `planet_count` histogram | {0: 41985, 5: 10, 3: 10, 12: 1, 1: 4} | {0: 41980, 5: 12, 3: 12, 12: 1, 1: 5} |
+| distinct species keys | 7 | 7 |
+| field presence | all 14 IDs on all 42,010 records; zero unknown IDs | same |
+
+Top values (Game0): type 6 (24,232) / 4 (14,491) / 5 (1,894); tech_level 1 (33,142);
+flags 0 (28,070) / 4096 (9,238); empire `0xFFFFFFFF` (37,499, i.e. none) vs one
+empire with 2,401 stars and singletons after that. The version pair occurs in
+6,931 distinct combinations; retained as count plus sample only.
+
+Readings: the galaxy is a thin disk (Z ±9 against X/Y ±700); nearly every star
+records 0 planets while a few dozen record 1–12 — consistent with
+`planetRecords.pkp` holding only player-relevant planets (97 → 114 rows across
+the same two saves). The version pair `0x03F1389D/9E` is present on every record
+but spans hundreds of distinct wide-ranging u32 pairs — retained opaque, exactly
+as the reader does; no version semantics claimed. The 14/14 presence with zero
+unknown IDs closes the schema: no hidden StarRecord fields on real data.
 
 ## What this confirms and what it does not
 

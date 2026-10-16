@@ -66,6 +66,39 @@ class StarsdbRealDecodeTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             dec.read_index(b"NOPE" + bytes(0x60))
 
+    def test_star_values(self):
+        import struct as st
+
+        def frame(fields):
+            body = b""
+            directory = b""
+            for fid, payload in fields:
+                directory += be(fid, len(payload))
+                body += payload
+            return be(0x01A80D26, 4 + len(directory) + len(body), len(fields)) + directory + body
+
+        rec1 = frame([(0x03D58BF2, be(7)), (0x03D58BF1, st.pack(">fff", 1.0, 2.0, 3.0)),
+                      (0x03D58BF4, be(3) + "AbC".encode("utf-16-le")), (0x051A1188, b"\x05"),
+                      (0xDEADBEEF, b"\x00\x01")])
+        rec2 = frame([(0x03D58BF2, be(9)), (0x03D58BF1, st.pack(">fff", 4.0, 5.0, 6.0)),
+                      (0x03D58BF5, be(1, 2, 3))])
+        stream = b""
+        envs = []
+        for token, rec in ((0x1001, rec1), (0x1002, rec2)):
+            envs.append({"offset": len(stream), "total": 12 + len(rec)})
+            stream += be(12 + len(rec), 0, token) + rec
+        # decode takes envs as given (CRC checking lives in walk_envelopes, tested above).
+        agg = dec.decode_star_values(stream, envs)
+        self.assertEqual((agg["value_ok"], agg["value_fail"]), (2, 0))
+        self.assertEqual(agg["mkeys_unique"], 2)
+        self.assertEqual(agg["bbox"], [1.0, 4.0, 2.0, 5.0, 3.0, 6.0])
+        self.assertEqual(agg["planets"], {5: 1})
+        self.assertEqual(agg["names_present"], 1)
+        self.assertEqual(agg["field_presence"]["0x03d58bf2"], 2)
+        self.assertEqual(agg["unknown_ids"], ["0xdeadbeef"])
+        bad = dec.decode_star_values(b"\x00" * 4, [{"offset": 0, "total": 4}])
+        self.assertEqual(bad["value_fail"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

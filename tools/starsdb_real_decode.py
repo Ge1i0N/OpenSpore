@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import struct
 import sys
 from pathlib import Path
@@ -167,10 +168,143 @@ def parse_frame_header(payload: bytes, at: int = 0):
             "field_ids": [f"0x{f:08x}" for f, _ in fields]}, ""
 
 
+# StarRecord field IDs, mirroring source/engine/starsdb.cpp inspect_star_record.
+SCALARS = {0x03D58BF2: "key", 0x03E95E04: "type", 0x03D58BF6: "tech_level",
+           0x03D58BF3: "flags", 0x03D58BF7: "starter_world_id",
+           0x03F1389B: "empire_id", 0x03F1389A: "last_observed_time",
+           0x03F1389D: "saved_game_version_major", 0x03F1389E: "saved_game_version_minor"}
+POS_ID, NAME_ID, SPECIES_ID = 0x03D58BF1, 0x03D58BF4, 0x03D58BF5
+STAMP_ID, PLANETS_ID = 0x03F1389C, 0x051A1188
+
+
+def ascii_safe(units) -> str:
+    return "".join(chr(u) if 32 <= u < 127 else "?" for u in units)
+
+
+def decode_star_values(stream: bytes, envs: list) -> dict:
+    # Value decode of every StarRecord envelope body; shapes mirror inspect_star_record.
+    # Aggregates only: no per-record retention beyond small samples.
+    agg: dict = {"envelopes": len(envs), "value_ok": 0, "value_fail": 0,
+                 "mkeys": set(), "bbox": None, "nonfinite_positions": 0,
+                 "planets": {}, "names_present": 0, "names_empty": 0,
+                 "name_samples": [], "species": set(), "saved_versions": set(),
+                 "distinct": {}, "field_presence": {}, "unknown_ids": set()}
+    for e in envs:
+        body = stream[e["offset"] + 12:e["offset"] + e["total"]]
+        frame, err = parse_frame_header(body, 0)
+        if frame is None or not frame["is_object_tag"]:
+            agg["value_fail"] += 1
+            continue
+        pos = 12 + 8 * frame["count"]
+        ok, vals = True, {}
+        # Walk the directory with real sizes (ids above are display only).
+        spans = []
+        for i in range(frame["count"]):
+            fid = be32(body, 12 + 8 * i)
+            size = be32(body, 16 + 8 * i)
+            if pos + size > len(body):
+                ok = False
+                break
+            spans.append((fid, pos, size))
+            pos += size
+        if not ok:
+            agg["value_fail"] += 1
+            continue
+        for fid, at, size in spans:
+            if size == 0:
+                continue  # GA skips zero-size fields
+            agg["field_presence"][f"0x{fid:08x}"] = agg["field_presence"].get(f"0x{fid:08x}", 0) + 1
+            if fid not in SCALARS and fid not in (POS_ID, NAME_ID, SPECIES_ID, STAMP_ID, PLANETS_ID):
+                agg["unknown_ids"].add(f"0x{fid:08x}")
+                continue
+            if fid in SCALARS:
+                if size != 4:
+                    ok = False
+                    break
+                vals[SCALARS[fid]] = be32(body, at)
+            elif fid == POS_ID:
+                if size != 12:
+                    ok = False
+                    break
+                vals["position"] = list(struct.unpack(">fff", body[at:at + 12]))
+            elif fid == NAME_ID:
+                if size < 4:
+                    ok = False
+                    break
+                count = be32(body, at)
+                if count > 1048576 or count != (size - 4) // 2 or (size - 4) % 2:
+                    ok = False
+                    break
+                units = struct.unpack("<%dH" % count, body[at + 4:at + 4 + 2 * count]) if count else ()
+                vals["name"] = ascii_safe(units)
+            elif fid == SPECIES_ID:
+                if size != 12:
+                    ok = False
+                    break
+                vals["species"] = (be32(body, at + 8), be32(body, at + 4), be32(body, at))
+            elif fid == STAMP_ID:
+                if size != 36:
+                    ok = False
+                    break
+                vals["has_stamp"] = True
+            elif fid == PLANETS_ID:
+                if size != 1:
+                    ok = False
+                    break
+                vals["planets"] = body[at]
+        if not ok:
+            agg["value_fail"] += 1
+            continue
+        agg["value_ok"] += 1
+        if "key" in vals:
+            agg["mkeys"].add(vals["key"])
+        if "position" in vals:
+            p = vals["position"]
+            if all(math.isfinite(v) for v in p):
+                box = agg["bbox"]
+                agg["bbox"] = [p[0], p[0], p[1], p[1], p[2], p[2]] if box is None else [
+                    min(box[0], p[0]), max(box[1], p[0]),
+                    min(box[2], p[1]), max(box[3], p[1]),
+                    min(box[4], p[2]), max(box[5], p[2])]
+            else:
+                agg["nonfinite_positions"] += 1
+        if "planets" in vals:
+            agg["planets"][vals["planets"]] = agg["planets"].get(vals["planets"], 0) + 1
+        if "name" in vals:
+            if vals["name"]:
+                agg["names_present"] += 1
+                if len(agg["name_samples"]) < 5:
+                    agg["name_samples"].append(vals["name"][:48])
+            else:
+                agg["names_empty"] += 1
+        if "species" in vals:
+            agg["species"].add(vals["species"])
+        if "saved_game_version_major" in vals or "saved_game_version_minor" in vals:
+            agg["saved_versions"].add((vals.get("saved_game_version_major"),
+                                       vals.get("saved_game_version_minor")))
+        for name in ("type", "tech_level", "flags", "empire_id"):
+            if name in vals:
+                hist = agg["distinct"].setdefault(name, {})
+                hist[vals[name]] = hist.get(vals[name], 0) + 1
+    agg["mkeys_unique"] = len(agg["mkeys"])
+    agg["mkeys"] = []  # count retained, 42k keys are not
+    agg["unknown_ids"] = sorted(agg["unknown_ids"])
+    agg["species_distinct"] = len(agg["species"])
+    agg["species"] = sorted(agg["species"])[:5]
+    ordered_versions = sorted(v for v in agg["saved_versions"] if v != (None, None))
+    agg["saved_versions"] = {"distinct": len(ordered_versions),
+                             "sample": ordered_versions[:10],
+                             "note": "opaque words; full set omitted"}
+    agg["distinct"] = {k: sorted(v.items(), key=lambda kv: -kv[1])[:8] for k, v in agg["distinct"].items()}
+    return agg
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="structural decode of one real stars.db")
     ap.add_argument("file", help="explicitly selected stars.db; nothing is scanned")
     ap.add_argument("--json-out", default="", help="write the machine-readable report here")
+    ap.add_argument("--star-values", action="store_true",
+                    help="also value-decode every StarRecord envelope (aggregates only)")
     args = ap.parse_args()
     path = Path(args.file)
     rep: dict = {"file": str(path)}
@@ -246,6 +380,17 @@ def main() -> int:
                 body_at = envs[0]["offset"] + 12
                 frame, ferr = parse_frame_header(stream, body_at)
                 entry["first_starrecord_frame"] = frame if frame else ferr
+                if args.star_values:
+                    values = decode_star_values(stream, envs)
+                    rep["star_values"] = values
+                    out(f"star values: ok={values['value_ok']} fail={values['value_fail']} "
+                        f"mkeys_unique={values['mkeys_unique']} "
+                        f"nonfinite_positions={values['nonfinite_positions']} "
+                        f"names={values['names_present']}+{values['names_empty']}empty "
+                        f"planets={values['planets']}")
+                    if values["value_fail"]:
+                        notes.append(f"StarRecord value decode failed on "
+                                     f"{values['value_fail']} envelopes")
         rep["classes"].append(entry)
         out(f"class 0x{class_id:08x} x{want_n}: {entry.get('envelopes')} envelopes, "
             f"crc_fail={entry.get('crc_fail', '?')}")
