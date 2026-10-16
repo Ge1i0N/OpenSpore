@@ -1,0 +1,36 @@
+{
+  "file": "C:\\Users\\gelion\\AppData\\Roaming\\SPORE\\Games\\Game0\\\u041a\u0430\u043c\u0437\u0430.spo",
+  "size": 19683,
+  "header": {
+    "magic": "0x46504244",
+    "version": 3,
+    "minor": 0,
+    "count": 12,
+    "alt_offset": 0,
+    "index_size": 344,
+    "field_3c": 3,
+    "index_offset_raw": 19339
+  },
+  "index_offset": 19339,
+  "strict_3_0_index3": true,
+  "kind": 4,
+  "index_formula": {
+    "prefix": 8,
+    "stride": 28,
+    "expected_size": 344
+  },
+  "record_count": 12,
+  "keys_shown": 8,
+  "keys": [
+    "0x01897c18,0x01897c18,0x01897c18",
+    "0x0179d304,0x0179d310,0x00000000",
+    "0x0179d304,0x01906183,0x00000000",
+    "0x0179d304,0x018eb5c7,0x00000000",
+    "0x0179d304,0x018eb4b7,0x00000000",
+    "0x0179d304,0x018eb45e,0x00000000",
+    "0x0179d304,0x02c21781,0x00000000",
+    "0x0179d304,0x03275728,0x00000000"
+  ],
+  "wanted": {},
+  "verdict": "STARSDB_SHAPED"
+}

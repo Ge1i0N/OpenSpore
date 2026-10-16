@@ -1,0 +1,36 @@
+{
+  "file": "C:\\Users\\gelion\\AppData\\Roaming\\SPORE\\Games\\Game0\\lastSave.pld",
+  "size": 144965,
+  "header": {
+    "magic": "0x46504244",
+    "version": 3,
+    "minor": 0,
+    "count": 23,
+    "alt_offset": 0,
+    "index_size": 564,
+    "field_3c": 3,
+    "index_offset_raw": 144401
+  },
+  "index_offset": 144401,
+  "strict_3_0_index3": true,
+  "kind": 5,
+  "index_formula": {
+    "prefix": 12,
+    "stride": 24,
+    "expected_size": 564
+  },
+  "record_count": 23,
+  "keys_shown": 8,
+  "keys": [
+    "0x28e2e471,0x00b1b104,0x4084b100",
+    "0x28e2e463,0x00b1b104,0x4084af00",
+    "0x28e2e466,0x00b1b104,0x4084af00",
+    "0x28e2e461,0x00b1b104,0x4084a100",
+    "0x28e2e462,0x00b1b104,0x4084b100",
+    "0x28e2e469,0x00b1b104,0x4084af00",
+    "0x28e2e464,0x00b1b104,0x4084a100",
+    "0x28e2e467,0x00b1b104,0x4084a100"
+  ],
+  "wanted": {},
+  "verdict": "STARSDB_SHAPED"
+}

@@ -4,18 +4,27 @@
 > tree are all DBPF **version 2**, minor 0, `field_3c` 3. The read-only adapter
 > (`source/engine/starsdb_dbpf.cpp`) requires exactly 3.0/index3 and refuses them —
 > the version boundary is now confirmed on real files, not just constructed inputs.
-> One record in `EditorOfflineUser.db` carries the exact documented save-root triple
-> `(0x01897C18, 0x01897C18, 0x01897C18)`, so the root identity survived beta to GA.
-> No GA save has been observed yet; nothing here authorizes treating 2.0 bytes as 3.0.
+> **A fresh GA save (created 2026-10-16, `%APPDATA%/SPORE/Games/Game0/`) confirms the
+> other side: `stars.db` is DBPF 3.0/index3 with the exact root and context keys the
+> adapter looks up, and `planetRecords.pkp` carries 65 records in the exact
+> type/group/instance-stride space the planet reader expects.** No `stars.db` existed
+> on either disk before; the corpus is now one fresh (+ one older) GA save, early game.
 
 ## Files (read-only; originals untouched on their own disk)
 
 | file | size | version | records | verdict |
 |---|---|---|---|---|
-| `Games/EditorOfflineUser.db` | 180 B | 2.0 | 1 | DBPF_OK_NOT_STARSDB |
-| `Games/planetRecords.pkp` | 96 B | 2.0 | 0 | DBPF_OK_NOT_STARSDB (empty DB) |
-| `Games/planetRecords.pkt` | 96 B | 2.0 | 0 | DBPF_OK_NOT_STARSDB (empty DB) |
-| `Games/snapshot.snp.pld` | 1,386,805 B | 2.0 | 285 | DBPF_OK_NOT_STARSDB |
+| `Games/EditorOfflineUser.db` (beta) | 180 B | 2.0 | 1 | DBPF_OK_NOT_STARSDB |
+| `Games/planetRecords.pkp` (beta) | 96 B | 2.0 | 0 | DBPF_OK_NOT_STARSDB (empty DB) |
+| `Games/planetRecords.pkt` (beta) | 96 B | 2.0 | 0 | DBPF_OK_NOT_STARSDB (empty DB) |
+| `Games/snapshot.snp.pld` (beta) | 1,386,805 B | 2.0 | 285 | DBPF_OK_NOT_STARSDB |
+| `Game0/stars.db` (GA fresh) | 2,408,029 B | 3.0/index3 | 7 | STARSDB_SHAPED, root + context FOUND |
+| `Game0/planetRecords.pkp` (GA fresh) | 22,277 B | 3.0/index3 | 65 | STARSDB_SHAPED, type 0x05220CB8/group 1 |
+| `Game0/planetRecords.pkt` (GA fresh) | 96 B | 2.0 | 0 | DBPF_OK_NOT_STARSDB (empty DB) |
+| `Game0/GGEUserData.dat` (GA fresh) | 408 B | 3.0/index3 | 1 | STARSDB_SHAPED, root triple |
+| `Game0/PlanetScripts.pld` (GA fresh) | 246,046 B | 3.0/index3 | 249 | STARSDB_SHAPED |
+| `Game0/lastSave.pld` (GA, 2026-09-27) | 144,965 B | 3.0/index3 | 23 | STARSDB_SHAPED |
+| `Game0/*.spo` creature (GA fresh) | 19,683 B | 3.0/index3 | 12 | STARSDB_SHAPED |
 
 Machine-readable reports: [audit/save-probe/](audit/save-probe/) (one JSON per file).
 
@@ -36,11 +45,29 @@ Machine-readable reports: [audit/save-probe/](audit/save-probe/) (one JSON per f
   prefix/stride arithmetic holds on 2.0 data too, at least structurally. First
   record group `0x4084B000`, instance `0x278361C2` (same instance family as the
   `PlanetCache` file names). Payloads not decoded.
-* `planetRecords.pkp/.pkt`: valid empty DBPF 2.0 headers (count 0, no index).
+* `planetRecords.pkp/.pkt` (beta): valid empty DBPF 2.0 headers (count 0, no index).
   Real [planet-record](planet-record.md) containers with no rows — not absent
   format, absent content.
-* No `stars.db` anywhere on either disk (Steam install or beta tree). The
-  `starsdb` wire/context readers therefore still have no real-save corpus.
+* GA fresh save (`%APPDATA%/SPORE/Games/Game0/`, created 2026-10-16, early game):
+  * `stars.db`: 3.0/index3, kind 4, 7 records. Root `(0x01897C18 x3)` FOUND (unique)
+    and context index `(0x0179D304, 0x0179D310, 0)` FOUND (unique), plus five class
+    records under instance `0x0179D304` (types `0x0424EA07/0x018EB9D2/0x03A3AC9F/`
+    `0x03E4353C/0x042232A1`) — exactly the root → index → per-class shape
+    `inspect_dbpf_context` consumes. The adapter's exact-key design is confirmed
+    on a real save; execution of the readers against it is still future work
+    (needs an MSVC build for the `*_inspect` tools).
+  * `planetRecords.pkp`: 3.0/index3, kind 7, **65 records, all type `0x05220CB8`
+    group 1**, instances `0x044EF041, 0x034EF041, 0x024EF041, …` — the
+    `star.mKey + i·0x01000000` stride from [planet-record](planet-record.md),
+    confirmed byte-for-byte on a real file.
+  * `GGEUserData.dat`: 3.0/index3, one record = the root triple again.
+  * `PlanetScripts.pld` (249 records, kind 5) and `lastSave.pld` (23 records,
+    kind 5): 3.0/index3, record type `0x00B1B104` — same family as the beta
+    snapshot's. Payloads not decoded.
+  * Creature `.spo`: 3.0/index3, 12 records, kind 4. Not examined further here.
+* No `stars.db` existed on either disk before this save. The corpus is now two GA
+  saves (fresh + 2026-09-27 `Game0.old`), both early game — a save per stage would
+  widen it, but none was requested.
 
 ## Tool
 
@@ -57,5 +84,7 @@ tests: `tools/tests/test_real_save_probe.py` (no game data required).
 * `Cells/` in the beta UserData is empty; `Creatures/` holds 3 editor-model
   files (one instance `0x28B152FA` in three type/group variants) — noted for the
   creature-stage work, not examined here.
-* GA saves (DBPF 3.0, `stars.db`, `*.spore_*`?) remain unobserved: no profile
-  scan was run and none is authorized by this step.
+* GA saves are now observed (one fresh + one older, both early game, both 3.0),
+  but the corpus is still narrow: one galaxy each, no per-stage saves, no profile
+  scan was run and none is authorized by this step. Key-shape confirmation is not
+  payload decoding — no record bytes were decompressed or parsed here.

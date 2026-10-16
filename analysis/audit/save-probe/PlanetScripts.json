@@ -1,0 +1,36 @@
+{
+  "file": "C:\\Users\\gelion\\AppData\\Roaming\\SPORE\\Games\\Game0\\PlanetScripts.pld",
+  "size": 246046,
+  "header": {
+    "magic": "0x46504244",
+    "version": 3,
+    "minor": 0,
+    "count": 249,
+    "alt_offset": 0,
+    "index_size": 5988,
+    "field_3c": 3,
+    "index_offset_raw": 240058
+  },
+  "index_offset": 240058,
+  "strict_3_0_index3": true,
+  "kind": 5,
+  "index_formula": {
+    "prefix": 12,
+    "stride": 24,
+    "expected_size": 5988
+  },
+  "record_count": 249,
+  "keys_shown": 8,
+  "keys": [
+    "0x28fcb154,0x00b1b104,0x4084b000",
+    "0x28fcb155,0x00b1b104,0x4084b000",
+    "0x28fcb156,0x00b1b104,0x4084b000",
+    "0x28fcb157,0x00b1b104,0x4084b000",
+    "0x28fcb158,0x00b1b104,0x4084b000",
+    "0x28fcb159,0x00b1b104,0x4084b000",
+    "0x28fcb15a,0x00b1b104,0x4084b000",
+    "0x28fcb15b,0x00b1b104,0x4084b000"
+  ],
+  "wanted": {},
+  "verdict": "STARSDB_SHAPED"
+}

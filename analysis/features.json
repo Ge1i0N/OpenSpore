@@ -1262,7 +1262,7 @@
         {
           "name": "save/load",
           "status": "todo",
-          "note": "Real beta saves probed read-only (all DBPF 2.0; 3.0-only adapter correctly refuses; root triple corroborated). No GA save corpus yet. analysis/real-saves.md"
+          "note": "Real key spaces confirmed on a fresh GA save (stars.db 3.0 root+context+5 classes; planetRecords 65 x type 0x05220CB8/group 1 on the exact stride). No payload decoding or load path yet. analysis/real-saves.md"
         },
         {
           "name": "galaxy gen",

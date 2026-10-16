@@ -1,0 +1,38 @@
+{
+  "file": "C:\\Users\\gelion\\AppData\\Roaming\\SPORE\\Games\\Game0\\planetRecords.pkp",
+  "size": 22277,
+  "header": {
+    "magic": "0x46504244",
+    "version": 3,
+    "minor": 0,
+    "count": 65,
+    "alt_offset": 0,
+    "index_size": 1316,
+    "field_3c": 3,
+    "index_offset_raw": 20961
+  },
+  "index_offset": 20961,
+  "strict_3_0_index3": true,
+  "kind": 7,
+  "index_formula": {
+    "prefix": 16,
+    "stride": 20,
+    "expected_size": 1316
+  },
+  "record_count": 65,
+  "keys_shown": 10,
+  "keys": [
+    "0x00000000,0x05220cb8,0x00000001",
+    "0x044ef041,0x05220cb8,0x00000001",
+    "0x034ef041,0x05220cb8,0x00000001",
+    "0x024ef041,0x05220cb8,0x00000001",
+    "0x014ef041,0x05220cb8,0x00000001",
+    "0x004ef041,0x05220cb8,0x00000001",
+    "0x0478e041,0x05220cb8,0x00000001",
+    "0x0378e041,0x05220cb8,0x00000001",
+    "0x0278e041,0x05220cb8,0x00000001",
+    "0x04b57059,0x05220cb8,0x00000001"
+  ],
+  "wanted": {},
+  "verdict": "STARSDB_SHAPED"
+}

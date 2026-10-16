@@ -7,6 +7,21 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — fresh GA save confirms the adapter key spaces
+
+The user created a new save in-game; `%APPDATA%/SPORE/Games/Game0/` now holds a real
+GA corpus. `stars.db` (2.4 MB) is DBPF 3.0/index3, kind 4, 7 records: the exact root
+triple and context index the adapter looks up are both FOUND uniquely, plus five class
+records under instance `0x0179D304` — the root → index → per-class shape
+`inspect_dbpf_context` consumes. Fresh `planetRecords.pkp` holds 65 records, all type
+`0x05220CB8`/group 1 on the exact `mKey + i·0x01000000` instance stride the planet
+reader expects. `GGEUserData.dat` repeats the root triple; `PlanetScripts.pld`,
+`lastSave.pld` and a creature `.spo` are 3.0-shaped, payloads not decoded. Reports in
+`analysis/audit/save-probe/`, findings folded into `analysis/real-saves.md`.
+Verification: probe reruns green on all files; `feature_map.py --check` and
+`docs_check.py` PASS; Python suite stays 15/15. Reader execution against the real
+save still needs an MSVC build; the corpus is two early-game saves, no per-stage saves.
+
 ## 2026-10-16 — real-save probe on beta UserData
 
 Staged Steam data reproduces the corpus exactly (`pkg_kinds.py`: 57 files / 150,945

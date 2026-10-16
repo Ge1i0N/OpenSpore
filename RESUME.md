@@ -185,6 +185,10 @@ test with `-w -devDirs`; retain evidence and commit.
   (adapter correctly refuses); `EditorOfflineUser.db`'s single record carries the
   documented root triple `(0x01897C18 x3)`. Reports in `analysis/audit/save-probe/`.
   `analysis/real-saves.md`; constructed-input tests pass without game data.
+- Fresh GA save (user-created 2026-10-16) confirms the key spaces on real 3.0 data:
+  `stars.db` has the exact root + context keys plus five class records; fresh
+  `planetRecords.pkp` holds 65 records of type `0x05220CB8`/group 1 on the exact
+  `mKey + i·0x01000000` instance stride. Reports in `analysis/audit/save-probe/`.
 
 ## Next, in order
 

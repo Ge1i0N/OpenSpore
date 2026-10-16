@@ -1,0 +1,38 @@
+{
+  "file": "C:\\Users\\gelion\\AppData\\Roaming\\SPORE\\Games\\Game0\\stars.db",
+  "size": 2408029,
+  "header": {
+    "magic": "0x46504244",
+    "version": 3,
+    "minor": 0,
+    "count": 7,
+    "alt_offset": 0,
+    "index_size": 204,
+    "field_3c": 3,
+    "index_offset_raw": 2407825
+  },
+  "index_offset": 2407825,
+  "strict_3_0_index3": true,
+  "kind": 4,
+  "index_formula": {
+    "prefix": 8,
+    "stride": 28,
+    "expected_size": 204
+  },
+  "record_count": 7,
+  "keys_shown": 7,
+  "keys": [
+    "0x01897c18,0x01897c18,0x01897c18",
+    "0x0179d304,0x0179d310,0x00000000",
+    "0x0179d304,0x0424ea07,0x00000000",
+    "0x0179d304,0x018eb9d2,0x00000000",
+    "0x0179d304,0x03a3ac9f,0x00000000",
+    "0x0179d304,0x03e4353c,0x00000000",
+    "0x0179d304,0x042232a1,0x00000000"
+  ],
+  "wanted": {
+    "0x0179d304,0x0179d310,0x00000000": "FOUND",
+    "0x01897c18,0x01897c18,0x01897c18": "FOUND"
+  },
+  "verdict": "STARSDB_SHAPED"
+}

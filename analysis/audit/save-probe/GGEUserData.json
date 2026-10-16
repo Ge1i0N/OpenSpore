@@ -1,0 +1,29 @@
+{
+  "file": "C:\\Users\\gelion\\AppData\\Roaming\\SPORE\\Games\\Game0\\GGEUserData.dat",
+  "size": 408,
+  "header": {
+    "magic": "0x46504244",
+    "version": 3,
+    "minor": 0,
+    "count": 1,
+    "alt_offset": 0,
+    "index_size": 36,
+    "field_3c": 3,
+    "index_offset_raw": 372
+  },
+  "index_offset": 372,
+  "strict_3_0_index3": true,
+  "kind": 7,
+  "index_formula": {
+    "prefix": 16,
+    "stride": 20,
+    "expected_size": 36
+  },
+  "record_count": 1,
+  "keys_shown": 1,
+  "keys": [
+    "0x01897c18,0x01897c18,0x01897c18"
+  ],
+  "wanted": {},
+  "verdict": "STARSDB_SHAPED"
+}
