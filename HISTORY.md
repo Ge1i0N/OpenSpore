@@ -24,6 +24,13 @@ property keys (`time_dilation`→`0x18B75C47`). The cell stage is **entirely dat
 `analysis/audit/cell-game.json`; doc `analysis/cell-game.md`. The 107 cell-save field ids are
 **not** in any FNV registry (they look like per-class sequential property indices).
 
+A C++ reader now mirrors the Python decoder: `source/engine/cell_game.{h,cpp}` parses a
+`CellGame.package` (archetypes with template id/display/part count + positional float slots,
+look_tables, loottables, worlds/random_creature/populate/structure counts; names via
+`os::naming`). `cell_game_verify` (5 constructed-input checks) plus a real-package run decode
+442 resources / 189 archetypes / 9 look_tables / 48 loottables / 13 worlds — identical to the
+Python tool. Builds in the main target with 0 warnings.
+
 ## 2026-10-16 — cell-stage gameplay vocabulary + FNV-1 hash; save-field names proven external
 
 Continued the semantic hunt for the 107 cell-save field ids. Established:

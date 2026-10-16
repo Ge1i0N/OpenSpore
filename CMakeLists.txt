@@ -135,6 +135,7 @@ set(OS_SOURCES
   source/engine/gge_star_scene.cpp
   source/engine/game_stages.cpp
   source/engine/cell_save.cpp
+  source/engine/cell_game.cpp
   source/engine/console.cpp
   source/engine/pkg.cpp
   source/engine/refpack.cpp
@@ -281,6 +282,12 @@ add_executable(cell_save_dump EXCLUDE_FROM_ALL tools/cell_save_dump.cpp
 target_include_directories(cell_save_dump PRIVATE source)
 target_compile_definitions(cell_save_dump PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_link_libraries(cell_save_dump PRIVATE user32 gdi32)
+add_executable(cell_game_verify EXCLUDE_FROM_ALL tools/cell_game_verify.cpp
+  source/engine/cell_game.cpp source/engine/refpack.cpp source/engine/log.cpp
+  source/engine/naming.cpp source/engine/pkg.cpp)
+target_include_directories(cell_game_verify PRIVATE source)
+target_compile_definitions(cell_game_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_link_libraries(cell_game_verify PRIVATE user32 gdi32)
 add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_inspect PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp

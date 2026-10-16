@@ -1169,6 +1169,11 @@
           "name": "intra-resource repeated key",
           "status": "done",
           "note": "10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original)."
+        },
+        {
+          "name": "cell game data (CellGame.package)",
+          "status": "done",
+          "note": "Cell stage is data-defined: 442 resources named by FNV-1-lower (cell 0xDFAD9F51, structure, world, look_table, loottable, globals). Decoded 189 archetypes (400-B record, UTF-16 display names), 48 loottables (part-unlock), 9 look_tables, 13 worlds, 10 random_creature, 23 populate, cell_properties globals (17 named tuning curves) and the OLE2 xls animation table. tools/cell_game.py + source/engine/cell_game.* (cell_game_verify 5/5). analysis/cell-game.md"
         }
       ]
     },
@@ -1222,7 +1227,7 @@
         {
           "name": "cell stage",
           "status": "partial",
-          "note": "Game_Cell skeleton driver attached to CellGame (tick counter, no simulation). analysis/game-stages.md"
+          "note": "Game_Cell skeleton driver attached to CellGame (tick counter, no simulation). CellGame.package data model decoded (189 archetypes, 48 loottables, 9 look_tables, 13 worlds, named globals) as tools/cell_game.py + source/engine/cell_game.*. analysis/cell-game.md"
         },
         {
           "name": "creature stage",
