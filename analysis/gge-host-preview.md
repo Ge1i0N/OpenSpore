@@ -32,8 +32,9 @@ Observed controlled log:
 ```
 
 The click is injected by `input::inject_click`, latched by the normal frame loop and consumed by
-`StarUiScene::pick`; it is not a parallel test-only hit function. The result intentionally ends at
-host identity: no DF7BF0/DF7AC0, CommandID, selected StarRecord or state transition is called.
+`StarUiScene::pick`; it is not a parallel test-only hit function. The selected card receives a
+visible host-only border and identity label. The result intentionally ends at host identity: no
+DF7BF0/DF7AC0, CommandID, selected StarRecord or state transition is called.
 
 ## Boundary
 
