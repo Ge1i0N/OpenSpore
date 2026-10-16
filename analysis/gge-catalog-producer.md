@@ -107,6 +107,16 @@ the `+0x58` service for nearest-record selection/picking
 (`ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1`). The static binary
 therefore does not establish that controller `+0x198` and the projection service are identical.
 
+REA also identifies the UI-bounds acquisition as a different registry path, not another camera
+getter. `DF6110` calls `00810650(0x02E5A4A8,0)`. The wrapper forwards through the registry object at
+`+0x14` to `008102A0`; that lookup walks registered services, queries interface `0xEEEE8218` at
+service slot `+0x0C`, compares the requested ID through slot `+0x1C`, and optionally invokes slot
+`+0xF0` (`ev_d2b10723dab7915c5fb7ecb22a4c7d132a0df5ffa003d1792dd8fdc968ec13c8`,
+`ev_a8cf6c11bc9c47ccba1819b66f0a798e410315bff6845c2ab36ff099356d25ff`). The concrete service
+behind ID `0x02E5A4A8` and its semantic name remain Unknown. `DE3C20` therefore uses global
+`0x015FD8B0`/slot `+0x58`, while `DF6110` uses the registry ID plus `805F90` viewport state and
+service slots `+0x34/+0x38`; neither route is synthesized as the other.
+
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
 (`ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714`); the reference-only

@@ -100,6 +100,11 @@ REA distinguishes this projection service from the controller's stored active-ca
 `DE46D0` obtains controller `+0x198` through `0067DCD0` slot `+0x50`, then returned-object slot
 `+0x38`, while `DE3C20` uses the getter's `+0x58` path. `DF6490` also uses `+0x58` for nearest
 record selection. Their identity is therefore not assumed equivalent in the host.
+REA also separates the UI-bounds service used by `DF6110`: it is acquired through registry lookup
+`00810650(0x02E5A4A8,0)`, whose `008102A0` implementation queries interface `0xEEEE8218` and
+matches the requested service ID. `DF6110` then uses that service's `+0x34/+0x38` values together
+with `805F90` viewport state. The service identity is Unknown; it is not treated as the projection
+camera or controller camera.
 This is static shipped-artifact evidence, not an observation of a running GA process.
 The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
 `DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence

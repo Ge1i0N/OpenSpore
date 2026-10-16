@@ -65,6 +65,9 @@
       "projection_formula_observed": "7c4250 matrix result plus 805f90 viewport; normalized (+1)*0.5 and 0.5*(1-y) transform",
       "camera_identity": "not established; separate static acquisition paths",
       "nearest_record_picker": "0x00df6490 uses projection service +0x58",
+      "ui_bounds_service_lookup": "0x00df6110 -> 0x00810650(0x02e5a4a8,0) -> registry +0x14 -> 0x008102a0",
+      "ui_bounds_interface_query": "0xeeee8218 via service +0x0c; ID comparison +0x1c; optional +0xf0",
+      "ui_bounds_service_identity": "Unknown",
       "direct_df6010_callers": "none resolved; Play Spore vtable +0x68 dispatch observed",
       "computed_record_ui_call": "0x00df606d",
       "computed_record_ui_call_status": "vtable-resolved-to-0x00df6110; reference-only resolver remains unresolved",
@@ -84,7 +87,10 @@
         "matrix_transform": "ev_5a64ad464337eea4c1d5be08a2abfea4b4fd511b5d988efe8e976f79e550be90",
         "viewport_state": "ev_00b0590ad36b8bdc1d71b8f38177ec593a29fd459378413eb42fc21e5d967f06",
         "controller_camera": "ev_7fd0e4f59184119cd1ab9c128942586067b6e77967905ff23e9728419adb8c58",
-        "nearest_record_picker": "ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1"
+        "nearest_record_picker": "ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1",
+        "service_registry_lookup": "ev_d2b10723dab7915c5fb7ecb22a4c7d132a0df5ffa003d1792dd8fdc968ec13c8",
+        "service_registry_wrapper": "ev_a8cf6c11bc9c47ccba1819b66f0a798e410315bff6845c2ab36ff099356d25ff",
+        "service_registry_dossier": "ev_c3381178aca22c37b095a19b9387700d91e6537776569f645c862e4787823e48"
       }
     },
     "evidence_ids": {
