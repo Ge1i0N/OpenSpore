@@ -200,6 +200,30 @@ int main(int argc,char** argv) {
     unknown=star; unknown.position=std::array<float,3>{std::numeric_limits<float>::quiet_NaN(),0,0};
     if (!check(fail_adapter(unknown,planets,observed),"nonfinite star position")) return 1;
     if (!check(fail_adapter(empty,{},observed),"empty selection blocked at metadata boundary")) return 1;
+    // Real planetRecords.pkp transport: 4-byte prefix + nested single-record DBPF.
+    auto wrapped_star=star; wrapped_star.planet_count=(u8)1;
+    planet::resource_keys(wrapped_star,keys,error);
+    const auto inner_pkg=package({{pkg::ResourceKey{1,planet::kResourceType,planet::kResourceGroup},named(u"Wrapped World")}});
+    Bytes wrapped_rec={0x00,0x25,0x00,0x03};
+    append(wrapped_rec,inner_pkg);
+    const auto outer_pkg=package({{keys[0],wrapped_rec}});
+    if (!check(reader.open_from_memory(outer_pkg,error) && planet::read_selected_records(reader,wrapped_star,planets,error) &&
+               planets.size()==1 && planets[0].record.name==u"Wrapped World" &&
+               planets[0].record.unvalidated_tail==0,"wrapped nested planet transport decodes")) return 1;
+    planet::Selection wrapped_sel;
+    if (!check(planet::select_save_stem(wrapped_star,planets,wrapped_sel,error) && wrapped_sel.source_index==size_t{0} &&
+               wrapped_sel.save_stem==u"Wrapped World","wrapped planet selects save stem")) return 1;
+    auto bad_prefix=wrapped_rec; bad_prefix[0]^=1;
+    const auto bad_pkg=package({{keys[0],bad_prefix}});
+    if (!check(reader.open_from_memory(bad_pkg,error) && !planet::read_selected_records(reader,wrapped_star,planets,error) &&
+               !error.empty(),"wrong prefix rejected, never silently direct-parsed")) return 1;
+    const auto two_inner=package({{pkg::ResourceKey{1,planet::kResourceType,planet::kResourceGroup},named(u"A")},
+                                  {pkg::ResourceKey{2,planet::kResourceType,planet::kResourceGroup},named(u"B")}});
+    Bytes two_rec={0x00,0x25,0x00,0x03};
+    append(two_rec,two_inner);
+    const auto two_pkg=package({{keys[0],two_rec}});
+    if (!check(reader.open_from_memory(two_pkg,error) && !planet::read_selected_records(reader,wrapped_star,planets,error) &&
+               !error.empty(),"nested planet DBPF must hold exactly 1 record")) return 1;
     if (argc==2) {
         if (std::filesystem::exists(argv[1])) { std::cerr<<"requires new synthetic destination\n"; return 2; }
         std::ofstream file(argv[1],std::ios::binary); file.write((const char*)physical.data(),(std::streamsize)physical.size());

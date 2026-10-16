@@ -7,6 +7,20 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — planet transport gap closed: pkp resources are wrapped DBPFs
+
+Python value-decode of `planetRecords.pkp` failed on all 211 records at the first
+count word — the bytes start with `00250003 44425046…`, not counts. Programmatic
+checks established: a constant 4-byte prefix plus a nested DBPF v3 (header invariant
+holds exactly) with 1 record whose bytes are the `read_record` input (zero counts,
+then the frame). Fixed-offset branch, never a magic search; prefix meaning
+unestablished and pinned. Values then decode clean: 114/114 + 97/97, zero tails,
+all named, civs 1→2, tribes static 22, nodes 46→61. C++ `read_transport_record`
+implements the same branch; `planet_record_verify` grows 291 → 295 checks PASS on
+MSVC (0 warnings) and MinGW. Findings in `analysis/planet-record.md`, values in
+`analysis/audit/planet-real/`. The gap the doc itself anticipated ("not yet verified
+on original planetRecords packages") is now closed.
+
 ## 2026-10-16 — MSVC Win32 Debug builds warning-free, full suite green
 
 User installed BuildTools 17.14 (MSVC 19.44.35229) after two silent CLI failures

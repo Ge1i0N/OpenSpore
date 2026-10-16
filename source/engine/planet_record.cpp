@@ -1,4 +1,5 @@
 #include "engine/planet_record.h"
+#include <cstring>
 #include <utility>
 
 namespace os::planet {
@@ -132,6 +133,31 @@ bool select_save_stem(const starsdb::StarRecord& star,const std::vector<Resource
     }
     out=std::move(result); error.clear(); return true;
 }
+bool read_transport_record(const std::vector<u8>& bytes,Record& out,std::string& error) {
+    // Real-save transport branch, at fixed offsets (not a magic search): the 4-byte
+    // prefix is pinned to the observed constant because its meaning is unestablished;
+    // anything else falls through to the direct read_record shape below.
+    constexpr u8 kPrefix[4]={0x00,0x25,0x00,0x03};
+    if (bytes.size()>=4+0x60 && std::memcmp(bytes.data(),kPrefix,sizeof(kPrefix))==0 &&
+        std::memcmp(bytes.data()+4,"DBPF",4)==0) {
+        pkg::Package nested;
+        if (!nested.open_from_memory(bytes.data()+4,bytes.size()-4,"planet-record-nested")) {
+            error=nested.why();
+            return false;
+        }
+        if (nested.records().size()!=1) {
+            error="nested planet DBPF does not hold exactly 1 record";
+            return false;
+        }
+        std::vector<u8> inner;
+        if (!nested.read_resource_decoded(0,inner)) {
+            error="nested planet record unreadable";
+            return false;
+        }
+        return read_record(inner,out,error);
+    }
+    return read_record(bytes,out,error);
+}
 bool read_selected_records(starsdb::ExplicitDbpfReader& reader,const starsdb::StarRecord& star,
                            std::vector<ResourceRecord>& out,std::string& error) {
     std::vector<pkg::ResourceKey> keys;
@@ -144,7 +170,7 @@ bool read_selected_records(starsdb::ExplicitDbpfReader& reader,const starsdb::St
         if (resource.bytes.size()>64*1024*1024-aggregate) { error="planet batch exceeds 64 MiB host limit"; return false; }
         aggregate+=resource.bytes.size();
         ResourceRecord planet; planet.resource=key;
-        if (!read_record(resource.bytes,planet.record,error)) return false;
+        if (!read_transport_record(resource.bytes,planet.record,error)) return false;
         if (planet.record.unvalidated_tail) { error="planet resource has unsupported trailing bytes"; return false; }
         result.push_back(std::move(planet));
     }

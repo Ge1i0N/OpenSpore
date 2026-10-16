@@ -1,8 +1,9 @@
 # PlanetRecord → saved-game name → typed GGE metadata
 
-Reviewed **2026-10-15**. Static GA-unpacked SHA-256
+Reviewed **2026-10-16**. Static GA-unpacked SHA-256
 `086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
-Constructed fixtures only; **no original planet-record/save corpus or original runtime replay**.
+Constructed fixtures plus a real-save transport/value corpus
+(`Game0`/`Game0.old` planetRecords.pkp, 211 records); no original runtime replay.
 
 ## What this closes — and what is still invisible
 
@@ -79,8 +80,25 @@ The factory [`0xBA6300`](audit/starsdb/planet/00ba6300.asm.txt) assigns this res
 from the serialized planet `mKey`. Neither is the context's pointer-shaped object token.
 
 `read_selected_records` reads **one explicitly selected DBPF** via exact keys; no fallback/merge,
-resource-manager wrapper emulation or profile scan. This adapter is tested on constructed DBPFs;
-its physical transport/version coverage is not yet verified on original planetRecords packages.
+resource-manager wrapper emulation or profile scan. The physical transport is now verified
+on the original planetRecords packages (see below); constructed DBPFs remain covered.
+
+## Wrapped transport in real planetRecords.pkp
+
+Every one of the 211 records in `Game0` (114) and `Game0.old` (97) planetRecords.pkp
+carries the same transport: a constant 4-byte prefix `00 25 00 03` (meaning
+unestablished; pinned, not interpreted) followed by a nested DBPF v3 whose header,
+`index_offset + index_size == length` invariant and kind-7/stride-20 directory all
+validate — holding exactly 1 record whose bytes are the `read_record` input (leading
+zero counts, then the field frame). The reader (`read_transport_record`) branches on
+the fixed-offset prefix+magic, never on a magic search; direct bytes keep parsing as
+before for constructed fixtures. A wrong prefix or a nested count other than 1 fails
+loudly. Reports: `tools/planet_real_decode.py`, audit JSONs beside the stars ones.
+
+Real-save values (Game0): 114/114 unwrap + parse clean, zero tails, all named;
+2 civilizations, 22 tribes, 0 events, 61 commodity nodes; planet types 2 (63) / 1 (21)
+/ 3 (16) / 5 (12); terrain keys on all 114. Game0.old: 97/97 clean; 1 civ, 22 tribes,
+46 nodes. Tribes static at 22 while civs/nodes grow with play.
 
 `0xBBA900` uses the unfiltered list unless star flags include `0x40`. With that flag it excludes
 planets whose `flags +0x2C` include `0x100` (`0xB8DAC0`). Order is retained; GGE `0xDF7F30` takes the
@@ -120,7 +138,8 @@ producer. The test's explicit catalogue Available observations belong only to co
 
 ## Checks / reproduction
 
-`planet_record_verify`: **291 constructed checks PASS**. Literal independent name fixture, all
+`planet_record_verify`: **295 constructed checks PASS** (291 + 4 wrapped-transport
+cases: nested decode, save-stem selection, wrong prefix, nested count). Literal independent name fixture, all
 prefix/field truncations, every collection route, city prefix and exact node cap, field/text bounds,
 duplicate fields, no magic scanning, counted resource identity/wrap, missing/duplicate DBPF entries,
 filter/order/Unknown distinctions, BAD_DATA rules, atomic rejection and decoded fields → typed

@@ -35,4 +35,9 @@ bool select_save_stem(const starsdb::StarRecord& star,const std::vector<Resource
 // Materializes counted records only; generation, selection and live readiness are separate.
 bool read_selected_records(starsdb::ExplicitDbpfReader& reader,const starsdb::StarRecord& star,
                            std::vector<ResourceRecord>& out,std::string& error);
+// Real planetRecords.pkp transport: each resource is a 4-byte prefix (constant
+// 0x00250003 on every observed record; meaning unestablished) followed by a nested
+// DBPF v3 holding exactly 1 record whose bytes are the read_record input.
+// Direct (unwrapped) bytes keep parsing as before, so constructed fixtures stay valid.
+bool read_transport_record(const std::vector<u8>& bytes,Record& out,std::string& error);
 }  // namespace os::planet
