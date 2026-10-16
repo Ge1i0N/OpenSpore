@@ -144,6 +144,10 @@ The secondary rebuild route is a separate controller/data vtable: REA bytes plac
 The exact post-rebuild continuation and its outer dispatch are retained as REA unknown
 `unk_62a04a0f821caf905e18ac86c10eeff41d3e79597e2165afa62a07039ccab2cc`; the next probe should be
 bounded assembly/reference inspection, not another broad Ghidra decompilation.
+Retained assembly confirms the exact order before that unknown: state `+0x108 == 2`, show control
+`0x0615A5FF`, `GlobalUI::show(1)`, `DF95A0`, then unconditional jump to `DF6C10`. Thus the state-2
+admission and catalogue rebuild are observed static edges; only the post-jump continuation remains
+unresolved.
 
 ## Verification and next boundary
 

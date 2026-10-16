@@ -214,6 +214,11 @@ The post-`DF95A0` continuation remains a retained REA unknown, not an omitted co
 `unk_62a04a0f821caf905e18ac86c10eeff41d3e79597e2165afa62a07039ccab2cc`. The failed new
 `DF6C10` analysis did not produce runtime evidence; the next safe probe is assembly/references-only
 against retained evidence after the Ghidra session is healthy. No new broad decompilation is required.
+Retained assembly now proves the pre-jump sequence at `DF9740`: test controller state `+0x108 == 2`,
+show control `0x0615A5FF`, call `GlobalUI::show(1)` through `E01320`, call `DF95A0`, then jump
+unconditionally to `DF6C10` (`ev_8ff92d4d3b6c627ed48d6d9c7fb7b66c043cc2bdd774523d4bc541c8d8ceff6b`).
+The open unknown is therefore only the behavior after the jump and its outer dispatch, not whether
+catalogue rebuild is on the state-2 path.
 
 The registrar is initialized from `F473F0` (`ev_ab2c2ad005b3f43fead96c8df28456dd217091dd0a08a5cf7a6dfff7aa385558`),
 which registers `GalaxyGameEntry` and other drivers. The controller activation path `DEA1B0`
