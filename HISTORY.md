@@ -7,6 +7,23 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — cell stage skeleton driver, data staging, RE skills
+
+First gameplay step, kept out of the GGE files: `source/engine/game_stages.*` holds the five
+playable-stage rows (mode/tag/registrar/object size/state/next from analysis/modes.md and the
+shipped SporeAppStates script). `Game_Cell` owns a skeleton driver attached to `CellGame`
+(enter resets, tick counts while active, exit parks; no simulation, no rendering). The generic
+placeholder frame names the skeleton and its tick count instead of NOT EXECUTED. Runtime data
+(`Data/`, `DataEP1/` from the Steam install) staged under `build/bin/Debug/`; beta reference
+(`SporeApp.exe` + PDB, byte-identical to the documented Beta190208) staged under `refs/`.
+Two RE skills vendored into `.opencode/skills/` (`reverse-engineering`, `ghidra-iterative-re`).
+Verification: `game_stages_verify` checks table/lookups/chain/lifecycle; new
+`tools/tests/test_game_stages_table.py` cross-checks the transcription against modes.md and the
+script (4 tests PASS); `feature_map.py --check`, `docs_check.py` and the full Python unittest
+suite PASS. C++ compilation still requires MSVC (absent on this machine), so the MSVC
+warning-free build and the `-state:CellGame` runtime smoke are pending on a machine with
+Visual Studio Build Tools.
+
 ## 2026-10-15 — catalogue sources and typed GGE entry projection
 
 After restart, confirmed clean HEAD `0dfdd85` and resumed catalogue work without repeating DBCheck.

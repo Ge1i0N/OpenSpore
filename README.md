@@ -52,6 +52,7 @@ zoom-панелей и runtime-контроллера, не готовый эк�
 | Текст | locale-таблицы, в том числе вложенные; **1 384 / 1 426** caption refs разрешаются | оригинальный шрифтовой renderer, полный Unicode/layout |
 | Модели | поддерживаемый subset `gmdl`, UV, `raster` DXT1/DXT5/raw; галерея настоящих моделей | полноценные RW4, материалы, анимация и игровой мир |
 | Навигация | видимый клик `(311,550)` → `CreatureEditor [0x022D9E01]` | сам Creature Editor и playable stages |
+| Геймплей | скелет-драйвер `Game_Cell` на `CellGame` (enter/tick/exit, без симуляции) | симуляция, остальные стадии и редакторы |
 
 <details>
 <summary><strong>Ранее достигнуто: модели и их текстуры</strong></summary>
@@ -98,7 +99,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify gge_star_input_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify gge_star_input_verify game_stages_verify
 ```
 
 Расположение данных рядом с собранным executable:
@@ -165,6 +166,7 @@ $streamDir = Join-Path $env:TEMP ('OpenSpore-stream-' + [guid]::NewGuid())
 .\build\Debug\gge_star_scene_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package
 .\build\Debug\gge_star_transition_verify.exe $fixtures
 .\build\Debug\gge_star_input_verify.exe $fixtures
+.\build\Debug\game_stages_verify.exe
 
 # controlled clickable host-card preview (Debug/dev only; not native GGE)
 .\build\bin\Debug\OpenSpore.exe -w -devDirs -state:GGEHostPreview
@@ -235,6 +237,8 @@ case4 не записывает native latch даже при return1. Серви
 карточки, реальный SPUI/atlas и настоящий input latch. Это controlled reconstruction, не live GGE state.
 Проверенный unattended запуск пишет `picked host card 20481 (host only)` и завершает работу с exit code 0.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
+Первый шаг геймплея: скелет-драйвер `Game_Cell` (счётчик тиков без симуляции) на состоянии
+`CellGame`; остальные стадии и редакторы не реализованы. Подробнее: [game-stages](analysis/game-stages.md).
 
 ### Полезный CLI
 

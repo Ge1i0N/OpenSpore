@@ -22,6 +22,7 @@
 #include "engine/raster.h"
 #include "engine/diag.h"
 #include "engine/fs.h"
+#include "engine/game_stages.h"
 #include "engine/input.h"
 #include "engine/log.h"
 #include "engine/naming.h"
@@ -349,12 +350,23 @@ void frame_body(void* p) {
                 y += 22.f;
             }
             if (gs && !gs->mode.empty()) {
-                render::overlay().text_fmt(48.f, y, 0xFFE0A878, "mode %s  -- NOT EXECUTED",
-                                           gs->mode.c_str());
-                y += 22.f;
-                render::overlay().text_fmt(48.f, y, 0xFF8494A4,
-                                           "(the engine's mode table is the next step after `spui`)");
-                y += 30.f;
+                if (os::stages::has_driver(gs->mode.c_str())) {
+                    // A skeleton driver owns this state (analysis/game-stages.md): name it and
+                    // its tick count instead of reporting the mode as unexecuted.
+                    render::overlay().text_fmt(48.f, y, 0xFF9FD0A0, "mode %s  -- SKELETON DRIVER (%s)",
+                                               gs->mode.c_str(), os::stages::cell_status().c_str());
+                    y += 22.f;
+                    render::overlay().text_fmt(48.f, y, 0xFF8494A4,
+                                               "(tick counter only; no simulation yet)");
+                    y += 30.f;
+                } else {
+                    render::overlay().text_fmt(48.f, y, 0xFFE0A878, "mode %s  -- NOT EXECUTED",
+                                               gs->mode.c_str());
+                    y += 22.f;
+                    render::overlay().text_fmt(48.f, y, 0xFF8494A4,
+                                               "(the engine's mode table is the next step after `spui`)");
+                    y += 30.f;
+                }
             }
             if (gs) {
                 for (const auto& nxt : gs->goto_state) {

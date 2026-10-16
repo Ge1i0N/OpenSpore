@@ -1,14 +1,14 @@
 {
   "updated": "2026-10-15",
-  "source_sha256": "d7f61ae4278713445503f63d74cad68f81adfa17fcbdc05de0da42184a0d1ce9",
+  "source_sha256": "455e16a8068ac55a0789b388d758397796d326a807b1d546e03756d4ea78539c",
   "method": "Equal-weight tracked items; done=1, partial=0.5, todo=0. Not game or code coverage.",
   "overall": {
     "total": 294,
     "done": 204,
-    "partial": 37,
-    "todo": 53,
+    "partial": 39,
+    "todo": 51,
     "done_pct": 69.39,
-    "weighted_checklist_index": 75.68
+    "weighted_checklist_index": 76.02
   },
   "scopes": {
     "engine": {
@@ -30,10 +30,10 @@
     "gameplay": {
       "total": 17,
       "done": 0,
-      "partial": 0,
-      "todo": 17,
+      "partial": 2,
+      "todo": 15,
       "done_pct": 0.0,
-      "weighted_checklist_index": 0.0
+      "weighted_checklist_index": 5.88
     },
     "tooling": {
       "total": 16,
@@ -148,10 +148,10 @@
       "scope": "gameplay",
       "total": 17,
       "done": 0,
-      "partial": 0,
-      "todo": 17,
+      "partial": 2,
+      "todo": 15,
       "done_pct": 0.0,
-      "weighted_checklist_index": 0.0
+      "weighted_checklist_index": 5.88
     },
     {
       "name": "tooling",

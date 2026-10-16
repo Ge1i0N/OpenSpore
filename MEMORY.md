@@ -30,7 +30,7 @@ point. [Full historical notebook](docs/archive/MEMORY-2026-10-15.md) is retained
 | Drawable chain | Window → typed drawable → Image (`0x01BE6B15`) → external PNG, atlas UV/logical size |
 | Supported drawables | ImageDrawable None branch + non-tileable Standard/Radio; scale/alignment and state slices tested |
 | Locale | key space is per table; use `(u64(table)<<32)|key`, never narrow it to u32 |
-| Game states / modes | 60 script states / 17 mode names, 10 recovered binary registrations; drivers are not implemented |
+| Game states / modes | 60 script states / 17 mode names, 10 recovered binary registrations; five playable-stage rows held; only Game_Cell has a skeleton driver (tick counter, no simulation) |
 
 Deep evidence: [binary SPUI](analysis/spui-binary.md), [drawables](analysis/spui-drawables.md),
 [locale](analysis/text-locale.md), [formats](analysis/formats.md), [current VERIFY](VERIFY.md).

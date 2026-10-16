@@ -1,5 +1,6 @@
 #include "engine/appmodes.h"  // the recovered mode table, so the log can name what a mode IS
 #include "engine/appstates.h"
+#include "engine/game_stages.h"  // stage progression table + the Cell skeleton driver
 #include "engine/gge_intro.h"
 
 #include <algorithm>
@@ -385,6 +386,18 @@ void install(os::states::Manager& mgr) {
                 LOG_INFO("gge", "post-title gate model deactivated; host latches cleared");
             };
         }
+        if (os::stages::has_driver(gs.mode.c_str())) {
+            // First gameplay step (analysis/game-stages.md): the Cell stage owns a skeleton
+            // driver - a tick counter with no world state. The other stage modes keep the
+            // honest "not implemented" path in on_enter below. No on_render here: the frame
+            // stays the generic placeholder, which now names the skeleton (see app.cpp).
+            st.on_tick = [](f32 dt) {
+                os::stages::cell_tick(dt);
+            };
+            st.on_exit = []() {
+                os::stages::cell_exit();
+            };
+        }
         const size_t n_cheat_unrun = n_cheat > n_ui_load ? n_cheat - n_ui_load : 0;
         st.on_enter = [chain = std::move(chain), mode = std::move(mode), n_msg, n_cheat_unrun,
                        n_ui_load, n_effect, name = gs.name]() {
@@ -392,8 +405,14 @@ void install(os::states::Manager& mgr) {
                 // `mode <M>` selects one of the original's ten named driver CLASSES, which we do not
                 // have. But we now KNOW the table (analysis/modes.md), so the log names the tag, the
                 // registering function and the state the mode drives, instead of a bare "not
-                // implemented" that tells the reader nothing they can act on.
-                if (const auto* m = appmodes::find_by_name(mode.c_str())) {
+                // implemented" that tells the reader nothing they can act on. Game_Cell is the
+                // exception: its skeleton driver (analysis/game-stages.md) is ENTERED here and
+                // parked by the on_exit hook above, so its line reports activity, not absence.
+                if (os::stages::has_driver(mode.c_str())) {
+                    os::stages::cell_enter();
+                    LOG_INFO("appstates", "%s: `%s` skeleton driver active (%s)", name.c_str(),
+                             mode.c_str(), os::stages::cell_status().c_str());
+                } else if (const auto* m = appmodes::find_by_name(mode.c_str())) {
                     LOG_WARN("appstates", "%s: `%s` full driver not implemented - %s", name.c_str(), mode.c_str(),
                              appmodes::describe(*m).c_str());
                 } else {

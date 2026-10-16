@@ -1221,8 +1221,8 @@
         },
         {
           "name": "cell stage",
-          "status": "todo",
-          "note": ""
+          "status": "partial",
+          "note": "Game_Cell skeleton driver attached to CellGame (tick counter, no simulation). analysis/game-stages.md"
         },
         {
           "name": "creature stage",
@@ -1291,8 +1291,8 @@
         },
         {
           "name": "AppMode execution",
-          "status": "todo",
-          "note": "Ten binary registrations are represented in engine/appmodes.cpp; their enter/tick/render behavior is not implemented. Missing strings are bounded negative evidence, not proof of absent classes. analysis/modes.md"
+          "status": "partial",
+          "note": "Ten binary registrations are represented in engine/appmodes.cpp; five playable-stage rows in engine/game_stages.cpp. Only Game_Cell has a skeleton driver (enter/tick/exit, no simulation); other drivers still not implemented. Missing strings are bounded negative evidence, not proof of absent classes. analysis/modes.md analysis/game-stages.md"
         }
       ]
     },

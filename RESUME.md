@@ -174,7 +174,12 @@ test with `-w -devDirs`; retain evidence and commit.
   candidates/positions, actual GGE SPUI/direct Graphics atlas, explicit camera, case2 host transition,
   draw_gge_star_scene and normal input latch. `-state:GGEHostPreview`; `-exec spui:-click,640,360
   -execAfter 10` logs `picked host card 20481 (host only)`. Clean smoke exit0/aborts0. Controlled
-  reconstruction only; no live catalogue/native camera/F8/FC/CommandID. analysis/gge-host-preview.md.
+   reconstruction only; no live catalogue/native camera/F8/FC/CommandID. analysis/gge-host-preview.md.
+- First gameplay step: `engine/game_stages.*` holds the five playable-stage rows
+  (mode/tag/registrar/object size/state/next, cross-checked against binary and script);
+  `Game_Cell` owns a skeleton driver attached to `CellGame` (enter/tick/exit counter,
+  no simulation). Other stages keep the honest not-implemented path.
+  `analysis/game-stages.md`; `game_stages_verify` checks table/chain/lifecycle.
 
 ## Next, in order
 
@@ -225,7 +230,7 @@ ancestor-origin translation, resource override choices and pointer-to-drawable s
 ## Repeatable checks (from repository root)
 
 ```powershell
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify gge_star_input_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify gge_star_input_verify game_stages_verify
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
 .\build\Debug\spui_verify.exe $fixtures
@@ -252,6 +257,7 @@ $streamDir = Join-Path $env:TEMP ('OpenSpore-stream-' + [guid]::NewGuid())
 .\build\Debug\gge_streaming_image_verify.exe .\build\bin\Debug\Data\Spore_Graphics.package $streamDir
 .\build\Debug\gge_star_scene_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package
 .\build\Debug\gge_star_transition_verify.exe $fixtures
+.\build\Debug\game_stages_verify.exe
 .\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
 .\build\Debug\overlay_clip_verify.exe $clipCapture
