@@ -16,6 +16,11 @@ manager_status<TAB>Available|Unknown|Failed
 starsdb_status<TAB>Available|Unknown|Failed
 planet_status<TAB>Available|Unknown|Failed
 refill_status<TAB>Available|Unknown|Failed
+resource_root_status<TAB>Available|Unknown|Failed (optional)
+resource_index_status<TAB>Available|Unknown|Failed (optional)
+resource_context_status<TAB>Available|Unknown|Failed (optional)
+resource_class_status<TAB>Available|Unknown|Failed (optional)
+refill_append<TAB>Appended|NotAppended|Unknown (optional)
 saved_count<TAB>N
 candidate_count<TAB>N
 saved<TAB>id<TAB>x<TAB>y<TAB>z<TAB>stage<TAB>source_flags<TAB>name_hex<TAB>save_stem_hex<TAB>probe<TAB>header_major<TAB>header_minor<TAB>terrain_loaded<TAB>terrain_image_instance
@@ -30,6 +35,10 @@ instance observed by the producer; zero is allowed when `terrain_loaded=0`. The 
 counts must match rows exactly.
 The four producer status lines are required. They describe upstream observations only; `Available`
 does not make rows original or complete, and `Unknown` is preserved rather than inferred from counts.
+Optional resource status lines preserve the deeper root/index/context/class outcomes from a native
+capture when the producer can report them. `refill_append` preserves whether the refill operation
+actually appended records. Missing optional lines remain `Unknown`; they do not affect the existing
+four-status admission gate and cannot make an unavailable capture ready.
 
 The loader accepts only a caller-selected path and a 16MiB file bound. It parses into a temporary
 `CatalogInput` and publishes atomically. Unknown source status remains Unknown and blocks
@@ -54,7 +63,7 @@ not only a UI status string.
 
 For a non-UI report, use `gge_catalog_snapshot_inspect <snapshot>`; it prints source statuses, row
 counts/order, duplicate star IDs, positions, names and terrain observations without writes or search.
-It also prints `source_label` and `producer_gate=READY|BLOCKED`; READY requires both list statuses
+It also prints `source_label`, all optional producer observations and `producer_gate=READY|BLOCKED`; READY requires both list statuses
 and all four upstream producer statuses to be Available, matching the StarScene admission gate.
 
 ## Verification

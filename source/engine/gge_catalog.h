@@ -33,11 +33,18 @@ struct SavedGameMetadata {
 
 enum class CatalogAvailability { Unknown, Available };
 enum class CatalogProducerStatus { Unknown, Available, Failed };
+enum class CatalogRefillOutcome { Unknown, Appended, NotAppended };
 struct CatalogProducerObservations {
     CatalogProducerStatus manager=CatalogProducerStatus::Unknown;
     CatalogProducerStatus starsdb=CatalogProducerStatus::Unknown;
     CatalogProducerStatus planet_records=CatalogProducerStatus::Unknown;
     CatalogProducerStatus candidate_refill=CatalogProducerStatus::Unknown;
+    // Optional upstream capture detail. These never substitute for the four admission statuses.
+    CatalogProducerStatus resource_root=CatalogProducerStatus::Unknown;
+    CatalogProducerStatus resource_index=CatalogProducerStatus::Unknown;
+    CatalogProducerStatus resource_context=CatalogProducerStatus::Unknown;
+    CatalogProducerStatus resource_class=CatalogProducerStatus::Unknown;
+    CatalogRefillOutcome refill_append=CatalogRefillOutcome::Unknown;
 };
 struct CatalogInput {
     CatalogAvailability saved_status = CatalogAvailability::Unknown;
