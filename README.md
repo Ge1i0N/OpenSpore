@@ -237,6 +237,8 @@ case4 не записывает native latch даже при return1. Серви
 Следующий блокер описан в [catalogue producer boundary](analysis/gge-catalog-producer.md): native manager
 вектора/порядок `DF95A0` восстановлены, но настоящих `stars.db`/save данных нет и synthetic entries
 не подключаются как production catalogue.
+Для явно переданного capture-файла появился `ggepreview:load,<path>`; формат и строгие проверки описаны
+в [gge-catalog-snapshot.md](analysis/gge-catalog-snapshot.md). Без команды preview остаётся controlled.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI

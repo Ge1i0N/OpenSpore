@@ -180,6 +180,12 @@ test with `-w -devDirs`; retain evidence and commit.
   DF7CB0/DF7F30 records, BB61C0 refill/generation, BB8C90/BB4D40 stars.db load/write. No real
   stars.db/save corpus or profile scanning; CatalogInput Unknown stays blocked and preview entries
   remain controlled. Next is caller-supplied catalogue capture or explicitly authorized native evidence.
+- `gge_catalog_snapshot.*`: strict caller-selected `GGE_CATALOG_V1` UTF-8 line snapshot (optional BOM),
+  hex UTF-8 names, explicit saved/candidate status/counts and saved header/probe/terrain fields.
+  Atomic parse, 16MiB/path/finite/count/row/END bounds; malformed/Unknown preserves prior output or
+  blocks build_catalog. Debug `ggepreview:load,<path>` reloads GGEHostPreview only after explicit
+  Available snapshot; failed load preserves current scene, no fallback/search/profile.
+  `gge_catalog_snapshot_verify`:8 checks. analysis/gge-catalog-snapshot.md.
 
 ## Next, in order
 

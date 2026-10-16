@@ -45,6 +45,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE input boundary | explicit active-camera ray + point-segment nearest-card subset; UI-window hit remains separate value identity | no native F8/FC route, raw event pump, tooltip/message bus or CommandID dispatch; world picker threshold/producer host observations only |
 | GGE controlled clickable preview | Debug-only GGEHostPreview: real shipped SPUI/atlas + explicit typed 3-card catalogue/camera + host input latch/pick | controlled reconstruction only; no live catalogue/native callback/camera/phase/GGE automatic caller; Release does not register state |
 | GGE catalogue producer | manager owner/vectors, DF95A0 ordering and DF7CB0/DF7F30/BB61C0/BB8C90/BB4D40 source boundary documented | no original stars.db/save corpus or live manager producer; controlled entries never promoted to production |
+| GGE catalogue snapshot bridge | caller-selected strict V1 UTF-8 line snapshot → atomic typed CatalogInput → explicit preview reload | no discovery/profile/save I/O/generation; Unknown blocks scene; provenance remains caller responsibility |
 | GGE explicit show/phase cases | requested2..5 + separately observed current guard; exact visible-mask1/name/local-rect host subset, per-action outcomes | opaque service events/control request Unsupported; no native latch/automatic input dispatch; actual case2 panel hit with original root IgnoreMouse |
 | Models | real gmdl/raster subset and textured diagnostic model gallery | full RW4, animation, materials and game world open |
 | Gameplay | mode registration table recovered | no playable stage or implemented editor |
@@ -85,6 +86,7 @@ entry / CRT / WinMain → boot → packages / config → states → real-art lau
 | GGE explicit phase transitions | 195 checks; ordered cases/guard/events/flags/name/rect, duplicates/ancestor state, transactional failures, actual untouched-panel picking and scene-frame retirement | `gge_star_transition_verify <fixtures>`; [case4 no-latch correction/callers](analysis/gge-star-transition.md) |
 | GGE world/UI input seam | 29 checks; real layouts + controlled positions/rays, threshold/camera/ticket isolation and transition separation | `gge_star_input_verify <fixtures>`; [evidence/limits](analysis/gge-star-input.md) |
 | GGEHostPreview smoke | state entered, real frame loop/atlas/camera setup, `spui:-click,640,360` → host card20481, clean exit | controlled manual screen, no native catalogue/callback/scene readiness; [evidence](analysis/gge-host-preview.md) |
+| GGE catalogue snapshot schema | 8 checks: UTF-8/BOM hex names, Available/Unknown status, counts/rows, malformed/nonfinite/atomic failures | `gge_catalog_snapshot_verify <NEW-test-dir>`; [format/limits](analysis/gge-catalog-snapshot.md) |
 | Historical RefPack corpus | 30,000 exact decoded lengths | `python tools/refpack.py --verify --limit 30000`; not re-run by every doc refresh |
 
 Full setup and fixture commands: [README](README.md#сборка-и-запуск).

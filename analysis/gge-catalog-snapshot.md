@@ -1,0 +1,52 @@
+# Caller-supplied GGE catalogue snapshot
+
+`gge_catalog_snapshot.*` adds a narrow input port for a future real catalogue/save capture. It does
+not discover files, scan profiles, generate stars, read saves or turn missing producer capability
+into an empty-ready catalogue.
+
+## File format
+
+UTF-8 text, optionally with a UTF-8 BOM:
+
+```text
+GGE_CATALOG_V1
+saved_status<TAB>Available|Unknown
+candidate_status<TAB>Available|Unknown
+saved_count<TAB>N
+candidate_count<TAB>N
+saved<TAB>id<TAB>x<TAB>y<TAB>z<TAB>stage<TAB>source_flags<TAB>name_hex<TAB>save_stem_hex<TAB>probe<TAB>header_major<TAB>header_minor<TAB>terrain_loaded
+candidate<TAB>id<TAB>x<TAB>y<TAB>z<TAB>stage_ignored<TAB>flags_ignored<TAB>name_hex<TAB>terrain_loaded
+END
+```
+
+Names are hex-encoded UTF-8. Candidate stage/flags fields are retained framing fields; candidate
+projection uses native builder defaults. All numeric fields are bounded and finite; counts must match
+rows exactly.
+
+The loader accepts only a caller-selected path and a 16MiB file bound. It parses into a temporary
+`CatalogInput` and publishes atomically. Unknown source status remains Unknown and blocks
+`build_catalog`/scene. Malformed header/status/count/row/UTF-8/numeric/unknown lines or missing END
+preserve the caller's prior output. No fallback path or directory search is performed.
+
+## Preview command
+
+While `GGEHostPreview` is active in a Debug/dev build:
+
+```text
+ggepreview:load,C:\captures\catalog.txt
+ggepreview:status
+```
+
+The command reloads the controlled host scene only after the snapshot parses with explicit Available
+saved/candidate sources. It uses the real explicitly selected Graphics atlas. Failed load preserves
+the current preview. This is a host capture bridge, not proof that the input came from the original
+producer; input provenance and authorization remain the caller's responsibility.
+
+## Verification
+
+`gge_catalog_snapshot_verify`: **8 checks PASS**: valid saved/candidate rows and header/terrain fields,
+UTF-8 hex names, BOM, Unknown status, malformed row/unknown line/nonfinite input and atomic output
+preservation. No user profile or save directory is searched.
+
+Next: accept explicitly authorized real manager/`stars.db` capture and compare source fields against
+this schema. The snapshot bridge does not itself recover that source.

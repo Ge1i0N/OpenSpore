@@ -33,6 +33,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE input boundary | [gge-star-input](gge-star-input.md) | separate world-ray vs UI-window picking, active-camera guard, native F8/FC/DF7800 boundaries; no callback/CommandID dispatch |
 | GGE controlled clickable preview | [gge-host-preview](gge-host-preview.md) | Debug-only 3-card host screen with real SPUI/atlas, explicit camera and normal input latch; clearly not native GGE/catalogue |
 | GGE catalogue producer boundary | [gge-catalog-producer](gge-catalog-producer.md) | manager vectors/DF95A0 ordering/refill/save persistence recovered; live producer and original stars.db corpus still absent |
+| GGE catalogue snapshot input | [gge-catalog-snapshot](gge-catalog-snapshot.md) | caller-selected strict UTF-8 capture loader + atomic Unknown/Available statuses; no discovery/generation/profile scan |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |
