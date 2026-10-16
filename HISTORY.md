@@ -7,6 +7,22 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-16 — cell-stage gameplay vocabulary + FNV-1 hash; save-field names proven external
+
+Continued the semantic hunt for the 107 cell-save field ids. Established:
+the Spore name hash is **FNV-1** (verified `fnv1("creature")=0x9EA3031A`,
+`fnv1("cell")=0xDFAD9F51`); the exe carries the **cell-tuning vocabulary**
+(`hp`, `chaseSpeed`, `fleeSpeed`, `wanderSpeed`, `digestionOutput/Count`,
+`growAmount`, `spawnOutput`, `awarenessRadius`, `fearsDamage`, `poisonNova`,
+part list `cell_flagella/cilia/jet/spike/jaw`) and a **size→HP progression
+table** (`0x010830E0`, step-1.73 HP tiers 30→52000, size fractions
+0.25/0.5/0.75/1.0, species tag `0x1D2EC0A5..A0`). Proved the save-field names
+are **not in the binary**: registration blocks hold no string pointers, and
+brute force (every binary string + 33k string dumps + gameplay-vocab combos,
+FNV-1) hashes to **zero** of the 107 ids. Names live only in the game's
+external tuning `.prop` data (`Simulator/Cell/Data`). Findings in
+`analysis/cell-save.md`.
+
 ## 2026-10-16 — cell-save creature = group of 8 frames; 250 objects recovered
 
 The gap-scan "lossy walk" is resolved: each creature is a GROUP of 8

@@ -121,6 +121,38 @@ position block uses other chains. Earlier per-frame-type tables in this file
 that assigned single offsets/defaults to ids were an over-read of this code
 and are superseded by the JSON audit.
 
+## Cell-stage tuning in the oracle binary
+
+The game binary carries the **cell-stage gameplay vocabulary and balance
+tables** as plaintext data, even though the save-field ids are separate.
+`tools/cell_field_descriptors.py`-adjacent scans (scratch dumps) recovered:
+
+**1. The Spore name hash is FNV-1 (not FNV-1a)** — verified on known ids:
+`fnv1("creature") = 0x9EA3031A` (`kCreature`) and `fnv1("cell") = 0xDFAD9F51`
+(`kCell`). This is the hash SporeModder FX uses for resource/instance names.
+
+**2. Cell-tuning property vocabulary** (`.rdata` key clusters, read by the
+tuning system): `hp`, `hpValue`, `foodValue`, `chaseSpeed`, `fleeSpeed`,
+`wanderSpeed`, `digestionOutput`, `digestionCount`, `digestionTime`,
+`growAmount`, `growCount`, `spawnOutput`, `spawnTime`, `awarenessRadius`,
+`awarenessRadiusPredator`, `awarenessRadiusFood`, `protectTime`, `protectRadius`,
+`fearsDamage`, `fearsWeapons`, `fearsMouths`, `chasesDamage`, `chaseTime`,
+`fleeTime`, `hatchDuration`, `sleepTime`, `awakeTime`, `electricDischarge`,
+`electricRecharge`, `poisonRecharge`, `poisonNova`, `ignoresFood`, `turnFactor`,
+`axisMovement`→`axialMovement`, `flocking`, `movementStyle`, and the part list
+`cell_flagella`/`cell_cilia`/`cell_jet`/`cell_spike`/`cell_jaw`/`cell_filter`,
+`cellType`, `cell_carnivore`/`cell_herbivore`/`cell_omnivore`.
+
+**3. Creature size→HP progression table** (file `0x010830E0`, stride `0x1C`):
+key `22,25,28,…` (step 3), `hp` geometric ≈×1.73 (`30,52,100,173,300,520,
+1000,1730,3000,5200,10000,17300,30000,52000`), a lagging second HP, a size
+fraction `0.25/0.5/0.75/1.0`, and a species-class tag `0x1D2EC0A5..A0`. This is
+the cell/creature size-level balance (HP tiers per growth stage).
+
+**4. Cell tuning lives at `Simulator/Cell/Data`** (string in `.rdata`); the
+tuning `.prop` files that bind these names to values are **not in the exe** —
+they ship in the game's `Data` packages.
+
 ## Boundaries
 
 - Field IDs are structural; **per-id semantics not yet confirmed** (which
@@ -136,6 +168,13 @@ and are superseded by the JSON audit.
   packed-int coordinates and the sequence id; it is not a gameplay stat (it
   tracks the coordinate blocks). Naming needs consumer-side offset analysis,
   not registration-side strings.
+- **No name in the binary hashes (FNV-1) to any of the 107 save ids** — brute
+  force over every string in `.text/.rdata/.data`, the 33k-line string dumps,
+  and a gameplay-vocabulary combo generator (prefix×word, camelCase) all return
+  zero hits. The save-field names therefore live **only in external `.prop`
+  data**, not in the executable. Known tuning keys like `creatureScale`
+  (`0x036AD587`) are not FNV-1 of their names either, confirming a separate
+  (data-side) hash namespace.
 - Gap-scan lossiness is resolved: the walk is now group-based (8 frames +
   24-byte trailer per creature) and recovers all 250 objects (150 + 100);
   the exact-frame validation rejects in-payload tag collisions instead of
