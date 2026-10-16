@@ -134,6 +134,11 @@ selection still must not route through an invented camera/controller path.
 This explains why forcing the primary layout's hidden windows visible cannot recreate game choice:
 the actual star UI is instantiated **per live game record** and driven by scene projection.
 
+REA vtable evidence places `DF9740` at `Play Spore` slot `+0x38` and `DF6010` at slot `+0x68`.
+`DF9740` gates on internal state `2`, then calls `DF95A0` to rebuild records/UI data before continuing
+to `DF6C10`; this is the native lifecycle seam for catalogue publication. The external state/message
+dispatcher that enters this vtable method remains unresolved.
+
 ## Verification and next boundary
 
 `gge_dbcheck_verify <SPUI fixtures>` checks the real dialog corpus/root, explicit descriptor,

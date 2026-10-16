@@ -195,6 +195,18 @@ at object `+0x30` and record `+0xB8`, then performs the stage/icon and save-flag
 itself has only `DE32B0` and `DF9740` in the resolved caller set (`ev_50fb51055abb84f6c4dda34ad2f90309a63e1ef6cc0371560ec69cb6a4a7e818`).
 No resolved direct edge from the `GalaxyGameEntry` registrar (`DDDE30`) to `DF95A0` was observed.
 
+The record rebuild now has a concrete native lifecycle slot. REA xrefs and vtable bytes place
+`DF9740` at `Play Spore` vtable `0x147EF50 +0x38` and `DF6010` at `+0x68`
+(`ev_bbccd5c81c566a10aa5c7400984c9686151b7ab4b994fa8f66dfa2cd60fda57f`,
+`ev_296c1dc2cda30113dbcaa14de914acc9a90a6c634a41314dc5bb8e954427e564`). `DF9740` checks the
+controller internal state for `2`, shows the relevant control/GlobalUI, calls `DF95A0`, and then
+continues to `DF6C10` (`ev_afab93e38887cae99c9d8e4b4729acd6012b4fcb01be06b889eeec7eb3567a7b`).
+`DE32B0` also calls `DF95A0`; its pointer is present at data/vtable block `0x147DC60 +0x00`
+(`ev_b4f2aeeac38443c36251d506cf0d9b4ad785e8166e4bef7b8c49879583496d32`,
+`ev_86dfdc43893984891a70e03d44ac23d2879456d3065e7def195db0507d9fb97d`). This links catalogue
+rebuild to the native Play Spore lifecycle without claiming that the outer message/phase dispatcher
+or runtime entry into either method has been recovered.
+
 The registrar is initialized from `F473F0` (`ev_ab2c2ad005b3f43fead96c8df28456dd217091dd0a08a5cf7a6dfff7aa385558`),
 which registers `GalaxyGameEntry` and other drivers. The controller activation path `DEA1B0`
 (`ev_83f03f72a363a0e940fa109ec5415508a44114d757b4b7e3e06da26c50f52bbe`) calls `DE5900`, which
