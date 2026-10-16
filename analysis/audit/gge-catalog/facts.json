@@ -77,6 +77,9 @@
         "owner_switch": ["0x008121c0", "0x008122a0"],
         "provider_sync_entry": "0x00811c70 direct callers unresolved"
       },
+      "layout_object_factory": "0x008121c0 -> 0x00811070 -> UI/LayoutObjects; owner switch via +0x88",
+      "layout_object_resource_key": "0x022568e7",
+      "layout_object_lookup_key": "caller-supplied/indirect; relation to 0x02e5a4a8 unknown",
       "direct_df6010_callers": "none resolved; Play Spore vtable +0x68 dispatch observed",
       "computed_record_ui_call": "0x00df606d",
       "computed_record_ui_call_status": "vtable-resolved-to-0x00df6110; reference-only resolver remains unresolved",
@@ -106,7 +109,11 @@
         "display_sync": "ev_ad2660dd3b9175bef811c1fb2ab0f8962821ec0cd2f2c51a9bd4b97030b18903",
         "display_sync_assembly": "ev_4865bdf9dea6bb33942d5be46af6445af7daef9450d3f5290aef0cb86b82c431",
         "display_lookup": "ev_54eabf869ff3a10ac284973e41a2f241730e2afc927b4b6c79fd19319128cf63",
-        "display_owner_switch_callers": "ev_127d3eefd901589373b362845d6b57f8744677820181fbf2e4209e4480249fbe"
+        "display_owner_switch_callers": "ev_127d3eefd901589373b362845d6b57f8744677820181fbf2e4209e4480249fbe",
+        "layout_owner_switch": "ev_11173ae44306a7f43b3d28af20908d7051b4f0c6b2620f023e0372648dafdd28",
+        "layout_factory": "ev_e50eb9ee18bc8bd439a8f5f4105b78cc09732b401de716957dfb1864fe3d780d",
+        "layout_constructor": "ev_e18e0694347d83d8fba1a7315c0a09f70e820d7fbacd06968672a33a91cd018b",
+        "layout_key_insert": "ev_268b4ab66c5326de72fdce74b332194e360f7460f8bcf276ee710041916c52a8"
         ,"registry_callers": "ev_182693150ec2aca09aca6eda83664ce25962446a7f1fe1d7683ce2ae9db31b2f",
         "registry_display_consumer": "ev_059d4b922486de4e38ad78a79eef526f05fd34590b13ef28c7cb627189c9341f",
         "registry_value_flow_summary": "ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2"

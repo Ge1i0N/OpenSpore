@@ -149,6 +149,17 @@ called only by `00811C70` and `00812100`. `00811C70` has no resolved direct call
 into synchronization is itself an indirect/object-lifecycle boundary. No retained static caller
 names a concrete `0xEEEE8218` provider; this is the remaining registration gap.
 
+`008121C0` narrows owner creation further: it calls `00811070(param_1)`, stores the returned
+`UI/LayoutObjects` object in its own `+0x14`, copies the three-word lookup key into `+0x08/+0x10`,
+and calls `00812100` when that object's `+0x88` is not initialized
+(`ev_11173ae44306a7f43b3d28af20908d7051b4f0c6b2620f023e0372648dafdd28`). `00811070` allocates
+`UI/LayoutObjects`, validates the supplied key, inserts/loads it through `00810CC0`, and publishes
+resource key `0x022568E7`; `00810170` initializes the object vtables/fields
+(`ev_e50eb9ee18bc8bd439a8f5f4105b78cc09732b401de716957dfb1864fe3d780d`,
+`ev_e18e0694347d83d8fba1a7315c0a09f70e820d7fbacd06968672a33a91cd018b`,
+`ev_268b4ab66c5326de72fdce74b332194e360f7460f8bcf276ee710041916c52a8`). The lookup key is
+caller-supplied/indirect at this boundary; REA does not connect it to provider ID `0x02E5A4A8`.
+
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
 (`ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714`); the reference-only
