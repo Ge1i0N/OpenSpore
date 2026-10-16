@@ -165,6 +165,10 @@ the GGE layout-owner path but do not identify the separate `0x02E5A4A8` provider
 (`ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635`,
 `ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452`,
 `ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`).
+REA also resolves the key framing used by the zoom-panel path: `0068D830` hashes the pre-dot layout
+name into word 0, stores tag `0x0510A95B` in word 1, and descriptor `0x40464100` in word 2;
+optional suffix text is parsed independently (`ev_1774a78a641dee54932082d8e71e8772f970dde3def6d9faccd4b2e5476ab3c3`).
+These values frame a layout lookup and remain distinct from SPUI root IDs and PNG resource IDs.
 
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target

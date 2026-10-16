@@ -84,6 +84,7 @@
         "zoom_panel": "0x00de5900 -> 0x00812250 -> 0x008121c0",
         "global_ui": "0x00e035f0 -> 0x008121c0 with 0x2edd95ca"
       },
+      "gge_layout_key_parser": "0x0068d830 hashes pre-dot name; word1=0x0510a95b; word2=0x40464100; suffix parsed separately",
       "direct_df6010_callers": "none resolved; Play Spore vtable +0x68 dispatch observed",
       "computed_record_ui_call": "0x00df606d",
       "computed_record_ui_call_status": "vtable-resolved-to-0x00df6110; reference-only resolver remains unresolved",
@@ -123,7 +124,8 @@
         "registry_value_flow_summary": "ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2",
         "gge_zoom_layout": "ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635",
         "gge_layout_bridge": "ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452",
-        "global_ui_layout": "ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14"
+        "global_ui_layout": "ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14",
+        "gge_layout_key_parser": "ev_1774a78a641dee54932082d8e71e8772f970dde3def6d9faccd4b2e5476ab3c3"
       }
     },
     "evidence_ids": {

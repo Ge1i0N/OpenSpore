@@ -72,6 +72,11 @@ calls `8121C0(param_1,1,0x2EDD95CA)` while constructing/loading `UI/GGE/GlobalUI
 (`ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`). Thus the native
 `UI/LayoutObjects` owner path is confirmed for GGE layouts, while the concrete provider for registry
 ID `0x02E5A4A8` remains a separate unresolved service identity.
+The key parser `0068D830` is now independently corroborated: it hashes the name before the first
+dot into word 0, writes caller tag `0x0510A95B` into word 1, and writes descriptor `0x40464100`
+into word 2; suffixes after a dot are parsed separately when present
+(`ev_1774a78a641dee54932082d8e71e8772f970dde3def6d9faccd4b2e5476ab3c3`). This confirms the
+GGE layout key framing without treating these words as SPUI root IDs or PNG group/type IDs.
 
 **Defaults can be overridden:** `0xDDDF80` reads property strings including `0xAF963138`,
 `0xD6F8F4A4`, `0x9E64A562` into these globals. Current subset uses the recovered defaults, not an
