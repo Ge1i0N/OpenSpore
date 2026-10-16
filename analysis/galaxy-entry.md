@@ -72,6 +72,14 @@ calls `8121C0(param_1,1,0x2EDD95CA)` while constructing/loading `UI/GGE/GlobalUI
 (`ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`). Thus the native
 `UI/LayoutObjects` owner path is confirmed for GGE layouts, while the concrete provider for registry
 ID `0x02E5A4A8` remains a separate unresolved service identity.
+REA's function bodies make the GGE layout handoff explicit: `DE5900` calls `812250`, which parses
+the selected panel name with `0068D830` and invokes `8121C0`; `E035F0` constructs `UI/GGE/GlobalUI`
+and calls `8121C0(param_1,1,0x2EDD95CA)` directly
+(`ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635`,
+`ev_e9016910838a25659be2b71d1a0138bba47ee996508b74a58d6bb5ab21171410`,
+`ev_e8b06532d45258569292eca19dbad6b337cc9722fa1584b4b2b5e86e207097`). The resulting
+`UI/LayoutObjects` owner is therefore a real GGE layout path, but its `0xEEEE8218` provider list
+and provider ID `0x02E5A4A8` remain runtime registry facts rather than inferred layout identities.
 The broader layout command path is not a provider-registration shortcut: REA identifies `812590`
 as the UI layout console/diagnostic handler, with list/load/unload behavior and parsed hex arguments;
 it forwards layout requests to `812250`, but has no resolved direct callers. This preserves the

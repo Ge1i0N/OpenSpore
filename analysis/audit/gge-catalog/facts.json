@@ -85,6 +85,7 @@
         "zoom_panel": "0x00de5900 -> 0x00812250 -> 0x008121c0",
         "global_ui": "0x00e035f0 -> 0x008121c0 with 0x2edd95ca"
       },
+      "gge_layout_owner_bridge": "DE5900->812250->8121c0 for zoom panels; E035F0->8121c0(...,0x2edd95ca) for GlobalUI",
       "gge_layout_key_parser": "0x0068d830 hashes pre-dot name; word1=0x0510a95b; word2=0x40464100; suffix parsed separately",
       "direct_df6010_callers": "none resolved; Play Spore vtable +0x68 dispatch observed",
       "computed_record_ui_call": "0x00df606d",
@@ -126,7 +127,10 @@
         "gge_zoom_layout": "ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635",
         "gge_layout_bridge": "ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452",
         "global_ui_layout": "ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14",
-        "gge_layout_key_parser": "ev_1774a78a641dee54932082d8e71e8772f970dde3def6d9faccd4b2e5476ab3c3"
+        "gge_layout_key_parser": "ev_1774a78a641dee54932082d8e71e8772f970dde3def6d9faccd4b2e5476ab3c3",
+        "gge_layout_owner_bridge_zoom": "ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635",
+        "gge_layout_owner_bridge_call": "ev_e9016910838a25659be2b71d1a0138bba47ee996508b74a58d6bb5ab21171410",
+        "gge_layout_owner_bridge_global": "ev_e8b06532d45258569292eca19dbad6b337cc9722fa1584b4b2b5e86e207097"
         ,"layout_command_assembly": "ev_3c8284d4d0a73a9441ea9657942c0b91e8bede6bf2d418cb38b79c74aff9c49a",
         "layout_command_callees": "ev_b4b177ba74aa2280d66904471eb58a6683316d6d41fb048f2d5fcc7a7eca809b",
         "layout_command_value_flow": "ev_dcea6f959caf6ac5dd61ac3987b488b73f2b3ee160829f80060ad4a36c82b8b5"

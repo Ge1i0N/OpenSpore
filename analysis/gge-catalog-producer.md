@@ -169,6 +169,10 @@ REA also resolves the key framing used by the zoom-panel path: `0068D830` hashes
 name into word 0, stores tag `0x0510A95B` in word 1, and descriptor `0x40464100` in word 2;
 optional suffix text is parsed independently (`ev_1774a78a641dee54932082d8e71e8772f970dde3def6d9faccd4b2e5476ab3c3`).
 These values frame a layout lookup and remain distinct from SPUI root IDs and PNG resource IDs.
+The native handoff is corroborated at the caller level: `DE5900 → 812250 → 8121C0` handles the
+zoom-panel layout, while `E035F0 → 8121C0(...,0x2EDD95CA)` handles `UI/GGE/GlobalUI`. This is the
+strongest static bridge from GGE controller UI initialization to `UI/LayoutObjects`; it still does
+not identify the runtime provider selected by registry ID `0x02E5A4A8`.
 REA's `00812590` caller is a layout command/diagnostic path rather than provider registration: its
 strings and control flow list loaded UI layouts, accept `load`/`unload`, parse the layout name and
 hex arguments, and call `812250` with tag/descriptor values (`ev_3c8284d4d0a73a9441ea9657942c0b91e8bede6bf2d418cb38b79c74aff9c49a`,
