@@ -14,9 +14,19 @@ creature `.spo`. All three `stars.db` decode clean with identical shapes; the ga
 is fixed at 42,010 StarRecords (same bytes size) while class `0x042232A1` grows
 1 → 4 → 5, class `0x018EB9D2` gains 4, root mem grows, and planet rows go 65 → 97 →
 114 in the confirmed type/group space. All six `.spo` are DBPF 3.0/index3 kind 4
-(12–43 records); their stage mapping is unknown. Reports `game0-old.json` /
+(12/39/43/40/40/26 records in creation order); their stage mapping is unknown.
+Reports `game0-old.json` /
 `game0.json` retained; class-ID semantics not decoded (counts only).
 Verification: three DECODED_STRUCTURE verdicts, no notes; suite stays 20/20.
+
+## 2026-10-16 — creature saves in creation order: three structural families
+
+Probed the six `.spo` oldest-first (player: stage by stage). Counts 12/39/43/40/40/26
+in three type families: minimal (#1, marker class `0xABCDEF00`), editor menagerie
+(#2/#3, 31 shared types), snapshot-shaped (#4 `snapshot.spo`, #5 with an identical
+40-type set — same DB shape, different creature: a transition auto-save reused seconds
+later). #6 embeds StarRecord `0x03E4353C`. Keys only, payloads untouched; stage names
+per file await player confirmation.
 
 ## 2026-10-16 — stars.db payload decode on the fresh save
 
