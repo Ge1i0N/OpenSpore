@@ -175,6 +175,11 @@ test with `-w -devDirs`; retain evidence and commit.
   draw_gge_star_scene and normal input latch. `-state:GGEHostPreview`; `-exec spui:-click,640,360
   -execAfter 10` logs `picked host card 20481 (host only)`. Clean smoke exit0/aborts0. Controlled
   reconstruction only; no live catalogue/native camera/F8/FC/CommandID. analysis/gge-host-preview.md.
+- `analysis/gge-catalog-producer.md`: producer boundary explicit—B3D3A0 owner, saved +F0/+F4,
+  candidate +DC/+E0, DF95A0 saved-before-candidate publication despite candidate-first builder call,
+  DF7CB0/DF7F30 records, BB61C0 refill/generation, BB8C90/BB4D40 stars.db load/write. No real
+  stars.db/save corpus or profile scanning; CatalogInput Unknown stays blocked and preview entries
+  remain controlled. Next is caller-supplied catalogue capture or explicitly authorized native evidence.
 
 ## Next, in order
 

@@ -1,0 +1,53 @@
+# GGE catalogue producer boundary — manager vectors, refill and persistence
+
+Reviewed **2026-10-16**. GA static authority SHA-256
+`086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
+No original runtime capture, `stars.db` corpus or user profile was used.
+
+## Recovered producer chain
+
+The host `build_catalog` helper intentionally accepts already-resolved typed metadata. Static GA
+evidence now clarifies exactly what must produce that metadata:
+
+- `B3D3A0` returns global `0x0167EAE4`, the game catalogue/StarManager owner.
+- Existing/saved vector is `+0xF0/+0xF4`; `BA6450` exposes candidate vector `+0xDC/+0xE0`.
+- `DF95A0` rebuilds the 0xBC record array, calls `DF7CB0` for candidates at
+  `entry_begin + saved_count*0xBC`, then `DF7F30` for saved records at the front. It calls
+  `DF9200` for per-record `UI/GGE_game_ui_data`, then `DF8300` effects. Thus candidate-first
+  call order is **not** presentation order: published order is saved then candidate.
+- `DF7CB0` candidate creation queries terrain/property service type `0xE38475D9`, property
+  `0x2BD4F5AC` type10, writes raw position/stage5 and terrain key `(property,PNG,0x02E9A2CA)`.
+  Its generation/refill route uses `BB61C0`.
+- `DF7F30` saved creation uses placeholder `(0x06837044,PNG,0x02605BA3)`, source position/name/
+  stage/flags and `.spo` probe via `BB27580`; it maps probe outcomes to neutral statuses. Host does
+  not export pointer-bearing `+0xB8` runtime UI objects.
+- `BB61C0` removes/refills candidates using count/quota, `BB24D0` eligibility, fallback selection
+  and planet work, then appends to `+0xDC`. It is runtime generation, not a static package list.
+- `BB8C90` initializes serializer-backed `stars.db`, planet records and refill. `BB4D40` writes
+  `stars.db.tmp` and renames it to `stars.db`; OpenSpore performs no such writes.
+
+## Why this is not attached
+
+The workspace has no original `stars.db` or save corpus, and requirements prohibit scanning user
+profiles. Package terrain/property resources are not StarManager vectors or generated positions.
+Native manager/service pointers, candidate grid generation, planet producer, save discovery and
+post-load fixups remain unavailable. A bounded negative workspace search is not an empty catalogue.
+
+`CatalogInput` therefore remains strict: both availability values must be explicit `Available`.
+Unknown does not become empty, and controlled verifier entries do not become production data.
+`GGEHostPreview` stays separately labeled controlled and uses three typed entries only for manual UI.
+
+## Required next adapter
+
+An honest producer needs a caller-supplied decoded `stars.db`/manager capture, authorized passive
+native manager/service evidence, or a separately justified complete generation/save-discovery
+reimplementation. It must preserve saved/candidate order and indices, distinguish missing terrain/
+name/save/probe states, publish Unknown when services are unavailable and never write `stars.db` as
+a preview/scene side effect.
+
+Evidence remains in `analysis/audit/gge-catalog/` (`DF95A0`, `DF7CB0`, `DF7F30`, `BB61C0`, `BB8C90`,
+`BB4D40`, manager getters). Existing `gge_catalog_verify` has 19 grouped controlled checks; this
+report adds no live catalogue/native producer claim.
+
+Next: caller-supplied catalogue capture/inspection or explicitly authorized runtime evidence. Until
+then the clickable preview validates presentation, not playable GGE data recovery.

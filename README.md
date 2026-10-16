@@ -234,6 +234,9 @@ case4 не записывает native latch даже при return1. Серви
 Для ручного тыканья есть явно маркированный [GGEHostPreview](analysis/gge-host-preview.md): три
 карточки, реальный SPUI/atlas и настоящий input latch. Это controlled reconstruction, не live GGE state.
 Проверенный unattended запуск пишет `picked host card 20481 (host only)` и завершает работу с exit code 0.
+Следующий блокер описан в [catalogue producer boundary](analysis/gge-catalog-producer.md): native manager
+вектора/порядок `DF95A0` восстановлены, но настоящих `stars.db`/save данных нет и synthetic entries
+не подключаются как production catalogue.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 
 ### Полезный CLI
