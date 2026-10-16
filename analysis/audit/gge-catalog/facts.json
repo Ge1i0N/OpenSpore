@@ -80,6 +80,10 @@
       "layout_object_factory": "0x008121c0 -> 0x00811070 -> UI/LayoutObjects; owner switch via +0x88",
       "layout_object_resource_key": "0x022568e7",
       "layout_object_lookup_key": "caller-supplied/indirect; relation to 0x02e5a4a8 unknown",
+      "gge_layout_callers": {
+        "zoom_panel": "0x00de5900 -> 0x00812250 -> 0x008121c0",
+        "global_ui": "0x00e035f0 -> 0x008121c0 with 0x2edd95ca"
+      },
       "direct_df6010_callers": "none resolved; Play Spore vtable +0x68 dispatch observed",
       "computed_record_ui_call": "0x00df606d",
       "computed_record_ui_call_status": "vtable-resolved-to-0x00df6110; reference-only resolver remains unresolved",
@@ -116,7 +120,10 @@
         "layout_key_insert": "ev_268b4ab66c5326de72fdce74b332194e360f7460f8bcf276ee710041916c52a8"
         ,"registry_callers": "ev_182693150ec2aca09aca6eda83664ce25962446a7f1fe1d7683ce2ae9db31b2f",
         "registry_display_consumer": "ev_059d4b922486de4e38ad78a79eef526f05fd34590b13ef28c7cb627189c9341f",
-        "registry_value_flow_summary": "ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2"
+        "registry_value_flow_summary": "ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2",
+        "gge_zoom_layout": "ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635",
+        "gge_layout_bridge": "ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452",
+        "global_ui_layout": "ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14"
       }
     },
     "evidence_ids": {

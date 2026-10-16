@@ -159,6 +159,12 @@ resource key `0x022568E7`; `00810170` initializes the object vtables/fields
 `ev_e18e0694347d83d8fba1a7315c0a09f70e820d7fbacd06968672a33a91cd018b`,
 `ev_268b4ab66c5326de72fdce74b332194e360f7460f8bcf276ee710041916c52a8`). The lookup key is
 caller-supplied/indirect at this boundary; REA does not connect it to provider ID `0x02E5A4A8`.
+The GGE callers are now explicit: `DE5900` invokes `812250` for `GGEZoomPanel`/`GGEZoomPanelV2`,
+while `E035F0` invokes `8121C0` for `UI/GGE/GlobalUI` with operand `0x2EDD95CA`. These establish
+the GGE layout-owner path but do not identify the separate `0x02E5A4A8` provider
+(`ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635`,
+`ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452`,
+`ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`).
 
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target

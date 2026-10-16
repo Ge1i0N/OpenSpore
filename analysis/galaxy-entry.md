@@ -64,6 +64,15 @@ GlobalUI vtable +8 -> `0xE035F0` -> `0x8121C0`; the loader path forwards a mount
 `0x2EDD95CA` through `0x812100` to `0x8106C0` for parent lookup. We do not replace the serialized
 root ControlID with this operand or treat it as a SPUI object index.
 
+REA corroborates the layout-object bridge: `DE5900` calls `812250` with the selected
+`GGEZoomPanel`/`GGEZoomPanelV2` name, tag `0x40464100`, mode `1`, and request `0x5B598FA`; `812250`
+builds the three-word layout key and forwards it to `8121C0` (`ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635`,
+`ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452`). `E035F0` separately
+calls `8121C0(param_1,1,0x2EDD95CA)` while constructing/loading `UI/GGE/GlobalUI`
+(`ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`). Thus the native
+`UI/LayoutObjects` owner path is confirmed for GGE layouts, while the concrete provider for registry
+ID `0x02E5A4A8` remains a separate unresolved service identity.
+
 **Defaults can be overridden:** `0xDDDF80` reads property strings including `0xAF963138`,
 `0xD6F8F4A4`, `0x9E64A562` into these globals. Current subset uses the recovered defaults, not an
 implemented GGE configuration property-list consumer. BSS runtime globals are not file-backed
