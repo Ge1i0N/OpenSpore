@@ -105,6 +105,10 @@ REA also separates the UI-bounds service used by `DF6110`: it is acquired throug
 matches the requested service ID. `DF6110` then uses that service's `+0x34/+0x38` values together
 with `805F90` viewport state. The service identity is Unknown; it is not treated as the projection
 camera or controller camera.
+The registry is shared more broadly: REA reports callers `00810650`, `008113D0`, and `00812590`.
+`008113D0`'s no-match branch enumerates providers implementing `0xEEEE8218`, combines their
+`+0x38` rectangles, and applies provider `+0x64`; the concrete provider for `0x02E5A4A8` remains
+Unknown. This supports a UI/display-service registry interpretation, not a camera identity claim.
 This is static shipped-artifact evidence, not an observation of a running GA process.
 The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
 `DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence

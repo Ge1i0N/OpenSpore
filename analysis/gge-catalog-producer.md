@@ -117,6 +117,17 @@ behind ID `0x02E5A4A8` and its semantic name remain Unknown. `DE3C20` therefore 
 `0x015FD8B0`/slot `+0x58`, while `DF6110` uses the registry ID plus `805F90` viewport state and
 service slots `+0x34/+0x38`; neither route is synthesized as the other.
 
+The registry boundary has three resolved callers in REA: `00810650`, `008113D0`, and `00812590`
+(`ev_182693150ec2aca09aca6eda83664ce25962446a7f1fe1d7683ce2ae9db31b2f`). `008113D0` first asks
+`008102A0(0xFFFFFFFF,1)` for a matching service; on the no-match branch it enumerates registered
+providers exposing `0xEEEE8218`, reads each provider's `+0x38` rectangle, combines the bounds, and
+invokes provider slot `+0x64` with the resulting offsets
+(`ev_059d4b922486de4e38ad78a79eef526f05fd34590b13ef28c7cb627189c9341f`). This corroborates a
+shared UI/display-service registry, but does not reveal which provider satisfies ID `0x02E5A4A8`.
+`008102A0` has no resolved direct callees because its provider calls are indirect; its High-Pcode
+summary is complete at 48 operations, 46 def-use links and 19 effects
+(`ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2`).
+
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
 (`ev_a4dba8f509e8ba29c296285fbd14194c252f325afc72de44b7b2d5400bb71714`); the reference-only
