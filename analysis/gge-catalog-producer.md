@@ -1,6 +1,6 @@
 # GGE catalogue producer boundary — manager vectors, refill and persistence
 
-Reviewed **2026-10-16**. GA static authority SHA-256
+Reviewed **2026-10-17**. GA static authority SHA-256
 `086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
 No original runtime capture, `stars.db` corpus or user profile was used.
 
@@ -42,6 +42,38 @@ instructions confirm the early `BA9D50` return, two serializer setup passes, res
 `0x01A80D26`, and later `BB61C0` refill. They also preserve a branch where no database/resource
 result is accepted and initialization continues with defaults; that branch is not a valid Available
 catalogue. The original function was not executed by REA.
+
+The surrounding REA call graph narrows the publication boundary further. `B33A00` calls `BB8C90`,
+then enumerates the saved vector span `(+0xF4 - +0xF0) / 4` and dispatches each saved entry through
+the manager-owned virtual interface; this is a post-initialization saved-entry pass, not proof that
+the vector was populated. `BB9AC0` conditionally calls `BB8C90`, invokes `BB61C0`, and selects a
+candidate from `+0xDC/+0xE0` only after filtering entries whose `C871D0` result has bit `0x2`; this
+selection path is distinct from presentation ordering. The presentation builder `DF95A0` is reached
+from `DE32B0` and `DF9740`, clears/reuses its `0xBC` record array, emits candidates through
+`DF7CB0`, saved entries through `DF7F30`, and only then attaches `UI/GGE_game_ui_data` through
+`DF9200` and applies `DF8300` effects. REA reports unresolved indirect calls separately, so these
+edges do not claim a complete runtime caller graph.
+
+Additional REA observations place candidate selection behind the normal simulator/path setup:
+`B29600` validates manager/path state, normalizes the selected `.spo`/path input, calls `BB9AC0`,
+and maps manager state values to the `BB9C40`/`BB9C70` state interface; `01022470` is a thin
+one-time caller of `BB9AC0`. `BB9AC0` conditionally initializes via `BB8C90`, calls `BB61C0`,
+and scans the candidate span while skipping entries whose `C871D0` selection result has bit `0x2`.
+This is the closest recovered static path to candidate selection, but it still does not expose a
+caller-supplied row, a live manager instance, or proof that the underlying resources were available.
+
+REA evidence retained for this pass: `BB8C90` callers
+`ev_8c76766c5b7cb4a9bca9b59f5ed2c3cd09b818da7c3da7ce480bf6d3a9e8254b`, `DF95A0` callers
+`ev_206838230b3646b4c7e98d29f40871a80c7cbc25ab2ca14be115a1b937dc9d7f`, `DF95A0` value-flow
+`ev_3e332a8d59bb373364411dcde09dcf8a42a01ef68db860f6b0c3bdba8a3992f1`, and `BB9AC0` value-flow
+`ev_223fe241d822f00099ab909965cd2cd6c8622bba5d1c6fa55f3dc7e82799afbe`. These are shipped-artifact
+static observations from REA/Ghidra; unresolved indirect calls, aliasing, persistent state and all
+runtime outcomes remain Unknown. The target was not launched.
+
+The retained REA value-flow summaries are complete within their requested views: `DF95A0` reports
+32 high-pcode operations, 31 def-use links and 15 effects (`ev_f32527fc7d18bb4ee63ae26ec01340c06360909f2eb66c404b235cd57d29a02a`); `BB9AC0` reports 50 operations,
+47 def-use links and 15 effects (`ev_ff9bfadc94685eb96712bc0323a7f1795b76f2c2deb84a2a09faf3934e6791c3`).
+These counts describe recovered static data flow, not runtime execution or semantic field types.
 
 For a caller-supplied native capture, the minimum useful observation bundle is therefore:
 `BA9D50` gate result; manager `+0x64/+0x50` path flags; explicit serializer root/manager/planet

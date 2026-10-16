@@ -36,5 +36,23 @@
     "static GA evidence only; no original process launched",
     "typed host field projection, not original ABI or stars.db reader",
     "constructor/serializer calling conventions may be incomplete in pseudocode"
-  ]
+  ],
+  "rea_static_corroboration": {
+    "reviewed": "2026-10-17",
+    "provider": "Ghidra 12.1.4",
+    "bb8c90_body": ["0x00bb8c90-0x00bb9939", "0x00bb9940-0x00bb9aba"],
+    "bb8c90_callers": ["0x00b32c30", "0x00b33a00", "0x00bb9ac0"],
+    "df95a0_callers": ["0x00de32b0", "0x00df9740"],
+    "bb61c0_callers": ["0x00bb8c90", "0x00bb9ac0", "0x00de30e0"],
+    "candidate_selection_callers": ["0x00b29600", "0x01022470"],
+    "evidence_ids": {
+      "bb8c90_callers": "ev_8c76766c5b7cb4a9bca9b59f5ed2c3cd09b818da7c3da7ce480bf6d3a9e8254b",
+      "df95a0_callers": "ev_206838230b3646b4c7e98d29f40871a80c7cbc25ab2ca14be115a1b937dc9d7f",
+      "df95a0_value_flow": "ev_3e332a8d59bb373364411dcde09dcf8a42a01ef68db860f6b0c3bdba8a3992f1",
+      "bb9ac0_value_flow": "ev_223fe241d822f00099ab909965cd2cd6c8622bba5d1c6fa55f3dc7e82799afbe",
+      "df95a0_value_flow_summary": "ev_f32527fc7d18bb4ee63ae26ec01340c06360909f2eb66c404b235cd57d29a02a",
+      "bb9ac0_value_flow_summary": "ev_ff9bfadc94685eb96712bc0323a7f1795b76f2c2deb84a2a09faf3934e6791c3"
+    },
+    "rea_limit": "resolved static edges only; unresolved indirect calls remain Unknown; aliasing, persistent state and runtime outcomes remain Unknown; target not executed"
+  }
 }
