@@ -45,13 +45,26 @@
     "df95a0_callers": ["0x00de32b0", "0x00df9740"],
     "bb61c0_callers": ["0x00bb8c90", "0x00bb9ac0", "0x00de30e0"],
     "candidate_selection_callers": ["0x00b29600", "0x01022470"],
+    "ui_publication_boundary": {
+      "df9200_callers": ["0x00df95a0"],
+      "df95a0_callers": ["0x00de32b0", "0x00df9740"],
+      "galaxy_registrar_callers": ["0x00f473f0"],
+      "direct_galaxy_registrar_to_df95a0": "not observed in resolved direct callers",
+      "global_ui_initializer": "0x00de5900",
+      "simulator_gge_constructor_path": "0x00de6ed0"
+    },
     "evidence_ids": {
       "bb8c90_callers": "ev_8c76766c5b7cb4a9bca9b59f5ed2c3cd09b818da7c3da7ce480bf6d3a9e8254b",
       "df95a0_callers": "ev_206838230b3646b4c7e98d29f40871a80c7cbc25ab2ca14be115a1b937dc9d7f",
       "df95a0_value_flow": "ev_3e332a8d59bb373364411dcde09dcf8a42a01ef68db860f6b0c3bdba8a3992f1",
       "bb9ac0_value_flow": "ev_223fe241d822f00099ab909965cd2cd6c8622bba5d1c6fa55f3dc7e82799afbe",
       "df95a0_value_flow_summary": "ev_f32527fc7d18bb4ee63ae26ec01340c06360909f2eb66c404b235cd57d29a02a",
-      "bb9ac0_value_flow_summary": "ev_ff9bfadc94685eb96712bc0323a7f1795b76f2c2deb84a2a09faf3934e6791c3"
+      "bb9ac0_value_flow_summary": "ev_ff9bfadc94685eb96712bc0323a7f1795b76f2c2deb84a2a09faf3934e6791c3",
+      "df9200_callers": "ev_90969d84c07b8ad3fd8e1a86452d960db52c781831be3c9bfaf698f5a62e4a2c",
+      "df95a0_callers_latest": "ev_50fb51055abb84f6c4dda34ad2f90309a63e1ef6cc0371560ec69cb6a4a7e818",
+      "galaxy_registrar": "ev_ab2c2ad005b3f43fead96c8df28456dd217091dd0a08a5cf7a6dfff7aa385558",
+      "controller_activation": "ev_83f03f72a363a0e940fa109ec5415508a44114d757b4b7e3e06da26c50f52bbe",
+      "global_ui_initializer": "ev_8449ddfe5c3361e95bbbfcacdae966bd5df54534e311ea6345ccd2ce36aed5a5"
     },
     "rea_limit": "resolved static edges only; unresolved indirect calls remain Unknown; aliasing, persistent state and runtime outcomes remain Unknown; target not executed"
   }

@@ -75,6 +75,21 @@ The retained REA value-flow summaries are complete within their requested views:
 47 def-use links and 15 effects (`ev_ff9bfadc94685eb96712bc0323a7f1795b76f2c2deb84a2a09faf3934e6791c3`).
 These counts describe recovered static data flow, not runtime execution or semantic field types.
 
+The GGE/UI boundary is separate from record construction. REA confirms that `DF9200` is called only
+by `DF95A0` in the resolved direct-caller set (`ev_90969d84c07b8ad3fd8e1a86452d960db52c781831be3c9bfaf698f5a62e4a2c`):
+it allocates one `0x90`-byte `UI/GGE_game_ui_data` object per `0xBC` record, stores the record pointer
+at object `+0x30` and record `+0xB8`, then performs the stage/icon and save-flag setup. `DF95A0`
+itself has only `DE32B0` and `DF9740` in the resolved caller set (`ev_50fb51055abb84f6c4dda34ad2f90309a63e1ef6cc0371560ec69cb6a4a7e818`).
+No resolved direct edge from the `GalaxyGameEntry` registrar (`DDDE30`) to `DF95A0` was observed.
+
+The registrar is initialized from `F473F0` (`ev_ab2c2ad005b3f43fead96c8df28456dd217091dd0a08a5cf7a6dfff7aa385558`),
+which registers `GalaxyGameEntry` and other drivers. The controller activation path `DEA1B0`
+(`ev_83f03f72a363a0e940fa109ec5415508a44114d757b4b7e3e06da26c50f52bbe`) calls `DE5900`, which
+loads `UI/GGE/GlobalUI`, while its state/update path calls `DE9F70`, `DE95B0` and `DE6FC0`.
+`DE6ED0` creates `Simulator/GGE` objects from those state transitions. This establishes parallel
+GGE controller/UI setup and per-record presentation setup, but not the missing runtime message,
+phase, camera or manager-instance linkage. REA's unresolved indirect calls remain Unknown.
+
 For a caller-supplied native capture, the minimum useful observation bundle is therefore:
 `BA9D50` gate result; manager `+0x64/+0x50` path flags; explicit serializer root/manager/planet
 resource outcomes; root/index/context/class resource keys and decoded frame statuses; saved/candidate
