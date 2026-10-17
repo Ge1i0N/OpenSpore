@@ -54,6 +54,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE message-to-state dispatch | [audit/gge-message-dispatch](audit/gge-message-dispatch/README.md) | DE99B0 event IDs update internal state fields; 0x036C4A10 matches SDK IStateManager +0x28 contract |
 | GA StateManager command dispatch | [audit/state-manager-dispatch](audit/state-manager-dispatch/README.md) | 0x007E5050 directly corroborates SDK StateIDFromName +0x38 and SwitchToState +0x28; distinct from GGE DF9740 |
 | GGE internal state → UI | [audit/gge-state-ui](audit/gge-state-ui/README.md) | DE48C0 maps internal state 5/13 to UI control IDs; no direct DF9740/catalogue claim |
+| GGE IDs ↔ SPUI ControlIDs | [audit/gge-message-dispatch/control-id-correlation](audit/gge-message-dispatch/control-id-correlation.md) | seven DE99B0/DE48C0 constants found as shipped GGE ControlIDs; producer remains Unknown |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Main → playable roadmap | [main-to-playable-roadmap](main-to-playable-roadmap.md) | current layer status, priority order and parked console work |

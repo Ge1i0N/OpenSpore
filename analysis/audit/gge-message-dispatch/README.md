@@ -40,6 +40,11 @@ DE99B0 event branch → controller state/request fields
 The exact indirect caller that invokes the Play Spore vtable `+0x38 = DF9740` remains a separate
 boundary. Setting fields in a static branch is not runtime execution or catalogue readiness.
 
+The seven state/UI constants used by the bounded handler/helper bodies were also found as actual
+SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](control-id-correlation.md).
+The bounded GA immediate scan found no separate MessageManager producer for them, so they remain
+ControlID/handler identities rather than independently proven message producers.
+
 The related state-to-UI helper `DE48C0` maps controller state 5/13 to UI IDs `0x061DD69B` and
 `0x070D74E7`, respectively, via `00810650` and control vtable `+0x28`. Its retained evidence is
 separate in [gge-state-ui](../gge-state-ui/README.md); matching IDs are not treated as a proven
