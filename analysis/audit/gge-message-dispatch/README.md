@@ -208,7 +208,7 @@ The publisher boundary is now identified in the GA startup/teardown path. The se
 the wide string `Preferences` at `0x01409938`; the surrounding startup body:
 
 ```text
-7E6E2D  → service/resource lookup using "Preferences"
+7E6E2D  → 0x006B3FA0 service/resource lookup using "Preferences"
 7E6E4D  → 67DED0([object]) → DAT_015FD91C
 ```
 
