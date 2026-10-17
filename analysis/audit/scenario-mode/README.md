@@ -51,9 +51,11 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   ownership patterns, but does not prove listener delivery.
 - The instruction-level registration order is more precise: `EF2290` stores MessageManager and
   listener-data fields at `+0x94/+0x98/+0x9C`, calls MessageManager `+0x28` with handler
-  `0x00EF2250` and event `0x0212D3E7`, then calls MessageManager `+0x24` for two IDs held in its
-  local array. SDK `IMessageManager` names `+0x24` `AddUnmanagedListener` and `+0x28` `AddHandler`,
-  which is a positive contract match; the callback delivery/runtime result remains Unknown.
+  `0x00EF2250` and event `0x0212D3E7`, then calls MessageManager `+0x24` for two IDs:
+  `0x04249453` and `0x07FB11B4`. SDK `IMessageManager` names `+0x24` `AddUnmanagedListener` and
+  `+0x28` `AddHandler`, which is a positive contract match; the callback delivery/runtime result
+  remains Unknown.
+- `EF23F0` removes the handler through MessageManager `+0x30` and the listener through `+0x20`.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
@@ -68,7 +70,7 @@ resource/planet was loaded.
 
 ## Separate mode-message corroboration
 
-The SDK `ScenarioMode.h` comments identify:
+The SDK `ScenarioMode.h` comments identify general mode-manager messages:
 
 ```text
 kMsgEnterMode = 0x074BAF67
@@ -77,8 +79,10 @@ kMsgExitMode  = 0x0462C656
 
 Bounded GA immediate scans find both values in ScenarioMode/mode-message handlers. The exit value
 is also sent through a MessageManager dispatch path in a separate mode lifecycle. This corroborates
-that ScenarioMode has a real message-driven enter/exit contract, but it does not identify the
-`Play Scenario` button's producer or prove that the button reaches this mode.
+These two IDs are not the two ScenarioMode-specific listener IDs registered by `EF2290`; this
+distinction prevents promoting a generic mode-manager message into the ScenarioMode producer route.
+It still corroborates a real message-driven mode contract, but it does not identify the `Play
+Scenario` button's producer or prove that the button reaches this mode.
 
 The SDK `cGameModeManager` also identifies `kScenarioMode = 0x01654C10` and classifies it as a
 simulator game mode. GA registration uses the same tag. The state script's standalone `ScenarioMode`
