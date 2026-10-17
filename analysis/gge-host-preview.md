@@ -1,6 +1,6 @@
 # GGEHostPreview — first physically clickable controlled card screen
 
-Reviewed **2026-10-15**. This is an explicitly named **Debug/dev-only host reconstruction**, not
+Reviewed **2026-10-18**. This is an explicitly named **Debug/dev-only host reconstruction**, not
 the original GGE state, native scene or live catalogue.
 
 ## Run it
