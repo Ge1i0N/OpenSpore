@@ -27,6 +27,7 @@ against the GA SHA-256 and a focused body/vtable/resource observation.
 | `IWindow::AddWinProc/RemoveWinProc` around `+0xB0/+0xB4` | `Spore/UTFWin/IWindow.h` | candidate registration path for the unresolved listener; not yet mapped to the GA Canvas `+0x5C` field |
 | `IWindowManager::SendMsg` at `+0x10` | `Spore/UTFWin/IWindowManager.h` | candidate for higher-level event delivery, separate from Win32 Canvas transport |
 | `App::IMessageManager::MessageSend` `+0x14`, `AddListener` `+0x20`, `AddHandler` `+0x28` | `Spore/App/IMessageManager.h` | `FUN_00812D80` copies an 8-dword payload, uses event `0x1EE1001` and calls global service vtable `+0x14`; strong GA match for `MessageSend` |
+| `App::IMessageListener::HandleMessage(messageID,payload)` | `Spore/App/IMessageListener.h` | GGE vtable `0x0147E030 +0x18 = DE99B0` consumes the object/message shape; GA-specific vtable placement is retained separately from SDK inheritance order |
 | `App::IPropManager::GetPropertyList` `+0x2C`, `AddPropertyList` `+0x34` | `Spore/App/IPropManager.h` | GA vtable `0x01409210` contains `0x006A60E0`/`0x006A61F0` at these slots; `DF7CB0` uses the `+0x2C` contract for terrain property lookup |
 | `CheatManager.AddCheat`, `ICommand::ParseLine`, `GetDescription` | `Documentation/Cheats.md` | corroborated by GA `App/CheatManager`, `help`, `history`, `clear`, line parser and output buffer |
 

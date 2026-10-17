@@ -5,7 +5,8 @@ no original process was executed. The generated C/instruction pairs are retained
 
 ## Handler contract
 
-`FUN_00DE99B0` is referenced by data at `0x0147E048` and has the shape of a GGE message listener.
+The GGE object vtable at `0x0147E030` contains `0x00DE99B0` at slot `+0x18` (`0x0147E048`).
+The body has the shape of a GGE message listener.
 It first forwards the message to an optional object at controller `+0x34`, requires event-object
 type `0x287259F6` at payload word `+0x08`, then calls that event object's vtable `+0x1C` to obtain
 the event ID.
@@ -44,6 +45,11 @@ boundary. Setting fields in a static branch is not runtime execution or catalogu
 `refs/Spore-ModAPI/Spore/App/IStateManager.h` puts `SwitchToState` at vtable `+0x28`, matching the
 GA call shape in the `0x036C4A10` branch. This is a method-order/contract corroboration; the SDK
 address table is not used as a literal GA address map.
+
+`IMessageListener` supplies the semantic `HandleMessage(messageID, payload)` contract, while
+`IMessageManager::AddListener` is at SDK vtable `+0x20` and is the slot used by `DEA1B0` when it
+registers the GGE listener object (`controller + 8`). The GGE object vtable placement `+0x18` is
+kept as a GA-specific observation; it is not substituted for a standalone SDK interface layout.
 
 ## Reproduction
 
