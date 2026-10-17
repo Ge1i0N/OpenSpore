@@ -50,9 +50,12 @@ Use persistent Ghidra sequentially, with no broad import:
 1. The handler registration is now bounded: `DE7660` creates/initializes the Simulator state
    handlers, `E008B0` installs the Play Spore vtable `0x147EF50`, `DF9620` is its state-2 enter
    slot, and `DF9740` is its state-2 refresh slot. This is direct GA vtable/data evidence.
-2. The remaining dispatch question is only the outer caller that selects state 2; do not broaden
+2. The record rebuild boundary is also closed: `DF9620`, `DF9740` and `DE32B0` converge on
+   `DF95A0`; it clears old per-record UI data, reads saved/candidate spans, resizes the `0xBC`
+   array, emits candidates into the post-saved region, then saved entries, UI data and effects.
+3. The remaining dispatch question is only the outer caller that selects state 2; do not broaden
    this into a generic state-manager rewrite.
-3. Keep `DF9620 → DF95A0 → DF6010 → DF8300 → event 0x080D7451` and
+4. Keep `DF9620 → DF95A0 → DF6010 → DF8300 → event 0x080D7451` and
    `DF9740 → DF95A0 → DF6C10` as the retained native orders. The current static result is:
    `state +0x108 == 2` → show `0x0615A5FF`/GlobalUI → rebuild records → continuation.
 4. Compare only the relevant SDK contracts: `IStateManager::SwitchToState` and

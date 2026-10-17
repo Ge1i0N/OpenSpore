@@ -7,6 +7,33 @@ are recorded in [gge-real-save](gge-real-save.md); no unrelated profile scan was
 
 ## Recovered producer chain
 
+### Exact `DF95A0` publication boundary
+
+The state-2 entry and refresh probes now corroborate the record publication order at instruction
+level. `DF9620` (Play Spore enter) and `DF9740` (state-2 refresh) both reach `DF95A0`; the separate
+controller route `DE32B0` reaches the same function as well. `DF95A0` first calls `DF94E0`, which
+releases existing per-record UI objects, clears record fields `+0xB4/+0xB8`, copies/rebuilds the
+record vector with stride `0xBC`, and only then obtains source vectors. Its exact body order is:
+
+```text
+DF94E0
+  → B3D3A0: saved span +F0/+F4
+  → BA6450: candidate span +DC/+E0
+  → DE9DD0: resize total record count
+  → DF7CB0: write candidates at record + saved_count * 0xBC
+  → DF7F30: write saved records at the front
+  → DF9200: create/configure per-record UI data
+  → DF8300: create/update marker effects
+```
+
+This confirms that the earlier candidate-first call order is an implementation detail, not the
+published card order. It also closes the remaining ambiguity about whether `DF95A0` merely reads a
+static list: it owns a destructive refresh/rebuild of the live record array, while the source
+vectors and their producer readiness remain separate Unknown/Absent/Available inputs.
+
+Static-only limitation: this observes no live vector contents, native service completion or original
+runtime card. It does not make a missing save/catalogue available.
+
 The host `build_catalog` helper intentionally accepts already-resolved typed metadata. Static GA
 evidence now clarifies exactly what must produce that metadata:
 
