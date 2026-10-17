@@ -85,6 +85,23 @@ gap:
 Its role is narrowed to shared/internal GGE message handling plus lifecycle/UI helpers; the
 upstream producer and payload route remain Unknown.
 
+One bounded branch in `DE8A80` is also separated from the UI-click hypothesis:
+
+```text
+message ID 0x99EDA4CD
+  → DE6E30
+```
+
+`DE6E30` performs a resource/property-shaped lookup using observed constants:
+
+```text
+type  = 0x011989B7
+group = 0x4084A100
+```
+
+and works through object state around `+0x70/+0x74`. This is retained as an internal GGE
+resource/state branch; it is not promoted to Button, CommandID or ScenarioMode behavior.
+
 ### Shared multi-vtable GGE object
 
 The constructor/initializer body `DE6120` writes four vtable pointers into one object:
