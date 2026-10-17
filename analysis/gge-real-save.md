@@ -22,6 +22,18 @@ lastSave.pld             189,486 bytes
 Both selected `stars.db` files have DBPF magic/version `DBPF/3`, and the read-only physical context
 inspector accepts root `0x01897C18` with exact index/class resources.
 
+Additional bounded DBPF inventory for the explicitly selected `Game0` files:
+
+```text
+GGEUserData.dat    1 record, type/group 0x01897C18/0x01897C18
+lastSave.pld       325 records across 5 type/group pairs
+PlanetScripts.pld  328 records across 5 type/group pairs
+planetRecords.pkt  0 indexed records
+```
+
+These are container observations only. Their payloads are not promoted to catalogue, candidate or
+refill readiness without a format-specific decoder and producer provenance.
+
 ## Real StarManager observations
 
 For `Game0\stars.db` the explicit DBPF/context reader observed:
