@@ -202,6 +202,36 @@ This confirms a runtime-published service-pointer layer between the Scenario hel
 generic property system. The service's semantic owner and the caller that publishes it remain
 Unknown; no Scenario-specific write is inferred from the setter stub alone.
 
+## ✔️ Milestone: Scenario properties owner resolved to Preferences
+
+The publisher boundary is now identified in the GA startup/teardown path. The selected binary uses
+the wide string `Preferences` at `0x01409938`; the surrounding startup body:
+
+```text
+7E6E2D  → service/resource lookup using "Preferences"
+7E6E4D  → 67DED0([object]) → DAT_015FD91C
+```
+
+The teardown path later calls:
+
+```text
+7E97E0  → 67DED0(0) → clears DAT_015FD91C
+```
+
+The static Scenario property path is therefore:
+
+```text
+Preferences property object
+  → DAT_015FD91C
+  → DF6C10 property/query calls
+  → ScenarioGAButtonClicked / ScenarioGAFirstLaunched
+  → GGE UI state targets
+```
+
+This resolves the semantic owner of the published property/query service for the selected GA
+build. It still does not identify the exact writer of either boolean, observe a runtime click, or
+prove entry into `ScenarioMode`.
+
 ## Property-name string search
 
 The selected GA binary contains no matching plaintext strings for:
