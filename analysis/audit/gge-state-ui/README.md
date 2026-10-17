@@ -57,6 +57,22 @@ shows a state `+0x108/+0x10C` normalization path followed by `DE44A0` and `DE48C
 mechanism therefore remains Unknown; it is not renamed to a vtable slot or per-frame callback from
 this negative search.
 
+### Adjacent GGE message-handler slot
+
+The adjacent body `DE8A80` has no direct `E8` caller, but its function address is present in the GA
+vtable at:
+
+```text
+vtable 0x0147E014
+slot +0x10  -> 0x00DE8A80
+```
+
+Its bounded body compares several internal message IDs and calls GGE lifecycle/UI helpers including
+`DE4AE0`, `DE4A20`, `DE4BD0`, `DE5210` and `DE5280`. It does not compare the `Play Scenario`
+ControlID `0x070D7509`; the only two direct immediate references to that value remain the
+state/UI-table writes in `DE48C0` and `DE5900`. Therefore `DE8A80` is a real GGE message-handler
+seam, but not yet the Play Scenario producer.
+
 ## Reproduction
 
 ```powershell
