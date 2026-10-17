@@ -42,10 +42,11 @@ address pairs universally interchangeable across binary versions.
 
 These labels fit our retained GA assembly: `810650 -> 8102A0` queries `0xEEEE8218`, compares
 `+0x1C`, and optionally searches through `+0xF0`. Earlier notes called these objects generic
-"providers" and described a "service ID". The more specific **SDK-assisted interpretation is
-window/ControlID lookup**. `0x02E5A4A8` is therefore a window ControlID candidate, not a newly
-identified camera service. The exact serialized window/object instance still requires verification.
-Do not use this declaration to resolve duplicate ControlIDs with a first-match host heuristic.
+"providers" and described a "service ID". The follow-up [per-card lookup investigation](gge-window-lookup.md)
+now verifies both the implicit `record+B8` receiver and the exact default asset: `0x02E5A4A8` is
+ControlID of root object177 in each `GGEGameStarUIv4` resource, not a camera/global display service.
+Native component registration/mount execution remains unobserved. Do not use this declaration to
+resolve duplicate ControlIDs with a first-match host heuristic.
 
 ### Persisted starter references already exist
 
@@ -84,7 +85,8 @@ but no concrete mapping for this ID was executed or independently recovered in t
 
 1. Resolve every persisted starter reference in order, retaining missing/null/unsupported outcomes.
 2. Keep that result separate from the runtime refill observation and terrain/property queries.
-3. Verify the exact `0x02E5A4A8` serialized window choice against actual SPUI before attaching it.
+3. Exact `0x02E5A4A8` default window identity and per-card lookup are now verified; preserve its
+   separation from native mounting, unknown runtime geometry and camera acquisition.
 4. Use the SDK names to target future REA probes, not to trigger a broad Ghidra import/reanalysis.
    Its included `SDKtoGhidra` importer remains unused until binary-version matching and monitoring
    are arranged explicitly.

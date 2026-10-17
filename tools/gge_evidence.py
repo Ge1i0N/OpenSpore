@@ -7,6 +7,8 @@ be in zero-fill BSS: never read them as file-backed bytes at their virtual addre
 import hashlib
 import json
 import os
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -100,6 +102,61 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--window-lookup' in sys.argv:
+        # A small, explicit source/artifact cross-check. Never opens/reimports a Ghidra project.
+        from tools.find_imm import OBJDUMP
+        if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+            raise ValueError('window-lookup ranges require the selected GA authority hash')
+        dest = ROOT/'analysis/audit/gge-window-lookup'
+        dest.mkdir(parents=True, exist_ok=True)
+        ranges = [('layout-window-wrapper', 0x810650, 0x810661),
+                  ('layout-root-window-search', 0x8102a0, 0x810305),
+                  ('card-placement-receiver', 0xdf6110, 0xdf613d)]
+        for name, start, end in ranges:
+            result = subprocess.run([str(OBJDUMP), '-d', '-M', 'intel',
+                                     f'--start-address={start}', f'--stop-address={end}', str(pe.path)],
+                                    capture_output=True, text=True, errors='replace', check=True, timeout=15)
+            instructions = [line.rstrip() for line in result.stdout.splitlines()
+                            if re.match(r'^\s+[0-9a-f]+:', line)]
+            if not instructions:
+                raise ValueError('empty bounded window-lookup disassembly')
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(instructions)+'\n', encoding='utf-8')
+        facts = {'oracle_sha256': digest, 'authority': 'static GA instructions + decoded shipped SPUI; no target execution',
+                 'sdk_revision': '69b27b5b407a2c76e1e701ba27630a77a9ce5d01',
+                 'receiver': 'DF6119 loads ECX from record+B8; 810650 dereferences that UILayout receiver+14, not a global registry',
+                 'lookup': '8102A0 enumerates receiver components +64/+68; IWindow Cast EEEE8218, GetControlID +1C; bool0 skips child search +F0',
+                 'control': '0x02e5a4a8', 'layouts': [],
+                 'limitations': ['Serialized root/component matches are not an original runtime mount observation',
+                                'Root geometry is the serialized local Area, not runtime GetRealArea output',
+                                'No automatic first-match duplicate resolution, camera/refill/scene admission or service readiness']}
+        wanted = {0x21df01f2, 0x52c07413, 0xcb6a4669, 0x28f6d535}
+        selected = [ROOT/'build/bin/Debug/Data'/name for name in
+                    ('PatchData.package', 'Spore_Graphics.package', 'Spore_EP1_Data.package')]
+        for package, record, instance, data in layouts(selected):
+            if instance not in wanted:
+                continue
+            parsed = BinaryLayout(data).parse()
+            matches = []
+            for index, obj in parsed.windows.items():
+                controls = [p for p in obj['properties'] if p['id'] == 0xeec1b001]
+                if not any(p.get('raw') == 'a8a4e502' and p['code'] == 9 and p['count'] == 1 for p in controls):
+                    continue
+                matches.append({'object': index, 'class': hex(obj['class']), 'serialized_root_flag': obj['root'],
+                                'parent': parsed.parents.get(index), 'children': parsed.children.get(index, []),
+                                'properties': obj['properties']})
+            facts['layouts'].append({'package': package.name, 'record': record, 'instance': hex(instance),
+                                     'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest(),
+                                     'consumed': parsed.pos, 'objects': len(parsed.objects),
+                                     'windows': len(parsed.windows), 'matches': matches})
+        expected = {(name, instance) for name in ('PatchData.package', 'Spore_Graphics.package')
+                    for instance in (0x21df01f2, 0x52c07413, 0xcb6a4669)}
+        expected.add(('Spore_EP1_Data.package', 0x28f6d535))
+        actual = [(row['package'], int(row['instance'], 16)) for row in facts['layouts']]
+        if len(actual) != len(expected) or set(actual) != expected:
+            raise ValueError('selected window-lookup corpus missing/duplicated resources; no complete report')
+        (dest/'facts.json').write_text(json.dumps(facts, indent=2)+'\n', encoding='utf-8')
+        print('retained bounded per-card UILayout lookup evidence and explicit three-package SPUI comparison')
+        return
     if '--input' in sys.argv:
         dest=ROOT/'analysis/audit/gge-input'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'GA static instructions + actual SPUI host verifier; no original input runtime',

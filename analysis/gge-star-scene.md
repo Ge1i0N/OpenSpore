@@ -13,8 +13,9 @@ Static local Ghidra/objdump and shipped UI/PNG observations; no original-runtime
 
 This is a **host 2D card collection**, not native Simulator/render-stage/effects execution. No code
 automatically connects it to the normal GGE screen, discovers saves, generates candidates, creates
-a native camera, forces MoviePlayer/DBCheck completion or marks a native scene ready. There is still
-no original stars.db/save corpus in the workspace; verifier metadata/cameras are clearly controlled.
+a native camera, forces MoviePlayer/DBCheck completion or marks a native scene ready. Explicitly
+authorized [real-save corpora](gge-real-save.md) are now available, but these scene verifiers still
+use controlled metadata/cameras, not a complete real-save runtime producer.
 
 ## Native camera/factory findings
 

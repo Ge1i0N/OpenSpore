@@ -14,6 +14,18 @@ static bool corpus(const std::filesystem::path& dir,size_t& matches) {
         std::ifstream input(dir/file,std::ios::binary); std::vector<u8> data(std::istreambuf_iterator<char>(input),{});
         spui::Layout layout; std::string error;
         if (!spui::parse_binary(data,layout,error)||data.size()!=24812||objects!=152||windows!=58) return false;
+        size_t positioning_roots=0;
+        for (const auto& win:layout.windows) if (win.control_id==kStarUiRoot) {
+            ++positioning_roots;
+            if (win.object_index!=177||win.class_id!=0x4ec1b8d8u||win.parent!=-1||!win.has_area||
+                win.area.left!=76||win.area.top!=167||win.area.right!=124||win.area.bottom!=215||
+                win.child_objects!=std::vector<u16>{28,41,90,176}) return false;
+        }
+        if (positioning_roots!=1||layout.roots.size()!=1||
+            layout.windows[layout.roots[0]].object_index!=177) return false;
+        bool serialized_root=false;
+        for (const auto& obj:layout.objects) if (obj.index==177) serialized_root=obj.root;
+        if (!serialized_root) return false;
         for (u32 id:{kStarUiRoot,0x026e0001u,0x026e0002u,0x03c4925eu,0x060a1102u,0x060a1103u,0x0375408cu,0x05944088u}) {
             bool found=false; for (const auto& win:layout.windows) if (win.control_id==id) found=true;
             if (!found) { std::cerr<<"missing real star UI control 0x"<<std::hex<<id<<std::dec<<'\n'; return false; }

@@ -100,25 +100,26 @@ REA distinguishes this projection service from the controller's stored active-ca
 `DE46D0` obtains controller `+0x198` through `0067DCD0` slot `+0x50`, then returned-object slot
 `+0x38`, while `DE3C20` uses the getter's `+0x58` path. `DF6490` also uses `+0x58` for nearest
 record selection. Their identity is therefore not assumed equivalent in the host.
-REA also separates the UI-bounds service used by `DF6110`: it is acquired through registry lookup
-`00810650(0x02E5A4A8,0)`, whose `008102A0` implementation queries interface `0xEEEE8218` and
-matches the requested service ID. `DF6110` then uses that service's `+0x34/+0x38` values together
-with `805F90` viewport state. The service identity is Unknown; it is not treated as the projection
-camera or controller camera.
-The registry is shared more broadly: REA reports callers `00810650`, `008113D0`, and `00812590`.
-`008113D0`'s no-match branch enumerates providers implementing `0xEEEE8218`, combines their
-`+0x38` rectangles, and applies provider `+0x64`; the concrete provider for `0x02E5A4A8` remains
-Unknown. This supports a UI/display-service registry interpretation, not a camera identity claim.
+The [2026-10-17 receiver cross-check](gge-window-lookup.md) corrects the earlier UI-bounds
+"global service" interpretation: `DF6110` calls `00810650(0x02E5A4A8,0)` on ECX loaded from
+**record+B8**. `810650` dereferences that UILayout's `+14`; `8102A0` compares root-window ControlIDs
+through `IWindow` interface `EEEE8218`. Both default per-star assets have exactly one matching root,
+object177. `DF6110` reads its GetArea/GetRealArea slots `+34/+38` and uses SetLocation at `+64`.
+This window identity is resolved, not a camera identity or proof of native mount completion.
+The component lookup has broader REA callers `00810650`, `008113D0`, and `00812590`.
+`008113D0`'s no-match branch enumerates windows implementing `0xEEEE8218`, combines their
+GetRealArea (`+0x38`) rectangles, and applies SetLocation (`+0x64`). This is layout/window geometry,
+not camera acquisition; native mount success remains unobserved.
 The broader REA call chain is `00812100/00811C70 → 00811C20 → 008113D0 → 008102A0`;
-`00811C20` invokes the active display/layout object's `+0xD8` for each provider exposing
-`0xEEEE8218`. This confirms provider synchronization, but still does not identify which provider
-satisfies `0x02E5A4A8`. The owner-switch callers for `00812100` resolve to `008121C0` and
-`008122A0`; `00811C70` itself has no resolved direct callers. The remaining gap is the concrete
-provider/owner creation path, not the registry matching or synchronization semantics.
+`00811C20` invokes the container window's AddWindow (`+0xD8`) for each component exposing
+`0xEEEE8218`. This confirms a window attachment path, not a separate camera service.
+The owner-switch callers for `00812100` resolve to `008121C0` and
+`008122A0`; `00811C70` itself has no resolved direct callers. The remaining gap is native
+creation/attachment execution, not the default root identity.
 REA further shows `008121C0` creates/selects a `UI/LayoutObjects` instance through `00811070`,
 copies its caller-supplied three-word key into owner fields, and only then calls `00812100`; the
-factory publishes resource key `0x022568E7`. The key's relation to provider ID `0x02E5A4A8` is not
-resolved, so the concrete display provider remains Unknown.
+factory publishes resource key `0x022568E7`. This is distinct from a window ControlID; finding
+root177 does not claim the native factory/attachment path has executed successfully.
 REA resolves the lifecycle around that registry: `00812100` replaces the display/layout owner at
 `+0x88` through `008106C0` and calls `00811C20`; `00811C70` syncs the providers, invokes owner
 callback `+0x8C`, and initializes resource key `0x2FBF2058`. This remains a display/layout path;

@@ -70,20 +70,20 @@ builds the three-word layout key and forwards it to `8121C0` (`ev_34068f9104b198
 `ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452`). `E035F0` separately
 calls `8121C0(param_1,1,0x2EDD95CA)` while constructing/loading `UI/GGE/GlobalUI`
 (`ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`). Thus the native
-`UI/LayoutObjects` owner path is confirmed for GGE layouts, while the concrete provider for registry
-ID `0x02E5A4A8` remains a separate unresolved service identity.
+`UI/LayoutObjects` owner path is confirmed for GGE layouts. The per-card `0x02E5A4A8` root lookup
+is separately resolved below; it is not an additional unidentified global service.
 REA's function bodies make the GGE layout handoff explicit: `DE5900` calls `812250`, which parses
 the selected panel name with `0068D830` and invokes `8121C0`; `E035F0` constructs `UI/GGE/GlobalUI`
 and calls `8121C0(param_1,1,0x2EDD95CA)` directly
 (`ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635`,
 `ev_e9016910838a25659be2b71d1a0138bba47ee996508b74a58d6bb5ab21171410`,
 `ev_e8b06532d45258569292eca19dbad6b337cc9722fa1584b4b2b5e86e207097`). The resulting
-`UI/LayoutObjects` owner is therefore a real GGE layout path, but its `0xEEEE8218` provider list
-and provider ID `0x02E5A4A8` remain runtime registry facts rather than inferred layout identities.
-The broader layout command path is not a provider-registration shortcut: REA identifies `812590`
+`UI/LayoutObjects` owner is therefore a real GGE layout path. Native registration of its components
+is not observed merely by finding the exact per-card root in SPUI.
+The broader layout command path is not a mount-completion shortcut: REA identifies `812590`
 as the UI layout console/diagnostic handler, with list/load/unload behavior and parsed hex arguments;
 it forwards layout requests to `812250`, but has no resolved direct callers. This preserves the
-distinction between layout loading and runtime `0xEEEE8218` provider registration.
+distinction between layout loading and native window/component registration.
 The key parser `0068D830` is now independently corroborated: it hashes the name before the first
 dot into word 0, writes caller tag `0x0510A95B` into word 1, and writes descriptor `0x40464100`
 into word 2; suffixes after a dot are parsed separately when present
@@ -96,6 +96,13 @@ implemented GGE configuration property-list consumer. BSS runtime globals are no
 values: `PE.read` beyond a section's raw length can misleadingly expose unrelated bytes.
 
 ## Implemented now — deliberately bounded
+
+**2026-10-17 correction to the historical provider interpretation above:** `0x02E5A4A8` is now
+identified as per-star layout root177. `DF6110` calls `810650` on the UI receiver loaded from that
+record's `+B8`; the wrapper searches that UILayout's components, not a global service registry.
+See [per-card window lookup](gge-window-lookup.md) for instructions and exact asset identity.
+This removes an alleged unknown display-service identity, not the missing original GGE lifecycle,
+native mounting/component registration, camera producer or catalogue readiness.
 
 `engine/mode_ui.cpp` exposes only the recovered **default primary UI binding**. A state whose
 script names `mode GalaxyGameEntry` now presents `GlobalUIGGE-9` through the existing typed

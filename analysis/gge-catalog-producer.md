@@ -2,7 +2,8 @@
 
 Reviewed **2026-10-17**. GA static authority SHA-256
 `086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
-No original runtime capture, `stars.db` corpus or user profile was used.
+The original function extracts are static-only. Later explicitly authorized real-save observations
+are recorded in [gge-real-save](gge-real-save.md); no unrelated profile scan was performed.
 
 ## Recovered producer chain
 
@@ -111,24 +112,26 @@ the `+0x58` service for nearest-record selection/picking
 (`ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1`). The static binary
 therefore does not establish that controller `+0x198` and the projection service are identical.
 
-REA also identifies the UI-bounds acquisition as a different registry path, not another camera
-getter. `DF6110` calls `00810650(0x02E5A4A8,0)`. The wrapper forwards through the registry object at
-`+0x14` to `008102A0`; that lookup walks registered services, queries interface `0xEEEE8218` at
-service slot `+0x0C`, compares the requested ID through slot `+0x1C`, and optionally invokes slot
-`+0xF0` (`ev_d2b10723dab7915c5fb7ecb22a4c7d132a0df5ffa003d1792dd8fdc968ec13c8`,
-`ev_a8cf6c11bc9c47ccba1819b66f0a798e410315bff6845c2ab36ff099356d25ff`). The concrete service
-behind ID `0x02E5A4A8` and its semantic name remain Unknown. `DE3C20` therefore uses global
-`0x015FD8B0`/slot `+0x58`, while `DF6110` uses the registry ID plus `805F90` viewport state and
-service slots `+0x34/+0x38`; neither route is synthesized as the other.
+The [2026-10-17 window lookup cross-check](gge-window-lookup.md) resolves UI-bounds identity and
+corrects the earlier global-registry interpretation. `DF6110` loads **ECX from record+B8**, then
+calls `00810650(0x02E5A4A8,0)`. `810650` reads that UILayout's `+14` and forwards to `8102A0`.
+The latter queries `IWindow` interface `EEEE8218`, compares ControlID through `+1C`, and only
+recurses through `+F0` when requested. The default matching window is unique root object177 in
+both `GGEGameStarUIv4` assets. Its `+34/+38/+64` are GetArea/GetRealArea/SetLocation; this is not
+another camera getter. Earlier REA IDs retain the static instructions
+(`ev_d2b10723dab7915c5fb7ecb22a4c7d132a0df5ffa003d1792dd8fdc968ec13c8`,
+`ev_a8cf6c11bc9c47ccba1819b66f0a798e410315bff6845c2ab36ff099356d25ff`), not the old inference.
+`DE3C20` still uses global `015FD8B0`/slot58 separately. Native mount/component registration and
+runtime window geometry are not observed by finding the serialized root.
 
-The registry boundary has three resolved callers in REA: `00810650`, `008113D0`, and `00812590`
+The layout-component lookup boundary has three resolved callers in REA: `00810650`, `008113D0`, and `00812590`
 (`ev_182693150ec2aca09aca6eda83664ce25962446a7f1fe1d7683ce2ae9db31b2f`). `008113D0` first asks
-`008102A0(0xFFFFFFFF,1)` for a matching service; on the no-match branch it enumerates registered
-providers exposing `0xEEEE8218`, reads each provider's `+0x38` rectangle, combines the bounds, and
-invokes provider slot `+0x64` with the resulting offsets
+`008102A0(0xFFFFFFFF,1)` for a matching window; on the no-match branch it enumerates components
+exposing `0xEEEE8218`, reads each window's GetRealArea (`+0x38`), combines the bounds, and
+invokes SetLocation (`+0x64`) with the resulting offsets
 (`ev_059d4b922486de4e38ad78a79eef526f05fd34590b13ef28c7cb627189c9341f`). This corroborates a
-shared UI/display-service registry, but does not reveal which provider satisfies ID `0x02E5A4A8`.
-`008102A0` has no resolved direct callees because its provider calls are indirect; its High-Pcode
+layout-local window geometry path, not a global display-service registry.
+`008102A0` has no resolved direct callees because its interface calls are indirect; its High-Pcode
 summary is complete at 48 operations, 46 def-use links and 19 effects
 (`ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2`).
 The higher-level registry path is also resolved: `008102A0` is called by `00810650`, `008113D0`,
@@ -136,8 +139,8 @@ and `00812590` (`ev_914b77ace5048cc0224e6a298cd0b7436f678d46390b4d938e0918812f21
 is called by `00811C20`, and `00811C20` is called by `00811C70` and `00812100`
 (`ev_4871815c0c0827cad1bab36b921a0a82232c491db33e80ddd54076a159ccbdf2`,
 `ev_d87f299f55916acf12ddda64a9c89eac9bbda90e92cb84c691ac443708d456e6`). `00811C20` invokes
-the active display/layout object's `+0xD8` with every provider exposing `0xEEEE8218`; this is a
-provider synchronization path, not a recovered concrete provider identity.
+the container window's AddWindow (`+0xD8`) with every component exposing `0xEEEE8218`;
+this is a native window-attachment path, not camera identity or mount-success evidence.
 
 REA resolves the two upstream display-object transitions. `00812100` selects/replaces the object at
 owner `+0x88` (using `008106C0` for a non-null lookup key), releases the previous object, retains the
@@ -151,7 +154,7 @@ The direct lifecycle callers are bounded as well: `00812100` is called by `00812
 (`ev_127d3eefd901589373b362845d6b57f8744677820181fbf2e4209e4480249fbe`), while `00811C20` is
 called only by `00811C70` and `00812100`. `00811C70` has no resolved direct callers, so its entry
 into synchronization is itself an indirect/object-lifecycle boundary. No retained static caller
-names a concrete `0xEEEE8218` provider; this is the remaining registration gap.
+observes successful runtime window registration; that execution boundary remains unobserved.
 
 `008121C0` narrows owner creation further: it calls `00811070(param_1)`, stores the returned
 `UI/LayoutObjects` object in its own `+0x14`, copies the three-word lookup key into `+0x08/+0x10`,
@@ -162,10 +165,10 @@ resource key `0x022568E7`; `00810170` initializes the object vtables/fields
 (`ev_e50eb9ee18bc8bd439a8f5f4105b78cc09732b401de716957dfb1864fe3d780d`,
 `ev_e18e0694347d83d8fba1a7315c0a09f70e820d7fbacd06968672a33a91cd018b`,
 `ev_268b4ab66c5326de72fdce74b332194e360f7460f8bcf276ee710041916c52a8`). The lookup key is
-caller-supplied/indirect at this boundary; REA does not connect it to provider ID `0x02E5A4A8`.
+caller-supplied/indirect at this boundary; a layout resource key is not ControlID `0x02E5A4A8`.
 The GGE callers are now explicit: `DE5900` invokes `812250` for `GGEZoomPanel`/`GGEZoomPanelV2`,
 while `E035F0` invokes `8121C0` for `UI/GGE/GlobalUI` with operand `0x2EDD95CA`. These establish
-the GGE layout-owner path but do not identify the separate `0x02E5A4A8` provider
+the GGE layout-owner path; the separate per-card root identity is verified in the SPUI cross-check
 (`ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635`,
 `ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452`,
 `ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`).
@@ -175,15 +178,14 @@ optional suffix text is parsed independently (`ev_1774a78a641dee54932082d8e71e87
 These values frame a layout lookup and remain distinct from SPUI root IDs and PNG resource IDs.
 The native handoff is corroborated at the caller level: `DE5900 → 812250 → 8121C0` handles the
 zoom-panel layout, while `E035F0 → 8121C0(...,0x2EDD95CA)` handles `UI/GGE/GlobalUI`. This is the
-strongest static bridge from GGE controller UI initialization to `UI/LayoutObjects`; it still does
-not identify the runtime provider selected by registry ID `0x02E5A4A8`.
+strongest static bridge from GGE controller UI initialization to `UI/LayoutObjects`; it does not
+observe runtime mount completion for the now-identified per-card root177.
 REA's `00812590` caller is a layout command/diagnostic path rather than provider registration: its
 strings and control flow list loaded UI layouts, accept `load`/`unload`, parse the layout name and
 hex arguments, and call `812250` with tag/descriptor values (`ev_3c8284d4d0a73a9441ea9657942c0b91e8bede6bf2d418cb38b79c74aff9c49a`,
 `ev_b4b177ba74aa2280d66904471eb58a6683316d6d41fb048f2d5fcc7a7eca809b`,
 `ev_dcea6f959caf6ac5dd61ac3987b488b73f2b3ee160829f80060ad4a36c82b8b5`). It has no resolved
-direct callers. Therefore this path explains layout command ingestion but does not reveal the
-concrete provider behind registry ID `0x02E5A4A8`.
+direct callers. Therefore this path explains layout command ingestion, not runtime card mounting.
 
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
@@ -242,10 +244,11 @@ service provenance facts yet.
 
 ## Why this is not attached
 
-The workspace has no original `stars.db` or save corpus, and requirements prohibit scanning user
-profiles. Package terrain/property resources are not StarManager vectors or generated positions.
-Native manager/service pointers, candidate grid generation, planet producer, save discovery and
-post-load fixups remain unavailable. A bounded negative workspace search is not an empty catalogue.
+The workspace now has explicitly authorized real-save corpora; persisted saved/starter references
+and selected planet/save records are decoded. This supersedes the original lack-of-corpus blocker.
+Package terrain/property resources still are not automatically post-load StarManager vectors or
+generated positions. Native manager/service pointers, candidate refill, terrain lookup and post-load
+fixups remain unobserved. No unrequested profile scan or empty/ready fallback is allowed.
 
 `CatalogInput` therefore remains strict: both availability values must be explicit `Available`.
 Unknown does not become empty, and controlled verifier entries do not become production data.

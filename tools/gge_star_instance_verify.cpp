@@ -41,8 +41,10 @@ int main(int argc,char** argv) {
         if (!check(a.instantiate(11,source,entry,error)&&b.instantiate(22,source,entry,error)&&a.active()&&b.active()&&
             !a.native_mount_complete()&&!b.native_mount_complete()&&a.id()!=b.id(),"separate host instances, no native mount claim")) return 1;
         const auto root_object=a.root_object(); const auto* initial=object(source,root_object);
-        if (!check(initial && a.control_objects(kStarUiRoot)==std::vector<u16>{root_object} && source.roots.size()==1,
-                   "root identified by object, not entry or state ID")) return 1;
+        if (!check(initial && root_object==177 && a.control_objects(kStarUiRoot)==std::vector<u16>{177} &&
+            source.roots.size()==1 && initial->parent==-1 && initial->class_id==0x4ec1b8d8u &&
+            initial->area.left==76 && initial->area.top==167 && initial->area.w()==48 && initial->area.h()==48,
+                    "per-card positioning root177 matches nonrecursive UILayout lookup, not a global service")) return 1;
         const auto repeated=a.control_objects(0x026e0002);
         if (!check(repeated.size()==2&&repeated[0]!=repeated[1],"REAL duplicate stage ControlID retained as two objects")) return 1;
         const float dx=250-initial->area.left,dy=300-initial->area.top;
