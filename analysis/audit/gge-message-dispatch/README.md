@@ -177,6 +177,20 @@ DF851E
   → DF6820(target)
 ```
 
+The `DE317A` context is also bounded: it is reached from vtable method `DE31F0` (table
+`0x0147DC50 +0x0C`) after a time/update guard, and its target expression is exact:
+
+```text
+owner +0x48
+  → [owner +0x48] +0xB8
+  → DF6820(new_target)
+```
+
+The second caller, `DF851E`, sits in the per-entry `DF8300` presentation/update loop and passes a
+target produced by its current entry/event path. Neither bounded caller contains a direct
+`0x070D7509` or `0x070D74E7` immediate, so the target identity and Play Scenario relation remain
+Unknown.
+
 This closes the setter/registration mechanism for `DE99B0`'s optional forward listener. It does
 not yet identify which caller/target is active for the EP1 `Play Scenario` control, and neither
 caller body contains a direct `0x070D7509`/`0x070D74E7` join in this bounded pass.
