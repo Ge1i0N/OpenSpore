@@ -99,6 +99,16 @@ This corroborates `0x0806A310` as a shared GGE control/state target across feedb
 Play-Spore state-2 common continuation. It still does not identify the upstream `Play Scenario`
 click producer, and it does not turn `0x070D7509` into the state-13 event value `0x070D74E7`.
 
+The related UI target `0x0806AA00` has two bounded GA references:
+
+```text
+DF6CBA  → state-2 continuation branch
+DF9112  → separate GGE per-entry/UI lifecycle cleanup path
+```
+
+This is another shared UI target rather than a unique Play Scenario control. Its semantic name and
+the exact relationship between the two lifecycle uses remain Unknown.
+
 ## SDK cross-check
 
 `refs/Spore-ModAPI/Spore/App/IStateManager.h` puts `SwitchToState` at vtable `+0x28`, matching the
