@@ -45,6 +45,8 @@ INPUT_FUNCTIONS = (0xdf6490,0xdf65b0,0xdf7800,0x7c45e0,0x698b30,0xdf6110,0xdf601
 PUBLICATION_FUNCTIONS = (0xdf94e0,0xde5e90,0xde9dd0,0xdf95a0,0xdf9620,0xdf85b0,
                          0xe03f50,0xe03f10)
 TERRAIN_PROP_FUNCTIONS = (0x67ddf0, 0x6a60e0, 0x6a61f0)
+REFILL_FUNCTIONS = (0xbb61c0, 0xbb24d0, 0xbb3e10, 0xbb9c40, 0xbb9c60, 0xbb9c70,
+                   0xbad210, 0xbb5950)
 
 
 def main():
@@ -60,6 +62,7 @@ def main():
     transition = '--transition' in sys.argv
     input_analysis = '--input' in sys.argv
     terrain_prop = '--terrain-prop' in sys.argv
+    refill = '--refill' in sys.argv
     addresses = INPUT_FUNCTIONS if input_analysis else TRANSITION_FUNCTIONS if transition else SCENE_FUNCTIONS if scene else ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
     dest = ROOT/('analysis/audit/gge-input' if input_analysis else 'analysis/audit/gge-star-transition' if transition else 'analysis/audit/gge-scene' if scene else 'analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
@@ -69,6 +72,9 @@ def main():
     if terrain_prop:
         addresses = TERRAIN_PROP_FUNCTIONS
         dest = ROOT/'analysis/audit/gge-terrain-prop'
+    if refill:
+        addresses = REFILL_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-refill'
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
     if '--publication' in sys.argv and digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':

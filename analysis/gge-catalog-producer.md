@@ -68,6 +68,16 @@ evidence now clarifies exactly what must produce that metadata:
   not export pointer-bearing `+0xB8` runtime UI objects.
 - `BB61C0` removes/refills candidates using count/quota, `BB24D0` eligibility, fallback selection
   and planet work, then appends to `+0xDC`. It is runtime generation, not a static package list.
+- The bounded `BB61C0` body now makes the refill gate concrete: it counts candidate entries whose
+  `BB9C60(2)` state bit is clear, combines that count with saved span `+0xF0/+0xF4`, clamps a
+  quota using globals `0x0156C518`/`0x0156C508`, scans possible starts `+0x118/+0x11C` through
+  `BB24D0`, then falls back to `BB3E10` after up to 1000 random-position attempts. A selected
+  starter-world is removed from `+0xA0`, `BA8980` performs planet work, and the new record is
+  AddRef'd/appended to `+0xDC/+0xE0`. If changed and controller byte `+0x64` is clear, `BB4D40`
+  writes `stars.db` and MessageManager `+0x18` sends `0x062D91C2`.
+- SDK `StarManager.h` corroborates `+0xA0/+0xDC/+0xF0/+0x118/+0x228`, but address leads remain
+  version-specific: SDK `0xBB61E0` is labelled Dispose while this GA `0xBB61C0` is refill; other
+  nearby SDK labels likewise land on different GA bodies. Names are retained as secondary hints only.
 - `BB8C90` initializes serializer-backed `stars.db`, planet records and refill. `BB4D40` writes
   `stars.db.tmp` and renames it to `stars.db`; OpenSpore performs no such writes.
 

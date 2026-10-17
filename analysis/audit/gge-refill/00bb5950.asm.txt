@@ -1,0 +1,131 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00BB5950
+
+00bb5950  SUB ESP,0x8
+00bb5953  MOV EAX,dword ptr [ESP + 0x10]
+00bb5957  PUSH EBX
+00bb5958  PUSH ESI
+00bb5959  PUSH EDI
+00bb595a  MOV EDI,dword ptr [ESP + 0x18]
+00bb595e  PUSH EAX
+00bb595f  MOV EBX,ECX
+00bb5961  PUSH EDI
+00bb5962  MOV dword ptr [ESP + 0x14],EBX
+00bb5966  CALL 0x00bb4c90
+00bb596b  XOR ESI,ESI
+00bb596d  CMP byte ptr [EDI + 0xac],0x0
+00bb5974  JBE 0x00bb5994
+00bb5976  PUSH ESI
+00bb5977  MOV ECX,EDI
+00bb5979  CALL 0x00bbabd0
+00bb597e  CMP byte ptr [EAX + 0x30],0x0
+00bb5982  JZ 0x00bb5ac2
+00bb5988  MOVZX ECX,byte ptr [EDI + 0xac]
+00bb598f  INC ESI
+00bb5990  CMP ESI,ECX
+00bb5992  JL 0x00bb5976
+00bb5994  PUSH EBP
+00bb5995  PUSH EDI
+00bb5996  MOV ECX,EBX
+00bb5998  CALL 0x00bafc70
+00bb599d  MOV ECX,EDI
+00bb599f  CALL 0x00801a60
+00bb59a4  MOV ESI,EAX
+00bb59a6  PUSH 0x1
+00bb59a8  PUSH ESI
+00bb59a9  CALL 0x00c84df0
+00bb59ae  FSTP float ptr [ESP + 0x28]
+00bb59b2  PUSH 0x2
+00bb59b4  PUSH ESI
+00bb59b5  CALL 0x00c84df0
+00bb59ba  FSTP float ptr [ESP + 0x24]
+00bb59be  ADD ESP,0x10
+00bb59c1  XOR EBP,EBP
+00bb59c3  CMP byte ptr [EDI + 0xac],0x0
+00bb59ca  JBE 0x00bb5ac1
+00bb59d0  PUSH EBP
+00bb59d1  MOV ECX,EDI
+00bb59d3  CALL 0x00bbabd0
+00bb59d8  MOV ESI,EAX
+00bb59da  TEST byte ptr [ESI + 0x2c],0x2
+00bb59de  JZ 0x00bb59ee
+00bb59e0  PUSH 0xc
+00bb59e2  MOV ECX,0x1601760
+00bb59e7  CALL 0x00a68f70
+00bb59ec  JMP 0x00bb59f1
+00bb59ee  OR EAX,0xffffffff
+00bb59f1  CMP dword ptr [ESI + 0x28],0x1
+00bb59f5  MOV byte ptr [ESI + 0xac],AL
+00bb59fb  JNZ 0x00bb5a0f
+00bb59fd  PUSH 0xc
+00bb59ff  MOV ECX,0x1601760
+00bb5a04  CALL 0x00a68f70
+00bb5a09  MOV byte ptr [ESI + 0xad],AL
+00bb5a0f  MOV ECX,ESI
+00bb5a11  CALL 0x00b8dc10
+00bb5a16  TEST AL,AL
+00bb5a18  JZ 0x00bb5a5b
+00bb5a1a  MOV ECX,ESI
+00bb5a1c  CALL 0x00b8dbc0
+00bb5a21  CMP EAX,-0x1
+00bb5a24  JNZ 0x00bb5a2a
+00bb5a26  XOR EAX,EAX
+00bb5a28  JMP 0x00bb5a5d
+00bb5a2a  MOV EBX,dword ptr [EBX + 0xc8]
+00bb5a30  MOV ECX,EAX
+00bb5a32  AND ECX,0xffffff
+00bb5a38  MOV EDX,ECX
+00bb5a3a  SHR EDX,0xc
+00bb5a3d  LEA EDX,[EDX + EDX*0x4]
+00bb5a40  MOV EDX,dword ptr [EBX + EDX*0x4]
+00bb5a43  AND ECX,0xfff
+00bb5a49  MOV ECX,dword ptr [EDX + ECX*0x4]
+00bb5a4c  SHR EAX,0x18
+00bb5a4f  PUSH EAX
+00bb5a50  CALL 0x00bbabd0
+00bb5a55  MOV EBX,dword ptr [ESP + 0x10]
+00bb5a59  JMP 0x00bb5a5d
+00bb5a5b  MOV EAX,ESI
+00bb5a5d  FLD float ptr [EAX + 0x4c]
+00bb5a60  FLD float ptr [EAX + 0x48]
+00bb5a63  FLD float ptr [EAX + 0x44]
+00bb5a66  FLD ST1
+00bb5a68  FMULP ST2
+00bb5a6a  FLD ST2
+00bb5a6c  FMULP ST3
+00bb5a6e  FXCH
+00bb5a70  FADDP ST2,ST0
+00bb5a72  FMUL ST0
+00bb5a74  FADDP
+00bb5a76  FSQRT
+00bb5a78  FST float ptr [ESP + 0x1c]
+00bb5a7c  FLD float ptr [ESP + 0x20]
+00bb5a80  FCOMIP ST0,ST1
+00bb5a82  FSTP ST0
+00bb5a84  JBE 0x00bb5a95
+00bb5a86  MOV EAX,dword ptr [ESI + 0x2c]
+00bb5a89  TEST AL,0x1
+00bb5a8b  JNZ 0x00bb5a95
+00bb5a8d  OR EAX,0x1000
+00bb5a92  MOV dword ptr [ESI + 0x2c],EAX
+00bb5a95  MOVSS XMM0,dword ptr [ESP + 0x1c]
+00bb5a9b  COMISS XMM0,dword ptr [ESP + 0x14]
+00bb5aa0  JBE 0x00bb5ab1
+00bb5aa2  MOV EAX,dword ptr [ESI + 0x2c]
+00bb5aa5  TEST AL,0x1
+00bb5aa7  JNZ 0x00bb5ab1
+00bb5aa9  OR EAX,0x2000
+00bb5aae  MOV dword ptr [ESI + 0x2c],EAX
+00bb5ab1  MOVZX EAX,byte ptr [EDI + 0xac]
+00bb5ab8  INC EBP
+00bb5ab9  CMP EBP,EAX
+00bb5abb  JL 0x00bb59d0
+00bb5ac1  POP EBP
+00bb5ac2  POP EDI
+00bb5ac3  POP ESI
+00bb5ac4  POP EBX
+00bb5ac5  ADD ESP,0x8
+00bb5ac8  RET 0x8
