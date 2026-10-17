@@ -188,6 +188,40 @@ and `0x00964370`. This is a static vtable join only. It does not identify the co
 that fills object fields `+0x80/+0x84`, and it does not prove that the `WinButton` object with
 ControlID `0x070D7509` receives component ID `0x070D74E7` at runtime.
 
+## ✔️ Milestone: runtime activation-field setters bounded
+
+The GA object layout now has a concrete constructor/setter boundary:
+
+```text
+base activable-window constructor 0x00962950
+  → object +0x80 = 0
+  → object +0x84 = 0
+
+WinButton constructor 0x00966EB0
+  → initializes the derived 0x888-byte object
+
+vtable 0x01442E80 +0x4C → 0x0097CC80
+vtable 0x01442E80 +0x54 → 0x0097CE10
+```
+
+The two runtime setter paths write the activation object's identity-adjacent fields:
+
+```text
+0x0097CC80:
+  object +0x80 = parameter
+  object +0x7C = parameter
+
+0x0097CE10:
+  object +0x80 = parameter
+  object +0x7C = parameter
+```
+
+This is a stronger boundary than a raw constructor zero: the fields are actively updated by the
+native window/layout family. However, the inspected setters write `+0x80`, not `+0x84`, and their
+callers pass runtime values through indirect layout/resource paths. No selected-GA literal joins
+those parameters to `0x070D7509` or `0x070D74E7`. The field-to-component-ID join therefore remains
+Unknown; no click or property mutation is claimed.
+
 ## Reproduction
 
 ```powershell
