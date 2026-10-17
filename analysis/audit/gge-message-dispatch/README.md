@@ -137,6 +137,22 @@ The producer's precedence is therefore:
 CommandID if nonzero, otherwise ControlID
 ```
 
+### DE99B0 forwarded-listener field
+
+`DE99B0` first checks controller/object field `+0x34` and, when non-null, forwards the incoming
+message through that object's vtable `+0x58` before applying its own component-ID branches. The
+bounded base initialization at `DE60A0` sets the related fields to zero:
+
+```text
+object +0x30 = 0
+object +0x34 = 0
+object +0x38 = 0
+```
+
+No direct write that populates this `+0x34` forward target was recovered in the bounded GGE
+constructor path. This does not prove that indirect registration never occurs, but it means the
+possible alternate handler for payload `0x070D7509` remains Unknown rather than being invented.
+
 The confirmed owner is instead the GA WinButton family initialized by `0x00966EB0`:
 
 ```text

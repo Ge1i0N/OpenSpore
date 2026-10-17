@@ -137,6 +137,11 @@ functions. `DE99B0` remains the observed event-listener/state branch; `DE8A80` i
 internal message-handler interface. This structural connection still does not identify the
 upstream `Play Scenario` producer or a ScenarioMode post.
 
+`DE99B0`'s optional forward target is also bounded separately: its controller/object `+0x34` is
+zeroed with neighboring `+0x30/+0x38` by the base initialization at `DE60A0`. No direct population
+write was found in the inspected GGE constructor path, so the alternate forwarded listener route
+for payload `0x070D7509` remains Unknown.
+
 ### Constructor boundary
 
 The direct-call scan found only one direct caller of `DE6120`:
