@@ -256,6 +256,41 @@ index parsing. Raw dump mode is limited to 1 MiB per resource. The probe caps ta
 reports all missing/ambiguous/blocked entries separately and applies a 30-second subprocess timeout.
 No Ghidra restart or new native-analysis claim is involved.
 
+### Property-table framing corroborated on selected script payloads
+
+The original `tools/prop.py` uniform-entry walker rejects the selected UserData payload at its first
+field, so it cannot establish property semantics here. A new bounded `tools/prop_table.py` subset uses
+the historical layout in `upstream/SporeMaster3/docs/PROP_FORMAT.md` as a hypothesis: BE property
+ID/type/flags, scalar or counted array according to flags, LE composite values, and a 16-byte slot
+for a scalar ResourceKey (12 key bytes plus four retained tail bytes). The tail was missing from the
+initial local scalar-prefix experiment; including it correctly aligns the next header `0x02A907B5`
+(type `0x20`, array flags `0x9C`) in all selected payloads. No resynchronization or magic search is used.
+
+All seven UserData payloads parse to exactly **35 fields**, consuming their complete bytes with no
+tail. The five available Ronikari payloads parse to **56, 55, 35, 55, 56 fields**, respectively, also
+with complete byte consumption. Unsupported types, flags, array strides, duplicate IDs and invalid
+counts fail closed. Raw padded bytes remain visible; the script does not replace them with zeros.
+This corroborates the selected wire layout, not every `.prop` variant or native method behavior.
+
+Property ID `0x00B2CCCA` contains these observed UTF-16 strings:
+
+- UserData: `GameplayTheme17`, `GameplayTheme04`, `GameplayTheme02`, `GameplayTheme`,
+  `GameplayTheme07`, `GameplayTheme19`, `GameplayTheme18`.
+- Ronikari: `EP1 Shaman Theme`, `EP1 Bard Theme`, `GameplayTheme11`, `EP1 Warrior Theme`,
+  `EP1 Bard Theme`.
+
+The local historical registry labels `0x00B2CCCA` as `description`, `0x00B2CCCB` as `parent`, and
+`0x02A907B5` as `modelEffect`; those labels are not recovered native symbols. Scalar keys in the
+second field are now extracted with their exact LE memory words and checked independently against
+the selected directory (no automatic priority merge or parent traversal). None of the 12 complete
+property tables contains field ID `0x2BD4F5AC`. That absence covers only these selected resources;
+it does not prove that an inherited or elsewhere-resolved terrain property is absent. No terrain
+query was executed and this does not turn Unknown into QueryFailed or Loaded.
+
+The payload probe includes the exact-subset property report alongside byte-pattern results. Tests
+cover scalar-key padding, array versus scalar widths, every fixture truncation, unsupported strides,
+duplicates, invalid counts and UTF-16 supplementary/invalid sequences. Ghidra was not started.
+
 ```powershell
 python tools/gge_userdata_payload_probe.py `
   --frame-inspector build/bin/Debug/dbpf_serialized_frame_inspect.exe `

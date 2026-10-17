@@ -13,6 +13,7 @@ from collections import defaultdict
 
 from gge_userdata_compare import TABLES, inspect
 from gge_userdata_correlate import inventory
+from prop_table import summary as property_table_summary
 
 
 def patterns(triple):
@@ -52,6 +53,66 @@ def read_payload(exe, path, record):
     return payload
 
 
+def scalar_property_prefix(payload):
+    """Observed scalar prefix only, NOT a complete prop decoder.
+
+    Headers are BE id/u16 type/u16 flags. Observed scalar string16 has a
+    BE unit count and LE UTF-16 units; scalar ResourceKey has LE memory words
+    and a retained four-byte tail (historical PROP_FORMAT.md, corroborated below).
+    Stop exactly at an unsupported header, without scanning for later fields.
+    Property labels come from the local historical registry, not native symbols.
+    """
+    fields = []
+    at = 0
+    try:
+        if len(payload) < 4:
+            raise ValueError('short property count')
+        declared, = struct.unpack_from('>I', payload)
+        if declared > 4096:
+            raise ValueError('property count exceeds prefix host bound')
+        at = 4
+        seen = set()
+        for _ in range(min(declared, 64)):
+            start = at
+            if len(payload) - at < 8:
+                raise ValueError('truncated property header')
+            key, kind, flags = struct.unpack_from('>IHH', payload, at)
+            if key in seen:
+                raise ValueError('duplicate property ID in scalar prefix')
+            if (kind, flags) not in ((0x13, 0x000d), (0x20, 0)):
+                return {'status': 'unsupported_suffix', 'declared_fields': declared,
+                        'parsed_fields': fields, 'consumed': start,
+                        'remaining_bytes': len(payload) - start,
+                        'next_header': {'id': f'{key:08x}', 'type': f'{kind:04x}', 'flags': f'{flags:04x}'}}
+            at += 8
+            entry = {'id': f'{key:08x}', 'type': f'{kind:04x}', 'flags': f'{flags:04x}', 'offset': start}
+            if kind == 0x13:
+                if len(payload) - at < 4:
+                    raise ValueError('truncated string16 count')
+                units, = struct.unpack_from('>I', payload, at)
+                at += 4
+                if units > 4096 or units * 2 > len(payload) - at:
+                    raise ValueError('string16 count/host bound mismatch')
+                entry['string16'] = payload[at:at + units * 2].decode('utf-16-le', errors='strict')
+                at += units * 2
+            else:
+                if len(payload) - at < 16:
+                    raise ValueError('truncated scalar ResourceKey')
+                instance, resource_type, group = struct.unpack_from('<III', payload, at)
+                entry['group_type_instance'] = [f'{v:08x}' for v in (group, resource_type, instance)]
+                entry['slot_tail_hex'] = payload[at + 12:at + 16].hex()
+                at += 16
+            if key in (0x00B2CCCA, 0x00B2CCCB):
+                entry['historical_registry_label'] = 'description' if key == 0x00B2CCCA else 'parent'
+            seen.add(key)
+            fields.append(entry)
+        status = 'complete' if declared == len(fields) and at == len(payload) else 'bounded_prefix'
+        return {'status': status, 'declared_fields': declared, 'parsed_fields': fields,
+                'consumed': at, 'remaining_bytes': len(payload) - at}
+    except (ValueError, UnicodeError) as exc:
+        return {'status': 'rejected_prefix', 'parsed_fields': fields, 'consumed': at, 'error': str(exc)}
+
+
 def probe(rows, records, selected_type, read):
     directory = defaultdict(list)
     for record in records:
@@ -75,7 +136,14 @@ def probe(rows, records, selected_type, read):
                 payload = read(matches[0])
                 entry.update(status='bytes_inspected', record=matches[0]['index'], bytes=len(payload),
                              sha256=hashlib.sha256(payload).hexdigest(),
-                             source_key_patterns={k: occurrences(payload, v) for k, v in patterns(source).items()})
+                             source_key_patterns={k: occurrences(payload, v) for k, v in patterns(source).items()},
+                             scalar_property_prefix=scalar_property_prefix(payload),
+                             property_table=property_table_summary(payload))
+                # Directory observations only for parsed scalar key fields, preserving duplicates.
+                for field in entry['scalar_property_prefix']['parsed_fields']:
+                    if 'group_type_instance' in field:
+                        field_key = tuple(int(v, 16) for v in field['group_type_instance'])
+                        field['exact_directory_record_indices'] = [r['index'] for r in directory.get(field_key, [])]
             except (ValueError, OSError, subprocess.TimeoutExpired) as exc:
                 entry.update(status='blocked', error=str(exc))
         results.append(entry)

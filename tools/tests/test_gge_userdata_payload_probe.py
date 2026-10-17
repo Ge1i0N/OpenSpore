@@ -13,6 +13,41 @@ spec.loader.exec_module(mod)
 
 
 class PayloadProbeTests(unittest.TestCase):
+    @staticmethod
+    def prefix():
+        text = 'GameplayTheme17'.encode('utf-16-le')
+        return (struct.pack('>IIHHI', 3, 0x00b2ccca, 0x13, 0xd, len(text) // 2) + text +
+                struct.pack('>IHH', 0x00b2cccb, 0x20, 0) + struct.pack('<III', 1, 2, 3) + b'\x12\x34\x56\x78' +
+                struct.pack('>IHHII', 0x02a907b5, 0x20, 0x9c, 1, 12) + b'\0' * 12)
+
+    def test_scalar_prefix_stops_at_array(self):
+        b = self.prefix()
+        p = mod.scalar_property_prefix(b)
+        self.assertEqual(p['status'], 'unsupported_suffix')
+        self.assertEqual(p['declared_fields'], 3)
+        self.assertEqual(p['parsed_fields'][0]['string16'], 'GameplayTheme17')
+        self.assertEqual(p['parsed_fields'][1]['group_type_instance'], ['00000003', '00000002', '00000001'])
+        self.assertEqual(p['parsed_fields'][1]['slot_tail_hex'], '12345678')
+        self.assertEqual(p['next_header']['id'], '02a907b5')
+        self.assertEqual(p['remaining_bytes'], 28)
+
+    def test_scalar_prefix_truncation_and_oversized_name(self):
+        b = self.prefix()
+        start = mod.scalar_property_prefix(b)['consumed']
+        for i in range(start):
+            self.assertEqual(mod.scalar_property_prefix(b[:i])['status'], 'rejected_prefix')
+        changed = bytearray(b)
+        struct.pack_into('>I', changed, 12, 4097)
+        self.assertEqual(mod.scalar_property_prefix(changed)['status'], 'rejected_prefix')
+
+    def test_parent_key_directory_match_preserves_ambiguity(self):
+        row = (3, 2, 1, 9, 8, 7)
+        records = [{'index': 0, 'key': (9, 99, 7), 'packed': 10},
+                   {'index': 1, 'key': (3, 2, 1), 'packed': 10},
+                   {'index': 2, 'key': (3, 2, 1), 'packed': 10}]
+        p = mod.probe([row], records, 99, lambda r: self.prefix())[0]['scalar_property_prefix']
+        self.assertEqual(p['parsed_fields'][1]['exact_directory_record_indices'], [1, 2])
+
     def test_sequences_include_unaligned_repeated_offsets(self):
         key = mod.patterns((3, 2, 1))['le_instance_type_group']
         result = mod.occurrences(b'x' + key + key, key)
