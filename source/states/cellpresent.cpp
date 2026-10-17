@@ -341,13 +341,20 @@ bool present_cell_world() {
         world.clear_target();
     }
 
-    // Cell editor: select parts with number keys 1-9 before evolving.
-    if (world.evolved()) {
-        for (int key = 1; key <= 9; ++key) {
-            char part_name[32];
-            std::snprintf(part_name, sizeof(part_name), "part_%d", key);
-            if (world.select_part(part_name)) {
-                // Part selected for the next stage.
+    // Cell editor: click a glowing pickup to select it as a part.
+    if (world.evolved() && input::clicked()) {
+        const float click_x = (static_cast<float>(input::x()) - cx) / ppu + camx;
+        const float click_y = (static_cast<float>(input::y()) - cy) / ppu + camy;
+        for (const cell::Entity& e : world.entities()) {
+            if (!e.alive || e.role != cell::Role::Food) continue;
+            const char* nm = naming::instance_name(e.archetype);
+            if (!nm || strncmp(nm, "cell_unlock_", 12) != 0) continue;
+            const float dx = e.x - click_x, dy = e.y - click_y;
+            const float reach = e.size + 1.0f;
+            if (dx * dx + dy * dy <= reach * reach) {
+                std::string part = nm + 12;  // strip "cell_unlock_" prefix
+                world.select_part(part);
+                break;
             }
         }
     }
@@ -559,7 +566,14 @@ bool present_cell_world() {
                     "PART: %s", world.selected_part().c_str());
     }
 
-    // Loottable UI: show available drops from nearby dead creatures.
+    // Stage progression UI: show current level and next.
+    std::string next = world.next_level(world.level());
+    if (!next.empty()) {
+        ov.text_fmt(16.f, static_cast<float>(h) - 104.f, 0xFF80C0FFu,
+                    "NEXT: %s", next.c_str());
+    }
+
+    // Loottable UI: show available drops with names.
     int loot_count = 0;
     for (const cell::Entity& e : ents) {
         if (!e.alive || e.role != cell::Role::Food) continue;
@@ -569,6 +583,16 @@ bool present_cell_world() {
     if (loot_count > 0) {
         ov.text_fmt(16.f, static_cast<float>(h) - 56.f, 0xFFFFC080u,
                     "LOOT: %d pickups", loot_count);
+        // Show first few loot names.
+        int shown = 0;
+        for (const cell::Entity& e : ents) {
+            if (!e.alive || e.role != cell::Role::Food) continue;
+            const char* nm = naming::instance_name(e.archetype);
+            if (!nm || strncmp(nm, "cell_unlock_", 12) != 0) continue;
+            ov.text_fmt(16.f, static_cast<float>(h) - 72.f - static_cast<float>(shown) * 16.f,
+                        0xFFFFC080u, "  %s", nm);
+            if (++shown >= 3) break;
+        }
     }
 
     ov.text_fmt(16.f, static_cast<float>(h) - 24.f, 0xFF7E98A8,
