@@ -97,7 +97,7 @@ the relevant code/data is independently checked against our GA target.
 
 | Repository | Inspected revision | Classification | Highest-value material |
 |---|---|---|---|
-| [OpenSporeLabs/openspore-old](https://github.com/OpenSporeLabs/openspore-old) | `970236558184bd88cd5c356c39b5b57fb5636afd` | Research corpus + Rust/Bevy direction; secondary | `docs/RE-WORKFLOW.md`, `docs/RE-DOSSIER-SCHEMA.md`, semantic bridge/KG, Cell-stage roadmap, package/asset staging boundaries |
+| [OpenSporeLabs/openspore-old](https://github.com/OpenSporeLabs/openspore-old) | `970236558184bd88cd5c356c39b5b57fb5636afd` | Research corpus + Rust/Bevy direction; secondary | Local tree: `refs/thirdparty/openspore-old-main` (ZIP extraction; no `.git`). Key files were normalized CRLF/LF-compared byte-for-byte with the pinned revision. |
 | [OpenSporeLabs/OpenSpore](https://github.com/OpenSporeLabs/OpenSpore) | `92ae75db64de577cf4a220d82ee64bac2c35d75c` | Current upstream-style implementation reference; secondary | Bevy-free asset layer, typed provenance, deterministic `--info` reports, package-priority rules, creator-document boundaries |
 | [Ge1i0N/OpenSpore](https://github.com/Ge1i0N/OpenSpore) | `51ba127f9da0f57fdb01a9b71b8bd557fcd8f965` | Fork with useful GA-save/Cell-stage leads; secondary | fresh-save structural reports, `stars.db`/planet-record observations, CellGame data decoder, first playable Cell slice and explicit seed boundaries |
 

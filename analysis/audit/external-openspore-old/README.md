@@ -7,9 +7,13 @@ Reviewed **2026-10-18**. This is a read-only review of
 970236558184bd88cd5c356c39b5b57fb5636afd
 ```
 
-The local reference is ignored at `refs/thirdparty/OpenSporeLabs-openspore-old`. Its generated
-`build-clang` tree contains Windows-hostile long paths, so a complete checkout is intentionally not
-required. The revision and tracked paths are sufficient for targeted `git show`/raw-file review.
+The local reference is the user-provided ZIP extraction at
+`refs/thirdparty/openspore-old-main`; it has no `.git` directory. Its generated `build-clang` tree
+contains Windows-hostile long paths, so a complete Git checkout is intentionally not required.
+Seven key files (`README.md`, `AGENTS.md`, the workflow, dossier schema, semantic bridge, roadmap and
+handoff) were normalized for line endings and matched the pinned revision byte-for-byte through the
+temporary metadata clone. The extracted tree is therefore accepted as the local representation of
+that revision.
 
 ## What this repository actually contributes
 
