@@ -159,6 +159,30 @@ The milestone is static reverse-engineering progress only. It does not claim tha
 observed, that any property writer is attached to the current host UI, or that the property family
 automatically enters `ScenarioMode`.
 
+### Generic property-writer boundary
+
+The SDK/GA address cross-check supplies the generic write surface that the missing producer must
+eventually reach:
+
+```text
+App::PropertyList::SetProperty         candidate 0x006A2E20
+  GA vtable entry at 0x0140885C
+
+App::DirectPropertyList::SetProperty  candidate 0x006A30C0
+  GA vtable entry at 0x014088AC
+```
+
+These are method/address and vtable corroborations, not a recovered Scenario-specific writer. The
+Scenario property IDs do not occur beside a direct call to either setter in the bounded searches;
+the actual writer may pass the ID through a generic property service, loaded definition or indirect
+callback. The safe status is therefore:
+
+```text
+generic setter contract: corroborated
+ScenarioGAButtonClicked writer: Unknown
+ScenarioGAFirstLaunched writer: Unknown
+```
+
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
 The apparent continuation at `DE9AD0` is not a separate message handler: the preceding `int3` run
