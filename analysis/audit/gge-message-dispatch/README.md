@@ -135,6 +135,30 @@ Play Spore state-2 continuation. It narrows the missing route from an unknown ge
 to a property-mediated path. It is **not** yet a runtime click observation and does not prove that
 the property write enters `ScenarioMode` or posts tag `0x01654C10`.
 
+## ✔️ Milestone: GA Scenario property family mapped statically
+
+The same local registry/config names can now be correlated with a broader set of immediate
+references in the selected GA `.text`:
+
+| Semantic property (secondary name) | ID | Bounded GA reference(s) |
+|---|---:|---|
+| `ScenarioStarEffectsEnabled` | `0x08069A6C` | `DE5900` |
+| `ScenarioGAEditorEffectsEnabled` | `0x0806DBBA` | `DFA8F3` / nearby continuation |
+| `ScenarioGAButtonClicked` | `0x080D7DE1` | `DF6C10`, `DE9C` |
+| `ScenarioGAFirstLaunched` | `0x080D97FE` | `DF6C10` |
+| `ScenarioSpaceGameLaunched` | `0x080EAA93` | `DEE316`, `DF4028` |
+| `ScenarioCaptainEditorLaunched` | `0x080D8460` | `DE114A`, `DE1A81` |
+| `ScenarioAdventureEditorLaunched` | `0x080D8470` | `DE114A`, `DE1A81` |
+
+The names come from the local SporeModder-FX registry and user-supplied EP1 `Properties.txt`; the
+GA authority is the independent byte-level presence/use of the IDs in the selected unpacked
+binary. This family shows that the Scenario launch/editor/UI surface is wired through shared
+property state across GGE and scenario-related paths.
+
+The milestone is static reverse-engineering progress only. It does not claim that a click was
+observed, that any property writer is attached to the current host UI, or that the property family
+automatically enters `ScenarioMode`.
+
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
 The apparent continuation at `DE9AD0` is not a separate message handler: the preceding `int3` run
