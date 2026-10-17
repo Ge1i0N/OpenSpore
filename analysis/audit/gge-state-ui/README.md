@@ -148,6 +148,11 @@ callers are `DE317A` (target `[owner+0x48]+0xB8`) and `DF851E` (target from the 
 path). `DE317A` is vtable method `0x0147DC50 +0x0C` after a bounded time/update guard. Their
 relation to the Play Scenario control remains Unknown; no runtime delivery is claimed.
 
+One concrete writer branch at `DF79FE` is now separated from this hypothesis: it handles
+`kMsgComponentActivated` with component ID `0x03C4925E`, stores controller `+0xFC` into owner
+`+0x48`, and requests internal state `11`. It is positive evidence for forwarded-target population,
+but not evidence that `0x070D7509` reaches `0x070D74E7`.
+
 ### Constructor boundary
 
 The direct-call scan found only one direct caller of `DE6120`:

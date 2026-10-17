@@ -191,6 +191,22 @@ target produced by its current entry/event path. Neither bounded caller contains
 `0x070D7509` or `0x070D74E7` immediate, so the target identity and Play Scenario relation remain
 Unknown.
 
+### 👀 Excellent finding: one population branch is for another event
+
+The bounded `DF79FE` writer supplies one concrete population branch:
+
+```text
+message.type = 0x287259F6 (kMsgComponentActivated)
+component/event ID = 0x03C4925E
+  → owner 0x016A11B4 +0x48 = controller 0x016A1344 +0xFC
+  → internal state setter 0x0000000B
+```
+
+This proves that the forwarded-target field is populated by a real activation-message branch, but
+the recognized event is `0x03C4925E`, not Play Scenario `0x070D7509` and not state-feedback
+`0x070D74E7`. The branch therefore strengthens the registration model while also separating this
+known target population from the unresolved Play Scenario route.
+
 This closes the setter/registration mechanism for `DE99B0`'s optional forward listener. It does
 not yet identify which caller/target is active for the EP1 `Play Scenario` control, and neither
 caller body contains a direct `0x070D7509`/`0x070D74E7` join in this bounded pass.
