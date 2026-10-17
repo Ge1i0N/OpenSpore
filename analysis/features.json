@@ -1173,7 +1173,7 @@
         {
           "name": "cell game data (CellGame.package)",
           "status": "done",
-          "note": "Cell stage is data-defined: 442 resources named by FNV-1-lower (cell 0xDFAD9F51, structure, world, look_table, loottable, globals). Decoded 189 archetypes (400-B record, UTF-16 display names), 48 loottables (part-unlock), 9 look_tables, 13 worlds, 10 random_creature, 23 populate, cell_properties globals (17 named tuning curves) and the OLE2 xls animation table. tools/cell_game.py + source/engine/cell_game.* (cell_game_verify 5/5). analysis/cell-game.md"
+          "note": "Cell stage is data-defined: 442 resources named by FNV-1-lower (cell 0xDFAD9F51, structure, world, look_table, loottable, globals). Decoded EVERY type: 189 archetypes (400-B record, UTF-16 display names), 48 loottables (part-unlock), 9 look_tables, 13 worlds, 10 random_creature, 23 populate, 144 structures (80-B header + N 32-B parts), backgroundMap (12 depth bands), effectMap, cell_properties globals (17 named tuning curves), globals/cellgame (raw floats) and the OLE2 xls animation table; plus CellGame_Layers.package (28 advect 128x128x3 f32 + 5 density 128x128 f32). tools/cell_game.py + source/engine/cell_game.* (cell_game_verify 8/8). analysis/cell-game.md"
         }
       ]
     },
@@ -1227,7 +1227,7 @@
         {
           "name": "cell stage",
           "status": "partial",
-          "note": "Game_Cell skeleton driver attached to CellGame (tick counter, no simulation). CellGame.package data model decoded (189 archetypes, 48 loottables, 9 look_tables, 13 worlds, named globals) as tools/cell_game.py + source/engine/cell_game.*. analysis/cell-game.md"
+          "note": "Game_Cell skeleton driver attached to CellGame (tick counter, no simulation). CellGame.package data model fully decoded (189 archetypes, 48 loottables, 9 look_tables, 13 worlds, 144 structures, named globals, Layers fields) as tools/cell_game.py + source/engine/cell_game.*. analysis/cell-game.md"
         },
         {
           "name": "creature stage",

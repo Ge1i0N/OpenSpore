@@ -1,11 +1,15 @@
 # Cell-stage game data (`CellGame.package`)
 
 > **Verdict, 2026-10-17:** the cell mini-game (`Game_Cell`, state `CellGame`) is defined
-> **entirely by data packages** — its archetypes, globals, spawn/biome/loot tables and
-> animation list all ship in `Data/CellGame.package` (442 resources) and
-> `Data/CellGame_Layers.package` (33). Resource types and instance names are 32-bit
-> **FNV-1** hashes of lower-cased names, so they are fully recoverable. This note is the
-> data model for the cell stage; the runtime skeleton is in `analysis/game-stages.md`.
+> **entirely by data packages** — its archetypes, globals, spawn/biome/loot tables,
+> body models, background fields and animation list all ship in `Data/CellGame.package`
+> (442 resources) and `Data/CellGame_Layers.package` (33). Resource types and instance
+> names are 32-bit **FNV-1** hashes of lower-cased names, so they are fully recoverable.
+> **Every resource type in both packages is now decoded at the structural level** — only the
+> positional semantics of a few raw float runs (archetype stats, `globals`, `effectMap`) and
+> the cell-save field ids remain unnamed (names not present in the shipped data).
+> This note is the data model for the cell stage; the runtime skeleton is in
+> `analysis/game-stages.md`.
 
 Reproduce: `python tools/cell_game.py` (add `--globals` for the tuning curves, `--anims`
 for the animation table, `--json out.json` for the audit).
@@ -46,13 +50,12 @@ ids that are not FNV of the name.
 | `0x9B8E862F` | `world` | 13 | tide-pool biome definitions |
 | `0xF9C3D770` | `random_creature` | 10 | random spawn tables |
 | `0x8C042499` | `look_table` | 9 | steering weights |
-| `0x5C74D18B` | `density` | 5 | density layer |
-| `0xDBA35AE2` | (unnamed) | 1 | id→value transition table (232 B) |
+| `0x5C74D18B` | `density` | 5 | density field (Layers pkg) |
+| `0xDBA35AE2` | `look_algorithm` | 1 | id→value transition table (232 B) |
 | `0x433FB70C` | `effectMap` | 1 | effect map |
 | `0x00B1B104` | `prop` | 1 | **cell globals** table |
-| `0x612B3191` | `backgroundMap` | 1 | background map |
+| `0x612B3191` | `backgroundMap` | 1 | background depth bands |
 | `0x1F639D98` | `xls` | 1 | **animation table** (OLE2/Excel) |
-| `0x8C042499`… | — | — | — |
 
 ## Cell globals — `prop`/`cell_properties`
 
@@ -79,8 +82,8 @@ game's tuning names. Each value is a **curve** `(x, y)` pairs:
 | `camera_lookahead` | (0,3)…(32,32) | camera look-ahead distance |
 | `camera_lerpfactor` | (0,2.5)(2,1.75)…(32,1) | camera smoothing |
 
-Plus `globals`/`cellgame` (196 B raw struct) holding more scalar tuning (floats
-`5.0, 0.5, 0.2, 1.0, 3.0, 250.0, 50.0, 35.0, 0.1, 40.0, 20.0, 100.0` from offset `0x40`).
+Plus `globals`/`cellgame` (196 B raw struct) holding more scalar tuning — see the
+**Cell globals** section below.
 
 ## Cell archetypes — `cell` (189)
 
@@ -141,8 +144,66 @@ from the shipped data.
 ## World biomes — `world` (13)
 
 `world_water`, `world_beach`, `world_ice`, `world_rock`, `world_plant`, `world_random`
-plus `_bg` background variants and `cell_empty`. Each holds the tide-pool layer setup
-(64 B record: layer counts + `3.5` depth scalar).
+plus `_bg` background variants and `cell_empty`. Each record starts with an entry **count**
+(`world_water` = 2, `world_ice` = 20, `cell_empty` = 0) followed by that many entries; two
+record shapes occur (24-byte `{id, 1, idx, id, 0, idx}` region point, and 28-byte
+`{idx, k, f, 0, 1.0, id, x, y}` layer/spawn row, e.g. `world_ice` rows ending `… 3.5 0 1.0`).
+Sizes 16/28/64/136/544. The 64-byte `world_water` ends `… 3.5, 0, 1.0`. The entry lists are
+positional; only the count is treated as a stable field.
+
+## Structures — `structure` (144)
+
+A cell **body model**: an **80-byte header** followed by `N` **32-byte part entries**
+(112 B = 80 + 1 part, 144 B = 80 + 2 parts). Header fields (Little-endian):
+
+| off | field |
+|---|---|
+| `+0x0C` | format marker `0x46748976` (present on 62/144) |
+| `+0x10` | **death archetype** id (spawned when the cell dies: `cell_deathNPC`, `cell_creature_L0_food_death`) |
+| `+0x28` | const `0x00000030` (48, on all 144) |
+| `+0x40` | **base body** id (`amoeba_cell`, `hummingbird`, `Poisoner`) |
+| `+0x44` | base scale xyz (f32 ×3) |
+
+Part entry:
+
+| off | field |
+|---|---|
+| `+0x00` | parent index (`0xFFFFFFFF` = root) |
+| `+0x04` | flag (0/1) |
+| `+0x10` | **part id** hash (`CG_poison_L1`, `cell_hero_L0_decorations`, `cell_creature_L0_food_decorations`, `cell_attack_poison_aura`) |
+| `+0x14` | part scale xyz (f32 ×3) |
+
+## Background map — `backgroundMap` (1)
+
+An 8-byte header then **12 depth bands** of `{r, g, b, depth}` floats. `depth` runs
+`5, 15, 50, 150, 500, 1500, 5000, 15000, 100000` — the parallax depth thresholds; `rgb`
+is the per-band tint. This is what a background renderer scrolls at different rates.
+
+## Effect map — `effectMap` (1, "CellEffects", 596 B)
+
+An 8-byte header `{count, ?}` then a list of effect entries, each an id followed by a run of
+floats (e.g. `{id}, 5, -1, -1, 1.5, 1.9, …` or `{id}, 5700, 1.5e4, 2e4, 2.2e4`). The
+float runs vary in length (particle counts / radius / lifetime bands); entries are
+positional.
+
+## Cell globals — `globals`/`cellgame` (raw struct, 196 B)
+
+Sixteen resource-id references (`+0x00..+0x3C`) then **~31 tuning floats** from `+0x40`
+(`5.0, 0.5, 0.2, 1.0, 3.0, 250.0, 50.0, 5.0, 0.5, 35.0, 0.1, 0.1, 0.5, 1.0, 1.0, 40.0,
+20.0, 0.5, 0.5, 100.0, 20.0, 1.0, 2.0, 7.0, 10.0, 6.0, 3.0, 15.0, 3.0`, tail `10, 2`). The
+floats have no shipped key names (unlike `cell_properties`), so they are exposed raw.
+
+## Background fields — `CellGame_Layers.package` (33)
+
+`advect` (28) and `density` (5) resources are raw background fields:
+
+| type | size | shape |
+|---|---:|---|
+| `advect` | 196608 | **128×128×3 f32** flow/current vector per cell (`cell_river`, `RandomFlow`, `CellRandomFlow`, `cell_vortex`, `cell_wave`, `cell_line`, `default`, `CellStarryNightFlow`, …) |
+| `density` | 65536 | **128×128 f32** scalar density (`Level1-zone1/2`, `Level1-bubbles`, `spiral`, `InverseSpiral`) |
+
+These are the parallax water currents and prop-density maps the cell stage scrolls behind
+the play area (`cell_advect_spirals`, `cell_advection_racetrack`, `CellMickeyFlow`, …).
 
 ## Animation table — `xls` (OLE2/Excel)
 
@@ -162,11 +223,17 @@ CellGame.package
 ├── world            13  biomes (water/beach/ice/rock/plant/random)
 ├── populate         23  per-level spawn lists (cell archetype id + count)
 ├── random_creature  10  random spawn tables (NeutralCell_01..03)
-├── structure       144  part layout records
-├── advect           28  flow maps
+├── structure       144  body models (80B header + N 32B parts)
+├── backgroundMap     1  12 parallax depth bands {rgb, depth}
+├── effectMap         1  effect id + float runs
+├── look_algorithm    1  id→value transition table
 ├── prop              1  cell_properties   (17 named tuning curves)
-├── globals           1  cellgame          (raw scalar tuning)
+├── globals           1  cellgame          (16 id refs + ~31 raw floats)
 └── xls               1  animation table    (74 rows)
+
+CellGame_Layers.package
+├── advect           28  128×128×3 f32 background flow fields
+└── density           5  128×128 f32 background density fields
 ```
 
 ## Boundaries
@@ -186,4 +253,6 @@ python tools/spore_hash.py cell structure look_table loottable
 python tools/cell_game.py                 # type/resource summary
 python tools/cell_game.py --globals        # named cell-globals tuning curves
 python tools/cell_game.py --json analysis/audit/cell-game.json
+build\Debug\cell_game_verify.exe "S:\Games\Other\Spore\Data\CellGame.package"
+build\Debug\cell_game_verify.exe "S:\Games\Other\Spore\Data\CellGame_Layers.package"
 ```

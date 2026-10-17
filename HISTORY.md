@@ -7,6 +7,21 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-17 — Cell stage: every resource type decoded (structures, globals, layers, background)
+
+Finished the structural decode of both cell packages. Added decoders for `structure` (80-byte
+header + N×32-byte part entries: `+0x10` death archetype, `+0x40` base body, part id at
+`+0x10`), `globals`/`cellgame` (16 id refs + ~31 raw tuning floats from `+0x40`),
+`backgroundMap` (12 parallax depth bands `{rgb, depth}`), `effectMap`, and
+`CellGame_Layers.package` (`advect` = 128×128×3 f32 flow fields, `density` = 128×128 f32).
+Extended `tools/cell_game.py` (audit regenerated), `source/engine/cell_game.{h,cpp}`
+(`Structure`, `Globals`, `LayerField`) and `cell_game_verify.cpp` (now 8 constructed checks).
+Re-verified against the 107 cell-save ids: **0 of 107** are keys of any of the 39 565 `prop`
+resources (322 distinct keys) in the install — confirming they are per-class sequential ids,
+not name hashes. Verified: `cell_game_verify` 0/2 packages = 442 + 33 resources with
+189/9/48/23/10/13/144/1 resources and 33 layers; main target builds 0 warnings; 24 unit tests,
+`feature_map --check`, `docs_check` all pass.
+
 ## 2026-10-17 — Cell stage is fully data-defined: CellGame.package decoded
 
 Located the Spore installs (`S:\Games\Other\Spore`, `S:\Games\Steam\...\spore`) and decoded

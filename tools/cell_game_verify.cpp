@@ -102,6 +102,28 @@ static std::vector<u8> make_population() {
     return d;
 }
 
+static std::vector<u8> make_structure() {
+    std::vector<u8> d(0x50 + 32, 0);
+    auto put = [&](size_t at, u32 x) { memcpy(d.data() + at, &x, 4); };
+    put(0x0C, 0x46748976u);                       // format marker
+    put(0x10, fnv1_lower("cell_deathNPC"));       // death archetype
+    put(0x40, fnv1_lower("amoeba_cell"));         // base body
+    float s = 1.0f; memcpy(d.data() + 0x44, &s, 4);
+    put(0x50 + 0x00, 0xFFFFFFFFu);                // root parent
+    put(0x50 + 0x10, fnv1_lower("CG_poison_L1")); // part id
+    float px = 0.1f; memcpy(d.data() + 0x50 + 0x14, &px, 4);
+    return d;
+}
+
+static std::vector<u8> make_globals() {
+    std::vector<u8> d(196, 0);
+    auto put = [&](size_t at, u32 x) { memcpy(d.data() + at, &x, 4); };
+    put(0x00, fnv1_lower("cell_food_L0"));        // ref 0
+    float f5 = 5.0f; memcpy(d.data() + 0x40, &f5, 4);   // first float
+    float f2 = 0.5f; memcpy(d.data() + 0x44, &f2, 4);
+    return d;
+}
+
 int main(int argc, char** argv) {
     const u32 squid = fnv1_lower("cell_squid");
     const u32 booster = fnv1_lower("loot_booster");
@@ -192,6 +214,36 @@ int main(int argc, char** argv) {
         check(g.populations[0].name.empty() || g.populations[0].name == "level_water", "pop name");
     }
 
+    // 7: structure (header + parts)
+    {
+        std::vector<Rec> recs = {{cell::kTypeStructure, 0, fnv1_lower("cell_hero"), make_structure()}};
+        auto dbpf = make_dbpf(recs);
+        cell::GameData g; std::string err;
+        bool ok = cell::decode_from_memory(dbpf.data(), dbpf.size(), "test", g, err);
+        check(ok, "decode structure");
+        check(g.structures.size() == 1, "one structure");
+        check(g.structures[0].death == fnv1_lower("cell_deathNPC"), "structure death id");
+        check(g.structures[0].base == fnv1_lower("amoeba_cell"), "structure base id");
+        check(g.structures[0].scale[0] == 1.0f, "structure scale");
+        check(g.structures[0].parts.size() == 1, "one structure part");
+        check(g.structures[0].parts[0].parent == 0xFFFFFFFFu, "part parent root");
+        check(g.structures[0].parts[0].part == fnv1_lower("CG_poison_L1"), "part id");
+    }
+
+    // 8: globals
+    {
+        std::vector<Rec> recs = {{cell::kTypeGlobals, 0, fnv1_lower("cellgame"), make_globals()}};
+        auto dbpf = make_dbpf(recs);
+        cell::GameData g; std::string err;
+        bool ok = cell::decode_from_memory(dbpf.data(), dbpf.size(), "test", g, err);
+        check(ok, "decode globals");
+        check(g.globals.size() == 1, "one globals");
+        check(g.globals[0].refs.size() == 16, "16 globals refs");
+        check(g.globals[0].refs[0] == fnv1_lower("cell_food_L0"), "globals ref 0");
+        check(g.globals[0].floats.size() == (196 - 0x40) / 4, "globals float count");
+        check(g.globals[0].floats[0] == 5.0f && g.globals[0].floats[1] == 0.5f, "globals floats");
+    }
+
     // Optional: real package.
     if (argc > 1 && argv[1] && argv[1][0]) {
         cell::GameData g; std::string err;
@@ -200,7 +252,9 @@ int main(int argc, char** argv) {
                       << g.archetypes.size() << " archetypes, " << g.look_tables.size()
                       << " look_tables, " << g.loot_tables.size() << " loottables, "
                       << g.populations.size() << " populations, " << g.random_spawns.size()
-                      << " random_spawns, " << g.worlds.size() << " worlds\n";
+                      << " random_spawns, " << g.worlds.size() << " worlds, "
+                      << g.structures.size() << " structures, " << g.globals.size()
+                      << " globals, " << g.layers.size() << " layers\n";
         } else {
             std::cerr << "real package decode failed: " << err << "\n";
             ++failures;
@@ -211,6 +265,6 @@ int main(int argc, char** argv) {
         std::cerr << failures << " cell_game_verify check(s) failed\n";
         return 1;
     }
-    std::cout << "cell_game_verify: 6 constructed-input checks PASS\n";
+    std::cout << "cell_game_verify: 8 constructed-input checks PASS\n";
     return 0;
 }

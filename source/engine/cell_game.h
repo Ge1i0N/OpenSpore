@@ -18,7 +18,10 @@
 //   0x9B8E862F world           — tide-pool biome (counted)
 //   0xF9C3D770 random_creature — random spawn table (counted)
 //   0xDA141C1B populate        — spawn population (counted)
-//   0x4B9EF6DC structure       — part layout (counted)
+//   0x4B9EF6DC structure       — part layout (header + N 32-byte part entries)
+//   0x2A3CE5B7 globals         — master tuning record (16 id refs + ~31 floats)
+//   0x04805684 advect          — 128x128x3 f32 background flow field (Layers pkg)
+//   0x5C74D18B density         — 128x128 f32 background density field (Layers pkg)
 // Anything else is tallied by type name only.
 //
 // Archetype record layout (400 B, little-endian), offsets proven to vary across the 189
@@ -48,6 +51,9 @@ inline constexpr u32 kTypeWorld = 0x9B8E862Fu;
 inline constexpr u32 kTypeRandomCreature = 0xF9C3D770u;
 inline constexpr u32 kTypePopulate = 0xDA141C1Bu;
 inline constexpr u32 kTypeStructure = 0x4B9EF6DCu;
+inline constexpr u32 kTypeGlobals = 0x2A3CE5B7u;
+inline constexpr u32 kTypeAdvect = 0x04805684u;
+inline constexpr u32 kTypeDensity = 0x5C74D18Bu;
 
 struct LookEntry {
     u32 type = 0;      // see LOOK_ENTRY: 0 up, 1 forward, ... 11 player
@@ -92,10 +98,50 @@ struct Archetype {
     u32 dword(u32 offset) const;
 };
 
-// Named resources that are decoded as counts only (world/structure).
+// Named resources that are decoded as counts only (world).
 struct NamedResource {
     u32 id = 0;
     std::string name;
+    u32 size = 0;
+};
+
+// One part attached to a structure body. Part entry: +0x00 parent (-1 = root),
+// +0x04 flag, +0x10 part id, +0x14 scale xyz.
+struct StructurePart {
+    u32 parent = 0xFFFFFFFFu;
+    u32 flag = 0;
+    u32 part = 0;
+    float scale[3] = {0.0f, 0.0f, 0.0f};
+};
+
+// Cell body model (`structure`, e.g. the layout of cell_hero). 80-byte header then N 32-byte
+// part entries. Header: +0x0C format marker, +0x10 death-archetype id, +0x40 base-body id,
+// +0x44 scale xyz.
+struct Structure {
+    u32 id = 0;
+    std::string name;
+    u32 death = 0;  // header +0x10 (spawned when the cell dies)
+    u32 base = 0;   // header +0x40 (base body: amoeba_cell/...)
+    float scale[3] = {0.0f, 0.0f, 0.0f};
+    std::vector<StructurePart> parts;
+};
+
+// Master tuning record (`globals`, 196 B): 16 resource-id references then ~31 floats from
+// +0x40. The floats are POSITIONAL (no shipped key names), so they are exposed raw.
+struct Globals {
+    u32 id = 0;
+    std::string name;
+    std::vector<u32> refs;    // 16 id references at +0x00..+0x3C
+    std::vector<float> floats;  // tuning floats from +0x40
+};
+
+// A background advection/density field from CellGame_Layers.package.
+// advect = 128x128x3 f32 (196608 B), density = 128x128 f32 (65536 B).
+struct LayerField {
+    u32 id = 0;
+    std::string name;
+    u32 components = 0;  // 3 = advect (flow), 1 = density
+    u32 width = 128, height = 128;
     u32 size = 0;
 };
 
@@ -131,7 +177,9 @@ struct GameData {
     std::vector<Population> populations;
     std::vector<RandomSpawn> random_spawns;
     std::vector<NamedResource> worlds;
-    std::vector<NamedResource> structures;
+    std::vector<Structure> structures;
+    std::vector<Globals> globals;
+    std::vector<LayerField> layers;
     std::map<u32, u32> type_counts;  // type id -> resource count (every type in the package)
     u32 total_resources = 0;
 };

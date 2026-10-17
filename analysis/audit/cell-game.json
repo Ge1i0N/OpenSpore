@@ -12,9 +12,9 @@
     "look_table": 9,
     "random_creature": 10,
     "look_algorithm": 1,
-    "effectMap": 1,
+    "effectmap": 1,
     "prop": 1,
-    "backgroundMap": 1,
+    "backgroundmap": 1,
     "xls": 1,
     "globals": 1,
     "advect": 28,
@@ -702,7 +702,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -775,7 +775,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -803,7 +803,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": []
     },
@@ -812,7 +812,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -831,7 +831,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -850,7 +850,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -869,7 +869,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 4.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -915,7 +915,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -943,7 +943,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1034,7 +1034,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1107,12 +1107,12 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
           "type": "table",
-          "cell": "packageSignature",
+          "cell": "0x00000000",
           "table": "loot_rock_chunk",
           "weight": 1.0,
           "count": 3,
@@ -1126,7 +1126,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1163,7 +1163,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": []
     },
@@ -1172,7 +1172,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1200,7 +1200,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 4.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1219,7 +1219,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1247,7 +1247,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1275,7 +1275,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1303,7 +1303,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1331,7 +1331,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1404,7 +1404,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1441,12 +1441,12 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
           "type": "nothing",
-          "cell": "packageSignature",
+          "cell": "0x00000000",
           "table": null,
           "weight": 0.8,
           "count": 0,
@@ -1469,7 +1469,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1488,7 +1488,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 1.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1525,7 +1525,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1544,7 +1544,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1572,7 +1572,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1627,7 +1627,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": []
     },
@@ -1636,12 +1636,12 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
           "type": "nothing",
-          "cell": "packageSignature",
+          "cell": "0x00000000",
           "table": null,
           "weight": 0.4,
           "count": 0,
@@ -1664,7 +1664,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1683,7 +1683,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1711,7 +1711,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1730,12 +1730,12 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
           "type": "table",
-          "cell": "packageSignature",
+          "cell": "0x00000000",
           "table": "0xdfd2adee",
           "weight": 0.1,
           "count": 5,
@@ -1749,7 +1749,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1777,7 +1777,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1796,7 +1796,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1824,7 +1824,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1897,7 +1897,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": []
     },
@@ -1906,7 +1906,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1925,7 +1925,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1953,12 +1953,12 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
           "type": "table",
-          "cell": "packageSignature",
+          "cell": "0x00000000",
           "table": "loot_ice_chunk",
           "weight": 1.0,
           "count": 3,
@@ -1972,7 +1972,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -1991,7 +1991,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -2073,7 +2073,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -2146,7 +2146,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -2210,7 +2210,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -2256,7 +2256,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -2284,7 +2284,7 @@
       "maxRadius": 0.0,
       "initialAlpha": 1.0,
       "expelForce": 0.0,
-      "effect": "packageSignature",
+      "effect": "0x00000000",
       "delay": 0.0,
       "entries": [
         {
@@ -3248,43 +3248,2316 @@
   },
   "world": {
     "world_water": {
+      "count": 2,
       "size": 64
     },
     "world_beach_bg": {
+      "count": 1,
       "size": 28
     },
     "world_ice_bg": {
+      "count": 10,
       "size": 136
     },
     "world_random": {
+      "count": 2,
       "size": 64
     },
     "world_water_bg": {
+      "count": 1,
       "size": 28
     },
     "world_plant": {
+      "count": 2,
       "size": 64
     },
     "world_ice": {
+      "count": 20,
       "size": 544
     },
     "cell_empty": {
+      "count": 0,
       "size": 16
     },
     "world_rock_bg": {
+      "count": 1,
       "size": 28
     },
     "world_rock": {
+      "count": 2,
       "size": 64
     },
     "world_beach": {
+      "count": 2,
       "size": 64
     },
     "world_plant_bg": {
+      "count": 1,
       "size": 28
     },
     "world_random_bg": {
+      "count": 1,
       "size": 28
+    }
+  },
+  "structures": {
+    "str_hummingbird": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "hummingbird",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_chomperSmall": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Chomper",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_jawheadSmall": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Jawhead",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x246d3b88": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0x0b1e9eef",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x246d3b89": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0x0b1e9eef",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x246d3b8a": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0x0b1e9eef",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x246d3b8d": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0x0b1e9eef",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x246d3b8e": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0x0b1e9eef",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x246d3b8f": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0x0b1e9eef",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover_L1": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover_L0": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover_L0",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x0d3fcfc4": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "amoeba_cell_rigid",
+        "scale": [
+          1.0,
+          0.5,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover_L2": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_poison_L0": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "0x27338a76",
+        "base": "0xdee6c9fd",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": [
+        {
+          "parent": "0xffffffff",
+          "flag": 0,
+          "part": "CG_poison_L1",
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    "cell_hero_L0": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": [
+        {
+          "parent": "0xffffffff",
+          "flag": 1,
+          "part": "cell_hero_L0_decorations",
+          "scale": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    "struct_ducky": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Ducky",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "beaker": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "beaker",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_nosey": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Nosey",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xb716c401": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0xa5cbd371",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x69917915": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "0x8ab35aa0",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x69917916": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "octamouth_B",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_poolBall": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "poolball",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_weapon_poison_npc": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_poison_flow_NPC",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xd8e2c3d8": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock2_L1",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xd8e2c3d9": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock3_L1",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xd8e2c3db": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock1_L1",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xd8e2c3de": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock4_L1",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_squid": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Squid",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_charger": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "charger",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_chomper": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Chomper",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_shysterAlpha": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "ShysterAlpha",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_squiggly": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Squiggly",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xde81e5e0": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_creature_puncture_outflow",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x407fb790": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x407fb793": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover3_l0": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover3_l0",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover3_l1": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover3_l1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover3_l2": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover3_l2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_eggdad": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Eggdad",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_simple_ai_L0": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "L0_swimming_guy",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_jetster": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Jetster",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_pinky": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Pinky",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_poker": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "poker",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_buzzyAlpha": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "BuzzyAlpha",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_jawhead": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Jawhead",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x9009ffa5": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock1_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x9009ffa6": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock1_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x9009ffa7": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock1_L3",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "BadData": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "amoeba_cell",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "poolball": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "poolball",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_megamouth": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Megamouth",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x10027a7c": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock2_L3",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x10027a7d": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock2_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x10027a7e": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock2_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0xf41158f4": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock4_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0xf41158f6": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock4_L3",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x9b17fa87": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "cell_solidFood",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xf41158f7": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock4_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "str_unlock_spike": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_unlock_spike_pickup",
+        "base": "cell_unlock_spike",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xcea32450": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "genMisc_poison",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": [
+        {
+          "parent": "0xffffffff",
+          "flag": 1,
+          "part": "0x9e781186",
+          "scale": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    "0xcbdb0a9a": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_poison_flow_short",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xa2ad2799": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_poison_flow_medium",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_unlock_chemical": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_unlock_chemical_pickup",
+        "base": "cell_unlock_chemical",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_shyster": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Shyster",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_unlock_proboscis": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_unlock_proboscis_pickup",
+        "base": "cell_unlock_proboscis",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_stabber": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Stabber",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x9d14a758": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_eggHatch_L0",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_loot_bubble": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_pop_bubbleMedium",
+        "base": "cell_loot_bubble_model",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xabc81b08": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "0x0f978ad1",
+        "base": "0xde90efb9",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_air_bubble": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_pop_bubbleMedium",
+        "base": "cell_air_bubble_model",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xabc81b0a": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "0x0f978ad1",
+        "base": "0xde90efb9",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xbf557441": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_breakMandible_eventLargeSolidCrack",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xabc81b0d": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "0x0f978ad1",
+        "base": "0xde90efb9",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xabc81b18": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "0x0f978ad1",
+        "base": "0xde90efb9",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_minno2": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Minno2",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_minno3": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Minno3",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_minno1": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Minno1",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_unlock_electric": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_unlock_electric_pickup",
+        "base": "cell_unlock_electric",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xa0befc9e": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "0x27338a76",
+        "base": "0xdee6c9fd",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": [
+        {
+          "parent": "0xffffffff",
+          "flag": 0,
+          "part": "CG_poison_L1",
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    "struct_grubby": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Grubby",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_stabberAlpha": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "StabberAlpha",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover2_L2": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover2_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover2_L1": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover2_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_flora_clover2_L0": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_flora_clover2_L0",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_booster": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Booster",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_puffish": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Puffish",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_goldy": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Goldy",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x54ff6054": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x54ff6057": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "creeper": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "creeper",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_goldy2": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Goldy2",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_spikey": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Spikey",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_goldy3": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Goldy3",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xa2b0dc84": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xa2b0dc87": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_leggy": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Leggy",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xcb94b824": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "0x8ab35aa0",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_creeper": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "creeperA",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x8628690a": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.64,
+          0.26,
+          0.05
+        ]
+      },
+      "parts": []
+    },
+    "0x31304ce2": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock_L2_radiolarians",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xf6c926a4": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0xf4e631b9",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x31304ce4": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock_L2_radiolarians",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xf6c926a5": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0xf4e631b9",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x31304ce5": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock_L2_radiolarians",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xf6c926a7": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "0xf4e631b9",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x31304ce7": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock_L2_radiolarians",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x4e17a715": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cg_groundtranscrg_l5",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_duckySmall": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Ducky",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x8f5ea990": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "CG_solidFood_5_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x8f5ea991": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "CG_solidFood_4_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x8f5ea994": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "CG_solidFood_1_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x621feb61": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x621feb62": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x8f5ea996": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "CG_solidFood_3_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x8f5ea997": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "CG_solidFood_2_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "str_unlock_cilia": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_unlock_cilia_pickup",
+        "base": "cell_unlock_cilia",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_buzzy": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Buzzy",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_water_balloon": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "waterBalloon",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_bolt": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "L0_spike",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "str_eyeGuy": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "Eyeguy",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_unlock_jet": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_unlock_jet_pickup",
+        "base": "cell_unlock_jet",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_food_L0": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_creature_L0_food_death",
+        "base": "amoeba_cell",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": [
+        {
+          "parent": "0xffffffff",
+          "flag": 1,
+          "part": "cell_creature_L0_food_decorations",
+          "scale": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    "str_octamouth": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "octamouth",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_egg": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_eggIdle_L0",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xa68c15b6": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_poison_flow_long",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x3c3e954f": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "none",
+        "scale": [
+          0.64,
+          0.52,
+          0.75
+        ]
+      },
+      "parts": []
+    },
+    "cell_ground_L5": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_ground_L5",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_ground_L1": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_ground_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "cell_ground_L2": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_ground_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x74055660": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock3_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x74055661": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock3_L3",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "0x74055663": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_rock3_L2",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "str_creeperB": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "creeper",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_creeperA": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "creeperB",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "cute1": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "cute1",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_poisoner": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Poisoner",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": [
+        {
+          "parent": "0xffffffff",
+          "flag": 1,
+          "part": "cell_attack_poison_aura",
+          "scale": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    "cell_weapon_poison_player": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "cell_poison_flow",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_pinkyAlpha": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "PinkyAlpha",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_eggmom": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Eggmom",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0x9607593c": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "cell_deathNPC",
+        "base": "0xc85f8e85",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "str_unlock_mandible": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "cell_unlock_mandible_pickup",
+        "base": "cell_unlock_mandible",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    },
+    "0xd93ee013": {
+      "header": {
+        "marker": "0x00000000",
+        "death": "none",
+        "base": "CG_liquidFood_L1",
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "parts": [
+        {
+          "parent": "0xffffffff",
+          "flag": 1,
+          "part": "cell_creature_L0_food_decorations",
+          "scale": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "parent": "0xffffffff",
+          "flag": 1,
+          "part": "0xcfdb942d",
+          "scale": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    "0x611db7bf": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "amoeba_cell_rigid",
+        "scale": [
+          1.0,
+          0.1,
+          1.0
+        ]
+      },
+      "parts": []
+    },
+    "struct_eggkid": {
+      "header": {
+        "marker": "0x46748976",
+        "death": "none",
+        "base": "Eggkid",
+        "scale": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "parts": []
+    }
+  },
+  "globals": {
+    "CellGame": {
+      "refs": [
+        "world_ice",
+        "world_rock",
+        "world_plant",
+        "world_water",
+        "world_beach",
+        "world_ice_bg",
+        "world_rock_bg",
+        "world_plant_bg",
+        "world_water_bg",
+        "world_beach_bg",
+        "world_random",
+        "world_random_bg",
+        "cell_hero_L0",
+        "0xb716c401",
+        "0x9d14a758",
+        "CellEffects"
+      ],
+      "floats": [
+        0.0,
+        5.0,
+        0.5,
+        0.2,
+        1.0,
+        3.0,
+        250.0,
+        50.0,
+        5.0,
+        0.5,
+        35.0,
+        0.1,
+        0.1,
+        0.5,
+        1.0,
+        1.0,
+        -3.700627269360727e+23,
+        40.0,
+        20.0,
+        0.5,
+        0.5,
+        100.0,
+        20.0,
+        1.0,
+        2.0,
+        7.0,
+        10.0,
+        6.0,
+        3.0,
+        15.0,
+        3.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "background_map": {
+    "CellBackgrounds": {
+      "bands": [
+        {
+          "rgb": [
+            0.753,
+            0.898,
+            0.922
+          ],
+          "depth": 0.0
+        },
+        {
+          "rgb": [
+            0.639,
+            0.822,
+            1.0
+          ],
+          "depth": 0.5
+        },
+        {
+          "rgb": [
+            0.472,
+            0.644,
+            1.0
+          ],
+          "depth": 1.5
+        },
+        {
+          "rgb": [
+            0.222,
+            0.338,
+            0.706
+          ],
+          "depth": 5.0
+        },
+        {
+          "rgb": [
+            0.004,
+            0.102,
+            0.557
+          ],
+          "depth": 15.0
+        },
+        {
+          "rgb": [
+            0.002,
+            0.243,
+            0.58
+          ],
+          "depth": 50.0
+        },
+        {
+          "rgb": [
+            0.0,
+            0.351,
+            0.598
+          ],
+          "depth": 150.0
+        },
+        {
+          "rgb": [
+            0.062,
+            0.502,
+            0.714
+          ],
+          "depth": 500.0
+        },
+        {
+          "rgb": [
+            0.0,
+            0.683,
+            0.793
+          ],
+          "depth": 1500.0
+        },
+        {
+          "rgb": [
+            0.331,
+            0.772,
+            0.837
+          ],
+          "depth": 5000.0
+        },
+        {
+          "rgb": [
+            0.831,
+            0.789,
+            0.635
+          ],
+          "depth": 15000.0
+        },
+        {
+          "rgb": [
+            0.831,
+            0.789,
+            0.635
+          ],
+          "depth": 100000.0
+        }
+      ]
+    }
+  },
+  "effect_map": {
+    "CellEffects": {
+      "count": 21,
+      "size": 596
+    }
+  },
+  "layers": {
+    "cell_advection_racetrack": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_river": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "empty": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "RandomFlow": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_diagonals": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advection_waves": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "Level1-zone2": {
+      "kind": "density 128x128 f32",
+      "size": 65536
+    },
+    "CellMickeyFlow": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "Level1-zone1": {
+      "kind": "density 128x128 f32",
+      "size": 65536
+    },
+    "cell_advection_racetrack_1": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "CellRandomFlow": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "spiral": {
+      "kind": "density 128x128 f32",
+      "size": 65536
+    },
+    "CellChaimFlow": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "InverseSpiral": {
+      "kind": "density 128x128 f32",
+      "size": 65536
+    },
+    "cell_advect_spirals2": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advect_test_swirly_magchange": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_vortex": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_wave": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advection_stripes_1": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_line": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advect_spirals1": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "CellMattFlow": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "default": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advection_waves1": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advection_clash1": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advect_test_swirly": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "CellStarryNightFlow": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "Level1-bubbles": {
+      "kind": "density 128x128 f32",
+      "size": 65536
+    },
+    "cell_advection_vertical_rivers": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_waves": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "CellJeffFlow": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advection_spirals": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
+    },
+    "cell_advect_wiggles": {
+      "kind": "advect 128x128x3 f32",
+      "size": 196608
     }
   },
   "populate": {
@@ -3296,11 +5569,11 @@
           "count": 5.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
@@ -3324,19 +5597,19 @@
           "count": 40.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 4.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 6.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 3.0
         },
         {
@@ -3381,11 +5654,11 @@
           "count": 4.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
@@ -3405,15 +5678,15 @@
           "count": 30.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
@@ -3450,7 +5723,7 @@
           "count": 3.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
@@ -3470,15 +5743,15 @@
           "count": 50.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 4.0
         },
         {
@@ -3519,11 +5792,11 @@
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
@@ -3543,15 +5816,15 @@
           "count": 40.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 3.0
         },
         {
@@ -3588,7 +5861,7 @@
           "count": 4.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
@@ -3612,19 +5885,19 @@
           "count": 32.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 4.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 6.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 10.0
         },
         {
@@ -3697,15 +5970,15 @@
           "count": 20.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 4.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 6.0
         },
         {
@@ -3889,11 +6162,11 @@
           "count": 5.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
@@ -3913,11 +6186,11 @@
           "count": 10.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 3.0
         },
         {
@@ -3954,11 +6227,11 @@
           "count": 5.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
@@ -3978,19 +6251,19 @@
           "count": 45.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 7.0
         },
         {
@@ -4039,11 +6312,11 @@
           "count": 5.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
@@ -4063,19 +6336,19 @@
           "count": 40.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 6.0
         },
         {
@@ -4167,7 +6440,7 @@
       "type": 4,
       "entries": [
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
@@ -4191,19 +6464,19 @@
           "count": 40.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 5.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 14.0
         },
         {
@@ -4240,11 +6513,11 @@
           "count": 4.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 1.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 0.0
         },
         {
@@ -4272,19 +6545,19 @@
           "count": 30.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 2.0
         },
         {
-          "cell": "packageSignature",
+          "cell": "none",
           "count": 10.0
         },
         {
@@ -4339,75 +6612,23 @@
   "random_creature": {
     "0xbc092044": {
       "size": 36,
-      "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
-        {
-          "cell": "packageSignature",
-          "weight": 1.0
-        },
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        }
-      ]
+      "cells": []
     },
     "0xbc092047": {
       "size": 36,
-      "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
-        {
-          "cell": "packageSignature",
-          "weight": 1.0
-        },
-        {
-          "cell": "renderTerrain",
-          "weight": 0.0
-        },
-        {
-          "cell": "renderEffects",
-          "weight": 0.0
-        }
-      ]
+      "cells": []
     },
     "0x4122e50c": {
       "size": 36,
-      "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
-        {
-          "cell": "packageSignature",
-          "weight": 1.0
-        }
-      ]
+      "cells": []
     },
     "0x4122e50f": {
       "size": 36,
-      "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
-        {
-          "cell": "packageSignature",
-          "weight": 1.0
-        }
-      ]
+      "cells": []
     },
     "neutralCells": {
       "size": 120,
       "cells": [
-        {
-          "cell": "renderTerrain",
-          "weight": 0.0
-        },
         {
           "cell": "NeutralCell",
           "weight": 1.0
@@ -4428,49 +6649,15 @@
     },
     "0xd7e124a4": {
       "size": 36,
-      "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
-        {
-          "cell": "packageSignature",
-          "weight": 1.0
-        },
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        }
-      ]
+      "cells": []
     },
     "0xd7e124a7": {
       "size": 36,
-      "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
-        {
-          "cell": "packageSignature",
-          "weight": 1.0
-        },
-        {
-          "cell": "renderTerrain",
-          "weight": 0.0
-        },
-        {
-          "cell": "renderUI",
-          "weight": 0.0
-        }
-      ]
+      "cells": []
     },
     "0x6beab167": {
       "size": 36,
       "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
         {
           "cell": "NeutralCell_cilia_01",
           "weight": 1.0
@@ -4479,45 +6666,11 @@
     },
     "0xb17debcc": {
       "size": 36,
-      "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
-        {
-          "cell": "packageSignature",
-          "weight": 1.0
-        },
-        {
-          "cell": "renderTerrain",
-          "weight": 0.0
-        },
-        {
-          "cell": "renderUI",
-          "weight": 0.0
-        }
-      ]
+      "cells": []
     },
     "0xb17debcf": {
       "size": 36,
-      "cells": [
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        },
-        {
-          "cell": "packageSignature",
-          "weight": 1.0
-        },
-        {
-          "cell": "renderTerrain",
-          "weight": 0.0
-        },
-        {
-          "cell": "showFPS",
-          "weight": 0.0
-        }
-      ]
+      "cells": []
     }
   }
 }

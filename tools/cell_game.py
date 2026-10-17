@@ -60,6 +60,7 @@ XLS = 0x1F639D98
 EFFECTMAP = 0x433FB70C
 BACKGROUNDMAP = 0x612B3191
 ADVECT = 0x04805684
+DENSITY = 0x5C74D18B
 
 # Extra cell names not present in reg_file.txt but confirmed on real resources.
 EMBEDDED = [
@@ -192,7 +193,8 @@ def decode_populate(data: bytes, names: dict[int, str] | None = None):
             break
         cell, = struct.unpack_from("<I", data, off + 0x18)
         count, = struct.unpack_from("<f", data, off + 0x2C)
-        rows.append({"cell": names.get(cell, "0x%08x" % cell), "count": round(count, 3)})
+        name = "none" if cell == 0 else names.get(cell, "0x%08x" % cell)
+        rows.append({"cell": name, "count": round(count, 3)})
     return {"type": typ, "entries": rows}
 
 
@@ -207,6 +209,71 @@ def decode_random_creature(data: bytes, names: dict[int, str] | None = None):
             if 0.0 < w <= 1000.0:
                 pairs.append({"cell": names[v], "weight": round(w, 3)})
     return {"size": len(data), "cells": pairs}
+
+
+def decode_structure(data: bytes, names: dict[int, str] | None = None):
+    """A cell body model: an 80-byte header followed by N 32-byte part entries.
+
+    Header (little-endian): +0x0C format marker (0x46748976), +0x10 death-archetype id
+    (spawned on death), +0x40 base-body id (amoeba_cell/...), +0x44 scale xyz.
+    Part entry: +0x00 parent (-1=root), +0x04 flag, +0x10 part id (CG_* / *_decorations),
+    +0x14 scale xyz.
+    """
+    names = names or {}
+
+    def nm(x: int) -> str:
+        return "none" if x == 0 else names.get(x, "0x%08x" % x)
+
+    header = {}
+    if len(data) >= 0x50:
+        header = {
+            "marker": "0x%08x" % struct.unpack_from("<I", data, 0x0C)[0],
+            "death": nm(struct.unpack_from("<I", data, 0x10)[0]),
+            "base": nm(struct.unpack_from("<I", data, 0x40)[0]),
+            "scale": [round(v, 4) for v in struct.unpack_from("<3f", data, 0x44)],
+        }
+    parts = []
+    for k in range((len(data) - 0x50) // 32):
+        e = data[0x50 + k * 32: 0x50 + (k + 1) * 32]
+        pid, = struct.unpack_from("<I", e, 0x10)
+        parts.append({
+            "parent": "0x%08x" % struct.unpack_from("<I", e, 0)[0],
+            "flag": struct.unpack_from("<I", e, 4)[0],
+            "part": nm(pid),
+            "scale": [round(v, 4) for v in struct.unpack_from("<3f", e, 0x14)],
+        })
+    return {"header": header, "parts": parts}
+
+
+def decode_globals(data: bytes, names: dict[int, str] | None = None):
+    """The `globals` master tuning record: 16 resource-id references then ~31 floats from +0x40."""
+    names = names or {}
+    refs = []
+    for o in range(0, 0x40, 4):
+        v, = struct.unpack_from("<I", data, o)
+        if v:
+            refs.append(names.get(v, "0x%08x" % v))
+    floats = [round(v, 4) for v in struct.unpack_from("<%df" % ((len(data) - 0x40) // 4), data, 0x40)]
+    return {"refs": refs, "floats": floats}
+
+
+def decode_background_map(data: bytes, names: dict[int, str] | None = None):
+    """Parallax background: 8-byte header then 12 depth bands of {r, g, b, depth} floats."""
+    _h0, _h1 = struct.unpack_from("<2I", data, 0)
+    bands = []
+    for o in range(8, len(data) - 15, 16):
+        r, g, b, depth = struct.unpack_from("<4f", data, o)
+        bands.append({"rgb": [round(r, 4), round(g, 4), round(b, 4)], "depth": round(depth, 2)})
+    return {"bands": bands}
+
+
+def layer_info(size: int) -> str:
+    """advect = 128x128x3 float flow field, density = 128x128 float scalar field (both = 65536 B/tile)."""
+    if size == 196608:
+        return "advect 128x128x3 f32"
+    if size == 65536:
+        return "density 128x128 f32"
+    return "?"
 
 
 def display_name(data: bytes) -> str:
@@ -229,7 +296,12 @@ def display_name(data: bytes) -> str:
 
 def build_name_map() -> dict[int, str]:
     m = {fnv1_lower(n): n for n in EMBEDDED}
-    m.update(load_registry())
+    # Keep only ids that can be DBPF resource ids: reg_property/reg_simulator carry a few
+    # tiny hand-assigned engine ids (0x0 "packageSignature", 0x30 ...) that would otherwise
+    # falsely name empty/small fields. FNV of a real name is ~never below 0x10000.
+    for h, n in load_registry().items():
+        if h >= 0x10000:
+            m.setdefault(h, n)
     return m
 
 
@@ -247,6 +319,8 @@ def main() -> int:
     names = build_name_map()
     report: dict = {"packages": [str(p) for p in pkgs], "types": {}, "prop": {},
                     "look_tables": {}, "loottables": {}, "cells": {}, "world": {},
+                    "structures": {}, "globals": {}, "background_map": {},
+                    "effect_map": {}, "layers": {},
                     "populate": {}, "random_creature": {}}
 
     for pkg in pkgs:
@@ -273,7 +347,19 @@ def main() -> int:
                 report["cells"][iname or "0x%08x" % i] = {
                     "instance": "0x%08x" % i, "display": display_name(data), "size": len(data)}
             elif t == WORLD:
-                report["world"][iname or "0x%08x" % i] = {"size": len(data)}
+                cnt, = struct.unpack_from("<I", data, 0) if len(data) >= 4 else (0,)
+                report["world"][iname or "0x%08x" % i] = {"count": cnt, "size": len(data)}
+            elif t == STRUCTURE:
+                report["structures"][iname or "0x%08x" % i] = decode_structure(data, names)
+            elif t == GLOBALS:
+                report["globals"][iname or "0x%08x" % i] = decode_globals(data, names)
+            elif t == BACKGROUNDMAP:
+                report["background_map"][iname or "0x%08x" % i] = decode_background_map(data, names)
+            elif t == EFFECTMAP:
+                h0, h1 = struct.unpack_from("<2I", data, 0) if len(data) >= 8 else (0, 0)
+                report["effect_map"][iname or "0x%08x" % i] = {"count": h0, "size": len(data)}
+            elif t in (ADVECT, DENSITY):
+                report["layers"][iname or "0x%08x" % i] = {"kind": layer_info(len(data)), "size": len(data)}
             elif t == POPULATE:
                 report["populate"][iname or "0x%08x" % i] = decode_populate(data, names)
             elif t == RANDOM_CREATURE:
@@ -290,6 +376,8 @@ def main() -> int:
     print("# look_tables: %d   loottables: %d   worlds: %d   random_creature: %d" % (
         len(report["look_tables"]), len(report["loottables"]),
         len(report["world"]), len(report["random_creature"])))
+    print("# structures: %d   layers: %d (advect+density)" % (
+        len(report["structures"]), len(report["layers"])))
     print("# populations: %d" % len(report["populate"]))
     for nm_, pop in sorted(report["populate"].items()):
         cells = ", ".join("%s x%g" % (e["cell"], e["count"]) for e in pop["entries"][:6])

@@ -326,7 +326,7 @@ Engine / data · 18 done / 9 partial / 11 todo
 | ✅ done | locale at three depths | flat Data/Locale/<lang> + nested in DataEP1/Spore_EP1_Locale_0{1,2} + nested in Data/PatchData (42 en-us tables). 265 distinct tables from 5 containers, 23,933 distinct (table,key) texts. The third depth was invisible for two sessions because the search was scoped by FILENAME (*Spore_EP1_Locale*) instead of by TYPE. |
 | ✅ done | caption gaps classified | spui -gaps splits the 42 unresolved refs into COVERAGE (table instance absent from the corpus: mvj 0x277DEE6A, 14 keys) and SEMANTIC (table present, key missing: 4 keys). `legal` 0xADB810C4 was on the missing list for two sessions and is NOT missing - it ships in PatchData's nested packages. |
 | ✅ done | intra-resource repeated key | 10 of 2,944 locale resources state one key twice (23 occurrences, 2 disagreements, both cosmetic). Our parser keeps one Entry per key LINE so it sees them; a {key:text} map reader cannot. Last occurrence wins (unverified against the original). |
-| ✅ done | cell game data (CellGame.package) | Cell stage is data-defined: 442 resources named by FNV-1-lower (cell 0xDFAD9F51, structure, world, look_table, loottable, globals). Decoded 189 archetypes (400-B record, UTF-16 display names), 48 loottables (part-unlock), 9 look_tables, 13 worlds, 10 random_creature, 23 populate, cell_properties globals (17 named tuning curves) and the OLE2 xls animation table. tools/cell_game.py + source/engine/cell_game.* (cell_game_verify 5/5). analysis/cell-game.md |
+| ✅ done | cell game data (CellGame.package) | Cell stage is data-defined: 442 resources named by FNV-1-lower (cell 0xDFAD9F51, structure, world, look_table, loottable, globals). Decoded EVERY type: 189 archetypes (400-B record, UTF-16 display names), 48 loottables (part-unlock), 9 look_tables, 13 worlds, 10 random_creature, 23 populate, 144 structures (80-B header + N 32-B parts), backgroundMap (12 depth bands), effectMap, cell_properties globals (17 named tuning curves), globals/cellgame (raw floats) and the OLE2 xls animation table; plus CellGame_Layers.package (28 advect 128x128x3 f32 + 5 density 128x128 f32). tools/cell_game.py + source/engine/cell_game.* (cell_game_verify 8/8). analysis/cell-game.md |
 
 ## UI / SPUI behavior
 
@@ -370,7 +370,7 @@ Gameplay · 0 done / 2 partial / 15 todo
 |---|---|---|
 | ⬜ todo | simulation |  |
 | ⬜ todo | creature editor |  |
-| 🚧 partial | cell stage | Game_Cell skeleton driver attached to CellGame (tick counter, no simulation). CellGame.package data model decoded (189 archetypes, 48 loottables, 9 look_tables, 13 worlds, named globals) as tools/cell_game.py + source/engine/cell_game.*. analysis/cell-game.md |
+| 🚧 partial | cell stage | Game_Cell skeleton driver attached to CellGame (tick counter, no simulation). CellGame.package data model fully decoded (189 archetypes, 48 loottables, 9 look_tables, 13 worlds, 144 structures, named globals, Layers fields) as tools/cell_game.py + source/engine/cell_game.*. analysis/cell-game.md |
 | ⬜ todo | creature stage |  |
 | ⬜ todo | tribal stage |  |
 | ⬜ todo | civ stage |  |

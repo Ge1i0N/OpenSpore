@@ -101,6 +101,48 @@ NamedResource named_resource(u32 id, const std::vector<u8>& d) {
     return r;
 }
 
+Structure parse_structure(u32 id, const std::vector<u8>& d) {
+    Structure s;
+    s.id = id;
+    if (const char* n = naming::instance_name(id)) s.name = n;
+    if (d.size() >= 0x50) {
+        s.death = le32(d.data() + 0x10);
+        s.base = le32(d.data() + 0x40);
+        s.scale[0] = le_f32(d.data() + 0x44);
+        s.scale[1] = le_f32(d.data() + 0x48);
+        s.scale[2] = le_f32(d.data() + 0x4C);
+    }
+    for (size_t base = 0x50; base + 32 <= d.size(); base += 32) {
+        StructurePart p;
+        p.parent = le32(d.data() + base);
+        p.flag = le32(d.data() + base + 4);
+        p.part = le32(d.data() + base + 0x10);
+        p.scale[0] = le_f32(d.data() + base + 0x14);
+        p.scale[1] = le_f32(d.data() + base + 0x18);
+        p.scale[2] = le_f32(d.data() + base + 0x1C);
+        s.parts.push_back(p);
+    }
+    return s;
+}
+
+Globals parse_globals(u32 id, const std::vector<u8>& d) {
+    Globals g;
+    g.id = id;
+    if (const char* n = naming::instance_name(id)) g.name = n;
+    for (size_t o = 0; o + 4 <= d.size() && o < 0x40; o += 4) g.refs.push_back(le32(d.data() + o));
+    for (size_t o = 0x40; o + 4 <= d.size(); o += 4) g.floats.push_back(le_f32(d.data() + o));
+    return g;
+}
+
+LayerField parse_layer(u32 id, const std::vector<u8>& d, u32 components) {
+    LayerField f;
+    f.id = id;
+    f.components = components;
+    f.size = static_cast<u32>(d.size());
+    if (const char* n = naming::instance_name(id)) f.name = n;
+    return f;
+}
+
 Population parse_population(u32 id, const std::vector<u8>& d) {
     Population p;
     p.id = id;
@@ -152,6 +194,9 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
         case kTypeRandomCreature:
         case kTypePopulate:
         case kTypeStructure:
+        case kTypeGlobals:
+        case kTypeAdvect:
+        case kTypeDensity:
             if (!p.read_resource_decoded(static_cast<u32>(i), d)) {
                 error = "resource read failed";
                 return false;
@@ -167,7 +212,10 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
         case kTypePopulate: out.populations.push_back(parse_population(id, d)); break;
         case kTypeRandomCreature: out.random_spawns.push_back(parse_random_spawn(id, d)); break;
         case kTypeWorld: out.worlds.push_back(named_resource(id, d)); break;
-        case kTypeStructure: out.structures.push_back(named_resource(id, d)); break;
+        case kTypeStructure: out.structures.push_back(parse_structure(id, d)); break;
+        case kTypeGlobals: out.globals.push_back(parse_globals(id, d)); break;
+        case kTypeAdvect: out.layers.push_back(parse_layer(id, d, 3)); break;
+        case kTypeDensity: out.layers.push_back(parse_layer(id, d, 1)); break;
         default: break;
         }
     }
