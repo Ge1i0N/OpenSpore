@@ -76,6 +76,20 @@ This is a concrete state-feedback branch for `0x070D74E7`, subject to its guards
 `0x070D7509`: the latter remains present only in the bounded `DE48C0`/`DE5900` UI setup tables,
 with no click producer or ScenarioMode post established.
 
+## Shared UI target `0x0806A310`
+
+The same UI identity used by the feedback branch is also referenced from the GGE phase-related
+helper immediately adjacent to the `DF6D80` phase-1 body:
+
+```text
+DE9C88  → 0x00810650 → 0x0806A310 → UI vtable +0x7C
+DF6C56  → 0x00810650 → 0x0806A310 → UI vtable +0x7C
+```
+
+This corroborates `0x0806A310` as a shared GGE control/state target across feedback and phase-related
+UI operations. It still does not identify the upstream `Play Scenario` click producer, and it does
+not turn `0x070D7509` into the state-13 event value `0x070D74E7`.
+
 ## SDK cross-check
 
 `refs/Spore-ModAPI/Spore/App/IStateManager.h` puts `SwitchToState` at vtable `+0x28`, matching the
