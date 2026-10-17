@@ -191,7 +191,7 @@ target produced by its current entry/event path. Neither bounded caller contains
 `0x070D7509` or `0x070D74E7` immediate, so the target identity and Play Scenario relation remain
 Unknown.
 
-### 👀 Excellent finding: one population branch is for another event
+### 👀 Excellent finding: one population branch is for stage-caption UI
 
 The bounded `DF79FE` writer supplies one concrete population branch:
 
@@ -204,8 +204,10 @@ component/event ID = 0x03C4925E
 
 This proves that the forwarded-target field is populated by a real activation-message branch, but
 the recognized event is `0x03C4925E`, not Play Scenario `0x070D7509` and not state-feedback
-`0x070D74E7`. The branch therefore strengthens the registration model while also separating this
-known target population from the unresolved Play Scenario route.
+`0x070D74E7`. Shipped `GGEGameStarUIv4` resources independently identify `0x03C4925E` as the
+per-star **stage caption** ControlID in both `PatchData.package` and `Spore_Graphics.package`.
+The branch therefore provides a concrete working example of forwarded-target population for
+per-star presentation UI, while separating that known path from the unresolved Play Scenario route.
 
 This closes the setter/registration mechanism for `DE99B0`'s optional forward listener. It does
 not yet identify which caller/target is active for the EP1 `Play Scenario` control, and neither
