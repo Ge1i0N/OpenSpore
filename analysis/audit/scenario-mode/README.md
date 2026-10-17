@@ -61,6 +61,24 @@ This makes ScenarioMode a real next reverse-engineering target after a selected 
 not connect the GGE `Play Scenario` ControlID `0x070D7509` to `ScenarioMode` or prove an adventure
 resource/planet was loaded.
 
+## Separate mode-message corroboration
+
+The SDK `ScenarioMode.h` comments identify:
+
+```text
+kMsgEnterMode = 0x074BAF67
+kMsgExitMode  = 0x0462C656
+```
+
+Bounded GA immediate scans find both values in ScenarioMode/mode-message handlers. The exit value
+is also sent through a MessageManager dispatch path in a separate mode lifecycle. This corroborates
+that ScenarioMode has a real message-driven enter/exit contract, but it does not identify the
+`Play Scenario` button's producer or prove that the button reaches this mode.
+
+The SDK `cGameModeManager` also identifies `kScenarioMode = 0x01654C10` and classifies it as a
+simulator game mode. GA registration uses the same tag. The state script's standalone `ScenarioMode`
+state is therefore a valid mode entry, while the GGE UI button-to-state transition remains open.
+
 Reproduction:
 
 ```powershell
