@@ -231,6 +231,36 @@ The reliable activation facts remain only:
 The setter/constructor input that later supplies the component ID remains Unknown; no click or
 property mutation is claimed.
 
+### Confirmed WinButton vtable owner
+
+The GA derived constructor `0x00966EB0` initializes the native button object with:
+
+```text
+object +0x00 = vtable 0x01441390
+object +0x04 = vtable 0x01441270
+```
+
+The activation producer is an actual entry in that native vtable family:
+
+```text
+vtable 0x01441390 +0x94 → 0x009640B0
+```
+
+The same vtable's SDK-defined identity slots are present in GA:
+
+```text
+vtable +0x50 → 0x00965150 = IWindow::SetControlID
+vtable +0x54 → 0x00963F20 = IWindow::SetCommandID
+```
+
+These setters establish the serialized `ControlID`/`CommandID` ownership surface, but they do not
+by themselves write the producer's `+0x80/+0x84` payload fields.
+
+This is stronger than address adjacency: `0x009640B0` is confirmed as a method of the derived
+GA button/activable-window object. The base constructor zeroes its `+0x80/+0x84` fields, but the
+selected static pass still does not recover the later setter/input that supplies the activation
+payload. The `Play Scenario` ControlID-to-component-ID join remains Unknown.
+
 ## Reproduction
 
 ```powershell

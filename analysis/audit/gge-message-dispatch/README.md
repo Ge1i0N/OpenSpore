@@ -138,6 +138,20 @@ Because `0x01442E80` is not the confirmed `WinButton/ActivableWindow` vtable fam
 cannot be used as activation-field setters. The reliable boundary remains constructor zeroing plus
 producer reads; no `+0x84` setter or final ControlID-to-component-ID join was recovered.
 
+The confirmed owner is instead the GA WinButton family initialized by `0x00966EB0`:
+
+```text
+object +0x00 = 0x01441390
+object +0x04 = 0x01441270
+0x01441390 +0x94 = 0x009640B0
+0x01441390 +0x50 = 0x00965150 (SetControlID)
+0x01441390 +0x54 = 0x00963F20 (SetCommandID)
+```
+
+Thus `0x009640B0` is a native WinButton/activable-window vtable method. This closes method ownership,
+not payload provenance: its `+0x80/+0x84` source remains runtime/indirect and is not statically
+joined to `0x070D7509` or `0x070D74E7`.
+
 The seven state/UI constants used by the bounded handler/helper bodies were also found as actual
 SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](control-id-correlation.md).
 The bounded GA immediate scan found no separate MessageManager producer for them, so they remain
