@@ -244,6 +244,12 @@ ScenarioGAFirstLaunched
 This is consistent with the observed numeric-ID path and does not disprove the properties. The
 retail writer must be sought through numeric PropertyList/config lifecycle, loaded definitions or
 indirect setters rather than name-string xrefs.
+
+The helper `0x005DD790`, used by the nearby Scenario launch/editor paths, is also not the missing
+Preferences writer. Its bounded body clears the temporary property/value record words at `+0x10`
+and `+0x12`, calls `0x00422E20`, and returns the prepared value object. It does not carry either
+Scenario property ID and does not call the GA `PropertyList::SetProperty` candidate `0x006A2E20`.
+This is retained as value-record construction/normalization, not a Scenario property mutation.
 ```
 
 ## `0x070D74E7` belongs to the `DE99B0` listener body
