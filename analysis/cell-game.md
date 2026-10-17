@@ -162,7 +162,13 @@ A cell **body model**: an **80-byte header** followed by `N` **32-byte part entr
 | `+0x10` | **death archetype** id (spawned when the cell dies: `cell_deathNPC`, `cell_creature_L0_food_death`) |
 | `+0x28` | const `0x00000030` (48, on all 144) |
 | `+0x40` | **base body** id (`amoeba_cell`, `hummingbird`, `Poisoner`) |
-| `+0x44` | base scale xyz (f32 ×3) |
+| `+0x44` | base scale xyz (f32 ×3) — observed `(0,0,0)` in every shipped record, so it is **not** a usable size source |
+
+The base body id doubles as a `gmdl` **model instance id** in the content packages (`Squid`,
+`Pinky`, `Booster`, ...): 28 of the tide-pool bodies carry a `gmdl` in `Spore_Content.package`, and
+every `gmdl` there has a paired `raster` (865/865). That is how the runtime draws real cell
+geometry. The hero (`cell_hero_L0`) has no such body (its template id names no structure), so it
+keeps the disc fallback.
 
 Part entry:
 
