@@ -45,9 +45,9 @@ constexpr float kPreySpeed = 15.0f;
 constexpr float kAggro = 24.0f;          // predator/prey reaction radius
 constexpr float kPredatorFraction = 1.05f;  // above player.size * this, a creature bites
 constexpr float kGrowRate = 0.55f;       // area added per eaten unit^2 (tuned so a level evolves)
-constexpr float kMaxSize = 4.0f;
+constexpr float kMaxSize = 16.0f;         // shipped size curves extend to 16 (time_dilation, npc_turn_factor)
 constexpr float kPlayerBaseSize = 1.0f;
-constexpr float kEvolveSize = 3.0f;      // size at which the cell could leave for the Creature stage
+constexpr float kEvolveSize = 8.0f;       // size at which the cell could leave for the Creature stage (seed, not recovered)
 constexpr float kRespawnDelay = 1.5f;
 constexpr float kMeatTtl = 14.0f;        // how long a dropped chunk stays edible
 constexpr float kRefillInterval = 3.0f;  // restock cadence for grazed plankton
@@ -84,6 +84,23 @@ int diet_from_name(const std::string& name) {
     if (contains_ci(name, "herbivore")) return 0;
     if (contains_ci(name, "omnivore")) return 2;
     return -1;  // unknown
+}
+
+// Unnamed food props have consecutive assigned ids (not FNV hashes).
+// These are the food/plant/bubble tiers: 0x5a5c0f00..03, 0x63166098..9e, 0x0e09bb72..75, 0x0feb4d91..96.
+bool is_unnamed_food_prop(u32 archetype_id) {
+    // Consecutive runs: check if the id falls in a known food-prop range.
+    // These are identified by their consecutive nature and their presence in populate entries.
+    static const std::vector<std::pair<u32, u32>> kFoodPropRanges = {
+        {0x5a5c0f00u, 0x5a5c0f03u},  // level_water food props
+        {0x63166098u, 0x6316609eu},  // level_plant food props
+        {0x0e09bb72u, 0x0e09bb75u},  // level_ice food props
+        {0x0feb4d91u, 0x0feb4d96u},  // level_random/beach food props
+    };
+    for (const auto& [lo, hi] : kFoodPropRanges) {
+        if (archetype_id >= lo && archetype_id <= hi) return true;
+    }
+    return false;
 }
 
 float hash01(u32 h) {
@@ -435,7 +452,9 @@ void World::spawn_from_level(const Population& pop) {
             }
         }
         const std::string name = arch ? archetype_label(m_data, *arch) : std::string();
-        const bool food = looks_like_food(name);
+        // Name-based food detection; also treat unnamed consecutive-id props as food
+        // (the original's assigned ids are not FNV hashes, so naming fails).
+        const bool food = looks_like_food(name) || is_unnamed_food_prop(e.cell);
         const int diet = diet_from_name(name);
         for (int k = 0; k < n && static_cast<int>(m_entities.size()) < kMaxEntities; ++k) {
             Entity en;
@@ -879,7 +898,9 @@ void World::tick(float dt) {
                 if (e.role == Role::Food) {
                     ++m_eaten_plant;
                     m_dna += kPlantDna;
-                    m_evo_points += static_cast<int>(curve_value("evo_points", 1.0f, 1.0f));
+                    // evo_points is a per-level curve (1-5 → 20-100), not per-meal.
+                    // Current use as per-meal award is a seed reinterpretation.
+                    m_evo_points += 20;
                     // Part unlock: eating a cell_unlock_* pickup unlocks that part.
                     const char* eaten_name = naming::instance_name(e.archetype);
                     if (eaten_name && strncmp(eaten_name, "cell_unlock_", 12) == 0) {
@@ -888,7 +909,7 @@ void World::tick(float dt) {
                 } else {
                     ++m_eaten_meat;
                     m_dna += (e.role == Role::Meat) ? kMeatDna : kPreyDna;
-                    m_evo_points += static_cast<int>(curve_value("evo_points", 2.0f, 2.0f));
+                    m_evo_points += 40;  // seed reinterpretation of per-level curve
                     if (e.role == Role::Creature) {
                         drops.push_back(e);  // the corpse becomes a chunk
                         drop_loot(e);        // the corpse may drop a part unlock
@@ -916,28 +937,23 @@ void World::tick(float dt) {
                         break;
                     }
                 }
-                // Poison damage: if the attacker has poison parts, apply damage-over-time.
+                // Poison damage-over-time: applies a persistent DoT, not instant.
+                // Real behavior: DoT via poison_count curve (1.5 dmg at 2+ parts), duration seed.
                 const bool has_poison = contains_ci(attacker_label, "poison");
                 if (has_poison) {
-                    const float poison_dps = curve_value("poison_count", 0.0f, 0.0f);
-                    if (poison_dps > 0.0f) {
-                        m_hp -= poison_dps * dt;
-                        pl->poison_time = 3.0f;
-                        if (pl->anim != kAnimGetHitSpike) {
-                            pl->anim = kAnimGetHitPoison;
-                            pl->anim_time = 0.0f;
-                        }
-                    }
-                }
-                // Electric stun: if the attacker has electric parts, briefly stun the player.
-                const bool has_electric = contains_ci(attacker_label, "elec");
-                if (has_electric) {
-                    const float stun_time = curve_value("electric_recharge_count", 0.0f, 0.0f);
-                    if (stun_time > 0.0f) {
-                        pl->electric_time = stun_time;
-                        pl->anim = kAnimGetHitElec;
+                    pl->poison_time = 3.0f;  // DoT duration seed (not in cell_properties)
+                    if (pl->anim != kAnimGetHitSpike) {
+                        pl->anim = kAnimGetHitPoison;
                         pl->anim_time = 0.0f;
                     }
+                }
+                // Electric stun: fixed 1.0s stun (real stun duration not in cell_properties).
+                // Chaining (electric_jumps_count, electric_range_count) not implemented.
+                const bool has_electric = contains_ci(attacker_label, "elec");
+                if (has_electric) {
+                    pl->electric_time = 1.0f;  // stun duration seed
+                    pl->anim = kAnimGetHitElec;
+                    pl->anim_time = 0.0f;
                 }
                 const float len = std::sqrt(dx * dx + dy * dy);
                 if (len > 0.001f) {
@@ -954,6 +970,21 @@ void World::tick(float dt) {
                     pl->anim = kAnimDeath;
                     pl->anim_time = 0.0f;
                     play_sound("death");
+                    // Spawn death archetype from structure +0x10.
+                    if (pl->structure >= 0 && static_cast<size_t>(pl->structure) < m_data.structures.size()) {
+                        const u32 death_id = m_data.structures[static_cast<size_t>(pl->structure)].death;
+                        if (death_id != 0 && death_id != 0xFFFFFFFFu && static_cast<int>(m_entities.size()) < kMaxEntities) {
+                            Entity death_ent;
+                            death_ent.archetype = death_id;
+                            death_ent.structure = -1;
+                            death_ent.role = Role::Food;
+                            death_ent.size = pl->size * 0.5f;
+                            death_ent.x = pl->x;
+                            death_ent.y = pl->y;
+                            death_ent.ttl = 5.0f;
+                            m_entities.push_back(death_ent);
+                        }
+                    }
                 }
             }
         }
