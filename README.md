@@ -15,6 +15,10 @@ OpenSpore — самостоятельная реимплементация **Sp
 > Последняя сверка: **15 октября 2026**. [Текущий статус](PROGRESS.md) ·
 > [Чеклист функций](analysis/features.md) · [Доказательства](VERIFY.md) · [План продолжения](RESUME.md)
 
+Порядок источников, pinned revisions внешних OpenSpore-репозиториев и правила их клонирования
+собраны в [REFS.md](REFS.md); связанные авторы и attribution notes — в
+[CONTRIBUTORS.md](CONTRIBUTORS.md).
+
 ## Уже не просто прямоугольники
 
 ![Настоящий E3LaunchScreen: логотип Spore, иконки стадий и плитки редакторов, отрисованные OpenSpore](analysis/shots/spui_e3launch_uv.png)

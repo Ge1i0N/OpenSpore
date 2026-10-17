@@ -1,9 +1,12 @@
 # Community reference repositories
 
-Reviewed **2026-10-17**. These are secondary community sources, not original Maxis source, target
+Reviewed **2026-10-18**. These are secondary community sources, not original Maxis source, target
 execution evidence, or permission to substitute SDK declarations for the selected GA executable.
 Clones reside in ignored `refs/`; their source trees are not vendored into OpenSpore's Git history.
 Nothing from either repository was built, injected into Spore, or imported into Ghidra.
+
+The wider registry, including the OpenSporeLabs and Ge1i0N OpenSpore repositories, is now maintained
+in the root [REFS.md](../REFS.md). The entries below remain the detailed local SDK/format notes.
 
 ## Selected references
 
