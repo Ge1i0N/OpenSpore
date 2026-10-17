@@ -131,6 +131,46 @@ yet prove that the GGE `Play Scenario` window has an attached WinProc at these s
 callback writes `ScenarioGAButtonClicked` or emits component-activation ID `0x070D74E7`. Those
 GGE-specific attachment/producer edges remain separate gates.
 
+## ✔️ Milestone: GA component-activation producer recovered
+
+The selected GA binary also contains the generic activable-window producer at `0x009640B0`. Its
+bounded body is an actual message construction/send path, not merely a consumer comparison:
+
+```text
+window +0x84, falling back to window +0x80
+  → UTFWin message type 0x287259F6 (kMsgComponentActivated)
+  → IWindow::SendMsg vtable +0x114
+```
+
+The same body constructs the ordinary Button messages on its later branches:
+
+```text
+state != 2/3 → message type 0x17 (kMsgButtonClick)
+state == 2/3 → message type 0x18 (kMsgButtonSelect)
+```
+
+The direct GA call inventory is:
+
+```text
+0x0081CF31 → 0x009640B0
+0x0081CA4E → 0x00964370
+0x0081CC90 → 0x00964370
+```
+
+This closes the generic producer half of the route:
+
+```text
+activable-window/button handling
+  → kMsgComponentActivated / kMsgButtonClick / kMsgButtonSelect
+  → InteractiveWinProc::HandleUIMessage
+```
+
+The remaining GGE-specific gap is now explicitly the dynamic payload binding: `0x009640B0` reads
+the component ID from object fields `+0x80/+0x84`, while the Play Scenario SPUI identity
+`0x070D7509` is serialized and attached dynamically by `DE5900`. No static immediate joins those
+fields to `0x070D74E7`, so the final `0x070D7509 → 0x070D74E7` conversion and runtime click remain
+Unknown.
+
 ## Reproduction
 
 ```powershell

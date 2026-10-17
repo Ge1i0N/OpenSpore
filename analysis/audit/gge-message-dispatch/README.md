@@ -83,6 +83,27 @@ This closes the **native attachment** gap and explains why the SPUI `WinProcs` p
 It does not yet prove that a click on `0x070D7509` produces component ID `0x070D74E7`: `DE99B0`
 still compares those values separately, and no original runtime message has been observed.
 
+## Generic producer boundary now recovered
+
+The GA generic activable-window body at `0x009640B0` constructs and sends the message consumed by
+this listener:
+
+```text
+object +0x84, fallback +0x80
+  → message.type = 0x287259F6 (kMsgComponentActivated)
+  → IWindow::SendMsg (+0x114)
+```
+
+Its later state branches construct `kMsgButtonClick = 0x17` or `kMsgButtonSelect = 0x18` and send
+those through the same window message route. The bounded direct callers are `0x0081CF31` for the
+activation producer and `0x0081CA4E`/`0x0081CC90` for the adjacent mouse/button path.
+
+This upgrades the earlier “producer Unknown” result only at the **generic UTFWin layer**. The
+attached GGE object and `DE99B0` listener are now connected to a real producer contract, but the
+dynamic source of object `+0x80/+0x84` is still not statically joined to `0x070D74E7`. The Play
+Scenario ControlID `0x070D7509` therefore remains distinct and the GGE-specific conversion is still
+Unknown.
+
 The seven state/UI constants used by the bounded handler/helper bodies were also found as actual
 SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](control-id-correlation.md).
 The bounded GA immediate scan found no separate MessageManager producer for them, so they remain
