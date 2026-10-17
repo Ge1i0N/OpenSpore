@@ -1,0 +1,87 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  7c6cd3:	8b 4c 24 10          	mov    ecx,DWORD PTR [esp+0x10]
+  7c6cd7:	8b 11                	mov    edx,DWORD PTR [ecx]
+  7c6cd9:	8b 42 28             	mov    eax,DWORD PTR [edx+0x28]
+  7c6cdc:	68 28 39 ed 00       	push   0xed3928
+  7c6ce1:	ff d0                	call   eax
+  7c6ce3:	0f b7 48 12          	movzx  ecx,WORD PTR [eax+0x12]
+  7c6ce7:	66 83 f9 0a          	cmp    cx,0xa
+  7c6ceb:	74 0d                	je     0x7c6cfa
+  7c6ced:	66 83 f9 10          	cmp    cx,0x10
+  7c6cf1:	74 07                	je     0x7c6cfa
+  7c6cf3:	b9 64 11 5d 01       	mov    ecx,0x15d1164
+  7c6cf8:	eb 13                	jmp    0x7c6d0d
+  7c6cfa:	f6 40 10 30          	test   BYTE PTR [eax+0x10],0x30
+  7c6cfe:	74 04                	je     0x7c6d04
+  7c6d00:	8b 08                	mov    ecx,DWORD PTR [eax]
+  7c6d02:	eb 09                	jmp    0x7c6d0d
+  7c6d04:	0f b7 c9             	movzx  ecx,cx
+  7c6d07:	f7 d9                	neg    ecx
+  7c6d09:	1b c9                	sbb    ecx,ecx
+  7c6d0b:	23 c8                	and    ecx,eax
+  7c6d0d:	8b 09                	mov    ecx,DWORD PTR [ecx]
+  7c6d0f:	8d 54 24 18          	lea    edx,[esp+0x18]
+  7c6d13:	52                   	push   edx
+  7c6d14:	8d 44 24 20          	lea    eax,[esp+0x20]
+  7c6d18:	89 4c 24 1c          	mov    DWORD PTR [esp+0x1c],ecx
+  7c6d1c:	8d 75 40             	lea    esi,[ebp+0x40]
+  7c6d1f:	50                   	push   eax
+  7c6d20:	8b ce                	mov    ecx,esi
+  7c6d22:	e8 19 f1 e7 ff       	call   0x645e40
+  7c6d27:	8b 4e 08             	mov    ecx,DWORD PTR [esi+0x8]
+  7c6d2a:	8b 56 04             	mov    edx,DWORD PTR [esi+0x4]
+  7c6d2d:	8b 7c 24 1c          	mov    edi,DWORD PTR [esp+0x1c]
+  7c6d31:	8d 04 8a             	lea    eax,[edx+ecx*4]
+  7c6d34:	8b 00                	mov    eax,DWORD PTR [eax]
+  7c6d36:	3b f8                	cmp    edi,eax
+  7c6d38:	0f 84 b3 00 00 00    	je     0x7c6df1
+  7c6d3e:	8b 4c 24 10          	mov    ecx,DWORD PTR [esp+0x10]
+  7c6d42:	8b 01                	mov    eax,DWORD PTR [ecx]
+  7c6d44:	8b 50 1c             	mov    edx,DWORD PTR [eax+0x1c]
+  7c6d47:	68 29 39 ed 00       	push   0xed3929
+  7c6d4c:	ff d2                	call   edx
+  7c6d4e:	84 c0                	test   al,al
+  7c6d50:	74 6f                	je     0x7c6dc1
+  7c6d52:	8b 4c 24 10          	mov    ecx,DWORD PTR [esp+0x10]
+  7c6d56:	8b 01                	mov    eax,DWORD PTR [ecx]
+  7c6d58:	8b 50 28             	mov    edx,DWORD PTR [eax+0x28]
+  7c6d5b:	68 29 39 ed 00       	push   0xed3929
+  7c6d60:	ff d2                	call   edx
+  7c6d62:	0f b7 48 12          	movzx  ecx,WORD PTR [eax+0x12]
+  7c6d66:	66 83 f9 13          	cmp    cx,0x13
+  7c6d6a:	74 0d                	je     0x7c6d79
+  7c6d6c:	66 83 f9 10          	cmp    cx,0x10
+  7c6d70:	74 07                	je     0x7c6d79
+  7c6d72:	e8 c9 f8 ff ff       	call   0x7c6640
+  7c6d77:	eb 15                	jmp    0x7c6d8e
+  7c6d79:	f6 40 10 30          	test   BYTE PTR [eax+0x10],0x30
+  7c6d7d:	74 04                	je     0x7c6d83
+  7c6d7f:	8b 08                	mov    ecx,DWORD PTR [eax]
+  7c6d81:	eb 09                	jmp    0x7c6d8c
+  7c6d83:	0f b7 c9             	movzx  ecx,cx
+  7c6d86:	f7 d9                	neg    ecx
+  7c6d88:	1b c9                	sbb    ecx,ecx
+  7c6d8a:	23 c8                	and    ecx,eax
+  7c6d8c:	8b c1                	mov    eax,ecx
+  7c6d8e:	8b 00                	mov    eax,DWORD PTR [eax]
+  7c6d90:	8b 4c 24 24          	mov    ecx,DWORD PTR [esp+0x24]
+  7c6d94:	8b 54 24 14          	mov    edx,DWORD PTR [esp+0x14]
+  7c6d98:	50                   	push   eax
+  7c6d99:	8b 44 24 14          	mov    eax,DWORD PTR [esp+0x14]
+  7c6d9d:	8d 34 91             	lea    esi,[ecx+edx*4]
+  7c6da0:	8b 4d 00             	mov    ecx,DWORD PTR [ebp+0x0]
+  7c6da3:	8b 57 04             	mov    edx,DWORD PTR [edi+0x4]
+  7c6da6:	50                   	push   eax
+  7c6da7:	89 4c 24 20          	mov    DWORD PTR [esp+0x20],ecx
+  7c6dab:	ff d2                	call   edx
+  7c6dad:	83 c4 04             	add    esp,0x4
+  7c6db0:	50                   	push   eax
+  7c6db1:	8b 06                	mov    eax,DWORD PTR [esi]
+  7c6db3:	50                   	push   eax
+  7c6db4:	8b 44 24 24          	mov    eax,DWORD PTR [esp+0x24]
+  7c6db8:	8b 50 24             	mov    edx,DWORD PTR [eax+0x24]
+  7c6dbb:	8b cd                	mov    ecx,ebp
+  7c6dbd:	ff d2                	call   edx
+  7c6dbf:	eb 30                	jmp    0x7c6df1

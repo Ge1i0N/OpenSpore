@@ -137,6 +137,27 @@ int main(int argc,char** argv) {
     (*invalid_viewer.view_window)[0]=.25f;
     if(!check(rejected_viewer(invalid_viewer),"overflowing product rejected without publication"))return 1;
     auto bad=camera; (*bad.clip_from_world)[15]=0;
+    CameraFovStep fov;
+    if(!check(step_camera_fov({1.f,2.f,.01f},fov,error)&&fov.next_current==1.1f&&
+        fov.requested_degrees==57.295780181884766f,"FOV viewer request uses OLD current then fixed .1 update"))return 1;
+    if(!check(step_camera_fov({-1.f,1.f,.01f},fov,error)&&!fov.requested_degrees&&fov.next_current==1.f,
+        "unset current adopts positive target but no viewer request this frame"))return 1;
+    if(!check(step_camera_fov({1.f,-1.f,.01f},fov,error)&&fov.requested_degrees&&fov.next_current==1.f,
+        "unset target holds positive current"))return 1;
+    if(!check(step_camera_fov({1.f,1.25f,.5f},fov,error)&&fov.next_current==1.25f,
+        "below threshold snaps"))return 1;
+    if(!check(step_camera_fov({1.f,1.5f,.5f},fov,error)&&fov.next_current==1.05f,
+        "exact threshold smooths, not snaps"))return 1;
+    if(!check(step_camera_fov({0.f,1.f,0.f},fov,error)&&!fov.requested_degrees&&fov.next_current==.1f,
+        "zero is observed, not an unset or Unknown substitute"))return 1;
+    const auto reject_fov=[&](const CameraFovObservation& input) {
+        CameraFovStep sentinel;sentinel.next_current=123.f;sentinel.requested_degrees=456.f;
+        return !step_camera_fov(input,sentinel,error)&&sentinel.next_current==123.f&&sentinel.requested_degrees==456.f;
+    };
+    if(!check(reject_fov({})&&reject_fov({1.f,2.f,std::nullopt})&&reject_fov({1.f,2.f,-1.f}),
+        "unobserved/negative-threshold FOV fails atomically"))return 1;
+    if(!check(reject_fov({std::numeric_limits<float>::quiet_NaN(),1.f,.1f})&&
+        reject_fov({std::numeric_limits<float>::max(),1.f,.1f}),"nonfinite/overflow FOV request fails atomically"))return 1;
     if (!check(rejected(bad,{}),"zero w")) return 1;
     bad=camera; (*bad.clip_from_world)[0]=std::numeric_limits<float>::infinity();
     if (!check(rejected(bad,{}),"nonfinite matrix")) return 1;

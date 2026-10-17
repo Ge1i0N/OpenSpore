@@ -102,6 +102,42 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--camera-controller' in sys.argv:
+        from tools.find_imm import OBJDUMP
+        from tools.gge_camera_property import report
+        if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+            raise ValueError('camera controller ranges require selected GA hash')
+        dest=ROOT/'analysis/audit/gge-camera-controller';dest.mkdir(parents=True,exist_ok=True)
+        ranges=[('factory-registration',0xdddfe3,0xdde004),('active-camera-choice',0xde477a,0xde47d6),
+                ('camera-choice-wrapper',0xb5cef0,0xb5cf68),('factory',0xddfe70,0xddfe9b),
+                ('constructor',0xddf940,0xddfa4a),('cast',0xdde390,0xdde3af),
+                ('update',0xddfb90,0xddfe6a),('property-reader',0xdde9f0,0xddf2ad),
+                ('viewer-fov-setter',0x7c5400,0x7c547f),('camera-property-factory-dispatch',0x7c6cd3,0x7c6dc1)]
+        for name,start,end in ranges:
+            r=subprocess.run([str(OBJDUMP),'-d','-M','intel',f'--start-address={start}',f'--stop-address={end}',str(pe.path)],
+                             capture_output=True,text=True,errors='replace',check=True,timeout=15)
+            instructions=[line.rstrip() for line in r.stdout.splitlines() if re.match(r'^\s+[0-9a-f]+:',line)]
+            if not instructions:raise ValueError('empty camera controller disassembly')
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(instructions)+'\n',encoding='utf-8')
+        if pe.u32(0x147da38+0x20)!=0xddfb90 or pe.u32(0x147da38+0x50)!=0xdde9f0:
+            raise ValueError('camera vtable mismatch')
+        prop=report(ROOT/'build/bin/Debug/Data/Spore_Graphics.package')
+        facts={'oracle_sha256':digest,'authority':'GA static instructions + one exact shipped camera property table; not original runtime',
+               'factory_type':'0x043c6e06','factory':'0x00ddfe70','constructor':'0x00ddf940','allocation_bytes':0x44,
+               'camera_id_requested_at_DE477A':'0x780786fd','selection_result_checked':False,
+               'vtable':{'base':'0x0147da38','entries':[{'slot':hex(i),'target':hex(pe.u32(0x147da38+i))} for i in range(0,0x58,4)]},
+               'property':prop,
+               'fov_subset':{'current_offset':'0x28','target_offset':'0x2c','threshold_offset':'0x34',
+                             'unset_sentinel':pe.f32(0x13eb1bc),'degrees_per_radian':pe.f32(0x147d9ec),
+                             'smoothing_factor':pe.f32(0x147d9d0),
+                             'order':'if OLD current>0 request viewer FOV first; then sentinel branches; abs(target-current)<threshold snaps else .1 smoothing'},
+               'limits':['Requested camera ID is static; no successful runtime selection or retained object identity observed',
+                         'DDFB90 also depends on shared BSS pose/mode pointers, transform builders and audio calls; not a complete camera port',
+                         'Generic camera property dispatcher creates via type00ED3928 and labels via00ED3929; package priority/runtime overrides unobserved',
+                         'No original process/Ghidra import, save mutation or native scene readiness']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8')
+        print('retained GGE camera factory/selection/update, complete exact prop table and FOV subset evidence')
+        return
     if '--viewer' in sys.argv:
         from tools.find_imm import OBJDUMP
         if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':

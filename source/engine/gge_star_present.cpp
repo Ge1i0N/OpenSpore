@@ -55,6 +55,29 @@ bool compose_viewer_projection(const ViewerProjectionInputs& observed,std::array
     }
     out=result;error.clear();return true;
 }
+bool step_camera_fov(const CameraFovObservation& observed,CameraFovStep& out,std::string& error) {
+    if(!observed.current||!observed.target||!observed.snap_threshold) {
+        error="camera FOV current/target/threshold unobserved";return false;
+    }
+    const float current=*observed.current,target=*observed.target,threshold=*observed.snap_threshold;
+    if(!std::isfinite(current)||!std::isfinite(target)||!std::isfinite(threshold)||threshold<0) {
+        error="invalid camera FOV observation";return false;
+    }
+    CameraFovStep result;
+    if(current>0)result.requested_degrees=current*57.295780181884766f; // GA 147D9EC
+    if(current==-1.f&&target>0)result.next_current=target;
+    else if(target==-1.f&&current>0)result.next_current=current;
+    else {
+        const float difference=target-current;
+        if(!std::isfinite(difference)){error="camera FOV difference overflow";return false;}
+        // GA snaps only when abs(diff) is STRICTLY LESS than threshold.
+        result.next_current=std::abs(difference)<threshold?target:current+difference*0.10000000149011612f;
+    }
+    if(!std::isfinite(result.next_current)||(result.requested_degrees&&!std::isfinite(*result.requested_degrees))) {
+        error="camera FOV output overflow";return false;
+    }
+    out=result;error.clear();return true;
+}
 bool project_star(const StarPosition& world,const CameraObservation& observed,ProjectedPoint& out,std::string& error) {
     const auto fail=[&](const char* why) { error=why; return false; };
     if (!observed.clip_from_world || !observed.window_rect) return fail("star projection viewer-matrix/window observations unavailable");

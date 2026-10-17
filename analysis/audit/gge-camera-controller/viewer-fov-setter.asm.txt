@@ -1,0 +1,33 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  7c5400:	d9 05 a8 c7 53 01    	fld    DWORD PTR ds:0x153c7a8
+  7c5406:	8b 81 70 01 00 00    	mov    eax,DWORD PTR [ecx+0x170]
+  7c540c:	d8 0d 74 1c 40 01    	fmul   DWORD PTR ds:0x1401c74
+  7c5412:	f3 0f 10 0d 40 37 45 	movss  xmm1,DWORD PTR ds:0x1453740
+  7c5419:	01
+  7c541a:	c7 40 6c 01 00 00 00 	mov    DWORD PTR [eax+0x6c],0x1
+  7c5421:	8b 91 70 01 00 00    	mov    edx,DWORD PTR [ecx+0x170]
+  7c5427:	d8 4c 24 04          	fmul   DWORD PTR [esp+0x4]
+  7c542b:	f3 0f 10 42 5c       	movss  xmm0,DWORD PTR [edx+0x5c]
+  7c5430:	f3 0f 5e 42 60       	divss  xmm0,DWORD PTR [edx+0x60]
+  7c5435:	0f 2e c1             	ucomiss xmm0,xmm1
+  7c5438:	d9 f2                	fptan
+  7c543a:	9f                   	lahf
+  7c543b:	dd d8                	fstp   st(0)
+  7c543d:	d9 5c 24 04          	fstp   DWORD PTR [esp+0x4]
+  7c5441:	f3 0f 10 54 24 04    	movss  xmm2,DWORD PTR [esp+0x4]
+  7c5447:	f6 c4 44             	test   ah,0x44
+  7c544a:	7b 08                	jnp    0x7c5454
+  7c544c:	f3 0f 59 15 c4 03 41 	mulss  xmm2,DWORD PTR ds:0x14103c4
+  7c5453:	01
+  7c5454:	f3 0f 59 c2          	mulss  xmm0,xmm2
+  7c5458:	0f 28 d9             	movaps xmm3,xmm1
+  7c545b:	f3 0f 5e d8          	divss  xmm3,xmm0
+  7c545f:	f3 0f 5e ca          	divss  xmm1,xmm2
+  7c5463:	f3 0f 11 42 5c       	movss  DWORD PTR [edx+0x5c],xmm0
+  7c5468:	f3 0f 11 52 60       	movss  DWORD PTR [edx+0x60],xmm2
+  7c546d:	f3 0f 11 5a 64       	movss  DWORD PTR [edx+0x64],xmm3
+  7c5472:	f3 0f 11 4a 68       	movss  DWORD PTR [edx+0x68],xmm1
+  7c5477:	e8 94 f5 ff ff       	call   0x7c4a10
+  7c547c:	c2 04 00             	ret    0x4

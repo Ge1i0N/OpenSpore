@@ -1,0 +1,637 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "GA static instructions + one exact shipped camera property table; not original runtime",
+  "factory_type": "0x043c6e06",
+  "factory": "0x00ddfe70",
+  "constructor": "0x00ddf940",
+  "allocation_bytes": 68,
+  "camera_id_requested_at_DE477A": "0x780786fd",
+  "selection_result_checked": false,
+  "vtable": {
+    "base": "0x0147da38",
+    "entries": [
+      {
+        "slot": "0x0",
+        "target": "0x671f20"
+      },
+      {
+        "slot": "0x4",
+        "target": "0xae0620"
+      },
+      {
+        "slot": "0x8",
+        "target": "0xddfa50"
+      },
+      {
+        "slot": "0xc",
+        "target": "0xdde390"
+      },
+      {
+        "slot": "0x10",
+        "target": "0xddfaa0"
+      },
+      {
+        "slot": "0x14",
+        "target": "0xb1e410"
+      },
+      {
+        "slot": "0x18",
+        "target": "0xc2e640"
+      },
+      {
+        "slot": "0x1c",
+        "target": "0xc2e640"
+      },
+      {
+        "slot": "0x20",
+        "target": "0xddfb90"
+      },
+      {
+        "slot": "0x24",
+        "target": "0x1082a20"
+      },
+      {
+        "slot": "0x28",
+        "target": "0xdde3b0"
+      },
+      {
+        "slot": "0x2c",
+        "target": "0xdde460"
+      },
+      {
+        "slot": "0x30",
+        "target": "0xdde470"
+      },
+      {
+        "slot": "0x34",
+        "target": "0xdde4a0"
+      },
+      {
+        "slot": "0x38",
+        "target": "0xdde4c0"
+      },
+      {
+        "slot": "0x3c",
+        "target": "0xdde4f0"
+      },
+      {
+        "slot": "0x40",
+        "target": "0xdde930"
+      },
+      {
+        "slot": "0x44",
+        "target": "0xdde930"
+      },
+      {
+        "slot": "0x48",
+        "target": "0xdde930"
+      },
+      {
+        "slot": "0x4c",
+        "target": "0x7f55c0"
+      },
+      {
+        "slot": "0x50",
+        "target": "0xdde9f0"
+      },
+      {
+        "slot": "0x54",
+        "target": "0xdde960"
+      }
+    ]
+  },
+  "property": {
+    "package": "E:\\_DPT_Projects_E\\_Harness\\OpenSpore\\build\\bin\\Debug\\Data\\Spore_Graphics.package",
+    "record": 22953,
+    "key_instance_type_group": [
+      "780786fd",
+      "00b1b104",
+      "40410100"
+    ],
+    "bytes": 531,
+    "sha256": "432605863c03b04a90bda5d5d9f3dc4d58fcdcf2dc64245f5f6dfefa2c2fabbb",
+    "consumed": 531,
+    "fields": [
+      {
+        "id": "00b2ccca",
+        "type": "0013",
+        "flags": 13,
+        "array": false,
+        "count": 10,
+        "stride": 2,
+        "header_offset": 4,
+        "data_offset": 12,
+        "data_bytes": 24,
+        "raw_hex": "0000000a4700470045002000630061006d00650072006100",
+        "string16": "GGE camera"
+      },
+      {
+        "id": "00c7c4f8",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 36,
+        "data_offset": 44,
+        "data_bytes": 4,
+        "raw_hex": "41a00000",
+        "float": 20.0
+      },
+      {
+        "id": "00c7c4fa",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 48,
+        "data_offset": 56,
+        "data_bytes": 4,
+        "raw_hex": "00000000",
+        "float": 0.0
+      },
+      {
+        "id": "00c7c4fb",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 60,
+        "data_offset": 68,
+        "data_bytes": 4,
+        "raw_hex": "44884000",
+        "float": 1090.0
+      },
+      {
+        "id": "00c7c4fc",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 72,
+        "data_offset": 80,
+        "data_bytes": 4,
+        "raw_hex": "c2040000",
+        "float": -33.0
+      },
+      {
+        "id": "00c7c4fd",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 84,
+        "data_offset": 92,
+        "data_bytes": 4,
+        "raw_hex": "00000000",
+        "float": 0.0
+      },
+      {
+        "id": "00ed3928",
+        "type": "000a",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 96,
+        "data_offset": 104,
+        "data_bytes": 4,
+        "raw_hex": "043c6e06",
+        "uint32": 71069190
+      },
+      {
+        "id": "00ed3929",
+        "type": "0013",
+        "flags": 13,
+        "array": false,
+        "count": 9,
+        "stride": 2,
+        "header_offset": 108,
+        "data_offset": 116,
+        "data_bytes": 22,
+        "raw_hex": "00000009470047004500430061006d00650072006100",
+        "string16": "GGECamera"
+      },
+      {
+        "id": "00ed392a",
+        "type": "0034",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 16,
+        "header_offset": 138,
+        "data_offset": 146,
+        "data_bytes": 16,
+        "raw_hex": "0000000000000000000000000000803f"
+      },
+      {
+        "id": "00fe23b2",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 162,
+        "data_offset": 170,
+        "data_bytes": 4,
+        "raw_hex": "44480000",
+        "float": 800.0
+      },
+      {
+        "id": "00fe2437",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 174,
+        "data_offset": 182,
+        "data_bytes": 4,
+        "raw_hex": "44960000",
+        "float": 1200.0
+      },
+      {
+        "id": "00fe243b",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 186,
+        "data_offset": 194,
+        "data_bytes": 4,
+        "raw_hex": "c2aa0000",
+        "float": -85.0
+      },
+      {
+        "id": "00fe243f",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 198,
+        "data_offset": 206,
+        "data_bytes": 4,
+        "raw_hex": "425c0000",
+        "float": 55.0
+      },
+      {
+        "id": "01102b20",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 210,
+        "data_offset": 218,
+        "data_bytes": 4,
+        "raw_hex": "40a00000",
+        "float": 5.0
+      },
+      {
+        "id": "01102b2f",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 222,
+        "data_offset": 230,
+        "data_bytes": 4,
+        "raw_hex": "46abe000",
+        "float": 22000.0
+      },
+      {
+        "id": "030bc65a",
+        "type": "0033",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 16,
+        "header_offset": 234,
+        "data_offset": 242,
+        "data_bytes": 16,
+        "raw_hex": "0000a04100002042000070420000a042"
+      },
+      {
+        "id": "046ec65e",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 258,
+        "data_offset": 266,
+        "data_bytes": 4,
+        "raw_hex": "3e99999a",
+        "float": 0.30000001192092896
+      },
+      {
+        "id": "05c75469",
+        "type": "0001",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 1,
+        "header_offset": 270,
+        "data_offset": 278,
+        "data_bytes": 1,
+        "raw_hex": "00"
+      },
+      {
+        "id": "0ab7ecaa",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 279,
+        "data_offset": 287,
+        "data_bytes": 4,
+        "raw_hex": "43c80000",
+        "float": 400.0
+      },
+      {
+        "id": "117596fe",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 291,
+        "data_offset": 299,
+        "data_bytes": 4,
+        "raw_hex": "3f733333",
+        "float": 0.949999988079071
+      },
+      {
+        "id": "12d3da88",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 303,
+        "data_offset": 311,
+        "data_bytes": 4,
+        "raw_hex": "41a00000",
+        "float": 20.0
+      },
+      {
+        "id": "1f5e6d86",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 315,
+        "data_offset": 323,
+        "data_bytes": 4,
+        "raw_hex": "40e00000",
+        "float": 7.0
+      },
+      {
+        "id": "1fa53607",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 327,
+        "data_offset": 335,
+        "data_bytes": 4,
+        "raw_hex": "3e4ccccd",
+        "float": 0.20000000298023224
+      },
+      {
+        "id": "23970b2e",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 339,
+        "data_offset": 347,
+        "data_bytes": 4,
+        "raw_hex": "40000000",
+        "float": 2.0
+      },
+      {
+        "id": "23e13c2e",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 351,
+        "data_offset": 359,
+        "data_bytes": 4,
+        "raw_hex": "3e19999a",
+        "float": 0.15000000596046448
+      },
+      {
+        "id": "327c1cab",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 363,
+        "data_offset": 371,
+        "data_bytes": 4,
+        "raw_hex": "43c80000",
+        "float": 400.0
+      },
+      {
+        "id": "334db042",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 375,
+        "data_offset": 383,
+        "data_bytes": 4,
+        "raw_hex": "3f0ccccd",
+        "float": 0.550000011920929
+      },
+      {
+        "id": "3510083b",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 387,
+        "data_offset": 395,
+        "data_bytes": 4,
+        "raw_hex": "3f59999a",
+        "float": 0.8500000238418579
+      },
+      {
+        "id": "4a2f63fe",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 399,
+        "data_offset": 407,
+        "data_bytes": 4,
+        "raw_hex": "40400000",
+        "float": 3.0
+      },
+      {
+        "id": "6712adaa",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 411,
+        "data_offset": 419,
+        "data_bytes": 4,
+        "raw_hex": "3dcccccd",
+        "float": 0.10000000149011612
+      },
+      {
+        "id": "6755710f",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 423,
+        "data_offset": 431,
+        "data_bytes": 4,
+        "raw_hex": "40000000",
+        "float": 2.0
+      },
+      {
+        "id": "6fda2e1c",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 435,
+        "data_offset": 443,
+        "data_bytes": 4,
+        "raw_hex": "00000000",
+        "float": 0.0
+      },
+      {
+        "id": "8d59f19f",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 447,
+        "data_offset": 455,
+        "data_bytes": 4,
+        "raw_hex": "3f19999a",
+        "float": 0.6000000238418579
+      },
+      {
+        "id": "8fda2e23",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 459,
+        "data_offset": 467,
+        "data_bytes": 4,
+        "raw_hex": "42c80000",
+        "float": 100.0
+      },
+      {
+        "id": "a62b9ae7",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 471,
+        "data_offset": 479,
+        "data_bytes": 4,
+        "raw_hex": "3f666666",
+        "float": 0.8999999761581421
+      },
+      {
+        "id": "a8fa45ba",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 483,
+        "data_offset": 491,
+        "data_bytes": 4,
+        "raw_hex": "3c23d70a",
+        "float": 0.009999999776482582
+      },
+      {
+        "id": "aa8d130b",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 495,
+        "data_offset": 503,
+        "data_bytes": 4,
+        "raw_hex": "43fa0000",
+        "float": 500.0
+      },
+      {
+        "id": "b7cc369a",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 507,
+        "data_offset": 515,
+        "data_bytes": 4,
+        "raw_hex": "437a0000",
+        "float": 250.0
+      },
+      {
+        "id": "ef6ba08a",
+        "type": "000d",
+        "flags": 0,
+        "array": false,
+        "count": 1,
+        "stride": 4,
+        "header_offset": 519,
+        "data_offset": 527,
+        "data_bytes": 4,
+        "raw_hex": "3e99999a",
+        "float": 0.30000001192092896
+      }
+    ],
+    "limits": "One explicit package, no priority/inheritance/native camera readiness"
+  },
+  "fov_subset": {
+    "current_offset": "0x28",
+    "target_offset": "0x2c",
+    "threshold_offset": "0x34",
+    "unset_sentinel": -1.0,
+    "degrees_per_radian": 57.295780181884766,
+    "smoothing_factor": 0.10000000149011612,
+    "order": "if OLD current>0 request viewer FOV first; then sentinel branches; abs(target-current)<threshold snaps else .1 smoothing"
+  },
+  "limits": [
+    "Requested camera ID is static; no successful runtime selection or retained object identity observed",
+    "DDFB90 also depends on shared BSS pose/mode pointers, transform builders and audio calls; not a complete camera port",
+    "Generic camera property dispatcher creates via type00ED3928 and labels via00ED3929; package priority/runtime overrides unobserved",
+    "No original process/Ghidra import, save mutation or native scene readiness"
+  ]
+}

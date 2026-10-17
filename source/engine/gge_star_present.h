@@ -26,6 +26,17 @@ struct ViewerProjectionInputs {
 // No native camera update, viewer acquisition, FOV/aspect defaults, raster or scene publication.
 // Unknown/unsupported/nonfinite/degenerate input returns false with output unchanged.
 bool compose_viewer_projection(const ViewerProjectionInputs& observed,std::array<float,16>& out,std::string& error);
+struct CameraFovObservation {
+    // Explicit controller fields +28/+2C/+34; -1 is the native unset sentinel, not Unknown.
+    std::optional<float> current, target, snap_threshold;
+};
+struct CameraFovStep {
+    // DDFB90 requests viewer FOV from OLD current before updating the controller's current value.
+    std::optional<float> requested_degrees;
+    float next_current=0;
+};
+// DDFCE6/DDFDC5..FE67 arithmetic subset only: no transform/audio/global-state/update scheduling.
+bool step_camera_fov(const CameraFovObservation& observed,CameraFovStep& out,std::string& error);
 struct ProjectedPoint { float x=0,y=0,ndc_z=0,clip_w=0; };
 // GA 0x7C4250 + 0xDE3C20: perspective divide and window EXTENTS, no origin addition/clipping.
 // Rejecting unknown/nonfinite/zero-w/invalid extents is host safety policy. Negative w is not culled.

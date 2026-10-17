@@ -92,7 +92,9 @@ still cannot substitute for viewer projection; failed updates still retire prior
 - Scene **212**, input **29** checks PASS on actual SPUI/PNG with controlled metadata/camera inputs.
   Scene tests explicitly publish a frame from composed viewer coefficients while keeping native
   readiness false; the legacy provenance name remains a checked alias.
-- Live GGE camera factory/type/properties, native viewer creation/lifetime, update scheduling,
+- Follow-up [camera-controller investigation](gge-camera-controller.md) identifies the **static** GGE
+  factory/type/requested ID and one complete shipped prop. It adds a bounded FOV-step helper;
+  runtime selection success, pose/mode state, native viewer lifetime/update scheduling,
   render/effects services and complete real catalogue remain unresolved.
 
 [Audit facts](audit/gge-viewer/facts.json) retain tables, routes and limitations; accompanying
