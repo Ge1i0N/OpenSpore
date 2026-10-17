@@ -68,6 +68,10 @@ int main() {
     stages::cell_tick(0.016f);
     check(stages::cell_ticks() == 0, "idle ticks dropped");
     check(stages::cell_status() == "idle (no simulation)", "idle status");
+    // No fs search paths are initialised in this offline tool, so the world cannot load here;
+    // that path must be honest and non-fatal (cell_world (no data) is the same driver test).
+    check(!stages::cell_world_loaded(), "no world loaded offline");
+    check(stages::cell_world_status() == "no world data", "offline world status");
     stages::cell_enter();
     stages::cell_tick(0.016f);
     stages::cell_tick(0.016f);
@@ -83,5 +87,5 @@ int main() {
         std::cerr << "game_stages_verify: " << failures << " check(s) failed\n";
         return 1;
     }
-    std::cout << "GA stage table/progression/cell-skeleton boundaries PASS (no simulation claimed)\n";
+    std::cout << "GA stage table/progression/cell-driver boundaries PASS\n";
 }

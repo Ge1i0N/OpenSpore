@@ -236,6 +236,21 @@ CellGame_Layers.package
 └── density           5  128×128 f32 background density fields
 ```
 
+## Runtime — from data to a live world
+
+`source/engine/cell_world.{h,cpp}` turns this data into entities and is the first step that
+unites the decode with the engine:
+
+* `load_default()` resolves `Data/CellGame.package` through `os::fs` and decodes it (a missing
+  package is an error, not a crash).
+* `set_level("level_water")` spawns one entity per unit of each `populate` entry's count
+  (160 cells for `level_water`), resolving each archetype's body model via `structure_of()`
+  (archetype `+0x000` template id == structure id).
+* The player is the shipped hero archetype `cell_hero_L0` (else `cell_minno1`); positions and
+  velocities are placeholder seeds (RNG seeded from the level name), clearly labelled as such.
+* `game_stages.cpp` drives it: `cell_enter()` loads + spawns, `cell_tick(dt)` advances,
+  `cell_exit()` clears. See [game-stages](game-stages.md). Rendering the cells is the next step.
+
 ## Boundaries
 
 * Per-archetype **stats** (HP, damage, social) are not in these records as named fields;

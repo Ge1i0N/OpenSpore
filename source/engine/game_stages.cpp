@@ -2,6 +2,9 @@
 
 #include <cstdio>
 
+#include "engine/cell_world.h"
+#include "engine/log.h"
+
 namespace os::stages {
 namespace {
 
@@ -30,7 +33,10 @@ bool same(const char* a, const char* b) {
 // Skeleton state: active between cell_enter() and cell_exit(), counting ticks.
 bool g_active = false;
 u64 g_ticks = 0;
-
+// The cell world: data decoded from CellGame.package + the cells spawned for a level. Empty
+// when the data is not on the search paths (D3D-free; see engine/cell_world.h).
+cell::World g_world;
+bool g_world_tried = false;
 }  // namespace
 
 const Stage* table() { return kStages; }
@@ -70,25 +76,49 @@ bool has_driver(const char* mode) {
 void cell_enter() {
     g_active = true;
     g_ticks = 0;
+    // Load the cell data once, then spawn the default level. A miss is reported, not fatal:
+    // the stage still ticks so the offline verify (no data) exercises the same contract.
+    if (!g_world.loaded()) {
+        std::string err;
+        if (g_world.load_default(err)) {
+            std::string lerr;
+            if (g_world.set_level("level_water", lerr)) {
+                LOG_INFO("stages", "cell world: %s", g_world.status().c_str());
+            } else {
+                LOG_WARN("stages", "cell world loaded but level spawn failed: %s", lerr.c_str());
+            }
+        } else if (!g_world_tried) {
+            LOG_WARN("stages", "cell world unavailable: %s", err.c_str());
+        }
+        g_world_tried = true;
+    }
 }
 
 void cell_exit() {
     g_active = false;
     g_ticks = 0;
+    g_world.clear();
+    g_world_tried = false;
 }
 
-void cell_tick(f32) {
-    if (g_active) ++g_ticks;
+void cell_tick(f32 dt) {
+    if (!g_active) return;
+    ++g_ticks;
+    g_world.tick(dt);
 }
 
 u64 cell_ticks() { return g_ticks; }
 
 std::string cell_status() {
     if (!g_active) return "idle (no simulation)";
-    char b[96];
-    std::snprintf(b, sizeof(b), "active: %llu ticks, no simulation",
-                  (unsigned long long)g_ticks);
+    char b[224];
+    std::snprintf(b, sizeof(b), "active: %llu ticks; %s",
+                  (unsigned long long)g_ticks, g_world.status().c_str());
     return b;
 }
+
+std::string cell_world_status() { return g_world.status(); }
+
+bool cell_world_loaded() { return g_world.loaded(); }
 
 }  // namespace os::stages

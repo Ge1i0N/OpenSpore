@@ -7,6 +7,24 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-17 — Cell stage: data wired into the engine (first live world)
+
+Added `source/engine/cell_world.{h,cpp}` (D3D-free, deterministic) that loads
+`Data/CellGame.package` and spawns a level's cells from the decoded `populate` table: each
+entry's `count` units, each archetype's body model resolved by template id
+(`archetype +0x000 == structure id`), player = the shipped `cell_hero_L0`. `game_stages.cpp`
+now drives it (`cell_enter` loads + spawns `level_water` = 160 cells, `cell_tick` advances a
+placeholder drift, `cell_exit` clears); `app.cpp` names the live world in the placeholder
+frame. New offline tool `tools/cell_world_verify.cpp` (constructed package: 5+3 cells,
+structure/size resolution, player fallback, deterministic re-spawn, unknown-level error,
+cleared-world tick drop) + `game_stages_verify` extended with the offline "no world data"
+path. Positions/velocities are seed placeholders (flagged), not the original algorithm — no
+rendering/camera/HUD yet. Verified: `cell_world_verify` PASS + real package
+(`level_water: 160 cells, player=cell_hero_L0`); `game_stages_verify` PASS; live
+`-state:CellGame` capture shows `CELL DRIVER (active: 31 ticks; level_water: 160 cells,
+player=cell_hero_L0)`; main target 0 warnings; 24 unit tests, `feature_map --check`,
+`docs_check` pass.
+
 ## 2026-10-17 — Cell stage: every resource type decoded (structures, globals, layers, background)
 
 Finished the structural decode of both cell packages. Added decoders for `structure` (80-byte

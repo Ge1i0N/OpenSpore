@@ -351,13 +351,20 @@ void frame_body(void* p) {
             }
             if (gs && !gs->mode.empty()) {
                 if (os::stages::has_driver(gs->mode.c_str())) {
-                    // A skeleton driver owns this state (analysis/game-stages.md): name it and
-                    // its tick count instead of reporting the mode as unexecuted.
-                    render::overlay().text_fmt(48.f, y, 0xFF9FD0A0, "mode %s  -- SKELETON DRIVER (%s)",
+                    // A cell-stage driver owns this state (analysis/game-stages.md): name it and
+                    // its live world (loaded package + spawned cells) instead of reporting the
+                    // mode as unexecuted.
+                    render::overlay().text_fmt(48.f, y, 0xFF9FD0A0, "mode %s  -- CELL DRIVER (%s)",
                                                gs->mode.c_str(), os::stages::cell_status().c_str());
                     y += 22.f;
-                    render::overlay().text_fmt(48.f, y, 0xFF8494A4,
-                                               "(tick counter only; no simulation yet)");
+                    if (os::stages::cell_world_loaded()) {
+                        render::overlay().text_fmt(48.f, y, 0xFF8494A4,
+                                                   "world: %s",
+                                                   os::stages::cell_world_status().c_str());
+                    } else {
+                        render::overlay().text_fmt(48.f, y, 0xFF8494A4,
+                                                   "(Data/CellGame.package not found; tick counter only)");
+                    }
                     y += 30.f;
                 } else {
                     render::overlay().text_fmt(48.f, y, 0xFFE0A878, "mode %s  -- NOT EXECUTED",

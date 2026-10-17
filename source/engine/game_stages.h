@@ -4,7 +4,8 @@
 // A `mode` is a named C++ driver class registered by a per-class factory under a TAG
 // (analysis/modes.md): implementing the ten rows of engine/appmodes.cpp means implementing
 // ten driver classes, which IS the gameplay work. This header owns the five PLAYABLE-stage
-// rows plus the first behaviour: a skeleton Game_Cell driver attached to the CellGame state.
+// rows plus the first behaviour: a Game_Cell driver attached to the CellGame state that
+// loads CellGame.package and spawns a level's cells (see engine/cell_world.h).
 //
 // Evidence (all level-1, GA oracle refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe):
 //   * Registration calls: Game_Cell tag 0x01654C00 from 0x00e616c0 (obj 0x0c),
@@ -54,13 +55,19 @@ std::string describe(const Stage& st);
 // True only for modes with an attached skeleton driver (today: Game_Cell alone).
 bool has_driver(const char* mode);
 
-// Cell skeleton lifecycle. A tick counter with no world state: cell_tick() only counts
-// while active, cell_exit() parks back to idle. Deliberately D3D-free so the offline
-// tools/game_stages_verify.cpp exercises the whole contract without a device.
+// Cell-stage lifecycle. cell_enter() loads Data/CellGame.package (best effort) and spawns the
+// default level; cell_tick() advances the world; cell_exit() parks. Deliberately D3D-free so
+// the offline tools/game_stages_verify.cpp exercises the whole contract without a device.
+// Without the data it degrades to a tick counter (reported, not hidden).
 void cell_enter();
 void cell_exit();
 void cell_tick(f32 dt);
 u64 cell_ticks();
 std::string cell_status();
+
+// The live cell world status (loaded package + spawned cells), or "no world data" when
+// Data/CellGame.package is not on the search paths. D3D-free (see engine/cell_world.h).
+std::string cell_world_status();
+bool cell_world_loaded();
 
 }  // namespace os::stages

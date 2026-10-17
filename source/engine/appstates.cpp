@@ -410,7 +410,7 @@ void install(os::states::Manager& mgr) {
                 // parked by the on_exit hook above, so its line reports activity, not absence.
                 if (os::stages::has_driver(mode.c_str())) {
                     os::stages::cell_enter();
-                    LOG_INFO("appstates", "%s: `%s` skeleton driver active (%s)", name.c_str(),
+                    LOG_INFO("appstates", "%s: `%s` cell driver active (%s)", name.c_str(),
                              mode.c_str(), os::stages::cell_status().c_str());
                 } else if (const auto* m = appmodes::find_by_name(mode.c_str())) {
                     LOG_WARN("appstates", "%s: `%s` full driver not implemented - %s", name.c_str(), mode.c_str(),
