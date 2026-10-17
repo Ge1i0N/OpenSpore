@@ -51,6 +51,12 @@ classification rather than a button producer role. `DE48C0` is reached from that
 via `DE5A86` and from the separate `DE8A71` helper/update path. No direct caller from the bounded
 UTFWin Button/CommandID route was found in this inventory.
 
+`DE8A71` itself has no direct `E8` caller in the selected `.text`, and its exact entry/dispatch
+owner was not recovered from simple `.rdata`/`.data` function-pointer scans. The bounded body still
+shows a state `+0x108/+0x10C` normalization path followed by `DE44A0` and `DE48C0`. Its dispatch
+mechanism therefore remains Unknown; it is not renamed to a vtable slot or per-frame callback from
+this negative search.
+
 ## Reproduction
 
 ```powershell
