@@ -213,6 +213,7 @@ LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
             input::on_button(false, true);
             return 0;
         case WM_KEYDOWN:
+            if (states::debugmenu::handle_keydown((unsigned)wp, (long)lp)) return 0;
             if (wp == 'C' && !(lp & (1LL << 30)) && (GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_SHIFT) & 0x8000)) {
 #ifdef OS_ENABLE_DEV_COMMANDS
                 states::debugmenu::toggle();
@@ -226,6 +227,9 @@ LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
                 PostQuitMessage(0);
                 return 0;
             }
+            break;
+        case WM_CHAR:
+            if (states::debugmenu::handle_char((wchar_t)wp)) return 0;
             break;
         case WM_ACTIVATEAPP:
             LOG_DEBUG("app", "activate=%d", (int)wp);

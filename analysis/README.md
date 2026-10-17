@@ -9,8 +9,10 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 |---|---|---|
 | Community SDK / format references | [community-references](community-references.md) | pinned ModAPI/SporeModder-FX clones; secondary names/offsets, not native execution or automatic readiness |
 | Additional local references | [additional-references](additional-references.md) | user-supplied `_Also` beta/readme/package/SporeMaster corpus; secondary evidence and leads |
-| Local launch modes | [launch-modes](launch-modes.md) | Debug batch launchers for Loader, DevLauncher, controlled GGE preview and Debug Menu |
-| OpenSpore Debug Menu | [debug-menu](debug-menu.md) | Debug-only Ctrl+Shift+C host state; routes to controlled GGE preview, not recovered EA Cheat Menu |
+| FLARE-FLOSS strings | [floss](floss.md) | pinned source/release reference and reproducible GA string JSON dump |
+| Bounded Ghidra runs | [ghidra-runner](ghidra-runner.md) | persistent PyGhidra probes with heartbeat, deadline and graceful/hard-stop policy |
+| Local launch modes | [launch-modes](launch-modes.md) | Debug batch launchers for Loader, DevLauncher, controlled GGE preview and Debug Cheat Console |
+| OpenSpore Debug Cheat Console | [debug-menu](debug-menu.md) | Debug-only Ctrl+Shift+C command-entry state; uses host registry, not recovered EA ConsoleWindow |
 | GGE placement-window identity | [gge-window-lookup](gge-window-lookup.md) | actual record+B8 receiver and root177; corrects earlier global-service interpretation, not native mount/camera readiness |
 | GGE viewer versus ICamera | [gge-viewer](gge-viewer.md) | vtables/getters/update handoff and explicit projection composition; no live camera parameters or viewer producer |
 | GGE camera factory / property | [gge-camera-controller](gge-camera-controller.md) | requested ID780786FD, factory type043C6E06, complete shipped prop and bounded FOV step; no live selection/pose readiness |

@@ -1,0 +1,30 @@
+# Focused vtable entries reached by the GA UI/DebugConsole object.
+# These are intentionally separate from the broad claims seed list.
+0x00802A00	function	os_debugconsole_00802A00
+0x008030A0	function	os_debugconsole_008030A0
+0x008030C0	function	os_debugconsole_008030C0
+0x008030E0	function	os_debugconsole_008030E0
+0x0067E120	function	os_appconsole_0067E120
+0x0067E150	function	os_appconsole_0067E150
+0x0067EA70	function	os_appconsole_0067EA70
+0x0067EAA0	function	os_appconsole_0067EAA0
+0x0067E240	function	os_cheatmanager_0067E240
+0x0067E9E0	function	os_cheatmanager_0067E9E0
+0x0067EF20	function	os_cheatmanager_0067EF20
+0x00847B60	function	os_canvas_00847B60
+0x00847B80	function	os_canvas_00847B80
+0x00847BA0	function	os_canvas_00847BA0
+0x00847BC0	function	os_canvas_00847BC0
+0x00847BE0	function	os_canvas_00847BE0
+0x00847FA0	function	os_canvas_00847FA0
+0x00847FC0	function	os_canvas_00847FC0
+0x00847FF0	function	os_canvas_00847FF0
+0x008490C0	function	os_canvas_008490C0
+0x007E9520	function	os_input_listener_007E9520
+0x00752060	function	os_graphics_event_00752060
+0x00752150	function	os_graphics_event_00752150
+0x00753CB0	function	os_graphics_event_00753CB0
+0x00746320	function	os_graphics_event_00746320
+0x00748C90	function	os_graphics_event_00748C90
+0x00744700	function	os_graphics_event_00744700
+0x00753C10	function	os_graphics_event_00753C10

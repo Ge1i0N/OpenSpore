@@ -19,7 +19,7 @@ Run from Explorer or a terminal:
 | `build/bin/Debug/Run-Loader.cmd` | `OpenSpore.exe -w -devDirs`; normal test loader path |
 | `build/bin/Debug/Run-DevLauncher.cmd` | `OpenSpore.exe -w -devDirs -state:DevLauncher`; directly opens the real DevLauncher state |
 | `build/bin/Debug/Run-GGEHostPreview.cmd` | `OpenSpore.exe -w -devDirs -state:GGEHostPreview`; controlled 3-card GGE host preview |
-| `build/bin/Debug/Run-DebugMenu.cmd` | starts DevLauncher and opens the OpenSpore Debug Menu automatically; `Ctrl+Shift+C` also toggles it |
+| `build/bin/Debug/Run-DebugMenu.cmd` | starts DevLauncher and opens the OpenSpore Debug Cheat Console automatically; `Ctrl+Shift+C` also toggles it |
 
 The existing `_RelGaStart.cmd` is deliberately different: it launches the original unpacked GA
 authority, not this reimplementation. It remains available for reference comparisons.
@@ -42,20 +42,13 @@ build/bin/Debug/OpenSpore.exe -w -devDirs -state:GGEHostPreview `
 Expected log evidence includes `picked host card 20481 (host only)`. The preview uses original shipped
 SPUI/atlas bytes, but catalogue entries and camera observations are controlled host inputs.
 
-## Debug Menu
+## Debug Cheat Console
 
 In a Debug build, run `Run-DebugMenu.cmd` to open automatically, or press **Ctrl+Shift+C** once the
-window is active. The menu is a host state, not the
-original native EA Cheat Console. It offers:
-
-- return to the previous state;
-- open `GGEHostPreview (controlled)`;
-- next/previous state;
-- reload the current state;
-- quit.
-
-`Esc` returns from the menu. Windows key auto-repeat is ignored for the toggle. The original Beta
-README documents the same `Ctrl+Shift+C` shortcut for a cheat console, but GA's native console
+window is active. Type a command and press **Enter**; **Up/Down** recalls history and **Esc** returns.
+Try `help`, `state -list`, `state -next`, `state DevLauncher`, `levels -unlock` or `quit`.
+This is a host command window, not the recovered native EA console. The original Beta README
+documents the same shortcut and the separate Ctrl+Shift+Alt+C in-window shortcut, but GA's native
 creation/dispatch chain is still unresolved; see [debug-menu](debug-menu.md) and
 [additional references](additional-references.md).
 
