@@ -92,6 +92,19 @@ def rows(capture: dict) -> list[dict]:
     return result
 
 
+def match_status(found: list[dict], starter_world_id: int | None) -> str:
+    if starter_world_id is None:
+        return "UnknownStarterWorld"
+    if not found:
+        return "AbsentInExplicitPackages"
+    if len(found) == 1:
+        return "ObservedType10Property" if found[0]["property"].get("status") == "type10" else "ObservedNonType10Property"
+    hashes = {item["property"].get("payload_sha256") for item in found}
+    if None not in hashes and len(hashes) == 1:
+        return "EquivalentExplicitPackages"
+    return "AmbiguousExplicitPackages"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture", type=Path, help="one explicit GGE_SAVE_OBSERVATIONS_V1 JSON")
@@ -128,10 +141,7 @@ def main() -> int:
         values = sorted({item["property"].get("value") for item in found
                          if item["property"].get("status") == "type10"})
         output_rows.append({**row, "match_count": len(found),
-                            "status": ("UnknownStarterWorld" if row["starter_world_id"] is None else
-                                       "AbsentInExplicitPackages" if not found else
-                                       "AmbiguousExplicitPackages" if len(found) != 1 else
-                                       "ObservedType10Property"),
+                            "status": match_status(found, row["starter_world_id"]),
                             "type10_values": [f"0x{value:08x}" for value in values]})
     print(json.dumps({"format": "GGE_TERRAIN_CORRELATION_V1",
                       "capture": str(args.capture),

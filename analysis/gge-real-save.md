@@ -455,7 +455,9 @@ read-only probe checked all eight IDs from the selected `UserData/Games/Game0` c
 rows and six persisted starters) against the explicitly selected `Data/PatchData.package` and
 `Data/Spore_Game.package` directories. Every ID has one exact directory entry in **each** package,
 with type `0x00B1B104`, group `0xE38475D9`, and a complete property table containing
-`0x2BD4F5AC` as scalar type `0x000A` (GA's required type 10).
+`0x2BD4F5AC` as scalar type `0x000A` (GA's required type 10). The two copies for each ID are
+byte-identical after decoding; their payload SHA-256 values match. The diagnostic therefore reports
+`EquivalentExplicitPackages`, rather than treating them as conflicting property definitions.
 
 The observed property values are:
 
@@ -471,9 +473,10 @@ starters 0x00BD9024 → 0xEDF593AB
 ```
 
 This is stronger package/property evidence than the earlier `terrain_query=Unknown`, but it does
-**not** execute the native PropManager call or establish package priority. Each row has two explicit
-matches across the selected package set, so the probe reports `AmbiguousExplicitPackages` and does
-not publish `terrain_loaded=true`, a runtime image key, candidate refill success or a production
+**not** execute the native PropManager call or establish package priority. The duplicate payloads are
+equivalent in this selected corpus, but that is still not proof that the native resolver would use
+either package or that the list was loaded into the runtime manager. The probe therefore does not
+publish `terrain_loaded=true`, a runtime image key, candidate refill success or a production
 catalogue. Exact package correlation is retained by [gge_terrain_probe.py](../tools/gge_terrain_probe.py).
 
 Controlled integration tests cover distinct headers with `(37,3)` and `(32,99)`, Unicode paths/names,

@@ -31,6 +31,12 @@ class TerrainProbeTests(unittest.TestCase):
         rows = probe.rows(capture)
         self.assertEqual([row["source_index"] for row in rows], [0, 1])
 
+    def test_equivalent_package_duplicates_are_distinguished_from_conflicts(self):
+        base = {"property": {"status": "type10", "payload_sha256": "same"}}
+        self.assertEqual(probe.match_status([base, dict(base)], 7), "EquivalentExplicitPackages")
+        other = {"property": {"status": "type10", "payload_sha256": "other"}}
+        self.assertEqual(probe.match_status([base, other], 7), "AmbiguousExplicitPackages")
+
 
 if __name__ == "__main__":
     unittest.main()
