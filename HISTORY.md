@@ -7,6 +7,20 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-17 — Cell stage: real cell-body meshes (gmdl) + textures
+
+A cell `structure`'s base-body id (header `+0x40`, e.g. `Booster`/`Squid`) turns out to be the
+instance id of a `gmdl` model in the shipped content: 28 of the tide-pool bodies carry one in
+`Spore_Content.package`, and every gmdl there has a paired `raster` (865/865). `states/cellpresent.cpp`
+now loads those bodies by base id and draws the stage top-down as real geometry
+(`render::Mesh::set_topdown_camera()` + `Mesh::draw_at()`), with the paired texture and an alpha-test
+cutout, keeping the tinted-disc fallback for bodies with no gmdl (procedural `amoeba_cell`, flora/rock
+props). `render::Mesh` became move-only (it owns D3D buffers), and gained the top-down camera/draw API.
+Verified: main target 0 warnings; live `-state:CellGame` capture shows textured creatures
+(`[cell] cell body meshes: N of M bodies have real gmdl geometry (K textured)`); `cell_world_verify`,
+`game_stages_verify`, `cell_game_verify` (10 checks) PASS; 24 unit tests, `feature_map --check`,
+`docs_check` pass.
+
 ## 2026-10-17 — Cell stage: data-driven backdrop + Cell→Creature progression
 
 The cell reader now parses `backgroundMap` (12 depth bands) into `GameData::background` and keeps

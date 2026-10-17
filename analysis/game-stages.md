@@ -66,8 +66,15 @@
 
 ### Presentation (`source/states/cellpresent.cpp`)
 
-* Top-down camera; cells drawn as tinted discs over an immediate-mode overlay. Player is white
-  with a cyan ring and a heading notch; predators carry a red ring; food is green.
+* Top-down follow camera. **Real cell-body geometry**: a cell's `structure` base-body id
+  (`header +0x40`, e.g. `Booster`/`Squid`) is *also* the instance id of a `gmdl` model shipped in
+  the game packages (28 of the tide-pool bodies carry one in `Spore_Content.package`, each with a
+  paired `raster` texture — 865/865). Loaded once by base id and drawn top-down through
+  `render::Mesh::draw_at()` (one `set_topdown_camera()` per frame, one WORLD matrix per cell,
+  depth buffer separating them), each with its own texture.
+* The player is white with a cyan ring and a heading notch; predators carry a red ring; cells with
+  no gmdl body (the procedural `amoeba_cell`, flora/rock props) keep a tinted-disc fallback, so
+  nothing disappears. Food is green.
 * **Backdrop from the game's own Layers data:** the 12 `backgroundMap` depth bands are painted as
   a vertical colour gradient, and a `density` field of `CellGame_Layers.package` (e.g.
   `Level1-zone1`) is uploaded as a 128x128 texture and drawn over the arena, drifting along that
@@ -82,9 +89,8 @@
 
 ## Boundaries
 
-* No mesh, sprite-atlas or RenderWare tide-pool rendering: discs stand in for the archetype
-  meshes (not yet drawable), and the backdrop is the game's own density field rather than the
-  original's composited parallax scene. No audio.
+* No sprite-atlas or RenderWare tide-pool *scene* rendering (we draw the decoded gmdl bodies, not
+  the original's RenderWare world), and no audio. The overlay/HUD is our own immediate-mode 2D.
 * Positions, velocities, sizes, role split, growth/HP/aggression rates, arena and camera are
   **seed placeholders**; not GA behaviour claims. The original's placement and player-creation
   are not recovered.

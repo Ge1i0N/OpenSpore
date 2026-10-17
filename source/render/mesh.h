@@ -16,6 +16,15 @@ namespace os::render {
 
 class Mesh {
 public:
+    Mesh() = default;
+    // Owns D3D buffers: copy would double-free, so it is move-only.
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+    Mesh(Mesh&& o) noexcept { adopt(o); }
+    Mesh& operator=(Mesh&& o) noexcept {
+        if (this != &o) { shutdown(); adopt(o); }
+        return *this;
+    }
     ~Mesh();
     void shutdown();
 
@@ -31,6 +40,19 @@ public:
     void draw(IDirect3DDevice9* dev, int vx, int vy, int vw, int vh, float angle,
               IDirect3DTexture9* tex = nullptr);
 
+    // --- Top-down scene drawing (the cell stage) ------------------------------------------
+    // Configure WORLD/VIEW/PROJECTION and the viewport for a top-down orthographic camera
+    // looking down -Z at a Z-up world: world point (camx, camy) is the screen centre and one
+    // world unit spans `px_per_world` pixels. Call once per frame before draw_at().
+    static void set_topdown_camera(IDirect3DDevice9* dev, float camx, float camy,
+                                   float px_per_world, int view_w, int view_h);
+
+    // Draw this mesh into that scene: centred at world (px, py), rotated about the world Z axis
+    // by `angle` radians, scaled so its model radius becomes `scale` world units, tinted by
+    // `tint` (0xAARRGGBB). Depth-tests against the frame's Z buffer (cleared by Device::clear).
+    void draw_at(IDirect3DDevice9* dev, float px, float py, float scale, float angle, D3DCOLOR tint,
+                 IDirect3DTexture9* tex = nullptr);
+
     u32 vertex_count() const { return m_vertex_count; }
     u32 index_count() const { return m_index_count; }
     u32 triangle_count() const { return m_index_count / 3; }
@@ -39,6 +61,10 @@ public:
     bool ready() const { return m_vb != nullptr && m_ib != nullptr; }
 
 private:
+    void bind_and_draw(IDirect3DDevice9* dev, D3DCOLOR tint, IDirect3DTexture9* tex);
+    // Steal another mesh's buffers (used by the move ctor/assign). Leaves `o` empty.
+    void adopt(Mesh& o);
+
     IDirect3DVertexBuffer9* m_vb = nullptr;
     IDirect3DIndexBuffer9* m_ib = nullptr;
     u32 m_vertex_count = 0, m_index_count = 0;

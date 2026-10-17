@@ -72,6 +72,30 @@ Mat4 perspective_fov_lh(float fov_y, float aspect, float zn, float zf) {
     return r;
 }
 
+// D3DXMatrixOrthoLH, by hand. Maps view-space [l,r]x[b,t] to NDC [-1,1] with z in [0,1].
+Mat4 ortho_lh(float l, float r_, float b, float t, float zn, float zf) {
+    Mat4 r = identity();
+    r.m[0] = 2.f / (r_ - l);
+    r.m[5] = 2.f / (t - b);
+    r.m[10] = 1.f / (zf - zn);
+    r.m[12] = (l + r_) / (l - r_);
+    r.m[13] = (t + b) / (b - t);
+    r.m[14] = zn / (zn - zf);
+    return r;
+}
+
+Mat4 translation(float x, float y, float z) {
+    Mat4 r = identity();
+    r.m[12] = x; r.m[13] = y; r.m[14] = z;
+    return r;
+}
+
+Mat4 scaling(float s) {
+    Mat4 r = identity();
+    r.m[0] = r.m[5] = r.m[10] = s;
+    return r;
+}
+
 struct Vtx {
     float x, y, z;
     float nx, ny, nz;
@@ -82,6 +106,15 @@ constexpr DWORD kFVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1;
 }  // namespace
 
 Mesh::~Mesh() { shutdown(); }
+
+void Mesh::adopt(Mesh& o) {
+    m_vb = o.m_vb; o.m_vb = nullptr;
+    m_ib = o.m_ib; o.m_ib = nullptr;
+    m_vertex_count = o.m_vertex_count; o.m_vertex_count = 0;
+    m_index_count = o.m_index_count; o.m_index_count = 0;
+    m_center[0] = o.m_center[0]; m_center[1] = o.m_center[1]; m_center[2] = o.m_center[2];
+    m_radius = o.m_radius;
+}
 
 void Mesh::shutdown() {
     if (m_ib) { m_ib->Release(); m_ib = nullptr; }
@@ -207,15 +240,26 @@ void Mesh::draw(IDirect3DDevice9* dev, int vx, int vy, int vw, int vh, float ang
     dev->SetTransform(D3DTS_VIEW, (const D3DMATRIX*)&view);
     dev->SetTransform(D3DTS_PROJECTION, (const D3DMATRIX*)&proj);
 
+    bind_and_draw(dev, 0xFFFFFFFFu, tex);
+
+    dev->SetViewport(&saved);
+}
+
+void Mesh::bind_and_draw(IDirect3DDevice9* dev, D3DCOLOR tint, IDirect3DTexture9* tex) {
     dev->SetRenderState(D3DRS_LIGHTING, TRUE);
-    dev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(38, 40, 46));
+    dev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(120, 124, 128));
     dev->SetRenderState(D3DRS_ZENABLE, TRUE);
     dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);  // winding is not guaranteed by the format
     dev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+    dev->SetRenderState(D3DRS_SPECULARENABLE, FALSE);
 
+    const float cr = ((tint >> 16) & 0xFF) / 255.f;
+    const float cg = ((tint >> 8) & 0xFF) / 255.f;
+    const float cb = (tint & 0xFF) / 255.f;
     D3DMATERIAL9 mat{};
-    mat.Diffuse.r = mat.Diffuse.g = mat.Diffuse.b = mat.Diffuse.a = 1.f;
-    mat.Ambient.r = mat.Ambient.g = mat.Ambient.b = mat.Ambient.a = 0.55f;
+    mat.Diffuse.r = cr; mat.Diffuse.g = cg; mat.Diffuse.b = cb; mat.Diffuse.a = 1.f;
+    mat.Ambient.r = cr * 0.9f; mat.Ambient.g = cg * 0.9f; mat.Ambient.b = cb * 0.9f;
+    mat.Ambient.a = 1.f;
     dev->SetMaterial(&mat);
 
     D3DLIGHT9 lt{};
@@ -236,19 +280,54 @@ void Mesh::draw(IDirect3DDevice9* dev, int vx, int vy, int vw, int vh, float ang
         dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
         dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
         dev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-        dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+        dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+        dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
         dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
         dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+        // Alpha TEST (not blend) so a texture's transparent regions (fins, gaps) are cut away
+        // without needing back-to-front sorting.
+        dev->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+        dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+        dev->SetRenderState(D3DRS_ALPHAREF, 0x30);
     } else {
         dev->SetTexture(0, nullptr);
         dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
         dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
         dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+        dev->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
     }
     dev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, m_vertex_count, 0, m_index_count / 3);
     dev->LightEnable(0, FALSE);
-
-    dev->SetViewport(&saved);
 }
+
+void Mesh::set_topdown_camera(IDirect3DDevice9* dev, float camx, float camy, float px_per_world,
+                              int view_w, int view_h) {
+    if (!dev || view_w < 8 || view_h < 8 || px_per_world <= 0.f) return;
+    D3DVIEWPORT9 vp{};
+    vp.X = 0; vp.Y = 0; vp.Width = (DWORD)view_w; vp.Height = (DWORD)view_h;
+    vp.MinZ = 0.f; vp.MaxZ = 1.f;
+    dev->SetViewport(&vp);
+    const float hw = (view_w * 0.5f) / px_per_world;
+    const float hh = (view_h * 0.5f) / px_per_world;
+    const float eye[3] = {camx, camy, 1000.f};
+    const float at[3] = {camx, camy, 0.f};
+    const float up[3] = {0.f, 1.f, 0.f};  // +Y is up on screen; the camera looks down -Z
+    Mat4 view = look_at_lh(eye, at, up);
+    Mat4 proj = ortho_lh(-hw, hw, -hh, hh, 1.f, 2000.f);
+    dev->SetTransform(D3DTS_VIEW, (const D3DMATRIX*)&view);
+    dev->SetTransform(D3DTS_PROJECTION, (const D3DMATRIX*)&proj);
+}
+
+void Mesh::draw_at(IDirect3DDevice9* dev, float px, float py, float scale, float angle,
+                   D3DCOLOR tint, IDirect3DTexture9* tex) {
+    if (!dev || !ready()) return;
+    // Centre the model on its own centroid, scale it, spin it, then drop it at (px, py, 0).
+    Mat4 world = mul(mul(mul(translation(-m_center[0], -m_center[1], -m_center[2]), scaling(scale)),
+                         rotation_z(angle)),
+                     translation(px, py, 0.f));
+    dev->SetTransform(D3DTS_WORLD, (const D3DMATRIX*)&world);
+    bind_and_draw(dev, tint, tex);
+}
+
 
 }  // namespace os::render

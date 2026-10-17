@@ -3,13 +3,23 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <map>
+#include <memory>
+#include <set>
+#include <utility>
+#include <vector>
 
 #include "engine/cell_world.h"
+#include "engine/fs.h"
 #include "engine/game_stages.h"
+#include "engine/gmdl.h"
 #include "engine/input.h"
 #include "engine/log.h"
 #include "engine/naming.h"
+#include "engine/pkg.h"
+#include "engine/raster.h"
 #include "render/device.h"
+#include "render/mesh.h"
 #include "render/overlay.h"
 #include "states/statemgr.h"
 
@@ -131,6 +141,99 @@ void build_backdrop(rnd::Device& dev, const os::cell::World& world) {
     }
 }
 
+// Real cell-body geometry. A cell `structure`'s base-body id (header +0x40, e.g. Booster/Squid)
+// is ALSO the instance id of a `gmdl` model shipped in the game packages - verified: 28 of the
+// tide-pool bodies carry a gmdl in Spore_Content.package, and the mesh's header bounding box
+// matches its vertices exactly (tools/gmdl_mesh.py). We load them once, by base id; a body with
+// no gmdl (amoeba_cell, the flora/rock props) keeps the disc fallback, so nothing disappears.
+constexpr u32 kGmdlType = 0x00E6BCE5;
+constexpr u32 kRasterType = 0x2F4E681C;
+
+struct BodyMesh {
+    rnd::Mesh mesh;
+    IDirect3DTexture9* tex = nullptr;  // paired `raster` (same instance), or null
+};
+std::map<u32, std::unique_ptr<BodyMesh>> g_bodies;  // base-body id -> uploaded mesh (+ texture)
+bool g_bodies_tried = false;
+
+void build_body_meshes(rnd::Device& dev, const cell::World& world) {
+    if (g_bodies_tried) return;
+    g_bodies_tried = true;
+    std::set<u32> want;
+    const auto& strucs = world.data().structures;
+    for (const cell::Entity& e : world.entities()) {
+        if (e.structure < 0 || (size_t)e.structure >= strucs.size()) continue;
+        const u32 base = strucs[(size_t)e.structure].base;
+        if (base) want.insert(base);
+    }
+    const size_t total = want.size();
+    size_t textured = 0;
+    for (auto& sp : os::fs::search_paths()) {
+        if (want.empty()) break;
+        for (auto& p : os::pkg::find_packages(sp.dir.string())) {
+            if (want.empty()) break;
+            os::pkg::Package pk;
+            if (!pk.open(p)) continue;
+            const auto& recs = pk.records();
+            for (u32 n = 0; n < recs.size() && !want.empty(); ++n) {
+                if (recs[n].type() != kGmdlType) continue;
+                const u32 inst = recs[n].instance();
+                auto it = want.find(inst);
+                if (it == want.end()) continue;
+                std::vector<u8> bytes;
+                if (!pk.read_resource_decoded(n, bytes)) continue;
+                gmdl::Mesh m = gmdl::parse(bytes.data(), bytes.size());
+                if (!m.ok || m.indices.size() < 3) continue;
+                auto bm = std::make_unique<BodyMesh>();
+                if (!bm->mesh.create(dev.d3d(), m.positions.data(), m.uvs.data(), m.vertex_count,
+                                     m.indices.data(), (u32)m.indices.size()))
+                    continue;
+                // Paired texture: a `raster` with the same instance id (present for every gmdl
+                // in Spore_Content - 865/865). Skip normal/specular/mask maps.
+                for (u32 r = 0; r < recs.size(); ++r) {
+                    if (recs[r].type() != kRasterType || recs[r].instance() != inst) continue;
+                    std::string rname = naming::resource_path(recs[r].type(), recs[r].group(),
+                                                              recs[r].instance());
+                    std::string low = rname;
+                    for (auto& c : low) c = (char)std::tolower((unsigned char)c);
+                    if (low.find("normal") != std::string::npos ||
+                        low.find("specular") != std::string::npos ||
+                        low.find("_mask") != std::string::npos)
+                        continue;
+                    std::vector<u8> tb;
+                    if (!pk.read_resource_decoded(r, tb)) continue;
+                    raster::Texture rt = raster::decode(tb.data(), tb.size());
+                    if (!rt.ok) continue;
+                    bm->tex = dev.create_texture_bgra(rt.bgra.data(), rt.width, rt.height);
+                    if (bm->tex) ++textured;
+                    break;
+                }
+                g_bodies[inst] = std::move(bm);
+                want.erase(it);
+            }
+        }
+    }
+    LOG_INFO("cell", "cell body meshes: %zu of %zu bodies have real gmdl geometry (%zu textured)",
+             g_bodies.size(), total, textured);
+}
+
+// The uploaded mesh for an entity's structure base, or null when it has none.
+rnd::Mesh* body_for(const cell::World& world, const cell::Entity& e) {
+    const auto& strucs = world.data().structures;
+    if (e.structure < 0 || (size_t)e.structure >= strucs.size()) return nullptr;
+    auto it = g_bodies.find(strucs[(size_t)e.structure].base);
+    if (it == g_bodies.end() || !it->second->mesh.ready()) return nullptr;
+    return &it->second->mesh;
+}
+
+// The paired texture for an entity's body, or null.
+IDirect3DTexture9* body_tex_for(const cell::World& world, const cell::Entity& e) {
+    const auto& strucs = world.data().structures;
+    if (e.structure < 0 || (size_t)e.structure >= strucs.size()) return nullptr;
+    auto it = g_bodies.find(strucs[(size_t)e.structure].base);
+    return it == g_bodies.end() ? nullptr : it->second->tex;
+}
+
 }  // namespace
 
 bool present_cell_world() {
@@ -193,6 +296,7 @@ bool present_cell_world() {
         ov.image_uv(sx(-ax + shiftx), sy(-ax + shifty), (sx(ax + shiftx) - sx(-ax + shiftx)),
                     (sy(ax + shifty) - sy(-ax + shifty)), g_bg.tex, 0.f, 0.f, 1.f, 1.f);
     }
+    ov.end();  // backdrop done - the cells themselves are drawn as 3D meshes next
 
     // Steer: the pointer, in world space, is the destination the player accelerates toward.
     if (world.player_alive()) {
@@ -202,26 +306,52 @@ bool present_cell_world() {
         world.clear_target();
     }
 
-    // The arena boundary, so the sandbox reads as finite.
-    ov.ring(sx(0.0f), sy(0.0f), world.arena() * ppu, 2.0f, 0x283A6A8Au);
-
     const float psize = world.player() ? world.player()->size : 1.0f;
     const int pi = world.player_index();
     const auto& ents = world.entities();
 
-    // Pass 1: everything but the player (creatures first, then food, so food specks stay visible).
+    // --- 3D pass: real cell-body meshes -----------------------------------
+    // A cell whose `structure` names a shipped gmdl body (Booster/Squid/...) is drawn as that
+    // model, viewed top-down and tinted by role; a cell with no body mesh (amoeba_cell, the
+    // flora/rock props) keeps the disc fallback below. One camera for the frame, one WORLD set
+    // per cell - the depth buffer separates them.
+    build_body_meshes(dev, world);
+    if (!g_bodies.empty()) {
+        rnd::Mesh::set_topdown_camera(dev.d3d(), camx, camy, ppu, w, h);
+        for (const cell::Entity& e : ents) {
+            if (!e.alive) continue;
+            rnd::Mesh* mp = body_for(world, e);            if (!mp || mp->radius() <= 1e-6f) continue;
+            const float r = e.size * ppu;
+            const float x = sx(e.x), y = sy(e.y);
+            if (x < -r - 16.f || y < -r - 16.f || x > w + r + 16.f || y > h + r + 16.f) continue;
+            const bool food = e.role == cell::Role::Food;
+            const u32 tint = food ? hsv(0.27f + 0.10f * hash01(e.archetype), 0.55f, 0.95f)
+                                  : hsv(0.02f + 0.80f * hash01(e.archetype), 0.55f, 0.95f);
+            IDirect3DTexture9* tex = body_tex_for(world, e);
+            // A textured body uses its own colours; tint only its untextured fallback.
+            const D3DCOLOR col = tex ? D3DCOLOR_ARGB(255, 255, 255, 255) : (D3DCOLOR)tint;
+            mp->draw_at(dev.d3d(), e.x, e.y, e.size / mp->radius(), std::atan2(e.vy, e.vx), col, tex);
+        }
+    }
+
+    ov.begin(w, h);
+
+    // The arena boundary, so the sandbox reads as finite.
+    ov.ring(sx(0.0f), sy(0.0f), world.arena() * ppu, 2.0f, 0x283A6A8Au);
+
+    // Disc fallback for cells with no body mesh (creatures first, then food specks on top).
     for (const cell::Entity& e : ents) {
         if (!e.alive || e.role != cell::Role::Creature) continue;
+        if (body_for(world, e)) continue;
         const float x = sx(e.x), y = sy(e.y);
         const float r = e.size * ppu;
         if (x < -r - 8.f || y < -r - 8.f || x > w + r + 8.f || y > h + r + 8.f) continue;
-        u32 col = hsv(0.02f + 0.80f * hash01(e.archetype), 0.5f, 0.92f);
-        ov.circle(x, y, r, col);
-        const bool predator = e.size > psize * 1.05f;
-        ov.ring(x, y, r, 2.0f, predator ? 0xFFE4584Cu : 0x50202028u);
+        ov.circle(x, y, r, hsv(0.02f + 0.80f * hash01(e.archetype), 0.5f, 0.92f));
+        ov.ring(x, y, r, 2.0f, e.size > psize * 1.05f ? 0xFFE4584Cu : 0x50202028u);
     }
     for (const cell::Entity& e : ents) {
         if (!e.alive || e.role != cell::Role::Food) continue;
+        if (body_for(world, e)) continue;
         const float x = sx(e.x), y = sy(e.y);
         const float r = e.size * ppu;
         if (r < 1.2f) continue;
@@ -229,12 +359,21 @@ bool present_cell_world() {
         ov.circle(x, y, r, hsv(0.27f + 0.10f * hash01(e.archetype), 0.55f, 0.80f));
     }
 
-    // Pass 2: the player, on top, with a cyan ring so it never gets lost in the shoal.
+    // Threat markers over the meshes: an oversized cell still reads as dangerous.
+    for (const cell::Entity& e : ents) {
+        if (!e.alive || e.role != cell::Role::Creature || !body_for(world, e)) continue;
+        if (e.size <= psize * 1.05f) continue;
+        const float x = sx(e.x), y = sy(e.y), r = e.size * ppu;
+        if (x < -r - 8.f || y < -r - 8.f || x > w + r + 8.f || y > h + r + 8.f) continue;
+        ov.ring(x, y, r, 2.0f, 0xFFE4584Cu);
+    }
+
+    // The player, with a cyan ring so it never gets lost in the shoal.
     if (pi >= 0 && static_cast<size_t>(pi) < ents.size()) {
         const cell::Entity& p = ents[static_cast<size_t>(pi)];
         if (p.alive) {
             const float x = sx(p.x), y = sy(p.y), r = p.size * ppu;
-            ov.circle(x, y, r, 0xFFF2F6FAu);
+            if (!body_for(world, p)) ov.circle(x, y, r, 0xFFF2F6FAu);
             ov.ring(x, y, r, 3.0f, 0xFF57D0FFu);
             // A heading notch: the way the cell is pushing.
             const float sp = std::sqrt(p.vx * p.vx + p.vy * p.vy);

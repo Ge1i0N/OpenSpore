@@ -254,10 +254,11 @@ unites the decode with the engine:
   growth/HP/aggression rates and the camera are OUR seeds** (the archetype stat slots are
   positional and unnamed) — the shipped spawn list and body structures are the game's data.
 * `game_stages.cpp` drives it (`cell_enter`/`cell_tick`/`cell_exit`) and
-  `source/states/cellpresent.cpp` draws it (tinted discs + HUD) and steers from the pointer.
-  The presenter also loads `Data/CellGame_Layers.package` (the `density`/`advect` fields) and
-  `backgroundMap` depth bands to paint a data-driven tide-pool backdrop.
-  See [game-stages](game-stages.md).
+  `source/states/cellpresent.cpp` draws it (real gmdl cell bodies + HUD) and steers from the
+  pointer. The presenter also loads `Data/CellGame_Layers.package` (the `density`/`advect` fields)
+  and `backgroundMap` depth bands to paint a data-driven tide-pool backdrop. A structure's base
+  body id (`+0x40`) doubles as a `gmdl` model instance id in the content packages, which is how
+  the cells get real geometry. See [game-stages](game-stages.md).
 
 ## Boundaries
 
