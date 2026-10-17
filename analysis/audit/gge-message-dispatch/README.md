@@ -304,6 +304,21 @@ static-confirmed is:
 
 Runtime click execution and the final `ScenarioMode` transition remain separate gates.
 
+## Event-object producer boundary
+
+The selected `.text` contains many consumers that validate event-object type `0x287259F6`, including
+the GGE `DE99B0` listener, but a bounded raw-form scan found:
+
+```text
+push imm32 0x287259F6: 0
+obvious mov [object+offset], 0x287259F6 constructor writes: 0
+```
+
+This is not a whole-binary semantic absence proof. It does show that the event object type is not
+constructed by a simple local literal in the inspected consumer paths; the producer likely uses a
+generic factory, registry, serialized record or indirect runtime callback. `DE99B0` remains a
+consumer boundary, not a recovered producer.
+
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
 The apparent continuation at `DE9AD0` is not a separate message handler: the preceding `int3` run
