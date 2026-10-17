@@ -55,6 +55,17 @@ UTFWin `kMsgComponentActivated` and recognizes `0x070D74E7`, while the attached 
 is `0x070D7509`. Static attachment does not by itself establish the click-to-payload conversion or
 runtime execution.
 
+The generic WinButton payload rule is now bounded separately from this object correlation:
+
+```text
+CommandID != 0 ? CommandID : ControlID
+```
+
+Object 74 has serialized `CommandID = 0`, so its generic activation payload is statically
+`0x070D7509`. Object 87 separately carries `0x070D74E7`. This makes the direct object-74-to-
+`DE99B0(0x070D74E7)` interpretation unsupported by the selected static evidence; a forwarded or
+separate control route remains possible but Unknown.
+
 The `0x036C4A10` match is the strongest current UI→state corroboration: the shipped `Dev` control
 and the native handler branch share the exact value, and the native branch calls the SDK-compatible
 StateManager `+0x28(1)` slot. The shipped `SporeAppStates` table assigns explicit id 1 to

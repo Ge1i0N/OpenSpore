@@ -188,9 +188,9 @@ and `0x00964370`. This is a static vtable join only. It does not identify the co
 that fills object fields `+0x80/+0x84`, and it does not prove that the `WinButton` object with
 ControlID `0x070D7509` receives component ID `0x070D74E7` at runtime.
 
-## Correction: nearby `+0x80` writes are not activation setters
+## ✔️ Milestone: WinButton activation payload source resolved
 
-The GA object layout now has a concrete constructor/setter boundary:
+The GA object layout and embedded-interface relationship are now concrete:
 
 ```text
 base activable-window constructor 0x00962950
@@ -198,70 +198,54 @@ base activable-window constructor 0x00962950
   → object +0x84 = 0
 
 WinButton constructor 0x00966EB0
-  → initializes the derived 0x888-byte object
-
-vtable 0x01442E80 +0x4C → 0x0097CC80
-vtable 0x01442E80 +0x54 → 0x0097CE10
+  → object +0x00 = vtable 0x01441390
+  → object +0x04 = embedded IWindow vtable 0x01441270
 ```
 
-The two runtime setter paths write the activation object's identity-adjacent fields:
+The embedded GA `IWindow` vtable has the identity setter slots:
 
 ```text
-0x0097CC80:
-  object +0x80 = parameter
-  object +0x7C = parameter
-
-0x0097CE10:
-  object +0x80 = parameter
-  object +0x7C = parameter
+0x01441270 +0x50 → 0x0095F980 = SetControlID
+0x01441270 +0x54 → 0x0095F990 = SetCommandID
 ```
 
-Those two functions are reached through vtable `0x01442E80`, which is not the confirmed
-`WinButton/ActivableWindow` vtable family (`0x01441390` and its compatible tables). Therefore their
-same numeric offsets do **not** establish writes to the activation producer's fields. They are
-retained as a separate object-family observation and are not promoted to activation setters.
-
-The reliable activation facts remain only:
+The bodies are exact:
 
 ```text
-0x00962950: activable-window +0x80/+0x84 initialized to zero
-0x009640B0: reads +0x84, fallback +0x80, then sends activation message
+SetControlID:
+  [IWindow +0x7C] = parameter
+  => [outer WinButton +0x80] = ControlID
+
+SetCommandID:
+  [IWindow +0x80] = parameter
+  => [outer WinButton +0x84] = CommandID
 ```
 
-The setter/constructor input that later supplies the component ID remains Unknown; no click or
-property mutation is claimed.
-
-### Confirmed WinButton vtable owner
-
-The GA derived constructor `0x00966EB0` initializes the native button object with:
+The derived WinButton vtable contains the producer:
 
 ```text
-object +0x00 = vtable 0x01441390
-object +0x04 = vtable 0x01441270
+0x01441390 +0x94 → 0x009640B0
 ```
 
-The activation producer is an actual entry in that native vtable family:
+`0x009640B0` chooses the activation payload with this precedence:
 
 ```text
-vtable 0x01441390 +0x94 → 0x009640B0
+outer +0x84 != 0 ? CommandID : outer +0x80 (ControlID)
+→ kMsgComponentActivated
 ```
 
-The same object also has nearby GA entries, but this vtable is not being conflated with the SDK's
-standalone `IWindow` slot numbering:
+For the explicit EP1 `GGEZoomPanelV2` object 74:
 
 ```text
-vtable +0x50 → 0x00966B80
-vtable +0x54 → 0x00950E00
+ControlID  = 0x070D7509
+CommandID  = 0
+→ generic activation payload = 0x070D7509
 ```
 
-No SDK name is assigned to these two entries from this join alone. The serialized `ControlID` and
-`CommandID` remain data properties, while the exact setter owner for the producer's `+0x80/+0x84`
-payload fields remains Unknown.
-
-This is stronger than address adjacency: `0x009640B0` is confirmed as a method of the derived
-GA button/activable-window object. The base constructor zeroes its `+0x80/+0x84` fields, but the
-selected static pass still does not recover the later setter/input that supplies the activation
-payload. The `Play Scenario` ControlID-to-component-ID join remains Unknown.
+This is a major static negative result: the generic payload for `Play Scenario` is not
+`0x070D74E7`. The latter belongs to separate EP1 object 87. A direct
+`Play Scenario 0x070D7509 → DE99B0 branch 0x070D74E7` route is therefore not established; any
+property path must use another listener/forwarded route or another control identity.
 
 ## Reproduction
 

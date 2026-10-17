@@ -106,37 +106,36 @@ Unknown.
 
 ### Payload-field ownership boundary
 
-The generic producer's object-field source is now bounded more precisely. GA `0x009640B0` reads:
+The generic producer's object-field source is now resolved through the embedded IWindow interface.
+GA `0x009640B0` reads:
 
 ```text
 object +0x84; if zero, object +0x80
 ```
 
-and the surrounding producer/lifecycle family has these observed vtable entries:
+The relevant WinButton vtable entries are:
 
 ```text
-0x0141941C → 0x009640B0
-0x014198F4 → 0x009640B0
-0x01419654 → 0x0081CF20
-0x01419600 → 0x00964370
+0x01441390 +0x94 → 0x009640B0
+0x01441270 +0x50 → 0x0095F980 (SetControlID)
+0x01441270 +0x54 → 0x0095F990 (SetCommandID)
 ```
 
-The selected GA `.text` scan found no literal store that joins either field directly to
-`0x070D7509` or `0x070D74E7`; the fields are therefore runtime/object data rather than serialized
-SPUI immediates in the inspected paths. The related vtable tables include `0x0081C9C0`,
-`0x0081CF20` and `0x00964370` alongside the producer, but this cluster does not by itself prove a
-single C++ class or reveal the setter. Nearby same-offset writes were initially considered a setter
-boundary, but their ownership is now separated:
+The GA setter bodies are exact:
 
 ```text
-0x00962950 constructor: +0x80/+0x84 = 0
-0x01442E80 +0x4C → 0x0097CC80: writes +0x80 and +0x7C in another object family
-0x01442E80 +0x54 → 0x0097CE10: writes +0x80 and +0x7C in another object family
+IWindow +0x7C = ControlID
+IWindow +0x80 = CommandID
+embedded IWindow is outer WinButton +0x04
+outer +0x80 = ControlID
+outer +0x84 = CommandID
 ```
 
-Because `0x01442E80` is not the confirmed `WinButton/ActivableWindow` vtable family, these writes
-cannot be used as activation-field setters. The reliable boundary remains constructor zeroing plus
-producer reads; no `+0x84` setter or final ControlID-to-component-ID join was recovered.
+The producer's precedence is therefore:
+
+```text
+CommandID if nonzero, otherwise ControlID
+```
 
 The confirmed owner is instead the GA WinButton family initialized by `0x00966EB0`:
 
@@ -144,13 +143,14 @@ The confirmed owner is instead the GA WinButton family initialized by `0x00966EB
 object +0x00 = 0x01441390
 object +0x04 = 0x01441270
 0x01441390 +0x94 = 0x009640B0
-0x01441390 +0x50 = 0x00966B80
-0x01441390 +0x54 = 0x00950E00
 ```
 
 Thus `0x009640B0` is a native WinButton/activable-window vtable method. This closes method ownership,
-not payload provenance: its `+0x80/+0x84` source remains runtime/indirect and is not statically
-joined to `0x070D7509` or `0x070D74E7`.
+and its payload source is now statically tied to the WinButton's `ControlID`/`CommandID` fields.
+
+For EP1 object 74 (`Play Scenario`), the serialized pair is `ControlID=0x070D7509`, `CommandID=0`,
+so its generic activation payload is statically `0x070D7509`. EP1 object 87 separately carries
+`0x070D74E7`; the direct same-listener conversion to the `DE99B0` property branch is not proven.
 
 The seven state/UI constants used by the bounded handler/helper bodies were also found as actual
 SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](control-id-correlation.md).
