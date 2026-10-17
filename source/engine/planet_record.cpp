@@ -93,6 +93,16 @@ bool resource_keys(const starsdb::StarRecord& star,std::vector<pkg::ResourceKey>
     for (u32 i=0;i<*star.planet_count;++i) result.push_back({*star.key+i*0x01000000u,kResourceType,kResourceGroup});
     out=std::move(result); error.clear(); return true;
 }
+static bool unwrap_planet_resource(const std::vector<u8>& bytes,std::vector<u8>& out,std::string& error) {
+    if (bytes.size()>=8 && bytes[4]=='D'&&bytes[5]=='B'&&bytes[6]=='P'&&bytes[7]=='F') {
+        pkg::Package nested;
+        if (!nested.open_from_memory(bytes.data()+4,bytes.size()-4,"nested-planet-record")) { error="nested planet DBPF rejected"; return false; }
+        if (nested.records().size()!=1) { error="nested planet DBPF record count is not one"; return false; }
+        if (!nested.read_resource_decoded(0,out)) { error="nested planet DBPF record unreadable"; return false; }
+        return true;
+    }
+    out=bytes; return true;
+}
 bool select_save_stem(const starsdb::StarRecord& star,const std::vector<ResourceRecord>& records,
                       Selection& out,std::string& error) {
     std::vector<pkg::ResourceKey> expected;
@@ -143,8 +153,9 @@ bool read_selected_records(starsdb::ExplicitDbpfReader& reader,const starsdb::St
         if (resource.status!=starsdb::ResourceReadStatus::Found) { error=resource.error; return false; }
         if (resource.bytes.size()>64*1024*1024-aggregate) { error="planet batch exceeds 64 MiB host limit"; return false; }
         aggregate+=resource.bytes.size();
+        std::vector<u8> payload; if(!unwrap_planet_resource(resource.bytes,payload,error)) return false;
         ResourceRecord planet; planet.resource=key;
-        if (!read_record(resource.bytes,planet.record,error)) return false;
+        if (!read_record(payload,planet.record,error)) return false;
         if (planet.record.unvalidated_tail) { error="planet resource has unsupported trailing bytes"; return false; }
         result.push_back(std::move(planet));
     }
