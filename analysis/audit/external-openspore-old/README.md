@@ -184,6 +184,19 @@ but the generic Button capture/release/checked producer and CommandID route are 
 `IButton::Create` and Standard/Radio drawable names are useful search terms only; no complete native
 Button event contract was promoted from them.
 
+One more bounded lead is worth retaining for the next GA search. The external event map lists the
+SDK message-type vocabulary:
+
+```text
+button-click   = 0x17
+button-select  = 0x18
+```
+
+It also describes `EditorNamePanel::HandleUIMessage` as a direct `button-select` consumer carrying a
+boolean payload. This gives us candidate constants and a payload shape to search for in GA, but it
+does **not** establish that GA's GGE Button path uses the same handler, that `0x17/0x18` are present
+at the same addresses, or that either event posts `0x01654C10`.
+
 ### StarManager / planet regeneration
 
 The external `star-system-regen` dossier describes a bounded policy lead: a star with no planets,
