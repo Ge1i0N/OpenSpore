@@ -139,7 +139,8 @@ grid cells                    4,096         4,096         4,096
 
 `UserData` contains one additional saved StarRecord after the space-stage experiment: key
 `0x0039A02F`, flags `0x1007`, tech level 5, position `(-124.487,-389.697,-0.577652)`, save stem
-`Реберилиа`. The original `0x0041C023` row remains. Ronikari contains two saved rows (`0x009D4020`
+`Рамант` (the StarRecord name is `Реберилиа`; the former wording confused the two). The original
+`0x0041C023` row remains. Ronikari contains two saved rows (`0x009D4020`
 and `0x00524036`) and is marked modded/non-vanilla; its structural format is still useful evidence,
 but its package-edited semantics are not treated as vanilla behavior.
 The post-flight class-count delta is also bounded and interesting: `UserData1` has class
@@ -367,7 +368,10 @@ corpus but not proof of vanilla producer semantics.
 
 ## Derived snapshot boundary
 
-A temporary derived `GGE_CATALOG_V1` row was inspected, not committed:
+A historical temporary derived `GGE_CATALOG_V1` row was inspected, not committed. **It is not a
+trusted capture:** its terrain flag encoded a failed query that had not actually occurred, and the
+old utility could reuse one header across multiple saved references. The superseding diagnostic
+format below removes both problems. Historical output (not a current readiness claim):
 
 ```text
 saved_status=Available
@@ -387,23 +391,63 @@ the physical root/index/class/planet observations, but it does not prove the can
 `BB61C0`, candidate refill completion, terrain property success, or a complete caller catalogue.
 No empty candidate list is substituted for the absent/unknown candidate producer.
 
-The reproducible bridge is now `starsdb_gge_capture`; it accepts only explicit paths and writes a
-caller-selected new snapshot. It preserves **all** resolved saved manager references rather than
-choosing the first one; this matters because the post-flight `UserData` corpus has two saved rows:
+### Hardened structural capture: `GGE_SAVE_OBSERVATIONS_V1`
+
+`starsdb_gge_capture` no longer writes `GGE_CATALOG_V1`. That production format has no per-row
+Unknown terrain representation; putting `terrain=0` there means observed query failure, not an
+unexecuted query. The diagnostic JSON is intentionally rejected by the production snapshot loader.
+There is no migration that silently upgrades historical derived rows into trusted metadata.
+
+The replacement preserves **every** persisted saved/starter reference in serialized order, including
+null, missing-class, missing-object, unsupported-class and duplicate-reference outcomes. Each
+resolved row retains token, class, object index, optional StarRecord fields and source index. Empty
+observed lists remain different from absent/zero-size fields. Starter tech level is serialized source
+data, not GGE presentation stage 5. No starter name post-load service is implied.
+
+Saved rows independently record complete counted planet selection or a blocked/empty-filtered result.
+Each optional `--save-header` assigns **one explicit file to one saved index**, never to every row:
 
 ```powershell
 cmake --build build --config Debug --target starsdb_gge_capture
-.\build\Debug\starsdb_gge_capture.exe `
+.\build\bin\Debug\starsdb_gge_capture.exe `
   build\bin\Debug\UserData\Games\Game0\stars.db `
   build\bin\Debug\UserData\Games\Game0\planetRecords.pkp `
-  build\bin\Debug\UserData\Games\Game0\Золяко.spo `
-  C:\captures\game0-derived.txt
+  C:\captures\game0-observations.json `
+  --save-header 0 build\bin\Debug\UserData\Games\Game0\Золяко.spo `
+  --save-header 1 build\bin\Debug\UserData\Games\Game0\Рамант.spo
 ```
 
-The tool reads the explicit DBPF/context/classes, resolves every saved manager reference, unwraps the
-nested planet DBPF resources, reads the explicit save header, and emits one row per saved reference.
-It deliberately emits candidate/refill Unknown and terrain QueryFailed until those observations are
-provided by a real producer/property capture. It never scans or modifies UserData.
+The parent directory must already exist and the output must be NEW. The tool first constructs the
+whole JSON, writes an exclusively created sibling, flushes/closes it, then publishes without replacing
+any existing destination. Racing writers cannot overwrite each other. Ordinary failure removes only
+the sibling this invocation created; interruption can leave a `.partial-*` sibling, not partial final
+JSON. This is a publication policy, not a power-loss durability guarantee.
+
+Unicode argv/UTF-8 filesystem paths and strict surrogate-pair conversion preserve Cyrillic and
+supplementary characters. Invalid UTF-16/nonfinite coordinates block publication; float output uses
+classic locale and `max_digits10`, retaining binary32 round trips (including signed zero). Explicit
+header bindings reject duplicate/out-of-range indices, reuse of one file through canonical paths or
+filesystem aliases, filename/save-stem mismatches and undecodable headers. Filename agreement and a
+valid version header still **do not prove file ownership**; JSON labels the assignment as caller-made
+and `ownership_verified=false`. Unassigned rows keep header Unknown. No directory/save discovery runs.
+
+Read-only validation on the three current `Game0` corpora produced:
+
+| Corpus | Saved rows | Persisted starters | Individually assigned headers |
+|---|---:|---:|---|
+| UserData1 | 1 | 6 | index0 `Золяко.spo`: `(37,3)` |
+| UserData | 2 | 6 | index0 `Золяко.spo`, index1 `Рамант.spo`: each `(37,3)` |
+| Ronikari | 2 | 6 | index0 `Джос.spo`, index1 `Энтира.spo`: each `(37,3)` |
+
+All starter refs resolve to StarRecords, confirming the earlier order/key comparison. Terrain query,
+runtime refill and post-load fixups remain **Unknown**; `production_catalogue=false`. SHA-256 of each
+explicitly selected stars/planet/header input matched before and after the run. Reports are local
+temporary artifacts, not committed save data. Neither `snapshot.spo` nor unrelated Ronikari files
+were selected by this validation. No REA/Ghidra process was launched for this host-tool correction.
+
+Controlled integration tests cover distinct headers with `(37,3)` and `(32,99)`, Unicode paths/names,
+float precision, all reference outcomes, Unknown/absent/empty distinctions, invalid bindings,
+malformed Unicode/nonfinite rejection, blocked planets, concurrent publication and output protection.
 
 ## Next required observation
 
@@ -411,7 +455,7 @@ Use the same explicit save corpus to add a read-only capture adapter that preser
 
 - saved row/name/stage/flags/header/planet observations;
 - root/index/context/class resource outcomes;
-- candidate vector/refill state as Unknown until directly observed;
+- persisted candidate-source rows separately from the unobserved post-load/refill runtime vector;
 - terrain property state as Unknown or Failed unless a real property lookup is captured.
 
 Only after an authorized observation proves the candidate/refill side may a caller snapshot become
