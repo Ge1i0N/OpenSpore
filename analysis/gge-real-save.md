@@ -116,6 +116,19 @@ an additional StarRecord. The class meanings are not inferred yet.
 (`0x066B980B` is 12 bytes rather than 4, and fields `0x07CA2687/8` are nonzero). These are observed
 save deltas with unknown semantics, not readiness signals.
 
+The nested `0x07CA2689` frame has four fields in all three corpora:
+
+```text
+field             UserData1   UserData   Ronikari
+0x07DB67DB            172        172       1324
+0x07DB67DC            172        172       1324
+0x07DB67DD            172        172       1324
+0x07DB67DE              4         32        224
+```
+
+The post-flight growth of `0x07DB67DE` from 4 to 32 bytes is a real GGEUserData delta; Ronikari's
+larger 224-byte variant is modded/non-vanilla comparison evidence. Field semantics remain Unknown.
+
 ## Explicit UserData package inventory
 
 Package files can provide planet/editor/resource correlation, but they are not substitutes for
