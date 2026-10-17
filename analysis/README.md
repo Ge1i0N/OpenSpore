@@ -7,6 +7,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 
 | Topic | Document | Scope / caution |
 |---|---|---|
+| Community SDK / format references | [community-references](community-references.md) | pinned ModAPI/SporeModder-FX clones; secondary names/offsets, not native execution or automatic readiness |
 | SPUI binary framing / graph | [spui-binary](spui-binary.md) | current parser authority; 748-layout corpus |
 | Atlas / drawable subset | [spui-drawables](spui-drawables.md) | current implemented branches and GA instruction extracts |
 | UI overview | [ui](ui.md) | current navigation, links to deeper evidence |

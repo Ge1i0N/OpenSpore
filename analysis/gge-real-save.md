@@ -58,6 +58,42 @@ the nested payload remains opaque until its schema is independently recovered.
 
 ## Real StarManager observations
 
+**Candidate-source clarification:** the persisted `starters` list is the descriptor-backed
+`mStarterStarRecords` at manager `+0xDC`, the vector exposed to GGE by `BA6450`. Its saved references
+are already decoded/resolvable, not absent. What remains unobserved is the post-load/post-`BB61C0`
+runtime vector, terrain property results and refill completion. See
+[community-reference cross-check](community-references.md). This does not alter the admission gate.
+
+### Starter-reference comparison prompted by the SDK cross-check
+
+Read-only reinspection of the three explicitly authorized current `Game0/stars.db` files resolves
+**all six starter references in each corpus** to decoded StarRecords. The existing 16-reference
+inspector preview therefore covers each complete starter list, not just a sample. In serialized order:
+
+| Corpus | Starter StarRecord keys |
+|---|---|
+| `UserData1` (before) | `00B2F02E`, `005AF046`, `0039A02F`, `00599019`, `00B70018`, `0078E041` |
+| `UserData` (after) | `00B2F02E`, `005AF046`, `00599019`, `00B70018`, `0078E041`, `00BD9024` |
+| `UserDataRonikari` | `00A9702A`, `00B2F02E`, `0069102B`, `0041F020`, `0088D02F`, `00AE3044` |
+
+Before-to-after, `0039A02F` is removed from starters and appears in the saved list, while
+`00BD9024` is appended to starters; the five retained starter keys keep their relative order.
+Object-pointer tokens and decoded object indices change and are **not** cross-save identities.
+All 18 resolved starter rows have observed tech level 0, type 4 and planet count 5. These source
+values must not be confused with GGE presentation stage 5 written by the candidate builder.
+Ronikari is a separate corpus, not an additional before/after observation of the user's play session.
+
+This establishes a persisted-list transition consistent with the candidate-source interpretation,
+not a runtime trace of `BB61C0`, its selection algorithm, or proof of post-load catalogue readiness.
+The current check covers `Game0`, not an additional comparison of the `.old` copies.
+Reproduce separately for each explicit corpus (substitute only its authorized directory):
+
+```powershell
+build/bin/Debug/starsdb_dbpf_inspect.exe build/bin/Debug/UserData1/Games/Game0/stars.db 0x01897c18 0x01897c18 0x01897c18
+build/bin/Debug/starsdb_dbpf_inspect.exe build/bin/Debug/UserData/Games/Game0/stars.db 0x01897c18 0x01897c18 0x01897c18
+build/bin/Debug/starsdb_dbpf_inspect.exe build/bin/Debug/UserDataRonikari/Games/Game0/stars.db 0x01897c18 0x01897c18 0x01897c18
+```
+
 For `Game0\stars.db` the explicit DBPF/context reader observed:
 
 ```text

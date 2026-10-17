@@ -11,6 +11,10 @@ evidence now clarifies exactly what must produce that metadata:
 
 - `B3D3A0` returns global `0x0167EAE4`, the game catalogue/StarManager owner.
 - Existing/saved vector is `+0xF0/+0xF4`; `BA6450` exposes candidate vector `+0xDC/+0xE0`.
+  The retained serializer descriptor names `+0xDC` as `mStarterStarRecords` (field `0x03EA8676`),
+  which the real-save inspector already resolves. Persisted candidate-source references are therefore
+  available; the live post-refill vector remains a separate Unknown. See the pinned
+  [community-reference cross-check](community-references.md), which also agrees with these offsets.
 - `DF95A0` rebuilds the 0xBC record array, calls `DF7CB0` for candidates at
   `entry_begin + saved_count*0xBC`, then `DF7F30` for saved records at the front. It calls
   `DF9200` for per-record `UI/GGE_game_ui_data`, then `DF8300` effects. Thus candidate-first
