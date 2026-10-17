@@ -106,6 +106,10 @@ grid cells                    4,096         4,096         4,096
 `Реберилиа`. The original `0x0041C023` row remains. Ronikari contains two saved rows (`0x009D4020`
 and `0x00524036`) and is marked modded/non-vanilla; its structural format is still useful evidence,
 but its package-edited semantics are not treated as vanilla behavior.
+The post-flight class-count delta is also bounded and interesting: `UserData1` has class
+`0x018EB9D2=2121` and `0x042232A1=1`, while `UserData` has `2122` and `2`; StarRecord class
+`0x03E4353C` remains `42010`. This indicates new serialized state in other class streams, not merely
+an additional StarRecord. The class meanings are not inferred yet.
 
 `GGEUserData.dat` outer frames also differ: `UserData1` decoded frame 656 bytes with nested field
 `0x07CA2689` size 564; `UserData` 684/592; Ronikari 4340/4240. Ronikari's small fields also differ
