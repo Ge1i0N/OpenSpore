@@ -165,7 +165,7 @@ test with `-w -devDirs`; retain evidence and commit.
   retains old cards for diagnostics ONLY; Available-empty distinct. Unique host IDs, duplicate star
   IDs/source ordinal resets retained, tickets/frame serials/reentry guards,128cards/65536objects/32768windows.
   states::draw_gge_star_scene uses shared pixel-layer hook, no begin/end/clear or automatic caller.
-  gge_star_scene_verify:204 checks on actual layouts/PNG with controlled camera/metadata; untouched
+  gge_star_scene_verify:208 checks on actual layouts/PNG with controlled camera/metadata; caller producer-status gate; untouched
   template remains hidden/IgnoreMouse after current phase subset. Picking test clears ONLY root177
   IgnoreMouse in controlled copy, not native show behavior. No new GPU galaxy/native mount readiness.
   analysis/gge-star-scene.md / audit/gge-scene/ retain14 functions, globals and separate camera paths.
@@ -237,6 +237,19 @@ test with `-w -devDirs`; retain evidence and commit.
   structural families; `snapshot.spo` identical in shape to the civ save;
   cell save carries marker class `0xABCDEF00`, space save embeds its StarRecord.
   `analysis/real-saves.md`.
+- `analysis/gge-catalog-producer.md`: producer boundary explicit—B3D3A0 owner, saved +F0/+F4,
+  candidate +DC/+E0, DF95A0 saved-before-candidate publication despite candidate-first builder call,
+  DF7CB0/DF7F30 records, BB61C0 refill/generation, BB8C90/BB4D40 stars.db load/write. No real
+  stars.db/save corpus or profile scanning; CatalogInput Unknown stays blocked and preview entries
+  remain controlled. Next is caller-supplied catalogue capture or explicitly authorized native evidence.
+- `gge_catalog_snapshot.*`: strict caller-selected `GGE_CATALOG_V1` UTF-8 line snapshot (optional BOM),
+  hex UTF-8 names, explicit saved/candidate status/counts, required manager/starsdb/planet/refill producer statuses and saved header/probe/terrain fields.
+  Atomic parse, 16MiB/path/finite/count/row/END bounds; malformed/Unknown preserves prior output or
+  blocks build_catalog. Debug `ggepreview:load,<path>` reloads GGEHostPreview only after explicit
+  Available snapshot; failed load preserves current scene, no fallback/search/profile.
+  `gge_catalog_snapshot_verify`:10 checks including loaded-terrain/image-key pairing. analysis/gge-catalog-snapshot.md.
+  `gge_catalog_snapshot_inspect <snapshot>` prints parsed statuses/counts/order/duplicate star IDs,
+  positions/names/terrain without UI, writes, search or native readiness.
 
 ## Next, in order
 

@@ -99,7 +99,7 @@ python tools/feature_map.py --check  # проверка актуальности
 ```powershell
 # Из корня репозитория
 cmake -S . -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify planet_record_inspect gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify gge_star_input_verify game_stages_verify
+cmake --build build --config Debug --target OpenSpore spui_verify pkg_lifetime_verify overlay_clip_verify mode_ui_verify gge_intro_verify gge_dbcheck_verify gge_catalog_verify starsdb_verify starsdb_inspect starsdb_links_verify starsdb_context_verify starsdb_context_inspect starsdb_dbpf_verify starsdb_dbpf_inspect starsdb_postload_verify save_header_verify save_header_inspect planet_record_verify gge_star_present_verify gge_star_instance_verify gge_star_phase1_verify gge_image_verify gge_animated_verify gge_star_lifecycle_verify gge_streaming_image_verify gge_star_scene_verify gge_star_transition_verify gge_star_input_verify game_stages_verify cell_world_verify gge_catalog_snapshot_inspect
 ```
 
 Расположение данных рядом с собранным executable:
@@ -236,6 +236,13 @@ case4 не записывает native latch даже при return1. Серви
 Для ручного тыканья есть явно маркированный [GGEHostPreview](analysis/gge-host-preview.md): три
 карточки, реальный SPUI/atlas и настоящий input latch. Это controlled reconstruction, не live GGE state.
 Проверенный unattended запуск пишет `picked host card 20481 (host only)` и завершает работу с exit code 0.
+Следующий блокер описан в [catalogue producer boundary](analysis/gge-catalog-producer.md): native manager
+вектора/порядок `DF95A0` восстановлены, но настоящих `stars.db`/save данных нет и synthetic entries
+не подключаются как production catalogue.
+Для явно переданного capture-файла появился `ggepreview:load,<path>`; формат и строгие проверки описаны
+в [gge-catalog-snapshot.md](analysis/gge-catalog-snapshot.md). Без команды preview остаётся controlled.
+Проверить snapshot отдельно можно через `gge_catalog_snapshot_inspect <snapshot>` без запуска UI.
+Проверить snapshot отдельно можно через `gge_catalog_snapshot_inspect <snapshot>` без запуска UI.
 Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
 Первый шаг геймплея: скелет-драйвер `Game_Cell` (счётчик тиков без симуляции) на состоянии
 `CellGame`; остальные стадии и редакторы не реализованы. Подробнее: [game-stages](analysis/game-stages.md).

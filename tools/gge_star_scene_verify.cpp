@@ -60,6 +60,9 @@ int main(int argc,char** argv) {
         catalog.saved={saved};
         StarMetadata candidate; candidate.star_id=42; candidate.name=u"Controlled candidate"; candidate.position.z=1;
         catalog.candidates={candidate,candidate}; catalog.candidates[1].position.z=2;
+        auto caller_catalog=catalog; caller_catalog.source_label="caller-catalog.txt";
+        if (!check(!scene.open(caller_catalog,source,{},error),"caller-labelled catalogue with unknown producer observations is blocked")) return 1;
+        caller_catalog.producer.manager=caller_catalog.producer.starsdb=caller_catalog.producer.planet_records=caller_catalog.producer.candidate_refill=CatalogProducerStatus::Available;
         std::vector<StarSceneCardInput> inputs(3);
         for (size_t i=0;i<inputs.size();++i) {
             inputs[i].host_id=100+i; inputs[i].saved_insets=SavedInsets{0,0,0,0};
@@ -76,6 +79,8 @@ int main(int argc,char** argv) {
         for (auto& w:source.windows) if (w.object_index==177) w.flags&=~0x10u;
         const auto template_windows=source.windows;
         if (!check(scene.open(catalog,source,inputs,error)&&scene.size()==3&&scene.ticket()&&!scene.card(3),"explicit Available typed catalogue owns three real-layout cards")) return 1;
+        if (!check(scene.open(caller_catalog,source,inputs,error)&&scene.catalog_source()=="caller-catalog.txt"&&scene.producer_observations().manager==CatalogProducerStatus::Available,
+            "caller-labelled catalogue requires and retains all producer Available observations")) return 1;
         const auto ticket=scene.ticket();
         if (!check(scene.card(0)->instance()->entry().source_index==0&&scene.card(1)->instance()->entry().source_index==0&&
             scene.card(2)->instance()->entry().source_index==1&&scene.card(0)->instance()->entry().star_id==scene.card(2)->instance()->entry().star_id,

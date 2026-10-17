@@ -1,0 +1,6 @@
+# StarManager initialization/refill helpers aligned from BB8C90/BB4D40 instructions.
+0x00bb9d50	function	os_StarManager_set_flag20
+0x00bb9c50	function	os_StarManager_get_state4c
+0x00bb9c60	function	os_StarManager_test_flags5c
+0x00bb9c90	function	os_StarManager_get_path_flag50
+0x00bb9cf0	function	os_StarManager_get_planet_owner

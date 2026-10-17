@@ -18,6 +18,13 @@ The screen labels itself **GGE HOST PREVIEW (CONTROLLED)** and says that no nati
 callback is attached. It is registered only when `OS_ENABLE_DEV_COMMANDS` is set; release builds do
 not register it.
 
+`ggepreview:status` reports the current host status, structural catalog source, card count and
+producer observations in order `manager,starsdb,planet,refill`. Built-in entries have empty source
+and Unknown producer statuses; caller snapshots report their explicit path and statuses.
+An explicit snapshot with any producer status other than Available is rejected with
+`caller catalogue producer observations are not fully Available`; the existing built-in scene remains
+active rather than being replaced by a blocked or empty scene.
+
 Automated click through the same frame input path:
 
 ```powershell
@@ -32,8 +39,11 @@ Observed controlled log:
 ```
 
 The click is injected by `input::inject_click`, latched by the normal frame loop and consumed by
-`StarUiScene::pick`; it is not a parallel test-only hit function. The result intentionally ends at
-host identity: no DF7BF0/DF7AC0, CommandID, selected StarRecord or state transition is called.
+`StarUiScene::pick`; it is not a parallel test-only hit function. The selected card receives a
+visible host-only border and identity label. The result intentionally ends at host identity: no
+DF7BF0/DF7AC0, CommandID, selected StarRecord or state transition is called.
+Hover is shown separately with a cyan host-only border; click selection is yellow. This tests pointer
+feedback without treating hover as the native F8 route or selection as native FC.
 
 ## Boundary
 
@@ -58,3 +68,7 @@ IgnoreMouse, force every panel visible or synthesize a native phase latch. Norma
 
 Next: attach genuine catalogue and active-camera/input owners, then compare against original
 phase/callback behavior. MoviePlayer/DBCheck, factories, effects and gameplay remain unresolved.
+
+Final Debug x86 warning-free. The controlled preview smoke entered the state, rendered 30 frames,
+processed `spui:-click,640,360`, logged host card20481 and exited code0 with aborts/asserts0.
+The full prior suites remain passing; this state is deliberately excluded from release registration.

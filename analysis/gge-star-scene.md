@@ -109,7 +109,7 @@ proof of native dynamic Z, camera depth sorting or tooltip lifecycle.
 
 ## Verification and actual-asset boundary
 
-`gge_star_scene_verify`: **204 checks PASS**, both real 152-object/58-window layouts and actual
+`gge_star_scene_verify`: **208 checks PASS**, both real 152-object/58-window layouts and actual
 original-package atlas pixels. Metadata, camera matrices and saved insets are controlled inputs,
 not a recovered live catalogue/save/native camera.
 

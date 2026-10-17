@@ -88,8 +88,66 @@ flags at **+0xAC/+0xAD**, per-entry UI pointer at **+0xB8** (roles partly inferr
 - `0xDF6010` calls `0xDE3C20` for world-to-screen placement. Original camera/UI transforms, effects
   manager and metadata dependencies are not available in the host yet.
 
+REA static corroboration makes the projection contract more precise: `DF6010` is the `Play Spore`
+vtable `0x147EF50` slot `+0x68` method. It reads each record's position from `record +0x80`, calls
+`DE3C20`, then forwards the record pointer and projected values through the owning object's virtual
+slot `+0x64`, which resolves to `DF6110`; `DE3C20` obtains a renderer/camera-related service
+through virtual slot `+0x58` before computing normalized screen placement. The direct-call list is
+empty because this is vtable dispatch; the concrete camera owner and runtime trigger remain Unknown.
+Instruction-level REA evidence shows the returned `+0x58` result is passed as the `this` object to
+`7C4250`; `805F90` supplies viewport state, and `DE3C20` applies the normalized screen transform.
+REA distinguishes this projection service from the controller's stored active-camera field:
+`DE46D0` obtains controller `+0x198` through `0067DCD0` slot `+0x50`, then returned-object slot
+`+0x38`, while `DE3C20` uses the getter's `+0x58` path. `DF6490` also uses `+0x58` for nearest
+record selection. Their identity is therefore not assumed equivalent in the host.
+REA also separates the UI-bounds service used by `DF6110`: it is acquired through registry lookup
+`00810650(0x02E5A4A8,0)`, whose `008102A0` implementation queries interface `0xEEEE8218` and
+matches the requested service ID. `DF6110` then uses that service's `+0x34/+0x38` values together
+with `805F90` viewport state. The service identity is Unknown; it is not treated as the projection
+camera or controller camera.
+The registry is shared more broadly: REA reports callers `00810650`, `008113D0`, and `00812590`.
+`008113D0`'s no-match branch enumerates providers implementing `0xEEEE8218`, combines their
+`+0x38` rectangles, and applies provider `+0x64`; the concrete provider for `0x02E5A4A8` remains
+Unknown. This supports a UI/display-service registry interpretation, not a camera identity claim.
+The broader REA call chain is `00812100/00811C70 → 00811C20 → 008113D0 → 008102A0`;
+`00811C20` invokes the active display/layout object's `+0xD8` for each provider exposing
+`0xEEEE8218`. This confirms provider synchronization, but still does not identify which provider
+satisfies `0x02E5A4A8`. The owner-switch callers for `00812100` resolve to `008121C0` and
+`008122A0`; `00811C70` itself has no resolved direct callers. The remaining gap is the concrete
+provider/owner creation path, not the registry matching or synchronization semantics.
+REA further shows `008121C0` creates/selects a `UI/LayoutObjects` instance through `00811070`,
+copies its caller-supplied three-word key into owner fields, and only then calls `00812100`; the
+factory publishes resource key `0x022568E7`. The key's relation to provider ID `0x02E5A4A8` is not
+resolved, so the concrete display provider remains Unknown.
+REA resolves the lifecycle around that registry: `00812100` replaces the display/layout owner at
+`+0x88` through `008106C0` and calls `00811C20`; `00811C70` syncs the providers, invokes owner
+callback `+0x8C`, and initializes resource key `0x2FBF2058`. This remains a display/layout path;
+no projection-camera identity is inferred from it.
+This is static shipped-artifact evidence, not an observation of a running GA process.
+The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
+`DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence
+shows that the `Play Spore` constructor installs vtable `0x147EF50` and slot `+0x64` points to
+`DF6110`. `DF6110` checks `record +0xB8` and uses the UI object's bounds to clamp the projected
+target. The camera owner behind `DE3C20` slot `+0x58` and runtime trigger remain Unknown; host
+selection still must not route through an invented camera/controller path.
+
 This explains why forcing the primary layout's hidden windows visible cannot recreate game choice:
 the actual star UI is instantiated **per live game record** and driven by scene projection.
+
+REA vtable evidence places `DF9740` at `Play Spore` slot `+0x38` and `DF6010` at slot `+0x68`.
+`DF9740` gates on internal state `2`, then calls `DF95A0` to rebuild records/UI data before continuing
+to `DF6C10`; this is the native lifecycle seam for catalogue publication. The external state/message
+dispatcher that enters this vtable method remains unresolved.
+The secondary rebuild route is a separate controller/data vtable: REA bytes place `DE32B0` at
+`0x147DC60 +0x00`, not in the `Play Spore` vtable. This preserves two native entry routes to
+`DF95A0` without assigning either one a guessed outer phase/message ID.
+The exact post-rebuild continuation and its outer dispatch are retained as REA unknown
+`unk_62a04a0f821caf905e18ac86c10eeff41d3e79597e2165afa62a07039ccab2cc`; the next probe should be
+bounded assembly/reference inspection, not another broad Ghidra decompilation.
+Retained assembly confirms the exact order before that unknown: state `+0x108 == 2`, show control
+`0x0615A5FF`, `GlobalUI::show(1)`, `DF95A0`, then unconditional jump to `DF6C10`. Thus the state-2
+admission and catalogue rebuild are observed static edges; only the post-jump continuation remains
+unresolved.
 
 ## Verification and next boundary
 

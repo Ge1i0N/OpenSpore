@@ -72,6 +72,8 @@ public:
     u64 ticket() const { return ticket_; }
     size_t size() const { return cards_.size(); }
     CatalogAvailability catalog_status() const { return catalog_available_?CatalogAvailability::Available:CatalogAvailability::Unknown; }
+    const std::string& catalog_source() const { return catalog_source_; }
+    const CatalogProducerObservations& producer_observations() const { return producer_; }
     const StarUiLifecycle* card(size_t index) const;
     // Borrowed layouts valid until mutation/open/close/destruction. Stale/Unavailable frames yield no
     // layers/hits; a paint callback should not mutate this owner while consuming these views.
@@ -88,6 +90,8 @@ private:
     StarSceneFrame frame_;
     bool busy_=false;
     bool catalog_available_=false;
+    std::string catalog_source_;
+    CatalogProducerObservations producer_;
     void retire_frame();
 };
 }  // namespace os::gge

@@ -118,6 +118,7 @@ set(OS_SOURCES
   source/engine/gge_intro.cpp
   source/engine/gge_dbcheck.cpp
   source/engine/gge_catalog.cpp
+  source/engine/gge_catalog_snapshot.cpp
   source/engine/serialized_frame.cpp
   source/engine/starsdb.cpp
   source/engine/starsdb_links.cpp
@@ -301,6 +302,12 @@ add_executable(cell_world_verify EXCLUDE_FROM_ALL tools/cell_world_verify.cpp
 target_include_directories(cell_world_verify PRIVATE source)
 target_compile_definitions(cell_world_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_link_libraries(cell_world_verify PRIVATE user32 gdi32)
+add_executable(gge_catalog_snapshot_verify EXCLUDE_FROM_ALL tools/gge_catalog_snapshot_verify.cpp
+  source/engine/gge_catalog_snapshot.cpp source/engine/gge_catalog.cpp)
+target_include_directories(gge_catalog_snapshot_verify PRIVATE source)
+add_executable(gge_catalog_snapshot_inspect EXCLUDE_FROM_ALL tools/gge_catalog_snapshot_inspect.cpp
+  source/engine/gge_catalog_snapshot.cpp source/engine/gge_catalog.cpp)
+target_include_directories(gge_catalog_snapshot_inspect PRIVATE source)
 add_executable(starsdb_inspect EXCLUDE_FROM_ALL tools/starsdb_inspect.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp)
 target_include_directories(starsdb_inspect PRIVATE source)
 add_executable(pkg_lifetime_verify EXCLUDE_FROM_ALL tools/pkg_lifetime_verify.cpp
@@ -340,6 +347,8 @@ if(MSVC)
   target_compile_options(gge_star_input_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(game_stages_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(cell_world_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(gge_catalog_snapshot_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(gge_catalog_snapshot_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(starsdb_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(pkg_lifetime_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(overlay_clip_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
