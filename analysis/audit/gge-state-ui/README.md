@@ -32,6 +32,18 @@ This strengthens the classification of `0x070D7509` as a shipped GA GGE UI/contr
 does **not** identify a mouse/button producer, a CommandID route, or a post to ScenarioMode tag
 `0x01654C10`; those remain Unknown.
 
+### Native attachment cross-check
+
+`DE5900` is now bounded as the native attachment owner for this table. It requests the GGE layout,
+looks up each identity through `00810650`, and calls the resolved window's vtable `+0x104`
+(`IWindow::AddWinProc`) with the GGE object subinterface at `object +0x04`. `DE6120` initializes
+that subinterface with vtable `0x0147E030`, whose slot `+0x18` is `DE99B0`.
+
+Consequently, `0x070D7509` is not merely a serialized orphan: under the observed `6854E0(2)` guard
+it receives the same native GGE listener attachment as `0x070D74E7`. This proves the control-to-
+listener registration edge, but not the later event payload conversion. The listener's recognized
+component ID remains `0x070D74E7`, distinct from the Play Scenario ControlID `0x070D7509`.
+
 ### Direct caller inventory
 
 The local `.text` scan for direct `E8 rel32` calls found:

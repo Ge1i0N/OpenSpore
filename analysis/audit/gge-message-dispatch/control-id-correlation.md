@@ -45,9 +45,15 @@ serialized   WinProcs property absent
 ```
 
 This proves the control is a real serialized window/object with the expected caption and parent,
-but its event/WinProc attachment is not present in the serialized SPUI object. The absence is not
-treated as “no handler”: it narrows the remaining producer search to dynamic/native attachment,
-layout lifecycle or generic event routing.
+but its event/WinProc attachment is not present in the serialized SPUI object. GA `DE5900` now
+provides the native explanation: after the GGE layout request it resolves `0x070D7509` through
+`00810650` and calls the resolved window's `IWindow::AddWinProc` slot `+0x104`, attaching the GGE
+multi-vtable object's `+0x04` interface. The absence is therefore not treated as “no handler”.
+
+The remaining producer question is narrower but still open: the attached `DE99B0` listener accepts
+UTFWin `kMsgComponentActivated` and recognizes `0x070D74E7`, while the attached control's identity
+is `0x070D7509`. Static attachment does not by itself establish the click-to-payload conversion or
+runtime execution.
 
 The `0x036C4A10` match is the strongest current UI→state corroboration: the shipped `Dev` control
 and the native handler branch share the exact value, and the native branch calls the SDK-compatible

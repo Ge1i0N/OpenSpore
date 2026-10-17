@@ -40,6 +40,49 @@ DE99B0 event branch → controller state/request fields
 The exact indirect caller that invokes the Play Spore vtable `+0x38 = DF9740` remains a separate
 boundary. Setting fields in a static branch is not runtime execution or catalogue readiness.
 
+## ✔️ Milestone: native WinProc attachment for the GGE controls
+
+The GA body `DE5900` is the native attachment path that follows the GGE layout request. After
+calling `812250` with layout tag `0x0510A95B`, group `0x40464100` and mount `0x05B598FA`, it builds
+the following UI-identity table:
+
+```text
+0x0615B966
+0x061DD69B
+0x0615B616
+0x070D74E7
+0x070D7509
+```
+
+For each resolved window, `DE5900` performs:
+
+```text
+00810650(identity)
+→ resolved IWindow
+→ IWindow vtable +0x104 (AddWinProc)
+→ attach object +0x04
+```
+
+The first three identities are attached unconditionally; the final two, including the serialized
+`Play Scenario` ControlID `0x070D7509`, are attached under the observed `6854E0(2)` feature guard.
+`DE5900` is called by `DEA1B0`, not by the generic UTFWin Button dispatcher.
+
+The attached `object +0x04` is not an analyst-invented callback: constructor `DE6120` writes
+`0x0147E030` at that subobject, and vtable `0x0147E030 +0x18` is `DE99B0`. Therefore the static
+attachment edge is now:
+
+```text
+GGE layout/control identity
+  → 00810650
+  → IWindow::AddWinProc(+0x104)
+  → GGE multi-vtable object +0x04
+  → vtable +0x18 = DE99B0
+```
+
+This closes the **native attachment** gap and explains why the SPUI `WinProcs` property is absent.
+It does not yet prove that a click on `0x070D7509` produces component ID `0x070D74E7`: `DE99B0`
+still compares those values separately, and no original runtime message has been observed.
+
 The seven state/UI constants used by the bounded handler/helper bodies were also found as actual
 SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](control-id-correlation.md).
 The bounded GA immediate scan found no separate MessageManager producer for them, so they remain
