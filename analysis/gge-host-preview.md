@@ -10,6 +10,16 @@ cmake --build build --config Debug --target OpenSpore
 .\build\bin\Debug\OpenSpore.exe -w -devDirs -state:GGEHostPreview
 ```
 
+The reproducible launcher is retained at:
+
+```text
+tools/run_gge_host_preview.bat
+```
+
+It builds `OpenSpore` if needed and starts the Debug/dev-only controlled preview. It is not a native
+GA runner. It also injects the existing `(640,360)` host-picking smoke click and exits after 30
+frames.
+
 ### Explicit real-save host preview
 
 The same Debug-only state accepts a separate host format built from explicitly selected structural
@@ -71,6 +81,42 @@ DF7BF0/DF7AC0, CommandID, selected StarRecord or state transition is called.
 Hover is shown separately with a cyan host-only border; click selection is yellow. This tests pointer
 feedback without treating hover as the native F8 route or selection as native FC.
 
+## Explicit host-only ScenarioMode diagnostic
+
+After a card has been selected, the Debug-only console command:
+
+```text
+ggepreview:scenario
+```
+
+copies the selected card's host metadata into an explicit diagnostic request and queues the separate
+`ScenarioHostDiagnostic` state. The diagnostic displays:
+
+```text
+selected host star
+requested GA mode tag = 0x01654C10 (ScenarioMode)
+native ScenarioMode = NotExecuted
+```
+
+This is deliberately a **HostOnly** handoff. It does not call the native mode registrar, create a
+`ScenarioMode` driver, load a planet/stage, emit `ScenarioGAButtonClicked`, or claim that the original
+Play Scenario control was clicked. It exists to make the selected-star → requested-mode boundary
+executable and inspectable without promoting the unresolved native producer path.
+
+The preview still reports the selected card first; the command must be issued after that selection.
+Returning with `state GGEHostPreview` reopens the controlled card scene. The diagnostic is registered
+only under `OS_ENABLE_DEV_COMMANDS`.
+
+The direct empty-request smoke launcher is retained at:
+
+```text
+tools/run_scenario_host_diagnostic.bat
+```
+
+It intentionally enters `ScenarioHostDiagnostic` without a selected-star request, so the visible
+result is the explicit failed/no-request branch. The successful HostOnly handoff still requires a
+card selection followed by `ggepreview:scenario`.
+
 ## Boundary
 
 The preview uses explicit controlled camera/catalogue data because no real `stars.db`/save producer,
@@ -93,7 +139,8 @@ IgnoreMouse, force every panel visible or synthesize a native phase latch. Norma
   controlled typed observations.
 
 Next: attach genuine catalogue and active-camera/input owners, then compare against original
-phase/callback behavior. MoviePlayer/DBCheck, factories, effects and gameplay remain unresolved.
+phase/callback behavior. The new host-only selected-star handoff does not change that boundary.
+MoviePlayer/DBCheck, factories, effects and gameplay remain unresolved.
 
 Final Debug x86 warning-free. The controlled preview smoke entered the state, rendered 30 frames,
 processed `spui:-click,640,360`, logged host card20481 and exited code0 with aborts/asserts0.
