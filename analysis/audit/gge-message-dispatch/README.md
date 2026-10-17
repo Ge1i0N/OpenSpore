@@ -188,6 +188,20 @@ visible key argument is `0x049B48EE`, not either Scenario property ID. This is a
 result against the inspected direct setter users only; it does not exclude a virtual/generic writer
 whose key arrives from a loaded definition or another data path.
 
+### Published property-service pointer
+
+`DF6C10` obtains its property/query service through global `DAT_015FD91C`. The selected GA binary
+also contains the small setter stub:
+
+```text
+0x0067DED0:
+  argument → DAT_015FD91C
+```
+
+This confirms a runtime-published service-pointer layer between the Scenario helpers and the
+generic property system. The service's semantic owner and the caller that publishes it remain
+Unknown; no Scenario-specific write is inferred from the setter stub alone.
+
 ## Property-name string search
 
 The selected GA binary contains no matching plaintext strings for:
