@@ -131,6 +131,78 @@ our GA bytes + REA/Ghidra     -> address/body/ABI/vtable decision
 
 No passport record was imported into `analysis/audit/`, `source/` or the runtime.
 
+## Semantic leads for our current Unknowns
+
+The extracted research corpus is still useful when read as a question generator. These are the
+highest-value leads found during the bounded search; none imports the external VA.
+
+### Scenario and game-mode axes
+
+The external conflict-adjudication and gameplay-transition notes explicitly keep these separate:
+
+```text
+App::cGameModeManager active index
+Simulator::cGameModeManager / strategy commit
+SpaceContext
+App::cScenarioMode::mMode
+cGameInputManager current mode
+```
+
+That is a useful corroborating design constraint for our ScenarioMode work. It supports keeping
+the selected-star → ScenarioMode handoff as an unresolved boundary instead of treating an App state,
+Simulator strategy, input mode and scenario mode word as one state variable.
+
+The external corpus also records a semantic-only `cScenarioPlayMode` layout lead:
+
+```text
+size                    264 bytes
+mCurrentPlayModeState   +0x90
+mCurrentActIndex        +0xB8
+mTimeLimitMS            +0xBC
+mCurrentTimeMS          +0xC0
+mAdventurePoints        +0xC4
+```
+
+These are **not** our GA offsets. The next valid use is to inspect the current GA SDK contract and
+then corroborate fields against the GA ScenarioPlayMode body/vtable after the selected-star handoff
+is real.
+
+### UTFWin/Button boundary
+
+The external event map gives a useful narrow seam:
+
+```text
+Window::SendMsg
+  -> IWinProc priority/event flags
+  -> IWinProc::HandleUIMessage
+  -> event-specific InteractiveWinProc callback
+```
+
+It leaves callback consumption, bubbling, focus, tie ordering and thread affinity unresolved. This
+matches our current GA boundary: serialized SPUI identity and the UTFWin message offsets are known,
+but the generic Button capture/release/checked producer and CommandID route are not. The external
+`IButton::Create` and Standard/Radio drawable names are useful search terms only; no complete native
+Button event contract was promoted from them.
+
+### StarManager / planet regeneration
+
+The external `star-system-regen` dossier describes a bounded policy lead: a star with no planets,
+after a timing guard, records observation time, removes a pending entry, resets manager state and
+calls a planet-generation routine. This may guide a later GA probe around the existing
+StarManager/refill work, but it is not the GGE candidate refill contract and does not establish
+that `BB61C0` or the GGE refresh ran.
+
+### Resulting probe order
+
+```text
+1. Use the GA-confirmed ScenarioMode registrar/vtable, plus the external field names only as
+   candidate labels for the post-selection ScenarioPlayMode pass.
+2. Continue GA UTFWin Button/WinProc static tracing around the exact GA Window message boundary;
+   do not import external addresses or assume a button click posts the ScenarioMode tag.
+3. Keep cStarManager planet-generation leads separate from GGE candidate refill and save-backed
+   host preview statuses.
+```
+
 ## What we must not import as a claim
 
 ```text
