@@ -109,6 +109,32 @@ DF9112  → separate GGE per-entry/UI lifecycle cleanup path
 This is another shared UI target rather than a unique Play Scenario control. Its semantic name and
 the exact relationship between the two lifecycle uses remain Unknown.
 
+## ✔️ Milestone: semantic names for the state-2 Scenario properties
+
+The GA bytes use two previously opaque property IDs in the `DF6C10` continuation:
+
+```text
+0x080D7DE1
+0x080D97FE
+```
+
+Secondary registry/config references independently label these IDs as:
+
+```text
+0x080D7DE1 = ScenarioGAButtonClicked
+0x080D97FE = ScenarioGAFirstLaunched
+```
+
+Sources for the names are the local SporeModder-FX `reg_property.txt` and the user-supplied final
+`DataEP1/Config/Properties.txt`; they are semantic corroboration, not GA address authority. The
+primary GA fact is stronger and separate: `DF6C10` actually queries both IDs, reads their boolean
+property payloads, and changes the GGE UI targets `0x0806A310` and `0x0806AA00` accordingly.
+
+This is the first concrete static link between the “Scenario GA button” semantic surface and the
+Play Spore state-2 continuation. It narrows the missing route from an unknown generic Button path
+to a property-mediated path. It is **not** yet a runtime click observation and does not prove that
+the property write enters `ScenarioMode` or posts tag `0x01654C10`.
+
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
 The apparent continuation at `DE9AD0` is not a separate message handler: the preceding `int3` run
