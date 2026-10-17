@@ -28,3 +28,5 @@
 0x00748C90	function	os_graphics_event_00748C90
 0x00744700	function	os_graphics_event_00744700
 0x00753C10	function	os_graphics_event_00753C10
+0x0084BCD0	function	os_canvas_listener_0084BCD0
+0x0084B6E0	function	os_canvas_listener_dispatch_0084B6E0

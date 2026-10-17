@@ -128,6 +128,10 @@ handler `0x00DDDF40`. Its exact option table is:
 The handler routes into native level state/services through `FUN_0083BAA0`; OpenSpore keeps its host
 `levels -unlock` response explicit because that backend is not connected.
 
+A bounded immediate scan found several higher App/UI callsites carrying event id `0x1EE1001`, but
+some reported offsets are inside uncarved bodies or dispatch data rather than function entries. They
+are retained as callsite leads, not falsely promoted to standalone Ghidra functions.
+
 The vtable mapping is now explicit: `AppConsole` vtable `0x0140195C + 0x00` points to
 `FUN_0067EAA0` (line parser/dispatcher), while `+0x04` points to `FUN_0067E240` (help description).
 The CheatManager vtable `0x01401B40 + 0x38` points to `FUN_0067EF20` (command execution/result
