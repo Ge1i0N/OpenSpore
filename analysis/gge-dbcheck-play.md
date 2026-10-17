@@ -151,6 +151,31 @@ Retained assembly confirms the exact order before that unknown: state `+0x108 ==
 admission and catalogue rebuild are observed static edges; only the post-jump continuation remains
 unresolved.
 
+### Bounded `DF6C10` continuation prefix
+
+A local GA `objdump` pass now closes part of that post-jump boundary without claiming the whole
+continuation. The observed prefix of `DF6C10`:
+
+```text
+resource/event lookup 0x080D7DE1
+  → inspect returned record word +0x12 == 1
+  → helper 0x0041E8E0 supplies a boolean
+  → lookup UI target 0x0806A310
+  → UI vtable +0x7C(1, !boolean)
+
+resource/event lookup 0x080D97FE
+  → inspect returned record word +0x12 == 1
+  → conditional lookup UI target 0x0806AA00
+  → UI vtable +0x7C(1, 0)
+  → construct/forward a bounded payload through the observed event helpers
+```
+
+The body also reads a timing/configuration record around `this +0x38`, with an `RDTSC`/QPC-style
+fallback path in the surrounding helper. This is a structural prefix only: exact resource semantics,
+message payload meaning, camera/effects ownership, and the outer caller remain Unknown. The prefix
+contains no `Play Scenario` ControlID `0x070D7509`, no CommandID `0x00E1132F`, and no ScenarioMode
+tag `0x01654C10`.
+
 ## Verification and next boundary
 
 `gge_dbcheck_verify <SPUI fixtures>` checks the real dialog corpus/root, explicit descriptor,
