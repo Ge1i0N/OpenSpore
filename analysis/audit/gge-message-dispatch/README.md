@@ -50,7 +50,8 @@ value `0x070D74E7`; the values differ and the bounded native scan finds the form
 
 Conversely, `0x036C4A10` is directly corroborated as the `Dev` ControlID in `GlobalUIGGE-9` and as
 the `DE99B0` branch that invokes StateManager-compatible vtable `+0x28(1)`. This is the current
-strongest shipped-UI-to-state link; it is still static evidence, not a runtime click observation.
+strongest shipped-UI-to-state link. The state script identifies target id 1 as `DevLauncher`, not
+Play Spore state 2; it is still static evidence, not a runtime click observation.
 
 The related state-to-UI helper `DE48C0` maps controller state 5/13 to UI IDs `0x061DD69B` and
 `0x070D74E7`, respectively, via `00810650` and control vtable `+0x28`. Its retained evidence is

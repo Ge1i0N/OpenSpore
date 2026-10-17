@@ -8,7 +8,7 @@ package priority or execute a native UI message.
 
 | Value | Shipped layout/control observation |
 |---:|---|
-| `0x036C4A10` | `GlobalUIGGE-9` object 133, inline caption `Dev`, parent object 1490; the same value is handled by `DE99B0` through StateManager vtable `+0x28(1)` |
+| `0x036C4A10` | `GlobalUIGGE-9` object 133, inline caption `Dev`, parent object 1490; the same value is handled by `DE99B0` through StateManager vtable `+0x28(1)`, which the shipped state table identifies as explicit `DevLauncher` state id 1 |
 | `0x062D88E9` | `GlobalUIGGE-9` root copy: PatchData/Spore_Graphics object 266; EP1 copy object 276 |
 | `0x0615B966` | `GGEZoomPanel` object 57; EP1 `GGEZoomPanelV2` object 53 |
 | `0x0615B616` | `GGEZoomPanel` object 35; EP1 `GGEZoomPanelV2` object 64 |
@@ -31,8 +31,10 @@ references whose table/key resolution is intentionally not substituted here.
 
 The `0x036C4A10` match is the strongest current UI→state corroboration: the shipped `Dev` control
 and the native handler branch share the exact value, and the native branch calls the SDK-compatible
-StateManager `+0x28(1)` slot. This still does not prove the complete UI dispatch scheduler or live
-state transition execution.
+StateManager `+0x28(1)` slot. The shipped `SporeAppStates` table assigns explicit id 1 to
+`DevLauncher`, not `Play Spore`; therefore this control is a developer/launcher route and must not
+be presented as the gameplay state-2 entry. This still does not prove the complete UI dispatch
+scheduler or live state transition execution.
 
 The similarly named state/UI value `0x070D74E7` is a different value. `find_imm` finds
 `0x070D7509` only in the `DE48C0`/`DE5900` UI-control tables in the bounded native scan; no direct
