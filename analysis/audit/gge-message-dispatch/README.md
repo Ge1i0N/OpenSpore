@@ -252,6 +252,58 @@ Scenario property ID and does not call the GA `PropertyList::SetProperty` candid
 This is retained as value-record construction/normalization, not a Scenario property mutation.
 ```
 
+## ✔️ Milestone: direct Preferences writers recovered
+
+The missing Scenario-specific writer is now observed statically in the GA bytes.
+
+### `ScenarioGAButtonClicked`
+
+Inside the `DE99B0` listener body, the guarded `0x070D74E7` branch reaches `DE9C4E` and performs:
+
+```text
+lookup Preferences object: DAT_015FD91C
+build boolean Property value: 0x005DD790
+load Preferences vtable +0x14
+call SetProperty(0x080D7DE1, value)
+```
+
+The surrounding branch first updates UI target `0x0806A310`, then writes the property through the
+same Preferences object. The setter call is visible at the `DE9CC5..DE9CCC` instruction sequence.
+
+### `ScenarioGAFirstLaunched`
+
+The `DF6C10` state-2 continuation performs the same generic setter shape:
+
+```text
+build boolean Property value: 0x005DD790
+load Preferences vtable +0x14
+call SetProperty(0x080D97FE, value)
+```
+
+The setter call is visible at `DF6D05..DF6D0C`, after the `0x080D97FE` property query and related
+UI target `0x0806AA00` handling.
+
+### Corroborating launch flags
+
+The same `Preferences vtable +0x14` setter shape is used by nearby Scenario editor paths for:
+
+```text
+0x080D8460 ScenarioCaptainEditorLaunched
+0x080D8470 ScenarioAdventureEditorLaunched
+```
+
+This closes the generic writer gap for the observed property family. It does **not** yet prove that
+the `Play Scenario` ControlID `0x070D7509` is the producer of the `0x070D74E7` event. What is now
+static-confirmed is:
+
+```text
+0x070D74E7 listener branch
+  → Preferences::SetProperty(ScenarioGAButtonClicked, true)
+  → controller state 13
+```
+
+Runtime click execution and the final `ScenarioMode` transition remain separate gates.
+
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
 The apparent continuation at `DE9AD0` is not a separate message handler: the preceding `int3` run
