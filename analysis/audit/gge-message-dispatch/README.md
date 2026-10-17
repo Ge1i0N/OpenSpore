@@ -144,8 +144,8 @@ The confirmed owner is instead the GA WinButton family initialized by `0x00966EB
 object +0x00 = 0x01441390
 object +0x04 = 0x01441270
 0x01441390 +0x94 = 0x009640B0
-0x01441390 +0x50 = 0x00965150 (SetControlID)
-0x01441390 +0x54 = 0x00963F20 (SetCommandID)
+0x01441390 +0x50 = 0x00966B80
+0x01441390 +0x54 = 0x00950E00
 ```
 
 Thus `0x009640B0` is a native WinButton/activable-window vtable method. This closes method ownership,

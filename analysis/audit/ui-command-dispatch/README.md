@@ -246,15 +246,17 @@ The activation producer is an actual entry in that native vtable family:
 vtable 0x01441390 +0x94 → 0x009640B0
 ```
 
-The same vtable's SDK-defined identity slots are present in GA:
+The same object also has nearby GA entries, but this vtable is not being conflated with the SDK's
+standalone `IWindow` slot numbering:
 
 ```text
-vtable +0x50 → 0x00965150 = IWindow::SetControlID
-vtable +0x54 → 0x00963F20 = IWindow::SetCommandID
+vtable +0x50 → 0x00966B80
+vtable +0x54 → 0x00950E00
 ```
 
-These setters establish the serialized `ControlID`/`CommandID` ownership surface, but they do not
-by themselves write the producer's `+0x80/+0x84` payload fields.
+No SDK name is assigned to these two entries from this join alone. The serialized `ControlID` and
+`CommandID` remain data properties, while the exact setter owner for the producer's `+0x80/+0x84`
+payload fields remains Unknown.
 
 This is stronger than address adjacency: `0x009640B0` is confirmed as a method of the derived
 GA button/activable-window object. The base constructor zeroes its `+0x80/+0x84` fields, but the
