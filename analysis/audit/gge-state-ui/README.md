@@ -85,6 +85,29 @@ gap:
 Its role is narrowed to shared/internal GGE message handling plus lifecycle/UI helpers; the
 upstream producer and payload route remain Unknown.
 
+### Shared multi-vtable GGE object
+
+The constructor/initializer body `DE6120` writes four vtable pointers into one object:
+
+```text
+object +0x00 = 0x0147E04C
+object +0x04 = 0x0147E030
+object +0x08 = 0x0147E020
+object +0x0C = 0x0147E014
+```
+
+This connects the two previously separate observations:
+
+```text
+object +0x0C → vtable 0x0147E014 → DE8A80
+object +0x04 → vtable 0x0147E030 → DE99B0
+```
+
+The object is therefore a multi-interface/multi-vtable GGE object, not two unrelated handler
+functions. `DE99B0` remains the observed event-listener/state branch; `DE8A80` is the adjacent
+internal message-handler interface. This structural connection still does not identify the
+upstream `Play Scenario` producer or a ScenarioMode post.
+
 ## Reproduction
 
 ```powershell
