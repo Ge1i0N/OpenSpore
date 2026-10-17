@@ -1,0 +1,43 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  dde810:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  dde814:	db 44 24 04          	fild   DWORD PTR [esp+0x4]
+  dde818:	85 c0                	test   eax,eax
+  dde81a:	7d 06                	jge    0xdde822
+  dde81c:	d8 05 c0 4f 3f 01    	fadd   DWORD PTR ds:0x13f4fc0
+  dde822:	d8 0d 58 94 3f 01    	fmul   DWORD PTR ds:0x13f9458
+  dde828:	51                   	push   ecx
+  dde829:	b9 48 30 5a 01       	mov    ecx,0x15a3048
+  dde82e:	d9 1c 24             	fstp   DWORD PTR [esp]
+  dde831:	e8 4a fd ff ff       	call   0xdde580
+  dde836:	f3 0f 10 1d 48 30 5a 	movss  xmm3,DWORD PTR ds:0x15a3048
+  dde83d:	01
+  dde83e:	f3 0f 10 25 4c 30 5a 	movss  xmm4,DWORD PTR ds:0x15a304c
+  dde845:	01
+  dde846:	f3 0f 10 2d 50 30 5a 	movss  xmm5,DWORD PTR ds:0x15a3050
+  dde84d:	01
+  dde84e:	f3 0f 10 35 d0 d9 47 	movss  xmm6,DWORD PTR ds:0x147d9d0
+  dde855:	01
+  dde856:	f3 0f 10 05 54 30 5a 	movss  xmm0,DWORD PTR ds:0x15a3054
+  dde85d:	01
+  dde85e:	f3 0f 10 0d 58 30 5a 	movss  xmm1,DWORD PTR ds:0x15a3058
+  dde865:	01
+  dde866:	f3 0f 10 15 5c 30 5a 	movss  xmm2,DWORD PTR ds:0x15a305c
+  dde86d:	01
+  dde86e:	f3 0f 5c c3          	subss  xmm0,xmm3
+  dde872:	f3 0f 5c cc          	subss  xmm1,xmm4
+  dde876:	f3 0f 5c d5          	subss  xmm2,xmm5
+  dde87a:	f3 0f 59 c6          	mulss  xmm0,xmm6
+  dde87e:	f3 0f 59 ce          	mulss  xmm1,xmm6
+  dde882:	f3 0f 59 d6          	mulss  xmm2,xmm6
+  dde886:	f3 0f 58 d8          	addss  xmm3,xmm0
+  dde88a:	f3 0f 58 e1          	addss  xmm4,xmm1
+  dde88e:	f3 0f 58 ea          	addss  xmm5,xmm2
+  dde892:	f3 0f 11 1d 48 30 5a 	movss  DWORD PTR ds:0x15a3048,xmm3
+  dde899:	01
+  dde89a:	f3 0f 11 25 4c 30 5a 	movss  DWORD PTR ds:0x15a304c,xmm4
+  dde8a1:	01
+  dde8a2:	f3 0f 11 2d 50 30 5a 	movss  DWORD PTR ds:0x15a3050,xmm5
+  dde8a9:	01
+  dde8aa:	c2 08 00             	ret    0x8

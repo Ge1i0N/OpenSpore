@@ -136,6 +136,80 @@ int main(int argc,char** argv) {
     invalid_viewer=viewer;(*invalid_viewer.world_to_view)[0]=std::numeric_limits<float>::max();
     (*invalid_viewer.view_window)[0]=.25f;
     if(!check(rejected_viewer(invalid_viewer),"overflowing product rejected without publication"))return 1;
+    CameraOrbitObservation orbit;
+    CameraPose pose;pose.position.x=123.f;
+    if(!check(!compose_camera_orbit(orbit,pose,error)&&pose.position.x==123.f,
+        "missing orbit fields never synthesize initial pose"))return 1;
+    orbit.basis=std::array<float,9>{1,0,0,0,1,0,0,0,1};orbit.pivot=StarPosition{2,3,4};
+    orbit.additional_offset=StarPosition{5,6,7};orbit.first_angle=0.f;orbit.second_angle=0.f;orbit.distance=10.f;
+    if(!check(compose_camera_orbit(orbit,pose,error)&&pose.rotation==*orbit.basis&&
+        pose.position.x==7&&pose.position.y==-1&&pose.position.z==11,
+        "zero angles preserve explicit basis; negative row1 orbit and separate additional offset"))return 1;
+    std::array<float,16> inverse_pose;
+    if(!check(camera_pose_world_to_view(pose,inverse_pose,error)&&inverse_pose[12]==-7&&inverse_pose[13]==1&&inverse_pose[14]==-11,
+        "explicit pose to viewer world-to-view rigid inverse"))return 1;
+    viewer.world_to_view=inverse_pose;viewer.kind=ViewerProjectionKind::Perspective;
+    if(!check(compose_viewer_projection(viewer,composed,error),"pose bridges into recovered viewer composition"))return 1;
+    built.clip_from_world=composed;
+    if(!check(project_star({7,3,11},built,projected,error)&&projected.x==500&&projected.y==375&&projected.clip_w==4,
+        "orbit pose -> rigid inverse -> viewer projection -> original pixel mapping"))return 1;
+    const float quarter_turn=1.5707963267948966f;
+    orbit.pivot=StarPosition{};orbit.additional_offset=StarPosition{};
+    orbit.first_angle=quarter_turn;orbit.second_angle=0.f;
+    if(!check(compose_camera_orbit(orbit,pose,error)&&std::abs(pose.rotation[1]+1)<.00001f&&
+        std::abs(pose.rotation[3]-1)<.00001f&&std::abs(pose.position.x+10)<.00001f,
+        "first rotation sign and row pair, not generic Euler guess"))return 1;
+    orbit.first_angle=0.f;orbit.second_angle=quarter_turn;
+    if(!check(compose_camera_orbit(orbit,pose,error)&&std::abs(pose.rotation[5]-1)<.00001f&&
+        std::abs(pose.rotation[7]+1)<.00001f&&std::abs(pose.position.z+10)<.00001f,
+        "second rotation acts on rows1/2 and positions along resulting row1"))return 1;
+    orbit.first_angle=.3f;orbit.second_angle=-.7f;orbit.distance=0.f;
+    if(!check(compose_camera_orbit(orbit,pose,error)&&camera_pose_world_to_view(pose,inverse_pose,error),
+        "nontrivial finite angles yield host-admissible rigid pose"))return 1;
+    for(size_t row=0;row<3;++row)for(size_t col=0;col<3;++col) {
+        float v=0;for(size_t k=0;k<3;++k)v+=pose.rotation[row*3+k]*inverse_pose[k*4+col];
+        if(!check(std::abs(v-(row==col?1.f:0.f))<.00001f,"asymmetric rotation times inverse is identity"))return 1;
+    }
+    const auto reject_orbit=[&](const CameraOrbitObservation& input) {
+        CameraPose sentinel;sentinel.position.x=123;
+        return !compose_camera_orbit(input,sentinel,error)&&sentinel.position.x==123;
+    };
+    for(int field=0;field<6;++field) {
+        auto missing_orbit=orbit;
+        switch(field){case 0:missing_orbit.basis.reset();break;case 1:missing_orbit.pivot.reset();break;
+        case 2:missing_orbit.additional_offset.reset();break;case 3:missing_orbit.first_angle.reset();break;
+        case 4:missing_orbit.second_angle.reset();break;case 5:missing_orbit.distance.reset();break;}
+        if(!check(reject_orbit(missing_orbit),"each missing orbit field blocks, never defaults"))return 1;
+    }
+    auto missing_orbit=orbit;
+    missing_orbit=orbit;(*missing_orbit.basis)[0]=std::numeric_limits<float>::infinity();
+    if(!check(reject_orbit(missing_orbit),"nonfinite orbit basis fails atomically"))return 1;
+    missing_orbit=orbit;missing_orbit.second_angle=std::numeric_limits<float>::quiet_NaN();
+    if(!check(reject_orbit(missing_orbit),"nonfinite orbit angle fails atomically"))return 1;
+    missing_orbit=orbit;missing_orbit.first_angle=0.f;missing_orbit.second_angle=0.f;
+    missing_orbit.distance=std::numeric_limits<float>::max();(*missing_orbit.basis)[4]=2.f;
+    if(!check(reject_orbit(missing_orbit),"finite orbit input with position overflow is rejected"))return 1;
+    auto invalid_pose=pose;invalid_pose.rotation[0]*=2.f;auto sentinel_inverse=identity;
+    if(!check(!camera_pose_world_to_view(invalid_pose,sentinel_inverse,error)&&sentinel_inverse==identity,
+        "non-rigid pose is not silently inverted by rigid helper"))return 1;
+    invalid_pose=pose;invalid_pose.position.y=std::numeric_limits<float>::quiet_NaN();
+    if(!check(!camera_pose_world_to_view(invalid_pose,sentinel_inverse,error)&&sentinel_inverse==identity,
+        "invalid pose inverse output remains unchanged"))return 1;
+    // A non-identity source basis makes rotation order/sign mistakes visible without relying on
+    // the runtime initializer or assuming the live camera basis is immutable.
+    orbit.basis=std::array<float,9>{0,1,0,-1,0,0,0,0,1};orbit.first_angle=quarter_turn;
+    orbit.second_angle=0.f;orbit.distance=-2.f;orbit.pivot=StarPosition{1,2,3};orbit.additional_offset=StarPosition{4,5,6};
+    if(!check(compose_camera_orbit(orbit,pose,error)&&std::abs(pose.rotation[0]-1)<.00001f&&
+        std::abs(pose.position.y-9)<.00001f&&std::abs(pose.position.x-5)<.00001f&&pose.position.z==9,
+        "observed nonidentity basis and negative displacement retained; no synthetic clamp"))return 1;
+    orbit.first_angle=.3f;orbit.second_angle=-.7f;orbit.distance=8.f;
+    if(!check(compose_camera_orbit(orbit,pose,error)&&camera_pose_world_to_view(pose,inverse_pose,error),
+        "translated rotated orbit pose admits rigid inverse"))return 1;
+    for(size_t col=0;col<3;++col) {
+        const float at_origin=pose.position.x*inverse_pose[col]+pose.position.y*inverse_pose[4+col]+
+                              pose.position.z*inverse_pose[8+col]+inverse_pose[12+col];
+        if(!check(std::abs(at_origin)<.00001f,"camera world position maps to local origin"))return 1;
+    }
     auto bad=camera; (*bad.clip_from_world)[15]=0;
     CameraFovStep fov;
     if(!check(step_camera_fov({1.f,2.f,.01f},fov,error)&&fov.next_current==1.1f&&

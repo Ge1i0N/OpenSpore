@@ -86,6 +86,9 @@ audio or scene state and is not automatically attached to normal GGE/preview. Fu
 the current global mode object through `16A10C8`, works with pose globals `16A10CC..`/`16A10E0..`,
 invokes service/audio calls, constructs a Transform and passes it to viewer setter `7C4DD0`.
 That pose/mode/transform path remains the next substantive reconstruction boundary.
+Follow-up [pose investigation](gge-camera-pose.md) now identifies the three dispatch tables and ports
+the common orbit-transform arithmetic plus an explicit rigid inverse bridge. Full mode dynamics,
+runtime state/selection and automatic normal-GGE camera publication remain unresolved.
 
 ## Verification and reproduction
 

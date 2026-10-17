@@ -37,6 +37,23 @@ struct CameraFovStep {
 };
 // DDFCE6/DDFDC5..FE67 arithmetic subset only: no transform/audio/global-state/update scheduling.
 bool step_camera_fov(const CameraFovObservation& observed,CameraFovStep& out,std::string& error);
+struct CameraOrbitObservation {
+    // Original Transform rotation memory order: three consecutive rows, no implicit identity.
+    std::optional<std::array<float,9>> basis;
+    std::optional<StarPosition> pivot, additional_offset;
+    // DDF2B0 uses -global15A308C then +global15A3090; DDF480 uses -mode+30 then +mode+20.
+    std::optional<float> first_angle, second_angle, distance;
+};
+struct CameraPose {
+    std::array<float,9> rotation{};
+    StarPosition position;
+};
+// Common DDF2B0/DDF480 transform arithmetic AFTER mode selection/clamping, not mode Update itself.
+// Two row rotations then position=pivot-distance*rotated_row1+additional_offset, scale1.
+bool compose_camera_orbit(const CameraOrbitObservation& observed,CameraPose& out,std::string& error);
+// Restricted host bridge to viewer+40: rigid inverse for an explicit orthonormal scale1 pose.
+// Finite/orthonormal checks are host policy, not the native general inverse implementation.
+bool camera_pose_world_to_view(const CameraPose& pose,std::array<float,16>& out,std::string& error);
 struct ProjectedPoint { float x=0,y=0,ndc_z=0,clip_w=0; };
 // GA 0x7C4250 + 0xDE3C20: perspective divide and window EXTENTS, no origin addition/clipping.
 // Rejecting unknown/nonfinite/zero-w/invalid extents is host safety policy. Negative w is not culled.

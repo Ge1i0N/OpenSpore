@@ -1,0 +1,124 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  ddf2b0:	51                   	push   ecx
+  ddf2b1:	f3 0f 10 05 40 37 45 	movss  xmm0,DWORD PTR ds:0x1453740
+  ddf2b8:	01
+  ddf2b9:	f3 0f 10 0d d4 d9 47 	movss  xmm1,DWORD PTR ds:0x147d9d4
+  ddf2c0:	01
+  ddf2c1:	53                   	push   ebx
+  ddf2c2:	8b 5c 24 0c          	mov    ebx,DWORD PTR [esp+0xc]
+  ddf2c6:	55                   	push   ebp
+  ddf2c7:	56                   	push   esi
+  ddf2c8:	57                   	push   edi
+  ddf2c9:	8d 6b 14             	lea    ebp,[ebx+0x14]
+  ddf2cc:	b9 09 00 00 00       	mov    ecx,0x9
+  ddf2d1:	be e0 10 6a 01       	mov    esi,0x16a10e0
+  ddf2d6:	8b fd                	mov    edi,ebp
+  ddf2d8:	f3 a5                	rep movs DWORD PTR es:[edi],DWORD PTR ds:[esi]
+  ddf2da:	f3 0f 11 43 10       	movss  DWORD PTR [ebx+0x10],xmm0
+  ddf2df:	a1 cc 10 6a 01       	mov    eax,ds:0x16a10cc
+  ddf2e4:	89 43 04             	mov    DWORD PTR [ebx+0x4],eax
+  ddf2e7:	8b 0d d0 10 6a 01    	mov    ecx,DWORD PTR ds:0x16a10d0
+  ddf2ed:	89 4b 08             	mov    DWORD PTR [ebx+0x8],ecx
+  ddf2f0:	8b 15 d4 10 6a 01    	mov    edx,DWORD PTR ds:0x16a10d4
+  ddf2f6:	33 c0                	xor    eax,eax
+  ddf2f8:	33 c9                	xor    ecx,ecx
+  ddf2fa:	89 53 0c             	mov    DWORD PTR [ebx+0xc],edx
+  ddf2fd:	66 89 03             	mov    WORD PTR [ebx],ax
+  ddf300:	66 89 4b 02          	mov    WORD PTR [ebx+0x2],cx
+  ddf304:	f3 0f 10 05 88 30 5a 	movss  xmm0,DWORD PTR ds:0x15a3088
+  ddf30b:	01
+  ddf30c:	0f 2f c8             	comiss xmm1,xmm0
+  ddf30f:	77 0d                	ja     0xddf31e
+  ddf311:	f3 0f 10 0d 68 ba 48 	movss  xmm1,DWORD PTR ds:0x148ba68
+  ddf318:	01
+  ddf319:	0f 2f c1             	comiss xmm0,xmm1
+  ddf31c:	76 03                	jbe    0xddf321
+  ddf31e:	0f 28 c1             	movaps xmm0,xmm1
+  ddf321:	d9 05 90 30 5a 01    	fld    DWORD PTR ds:0x15a3090
+  ddf327:	f3 0f 11 05 88 30 5a 	movss  DWORD PTR ds:0x15a3088,xmm0
+  ddf32e:	01
+  ddf32f:	f3 0f 10 05 94 30 5a 	movss  xmm0,DWORD PTR ds:0x15a3094
+  ddf336:	01
+  ddf337:	d9 5c 24 18          	fstp   DWORD PTR [esp+0x18]
+  ddf33b:	f3 0f 11 44 24 10    	movss  DWORD PTR [esp+0x10],xmm0
+  ddf341:	f3 0f 10 05 8c 30 5a 	movss  xmm0,DWORD PTR ds:0x15a308c
+  ddf348:	01
+  ddf349:	0f 57 05 70 e9 4c 01 	xorps  xmm0,XMMWORD PTR ds:0x14ce970
+  ddf350:	51                   	push   ecx
+  ddf351:	8b cb                	mov    ecx,ebx
+  ddf353:	f3 0f 11 04 24       	movss  DWORD PTR [esp],xmm0
+  ddf358:	e8 53 a6 62 ff       	call   0x4099b0
+  ddf35d:	d9 44 24 18          	fld    DWORD PTR [esp+0x18]
+  ddf361:	51                   	push   ecx
+  ddf362:	8b cb                	mov    ecx,ebx
+  ddf364:	d9 1c 24             	fstp   DWORD PTR [esp]
+  ddf367:	e8 04 3a 7c ff       	call   0x5a2d70
+  ddf36c:	f3 0f 10 44 24 10    	movss  xmm0,DWORD PTR [esp+0x10]
+  ddf372:	0f 57 05 70 e9 4c 01 	xorps  xmm0,XMMWORD PTR ds:0x14ce970
+  ddf379:	0f 28 d0             	movaps xmm2,xmm0
+  ddf37c:	f3 0f 10 43 10       	movss  xmm0,DWORD PTR [ebx+0x10]
+  ddf381:	0f 28 c8             	movaps xmm1,xmm0
+  ddf384:	f3 0f 59 0d b4 52 48 	mulss  xmm1,DWORD PTR ds:0x14852b4
+  ddf38b:	01
+  ddf38c:	f3 0f 59 c2          	mulss  xmm0,xmm2
+  ddf390:	f3 0f 10 55 10       	movss  xmm2,DWORD PTR [ebp+0x10]
+  ddf395:	0f 28 e0             	movaps xmm4,xmm0
+  ddf398:	f3 0f 10 45 18       	movss  xmm0,DWORD PTR [ebp+0x18]
+  ddf39d:	0f 28 d9             	movaps xmm3,xmm1
+  ddf3a0:	0f 28 e9             	movaps xmm5,xmm1
+  ddf3a3:	f3 0f 10 4d 0c       	movss  xmm1,DWORD PTR [ebp+0xc]
+  ddf3a8:	f3 0f 59 cc          	mulss  xmm1,xmm4
+  ddf3ac:	f3 0f 59 c5          	mulss  xmm0,xmm5
+  ddf3b0:	f3 0f 58 c1          	addss  xmm0,xmm1
+  ddf3b4:	f3 0f 10 4d 00       	movss  xmm1,DWORD PTR [ebp+0x0]
+  ddf3b9:	f3 0f 59 cb          	mulss  xmm1,xmm3
+  ddf3bd:	f3 0f 58 c1          	addss  xmm0,xmm1
+  ddf3c1:	f3 0f 10 4d 1c       	movss  xmm1,DWORD PTR [ebp+0x1c]
+  ddf3c6:	f3 0f 59 d4          	mulss  xmm2,xmm4
+  ddf3ca:	f3 0f 59 cd          	mulss  xmm1,xmm5
+  ddf3ce:	f3 0f 58 ca          	addss  xmm1,xmm2
+  ddf3d2:	f3 0f 10 55 04       	movss  xmm2,DWORD PTR [ebp+0x4]
+  ddf3d7:	f3 0f 59 d3          	mulss  xmm2,xmm3
+  ddf3db:	f3 0f 58 ca          	addss  xmm1,xmm2
+  ddf3df:	f3 0f 10 55 20       	movss  xmm2,DWORD PTR [ebp+0x20]
+  ddf3e4:	f3 0f 59 d5          	mulss  xmm2,xmm5
+  ddf3e8:	f3 0f 10 6d 14       	movss  xmm5,DWORD PTR [ebp+0x14]
+  ddf3ed:	f3 0f 59 ec          	mulss  xmm5,xmm4
+  ddf3f1:	f3 0f 10 65 08       	movss  xmm4,DWORD PTR [ebp+0x8]
+  ddf3f6:	f3 0f 59 e3          	mulss  xmm4,xmm3
+  ddf3fa:	f3 0f 10 5b 04       	movss  xmm3,DWORD PTR [ebx+0x4]
+  ddf3ff:	f3 0f 58 d8          	addss  xmm3,xmm0
+  ddf403:	f3 0f 10 43 08       	movss  xmm0,DWORD PTR [ebx+0x8]
+  ddf408:	f3 0f 11 5b 04       	movss  DWORD PTR [ebx+0x4],xmm3
+  ddf40d:	f3 0f 58 c1          	addss  xmm0,xmm1
+  ddf411:	f3 0f 11 43 08       	movss  DWORD PTR [ebx+0x8],xmm0
+  ddf416:	f3 0f 10 43 0c       	movss  xmm0,DWORD PTR [ebx+0xc]
+  ddf41b:	f3 0f 58 d5          	addss  xmm2,xmm5
+  ddf41f:	f3 0f 58 d4          	addss  xmm2,xmm4
+  ddf423:	f3 0f 58 c2          	addss  xmm0,xmm2
+  ddf427:	f3 0f 11 43 0c       	movss  DWORD PTR [ebx+0xc],xmm0
+  ddf42c:	66 83 0b 04          	or     WORD PTR [ebx],0x4
+  ddf430:	b8 01 00 00 00       	mov    eax,0x1
+  ddf435:	66 01 43 02          	add    WORD PTR [ebx+0x2],ax
+  ddf439:	f3 0f 10 43 08       	movss  xmm0,DWORD PTR [ebx+0x8]
+  ddf43e:	f3 0f 10 4b 0c       	movss  xmm1,DWORD PTR [ebx+0xc]
+  ddf443:	f3 0f 10 53 04       	movss  xmm2,DWORD PTR [ebx+0x4]
+  ddf448:	f3 0f 58 05 4c 30 5a 	addss  xmm0,DWORD PTR ds:0x15a304c
+  ddf44f:	01
+  ddf450:	f3 0f 58 0d 50 30 5a 	addss  xmm1,DWORD PTR ds:0x15a3050
+  ddf457:	01
+  ddf458:	f3 0f 58 15 48 30 5a 	addss  xmm2,DWORD PTR ds:0x15a3048
+  ddf45f:	01
+  ddf460:	5f                   	pop    edi
+  ddf461:	f3 0f 11 53 04       	movss  DWORD PTR [ebx+0x4],xmm2
+  ddf466:	f3 0f 11 43 08       	movss  DWORD PTR [ebx+0x8],xmm0
+  ddf46b:	f3 0f 11 4b 0c       	movss  DWORD PTR [ebx+0xc],xmm1
+  ddf470:	66 83 0b 04          	or     WORD PTR [ebx],0x4
+  ddf474:	66 01 43 02          	add    WORD PTR [ebx+0x2],ax
+  ddf478:	5e                   	pop    esi
+  ddf479:	5d                   	pop    ebp
+  ddf47a:	5b                   	pop    ebx
+  ddf47b:	59                   	pop    ecx
+  ddf47c:	c2 04 00             	ret    0x4

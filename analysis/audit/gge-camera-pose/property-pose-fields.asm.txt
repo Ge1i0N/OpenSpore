@@ -1,0 +1,132 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  ddebcf:	0f 84 86 00 00 00    	je     0xddec5b
+  ddebd5:	8b 4e 10             	mov    ecx,DWORD PTR [esi+0x10]
+  ddebd8:	8b 01                	mov    eax,DWORD PTR [ecx]
+  ddebda:	8b 50 28             	mov    edx,DWORD PTR [eax+0x28]
+  ddebdd:	68 fb c4 c7 00       	push   0xc7c4fb
+  ddebe2:	ff d2                	call   edx
+  ddebe4:	0f b7 48 12          	movzx  ecx,WORD PTR [eax+0x12]
+  ddebe8:	66 3b cf             	cmp    cx,di
+  ddebeb:	74 0d                	je     0xddebfa
+  ddebed:	66 83 f9 10          	cmp    cx,0x10
+  ddebf1:	74 07                	je     0xddebfa
+  ddebf3:	b9 68 11 5d 01       	mov    ecx,0x15d1168
+  ddebf8:	eb 12                	jmp    0xddec0c
+  ddebfa:	84 58 10             	test   BYTE PTR [eax+0x10],bl
+  ddebfd:	74 04                	je     0xddec03
+  ddebff:	8b 08                	mov    ecx,DWORD PTR [eax]
+  ddec01:	eb 09                	jmp    0xddec0c
+  ddec03:	0f b7 c9             	movzx  ecx,cx
+  ddec06:	f7 d9                	neg    ecx
+  ddec08:	1b c9                	sbb    ecx,ecx
+  ddec0a:	23 c8                	and    ecx,eax
+  ddec0c:	f3 0f 10 01          	movss  xmm0,DWORD PTR [ecx]
+  ddec10:	f3 0f 11 05 88 30 5a 	movss  DWORD PTR ds:0x15a3088,xmm0
+  ddec17:	01
+  ddec18:	8b 4e 10             	mov    ecx,DWORD PTR [esi+0x10]
+  ddec1b:	8b 01                	mov    eax,DWORD PTR [ecx]
+  ddec1d:	8b 50 28             	mov    edx,DWORD PTR [eax+0x28]
+  ddec20:	68 fb c4 c7 00       	push   0xc7c4fb
+  ddec25:	ff d2                	call   edx
+  ddec27:	0f b7 48 12          	movzx  ecx,WORD PTR [eax+0x12]
+  ddec2b:	66 3b cf             	cmp    cx,di
+  ddec2e:	74 0d                	je     0xddec3d
+  ddec30:	66 83 f9 10          	cmp    cx,0x10
+  ddec34:	74 07                	je     0xddec3d
+  ddec36:	b9 68 11 5d 01       	mov    ecx,0x15d1168
+  ddec3b:	eb 12                	jmp    0xddec4f
+  ddec3d:	84 58 10             	test   BYTE PTR [eax+0x10],bl
+  ddec40:	74 04                	je     0xddec46
+  ddec42:	8b 08                	mov    ecx,DWORD PTR [eax]
+  ddec44:	eb 09                	jmp    0xddec4f
+  ddec46:	0f b7 c9             	movzx  ecx,cx
+  ddec49:	f7 d9                	neg    ecx
+  ddec4b:	1b c9                	sbb    ecx,ecx
+  ddec4d:	23 c8                	and    ecx,eax
+  ddec4f:	f3 0f 10 01          	movss  xmm0,DWORD PTR [ecx]
+  ddec53:	f3 0f 11 05 94 30 5a 	movss  DWORD PTR ds:0x15a3094,xmm0
+  ddec5a:	01
+  ddec5b:	8b 4e 10             	mov    ecx,DWORD PTR [esi+0x10]
+  ddec5e:	8b 01                	mov    eax,DWORD PTR [ecx]
+  ddec60:	8b 50 1c             	mov    edx,DWORD PTR [eax+0x1c]
+  ddec63:	68 fc c4 c7 00       	push   0xc7c4fc
+  ddec68:	ff d2                	call   edx
+  ddec6a:	84 c0                	test   al,al
+  ddec6c:	74 75                	je     0xddece3
+  ddec6e:	8b 4e 10             	mov    ecx,DWORD PTR [esi+0x10]
+  ddec71:	f3 0f 10 05 8c 30 5a 	movss  xmm0,DWORD PTR ds:0x15a308c
+  ddec78:	01
+  ddec79:	8b 01                	mov    eax,DWORD PTR [ecx]
+  ddec7b:	8b 50 28             	mov    edx,DWORD PTR [eax+0x28]
+  ddec7e:	f3 0f 11 44 24 10    	movss  DWORD PTR [esp+0x10],xmm0
+  ddec84:	f3 0f 10 05 90 30 5a 	movss  xmm0,DWORD PTR ds:0x15a3090
+  ddec8b:	01
+  ddec8c:	68 fc c4 c7 00       	push   0xc7c4fc
+  ddec91:	f3 0f 11 44 24 10    	movss  DWORD PTR [esp+0x10],xmm0
+  ddec97:	ff d2                	call   edx
+  ddec99:	0f b7 48 12          	movzx  ecx,WORD PTR [eax+0x12]
+  ddec9d:	66 3b cf             	cmp    cx,di
+  ddeca0:	74 0d                	je     0xddecaf
+  ddeca2:	66 83 f9 10          	cmp    cx,0x10
+  ddeca6:	74 07                	je     0xddecaf
+  ddeca8:	b9 68 11 5d 01       	mov    ecx,0x15d1168
+  ddecad:	eb 12                	jmp    0xddecc1
+  ddecaf:	84 58 10             	test   BYTE PTR [eax+0x10],bl
+  ddecb2:	74 04                	je     0xddecb8
+  ddecb4:	8b 08                	mov    ecx,DWORD PTR [eax]
+  ddecb6:	eb 09                	jmp    0xddecc1
+  ddecb8:	0f b7 c9             	movzx  ecx,cx
+  ddecbb:	f7 d9                	neg    ecx
+  ddecbd:	1b c9                	sbb    ecx,ecx
+  ddecbf:	23 c8                	and    ecx,eax
+  ddecc1:	f3 0f 10 01          	movss  xmm0,DWORD PTR [ecx]
+  ddecc5:	f3 0f 59 05 e8 d9 47 	mulss  xmm0,DWORD PTR ds:0x147d9e8
+  ddeccc:	01
+  ddeccd:	f3 0f 10 4c 24 10    	movss  xmm1,DWORD PTR [esp+0x10]
+  ddecd3:	f3 0f 11 0d 8c 30 5a 	movss  DWORD PTR ds:0x15a308c,xmm1
+  ddecda:	01
+  ddecdb:	f3 0f 11 05 90 30 5a 	movss  DWORD PTR ds:0x15a3090,xmm0
+  ddece2:	01
+  ddece3:	8b 4e 10             	mov    ecx,DWORD PTR [esi+0x10]
+  ddece6:	8b 01                	mov    eax,DWORD PTR [ecx]
+  ddece8:	8b 50 1c             	mov    edx,DWORD PTR [eax+0x1c]
+  ddeceb:	68 fd c4 c7 00       	push   0xc7c4fd
+  ddecf0:	ff d2                	call   edx
+  ddecf2:	84 c0                	test   al,al
+  ddecf4:	74 75                	je     0xdded6b
+  ddecf6:	8b 4e 10             	mov    ecx,DWORD PTR [esi+0x10]
+  ddecf9:	f3 0f 10 05 8c 30 5a 	movss  xmm0,DWORD PTR ds:0x15a308c
+  dded00:	01
+  dded01:	8b 01                	mov    eax,DWORD PTR [ecx]
+  dded03:	8b 50 28             	mov    edx,DWORD PTR [eax+0x28]
+  dded06:	f3 0f 11 44 24 10    	movss  DWORD PTR [esp+0x10],xmm0
+  dded0c:	f3 0f 10 05 90 30 5a 	movss  xmm0,DWORD PTR ds:0x15a3090
+  dded13:	01
+  dded14:	68 fd c4 c7 00       	push   0xc7c4fd
+  dded19:	f3 0f 11 44 24 10    	movss  DWORD PTR [esp+0x10],xmm0
+  dded1f:	ff d2                	call   edx
+  dded21:	0f b7 48 12          	movzx  ecx,WORD PTR [eax+0x12]
+  dded25:	66 3b cf             	cmp    cx,di
+  dded28:	74 0d                	je     0xdded37
+  dded2a:	66 83 f9 10          	cmp    cx,0x10
+  dded2e:	74 07                	je     0xdded37
+  dded30:	b9 68 11 5d 01       	mov    ecx,0x15d1168
+  dded35:	eb 12                	jmp    0xdded49
+  dded37:	84 58 10             	test   BYTE PTR [eax+0x10],bl
+  dded3a:	74 04                	je     0xdded40
+  dded3c:	8b 08                	mov    ecx,DWORD PTR [eax]
+  dded3e:	eb 09                	jmp    0xdded49
+  dded40:	0f b7 c9             	movzx  ecx,cx
+  dded43:	f7 d9                	neg    ecx
+  dded45:	1b c9                	sbb    ecx,ecx
+  dded47:	23 c8                	and    ecx,eax
+  dded49:	f3 0f 10 01          	movss  xmm0,DWORD PTR [ecx]
+  dded4d:	f3 0f 59 05 e8 d9 47 	mulss  xmm0,DWORD PTR ds:0x147d9e8
+  dded54:	01
+  dded55:	f3 0f 11 05 8c 30 5a 	movss  DWORD PTR ds:0x15a308c,xmm0
+  dded5c:	01
+  dded5d:	f3 0f 10 44 24 0c    	movss  xmm0,DWORD PTR [esp+0xc]
+  dded63:	f3 0f 11 05 90 30 5a 	movss  DWORD PTR ds:0x15a3090,xmm0
+  dded6a:	01

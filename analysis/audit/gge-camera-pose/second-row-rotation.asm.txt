@@ -1,0 +1,73 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  5a2d70:	83 ec 34             	sub    esp,0x34
+  5a2d73:	d9 44 24 38          	fld    DWORD PTR [esp+0x38]
+  5a2d77:	f3 0f 10 49 30       	movss  xmm1,DWORD PTR [ecx+0x30]
+  5a2d7c:	d9 c0                	fld    st(0)
+  5a2d7e:	f3 0f 10 51 34       	movss  xmm2,DWORD PTR [ecx+0x34]
+  5a2d83:	d9 fe                	fsin
+  5a2d85:	f3 0f 10 69 20       	movss  xmm5,DWORD PTR [ecx+0x20]
+  5a2d8a:	f3 0f 10 79 2c       	movss  xmm7,DWORD PTR [ecx+0x2c]
+  5a2d8f:	f3 0f 10 71 24       	movss  xmm6,DWORD PTR [ecx+0x24]
+  5a2d94:	f3 0f 10 61 28       	movss  xmm4,DWORD PTR [ecx+0x28]
+  5a2d99:	f3 0f 11 4c 24 14    	movss  DWORD PTR [esp+0x14],xmm1
+  5a2d9f:	f3 0f 11 54 24 18    	movss  DWORD PTR [esp+0x18],xmm2
+  5a2da5:	f3 0f 11 7c 24 10    	movss  DWORD PTR [esp+0x10],xmm7
+  5a2dab:	f3 0f 11 64 24 30    	movss  DWORD PTR [esp+0x30],xmm4
+  5a2db1:	0f 28 de             	movaps xmm3,xmm6
+  5a2db4:	d9 5c 24 38          	fstp   DWORD PTR [esp+0x38]
+  5a2db8:	f3 0f 10 44 24 38    	movss  xmm0,DWORD PTR [esp+0x38]
+  5a2dbe:	d9 ff                	fcos
+  5a2dc0:	f3 0f 59 c8          	mulss  xmm1,xmm0
+  5a2dc4:	f3 0f 11 4c 24 20    	movss  DWORD PTR [esp+0x20],xmm1
+  5a2dca:	0f 28 ca             	movaps xmm1,xmm2
+  5a2dcd:	f3 0f 59 c8          	mulss  xmm1,xmm0
+  5a2dd1:	f3 0f 11 4c 24 24    	movss  DWORD PTR [esp+0x24],xmm1
+  5a2dd7:	f3 0f 59 f8          	mulss  xmm7,xmm0
+  5a2ddb:	0f 28 d5             	movaps xmm2,xmm5
+  5a2dde:	d9 1c 24             	fstp   DWORD PTR [esp]
+  5a2de1:	f3 0f 10 0c 24       	movss  xmm1,DWORD PTR [esp]
+  5a2de6:	f3 0f 59 d1          	mulss  xmm2,xmm1
+  5a2dea:	f3 0f 59 d9          	mulss  xmm3,xmm1
+  5a2dee:	f3 0f 58 5c 24 20    	addss  xmm3,DWORD PTR [esp+0x20]
+  5a2df4:	f3 0f 59 e1          	mulss  xmm4,xmm1
+  5a2df8:	f3 0f 58 64 24 24    	addss  xmm4,DWORD PTR [esp+0x24]
+  5a2dfe:	f3 0f 58 d7          	addss  xmm2,xmm7
+  5a2e02:	f3 0f 11 54 24 04    	movss  DWORD PTR [esp+0x4],xmm2
+  5a2e08:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  5a2e0c:	f3 0f 10 54 24 10    	movss  xmm2,DWORD PTR [esp+0x10]
+  5a2e12:	89 41 20             	mov    DWORD PTR [ecx+0x20],eax
+  5a2e15:	f3 0f 11 5c 24 08    	movss  DWORD PTR [esp+0x8],xmm3
+  5a2e1b:	8b 54 24 08          	mov    edx,DWORD PTR [esp+0x8]
+  5a2e1f:	f3 0f 10 5c 24 14    	movss  xmm3,DWORD PTR [esp+0x14]
+  5a2e25:	f3 0f 11 64 24 0c    	movss  DWORD PTR [esp+0xc],xmm4
+  5a2e2b:	8b 44 24 0c          	mov    eax,DWORD PTR [esp+0xc]
+  5a2e2f:	f3 0f 10 64 24 18    	movss  xmm4,DWORD PTR [esp+0x18]
+  5a2e35:	89 51 24             	mov    DWORD PTR [ecx+0x24],edx
+  5a2e38:	89 41 28             	mov    DWORD PTR [ecx+0x28],eax
+  5a2e3b:	0f 57 05 70 e9 4c 01 	xorps  xmm0,XMMWORD PTR ds:0x14ce970
+  5a2e42:	66 83 09 02          	or     WORD PTR [ecx],0x2
+  5a2e46:	66 ff 41 02          	inc    WORD PTR [ecx+0x2]
+  5a2e4a:	f3 0f 59 d1          	mulss  xmm2,xmm1
+  5a2e4e:	f3 0f 59 d9          	mulss  xmm3,xmm1
+  5a2e52:	f3 0f 59 e1          	mulss  xmm4,xmm1
+  5a2e56:	f3 0f 10 4c 24 30    	movss  xmm1,DWORD PTR [esp+0x30]
+  5a2e5c:	f3 0f 59 e8          	mulss  xmm5,xmm0
+  5a2e60:	f3 0f 59 f0          	mulss  xmm6,xmm0
+  5a2e64:	f3 0f 59 c8          	mulss  xmm1,xmm0
+  5a2e68:	f3 0f 58 ea          	addss  xmm5,xmm2
+  5a2e6c:	f3 0f 11 6c 24 10    	movss  DWORD PTR [esp+0x10],xmm5
+  5a2e72:	8b 54 24 10          	mov    edx,DWORD PTR [esp+0x10]
+  5a2e76:	0f 28 c1             	movaps xmm0,xmm1
+  5a2e79:	f3 0f 58 f3          	addss  xmm6,xmm3
+  5a2e7d:	89 51 2c             	mov    DWORD PTR [ecx+0x2c],edx
+  5a2e80:	f3 0f 11 74 24 14    	movss  DWORD PTR [esp+0x14],xmm6
+  5a2e86:	8b 44 24 14          	mov    eax,DWORD PTR [esp+0x14]
+  5a2e8a:	f3 0f 58 c4          	addss  xmm0,xmm4
+  5a2e8e:	f3 0f 11 44 24 18    	movss  DWORD PTR [esp+0x18],xmm0
+  5a2e94:	8b 54 24 18          	mov    edx,DWORD PTR [esp+0x18]
+  5a2e98:	89 41 30             	mov    DWORD PTR [ecx+0x30],eax
+  5a2e9b:	89 51 34             	mov    DWORD PTR [ecx+0x34],edx
+  5a2e9e:	83 c4 34             	add    esp,0x34
+  5a2ea1:	c2 04 00             	ret    0x4

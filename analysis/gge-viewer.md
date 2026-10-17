@@ -96,6 +96,8 @@ still cannot substitute for viewer projection; failed updates still retire prior
   factory/type/requested ID and one complete shipped prop. It adds a bounded FOV-step helper;
   runtime selection success, pose/mode state, native viewer lifetime/update scheduling,
   render/effects services and complete real catalogue remain unresolved.
+  [Pose/mode follow-up](gge-camera-pose.md) adds explicit orbit construction and a restricted rigid
+  world-to-view inverse; this narrows the arithmetic gap without supplying a live pose producer.
 
 [Audit facts](audit/gge-viewer/facts.json) retain tables, routes and limitations; accompanying
 instruction files retain original byte columns. Reproduce:

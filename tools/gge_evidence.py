@@ -102,6 +102,53 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--camera-pose' in sys.argv:
+        from tools.find_imm import OBJDUMP
+        if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+            raise ValueError('camera pose ranges require selected GA hash')
+        dest=ROOT/'analysis/audit/gge-camera-pose';dest.mkdir(parents=True,exist_ok=True)
+        ranges=[('normal-mode-transform',0xddf2b0,0xddf47f),('transition-mode-transform',0xddf480,0xddf604),
+                ('normal-mode-update',0xdde810,0xdde8ad),('transition-setup',0xdde260,0xdde2f8),
+                ('transition-expiry',0xdde300,0xdde38f),('timed-mode-setup',0xdde8b0,0xdde92e),
+                ('basis-initializer',0x136cf30,0x136cf8c),('first-row-rotation',0x4099b0,0x409b2a),
+                ('second-row-rotation',0x5a2d70,0x5a2ea4),('transform-to-matrix',0x6b93f0,0x6b94b5),
+                ('property-pose-fields',0xddebcf,0xdded6b),('trig-import-thunks',0x11e076c,0x11e0778)]
+        for name,start,end in ranges:
+            r=subprocess.run([str(OBJDUMP),'-d','-M','intel',f'--start-address={start}',f'--stop-address={end}',str(pe.path)],
+                             capture_output=True,text=True,errors='replace',check=True,timeout=15)
+            instructions=[line.rstrip() for line in r.stdout.splitlines() if re.match(r'^\s+[0-9a-f]+:',line)]
+            if not instructions:raise ValueError('empty pose disassembly')
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(instructions)+'\n',encoding='utf-8')
+        objects=[]
+        for base,count in ((0x15a30b4,2),(0x15a30b8,2),(0x15a3110,2)):
+            table=pe.u32(base)
+            objects.append({'object':hex(base),'initial_table':hex(table),
+                            'slots':[{'slot':hex(i*4),'target':hex(pe.u32(table+i*4))} for i in range(count)]})
+        if [(pe.u32(pe.u32(base)),pe.u32(pe.u32(base)+4)) for base in (0x15a30b4,0x15a30b8,0x15a3110)] != [
+            (0xdde810,0xddf2b0),(0xddfea0,0xddf480),(0xdde300,0xddf610)]:
+            raise ValueError('pose mode tables mismatch')
+        pe.pe.parse_data_directories(directories=[1])
+        imports=[{'iat':hex(item.address),'dll':desc.dll.decode(),'name':item.name.decode() if item.name else None}
+                 for desc in pe.pe.DIRECTORY_ENTRY_IMPORT for item in desc.imports
+                 if item.address in (0x13cc46c,0x13cc470)]
+        facts={'oracle_sha256':digest,'authority':'static file bytes and PE imports; explicit controlled host inputs, no runtime pose capture',
+               'mode_objects':objects,'trig_imports':imports,
+               'pose_sources':{'basis':'16A10E0..1103 BSS; initializer136CF30 writes nine floats identity, no runtime immutability claim',
+                               'pivot':'16A10CC..D4 BSS, copied into Transform+04',
+                               'normal_angles':'first=-15A308C then second=15A3090',
+                               'normal_distance':'15A3088 clamped then copied from15A3094 for Transform displacement; host accepts post-clamp explicit distance',
+                               'normal_additional_offset':'15A3048..50',
+                               'transition_angles_distance_offset':'-mode+30, +mode+20, mode+28, mode+34..3C'},
+               'rotation_rows':'row0=c1*a+s1*b; intermediate_row1=-s1*a+c1*b; row1=c2*intermediate+s2*c; row2=-s2*intermediate+c2*c',
+               'position':'pivot -distance*rotation.row1 +additional_offset; scale1',
+               'host_inverse':'explicit orthonormal scale1 pose only, transpose rotation and -dot(position,row_i); not native generic inverse or viewer ownership',
+               'limitations':['Mode objects are statically identified, not live current-mode pointer observations',
+                              'No claim to full DDE580 damping/clamps, timed interpolation or user-input dispatch',
+                              'Property-reader sibling-angle scratch behavior not generalized into defaults',
+                              'No normal-GGE automatic caller, complete catalogue/refill or native camera readiness']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8')
+        print('retained mode tables/transform builders/basis initializer/trig imports; no native pose observation')
+        return
     if '--camera-controller' in sys.argv:
         from tools.find_imm import OBJDUMP
         from tools.gge_camera_property import report

@@ -1,0 +1,46 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  dde300:	8b 44 24 04          	mov    eax,DWORD PTR [esp+0x4]
+  dde304:	56                   	push   esi
+  dde305:	8b f1                	mov    esi,ecx
+  dde307:	01 46 08             	add    DWORD PTR [esi+0x8],eax
+  dde30a:	db 46 08             	fild   DWORD PTR [esi+0x8]
+  dde30d:	8b 4e 08             	mov    ecx,DWORD PTR [esi+0x8]
+  dde310:	85 c9                	test   ecx,ecx
+  dde312:	7d 06                	jge    0xdde31a
+  dde314:	d8 05 c0 4f 3f 01    	fadd   DWORD PTR ds:0x13f4fc0
+  dde31a:	8b 56 04             	mov    edx,DWORD PTR [esi+0x4]
+  dde31d:	db 46 04             	fild   DWORD PTR [esi+0x4]
+  dde320:	85 d2                	test   edx,edx
+  dde322:	7d 06                	jge    0xdde32a
+  dde324:	d8 05 c0 4f 3f 01    	fadd   DWORD PTR ds:0x13f4fc0
+  dde32a:	de f9                	fdivp  st(1),st
+  dde32c:	d9 54 24 08          	fst    DWORD PTR [esp+0x8]
+  dde330:	d9 e8                	fld1
+  dde332:	d9 c9                	fxch   st(1)
+  dde334:	df f1                	fcomip st,st(1)
+  dde336:	dd d8                	fstp   st(0)
+  dde338:	76 28                	jbe    0xdde362
+  dde33a:	e8 41 f9 89 ff       	call   0x67dc80
+  dde33f:	8b 10                	mov    edx,DWORD PTR [eax]
+  dde341:	6a 00                	push   0x0
+  dde343:	6a 00                	push   0x0
+  dde345:	8b c8                	mov    ecx,eax
+  dde347:	8b 42 14             	mov    eax,DWORD PTR [edx+0x14]
+  dde34a:	68 14 0e 36 04       	push   0x4360e14
+  dde34f:	ff d0                	call   eax
+  dde351:	c7 46 08 00 00 00 00 	mov    DWORD PTR [esi+0x8],0x0
+  dde358:	c7 05 c8 10 6a 01 b4 	mov    DWORD PTR ds:0x16a10c8,0x15a30b4
+  dde35f:	30 5a 01
+  dde362:	f3 0f 10 46 14       	movss  xmm0,DWORD PTR [esi+0x14]
+  dde367:	f3 0f 10 4e 0c       	movss  xmm1,DWORD PTR [esi+0xc]
+  dde36c:	f3 0f 10 15 40 37 45 	movss  xmm2,DWORD PTR ds:0x1453740
+  dde373:	01
+  dde374:	f3 0f 5c 54 24 08    	subss  xmm2,DWORD PTR [esp+0x8]
+  dde37a:	f3 0f 5c c8          	subss  xmm1,xmm0
+  dde37e:	f3 0f 59 ca          	mulss  xmm1,xmm2
+  dde382:	f3 0f 58 c8          	addss  xmm1,xmm0
+  dde386:	f3 0f 11 4e 10       	movss  DWORD PTR [esi+0x10],xmm1
+  dde38b:	5e                   	pop    esi
+  dde38c:	c2 08 00             	ret    0x8
