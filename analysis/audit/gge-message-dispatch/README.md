@@ -78,17 +78,26 @@ with no click producer or ScenarioMode post established.
 
 ## Shared UI target `0x0806A310`
 
-The same UI identity used by the feedback branch is also referenced from the GGE phase-related
-helper immediately adjacent to the `DF6D80` phase-1 body:
+The same UI identity used by the feedback branch is also referenced from `DF6C10`, the common
+continuation reached by the Play Spore state-2 enter/refresh path. It is close to `DF6D80` in the
+address space, but it is **not** the `DF6D80` phase-1 body:
 
 ```text
 DE9C88  → 0x00810650 → 0x0806A310 → UI vtable +0x7C
 DF6C56  → 0x00810650 → 0x0806A310 → UI vtable +0x7C
 ```
 
-This corroborates `0x0806A310` as a shared GGE control/state target across feedback and phase-related
-UI operations. It still does not identify the upstream `Play Scenario` click producer, and it does
-not turn `0x070D7509` into the state-13 event value `0x070D74E7`.
+Direct-call inventory for the continuation is:
+
+```text
+DF6C10 direct call: DF9620
+DF9740 → unconditional tail jump → DF6C10
+DF6D80: separate function with its own eight direct callers
+```
+
+This corroborates `0x0806A310` as a shared GGE control/state target across feedback and the
+Play-Spore state-2 common continuation. It still does not identify the upstream `Play Scenario`
+click producer, and it does not turn `0x070D7509` into the state-13 event value `0x070D74E7`.
 
 ## SDK cross-check
 
