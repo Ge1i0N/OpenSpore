@@ -198,6 +198,8 @@ target_include_directories(starsdb_postload_verify PRIVATE source)
 set(OS_SAVE_HEADER_SOURCES source/engine/save_header.cpp source/engine/starsdb_dbpf.cpp
   source/engine/starsdb_context.cpp source/engine/starsdb_links.cpp source/engine/starsdb.cpp
   source/engine/serialized_frame.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
+add_executable(starsdb_save_corpus_inspect EXCLUDE_FROM_ALL tools/starsdb_save_corpus_inspect.cpp source/engine/planet_record.cpp ${OS_SAVE_HEADER_SOURCES})
+target_include_directories(starsdb_save_corpus_inspect PRIVATE source)
 add_executable(save_header_verify EXCLUDE_FROM_ALL tools/save_header_verify.cpp source/engine/gge_catalog.cpp ${OS_SAVE_HEADER_SOURCES})
 target_include_directories(save_header_verify PRIVATE source)
 add_executable(save_header_inspect EXCLUDE_FROM_ALL tools/save_header_inspect.cpp ${OS_SAVE_HEADER_SOURCES})

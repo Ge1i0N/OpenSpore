@@ -50,6 +50,12 @@ The host now has a bounded explicit `dbpf_serialized_frame_inspect` tool for thi
 semantics and nested payload meaning remain Unknown; no GGE catalogue or readiness status is inferred
 from these IDs.
 
+Comparing the same explicit resource in `Game0.old` gives the same six outer field IDs and the same
+five small-field sizes/previews, but the nested `0x07CA2689` field changes from **60 bytes** in the
+older save to **564 bytes** in `Game0` after the space-stage play/save. The decoded outer frame sizes
+are 152 and 656 bytes respectively. This is a real observed save delta, not a semantic interpretation:
+the nested payload remains opaque until its schema is independently recovered.
+
 ## Real StarManager observations
 
 For `Game0\stars.db` the explicit DBPF/context reader observed:
@@ -103,7 +109,8 @@ the physical root/index/class/planet observations, but it does not prove the can
 No empty candidate list is substituted for the absent/unknown candidate producer.
 
 The reproducible bridge is now `starsdb_gge_capture`; it accepts only explicit paths and writes a
-caller-selected new snapshot:
+caller-selected new snapshot. It preserves **all** resolved saved manager references rather than
+choosing the first one; this matters because the post-flight `UserData` corpus has two saved rows:
 
 ```powershell
 cmake --build build --config Debug --target starsdb_gge_capture
@@ -114,8 +121,8 @@ cmake --build build --config Debug --target starsdb_gge_capture
   C:\captures\game0-derived.txt
 ```
 
-The tool reads the explicit DBPF/context/classes, resolves the single saved manager reference,
-unwraps the nested planet DBPF resources, reads the explicit save header, and emits one saved row.
+The tool reads the explicit DBPF/context/classes, resolves every saved manager reference, unwraps the
+nested planet DBPF resources, reads the explicit save header, and emits one row per saved reference.
 It deliberately emits candidate/refill Unknown and terrain QueryFailed until those observations are
 provided by a real producer/property capture. It never scans or modifies UserData.
 
