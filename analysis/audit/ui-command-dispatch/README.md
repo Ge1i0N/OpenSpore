@@ -188,7 +188,7 @@ and `0x00964370`. This is a static vtable join only. It does not identify the co
 that fills object fields `+0x80/+0x84`, and it does not prove that the `WinButton` object with
 ControlID `0x070D7509` receives component ID `0x070D74E7` at runtime.
 
-## ✔️ Milestone: runtime activation-field setters bounded
+## Correction: nearby `+0x80` writes are not activation setters
 
 The GA object layout now has a concrete constructor/setter boundary:
 
@@ -216,11 +216,20 @@ The two runtime setter paths write the activation object's identity-adjacent fie
   object +0x7C = parameter
 ```
 
-This is a stronger boundary than a raw constructor zero: the fields are actively updated by the
-native window/layout family. However, the inspected setters write `+0x80`, not `+0x84`, and their
-callers pass runtime values through indirect layout/resource paths. No selected-GA literal joins
-those parameters to `0x070D7509` or `0x070D74E7`. The field-to-component-ID join therefore remains
-Unknown; no click or property mutation is claimed.
+Those two functions are reached through vtable `0x01442E80`, which is not the confirmed
+`WinButton/ActivableWindow` vtable family (`0x01441390` and its compatible tables). Therefore their
+same numeric offsets do **not** establish writes to the activation producer's fields. They are
+retained as a separate object-family observation and are not promoted to activation setters.
+
+The reliable activation facts remain only:
+
+```text
+0x00962950: activable-window +0x80/+0x84 initialized to zero
+0x009640B0: reads +0x84, fallback +0x80, then sends activation message
+```
+
+The setter/constructor input that later supplies the component ID remains Unknown; no click or
+property mutation is claimed.
 
 ## Reproduction
 

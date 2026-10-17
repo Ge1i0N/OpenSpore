@@ -125,17 +125,18 @@ The selected GA `.text` scan found no literal store that joins either field dire
 `0x070D7509` or `0x070D74E7`; the fields are therefore runtime/object data rather than serialized
 SPUI immediates in the inspected paths. The related vtable tables include `0x0081C9C0`,
 `0x0081CF20` and `0x00964370` alongside the producer, but this cluster does not by itself prove a
-single C++ class or reveal the setter. The setter boundary is now separately observed:
+single C++ class or reveal the setter. Nearby same-offset writes were initially considered a setter
+boundary, but their ownership is now separated:
 
 ```text
 0x00962950 constructor: +0x80/+0x84 = 0
-0x01442E80 +0x4C → 0x0097CC80: writes +0x80 and +0x7C
-0x01442E80 +0x54 → 0x0097CE10: writes +0x80 and +0x7C
+0x01442E80 +0x4C → 0x0097CC80: writes +0x80 and +0x7C in another object family
+0x01442E80 +0x54 → 0x0097CE10: writes +0x80 and +0x7C in another object family
 ```
 
-These methods receive runtime values through indirect layout/resource callers. They do not expose a
-literal `0x070D7509` or `0x070D74E7`, and no `+0x84` setter was recovered in this bounded pass. The
-exact constructor/setter input and final ControlID-to-component-ID join remain Unknown.
+Because `0x01442E80` is not the confirmed `WinButton/ActivableWindow` vtable family, these writes
+cannot be used as activation-field setters. The reliable boundary remains constructor zeroing plus
+producer reads; no `+0x84` setter or final ControlID-to-component-ID join was recovered.
 
 The seven state/UI constants used by the bounded handler/helper bodies were also found as actual
 SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](control-id-correlation.md).
