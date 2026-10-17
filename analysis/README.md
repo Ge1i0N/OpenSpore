@@ -47,6 +47,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE controlled clickable preview | [gge-host-preview](gge-host-preview.md) | Debug-only 3-card host screen with real SPUI/atlas, explicit camera and normal input latch; clearly not native GGE/catalogue |
 | GGE catalogue producer boundary | [gge-catalog-producer](gge-catalog-producer.md) | manager vectors/DF95A0 ordering/refill/save persistence recovered; live producer and original stars.db corpus still absent |
 | GGE catalogue snapshot input | [gge-catalog-snapshot](gge-catalog-snapshot.md) | caller-selected strict UTF-8 capture loader + atomic Unknown/Available statuses; no discovery/generation/profile scan |
+| GGE terrain correlation | [gge-real-save](gge-real-save.md) | explicit starter-world/property matches across selected packages; duplicate package matches stay ambiguous, no native readiness claim |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Main → playable roadmap | [main-to-playable-roadmap](main-to-playable-roadmap.md) | current layer status, priority order and parked console work |

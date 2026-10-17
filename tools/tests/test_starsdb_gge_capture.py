@@ -58,7 +58,7 @@ def package(items):
 def star(key=42, name='Звезда 🌐', position=(0.12345679104328156, -0.0, -389.6969909667969)):
     return frame([(0x03d58bf2, words(key)), (0x03d58bf1, struct.pack('>3f', *position)),
                   (0x03d58bf3, words(0x37)), (0x03d58bf6, words(5)),
-                  (0x03d58bf4, wide(name)), (0x051a1188, b'\1')])
+                  (0x03d58bf4, wide(name)), (0x051a1188, b'\1'), (0x03d58bf7, words(0x12345678))])
 
 
 def context(saved=None, starters=None, bodies=None):
@@ -115,6 +115,8 @@ class SaveCaptureTests(unittest.TestCase):
         self.assertEqual(row['star']['name'], 'Звезда 🌐')
         self.assertEqual(struct.pack('>3f', *row['star']['position']), struct.pack('>3f', 0.12345679104328156, -0.0, -389.6969909667969))
         self.assertEqual(r['persisted_starters']['rows'][0]['star']['key'], '0x0000002a')
+        self.assertEqual(row['star']['starter_world_id'], '0x12345678')
+        self.assertEqual(r['persisted_starters']['rows'][0]['star']['starter_world_id'], '0x12345678')
         self.assertEqual(r['physical_context']['class_streams'], 1)
         if SNAPSHOT.is_file():
             p = subprocess.run([str(SNAPSHOT), str(self.output)], capture_output=True, timeout=10)
@@ -130,6 +132,15 @@ class SaveCaptureTests(unittest.TestCase):
         self.assertEqual(rows[1]['header']['minor'], 3)
         self.assertFalse(rows[1]['header']['ownership_verified'])
         self.assertEqual(rows[1]['header']['path'], str(self.header))
+
+    def test_starter_world_id_absent_and_zero_are_distinct(self):
+        self.stars.write_bytes(context(bodies=[(7, STAR, frame([(0x03d58bf2, words(42))]))]))
+        r = self.run_capture()
+        self.assertIsNone(r['persisted_starters']['rows'][0]['star']['starter_world_id'])
+        self.output.unlink()
+        self.stars.write_bytes(context(bodies=[(7, STAR, frame([(0x03d58bf7, words(0))]))]))
+        r = self.run_capture()
+        self.assertEqual(r['persisted_starters']['rows'][0]['star']['starter_world_id'], '0x00000000')
 
     def test_independent_headers_have_independent_words(self):
         self.stars.write_bytes(context(saved=[(7, STAR), (8, STAR)], bodies=[(7, STAR, star()), (8, STAR, star(43))]))

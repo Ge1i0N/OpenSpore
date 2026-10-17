@@ -448,6 +448,34 @@ explicitly selected stars/planet/header input matched before and after the run. 
 temporary artifacts, not committed save data. Neither `snapshot.spo` nor unrelated Ronikari files
 were selected by this validation. No REA/Ghidra process was launched for this host-tool correction.
 
+### Explicit starter-world terrain correlation
+
+The decoded `starter_world_id` is now retained in each structural save-observation row. A bounded
+read-only probe checked all eight IDs from the selected `UserData/Games/Game0` capture (two saved
+rows and six persisted starters) against the explicitly selected `Data/PatchData.package` and
+`Data/Spore_Game.package` directories. Every ID has one exact directory entry in **each** package,
+with type `0x00B1B104`, group `0xE38475D9`, and a complete property table containing
+`0x2BD4F5AC` as scalar type `0x000A` (GA's required type 10).
+
+The observed property values are:
+
+```text
+saved 0x0041C023 / starter_world 0xB59BA540 → terrain 0xB59BA540
+saved 0x0039A02F / starter_world 0x6A2B3158 → terrain 0x3B66C6AB
+starters 0x00B2F02E → 0x73BD8FEB
+starters 0x005AF046 → 0x1A5337B5
+starters 0x00599019 → 0xA36D90EE
+starters 0x00B70018 → 0xF1851946
+starters 0x0078E041 → 0x4DDB0AF7
+starters 0x00BD9024 → 0xEDF593AB
+```
+
+This is stronger package/property evidence than the earlier `terrain_query=Unknown`, but it does
+**not** execute the native PropManager call or establish package priority. Each row has two explicit
+matches across the selected package set, so the probe reports `AmbiguousExplicitPackages` and does
+not publish `terrain_loaded=true`, a runtime image key, candidate refill success or a production
+catalogue. Exact package correlation is retained by [gge_terrain_probe.py](../tools/gge_terrain_probe.py).
+
 Controlled integration tests cover distinct headers with `(37,3)` and `(32,99)`, Unicode paths/names,
 float precision, all reference outcomes, Unknown/absent/empty distinctions, invalid bindings,
 malformed Unicode/nonfinite rejection, blocked planets, concurrent publication and output protection.
@@ -462,7 +490,8 @@ Use the same explicit save corpus to add a read-only capture adapter that preser
 - saved row/name/stage/flags/header/planet observations;
 - root/index/context/class resource outcomes;
 - persisted candidate-source rows separately from the unobserved post-load/refill runtime vector;
-- terrain property state as Unknown or Failed unless a real property lookup is captured.
+- explicit package/property correlation separately from native terrain-query status; the native
+  PropManager lookup remains Unknown even when a duplicate type-10 package match is observed.
 
 Only after an authorized observation proves the candidate/refill side may a caller snapshot become
 scene-admissible. This document is evidence of a real save corpus and structural parsing, not a claim

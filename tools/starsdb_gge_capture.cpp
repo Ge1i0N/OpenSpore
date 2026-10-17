@@ -28,6 +28,7 @@ void star_fields(std::ostream& out,const StarRecord& star) {
     out<<",\"flags\":";number(out,star.flags);
     out<<",\"tech_level\":";number(out,star.tech_level);
     out<<",\"type\":";number(out,star.type);
+    out<<",\"starter_world_id\":";if(star.starter_world_id)out<<text(hex(*star.starter_world_id));else out<<"null";
     out<<",\"planet_count\":";number(out,star.planet_count);
     out<<",\"name\":";if(star.name)out<<text(capture::utf8(*star.name));else out<<"null";
     out<<",\"position\":";
