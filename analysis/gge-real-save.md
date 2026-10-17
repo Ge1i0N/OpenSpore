@@ -86,6 +86,32 @@ After read-only nested-DBPF unwrapping, all five structural PlanetRecord observa
 selection adapter returns save stem `Золяко`. The `.spo` first-header reader observes
 `mFileVersionMajor=37`, `mFileVersionMinor=3`, and the bounded predicate `major >= 33` is true.
 
+## Corpus comparison
+
+The full bounded inspection of the three explicitly selected corpora found:
+
+```text
+                         UserData1     UserData       Ronikari
+stars.db root bytes       408,914       410,680       901,952
+StarRecord objects          42,010        42,010        42,010
+saved references                  1             2             2
+starter references                6             6             6
+black holes                     336           336           336
+possible starts                  44            44            44
+grid cells                    4,096         4,096         4,096
+```
+
+`UserData` contains one additional saved StarRecord after the space-stage experiment: key
+`0x0039A02F`, flags `0x1007`, tech level 5, position `(-124.487,-389.697,-0.577652)`, save stem
+`Реберилиа`. The original `0x0041C023` row remains. Ronikari contains two saved rows (`0x009D4020`
+and `0x00524036`) and is marked modded/non-vanilla; its structural format is still useful evidence,
+but its package-edited semantics are not treated as vanilla behavior.
+
+`GGEUserData.dat` outer frames also differ: `UserData1` decoded frame 656 bytes with nested field
+`0x07CA2689` size 564; `UserData` 684/592; Ronikari 4340/4240. Ronikari's small fields also differ
+(`0x066B980B` is 12 bytes rather than 4, and fields `0x07CA2687/8` are nonzero). These are observed
+save deltas with unknown semantics, not readiness signals.
+
 ## Derived snapshot boundary
 
 A temporary derived `GGE_CATALOG_V1` row was inspected, not committed:

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 project(OpenSpore LANGUAGES CXX)
 
+# Keep every executable (main app and explicit read-only utilities) together in the
+# canonical review/runtime directory. Multi-config generators expand $<CONFIG>.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
+
 # ---------------------------------------------------------------------------
 # Target shape, decided by evidence, not taste:
 #   * The original (refs/bins/ReleaseGA/SporeApp.exe) is 32-bit (machine 0x14c),
