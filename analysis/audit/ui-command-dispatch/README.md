@@ -88,6 +88,21 @@ dispatch code contains callback values `3`, `4` and `5` and record branches for 
 is not a whole-binary absence proof: the button event may be written into the record upstream or
 handled by an indirect callback.
 
+## Immediate-search limitation
+
+The helper `python tools/find_imm.py 0x17 0x18` reports:
+
+```text
+imm32 0x17: 107 raw matches in .text
+imm32 0x18: 1068 raw matches in .text
+```
+
+These are not event counts. The helper intentionally reports raw four-byte patterns, and many hits
+are ordinary bitset/table arithmetic (`value >> 5`, `value % 32`) or coincidental bytes. After
+disassembly filtering, the specific forwarding body `0x0095A0A0..0x0095A500` still has no relevant
+`0x17`/`0x18` event comparison or push. The whole-binary candidate search therefore remains
+**inconclusive**, while the bounded Window forwarding result remains negative for that body.
+
 ## Reproduction
 
 ```powershell
