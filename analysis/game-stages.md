@@ -68,13 +68,23 @@
 
 * Top-down camera; cells drawn as tinted discs over an immediate-mode overlay. Player is white
   with a cyan ring and a heading notch; predators carry a red ring; food is green.
+* **Backdrop from the game's own Layers data:** the 12 `backgroundMap` depth bands are painted as
+  a vertical colour gradient, and a `density` field of `CellGame_Layers.package` (e.g.
+  `Level1-zone1`) is uploaded as a 128x128 texture and drawn over the arena, drifting along that
+  layer's mean `advect` (flow) direction. Which density/flow layer a level uses is our choice by
+  name; the field contents are the game's.
 * HUD: level, cell/eaten counts, size and time, HP bar, GROW bar (evolve at 3.00), a death /
   evolve banner, and a control hint.
+* **Progression:** once evolved (size 3.0) a click advances to the `next` state of the shipped
+  `SporeAppStates` chain (`CellGame` -> `CreatureGame`). The Creature driver is not implemented,
+  so that state shows its honest placeholder — this is the real progression link, not a fake
+  transition.
 
 ## Boundaries
 
 * No mesh, sprite-atlas or RenderWare tide-pool rendering: discs stand in for the archetype
-  meshes (not yet drawable). No audio.
+  meshes (not yet drawable), and the backdrop is the game's own density field rather than the
+  original's composited parallax scene. No audio.
 * Positions, velocities, sizes, role split, growth/HP/aggression rates, arena and camera are
   **seed placeholders**; not GA behaviour claims. The original's placement and player-creation
   are not recovered.

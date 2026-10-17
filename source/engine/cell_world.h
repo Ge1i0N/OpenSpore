@@ -98,6 +98,11 @@ public:
     // The structure index that an archetype's +0x000 template id names, or -1.
     int structure_of(const Archetype& a) const;
 
+    // Background fields from CellGame_Layers.package (optional). Look up a layer by name, or the
+    // first with a given component count (1 = density, 3 = advect), or null when none was loaded.
+    const LayerField* layer_named(const std::string& name) const;
+    const LayerField* first_layer(u32 components) const;
+
 private:
     void spawn_from_level(const Population& pop);
     void respawn_player();

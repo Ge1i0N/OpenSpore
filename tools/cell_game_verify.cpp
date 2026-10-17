@@ -124,6 +124,22 @@ static std::vector<u8> make_globals() {
     return d;
 }
 
+static std::vector<u8> make_background() {
+    std::vector<u8> d;
+    put_le32(d, 0); put_le32(d, 2);               // 8-byte header
+    put_le_f32(d, 0.75f); put_le_f32(d, 0.90f); put_le_f32(d, 0.92f); put_le_f32(d, 0.0f);
+    put_le_f32(d, 0.00f); put_le_f32(d, 0.10f); put_le_f32(d, 0.55f); put_le_f32(d, 15.0f);
+    return d;
+}
+
+static std::vector<u8> make_density() {
+    std::vector<u8> d(128 * 128 * 4, 0);
+    auto put = [&](size_t at, float f) { memcpy(d.data() + at, &f, 4); };
+    put(0, 0.5f);
+    put((128 * 129 / 2) * 4, 0.9f);
+    return d;
+}
+
 int main(int argc, char** argv) {
     const u32 squid = fnv1_lower("cell_squid");
     const u32 booster = fnv1_lower("loot_booster");
@@ -244,6 +260,31 @@ int main(int argc, char** argv) {
         check(g.globals[0].floats[0] == 5.0f && g.globals[0].floats[1] == 0.5f, "globals floats");
     }
 
+    // 9: backgroundMap parallax bands
+    {
+        std::vector<Rec> recs = {{cell::kTypeBackgroundMap, 0, fnv1_lower("CellBackgrounds"),
+                                  make_background()}};
+        auto dbpf = make_dbpf(recs);
+        cell::GameData g; std::string err;
+        bool ok = cell::decode_from_memory(dbpf.data(), dbpf.size(), "test", g, err);
+        check(ok, "decode backgroundMap");
+        check(g.background.size() == 2, "two background bands");
+        check(g.background[0].r == 0.75f && g.background[0].g == 0.90f, "band 0 rgb");
+        check(g.background[1].depth == 15.0f, "band 1 depth");
+    }
+
+    // 10: a density layer keeps its payload (for the backdrop texture)
+    {
+        std::vector<Rec> recs = {{cell::kTypeDensity, 0, fnv1_lower("Level1-zone1"), make_density()}};
+        auto dbpf = make_dbpf(recs);
+        cell::GameData g; std::string err;
+        bool ok = cell::decode_from_memory(dbpf.data(), dbpf.size(), "test", g, err);
+        check(ok, "decode density layer");
+        check(g.layers.size() == 1, "one layer");
+        check(g.layers[0].components == 1, "density components");
+        check(g.layers[0].data.size() == 65536, "density payload retained");
+    }
+
     // Optional: real package.
     if (argc > 1 && argv[1] && argv[1][0]) {
         cell::GameData g; std::string err;
@@ -254,7 +295,8 @@ int main(int argc, char** argv) {
                       << g.populations.size() << " populations, " << g.random_spawns.size()
                       << " random_spawns, " << g.worlds.size() << " worlds, "
                       << g.structures.size() << " structures, " << g.globals.size()
-                      << " globals, " << g.layers.size() << " layers\n";
+                      << " globals, " << g.background.size() << " background bands, "
+                      << g.layers.size() << " layers\n";
         } else {
             std::cerr << "real package decode failed: " << err << "\n";
             ++failures;
@@ -265,6 +307,6 @@ int main(int argc, char** argv) {
         std::cerr << failures << " cell_game_verify check(s) failed\n";
         return 1;
     }
-    std::cout << "cell_game_verify: 8 constructed-input checks PASS\n";
+    std::cout << "cell_game_verify: 10 constructed-input checks PASS\n";
     return 0;
 }

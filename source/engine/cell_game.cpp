@@ -140,7 +140,22 @@ LayerField parse_layer(u32 id, const std::vector<u8>& d, u32 components) {
     f.components = components;
     f.size = static_cast<u32>(d.size());
     if (const char* n = naming::instance_name(id)) f.name = n;
+    f.data = d;  // keep the payload so a caller can build a background tile
     return f;
+}
+
+// `backgroundMap`: 8-byte header then 16-byte bands of {r,g,b,depth} f32 (see tools/cell_game.py).
+std::vector<BackgroundBand> parse_background(const std::vector<u8>& d) {
+    std::vector<BackgroundBand> bands;
+    for (size_t o = 8; o + 16 <= d.size(); o += 16) {
+        BackgroundBand b;
+        b.r = le_f32(d.data() + o);
+        b.g = le_f32(d.data() + o + 4);
+        b.b = le_f32(d.data() + o + 8);
+        b.depth = le_f32(d.data() + o + 12);
+        bands.push_back(b);
+    }
+    return bands;
 }
 
 Population parse_population(u32 id, const std::vector<u8>& d) {
@@ -197,6 +212,7 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
         case kTypeGlobals:
         case kTypeAdvect:
         case kTypeDensity:
+        case kTypeBackgroundMap:
             if (!p.read_resource_decoded(static_cast<u32>(i), d)) {
                 error = "resource read failed";
                 return false;
@@ -216,6 +232,11 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
         case kTypeGlobals: out.globals.push_back(parse_globals(id, d)); break;
         case kTypeAdvect: out.layers.push_back(parse_layer(id, d, 3)); break;
         case kTypeDensity: out.layers.push_back(parse_layer(id, d, 1)); break;
+        case kTypeBackgroundMap: {
+            std::vector<BackgroundBand> bands = parse_background(d);
+            out.background.insert(out.background.end(), bands.begin(), bands.end());
+            break;
+        }
         default: break;
         }
     }

@@ -54,6 +54,7 @@ inline constexpr u32 kTypeStructure = 0x4B9EF6DCu;
 inline constexpr u32 kTypeGlobals = 0x2A3CE5B7u;
 inline constexpr u32 kTypeAdvect = 0x04805684u;
 inline constexpr u32 kTypeDensity = 0x5C74D18Bu;
+inline constexpr u32 kTypeBackgroundMap = 0x612B3191u;
 
 struct LookEntry {
     u32 type = 0;      // see LOOK_ENTRY: 0 up, 1 forward, ... 11 player
@@ -143,6 +144,12 @@ struct LayerField {
     u32 components = 0;  // 3 = advect (flow), 1 = density
     u32 width = 128, height = 128;
     u32 size = 0;
+    std::vector<u8> data;  // the raw payload (little-endian f32), for tiles/textures
+};
+
+// One parallax depth band from `backgroundMap` (8-byte header + 12 x {r,g,b,depth} f32).
+struct BackgroundBand {
+    float r = 0.0f, g = 0.0f, b = 0.0f, depth = 0.0f;
 };
 
 // A single spawn line: which cell archetype, and how many / at what weight.
@@ -180,6 +187,7 @@ struct GameData {
     std::vector<Structure> structures;
     std::vector<Globals> globals;
     std::vector<LayerField> layers;
+    std::vector<BackgroundBand> background;  // `backgroundMap` parallax bands (12 typical)
     std::map<u32, u32> type_counts;  // type id -> resource count (every type in the package)
     u32 total_resources = 0;
 };

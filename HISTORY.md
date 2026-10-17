@@ -7,6 +7,21 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-17 — Cell stage: data-driven backdrop + Cell→Creature progression
+
+The cell reader now parses `backgroundMap` (12 depth bands) into `GameData::background` and keeps
+each `advect`/`density` layer's payload (`LayerField::data`); `World::load_default` also loads
+`Data/CellGame_Layers.package` (best effort). `states/cellpresent.cpp` paints a tide-pool backdrop
+from that data: the depth-band gradient plus a `density` field (e.g. `Level1-zone1`) uploaded as a
+128x128 texture and drifted along the field's mean `advect` flow. When the player evolves (size
+3.0) a click now advances to the shipped chain's next state (`CellGame` → `CreatureGame`), which
+keeps its honest placeholder since the Creature driver is not implemented. `cell_game_verify`
+grew to 10 constructed checks (backgroundMap bands, density payload). Verified: `cell_game_verify`
+10 PASS + real packages (CellGame: 12 background bands; Layers: 33 layers),
+`cell_world_verify`/`game_stages_verify` PASS, live `-state:CellGame` capture shows the gradient +
+plankton backdrop (`[cell] backdrop: density 'Level1-zone1' ... flow 'RandomFlow'`); main target
+0 warnings; 24 unit tests, `feature_map --check`, `docs_check` pass.
+
 ## 2026-10-17 — Cell stage: playable (render + camera + food chain)
 
 Made the Cell stage actually playable. `cell_world.{h,cpp}` now simulates a small food chain:

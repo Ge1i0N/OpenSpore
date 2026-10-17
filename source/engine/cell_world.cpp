@@ -119,7 +119,31 @@ bool World::load_default(std::string& error) {
         error = "Data/CellGame.package not found on the search paths";
         return false;
     }
-    return load_path(path.string(), error);
+    if (!load_path(path.string(), error)) return false;
+    // Background layers are optional: a missing CellGame_Layers.package disables the tide-pool
+    // backdrop but not the world. `decode` appends, so the fields join the same GameData.
+    const auto layers = fs::resolve("Data/CellGame_Layers.package");
+    if (!layers.empty()) {
+        std::string lerr;
+        if (!decode(layers.string(), m_data, lerr)) {
+            error = lerr;  // non-fatal: report why the backdrop is absent, keep the world
+        }
+    }
+    return true;
+}
+
+const LayerField* World::layer_named(const std::string& name) const {
+    for (const LayerField& f : m_data.layers) {
+        if (f.name == name) return &f;
+    }
+    return nullptr;
+}
+
+const LayerField* World::first_layer(u32 components) const {
+    for (const LayerField& f : m_data.layers) {
+        if (f.components == components) return &f;
+    }
+    return nullptr;
 }
 
 void World::spawn_from_level(const Population& pop) {

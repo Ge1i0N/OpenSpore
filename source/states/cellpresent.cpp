@@ -2,13 +2,16 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 
 #include "engine/cell_world.h"
 #include "engine/game_stages.h"
 #include "engine/input.h"
+#include "engine/log.h"
 #include "engine/naming.h"
 #include "render/device.h"
 #include "render/overlay.h"
+#include "states/statemgr.h"
 
 namespace os::states {
 namespace {
@@ -44,6 +47,12 @@ float hash01(u32 h) {
     return static_cast<float>(h & 0xFFFFFF) / 16777216.0f;
 }
 
+float rd_f32(const u8* p) {
+    float f;
+    memcpy(&f, p, 4);
+    return f;
+}
+
 void bar(rnd::Overlay& ov, float x, float y, float w, float h, float frac, u32 fill) {
     ov.rect(x, y, w, h, 0xC0101418u);
     if (frac < 0.f) frac = 0.f;
@@ -53,6 +62,73 @@ void bar(rnd::Overlay& ov, float x, float y, float w, float h, float frac, u32 f
     ov.rect(x, y + h - 1.f, w, 1.f, 0xFF3A4A5A);
     ov.rect(x, y, 1.f, h, 0xFF3A4A5A);
     ov.rect(x + w - 1.f, y, 1.f, h, 0xFF3A4A5A);
+}
+
+// The tide-pool backdrop, built once from one `density` field of CellGame_Layers (a 128x128 f32
+// plankton map). Its mean `advect` (flow) field gives the drift direction. Both are the game's
+// data; WHICH density/flow layer a level uses is our choice (by name).
+struct Backdrop {
+    u32 density_id = 0;
+    IDirect3DTexture9* tex = nullptr;
+    int w = 0, h = 0;
+    u32 flow_id = 0;
+    float fx = 0.0f, fy = 0.0f;
+    bool flow_ok = false;
+};
+Backdrop g_bg;
+
+void build_backdrop(rnd::Device& dev, const os::cell::World& world) {
+    const os::cell::LayerField* den = world.layer_named("Level1-zone1");
+    if (!den) den = world.layer_named("spiral");
+    if (!den) den = world.first_layer(1);
+    if (!den) return;
+    const os::cell::LayerField* flow = world.layer_named("RandomFlow");
+    if (!flow) flow = world.first_layer(3);
+
+    if (den->id != g_bg.density_id) {
+        if (g_bg.tex) { g_bg.tex->Release(); g_bg.tex = nullptr; }
+        g_bg.density_id = den->id;
+        g_bg.w = g_bg.h = 0;
+        const size_t n = static_cast<size_t>(den->width) * den->height;
+        if (den->data.size() >= n * 4) {
+            std::vector<u8> bgra(n * 4);
+            for (size_t i = 0; i < n; ++i) {
+                float v = rd_f32(den->data.data() + i * 4);
+                if (v < 0.f) v = 0.f;
+                if (v > 1.f) v = 1.f;
+                const u8 a = static_cast<u8>(std::sqrt(v) * 255.0f);  // sparse -> brighter flecks
+                bgra[i * 4 + 0] = 255;  // B
+                bgra[i * 4 + 1] = 240;  // G
+                bgra[i * 4 + 2] = 180;  // R
+                bgra[i * 4 + 3] = a;    // A
+            }
+            g_bg.tex = dev.create_texture_bgra(bgra.data(), static_cast<int>(den->width),
+                                               static_cast<int>(den->height));
+            if (g_bg.tex) {
+                g_bg.w = static_cast<int>(den->width);
+                g_bg.h = static_cast<int>(den->height);
+            }
+            LOG_INFO("cell", "backdrop: density '%s' (%ux%u, %s)", den->name.c_str(), den->width,
+                     den->height, g_bg.tex ? "texture ready" : "texture failed");
+        }
+    }
+    if (flow && flow->id != g_bg.flow_id) {
+        g_bg.flow_id = flow->id;
+        const size_t n = static_cast<size_t>(flow->width) * flow->height;
+        g_bg.flow_ok = false;
+        if (flow->data.size() >= n * 12) {
+            double sx = 0, sy = 0;
+            for (size_t i = 0; i < n; ++i) {
+                sx += rd_f32(flow->data.data() + i * 12);
+                sy += rd_f32(flow->data.data() + i * 12 + 4);
+            }
+            g_bg.fx = static_cast<float>(sx / (double)n);
+            g_bg.fy = static_cast<float>(sy / (double)n);
+            g_bg.flow_ok = true;
+            LOG_INFO("cell", "backdrop: flow '%s' mean=(%.3f, %.3f)", flow->name.c_str(), g_bg.fx,
+                     g_bg.fy);
+        }
+    }
 }
 
 }  // namespace
@@ -67,13 +143,7 @@ bool present_cell_world() {
 
     cell::World& world = os::stages::cell_world();
 
-    // A dark tide-pool blue; a per-level hue keeps each level readable at a glance.
-    u32 bg = 0xFF0B1620u;
-    if (!world.level().empty()) {
-        const float hue = hash01(os::fnv1_lower(world.level().c_str()));
-        bg = hsv(0.55f + 0.10f * hue, 0.55f, 0.16f) | 0xFF000000u;
-    }
-    dev.clear(bg);
+    dev.clear(0xFF06121Cu);
     ov.begin(w, h);
 
     if (!world.loaded()) {
@@ -96,6 +166,33 @@ bool present_cell_world() {
     const float camx = world.camera_x(), camy = world.camera_y();
     const auto sx = [&](float wx) { return (wx - camx) * ppu + cx; };
     const auto sy = [&](float wy) { return (wy - camy) * ppu + cy; };
+
+    // --- Backdrop: the `backgroundMap` depth-band gradient, then the plankton density field ----
+    const auto& bands = world.data().background;
+    if (!bands.empty()) {
+        const float bh = static_cast<float>(h) / static_cast<float>(bands.size());
+        for (size_t i = 0; i < bands.size(); ++i) {
+            const auto& bnd = bands[i];
+            const u8 r = static_cast<u8>(bnd.r * 130.f);
+            const u8 g = static_cast<u8>(bnd.g * 130.f);
+            const u8 b = static_cast<u8>(bnd.b * 130.f);
+            ov.rect(0.f, static_cast<float>(i) * bh, static_cast<float>(w), bh + 1.f,
+                    rnd::rgba(r, g, b));
+        }
+    }
+    build_backdrop(dev, world);
+    if (g_bg.tex && g_bg.w > 0) {
+        // The field covers the arena; the flow field slowly DRIFTS it (a small world-space shift),
+        // so the plankton moves without wrapping the UVs off the texture.
+        float shiftx = 0.f, shifty = 0.f;
+        if (g_bg.flow_ok) {
+            shiftx = g_bg.fx * world.time() * 6.0f;
+            shifty = g_bg.fy * world.time() * 6.0f;
+        }
+        const float ax = world.arena();
+        ov.image_uv(sx(-ax + shiftx), sy(-ax + shifty), (sx(ax + shiftx) - sx(-ax + shiftx)),
+                    (sy(ax + shifty) - sy(-ax + shifty)), g_bg.tex, 0.f, 0.f, 1.f, 1.f);
+    }
 
     // Steer: the pointer, in world space, is the destination the player accelerates toward.
     if (world.player_alive()) {
@@ -168,9 +265,9 @@ bool present_cell_world() {
         ov.rect(cx - 220.f, cy - 30.f, 440.f, 46.f, 0xC0A02020u);
         ov.text_fmt(cx - 200.f, cy - 20.f, 0xFFFFE0E0u, "EATEN  -  respawning...");
     } else if (world.evolved()) {
-        ov.rect(cx - 300.f, cy - 30.f, 600.f, 46.f, 0xC0206030u);
-        ov.text_fmt(cx - 280.f, cy - 20.f, 0xFFE8FFE8u,
-                    "READY TO EVOLVE  (Creature stage is not implemented)");
+        ov.rect(cx - 320.f, cy - 30.f, 640.f, 46.f, 0xC0206030u);
+        ov.text_fmt(cx - 300.f, cy - 20.f, 0xFFE8FFE8u,
+                    "READY TO EVOLVE  -  click to enter the Creature stage");
     }
 
     ov.text_fmt(16.f, static_cast<float>(h) - 24.f, 0xFF7E98A8,
@@ -178,6 +275,17 @@ bool present_cell_world() {
 
     ov.end();
     dev.end_frame();
+
+    // The shipped script pairs CellGame with CreatureGame (`SporeAppStates`); once the player has
+    // grown enough, a click advances exactly that step. The Creature driver is not implemented yet,
+    // so its state shows the honest placeholder - this is the progression, not a fake transition.
+    if (world.evolved() && input::clicked()) {
+        const os::stages::Stage* st = os::stages::find_by_state("CellGame");
+        if (st && st->next[0]) {
+            LOG_INFO("cell", "evolved -> goto %s (shipped CellGame progression)", st->next);
+            states::manager().request_goto(st->next);
+        }
+    }
     return true;
 }
 
