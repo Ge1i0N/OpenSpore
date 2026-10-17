@@ -34,6 +34,22 @@ planetRecords.pkt  0 indexed records
 These are container observations only. Their payloads are not promoted to catalogue, candidate or
 refill readiness without a format-specific decoder and producer provenance.
 
+`GGEUserData.dat` is a complete decoded serialized frame when its only DBPF resource is selected:
+tag `0x01A80D26`, six fields, zero trailing bytes. Observed field IDs/sizes are:
+
+```text
+0x066B980A  16 bytes
+0x066B980B   4 bytes
+0x07CA2686   4 bytes
+0x07CA2687   4 bytes
+0x07CA2688   4 bytes
+0x07CA2689 564 bytes (nested/opaque payload)
+```
+
+The host now has a bounded explicit `dbpf_serialized_frame_inspect` tool for this observation. Field
+semantics and nested payload meaning remain Unknown; no GGE catalogue or readiness status is inferred
+from these IDs.
+
 ## Real StarManager observations
 
 For `Game0\stars.db` the explicit DBPF/context reader observed:

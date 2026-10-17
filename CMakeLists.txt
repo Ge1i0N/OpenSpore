@@ -189,6 +189,8 @@ add_executable(dbpf_inventory_inspect EXCLUDE_FROM_ALL tools/dbpf_inventory_insp
 target_include_directories(dbpf_inventory_inspect PRIVATE source)
 add_executable(dbpf_resource_inspect EXCLUDE_FROM_ALL tools/dbpf_resource_inspect.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
 target_include_directories(dbpf_resource_inspect PRIVATE source)
+add_executable(dbpf_serialized_frame_inspect EXCLUDE_FROM_ALL tools/dbpf_serialized_frame_inspect.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp source/engine/serialized_frame.cpp)
+target_include_directories(dbpf_serialized_frame_inspect PRIVATE source)
 add_executable(starsdb_dbpf_verify EXCLUDE_FROM_ALL tools/starsdb_dbpf_verify.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp source/engine/starsdb_context.cpp source/engine/starsdb_dbpf.cpp)
 target_include_directories(starsdb_dbpf_verify PRIVATE source)
 add_executable(starsdb_postload_verify EXCLUDE_FROM_ALL tools/starsdb_postload_verify.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp)
