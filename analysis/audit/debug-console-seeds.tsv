@@ -33,3 +33,4 @@
 0x00697CA0	function	os_sdk_gameinput_keydown_00697CA0
 0x008153C0	function	os_sdk_mainwindow_onkey_008153C0
 0x0067F150	function	os_sdk_cheatmanager_processline_0067F150
+0x00814180	function	os_mainwindow_ctrl_shift_c_00814180

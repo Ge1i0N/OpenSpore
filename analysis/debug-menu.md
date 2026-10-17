@@ -173,6 +173,22 @@ The owner path is also bounded: `FUN_00849BF0` registers the Win32 class **`Canv
 event `0x1EE100C` before translating `WM_KEYDOWN` into `0x1EE1001`. The final hotkey probe is
 therefore limited to the object assigned to that one listener field.
 
+### Exact GA Ctrl+Shift+C branch
+
+The exact hotkey branch is recovered at `FUN_00814180`:
+
+```cpp
+if (modifiers == 3 && key == 0x43) {  // Ctrl + Shift + 'C'
+    if (!FUN_0067CA60()->vtable[0x84]()) {
+        FUN_0067DDE0()->vtable[0x44](1);  // native console toggle/open
+    }
+    return 1;
+}
+```
+
+This is direct GA-unpacked evidence, not Beta/MiniWiki inference. The same function contains other
+Enter/Alt and `S`/modifier branches, but they are separate from the Console hotkey.
+
 The listener source is now narrowed further: `FUN_007E62C0` fills outer `+0x14` through global
 service lookup ID `0x0114259C`; `FUN_007E6850` passes that field to Canvas vtable `+0x68`, and
 `FUN_00A169B0` stores it at `Canvas+0x5C`. The remaining task is to resolve that service object's
