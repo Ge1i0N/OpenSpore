@@ -29,6 +29,26 @@ One inline caption is already present in the bounded data: `0x070D7509` has capt
 `Play Scenario` in the EP1 `GGEZoomPanelV2` copy. Other targeted captions are locale-table
 references whose table/key resolution is intentionally not substituted here.
 
+## Play Scenario object details
+
+The explicit EP1 record `Spore_EP1_Data.package`, ordinal `12415`, was inspected directly for the
+matching object:
+
+```text
+object       74
+class        0xEEEFE2C3
+ControlID    0x070D7509
+CommandID    0
+parent       138
+Drawable     object 73
+serialized   WinProcs property absent
+```
+
+This proves the control is a real serialized window/object with the expected caption and parent,
+but its event/WinProc attachment is not present in the serialized SPUI object. The absence is not
+treated as “no handler”: it narrows the remaining producer search to dynamic/native attachment,
+layout lifecycle or generic event routing.
+
 The `0x036C4A10` match is the strongest current UI→state corroboration: the shipped `Dev` control
 and the native handler branch share the exact value, and the native branch calls the SDK-compatible
 StateManager `+0x28(1)` slot. The shipped `SporeAppStates` table assigns explicit id 1 to
