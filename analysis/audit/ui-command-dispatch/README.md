@@ -46,6 +46,28 @@ visible E3LaunchScreen hit
 It is not used for GGE controls, and it is not generalized to `Play Scenario`. The original
 WinProc/button capture/CommandID producer remains Unknown.
 
+## GA Window message forwarding seed
+
+To narrow the external `button-click=0x17` / `button-select=0x18` leads, a local objdump pass checked
+the already relevant GA Window boundary:
+
+```text
+0x00960250:
+  this + 0x30 == null -> return false
+  otherwise forward (this - 4, caller record) to 0x0095A010
+
+0x0095A010:
+  copy seven dwords from the supplied record into a bounded local message shape
+  invoke the receiver callback/vtable path (one observed literal callback argument is 3)
+  normalize/forward through 0x00959240
+```
+
+The inspected `0x00960250` body contains no comparison against `0x17` or `0x18`. This is useful
+negative/route evidence, not proof that those values are absent from GA: the event type may be
+written into the record by an upstream producer or handled in a callback reached indirectly.
+No `ControlID 0x070D7509`, `CommandID 0x00E1132F`, or ScenarioMode tag `0x01654C10` was promoted
+from this forwarding boundary.
+
 ## Reproduction
 
 ```powershell
