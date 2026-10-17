@@ -45,6 +45,9 @@ SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](co
 The bounded GA immediate scan found no separate MessageManager producer for them, so they remain
 ControlID/handler identities rather than independently proven message producers.
 
+Do not conflate `ControlID 0x070D7509` (`Play Scenario`, EP1 `GGEZoomPanelV2`) with handler/state
+value `0x070D74E7`; the values differ and the bounded native scan finds the former only in UI setup.
+
 The related state-to-UI helper `DE48C0` maps controller state 5/13 to UI IDs `0x061DD69B` and
 `0x070D74E7`, respectively, via `00810650` and control vtable `+0x28`. Its retained evidence is
 separate in [gge-state-ui](../gge-state-ui/README.md); matching IDs are not treated as a proven

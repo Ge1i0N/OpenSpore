@@ -28,6 +28,11 @@ One inline caption is already present in the bounded data: `0x070D7509` has capt
 `Play Scenario` in the EP1 `GGEZoomPanelV2` copy. Other targeted captions are locale-table
 references whose table/key resolution is intentionally not substituted here.
 
+The similarly named state/UI value `0x070D74E7` is a different value. `find_imm` finds
+`0x070D7509` only in the `DE48C0`/`DE5900` UI-control tables in the bounded native scan; no direct
+handler branch for `0x070D7509` was observed. Therefore the corpus proves the control identity and
+caption, not that clicking it posts `DE99B0(0x070D74E7)` or enters Adventure/gameplay.
+
 The bounded GA immediate scan found no separate `MessageManager` send/post call that emits these
 values. Their current classification is therefore **GGE UI ControlID / handler identity**, not an
 independently proven message producer. `0x07BFB76E` also has a separate consumer at `0x00DFE422`
