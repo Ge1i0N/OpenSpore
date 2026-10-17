@@ -109,6 +109,24 @@ DF9112  → separate GGE per-entry/UI lifecycle cleanup path
 This is another shared UI target rather than a unique Play Scenario control. Its semantic name and
 the exact relationship between the two lifecycle uses remain Unknown.
 
+## `0x070D74E7` belongs to the `DE99B0` listener body
+
+The apparent continuation at `DE9AD0` is not a separate message handler: the preceding `int3` run
+places the function entry at `DE99B0`. The exact branch is therefore:
+
+```text
+DE99B0 listener body
+  ...
+  DE9C15: compare event ID with 0x070D74E7
+  DE9C4E: guarded state/UI feedback path
+  DE9D0C: controller +0x108/+0x104 = 13
+```
+
+This strengthens the existing classification of `0x070D74E7` as a listener/event state value. It
+also makes the separation from `0x070D7509` sharper: the latter has only the two setup-table
+references in `DE48C0` and `DE5900`, while the former is actively branched inside the `DE99B0`
+listener. No producer for the `0x070D7509` control has been found.
+
 ## SDK cross-check
 
 `refs/Spore-ModAPI/Spore/App/IStateManager.h` puts `SwitchToState` at vtable `+0x28`, matching the
