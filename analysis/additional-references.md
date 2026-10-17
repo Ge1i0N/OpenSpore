@@ -93,6 +93,10 @@ command parser exists.
 Event id `0x10001` reaches the ConsoleWindow output buffer through `0x0096A7B0` (wide append),
 `0x0096A900` (ASCII append) and `0x0096AA80` (clear), dispatched by `0x00803310`.
 
+The bounded command scan also confirms native `help`, `history` (`[<items:int>] Lists the last n
+commands in the command history`) and `levels -unlockAdventures` (`Unlocks all Maxis adventures`)
+leads. These remain native semantics until each host service is independently implemented.
+
 The native WinProc `0x00849310` maps `WM_KEYDOWN/UP/CHAR` to `0x00848620/0x00848700/0x008487D0`
 and sends modifier bits through `0x00847F40`; a listener at `window+0x5C` can consume the event
 before default routing. `0x00849BF0` owns this `Canvas` class and stores the engine object via

@@ -113,6 +113,10 @@ This confirms the native command backend and its connection to the Console UI. T
 trigger and complete command table remain unresolved; the OpenSpore host console does not claim to
 implement those native cheat services.
 
+Additional bounded GA command leads are `history` with `[<items:int>] Lists the last n commands in the
+command history` and `levels -unlockAdventures` with `Unlocks all Maxis adventures`. They are retained
+as native leads only; OpenSpore does not report them as implemented cheat services.
+
 The vtable mapping is now explicit: `AppConsole` vtable `0x0140195C + 0x00` points to
 `FUN_0067EAA0` (line parser/dispatcher), while `+0x04` points to `FUN_0067E240` (help description).
 The CheatManager vtable `0x01401B40 + 0x38` points to `FUN_0067EF20` (command execution/result

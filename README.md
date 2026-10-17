@@ -150,6 +150,10 @@ state. Начните с `help`, затем попробуйте `state -list`, 
 `cfg -list`, `txt -ambig`, `levels -unlock` или `quit`. Последняя команда пока честно сообщает,
 что native level service не подключён, и не меняет saves.
 
+В GA native command registry отдельно наблюдаются `history`, `clear` и
+`levels -unlockAdventures` (`Unlocks all Maxis adventures`); в OpenSpore они пока остаются
+явными host-boundaries и не должны восприниматься как выполненные cheat services.
+
 Это host-реконструкция через наш command registry. Исторический Beta README описывает Cheat Console
 и отдельный in-window shortcut Ctrl+Shift+Alt+C; GA `UI/DebugConsole` уже найден и анализируется,
 но native creation/parenting/dispatch chain ещё не объявлена восстановленной. Подробнее:
