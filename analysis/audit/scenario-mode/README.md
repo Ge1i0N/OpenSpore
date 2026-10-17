@@ -41,6 +41,26 @@ enters ScenarioMode. The shipped state table defines a `ScenarioMode` state with
 producer remains unresolved. `cScenarioMode` owns edit/play strategies and scenario data/resources
 according to the SDK, but their runtime readiness and stage factory path remain unobserved.
 
+## GA lifecycle sample
+
+The bounded GA bodies add a concrete, still-static lifecycle shape:
+
+- `EF2290` (`Initialize`) allocates a `0xA8` Simulator-side object, creates another strategy/data
+  object, obtains the GameModeManager and registers a listener through MessageManager `+0x28` for
+  event `0x212D3E7` plus a second listener set. This is consistent with SDK `MessageListenerData`
+  ownership patterns, but does not prove listener delivery.
+- `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
+  scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
+  statically; no runtime ScenarioMode instance was observed.
+- `EF2EF0` (`Update`) branches on `cScenarioMode::mMode` at `+0xCC`: mode `1` follows the edit
+  path; mode `2` follows the play path and invokes play-mode/goal/terrain helpers. When the initial
+  latch is set it requests the `ScenarioPlanet` simulator resource and performs the play/edit
+  transition work. These calls are retained as native candidates, not host readiness.
+
+This makes ScenarioMode a real next reverse-engineering target after a selected star, but it does
+not connect the GGE `Play Scenario` ControlID `0x070D7509` to `ScenarioMode` or prove an adventure
+resource/planet was loaded.
+
 Reproduction:
 
 ```powershell
