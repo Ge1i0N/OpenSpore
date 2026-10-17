@@ -54,6 +54,15 @@ bool compose_camera_orbit(const CameraOrbitObservation& observed,CameraPose& out
 // Restricted host bridge to viewer+40: rigid inverse for an explicit orthonormal scale1 pose.
 // Finite/orthonormal checks are host policy, not the native general inverse implementation.
 bool camera_pose_world_to_view(const CameraPose& pose,std::array<float,16>& out,std::string& error);
+struct CameraDynamicsAxisObservation {
+    std::optional<float> current, target, velocity, minimum, maximum, delta_seconds;
+    std::optional<float> damping_base, stiffness;
+};
+struct CameraDynamicsAxisStep { float current=0, velocity=0; };
+// DDE580 one-axis arithmetic: velocity=(target-current)*stiffness*dt+velocity*pow(damping,dt),
+// current+=velocity*dt, then clamp. Mode mapping/wrap/viewer update remain outside this helper.
+bool step_camera_dynamics_axis(const CameraDynamicsAxisObservation& observed,
+                               CameraDynamicsAxisStep& out,std::string& error);
 struct ProjectedPoint { float x=0,y=0,ndc_z=0,clip_w=0; };
 // GA 0x7C4250 + 0xDE3C20: perspective divide and window EXTENTS, no origin addition/clipping.
 // Rejecting unknown/nonfinite/zero-w/invalid extents is host safety policy. Negative w is not culled.

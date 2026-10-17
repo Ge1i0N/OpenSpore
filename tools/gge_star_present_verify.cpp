@@ -210,6 +210,27 @@ int main(int argc,char** argv) {
                               pose.position.z*inverse_pose[8+col]+inverse_pose[12+col];
         if(!check(std::abs(at_origin)<.00001f,"camera world position maps to local origin"))return 1;
     }
+    CameraDynamicsAxisStep dynamics;
+    if(!check(step_camera_dynamics_axis({1.f,3.f,2.f,0.f,10.f,1.f,.1f,2.f},dynamics,error)&&
+        std::abs(dynamics.velocity-4.2f)<.00001f&&std::abs(dynamics.current-5.2f)<.00001f,
+        "DDE580 damping/stiffness/current order"))return 1;
+    if(!check(step_camera_dynamics_axis({1.f,3.f,2.f,0.f,5.f,1.f,.1f,2.f},dynamics,error)&&
+        dynamics.current==5.f&&std::abs(dynamics.velocity-4.2f)<.00001f,"DDE580 max clamp after velocity"))return 1;
+    if(!check(step_camera_dynamics_axis({5.f,1.f,-2.f,0.f,5.f,1.f,.1f,2.f},dynamics,error)&&
+        dynamics.current==0.f&&std::abs(dynamics.velocity+8.2f)<.00001f,"DDE580 min clamp and negative direction"))return 1;
+    if(!check(step_camera_dynamics_axis({2.f,2.f,9.f,0.f,10.f,0.f,.1f,2.f},dynamics,error)&&
+        dynamics.current==2.f&&dynamics.velocity==9.f,"zero delta leaves velocity unchanged, no movement"))return 1;
+    if(!check(step_camera_dynamics_axis({2.f,4.f,0.f,0.f,10.f,.5f,.1f,2.f},dynamics,error)&&
+        std::abs(dynamics.velocity-2.f)<.00001f,"fractional delta and pow damping"))return 1;
+    const auto reject_dynamics=[&](const CameraDynamicsAxisObservation& input) {
+        CameraDynamicsAxisStep sentinel{123.f,456.f};
+        return !step_camera_dynamics_axis(input,sentinel,error)&&sentinel.current==123.f&&sentinel.velocity==456.f;
+    };
+    if(!check(reject_dynamics({})&&reject_dynamics({2.f,3.f,0.f,0.f,1.f,-1.f,.1f,2.f})&&
+        reject_dynamics({2.f,3.f,0.f,2.f,1.f,1.f,.1f,2.f}),"missing/invalid dynamics fields atomic"))return 1;
+    if(!check(reject_dynamics({2.f,3.f,0.f,0.f,1.f,1.f,0.f,2.f})&&
+        reject_dynamics({2.f,3.f,0.f,0.f,1.f,1.f,.1f,std::numeric_limits<float>::quiet_NaN()}),
+        "invalid damping/stiffness atomic"))return 1;
     auto bad=camera; (*bad.clip_from_world)[15]=0;
     CameraFovStep fov;
     if(!check(step_camera_fov({1.f,2.f,.01f},fov,error)&&fov.next_current==1.1f&&

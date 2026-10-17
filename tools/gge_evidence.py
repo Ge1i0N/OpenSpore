@@ -107,7 +107,7 @@ def retain_static():
         if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
             raise ValueError('camera pose ranges require selected GA hash')
         dest=ROOT/'analysis/audit/gge-camera-pose';dest.mkdir(parents=True,exist_ok=True)
-        ranges=[('normal-mode-transform',0xddf2b0,0xddf47f),('transition-mode-transform',0xddf480,0xddf604),
+        ranges=[('normal-mode-transform',0xddf2b0,0xddf47f),('dynamics-helper',0xdde580,0xdde798),('transition-mode-transform',0xddf480,0xddf604),
                 ('normal-mode-update',0xdde810,0xdde8ad),('transition-setup',0xdde260,0xdde2f8),
                 ('transition-expiry',0xdde300,0xdde38f),('timed-mode-setup',0xdde8b0,0xdde92e),
                 ('basis-initializer',0x136cf30,0x136cf8c),('first-row-rotation',0x4099b0,0x409b2a),
@@ -133,6 +133,7 @@ def retain_static():
                  if item.address in (0x13cc46c,0x13cc470)]
         facts={'oracle_sha256':digest,'authority':'static file bytes and PE imports; explicit controlled host inputs, no runtime pose capture',
                'mode_objects':objects,'trig_imports':imports,
+               'dynamics_constants':{'damping_base':0.1,'stiffness':2.0,'smoothing_factor':0.1,'delta_units':'DDE810 converts milliseconds to seconds before DDE580','helper_input_import':'DDE580 calls _CIpow through 11E0930'},
                'pose_sources':{'basis':'16A10E0..1103 BSS; initializer136CF30 writes nine floats identity, no runtime immutability claim',
                                'pivot':'16A10CC..D4 BSS, copied into Transform+04',
                                'normal_angles':'first=-15A308C then second=15A3090',

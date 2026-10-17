@@ -57,6 +57,13 @@
       "name": "_CIsin"
     }
   ],
+  "dynamics_constants": {
+    "damping_base": 0.1,
+    "stiffness": 2.0,
+    "smoothing_factor": 0.1,
+    "delta_units": "DDE810 converts milliseconds to seconds before DDE580",
+    "helper_input_import": "DDE580 calls _CIpow through 11E0930"
+  },
   "pose_sources": {
     "basis": "16A10E0..1103 BSS; initializer136CF30 writes nine floats identity, no runtime immutability claim",
     "pivot": "16A10CC..D4 BSS, copied into Transform+04",

@@ -129,6 +129,29 @@ bool camera_pose_world_to_view(const CameraPose& pose,std::array<float,16>& out,
     }
     result[15]=1.f;out=result;error.clear();return true;
 }
+bool step_camera_dynamics_axis(const CameraDynamicsAxisObservation& observed,
+                               CameraDynamicsAxisStep& out,std::string& error) {
+    const auto fail=[&](const char* why){error=why;return false;};
+    if(!observed.current||!observed.target||!observed.velocity||!observed.minimum||!observed.maximum||
+       !observed.delta_seconds||!observed.damping_base||!observed.stiffness)
+        return fail("camera dynamics fields unobserved");
+    const float current=*observed.current,target=*observed.target,velocity=*observed.velocity,
+        minimum=*observed.minimum,maximum=*observed.maximum,dt=*observed.delta_seconds,
+        damping=*observed.damping_base,stiffness=*observed.stiffness;
+    for(float v:{current,target,velocity,minimum,maximum,dt,damping,stiffness})
+        if(!std::isfinite(v))return fail("nonfinite camera dynamics input");
+    if(dt<0||damping<=0||minimum>maximum)return fail("invalid camera dynamics bounds/delta/damping");
+    const float decay=std::pow(damping,dt);
+    if(!std::isfinite(decay))return fail("camera dynamics damping overflow");
+    const float next_velocity=(target-current)*stiffness*dt+velocity*decay;
+    if(!std::isfinite(next_velocity))return fail("camera dynamics velocity overflow");
+    const float unclamped=current+next_velocity*dt;
+    if(!std::isfinite(unclamped))return fail("camera dynamics position overflow");
+    CameraDynamicsAxisStep result;
+    result.current=std::clamp(unclamped,minimum,maximum);result.velocity=next_velocity;
+    if(!std::isfinite(result.current))return fail("camera dynamics output nonfinite");
+    out=result;error.clear();return true;
+}
 bool project_star(const StarPosition& world,const CameraObservation& observed,ProjectedPoint& out,std::string& error) {
     const auto fail=[&](const char* why) { error=why; return false; };
     if (!observed.clip_from_world || !observed.window_rect) return fail("star projection viewer-matrix/window observations unavailable");

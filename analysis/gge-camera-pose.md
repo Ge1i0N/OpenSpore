@@ -23,9 +23,11 @@ message `04360E14` on its completion branch, resets its timer word and returns t
 This is static dispatch/transition evidence, not a live observation of which mode GGE is in.
 
 `DDE810` calls the substantial dynamics helper `DDE580` with milliseconds converted to seconds,
-then moves shared offset `15A3048..50` toward `15A3054..5C` with factor0.1. The dynamics helper has
-velocity/damping, directional constraints, clamps and wrap behavior. It is **not ported by this
-change**. A Transform builder alone is not full mode Update, input handling or timing parity.
+then moves shared offset `15A3048..50` toward `15A3054..5C` with factor0.1. `DDE580` uses `_CIpow`
+(`0.1^dt`) to decay velocity, adds `(target-current)*2.0*dt`, advances current by velocity*dt,
+and clamps current between explicit mode fields. It also contains directional constraints and wrap
+behavior outside this one-axis subset. `step_camera_dynamics_axis` ports this bounded arithmetic;
+mode input, shared BSS, wrap and viewer update remain unported.
 
 ## Sources and transform builder
 
@@ -82,15 +84,21 @@ orthonormal rows (host tolerance1e-4), not scale/shear/singular inputs. This is 
 bridge**, not a port of GA's general matrix inversion or its error behavior. Reflections are not
 relabelled as native camera rotations by this validation.
 
+`step_camera_dynamics_axis` is a value step, not a stateful camera. It requires current, target,
+velocity, min/max, delta seconds, damping base and stiffness; no missing field becomes zero. The
+observed constants are `damping=.1`, `stiffness=2.0`, `update factor=.1`, and the host uses `std::pow`
+as the counterpart to MSVCR90 `_CIpow`. Native x87 rounding, mode-field mapping, wrap and the other
+axis are not claimed identical.
+
 The pose feeds [viewer composition](gge-viewer.md) and the original pixel projection in controlled
 tests, including an actual card scene. Normal GGE and controlled preview behavior are unchanged:
 no default pose, current-mode pointer, viewer ownership, input dispatch or readiness is fabricated.
 
 ## Verification / reproduction
 
-Presentation **118** checks and scene **218** checks PASS: zero/nonzero angles, two rotation signs,
+Presentation **125** checks and scene **218** checks PASS: zero/nonzero angles, two rotation signs,
 nonidentity basis, separate pivot/offset, negative distance, missing fields, nonfinite/overflow,
-rigid inverse order/translation and full pose→viewer→card chain. Fixtures supply all camera values;
+rigid inverse order/translation, dynamics decay/acceleration/clamps/atomic failures and full pose→viewer→card chain. Fixtures supply all camera values;
 scene native readiness remains false. [Audit facts](audit/gge-camera-pose/facts.json) include initial
 object/table words, inputs, imports and explicit limits; adjacent files retain instruction bytes.
 
