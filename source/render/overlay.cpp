@@ -294,6 +294,50 @@ void Overlay::rect(float x, float y, float w, float h, u32 argb) {
     m_flat_drawn = true;
 }
 
+void Overlay::circle(float cx, float cy, float r, u32 argb, int segments) {
+    if (!m_dev || !m_atlas || r <= 0.f) return;
+    if (segments < 3) segments = 3;
+    if (segments > 62) segments = 62;
+    flush_text();  // keep each draw batch homogeneous in FVF/state
+    set_flat_states(m_dev);
+    struct FlatVert {
+        FLOAT x, y, z, rhw;
+        DWORD color;
+    };
+    FlatVert v[64];
+    v[0] = {cx, cy, 0, 1, argb};
+    for (int i = 0; i <= segments; ++i) {
+        const float a = 6.28318530718f * (float)i / (float)segments;
+        v[i + 1] = {cx + r * std::cos(a), cy + r * std::sin(a), 0, 1, argb};
+    }
+    m_dev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, (UINT)segments, v, sizeof(FlatVert));
+    m_flat_drawn = true;
+}
+
+void Overlay::ring(float cx, float cy, float r, float thickness, u32 argb, int segments) {
+    if (!m_dev || !m_atlas || r <= 0.f) return;
+    if (segments < 3) segments = 3;
+    if (segments > 62) segments = 62;
+    if (thickness < 1.f) thickness = 1.f;
+    flush_text();
+    set_flat_states(m_dev);
+    struct FlatVert {
+        FLOAT x, y, z, rhw;
+        DWORD color;
+    };
+    FlatVert v[130];
+    int n = 0;
+    const float ri = r - thickness > 0.f ? r - thickness : 0.f;
+    for (int i = 0; i <= segments; ++i) {
+        const float a = 6.28318530718f * (float)i / (float)segments;
+        const float ca = std::cos(a), sa = std::sin(a);
+        v[n++] = {cx + ri * ca, cy + ri * sa, 0, 1, argb};
+        v[n++] = {cx + r * ca, cy + r * sa, 0, 1, argb};
+    }
+    m_dev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, (UINT)(n - 2), v, sizeof(FlatVert));
+    m_flat_drawn = true;
+}
+
 void Overlay::text(float x, float y, u32 argb, const std::string& s) {
     if (!m_dev || !m_atlas) return;
     const int rows = (kGlyphCount + m_cols - 1) / m_cols;

@@ -7,6 +7,23 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-17 — Cell stage: playable (render + camera + food chain)
+
+Made the Cell stage actually playable. `cell_world.{h,cpp}` now simulates a small food chain:
+hash-stable sizes, a name-derived `Food`/`Creature` role, mouse steering, predator/prey AI,
+eating/growth, HP, death + respawn, an evolve threshold (size 3.0) and a follow camera. New
+`source/render/overlay.cpp` `circle()`/`ring()` primitives; new `source/states/cellpresent.cpp`
+draws the world (tinted discs, predator red rings, player white/cyan) with a HUD (HP, GROW,
+eaten, level, banner, control hint) and steers from the pointer; `appstates.cpp` attaches
+`on_render` to the Cell driver. The player is found by its FNV-1 id (works without the name
+registry). `tools/cell_world_verify.cpp` extended with steering/camera/eating/growth/predator
+death/respawn checks. Positions, sizes, role split, growth/HP/aggression rates and the camera
+are seed placeholders (flagged in analysis/game-stages.md); the spawn list and body structures
+are the game's data. Verified: `cell_world_verify` PASS (constructed) + real package
+(`level_water: 160 cells, player=cell_hero_L0, eaten=0, hp=100`); `game_stages_verify` PASS;
+live `-state:CellGame` capture renders the tide pool (160 cells, player centred, HUD); main
+target 0 warnings; 24 unit tests, `feature_map --check`, `docs_check` pass.
+
 ## 2026-10-17 — Cell stage: data wired into the engine (first live world)
 
 Added `source/engine/cell_world.{h,cpp}` (D3D-free, deterministic) that loads

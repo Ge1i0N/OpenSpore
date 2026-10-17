@@ -121,4 +121,6 @@ std::string cell_world_status() { return g_world.status(); }
 
 bool cell_world_loaded() { return g_world.loaded(); }
 
+cell::World& cell_world() { return g_world; }
+
 }  // namespace os::stages

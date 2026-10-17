@@ -16,6 +16,7 @@
 #include "engine/log.h"
 #include "engine/pkg.h"
 #include "states/statemgr.h"
+#include "states/cellpresent.h"  // present_cell_world: draws the live cell world
 #include "states/uipresent.h"  // present_ui_screen: the layout a state names, drawn
 #include "states/ggehostpreview.h"
 
@@ -387,13 +388,17 @@ void install(os::states::Manager& mgr) {
             };
         }
         if (os::stages::has_driver(gs.mode.c_str())) {
-            // First gameplay step (analysis/game-stages.md): the Cell stage owns a skeleton
-            // driver - a tick counter with no world state. The other stage modes keep the
-            // honest "not implemented" path in on_enter below. No on_render here: the frame
-            // stays the generic placeholder, which now names the skeleton (see app.cpp).
+            // First gameplay step (analysis/game-stages.md): the Cell stage owns a driver that
+            // loads CellGame.package and simulates a level's cells (engine/cell_world.h). The
+            // state draws the live world itself (states/cellpresent.cpp): steering, camera, HUD.
             st.on_tick = [](f32 dt) {
                 os::stages::cell_tick(dt);
             };
+            if (!st.on_render) {
+                st.on_render = []() {
+                    os::states::present_cell_world();
+                };
+            }
             st.on_exit = []() {
                 os::stages::cell_exit();
             };

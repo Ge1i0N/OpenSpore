@@ -246,10 +246,16 @@ unites the decode with the engine:
 * `set_level("level_water")` spawns one entity per unit of each `populate` entry's count
   (160 cells for `level_water`), resolving each archetype's body model via `structure_of()`
   (archetype `+0x000` template id == structure id).
-* The player is the shipped hero archetype `cell_hero_L0` (else `cell_minno1`); positions and
-  velocities are placeholder seeds (RNG seeded from the level name), clearly labelled as such.
-* `game_stages.cpp` drives it: `cell_enter()` loads + spawns, `cell_tick(dt)` advances,
-  `cell_exit()` clears. See [game-stages](game-stages.md). Rendering the cells is the next step.
+* The player is the shipped hero archetype `cell_hero_L0` (else `cell_minno1`, else the first
+  cell), found by its FNV-1 id so it resolves without the name registry.
+* `tick(dt)` runs a small food chain: a hash-stable size and a name-derived role (`Food` vs
+  `Creature`) per entity, mouse steering for the player, predator/prey AI, eating/growth, HP,
+  death/respawn, an evolve threshold and a follow camera. **Positions, sizes, role split,
+  growth/HP/aggression rates and the camera are OUR seeds** (the archetype stat slots are
+  positional and unnamed) — the shipped spawn list and body structures are the game's data.
+* `game_stages.cpp` drives it (`cell_enter`/`cell_tick`/`cell_exit`) and
+  `source/states/cellpresent.cpp` draws it (tinted discs + HUD) and steers from the pointer.
+  See [game-stages](game-stages.md).
 
 ## Boundaries
 

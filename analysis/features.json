@@ -1227,7 +1227,7 @@
         {
           "name": "cell stage",
           "status": "partial",
-          "note": "Game_Cell driver loads CellGame.package and spawns a level's cells (level_water = 160, player=cell_hero_L0) into a data-driven sandbox with placeholder drift; no rendering/camera/HUD/input yet. Data model fully decoded (189 archetypes, 48 loottables, 9 look_tables, 13 worlds, 144 structures, named globals, Layers fields). source/engine/cell_world.* + cell_game.*, verify cell_world_verify/game_stages_verify. analysis/cell-game.md"
+          "note": "PLAYABLE tide pool: Game_Cell driver loads CellGame.package, spawns a level (level_water = 160, player=cell_hero_L0 by id) and simulates a food chain - mouse steering, Food/Creature roles, eating/growth, HP, death+respawn, evolve at size 3.0, follow camera. Drawn by source/states/cellpresent.* (tinted discs + HUD) via Overlay::circle/ring. Positions/sizes/rates/camera are seeds (see analysis/game-stages.md); no meshes/RenderWare/audio. Data model fully decoded (189 archetypes, 48 loottables, 9 look_tables, 13 worlds, 144 structures, named globals, Layers fields). source/engine/cell_world.* + cell_game.*, verify cell_world_verify/game_stages_verify."
         },
         {
           "name": "creature stage",

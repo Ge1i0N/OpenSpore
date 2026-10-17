@@ -38,6 +38,10 @@ public:
     void end();
 
     void rect(float x, float y, float w, float h, u32 argb);
+    // Filled circle (triangle fan) and its outline ring. Flat-shaded with the diffuse colour,
+    // so cells can be drawn as tinted discs without a texture per archetype.
+    void circle(float cx, float cy, float r, u32 argb, int segments = 24);
+    void ring(float cx, float cy, float r, float thickness, u32 argb, int segments = 28);
     void text(float x, float y, u32 argb, const std::string& s);
     void text_fmt(float x, float y, u32 argb, const char* fmt, ...);
     float text_width(const std::string& s) const;

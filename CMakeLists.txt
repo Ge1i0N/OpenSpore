@@ -158,6 +158,7 @@ set(OS_SOURCES
   source/states/loader.cpp
   source/states/title.cpp
   source/states/uipresent.cpp
+  source/states/cellpresent.cpp
   source/states/ggehostpreview.cpp
 )
 

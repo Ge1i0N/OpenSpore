@@ -2,6 +2,7 @@
 // a real CellGame.package, also decodes it, spawns level_water and ticks once.
 #include "engine/cell_world.h"
 
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -66,12 +67,15 @@ static std::vector<u8> make_structure(u32 id, float scale) {
     return d;
 }
 
-static std::vector<u8> make_population(u32 cell_a, float a_n, u32 cell_b, float b_n) {
-    std::vector<u8> d(16 + 2 * 64, 0);
+struct PEntry { u32 cell; float np; };
+static std::vector<u8> make_population(const std::vector<PEntry>& cells) {
+    std::vector<u8> d(16 + cells.size() * 64, 0);
     auto put = [&](size_t at, u32 x) { memcpy(d.data() + at, &x, 4); };
-    put(0, 4); put(8, 2);  // header type 4, 2 entries
-    put(16 + 0x18, cell_a); memcpy(d.data() + 16 + 0x2C, &a_n, 4);
-    put(16 + 64 + 0x18, cell_b); memcpy(d.data() + 16 + 64 + 0x2C, &b_n, 4);
+    put(0, 4); put(8, static_cast<u32>(cells.size()));
+    for (size_t k = 0; k < cells.size(); ++k) {
+        put(16 + k * 64 + 0x18, cells[k].cell);
+        memcpy(d.data() + 16 + k * 64 + 0x2C, &cells[k].np, 4);
+    }
     return d;
 }
 
@@ -91,7 +95,7 @@ int main(int argc, char** argv) {
             {cell::kTypeCell, 0, a2, make_archetype(s2, "Pink")},
             {cell::kTypeStructure, 0, s1, make_structure(s1, 2.0f)},
             {cell::kTypeStructure, 0, s2, make_structure(s2, 3.0f)},
-            {cell::kTypePopulate, 0, lvl, make_population(a1, 5.0f, a2, 3.0f)},
+            {cell::kTypePopulate, 0, lvl, make_population({{a1, 5.0f}, {a2, 3.0f}})},
         };
         auto dbpf = make_dbpf(recs);
         World w; std::string err;
@@ -108,27 +112,25 @@ int main(int argc, char** argv) {
         bool all_struct = true;
         for (const Entity& e : w.entities()) if (e.structure < 0) all_struct = false;
         check(all_struct, "every entity resolves a structure");
-        // food cells (a1) carry structure s1 -> scale 2.0
-        check(w.entities()[0].size == 2.0f, "size from structure scale");
+        // "Food" is a food name -> Role::Food; entities 0..4 are cell_food_L0, 5..7 cell_pinky.
+        check(w.entities()[0].role == Role::Food, "food archetype classified as Food");
+        check(w.entities()[5].role == Role::Creature, "non-food archetype classified as Creature");
         check(w.player_index() == 0, "player falls back to first cell");
 
-        // spawn distribution uses a deterministic RNG, so it is reproducible across loads.
         float x0 = w.entities()[0].x;
         check(x0 >= -w.arena() && x0 <= w.arena(), "spawn inside arena");
 
-        w.tick(0.5f);
-        w.tick(0.5f);
-        check(w.ticks() == 2, "tick counter");
+        // dt is clamped to 0.1 s per step, so advance with small steps to accumulate a second.
+        for (int i = 0; i < 20; ++i) w.tick(0.05f);
+        check(w.ticks() == 20, "tick counter");
         check(w.time() > 0.99f && w.time() < 1.01f, "accumulated time");
 
         check(w.status().find("level_water") != std::string::npos, "status level");
         check(w.status().find("8 cells") != std::string::npos, "status count");
 
-        // unknown level is an error, not a crash; world stays usable.
         std::string lerr2;
         check(!w.set_level("nope", lerr2) && !lerr2.empty(), "unknown level rejected");
 
-        // entity ids/positions: two loads of the same level agree (deterministic).
         std::string r1 = w.status();
         check(w.set_level("level_water", lerr), "re-spawn level");
         check(w.status() == r1, "deterministic re-spawn");
@@ -144,6 +146,79 @@ int main(int argc, char** argv) {
         World w; std::string err;
         check(!w.load_path("", err) && !err.empty(), "empty path rejected");
         check(!w.loaded(), "not loaded after empty path");
+    }
+
+    // 10+: gameplay - steering, eating/growth, HP/death/respawn, camera. A hero archetype so
+    // the player is its own entity; one food species and six creature species so a predator
+    // exists with near-certainty (creature size is a hash of the id, range [0.8, 2.4]).
+    {
+        const u32 hero = fnv1_lower("cell_hero_L0");
+        const u32 food = fnv1_lower("cell_food_L0");
+        std::vector<Rec> recs;
+        recs.push_back({cell::kTypeCell, 0, hero, make_archetype(fnv1_lower("struct_hero"), "Hero")});
+        recs.push_back({cell::kTypeCell, 0, food, make_archetype(fnv1_lower("struct_food"), "food")});
+        std::vector<PEntry> pop = {{food, 6.0f}};
+        for (int i = 0; i < 6; ++i) {
+            const std::string nm = "cell_blob" + std::to_string(i);
+            const u32 id = fnv1_lower(nm.c_str());
+            recs.push_back({cell::kTypeCell, 0, id, make_archetype(id, "Blob")});
+            pop.push_back({id, 3.0f});
+        }
+        recs.push_back({cell::kTypePopulate, 0, lvl, make_population(pop)});
+
+        auto dbpf = make_dbpf(recs);
+        World w; std::string err;
+        check(w.load_memory(dbpf.data(), dbpf.size(), "gameplay", err), "gameplay load");
+        std::string lerr;
+        check(w.set_level("level_water", lerr), "gameplay set level");
+        check(w.player() != nullptr, "player resolved (hero by id)");
+        if (w.player()) {
+            check(w.player()->size == 1.0f, "player base size 1.0");
+            check(w.player_alive() && w.player_hp() > 0.f, "player starts alive with HP");
+        }
+
+        // Steering: a target to the player's +x accelerates it that way; the camera tracks it.
+        w.set_target(w.player()->x + 20.f, w.player()->y);
+        w.tick(0.1f);
+        check(w.player()->vx > 0.f, "steers toward the target");
+        check(std::fabs(w.camera_x() - w.player()->x) < 1e-3f, "camera follows the player");
+
+        // Eating food always works (Role::Food is never a predator) and grows the player.
+        int fi = -1;
+        for (size_t i = 0; i < w.entities().size(); ++i)
+            if (w.entities()[i].role == Role::Food && w.entities()[i].alive) { fi = (int)i; break; }
+        check(fi >= 0, "a food entity exists");
+        if (fi >= 0) {
+            const float before = w.player()->size;
+            w.teleport_player(w.entities()[fi].x, w.entities()[fi].y);
+            w.tick(1.0f / 60.0f);
+            check(w.eaten() >= 1, "eating food increments the eaten count");
+            check(w.player()->size >= before, "eating grows the player");
+        }
+
+        // Predator: overlap a larger creature every step until the player is bitten to death,
+        // then confirm it respawns.
+        int pri = -1;
+        for (size_t i = 0; i < w.entities().size(); ++i) {
+            const Entity& e = w.entities()[i];
+            if ((int)i != w.player_index() && e.alive && e.role == Role::Creature &&
+                e.size > w.player()->size * 1.05f) { pri = (int)i; break; }
+        }
+        check(pri >= 0, "a predator creature exists");
+        if (pri >= 0) {
+            for (int k = 0; k < 400 && w.player_alive(); ++k) {
+                w.teleport_player(w.entities()[pri].x, w.entities()[pri].y);
+                w.tick(0.05f);
+            }
+            check(!w.player_alive(), "a larger creature bites the player to death");
+            bool respawned = false;
+            for (int k = 0; k < 200 && !respawned; ++k) {
+                w.tick(0.05f);
+                if (w.player_alive()) respawned = true;
+            }
+            check(respawned, "player respawns after death");
+            check(w.player_hp() > 0.f, "HP restored on respawn");
+        }
     }
 
     // Optional: real package.

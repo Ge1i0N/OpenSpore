@@ -24,6 +24,7 @@
 #include <string>
 
 #include "common.h"
+#include "engine/cell_world.h"
 
 namespace os::stages {
 
@@ -69,5 +70,9 @@ std::string cell_status();
 // Data/CellGame.package is not on the search paths. D3D-free (see engine/cell_world.h).
 std::string cell_world_status();
 bool cell_world_loaded();
+
+// The live world itself, for the presenter (states/cellpresent.cpp) to draw and steer. Always
+// valid; check loaded() before using. D3D-free.
+cell::World& cell_world();
 
 }  // namespace os::stages
