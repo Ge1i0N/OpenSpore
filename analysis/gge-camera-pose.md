@@ -90,15 +90,21 @@ observed constants are `damping=.1`, `stiffness=2.0`, `update factor=.1`, and th
 as the counterpart to MSVCR90 `_CIpow`. Native x87 rounding, mode-field mapping, wrap and the other
 axis are not claimed identical.
 
+The exact final wrap branch is also exposed as `wrap_camera_angle_once`: it subtracts one explicit
+period only when `value > period`, adds one period only when `value < 0`, and preserves equality.
+It is intentionally not modulo normalization and does not infer the BSS period. Directional
+constraint branches immediately before it remain unported because their `+24/+28/+64` relationships
+are mode-state dependent and have not been named from native semantics.
+
 The pose feeds [viewer composition](gge-viewer.md) and the original pixel projection in controlled
 tests, including an actual card scene. Normal GGE and controlled preview behavior are unchanged:
 no default pose, current-mode pointer, viewer ownership, input dispatch or readiness is fabricated.
 
 ## Verification / reproduction
 
-Presentation **125** checks and scene **218** checks PASS: zero/nonzero angles, two rotation signs,
+Presentation **130** checks and scene **218** checks PASS: zero/nonzero angles, two rotation signs,
 nonidentity basis, separate pivot/offset, negative distance, missing fields, nonfinite/overflow,
-rigid inverse order/translation, dynamics decay/acceleration/clamps/atomic failures and full pose→viewer→card chain. Fixtures supply all camera values;
+rigid inverse order/translation, dynamics decay/acceleration/clamps/wrap/atomic failures and full pose→viewer→card chain. Fixtures supply all camera values;
 scene native readiness remains false. [Audit facts](audit/gge-camera-pose/facts.json) include initial
 object/table words, inputs, imports and explicit limits; adjacent files retain instruction bytes.
 

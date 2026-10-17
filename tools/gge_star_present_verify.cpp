@@ -231,6 +231,13 @@ int main(int argc,char** argv) {
     if(!check(reject_dynamics({2.f,3.f,0.f,0.f,1.f,1.f,0.f,2.f})&&
         reject_dynamics({2.f,3.f,0.f,0.f,1.f,1.f,.1f,std::numeric_limits<float>::quiet_NaN()}),
         "invalid damping/stiffness atomic"))return 1;
+    float wrapped=123.f;
+    if(!check(wrap_camera_angle_once({6.5f,6.283185307179586f},wrapped,error)&&std::abs(wrapped-0.2168147f)<.00001f,"angle above period subtracts once"))return 1;
+    if(!check(wrap_camera_angle_once({-0.5f,6.283185307179586f},wrapped,error)&&std::abs(wrapped-5.7831855f)<.00001f,"negative angle adds once"))return 1;
+    if(!check(wrap_camera_angle_once({6.283185307179586f,6.283185307179586f},wrapped,error)&&wrapped==6.283185307179586f,"angle equal period is preserved"))return 1;
+    if(!check(wrap_camera_angle_once({20.f,6.283185307179586f},wrapped,error)&&std::abs(wrapped-13.716814f)<.00001f,"wrap is one correction, not modulo"))return 1;
+    const auto reject_wrap=[&](const CameraAngleWrapObservation& input) { float sentinel=123.f;return !wrap_camera_angle_once(input,sentinel,error)&&sentinel==123.f; };
+    if(!check(reject_wrap({})&&reject_wrap({1.f,0.f})&&reject_wrap({std::numeric_limits<float>::quiet_NaN(),1.f}),"unknown/invalid wrap input atomic"))return 1;
     auto bad=camera; (*bad.clip_from_world)[15]=0;
     CameraFovStep fov;
     if(!check(step_camera_fov({1.f,2.f,.01f},fov,error)&&fov.next_current==1.1f&&

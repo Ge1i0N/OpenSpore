@@ -152,6 +152,16 @@ bool step_camera_dynamics_axis(const CameraDynamicsAxisObservation& observed,
     if(!std::isfinite(result.current))return fail("camera dynamics output nonfinite");
     out=result;error.clear();return true;
 }
+bool wrap_camera_angle_once(const CameraAngleWrapObservation& observed,float& out,std::string& error) {
+    if(!observed.value||!observed.period){error="camera angle/period unobserved";return false;}
+    const float value=*observed.value,period=*observed.period;
+    if(!std::isfinite(value)||!std::isfinite(period)||period<=0||!std::isfinite(value-period)||!std::isfinite(value+period)) {
+        error="invalid camera angle wrap input";return false;
+    }
+    float result=value;if(result>period)result-=period;else if(result<0)result+=period;
+    if(!std::isfinite(result)){error="camera angle wrap output overflow";return false;}
+    out=result;error.clear();return true;
+}
 bool project_star(const StarPosition& world,const CameraObservation& observed,ProjectedPoint& out,std::string& error) {
     const auto fail=[&](const char* why) { error=why; return false; };
     if (!observed.clip_from_world || !observed.window_rect) return fail("star projection viewer-matrix/window observations unavailable");

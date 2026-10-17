@@ -133,7 +133,7 @@ def retain_static():
                  if item.address in (0x13cc46c,0x13cc470)]
         facts={'oracle_sha256':digest,'authority':'static file bytes and PE imports; explicit controlled host inputs, no runtime pose capture',
                'mode_objects':objects,'trig_imports':imports,
-               'dynamics_constants':{'damping_base':0.1,'stiffness':2.0,'smoothing_factor':0.1,'delta_units':'DDE810 converts milliseconds to seconds before DDE580','helper_input_import':'DDE580 calls _CIpow through 11E0930'},
+               'dynamics_constants':{'damping_base':0.1,'stiffness':2.0,'smoothing_factor':0.1,'delta_units':'DDE810 converts milliseconds to seconds before DDE580','helper_input_import':'DDE580 calls _CIpow through 11E0930','wrap':'DDE762..791 one correction: >period subtract, <0 add'},
                'pose_sources':{'basis':'16A10E0..1103 BSS; initializer136CF30 writes nine floats identity, no runtime immutability claim',
                                'pivot':'16A10CC..D4 BSS, copied into Transform+04',
                                'normal_angles':'first=-15A308C then second=15A3090',
