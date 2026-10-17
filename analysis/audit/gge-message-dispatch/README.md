@@ -7,9 +7,9 @@ no original process was executed. The generated C/instruction pairs are retained
 
 The GGE object vtable at `0x0147E030` contains `0x00DE99B0` at slot `+0x18` (`0x0147E048`).
 The body has the shape of a GGE message listener.
-It first forwards the message to an optional object at controller `+0x34`, requires event-object
-type `0x287259F6` at payload word `+0x08`, then calls that event object's vtable `+0x1C` to obtain
-the event ID.
+It first forwards the message to an optional object at controller `+0x34`, requires UTFWin message
+type `0x287259F6` (`kMsgComponentActivated`) at payload word `+0x08`, then calls the component
+payload's vtable `+0x1C` to obtain the component/event ID.
 
 Observed GA branches:
 
@@ -304,20 +304,51 @@ static-confirmed is:
 
 Runtime click execution and the final `ScenarioMode` transition remain separate gates.
 
-## Event-object producer boundary
+## ✔️ Milestone: GGE listener tied to UTFWin component activation
 
-The selected `.text` contains many consumers that validate event-object type `0x287259F6`, including
-the GGE `DE99B0` listener, but a bounded raw-form scan found:
+The SDK semantic cross-check identifies message type `0x287259F6` as:
+
+```text
+UTFWin::kMsgComponentActivated
+```
+
+The same SDK vocabulary defines:
+
+```text
+kMsgButtonClick  = 0x17
+kMsgButtonSelect = 0x18
+```
+
+The static GA route is now better described as:
+
+```text
+UTFWin component-activation message
+  → GGE listener DE99B0
+  → component/event ID 0x070D74E7
+  → Preferences::SetProperty(ScenarioGAButtonClicked, true)
+  → controller state 13
+```
+
+This is a major semantic correction: `0x287259F6` is not an unidentified event-object class but a
+known UTFWin activation message type. The exact upstream route from `ControlID 0x070D7509` through
+Button click/select handling into this activation message is still Unknown, as is runtime execution
+of the chain and final ScenarioMode entry.
+
+## Component-activation producer boundary
+
+The selected `.text` contains many consumers that validate UTFWin message type `0x287259F6`, including
+the GGE `DE99B0` listener. A bounded raw-form scan found:
 
 ```text
 push imm32 0x287259F6: 0
 obvious mov [object+offset], 0x287259F6 constructor writes: 0
 ```
 
-This is not a whole-binary semantic absence proof. It does show that the event object type is not
-constructed by a simple local literal in the inspected consumer paths; the producer likely uses a
-generic factory, registry, serialized record or indirect runtime callback. `DE99B0` remains a
-consumer boundary, not a recovered producer.
+This is not a whole-binary semantic absence proof. It does show that the component-activation
+message is not constructed by a simple local literal in the inspected consumer paths; the producer
+likely uses the generic UTFWin message path, registry or indirect UI callback. `DE99B0` is now
+identified as a component-activation consumer, while the exact `ControlID 0x070D7509` → activation
+producer remains Unknown.
 
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
