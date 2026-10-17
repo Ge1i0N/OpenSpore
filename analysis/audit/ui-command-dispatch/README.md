@@ -103,6 +103,34 @@ disassembly filtering, the specific forwarding body `0x0095A0A0..0x0095A500` sti
 `0x17`/`0x18` event comparison or push. The whole-binary candidate search therefore remains
 **inconclusive**, while the bounded Window forwarding result remains negative for that body.
 
+## ✔️ Milestone: GA generic Button dispatch recovered
+
+The selected GA binary contains the generic UTFWin message dispatcher at `0x00950E50`, matching
+the SDK semantic `InteractiveWinProc::HandleUIMessage` contract. Its bounded dispatch shape is:
+
+```text
+message.type = payload +0x08
+→ jump table at 0x0095110C
+→ event-specific InteractiveWinProc callback
+```
+
+The table entries for the two Button events are exact:
+
+```text
+message type 0x17 (kMsgButtonClick)
+  → 0x00950FD0
+  → receiver vtable +0x68 (OnButtonClick)
+
+message type 0x18 (kMsgButtonSelect)
+  → 0x00950FE7
+  → receiver vtable +0x6C (OnButtonSelect)
+```
+
+This closes the **generic** GA Button dispatch boundary that was previously Unknown. It does not
+yet prove that the GGE `Play Scenario` window has an attached WinProc at these slots, nor that its
+callback writes `ScenarioGAButtonClicked` or emits component-activation ID `0x070D74E7`. Those
+GGE-specific attachment/producer edges remain separate gates.
+
 ## Reproduction
 
 ```powershell
