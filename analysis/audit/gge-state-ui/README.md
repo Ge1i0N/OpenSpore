@@ -32,6 +32,25 @@ This strengthens the classification of `0x070D7509` as a shipped GA GGE UI/contr
 does **not** identify a mouse/button producer, a CommandID route, or a post to ScenarioMode tag
 `0x01654C10`; those remain Unknown.
 
+### Direct caller inventory
+
+The local `.text` scan for direct `E8 rel32` calls found:
+
+```text
+DE48C0 callers:
+  DE5A86
+  DE8A71
+
+DE5900 callers:
+  DEA1B0
+```
+
+`DE5900` is therefore only reached directly from the already mapped
+`GalaxyGameEntry` activation-shaped path `DEA1B0`; this supports its lifecycle/UI-initialization
+classification rather than a button producer role. `DE48C0` is reached from that initialization
+via `DE5A86` and from the separate `DE8A71` helper/update path. No direct caller from the bounded
+UTFWin Button/CommandID route was found in this inventory.
+
 ## Reproduction
 
 ```powershell
