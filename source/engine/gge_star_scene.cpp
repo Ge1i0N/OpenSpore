@@ -24,7 +24,8 @@ bool StarUiScene::open(const CatalogInput& catalog,const spui::Layout& source,co
         error="host scene catalogue observations unavailable; prior cards retained for diagnostics only";
         frame_.ticket=ticket_; frame_.error=error; return false;
     }
-    if (!catalog.source_label.empty() &&
+    const bool host_real_save=catalog.source_label.rfind("host-real-save:",0)==0;
+    if (!catalog.source_label.empty() && !host_real_save &&
         (catalog.producer.manager!=CatalogProducerStatus::Available||
          catalog.producer.starsdb!=CatalogProducerStatus::Available||
          catalog.producer.planet_records!=CatalogProducerStatus::Available||

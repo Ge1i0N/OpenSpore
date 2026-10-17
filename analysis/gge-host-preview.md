@@ -10,6 +10,29 @@ cmake --build build --config Debug --target OpenSpore
 .\build\bin\Debug\OpenSpore.exe -w -devDirs -state:GGEHostPreview
 ```
 
+### Explicit real-save host preview
+
+The same Debug-only state accepts a separate host format built from explicitly selected structural
+save observations and an equivalent terrain-property correlation:
+
+```powershell
+python tools/gge_real_save_host.py `
+  C:\captures\gge-observations.json `
+  C:\captures\gge-terrain-correlation.json `
+  C:\captures\gge-real-save-host.txt
+
+.\build\bin\Debug\OpenSpore.exe -w -devDirs -state:GGEHostPreview `
+  -exec "ggepreview:load,C:\captures\gge-real-save-host.txt" -execAfter 10
+```
+
+`GGE_HOST_REAL_SAVE_V1` is not `GGE_CATALOG_V1`: it contains saved rows only, explicitly empty
+candidates and Unknown manager/stars.db/planet/refill statuses. The scene allows this caller-labelled
+host format solely to render real saved cards; no native catalogue readiness, candidate refill,
+camera ownership, WinProc/CommandID dispatch or gameplay transition is implied.
+
+The snapshot inspector labels this input as `host_only=true`; ordinary `GGE_CATALOG_V1` admission
+rules remain unchanged.
+
 It presents three controlled cards using the actual `GGEGameStarUIv4` SPUI layout, the actual atlas
 PNG from explicitly selected `Spore_Graphics.package`, typed in-memory candidate metadata, an
 explicit identity camera observation, the host scene/lifecycle, renderer and normal input latch.
