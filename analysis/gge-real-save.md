@@ -226,6 +226,46 @@ Tests preserve exact type/key matching, distinguish related types from matches, 
 rows/ambiguous directory entries, and reject incomplete inventory output. Raw reports remain local
 and save binaries are not committed. Ghidra is not required for these byte/directory observations.
 
+### Related script payloads: direct-key hypothesis checked
+
+`tools/gge_userdata_payload_probe.py` follows only an explicitly selected payload type, not an
+automatic type fallback: for each DB right-hand triple it probes the same group/instance with
+caller-supplied type `0x00B1B104`. Duplicate directory matches remain ambiguous; no first-match
+selection is used. The tool decodes only unique readable resources, hashes the exact decoded bytes,
+and tests four literal source-key sequences (BE/LE group-type-instance and BE/LE instance-type-group).
+Matches would be byte occurrences, **not** typed references or evidence of native execution.
+
+For the explicitly selected `Game0/PlanetScripts.pld` files:
+
+| Corpus | Table rows | Related payloads decoded | Absent in selected directory | Full source-key sequence hits |
+|---|---:|---:|---:|---:|
+| UserData1 | 7 | 0 | 7 | 0 |
+| UserData | 7 | 7 | 0 | 0 |
+| UserDataRonikari | 55 | 5 | 50 | 0 |
+
+The seven UserData payloads are 34751, 38915, 32451, 34747, 32451, 30651 and 32835 decoded bytes.
+The five Ronikari payloads are 25562, 13946, 36743, 37472 and 30262 decoded bytes. All selected
+payloads decoded successfully; the negative result covers their **complete** bytes, not merely the
+256-byte console preview. No literal source key was found in the four tested layouts. This rules out
+that simple embedded-key hypothesis within this exact scope, but does not disprove a relationship
+through property fields, names, remapping tables, or other byte layouts/resources. In particular,
+the related payload type is still not substituted for the GGE table type.
+
+The payload inspector now uses explicit file/directory/decoded-size bounds and strict decimal record
+index parsing. Raw dump mode is limited to 1 MiB per resource. The probe caps table size at 64 rows,
+reports all missing/ambiguous/blocked entries separately and applies a 30-second subprocess timeout.
+No Ghidra restart or new native-analysis claim is involved.
+
+```powershell
+python tools/gge_userdata_payload_probe.py `
+  --frame-inspector build/bin/Debug/dbpf_serialized_frame_inspect.exe `
+  --inventory-inspector build/bin/Debug/dbpf_inventory_inspect.exe `
+  --resource-inspector build/bin/Debug/dbpf_resource_inspect.exe `
+  --package build/bin/Debug/UserData/Games/Game0/PlanetScripts.pld `
+  --payload-type 0x00b1b104 `
+  build/bin/Debug/UserData/Games/Game0/GGEUserData.dat
+```
+
 ## Explicit UserData package inventory
 
 Package files can provide planet/editor/resource correlation, but they are not substitutes for
