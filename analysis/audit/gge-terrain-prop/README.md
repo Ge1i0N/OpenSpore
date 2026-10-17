@@ -7,8 +7,8 @@ No original process was executed and no package priority was inferred from this 
 ## Corroborated contract
 
 - `FUN_0067DDF0` returns the GA PropManager global at `0x015FD8A8`.
-- GA's PropManager vtable at `0x01409200` has `0x006A60E0` at `+0x2C`, matching the SDK
-  `IPropManager::GetPropertyList` slot. The same vtable has `0x006A61F0` at `+0x44`, matching the
+- GA's PropManager vtable at `0x01409210` has `0x006A60E0` at `+0x2C`, matching the SDK
+  `IPropManager::GetPropertyList` slot. The same vtable has `0x006A61F0` at `+0x34`, matching the
   SDK `AddPropertyList` slot.
 - `0x006A60E0` uses the property-manager cache keyed by instance/group and, on a cache miss,
   forwards the resource request through its resource-manager/factory path. It returns a property
