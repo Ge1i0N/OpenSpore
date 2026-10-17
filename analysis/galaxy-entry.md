@@ -18,6 +18,13 @@ Static evidence does not observe the original runtime. All addresses below are G
 - `0xDDD9E0` delegates controller deactivation to `0xDE8160`; `0xDDDC50` removes additional
   registrations/resources and releases the patch manager. These method-role labels are inferred
   from side effects, not recovered original symbols or a fully traced mode-manager caller.
+- The GGE message listener `0xDE99B0` is now bounded: event-object type `0x287259F6` is checked,
+  event IDs are read through object vtable `+0x1C`, and IDs `0x062D88E9`/`0x061DD69B` assign
+  controller `+0x104/+0x108 = 2`. ID `0x0615B966` assigns 5, `0x07BFB76E` assigns current 2,
+  and `0x070D74E7` can assign 13 after guards. ID `0x036C4A10` calls the StateManager getter
+  `0x0067DCE0` vtable `+0x28(1)`, matching the SDK `IStateManager::SwitchToState` slot. The
+  later `DF9740` indirect vtable invocation remains a separate static boundary; these assignments
+  are not runtime observations or readiness claims. See [message dispatch evidence](audit/gge-message-dispatch/README.md).
 - `0xDDDB80` forwards two float inputs to `0xDE8710`, converts the second to an integer using
   the binary's scale constant, then updates two further managers. Controller +0x108/+0x10C are
   current/requested internal state fields, not the outer AppState ID. Our host does not execute this.
