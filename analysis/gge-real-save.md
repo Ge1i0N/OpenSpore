@@ -129,6 +129,53 @@ field             UserData1   UserData   Ronikari
 The post-flight growth of `0x07DB67DE` from 4 to 32 bytes is a real GGEUserData delta; Ronikari's
 larger 224-byte variant is modded/non-vanilla comparison evidence. Field semantics remain Unknown.
 
+### Exact counted-table comparison
+
+`tools/gge_userdata_compare.py` now validates the complete decoded nested bytes, not just their
+previews. It invokes the explicit C++ inspector with a 30-second subprocess timeout; no Ghidra,
+profile search, save writes or runtime code execution is involved. It enforces exact frame/field
+lengths, unique expected field IDs and a host cap of 4096 rows per field.
+
+The observed wire shape is three counted six-word tables (`DB/DC/DD`) and a counted word list
+(`DE`), all big-endian. Reading each six-word row as two ResourceKey-sized triples is a structural
+hypothesis, not a recovered native member/type declaration. Observed counts:
+
+| Explicit save | DB | DC | DD | DE |
+|---|---:|---:|---:|---:|
+| UserData1/Game0.old | 0 | 0 | 0 | 0 |
+| UserData1/Game0 | 7 | 7 | 7 | 0 |
+| UserData/Game0.old | 7 | 7 | 7 | 7 |
+| UserData/Game0 | 7 | 7 | 7 | 7 |
+| UserDataRonikari/Game0.old | 53 | 53 | 53 | 53 |
+| UserDataRonikari/Game0 | 55 | 55 | 55 | 55 |
+
+For every inspected file, swapping the two triples in each DB row gives exactly the DD rows as a
+multiset, preserving duplicates. DB and DC have equal left-hand triples in stream order. In the
+post-flight UserData and both Ronikari variants, DE equals the multiset of third words in the
+left-hand triples of DD. This last equality is **false** in UserData1/Game0, where DE is explicitly
+empty; that discrepancy is retained, never repaired or replaced by the DD entries.
+
+UserData1/Game0 versus UserData/Game0 has identical DB/DC/DD rows in exact order. Only DE changes,
+adding seven words and removing none. Thus the tables themselves did not gain seven new mappings
+during this experiment. A native meaning such as candidate stars, visited systems, or refill
+completion is not established by these relationships. Ronikari provides a larger valid structural
+sample; the data alone does not attribute its larger counts to mods rather than normal play.
+Ronikari/Game0.old versus Ronikari/Game0 adds exactly two rows in each of DB/DC/DD and two words
+in DE, with zero removals under duplicate-preserving multiset comparison.
+
+Reproduce the before/after comparison (utilities reside in the canonical build output directory):
+
+```powershell
+python tools/gge_userdata_compare.py --inspector build/bin/Debug/dbpf_serialized_frame_inspect.exe `
+  build/bin/Debug/UserData1/Games/Game0/GGEUserData.dat `
+  build/bin/Debug/UserData/Games/Game0/GGEUserData.dat
+```
+
+Tests cover all nested-payload truncations, extra tails, invalid counts/IDs, duplicate-aware delta
+comparison, relation mismatches, and a child frame attempting to consume its sibling's bytes. The
+inspector rejects ambiguous nested selectors and caps the explicit hex dump at 64 KiB. None of these
+structural observations changes the catalogue admission gate.
+
 ## Explicit UserData package inventory
 
 Package files can provide planet/editor/resource correlation, but they are not substitutes for
