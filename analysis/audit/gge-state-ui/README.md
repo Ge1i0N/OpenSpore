@@ -14,6 +14,24 @@ GA-specific vtable slot whose state-2 guard calls `DF95A0`; no direct `DE48C0 â†
 claimed. The matching IDs in `DE99B0` therefore remain event/state feedback candidates until a
 specific caller and payload route is recovered.
 
+### Additional GA byte-level cross-check
+
+The local GA `objdump` pass found the two direct immediate references to `0x070D7509`:
+
+```text
+0x00DE4918  inside DE48C0
+0x00DE595F  inside DE5900
+```
+
+Both occur beside the distinct value `0x070D74E7`, matching the existing state/UI table rather
+than a button event comparison. `DE48C0` uses the table while looking up UI objects and applying
+state operations; `DE5900` initializes the GGE UI path, reuses the same IDs through the object
+lookup/vtable `+0x104` route, then calls `DE48C0` before continuing initialization.
+
+This strengthens the classification of `0x070D7509` as a shipped GA GGE UI/control identity. It
+does **not** identify a mouse/button producer, a CommandID route, or a post to ScenarioMode tag
+`0x01654C10`; those remain Unknown.
+
 ## Reproduction
 
 ```powershell
