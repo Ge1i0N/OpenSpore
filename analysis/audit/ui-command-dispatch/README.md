@@ -171,10 +171,10 @@ the component ID from object fields `+0x80/+0x84`, while the Play Scenario SPUI 
 fields to `0x070D74E7`, so the final `0x070D7509 → 0x070D74E7` conversion and runtime click remain
 Unknown.
 
-### Native class/vtable cross-check
+### Native vtable-cluster cross-check
 
-The producer and its adjacent GGE lifecycle methods are also present in GA vtable data, which
-separates class ownership from accidental code adjacency:
+The producer and its adjacent lifecycle methods are also present in several GA vtable tables. This
+is a structural cluster, not yet a proof that every table belongs to one C++ class:
 
 ```text
 0x0141941C → 0x009640B0  generic activable-window message producer
@@ -183,9 +183,10 @@ separates class ownership from accidental code adjacency:
 0x014198F4 → 0x009640B0  second compatible interface table
 ```
 
-This is a static vtable join only. It does not identify the constructor input that fills object
-fields `+0x80/+0x84`, and it does not prove that the `WinButton` object with ControlID `0x070D7509`
-receives component ID `0x070D74E7` at runtime.
+The broader tables additionally contain the adjacent lifecycle entries `0x0081C9C0`, `0x0081CF20`
+and `0x00964370`. This is a static vtable join only. It does not identify the constructor input
+that fills object fields `+0x80/+0x84`, and it does not prove that the `WinButton` object with
+ControlID `0x070D7509` receives component ID `0x070D74E7` at runtime.
 
 ## Reproduction
 

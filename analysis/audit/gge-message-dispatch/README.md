@@ -123,8 +123,9 @@ and the surrounding producer/lifecycle family has these observed vtable entries:
 
 The selected GA `.text` scan found no literal store that joins either field directly to
 `0x070D7509` or `0x070D74E7`; the fields are therefore runtime/object data rather than serialized
-SPUI immediates in the inspected paths. This explains why the ControlID table alone cannot close the
-payload join. The exact setter/constructor input remains Unknown.
+SPUI immediates in the inspected paths. The related vtable tables include `0x0081C9C0`,
+`0x0081CF20` and `0x00964370` alongside the producer, but this cluster does not by itself prove a
+single C++ class or reveal the setter. The exact setter/constructor input remains Unknown.
 
 The seven state/UI constants used by the bounded handler/helper bodies were also found as actual
 SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](control-id-correlation.md).
