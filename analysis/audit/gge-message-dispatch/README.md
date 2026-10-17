@@ -58,6 +58,24 @@ The related state-to-UI helper `DE48C0` maps controller state 5/13 to UI IDs `0x
 separate in [gge-state-ui](../gge-state-ui/README.md); matching IDs are not treated as a proven
 message feedback loop without a caller/payload observation.
 
+## Exact `0x070D74E7` feedback branch
+
+The local GA instruction pass further bounds the separate `0x070D74E7` message/state route. After
+the ID comparison, the body:
+
+```text
+guard 0x6854E0(2)
+→ object/resource lookup
+→ 0x00810650 lookup with UI identity 0x0806A310
+→ resolved UI vtable +0x7C(1,0)
+→ controller +0x104 = 13
+→ controller +0x108 = 13
+```
+
+This is a concrete state-feedback branch for `0x070D74E7`, subject to its guards. It does not use
+`0x070D7509`: the latter remains present only in the bounded `DE48C0`/`DE5900` UI setup tables,
+with no click producer or ScenarioMode post established.
+
 ## SDK cross-check
 
 `refs/Spore-ModAPI/Spore/App/IStateManager.h` puts `SwitchToState` at vtable `+0x28`, matching the
