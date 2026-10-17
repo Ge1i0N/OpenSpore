@@ -84,6 +84,8 @@ not that the original mounted the same UI.
 The detailed local clone revisions and licensing notes are maintained in
 [`analysis/community-references.md`](analysis/community-references.md). The additional local
 corpus is described in [`analysis/additional-references.md`](analysis/additional-references.md).
+The first actual external-clone reproduction is recorded in
+[`analysis/audit/external-openspore/README.md`](analysis/audit/external-openspore/README.md).
 
 ## External OpenSpore repositories
 
