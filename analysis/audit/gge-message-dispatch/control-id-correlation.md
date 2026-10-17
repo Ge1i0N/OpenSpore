@@ -16,11 +16,17 @@ package priority or execute a native UI message.
 | `0x070D7509` | `GGEZoomPanelV2` object 74 |
 | `0x07BFB76E` | one EP1 layout record 13754, object 459 |
 
-Every listed match is a `ControlID`, not a `CommandID` in the bounded corpus. This strongly
+Every listed match is a `ControlID`, not a `CommandID` in the bounded corpus; all 15 exact matches
+carry serialized `CommandID = 0`. Their parent is a GGE panel/container (for example object 81 in
+the zoom panel and object 1319 in GlobalUIGGE-9). This strongly
 corroborates that the constants consumed by `DE99B0`/`DE48C0` belong to the GGE UI/control route.
 It does not prove which UI action posts each message, nor that a ControlID is globally unique across
 package copies/layouts. The native handler may receive a higher-level UI event whose ID is derived
 from the control; that producer remains Unknown.
+
+One inline caption is already present in the bounded data: `0x070D7509` has caption text
+`Play Scenario` in the EP1 `GGEZoomPanelV2` copy. Other targeted captions are locale-table
+references whose table/key resolution is intentionally not substituted here.
 
 The bounded GA immediate scan found no separate `MessageManager` send/post call that emits these
 values. Their current classification is therefore **GGE UI ControlID / handler identity**, not an

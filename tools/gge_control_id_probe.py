@@ -44,11 +44,20 @@ def probe(root: Path, wanted: set[int]) -> dict:
                             continue
                         value = struct.unpack("<I", bytes.fromhex(raw[:8]))[0]
                         if value in matches:
+                            command_prop = properties.get(0xEEC1B002)
+                            command_raw = command_prop.get("raw", "") if command_prop else ""
+                            command = (struct.unpack("<I", bytes.fromhex(command_raw[:8]))[0]
+                                       if len(command_raw) >= 8 else None)
+                            caption = properties.get(0xEEC1B00A)
                             matches[value].append({"package": package.name,
                                                    "record": ordinal,
                                                    "instance": f"0x{instance:08x}",
                                                    "object": object_index,
-                                                   "property": label})
+                                                   "property": label,
+                                                   "command_id": None if command is None else f"0x{command:08x}",
+                                                   "parent": reader.parents.get(object_index),
+                                                   "children": reader.children.get(object_index, []),
+                                                   "caption": (caption.get("strings") if caption else None)})
         except Exception:
             skipped += 1
     return {"format": "GGE_CONTROL_ID_CORRELATION_V1",
