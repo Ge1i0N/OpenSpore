@@ -18,6 +18,48 @@ path, validated the SDK↔Ghidra workflow and closed the exact `Ctrl+Shift+C` br
 low priority. Continuing to name every console/message-manager virtual slot would be tactical drift
 unless a later gameplay probe needs that service.
 
+## Distance to “GGE menu → click → play”
+
+This is the practical status, not a percentage estimate:
+
+| Milestone | Status | What is still missing |
+|---|---|---|
+| Show a GGE-looking screen | **Host controlled / native partial** | Main→GGE primary layout works, but native controller lifecycle and full window mounting are absent; only a sparse serialized subset is visible |
+| Show real saved star cards | **Not connected** | Existing `Game0` observations must be converted into a deliberately labelled data-backed host scene; native post-load/refill remains Unknown |
+| Click a real saved card | **Controlled only** | Host picking works in `GGEHostPreview`; native F8/FC/CommandID/UI callback route is not attached |
+| Select/zoom/phase-change the star | **Static plan only** | `DF6D80`/`DF7BF0`/`DF7AC0` bodies are bounded, but current-phase producer, camera and native callback scheduling are missing |
+| Start the selected stage/adventure | **Not implemented** | selected-star handoff, stage state transition, ScenarioMode/Creature/Tribe/Civ/Space factory and services |
+| Actually play | **Not implemented** | simulator world/actors/input/update loop, stage-specific assets and gameplay systems |
+
+### Fastest honest milestone
+
+The shortest path to a visible, clickable, **real-data-backed but host-labelled** GGE screen is:
+
+```text
+explicit Game0 capture
+  → saved StarRecord/planet/header observations
+  → explicit equivalent terrain-property correlation
+  → diagnostic CatalogInput adapter
+  → existing StarUiScene/GGEGameStarUIv4
+  → saved card render + host pick
+```
+
+This can be called `GGERealSavePreview`, but it must not publish native catalogue readiness while
+`candidate_refill`, native PropManager execution, camera ownership and callback services remain
+Unknown. It is a practical visual milestone, not a shortcut to gameplay.
+
+### Native-parity path after that
+
+For original-like interaction, the next gates are:
+
+1. native/observed active viewer + GGE ICamera producer;
+2. native UI mount/WinProc/CommandID route;
+3. selected-star callback and phase transition;
+4. stage/ScenarioMode handoff and actual simulator world.
+
+The SDK is most valuable at gates 1–3 for contracts and vtable order. GA Ghidra remains the authority
+for exact addresses and side effects.
+
 ## Layer status
 
 | Layer | Current status | Meaning for the next step |
