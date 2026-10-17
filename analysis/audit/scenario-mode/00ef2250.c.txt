@@ -1,0 +1,21 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00EF2250
+
+undefined4 os_scenario_mode_message_handler_00ef2250(undefined4 param_1,int param_2)
+
+{
+  if (*(undefined1 **)(param_2 + 8) == &DAT_01654c10) {
+    if (*(int *)(DAT_016c7aa4 + 0xcc) == 0) {
+      FUN_00ef1d20();
+      return 1;
+    }
+  }
+  else if ((*(undefined1 **)(param_2 + 8) != &LAB_00dbdba1) && (*(int *)(DAT_016c7aa4 + 0xcc) != 0))
+  {
+    FUN_00ef1380();
+  }
+  return 1;
+}

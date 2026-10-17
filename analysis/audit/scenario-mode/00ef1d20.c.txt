@@ -1,0 +1,265 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00EF1D20
+
+void __fastcall FUN_00ef1d20(int param_1)
+
+{
+  int *piVar1;
+  int iVar2;
+  char cVar3;
+  int iVar4;
+  int *piVar5;
+  uint uVar6;
+  bool bVar7;
+  undefined4 uVar8;
+
+  iVar4 = FUN_00b3d410();
+  uVar6 = 0;
+  *(undefined1 *)(iVar4 + 0x24) = 0;
+  if (param_1 == 0) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = param_1 + 4;
+  }
+  piVar5 = (int *)FUN_0067dc80();
+  *(int **)(param_1 + 0x80) = piVar5;
+  *(int *)(param_1 + 0x84) = iVar4;
+  *(undefined4 **)(param_1 + 0x88) = &DAT_0148af98;
+  *(undefined4 *)(param_1 + 0x8c) = 8;
+  *(undefined4 *)(param_1 + 0x90) = 0;
+  if ((piVar5 != (int *)0x0) && (iVar4 != 0)) {
+    do {
+      (**(code **)(*piVar5 + 0x24))(iVar4,*(undefined4 *)((int)&DAT_0148af98 + uVar6));
+      uVar6 = uVar6 + 4;
+    } while (uVar6 < 0x20);
+  }
+  *(int *)(param_1 + 0xd0) = DAT_015accf0;
+  iVar4 = FUN_00f47240(0x1cc,"Simulator",0,0,0,0);
+  if (iVar4 == 0) {
+    piVar5 = (int *)0x0;
+  }
+  else {
+    piVar5 = (int *)FUN_00f33e30();
+  }
+  piVar1 = *(int **)(param_1 + 0x18);
+  if (piVar5 != piVar1) {
+    if (piVar5 != (int *)0x0) {
+      (**(code **)(*piVar5 + 8))();
+    }
+    *(int **)(param_1 + 0x18) = piVar5;
+    if (piVar1 != (int *)0x0) {
+      (**(code **)(*piVar1 + 0xc))();
+    }
+  }
+  FUN_00f37dc0(&DAT_015accc8);
+  FUN_00f02af0();
+  iVar4 = FUN_00f47240(0x108,"Simulator",0,0,0,0);
+  if (iVar4 == 0) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = FUN_00f1e330();
+  }
+  iVar2 = *(int *)(param_1 + 0x78);
+  if (iVar4 != iVar2) {
+    if (iVar4 != 0) {
+      (**(code **)(*(int *)(iVar4 + 4) + 4))();
+    }
+    *(int *)(param_1 + 0x78) = iVar4;
+    if (iVar2 != 0) {
+      (**(code **)(*(int *)(iVar2 + 4) + 8))();
+    }
+  }
+  FUN_00f1e500();
+  if (*(int *)(param_1 + 0xcc) == 0) {
+    if (DAT_015accf0 == 0) {
+      *(undefined4 *)(param_1 + 0xcc) = 1;
+    }
+    else if (DAT_015accf0 - 1U < 2) {
+      *(undefined4 *)(param_1 + 0xcc) = 2;
+    }
+  }
+  bVar7 = DAT_015accc8 == 0;
+  iVar4 = FUN_00f47240(0x1fc,"Simulator",0,0,0,0);
+  if (iVar4 == 0) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = FUN_00f3f970();
+  }
+  iVar2 = *(int *)(param_1 + 0x74);
+  if (iVar4 != iVar2) {
+    if (iVar4 != 0) {
+      (**(code **)(*(int *)(iVar4 + 8) + 4))();
+    }
+    *(int *)(param_1 + 0x74) = iVar4;
+    if (iVar2 != 0) {
+      (**(code **)(*(int *)(iVar2 + 8) + 8))();
+    }
+  }
+  FUN_00f44690(bVar7);
+  FUN_00f20eb0();
+  FUN_00f24bb0();
+  if (!bVar7) {
+    FUN_00660950(&DAT_015accf8);
+    cVar3 = FUN_00f464d0(&DAT_015accc8);
+    if (cVar3 != '\0') {
+      if (DAT_015acce0 != 0) {
+        FUN_00f42420(&DAT_015acce0);
+      }
+      FUN_00ef1bc0();
+    }
+  }
+  FUN_00d3d820(DAT_015acc2c,0x2980610e);
+  FUN_00ebf0f0();
+  uVar8 = 0;
+  FUN_00b3d330(0);
+  FUN_00b5cef0(uVar8);
+  FUN_00f09460();
+  iVar4 = FUN_00f47240(0x308,"Simulator",0,0,0,0);
+  if (iVar4 == 0) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = FUN_00f0fdd0();
+  }
+  iVar2 = *(int *)(param_1 + 0x6c);
+  if (iVar4 != iVar2) {
+    if (iVar4 != 0) {
+      (*(code *)**(undefined4 **)(iVar4 + 0x38))();
+    }
+    *(int *)(param_1 + 0x6c) = iVar4;
+    if (iVar2 != 0) {
+      (**(code **)(*(int *)(iVar2 + 0x38) + 4))();
+    }
+  }
+  iVar4 = FUN_00f47240(0x120,"Simulator",0,0,0,0);
+  if (iVar4 == 0) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = FUN_00f11a40();
+  }
+  iVar2 = *(int *)(param_1 + 0x68);
+  if (iVar4 != iVar2) {
+    if (iVar4 != 0) {
+      (**(code **)(*(int *)(iVar4 + 0x3c) + 4))();
+    }
+    *(int *)(param_1 + 0x68) = iVar4;
+    if (iVar2 != 0) {
+      (**(code **)(*(int *)(iVar2 + 0x3c) + 8))();
+    }
+  }
+  (**(code **)(**(int **)(param_1 + 0x68) + 4))();
+  if (*(int *)(param_1 + 0xd0) == 0) {
+    iVar4 = FUN_00f47240(0x740,"Simulator/cScenarioTutorials",0,0,0,0);
+    if (iVar4 == 0) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = FUN_00ef9c90();
+    }
+    iVar2 = *(int *)(param_1 + 0xd4);
+    if (iVar4 != iVar2) {
+      if (iVar4 != 0) {
+        (**(code **)(*(int *)(iVar4 + 4) + 4))();
+      }
+      *(int *)(param_1 + 0xd4) = iVar4;
+      if (iVar2 != 0) {
+        (**(code **)(*(int *)(iVar2 + 4) + 8))();
+      }
+    }
+    FUN_00ef9d40();
+    iVar4 = FUN_00f47240(0x120,"Simulator/cScenarioYouTube",0,0,0,0);
+    if (iVar4 == 0) {
+      piVar5 = (int *)0x0;
+    }
+    else {
+      piVar5 = (int *)FUN_00f04620();
+    }
+    piVar1 = *(int **)(param_1 + 0xd8);
+    if (piVar5 != piVar1) {
+      if (piVar5 != (int *)0x0) {
+        (**(code **)*piVar5)();
+      }
+      *(int **)(param_1 + 0xd8) = piVar5;
+      if (piVar1 != (int *)0x0) {
+        (**(code **)(*piVar1 + 4))();
+      }
+    }
+    FUN_00f06bc0();
+    iVar4 = FUN_00f47240(0x70,"Simulator/cScenarioEditModeInputStrategy",0,0,0,0);
+    if (iVar4 == 0) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = FUN_00eda980();
+    }
+    iVar2 = *(int *)(param_1 + 0x10);
+    if (iVar4 != iVar2) {
+      if (iVar4 != 0) {
+        (**(code **)(*(int *)(iVar4 + 0x3c) + 4))();
+      }
+      *(int *)(param_1 + 0x10) = iVar4;
+      if (iVar2 != 0) {
+        (**(code **)(*(int *)(iVar2 + 0x3c) + 8))();
+      }
+    }
+    (**(code **)(**(int **)(param_1 + 0x10) + 4))();
+    iVar4 = FUN_00f47240(0x98,"Simulator/cScenarioEditModeDisplayStrategy",0,0,0,0);
+    if (iVar4 == 0) {
+      piVar5 = (int *)0x0;
+    }
+    else {
+      piVar5 = (int *)FUN_00ed5130();
+    }
+    piVar1 = *(int **)(param_1 + 0x14);
+    if (piVar5 != piVar1) {
+      if (piVar5 != (int *)0x0) {
+        (**(code **)(*piVar5 + 4))();
+      }
+      *(int **)(param_1 + 0x14) = piVar5;
+      if (piVar1 != (int *)0x0) {
+        (**(code **)(*piVar1 + 8))();
+      }
+    }
+    FUN_00ed5c70();
+    FUN_00f08dd0();
+    FUN_00ec92b0();
+  }
+  if (*(int *)(param_1 + 0x70) == 0) {
+    FUN_010408c0();
+    FUN_01041bd0();
+    iVar4 = FUN_00f47240(0x68,"Simulator",0,0,0,0);
+    if (iVar4 == 0) {
+      piVar5 = (int *)0x0;
+    }
+    else {
+      piVar5 = (int *)FUN_00ebc0b0();
+    }
+    piVar1 = *(int **)(param_1 + 0x70);
+    if (piVar5 != piVar1) {
+      if (piVar5 != (int *)0x0) {
+        (**(code **)(*piVar5 + 4))();
+      }
+      *(int **)(param_1 + 0x70) = piVar5;
+      if (piVar1 != (int *)0x0) {
+        (**(code **)(*piVar1 + 8))();
+      }
+    }
+  }
+  FUN_00ebd1b0();
+  *(undefined4 *)(param_1 + 0xcc) = 0;
+  FUN_00ef11f0(DAT_015accec);
+  piVar5 = (int *)FUN_00d53980();
+  (**(code **)(*piVar5 + 0x1c))();
+  piVar5 = (int *)FUN_00b3d430();
+  iVar4 = *piVar5;
+  uVar8 = FUN_00d53980();
+  (**(code **)(iVar4 + 0x50))(uVar8);
+  return;
+}

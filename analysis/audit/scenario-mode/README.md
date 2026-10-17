@@ -56,6 +56,11 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   `+0x28` `AddHandler`, which is a positive contract match; the callback delivery/runtime result
   remains Unknown.
 - `EF23F0` removes the handler through MessageManager `+0x30` and the listener through `+0x20`.
+- The registered handler `EF2250` reads message payload word `+0x08` as a mode tag. If it is
+  `0x01654C10` (`ScenarioMode`) and `mMode` at `+0xCC` is zero, it calls `EF1D20` (ScenarioMode
+  enter-side initialization). If the tag is `0x00DBDBA1` (`Editors`) while ScenarioMode is active,
+  it calls `EF1380` (leave/cleanup-side path). This is a native mode-manager payload route, not a
+  direct `Play Scenario` ControlID route.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
@@ -93,6 +98,7 @@ Reproduction:
 ```powershell
 python tools/ghidra_run.py --timeout 180 tools/ghidra_list.py --dump 0x0148AFD8 32
 python tools/ghidra_run.py --timeout 180 tools/gge_evidence.py --scenario
+python tools/ghidra_run.py --timeout 180 tools/gge_evidence.py --scenario-message
 ```
 
 Raw output is retained in [vtable.txt](vtable.txt).
