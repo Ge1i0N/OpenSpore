@@ -100,11 +100,16 @@ The pose feeds [viewer composition](gge-viewer.md) and the original pixel projec
 tests, including an actual card scene. Normal GGE and controlled preview behavior are unchanged:
 no default pose, current-mode pointer, viewer ownership, input dispatch or readiness is fabricated.
 
+`sample_camera_transition` separately ports the pure `DDE300` sampler: explicit signed elapsed and
+positive duration produce `ratio=elapsed/duration` and `end+(start-end)*(1-ratio)`. `ratio>1`
+sets `completed=true` but preserves native extrapolation; message `04360E14` and the switch back to
+normal mode are not dispatched.
+
 ## Verification / reproduction
 
-Presentation **130** checks and scene **218** checks PASS: zero/nonzero angles, two rotation signs,
+Presentation **137** checks and scene **218** checks PASS: zero/nonzero angles, two rotation signs,
 nonidentity basis, separate pivot/offset, negative distance, missing fields, nonfinite/overflow,
-rigid inverse order/translation, dynamics decay/acceleration/clamps/wrap/atomic failures and full pose→viewer→card chain. Fixtures supply all camera values;
+rigid inverse order/translation, dynamics decay/acceleration/clamps/wrap/transition sampling/atomic failures and full pose→viewer→card chain. Fixtures supply all camera values;
 scene native readiness remains false. [Audit facts](audit/gge-camera-pose/facts.json) include initial
 object/table words, inputs, imports and explicit limits; adjacent files retain instruction bytes.
 

@@ -8,6 +8,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | Topic | Document | Scope / caution |
 |---|---|---|
 | Community SDK / format references | [community-references](community-references.md) | pinned ModAPI/SporeModder-FX clones; secondary names/offsets, not native execution or automatic readiness |
+| OpenSpore Debug Menu | [debug-menu](debug-menu.md) | Debug-only Ctrl+Shift+C host state; routes to controlled GGE preview, not recovered EA Cheat Menu |
 | GGE placement-window identity | [gge-window-lookup](gge-window-lookup.md) | actual record+B8 receiver and root177; corrects earlier global-service interpretation, not native mount/camera readiness |
 | GGE viewer versus ICamera | [gge-viewer](gge-viewer.md) | vtables/getters/update handoff and explicit projection composition; no live camera parameters or viewer producer |
 | GGE camera factory / property | [gge-camera-controller](gge-camera-controller.md) | requested ID780786FD, factory type043C6E06, complete shipped prop and bounded FOV step; no live selection/pose readiness |

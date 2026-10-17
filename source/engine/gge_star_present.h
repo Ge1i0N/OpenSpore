@@ -66,6 +66,14 @@ bool step_camera_dynamics_axis(const CameraDynamicsAxisObservation& observed,
 struct CameraAngleWrapObservation { std::optional<float> value, period; };
 // DDE762..791 exact one-wrap branch: >period subtract once; <0 add once; equality is preserved.
 bool wrap_camera_angle_once(const CameraAngleWrapObservation& observed,float& out,std::string& error);
+struct CameraTransitionObservation {
+    std::optional<std::int32_t> elapsed_ms, duration_ms;
+    std::optional<float> start, end;
+};
+struct CameraTransitionStep { float value=0, ratio=0; bool completed=false; };
+// DDE300 sampler only. Native message/mode switch is not executed.
+bool sample_camera_transition(const CameraTransitionObservation& observed,
+                              CameraTransitionStep& out,std::string& error);
 struct ProjectedPoint { float x=0,y=0,ndc_z=0,clip_w=0; };
 // GA 0x7C4250 + 0xDE3C20: perspective divide and window EXTENTS, no origin addition/clipping.
 // Rejecting unknown/nonfinite/zero-w/invalid extents is host safety policy. Negative w is not culled.

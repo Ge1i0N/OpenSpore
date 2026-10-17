@@ -34,6 +34,7 @@
 #include "render/overlay.h"
 #include "states/statemgr.h"
 #include "states/uipresent.h"   // requested_by_state: which layout the current state asked for
+#include "states/debugmenu.h"
 
 namespace os::app {
 namespace {
@@ -212,7 +213,16 @@ LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
             input::on_button(false, true);
             return 0;
         case WM_KEYDOWN:
+            if (wp == 'C' && !(lp & (1LL << 30)) && (GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_SHIFT) & 0x8000)) {
+#ifdef OS_ENABLE_DEV_COMMANDS
+                states::debugmenu::toggle();
+#endif
+                return 0;
+            }
             if (wp == VK_ESCAPE) {
+#ifdef OS_ENABLE_DEV_COMMANDS
+                if (states::debugmenu::open()) { states::debugmenu::toggle(); return 0; }
+#endif
                 PostQuitMessage(0);
                 return 0;
             }
@@ -522,6 +532,7 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     states::install_console_command(states::manager());
     states::install_loader(states::manager());
     states::install_title(states::manager());
+    states::debugmenu::install(states::manager());
     // The game's 60 states, with their real ids, into our state manager, so `-state:Main` and
     // `-state:TribalAccessoriesEditor` resolve against the shipped table rather than only ours.
     appstates::install(states::manager());

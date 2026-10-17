@@ -238,6 +238,14 @@ int main(int argc,char** argv) {
     if(!check(wrap_camera_angle_once({20.f,6.283185307179586f},wrapped,error)&&std::abs(wrapped-13.716814f)<.00001f,"wrap is one correction, not modulo"))return 1;
     const auto reject_wrap=[&](const CameraAngleWrapObservation& input) { float sentinel=123.f;return !wrap_camera_angle_once(input,sentinel,error)&&sentinel==123.f; };
     if(!check(reject_wrap({})&&reject_wrap({1.f,0.f})&&reject_wrap({std::numeric_limits<float>::quiet_NaN(),1.f}),"unknown/invalid wrap input atomic"))return 1;
+    CameraTransitionStep transition;
+    if(!check(sample_camera_transition({0,1000,0.f,10.f},transition,error)&&transition.value==0.f&&transition.ratio==0.f&&!transition.completed,"transition sampler starts at explicit start"))return 1;
+    if(!check(sample_camera_transition({500,1000,0.f,10.f},transition,error)&&transition.value==5.f&&transition.ratio==.5f&&!transition.completed,"transition sampler midpoint"))return 1;
+    if(!check(sample_camera_transition({1000,1000,0.f,10.f},transition,error)&&transition.value==10.f&&transition.ratio==1.f&&!transition.completed,"transition sampler reaches end without dispatch"))return 1;
+    if(!check(sample_camera_transition({1500,1000,0.f,10.f},transition,error)&&transition.value==15.f&&transition.ratio==1.5f&&transition.completed,"transition sampler preserves post-expiry extrapolation"))return 1;
+    if(!check(sample_camera_transition({-500,1000,0.f,10.f},transition,error)&&transition.value==-5.f&&transition.ratio==-.5f&&!transition.completed,"signed elapsed remains explicit"))return 1;
+    const auto reject_transition=[&](const CameraTransitionObservation& input) { CameraTransitionStep sentinel{123.f,456.f,true}; return !sample_camera_transition(input,sentinel,error)&&sentinel.value==123.f&&sentinel.ratio==456.f&&sentinel.completed; };
+    if(!check(reject_transition({})&&reject_transition({0,0,0.f,1.f})&&reject_transition({0,1,std::numeric_limits<float>::quiet_NaN(),1.f}),"unknown/invalid transition atomic"))return 1;
     auto bad=camera; (*bad.clip_from_world)[15]=0;
     CameraFovStep fov;
     if(!check(step_camera_fov({1.f,2.f,.01f},fov,error)&&fov.next_current==1.1f&&

@@ -162,6 +162,20 @@ bool wrap_camera_angle_once(const CameraAngleWrapObservation& observed,float& ou
     if(!std::isfinite(result)){error="camera angle wrap output overflow";return false;}
     out=result;error.clear();return true;
 }
+bool sample_camera_transition(const CameraTransitionObservation& observed,
+                              CameraTransitionStep& out,std::string& error) {
+    if(!observed.elapsed_ms||!observed.duration_ms||!observed.start||!observed.end) {
+        error="camera transition elapsed/duration/endpoints unobserved";return false;
+    }
+    const float elapsed=static_cast<float>(*observed.elapsed_ms),duration=static_cast<float>(*observed.duration_ms);
+    if(!std::isfinite(elapsed)||!std::isfinite(duration)||!std::isfinite(*observed.start)||!std::isfinite(*observed.end)||duration<=0) {
+        error="invalid camera transition inputs";return false;
+    }
+    const float ratio=elapsed/duration;
+    const float value=*observed.end+(*observed.start-*observed.end)*(1.f-ratio);
+    if(!std::isfinite(ratio)||!std::isfinite(value)){error="camera transition output overflow";return false;}
+    out={value,ratio,ratio>1.f};error.clear();return true;
+}
 bool project_star(const StarPosition& world,const CameraObservation& observed,ProjectedPoint& out,std::string& error) {
     const auto fail=[&](const char* why) { error=why; return false; };
     if (!observed.clip_from_world || !observed.window_rect) return fail("star projection viewer-matrix/window observations unavailable");
