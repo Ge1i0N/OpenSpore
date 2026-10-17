@@ -108,6 +108,20 @@ functions. `DE99B0` remains the observed event-listener/state branch; `DE8A80` i
 internal message-handler interface. This structural connection still does not identify the
 upstream `Play Scenario` producer or a ScenarioMode post.
 
+### Constructor boundary
+
+The direct-call scan found only one direct caller of `DE6120`:
+
+```text
+DE6E13
+```
+
+The surrounding wrapper `DE6E10` calls `DE6120`, optionally frees the receiver when its delete flag
+is set, and returns the object. `DE6E10` itself has no direct `E8` callers in the selected `.text`,
+and simple `.rdata`/`.data` scans found no raw function-pointer reference to this wrapper family.
+The safe conclusion is a bounded constructor/lifecycle seam with an indirect or otherwise
+unrecovered allocation entry; no hidden caller or registration owner is invented here.
+
 ## Reproduction
 
 ```powershell
