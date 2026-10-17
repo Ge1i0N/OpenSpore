@@ -28,6 +28,7 @@ against the GA SHA-256 and a focused body/vtable/resource observation.
 | `IWindowManager::SendMsg` at `+0x10` | `Spore/UTFWin/IWindowManager.h` | candidate for higher-level event delivery, separate from Win32 Canvas transport |
 | `App::IMessageManager::MessageSend` `+0x14`, `AddListener` `+0x20`, `AddHandler` `+0x28` | `Spore/App/IMessageManager.h` | `FUN_00812D80` copies an 8-dword payload, uses event `0x1EE1001` and calls global service vtable `+0x14`; strong GA match for `MessageSend` |
 | `App::IMessageListener::HandleMessage(messageID,payload)` | `Spore/App/IMessageListener.h` | GGE vtable `0x0147E030 +0x18 = DE99B0` consumes the object/message shape; GA-specific vtable placement is retained separately from SDK inheritance order |
+| `App::IGameMode` method order | `Spore/App/IGameMode.h` | comparison only: SDK has `OnEnter +0x18`, `OnExit +0x1C`, `OnMouseWheel +0x38`, `Update +0x3C`; GA vtable `0x147EF50` instead has `DF9620 +0x0C`, `DF85B0 +0x10`, `DF8700 +0x14`, `DF9740 +0x38`, `DF5F00 +0x3C`, `DF6010 +0x68`. GA `DF9740` is not promoted to SDK `OnMouseWheel`. |
 | `App::IPropManager::GetPropertyList` `+0x2C`, `AddPropertyList` `+0x34` | `Spore/App/IPropManager.h` | GA vtable `0x01409210` contains `0x006A60E0`/`0x006A61F0` at these slots; `DF7CB0` uses the `+0x2C` contract for terrain property lookup |
 | `CheatManager.AddCheat`, `ICommand::ParseLine`, `GetDescription` | `Documentation/Cheats.md` | corroborated by GA `App/CheatManager`, `help`, `history`, `clear`, line parser and output buffer |
 

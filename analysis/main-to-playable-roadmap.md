@@ -57,8 +57,10 @@ Use persistent Ghidra sequentially, with no broad import:
 2. The record rebuild boundary is also closed: `DF9620`, `DF9740` and `DE32B0` converge on
    `DF95A0`; it clears old per-record UI data, reads saved/candidate spans, resizes the `0xBC`
    array, emits candidates into the post-saved region, then saved entries, UI data and effects.
-3. The remaining dispatch question is only the outer caller that selects state 2; do not broaden
-   this into a generic state-manager rewrite.
+3. The remaining dispatch question is only the outer caller that invokes GA vtable slot `+0x38`;
+   do not map it to SDK `IGameMode::OnMouseWheel` without a signature match. GA's vtable is
+   shifted/specialized (`DF9620 +0x0C`, `DF85B0 +0x10`, `DF8700 +0x14`, `DF9740 +0x38`). Do not
+   broaden this into a generic state-manager rewrite.
 4. Keep `DF9620 → DF95A0 → DF6010 → DF8300 → event 0x080D7451` and
    `DF9740 → DF95A0 → DF6C10` as the retained native orders. The current static result is:
    `state +0x108 == 2` → show `0x0615A5FF`/GlobalUI → rebuild records → continuation.
