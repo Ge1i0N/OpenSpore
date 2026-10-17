@@ -134,6 +134,18 @@ Globals parse_globals(u32 id, const std::vector<u8>& d) {
     return g;
 }
 
+PropertyCurve parse_prop_curve(u32 id, const std::vector<u8>& d) {
+    PropertyCurve c;
+    if (const char* n = naming::instance_name(id)) c.key = n;
+    // Format: sequence of (x, y) float pairs, 8 bytes each.
+    for (size_t o = 0; o + 8 <= d.size(); o += 8) {
+        float x = le_f32(d.data() + o);
+        float y = le_f32(d.data() + o + 4);
+        c.points.push_back({x, y});
+    }
+    return c;
+}
+
 LayerField parse_layer(u32 id, const std::vector<u8>& d, u32 components) {
     LayerField f;
     f.id = id;
@@ -213,6 +225,7 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
         case kTypeAdvect:
         case kTypeDensity:
         case kTypeBackgroundMap:
+        case kTypeProp:
             if (!p.read_resource_decoded(static_cast<u32>(i), d)) {
                 error = "resource read failed";
                 return false;
@@ -237,6 +250,7 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
             out.background.insert(out.background.end(), bands.begin(), bands.end());
             break;
         }
+        case kTypeProp: out.properties.push_back(parse_prop_curve(id, d)); break;
         default: break;
         }
     }

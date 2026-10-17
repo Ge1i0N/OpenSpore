@@ -297,7 +297,7 @@ target_include_directories(cell_game_verify PRIVATE source)
 target_compile_definitions(cell_game_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_link_libraries(cell_game_verify PRIVATE user32 gdi32)
 add_executable(cell_world_verify EXCLUDE_FROM_ALL tools/cell_world_verify.cpp
-  source/engine/cell_world.cpp source/engine/cell_game.cpp source/engine/naming.cpp
+  source/engine/cell_world.cpp source/engine/cell_game.cpp source/engine/cell_save.cpp source/engine/naming.cpp
   source/engine/pkg.cpp source/engine/refpack.cpp source/engine/fs.cpp source/engine/log.cpp)
 target_include_directories(cell_world_verify PRIVATE source)
 target_compile_definitions(cell_world_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)

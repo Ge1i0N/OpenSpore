@@ -87,6 +87,9 @@ void cell_enter() {
             } else {
                 LOG_WARN("stages", "cell world loaded but level spawn failed: %s", lerr.c_str());
             }
+            // Load saved progress if available.
+            std::string save_err;
+            g_world.load_save("cell_progress.spo", save_err);
         } else if (!g_world_tried) {
             LOG_WARN("stages", "cell world unavailable: %s", err.c_str());
         }

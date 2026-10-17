@@ -1,9 +1,11 @@
 // Constructed-input tests for cell_world.cpp (D3D-free). With an optional argv[1] =
 // a real CellGame.package, also decodes it, spawns level_water and ticks once.
 #include "engine/cell_world.h"
+#include "engine/cell_game.h"
 
 #include <cmath>
 #include <cstring>
+#include <cstdio>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -88,7 +90,7 @@ int main(int argc, char** argv) {
     const u32 a2 = fnv1_lower("cell_pinky");
     const u32 lvl = fnv1_lower("level_water");
 
-    // 1-8: constructed package: two structures, two archetypes, one level.
+        // 1-8: constructed package: two structures, two archetypes, one level.
     {
         std::vector<Rec> recs = {
             {cell::kTypeCell, 0, a1, make_archetype(s1, "Food")},
@@ -197,6 +199,7 @@ int main(int argc, char** argv) {
             check(w.eaten_plant() >= 1, "eating plankton counts as herbivore food");
             check(w.dna() > 0, "eating awards DNA");
             check(w.diet() == Diet::Herbivore, "diet is herbivore after eating plants");
+            check(strcmp(w.player()->anim, cell::kAnimEat) == 0, "eating sets ANIM_EAT_JAW animation");
         }
 
         // Eating a smaller cell counts as flesh: the diet shifts and a meat chunk is dropped.
@@ -232,6 +235,8 @@ int main(int argc, char** argv) {
             for (int k = 0; k < 400 && w.player_alive(); ++k) {
                 w.teleport_player(w.entities()[pri].x, w.entities()[pri].y);
                 w.tick(0.05f);
+                // Reset protection so the predator can deal damage.
+                w.reset_protection();
             }
             check(!w.player_alive(), "a larger creature bites the player to death");
             bool respawned = false;
