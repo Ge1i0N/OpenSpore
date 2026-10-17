@@ -223,6 +223,29 @@ Thus `0x070D7509` does not occur in the known `DF79FE` stage-caption activation 
 GA immediate occurrences remain the `DE48C0`/`DE5900` control tables; a dynamic or higher-level
 producer is still required.
 
+### 👀 Excellent finding: forwarded target is resource/property-backed
+
+The target source is now bounded one layer earlier. In the GA resource/property load path around
+`DF1A55`, a lookup with key `0xD047A893` stores its returned value into the current object field
+`+0xB8`:
+
+```text
+resource/property key 0xD047A893
+  → current GGE-related object +0xB8
+```
+
+That value can then be reached by the `DE317A` expression:
+
+```text
+owner +0x48
+  → object +0xB8
+  → DF6820
+  → DE99B0 forward target +0x34
+```
+
+The semantic registry name for `0xD047A893` is not established. This is therefore a positive
+data-driven registration boundary, not permission to name the target as a Play Scenario handler.
+
 This closes the setter/registration mechanism for `DE99B0`'s optional forward listener. It does
 not yet identify which caller/target is active for the EP1 `Play Scenario` control, and neither
 caller body contains a direct `0x070D7509`/`0x070D74E7` join in this bounded pass.

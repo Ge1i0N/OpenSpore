@@ -154,6 +154,10 @@ owner `+0x48`, and requests internal state `11`. Shipped `GGEGameStarUIv4` data 
 the stage-caption ControlID. It is positive evidence for forwarded-target population, but not
 evidence that `0x070D7509` reaches `0x070D74E7`.
 
+The target source is also resource-backed: `DF1A55` loads a value under key `0xD047A893` into a
+related object's `+0xB8`, which is the value later consumed by the `DE317A → DF6820` registration
+expression. The key's semantic name and relation to Play Scenario remain Unknown.
+
 ### Constructor boundary
 
 The direct-call scan found only one direct caller of `DE6120`:
