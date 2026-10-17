@@ -486,6 +486,20 @@ bool present_cell_world() {
                     "sound: %s", world.last_sound().c_str());
     }
 
+    // Animation UI: show current xls clip name from cell_anims.inc.
+    if (world.player()) {
+        const char* anim = world.player()->anim;
+        const char* clip = "unknown";
+        for (size_t i = 0; i < cell::kCellAnimCount; ++i) {
+            if (anim && strcmp(anim, cell::kCellAnims[i].event) == 0) {
+                clip = cell::kCellAnims[i].clip;
+                break;
+            }
+        }
+        ov.text_fmt(16.f, static_cast<float>(h) - 104.f, 0xFF80C0FFu,
+                    "clip: %s", clip);
+    }
+
     // Particles: eat, death, evolve effects.
     for (const cell::Particle& p : world.particles()) {
         if (p.life <= 0.0f) continue;
@@ -566,11 +580,15 @@ bool present_cell_world() {
                     "PART: %s", world.selected_part().c_str());
     }
 
-    // Stage progression UI: show current level and next.
+    // Stage progression UI: show current level, next, and evolve progress.
     std::string next = world.next_level(world.level());
     if (!next.empty()) {
         ov.text_fmt(16.f, static_cast<float>(h) - 104.f, 0xFF80C0FFu,
                     "NEXT: %s", next.c_str());
+    }
+    if (world.evolved()) {
+        ov.text_fmt(static_cast<float>(w) / 2.f - 80.f, static_cast<float>(h) / 2.f + 40.f,
+                    0xFFE8FFE8u, "CLICK TO EVOLVE");
     }
 
     // Loottable UI: show available drops with names.

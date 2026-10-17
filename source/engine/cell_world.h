@@ -24,6 +24,7 @@
 
 #include "common.h"
 #include "engine/cell_game.h"
+#include "engine/cell_anims.inc"
 
 namespace os::cell {
 
@@ -89,6 +90,11 @@ public:
     void spawn_particles(float x, float y, int count, u32 color);
     // Get active particles for rendering.
     const std::vector<Particle>& particles() const { return m_particles; }
+
+    // Electric chain: find nearby creatures to chain to.
+    std::vector<const Entity*> electric_targets(const Entity& source, float range) const;
+    // Poison cloud: find creatures within poison radius.
+    std::vector<const Entity*> poison_targets(const Entity& source, float range) const;
 
     // Spawn the entities for a `populate` level (e.g. "level_water") and place the player.
     // Returns false and sets `error` when the level is unknown. A no-op error when not loaded.
@@ -177,6 +183,7 @@ private:
     void update_diet();
     float hp_for_size(float size) const;
     float stat_for_archetype(u32 archetype_id, u32 offset) const;
+    bool is_predator_archetype(u32 archetype_id) const;
     void drop_loot(const Entity& from);
 
     GameData m_data;

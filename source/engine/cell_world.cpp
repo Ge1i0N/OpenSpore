@@ -33,26 +33,28 @@ struct Rng {
 
 constexpr int kMaxEntities = 400;
 
-// Simulation seeds (see the header note: these numbers are OURS, not the shipped tide pool's).
-// chaseSpeed/fleeSpeed/wanderSpeed are NOT in cell_properties — these are seed values.
-constexpr float kPlayerAccel = 70.0f;    // units/s^2 toward the steering target
-constexpr float kPlayerSpeed = 24.0f;    // units/s cap
-constexpr float kDrag = 4.0f;            // velocity damping per second
+// Simulation seeds: values not recovered from shipped data, marked SEED.
+// Will be replaced with real data from the binary oracle / shipped data when recovered.
+// SEED: protectTime, hatchDuration, hp formula, chaseSpeed, fleeSpeed, growAmount,
+// spawnOutput, foodValue, digestion* are NOT in cell_properties.
+constexpr float kPlayerAccel = 70.0f;
+constexpr float kPlayerSpeed = 24.0f;
+constexpr float kDrag = 4.0f;
 constexpr float kPredatorAccel = 34.0f;
 constexpr float kPredatorSpeed = 13.0f;
 constexpr float kPreyAccel = 30.0f;
 constexpr float kPreySpeed = 15.0f;
-constexpr float kAggro = 24.0f;          // predator/prey reaction radius
-constexpr float kPredatorFraction = 1.05f;  // above player.size * this, a creature bites
-constexpr float kGrowRate = 0.55f;       // area added per eaten unit^2 (tuned so a level evolves)
-constexpr float kMaxSize = 16.0f;         // shipped size curves extend to 16 (time_dilation, npc_turn_factor)
+constexpr float kAggro = 24.0f;
+constexpr float kPredatorFraction = 1.05f;
+constexpr float kGrowRate = 0.55f;
+constexpr float kMaxSize = 16.0f;
 constexpr float kPlayerBaseSize = 1.0f;
-constexpr float kEvolveSize = 8.0f;       // size at which the cell could leave for the Creature stage (seed, not recovered)
-constexpr float kRespawnDelay = 1.5f;
-constexpr float kMeatTtl = 14.0f;        // how long a dropped chunk stays edible
-constexpr float kRefillInterval = 3.0f;  // restock cadence for grazed plankton
-constexpr int kMeatDna = 2, kPlantDna = 1, kPreyDna = 3;
-constexpr float kActionAnimDuration = 0.5f;  // seconds before an action anim reverts
+constexpr float kEvolveSize = 8.0f;  // SEED: not recovered
+constexpr float kRespawnDelay = 1.5f;  // SEED: not in cell_properties
+constexpr float kMeatTtl = 14.0f;
+constexpr float kRefillInterval = 3.0f;
+constexpr int kMeatDna = 2, kPlantDna = 1, kPreyDna = 3;  // SEED: not in cell_properties
+constexpr float kActionAnimDuration = 0.5f;
 
 bool contains_ci(const std::string& hay, const char* needle) {
     if (hay.empty()) return false;
@@ -180,12 +182,56 @@ bool World::load_save(const std::string& path, std::string& error) {
     return true;
 }
 
+bool World::is_predator_archetype(u32 archetype_id) const {
+    for (const Archetype& a : m_data.archetypes) {
+        if (a.id != archetype_id) continue;
+        const std::string name = archetype_label(m_data, a);
+        if (contains_ci(name, "chomper") || contains_ci(name, "jawhead") ||
+            contains_ci(name, "megamouth") || contains_ci(name, "squid") ||
+            contains_ci(name, "poker") || contains_ci(name, "puffish") ||
+            contains_ci(name, "booster") || contains_ci(name, "charger")) {
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
+std::vector<const Entity*> World::electric_targets(const Entity& source, float range) const {
+    std::vector<const Entity*> targets;
+    const float jumps = curve_value("electric_jumps_count", 0.0f, 1.0f);
+    const float max_targets = jumps > 0.0f ? jumps : 1.0f;
+    for (const Entity& e : m_entities) {
+        if (!e.alive || e.role != Role::Creature) continue;
+        if (&e == &source) continue;
+        const float dx = e.x - source.x, dy = e.y - source.y;
+        if (dx * dx + dy * dy <= range * range) {
+            targets.push_back(&e);
+            if (static_cast<int>(targets.size()) >= static_cast<int>(max_targets)) break;
+        }
+    }
+    return targets;
+}
+
+std::vector<const Entity*> World::poison_targets(const Entity& source, float range) const {
+    std::vector<const Entity*> targets;
+    for (const Entity& e : m_entities) {
+        if (!e.alive || e.role != Role::Creature) continue;
+        if (&e == &source) continue;
+        const float dx = e.x - source.x, dy = e.y - source.y;
+        if (dx * dx + dy * dy <= range * range) {
+            targets.push_back(&e);
+        }
+    }
+    return targets;
+}
+
 void World::spawn_particles(float x, float y, int count, u32 color) {
     for (int i = 0; i < count && static_cast<int>(m_particles.size()) < 200; ++i) {
         Particle p;
         p.x = x;
         p.y = y;
-        const float angle = static_cast<float>(m_ticks + i) * 2.399963f;  // golden angle
+        const float angle = static_cast<float>(m_ticks + i) * 2.399963f;
         const float speed = 2.0f + static_cast<float>(i % 5);
         p.vx = std::cos(angle) * speed;
         p.vy = std::sin(angle) * speed;
@@ -195,9 +241,8 @@ void World::spawn_particles(float x, float y, int count, u32 color) {
     }
 }
 
+// SEED: procedural sound via Beep is a placeholder, not game audio. Will be replaced with real audio data.
 void World::play_sound(const char* name) {
-    // Procedural sound: generate simple tones using Windows Beep.
-    // In a full implementation, this would use DirectSound or XAudio2.
     if (!name || !*name) return;
     m_last_sound = name;
     if (strcmp(name, "eat") == 0) {
@@ -813,14 +858,14 @@ void World::tick(float dt) {
         const float eye_count = curve_value("eye_count", 0.0f, 1.0f);
         const float aggro = kAggro * eye_count;
         if (dist < aggro && dist > 0.001f) {
-            const bool predator = e.role == Role::Creature && e.size > psize * kPredatorFraction;
+            const bool predator = e.role == Role::Creature &&
+                (e.size > psize * kPredatorFraction || is_predator_archetype(e.archetype));
             const bool prey = e.role == Role::Food ||
                               (e.role == Role::Creature && e.size <= psize * kPredatorFraction);
             // Look-table steering: modulate accel/speed by the creature's behavioral weights.
             const char* table = predator ? "npc_mad" : (prey ? "npc_scared" : "NPC_idle");
             const float pursue_w = look_weight(table, 4);   // pursue_target
             const float flee_w = look_weight(table, 5);     // flee_target
-            const float object_w = look_weight(table, 6);   // object (flocking)
             // Turn factor: NPC turn rate scales with their size.
             const float turn_factor = curve_value("npc_turn_factor", e.size, 1.0f);
             if (predator) {
@@ -832,8 +877,10 @@ void World::tick(float dt) {
                 e.vx -= (dx / dist) * kPreyAccel * w * dt;
                 e.vy -= (dy / dist) * kPreyAccel * w * dt;
             }
-            // Flocking: steer toward the average position of nearby same-role creatures.
-            if (object_w > 0.0f && e.role == Role::Creature) {
+            // Flocking: only NPC_idle and default_look_table have object entries (weight 1.0).
+            // npc_mad/npc_scared are single-purpose (pursue/flee only).
+            const float flock_w = look_weight("NPC_idle", 6);
+            if (flock_w > 0.0f && e.role == Role::Creature) {
                 float avg_x = 0.0f, avg_y = 0.0f;
                 int count = 0;
                 for (const Entity& other : m_entities) {
@@ -853,8 +900,8 @@ void World::tick(float dt) {
                     const float fdx = avg_x - e.x, fdy = avg_y - e.y;
                     const float flen = std::sqrt(fdx * fdx + fdy * fdy);
                     if (flen > 0.001f) {
-                        e.vx += (fdx / flen) * kPreyAccel * object_w * dt;
-                        e.vy += (fdy / flen) * kPreyAccel * object_w * dt;
+                e.vx += (fdx / flen) * kPreyAccel * flock_w * dt;
+                e.vy += (fdy / flen) * kPreyAccel * flock_w * dt;
                     }
                 }
             }
@@ -925,6 +972,7 @@ void World::tick(float dt) {
                 // Protection window: after being hit, the player is briefly invulnerable.
                 // protectTime is NOT in cell_properties — use a fixed 0.5s window as a seed.
                 const float protect_time = curve_value("protectTime", 0.0f, 0.5f);
+                // SEED: protectTime is NOT in cell_properties. Will be replaced with real data.
                 if (pl->protect_time <= 0.0f) {
                     m_hp -= e.size * 18.0f * dt;
                     pl->protect_time = protect_time;
@@ -937,23 +985,35 @@ void World::tick(float dt) {
                         break;
                     }
                 }
-                // Poison damage-over-time: applies a persistent DoT, not instant.
-                // Real behavior: DoT via poison_count curve (1.5 dmg at 2+ parts), duration seed.
+                // SEED: poison DoT duration and cloud spread NOT in cell_properties. Will be replaced with real data.
                 const bool has_poison = contains_ci(attacker_label, "poison");
                 if (has_poison) {
-                    pl->poison_time = 3.0f;  // DoT duration seed (not in cell_properties)
+                    pl->poison_time = 3.0f;
                     if (pl->anim != kAnimGetHitSpike) {
                         pl->anim = kAnimGetHitPoison;
                         pl->anim_time = 0.0f;
                     }
+                    const float poison_range = curve_value("poison_count", 0.0f, 3.0f);
+                    std::vector<const Entity*> poisoned = poison_targets(e, poison_range);
+                    for (const Entity* target : poisoned) {
+                        if (target->alive) {
+                            const_cast<Entity*>(target)->poison_time = 2.0f;
+                        }
+                    }
                 }
-                // Electric stun: fixed 1.0s stun (real stun duration not in cell_properties).
-                // Chaining (electric_jumps_count, electric_range_count) not implemented.
+                // SEED: electric stun duration and chain mechanics NOT confirmed in cell_properties. Will be replaced with real data.
                 const bool has_electric = contains_ci(attacker_label, "elec");
                 if (has_electric) {
-                    pl->electric_time = 1.0f;  // stun duration seed
+                    pl->electric_time = 1.0f;
                     pl->anim = kAnimGetHitElec;
                     pl->anim_time = 0.0f;
+                    const float range = curve_value("electric_range_count", 0.0f, 5.0f);
+                    std::vector<const Entity*> chained = electric_targets(e, range);
+                    for (const Entity* target : chained) {
+                        if (target->alive) {
+                            const_cast<Entity*>(target)->electric_time = 1.0f;
+                        }
+                    }
                 }
                 const float len = std::sqrt(dx * dx + dy * dy);
                 if (len > 0.001f) {
@@ -970,6 +1030,7 @@ void World::tick(float dt) {
                     pl->anim = kAnimDeath;
                     pl->anim_time = 0.0f;
                     play_sound("death");
+                    spawn_particles(pl->x, pl->y, 15, 0xFF4040FFu);
                     // Spawn death archetype from structure +0x10.
                     if (pl->structure >= 0 && static_cast<size_t>(pl->structure) < m_data.structures.size()) {
                         const u32 death_id = m_data.structures[static_cast<size_t>(pl->structure)].death;
@@ -1007,12 +1068,13 @@ void World::tick(float dt) {
         if (!e.alive || e.hatch_time <= 0.0f) continue;
         e.hatch_time -= dt;
         if (e.hatch_time <= 0.0f && static_cast<int>(m_entities.size()) < kMaxEntities) {
-            // Hatch: replace the egg with a small creature.
             e.hatch_time = 0.0f;
             e.role = Role::Creature;
             e.size = 0.3f;
             e.anim = kAnimHatch;
             e.anim_time = 0.0f;
+            play_sound("hatch");
+            spawn_particles(e.x, e.y, 8, 0xFF80FF80u);
         }
     }
 
