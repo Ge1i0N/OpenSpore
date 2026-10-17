@@ -187,6 +187,19 @@ several ordinary setter callsites (`BAF169`, `BED976`, `BEDBE6`, `10588B9`, and 
 visible key argument is `0x049B48EE`, not either Scenario property ID. This is a bounded negative
 result against the inspected direct setter users only; it does not exclude a virtual/generic writer
 whose key arrives from a loaded definition or another data path.
+
+## Property-name string search
+
+The selected GA binary contains no matching plaintext strings for:
+
+```text
+ScenarioGAButtonClicked
+ScenarioGAFirstLaunched
+```
+
+This is consistent with the observed numeric-ID path and does not disprove the properties. The
+retail writer must be sought through numeric PropertyList/config lifecycle, loaded definitions or
+indirect setters rather than name-string xrefs.
 ```
 
 ## `0x070D74E7` belongs to the `DE99B0` listener body
