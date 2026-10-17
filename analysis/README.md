@@ -12,6 +12,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | FLARE-FLOSS strings | [floss](floss.md) | pinned source/release reference and reproducible GA string JSON dump |
 | Bounded Ghidra runs | [ghidra-runner](ghidra-runner.md) | persistent PyGhidra probes with heartbeat, deadline and graceful/hard-stop policy |
 | MiniWiki references | [miniwiki-references](miniwiki-references.md) | local historical console/cheat/command-line leads, explicitly secondary to GA evidence |
+| MiniWiki command comparison | [miniwiki-command-compare](miniwiki-command-compare.md) | bounded historical-token vs GA-string report; no string-only readiness claims |
 | Local launch modes | [launch-modes](launch-modes.md) | Debug batch launchers for Loader, DevLauncher, controlled GGE preview and Debug Cheat Console |
 | OpenSpore Debug Cheat Console | [debug-menu](debug-menu.md) | Debug-only Ctrl+Shift+C command-entry state; uses host registry, not recovered EA ConsoleWindow |
 | GGE placement-window identity | [gge-window-lookup](gge-window-lookup.md) | actual record+B8 receiver and root177; corrects earlier global-service interpretation, not native mount/camera readiness |
