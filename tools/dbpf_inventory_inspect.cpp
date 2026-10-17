@@ -1,11 +1,14 @@
 // Explicit DBPF inventory only. No directory search, profile scan, writes or gameplay readiness.
 #include "engine/pkg.h"
+#include <algorithm>
 #include <map>
 #include <iostream>
 int main(int argc,char** argv){
     if(argc!=2&&argc!=3){std::cerr<<"usage: dbpf_inventory_inspect <explicit-DBPF> [--full]\n";return 2;}
     const bool full=argc==3&&std::string(argv[2])=="--full";if(argc==3&&!full){std::cerr<<"unknown option\n";return 2;}
-    os::pkg::Package p;if(!p.open(argv[1])){std::cerr<<"DBPF rejected: "<<p.why()<<'\n';return 1;}
+    os::pkg::Package p;os::pkg::ReadLimits limits;limits.file_bytes=512ull*1024*1024;limits.records=262144;limits.index_bytes=16*1024*1024;
+    if(!p.open_bounded(argv[1],limits)){std::cerr<<"DBPF rejected: "<<p.why()<<'\n';return 1;}
+    if(!p.index_parsed()){std::cerr<<"DBPF directory unparsed; inventory unavailable\n";return 1;}
     std::map<std::pair<os::u32,os::u32>,size_t> groups;for(const auto& r:p.records())++groups[{r.type(),r.group()}];
     std::cout<<"EXPLICIT DBPF INVENTORY ONLY path="<<argv[1]<<" records="<<p.records().size()<<" kind="<<p.kind()<<" groups="<<groups.size()<<"\n";
     for(const auto& g:groups)std::cout<<"group type=0x"<<std::hex<<g.first.first<<" group=0x"<<g.first.second<<std::dec<<" records="<<g.second<<"\n";

@@ -176,6 +176,56 @@ comparison, relation mismatches, and a child frame attempting to consume its sib
 inspector rejects ambiguous nested selectors and caps the explicit hex dump at 64 KiB. None of these
 structural observations changes the catalogue admission gate.
 
+### Correlation with selected package directories
+
+`tools/gge_userdata_correlate.py` compares **every** row against every entry of each explicitly
+selected DBPF directory. The triple-order hypothesis is `(group,type,instance)`. Exact matches and
+same-group/instance entries with a different type are reported separately. Duplicate keys remain
+ambiguous, and zero-size/unreadable-marked entries are never reported as usable payloads. Packages
+are inspected independently; no priority merging or automatic folder search is performed.
+
+| Corpus | Selected package | Directory entries | Exact triple matches | DB-right / DD-left same group+instance, different type |
+|---|---|---:|---:|---:|
+| UserData1 | PlanetScripts.pld | 328 | 0 | 0 of 7 |
+| UserData1 | lastSave.pld | 325 | 0 | 0 of 7 |
+| UserData1 | Planets.package | 110 | 0 | 0 of 7 |
+| UserData | PlanetScripts.pld | 575 | 0 | 7 of 7 |
+| UserData | lastSave.pld | 575 | 0 | 7 of 7 |
+| UserData | Planets.package | 7 | 0 | 0 of 7 |
+| Ronikari | PlanetScripts.pld | 116639 | 0 | 5 of 55 |
+| Ronikari | lastSave.pld | 116512 | 0 | 5 of 55 |
+| Ronikari | Planets.package | 1638 | 0 | 0 of 55 |
+
+The different type is `0x00B1B104` in the package entries versus `0x011989B7` in the table's right
+triples (DB) / left triples (DD). DB-left and both sides of DC had no exact or same-group/instance
+matches in these selected directories. The report does **not** substitute one resource type for
+another. These are cross-directory correlations, not an established conversion/lookup rule.
+
+Thus the before/after result is stronger than a file-size delta: the seven unchanged GGE mappings
+become correlated with seven script-directory entries and the DE word list becomes populated.
+Neither causality nor a native meaning such as candidate refill is proven. Missing exact keys are
+absent only from the selected directories, not necessarily from other caches or shipped packages.
+
+Ronikari required more than the initial diagnostic inventory cap of 65536 entries: the full
+PlanetScripts directory contains 116639 records. The inventory tool now has explicit host limits
+of 512 MiB per file, 262144 directory entries and 16 MiB directory bytes, and rejects unparsed
+directories rather than reporting an empty successful inventory. Payloads are not decoded by this
+comparison; 30-second per-inspector subprocess timeouts bound each probe.
+
+```powershell
+python tools/gge_userdata_correlate.py `
+  --frame-inspector build/bin/Debug/dbpf_serialized_frame_inspect.exe `
+  --inventory-inspector build/bin/Debug/dbpf_inventory_inspect.exe `
+  --package build/bin/Debug/UserData/Games/Game0/PlanetScripts.pld `
+  --package build/bin/Debug/UserData/Games/Game0/lastSave.pld `
+  --package build/bin/Debug/UserData/Planets.package `
+  build/bin/Debug/UserData/Games/Game0/GGEUserData.dat
+```
+
+Tests preserve exact type/key matching, distinguish related types from matches, retain duplicate
+rows/ambiguous directory entries, and reject incomplete inventory output. Raw reports remain local
+and save binaries are not committed. Ghidra is not required for these byte/directory observations.
+
 ## Explicit UserData package inventory
 
 Package files can provide planet/editor/resource correlation, but they are not substitutes for
