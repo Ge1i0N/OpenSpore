@@ -42,6 +42,13 @@ work item is the ConsoleWindow creation/registration/command-dispatch chain, fol
 about a real SPUI/WinProc bridge. Until then, this host menu is the usable manual entry point and the
 original hotkey README is an evidence lead, not a native cheat backend.
 
+The hidden dev-only `_debugmenu` command toggles the same host state for unattended launch scripts;
+the keyboard path is not required for automation. The switch is queued through the normal state
+manager chain, so its command response reports the requested transition, not synchronous visibility.
+
+A Debug-only `_debugmenu` console command is also registered for repeatable launches; it toggles the
+same host state and does not create a second menu owner.
+
 ## Try it
 
 ```powershell
@@ -49,7 +56,11 @@ cmake --build build --config Debug --target OpenSpore
 build/bin/Debug/OpenSpore.exe -w -devDirs
 ```
 
-Press **Ctrl+Shift+C**, choose `Open GGEHostPreview (controlled)`, and press `Esc` to return. Existing
+Press **Ctrl+Shift+C**, or use `Run-DebugMenu.cmd` (which invokes `_debugmenu` through `-exec`). Choose
+`Open GGEHostPreview (controlled)`, and press `Esc` to return. Existing
 console commands (`state`, `ggepreview status`, `capture`, `quit`) remain available. No saves/profiles
 are touched. Native Cheat Menu layout, exact GA hotkey handling, command registry and original
 console text/input behavior remain unresolved.
+
+Each run's normal and crash logs are retained under the executable's `logs/` directory with timestamp/PID names; see
+[local launch modes](launch-modes.md) for the naming and fallback policy.

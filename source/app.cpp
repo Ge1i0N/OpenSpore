@@ -401,6 +401,25 @@ void pump_messages() {
     }
 }
 
+struct RunLogPaths { std::string normal="OpenSpore.log", crash="OpenSpore.crash.log"; };
+RunLogPaths make_run_log_paths() {
+    RunLogPaths paths; SYSTEMTIME now{}; GetLocalTime(&now); char stem[96]{};
+    _snprintf_s(stem,sizeof(stem),_TRUNCATE,"OpenSpore-%04u%02u%02u-%02u%02u%02u-%03u-pid%lu",
+                now.wYear,now.wMonth,now.wDay,now.wHour,now.wMinute,now.wSecond,now.wMilliseconds,GetCurrentProcessId());
+    wchar_t module[MAX_PATH]{};
+    const DWORD length=GetModuleFileNameW(nullptr,module,MAX_PATH);
+    std::error_code ec;
+    if(length>0&&length<MAX_PATH) {
+        const auto log_directory=std::filesystem::path(module).parent_path()/"logs";
+        std::filesystem::create_directories(log_directory,ec);
+        if(!ec) {
+            paths.normal=(log_directory/(std::string(stem)+".log")).string();
+            paths.crash=(log_directory/(std::string(stem)+".crash.log")).string();
+        }
+    }
+    return paths;
+}
+
 }  // namespace
 
 void request_quit(int code) {
@@ -417,10 +436,11 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     // and the only thing that turns that into "log + continue" instead of a modal dialog is
     // the harness being already in place.
     std::string console_how = attach_console();
-    diag::install("OpenSpore.crash.log");
-    log::init("OpenSpore.log", log::Level::Trace, log::Level::Debug);
+    const RunLogPaths log_paths=make_run_log_paths();
+    diag::install(log_paths.crash.c_str());
+    log::init(log_paths.normal.c_str(), log::Level::Trace, log::Level::Debug);
     mark(0, true, "harness up before the log existed");
-    mark(1, true, "file=OpenSpore.log console=" + console_how);
+    mark(1, true, "file="+log_paths.normal+" crash="+log_paths.crash+" console="+console_how);
     // Name resolution (id -> name) is data, loaded once. Failure is not fatal: every name
     // falls back to hex rather than to a guess.
     {

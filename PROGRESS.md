@@ -8,6 +8,9 @@ Detailed counts and the dashboard are generated from [features.json](analysis/fe
 
 ## Main → playable
 
+Manual Debug launchers and their boundaries are documented in [local launch modes](analysis/launch-modes.md).
+Per-run normal and crash logs are retained under the executable's `logs/` directory with timestamp/PID names.
+
 ```text
 entry / CRT / WinMain → boot → packages / config → states → real-art launcher → visible selection
                                                                             ↓

@@ -3,6 +3,7 @@
 #ifdef OS_ENABLE_DEV_COMMANDS
 #include "engine/input.h"
 #include "engine/log.h"
+#include "engine/console.h"
 #include "render/device.h"
 #include "render/overlay.h"
 #include "states/statemgr.h"
@@ -57,7 +58,7 @@ void render() {
 } // namespace
 void toggle(){if(!g_manager)return;if(g_open){close_menu();return;}const std::string current=g_manager->current_name();if(current.empty()||current==kName)return;g_previous=current;g_manager->request_goto(kName);}
 bool open(){return g_open;}
-void install(Manager& manager){g_manager=&manager;State state;state.name=kName;state.on_enter=enter;state.on_exit=exit;state.on_tick=tick;state.on_render=render;if(manager.reg(std::move(state)))LOG_INFO("states","registered dev-only OpenSporeDebugMenu");}
+void install(Manager& manager){g_manager=&manager;State state;state.name=kName;state.on_enter=enter;state.on_exit=exit;state.on_tick=tick;state.on_render=render;if(manager.reg(std::move(state)))LOG_INFO("states","registered dev-only OpenSporeDebugMenu");os::console::reg({"_debugmenu","Open or close the OpenSpore host Debug Menu.","",[](const os::console::CmdContext&)->std::string{const bool was_open=open();toggle();return was_open?"Debug Menu closing":"Debug Menu opening";}});}
 } // namespace os::states::debugmenu
 #else
 namespace os::states::debugmenu { void toggle(){} bool open(){return false;} void install(Manager&){} }

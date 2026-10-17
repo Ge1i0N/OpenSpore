@@ -1,0 +1,14 @@
+{
+  "reviewed": "2026-10-17",
+  "authority": "GA-unpacked SHA-256 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "additional_reference": "refs/_Also/SporeGames/SporeBeta190208/readme.txt",
+  "beta_shortcuts": {"Ctrl-H":"toggle UI","Ctrl-Alt-Home":"back to Galaxy Game Entry","Ctrl-Shift-C":"cheat console","Ctrl-Shift-Alt-C":"in-window cheat console","Ctrl-Shift-X":"property editor","Ctrl-Shift-W":"wireframe","Ctrl-Shift-S":"stats window","Ctrl-Shift-H":"hide UI"},
+  "ga_imports": ["GetKeyState", "GetAsyncKeyState"],
+  "ga_strings": ["Cheat", "cheat", "console", "Console"],
+  "ga_keyboard_callsites": ["0x8D3140", "0x8D35E0", "0x848080", "0x848100", "0x7E6010"],
+  "sdk": {"class":"UTFWin::ConsoleWindow", "proxy_type":"0xEFBC56D8", "imported_symbol":"UI::ConsoleWindow at 0x0096B3E0"},
+  "spui_scan": {"layouts_parsed":748, "serialized_console_window_objects":0, "class_type_write":"0x00969A9F"},
+  "conclusion":"Likely dynamically native-created ConsoleWindow; exact GA creation/registration/hotkey chain unresolved",
+  "host_menu":"OpenSporeDebugMenu is Debug-only host state and is not native Cheat Menu evidence",
+  "executed":false
+}
