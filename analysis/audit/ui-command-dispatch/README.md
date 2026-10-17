@@ -68,6 +68,26 @@ written into the record by an upstream producer or handled in a callback reached
 No `ControlID 0x070D7509`, `CommandID 0x00E1132F`, or ScenarioMode tag `0x01654C10` was promoted
 from this forwarding boundary.
 
+### Direct-call inventory for the inspected seam
+
+The local `.text` scan for direct `E8 rel32` calls found:
+
+```text
+0x0095A010 callers: 1
+  0x00960262
+
+0x00959240 callers: 2
+  0x0095964B
+  0x0095A081
+```
+
+Thus the inspected route has one direct GA entry from `0x00960250` into `0x0095A010`, while
+`0x00959240` is a lower-level record/list forwarding helper used by two bodies. Nearby inspected
+dispatch code contains callback values `3`, `4` and `5` and record branches for `0x0D`, `0x14` and
+`0x16`; no `0x17`/`0x18` comparison was observed in these bounded bodies. This narrows the search but
+is not a whole-binary absence proof: the button event may be written into the record upstream or
+handled by an indirect callback.
+
 ## Reproduction
 
 ```powershell
