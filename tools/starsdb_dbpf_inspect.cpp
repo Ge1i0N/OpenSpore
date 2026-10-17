@@ -21,9 +21,10 @@ static void print_star(const os::starsdb::StarRecord& s) {
 }
 int main(int argc,char** argv) {
     using namespace os; using namespace os::starsdb;
-    if (argc!=5) { std::cerr<<"usage: starsdb_dbpf_inspect <explicit-package> <root-instance> <root-type> <root-group>\n"; return 2; }
+    if (argc!=5&&argc!=6) { std::cerr<<"usage: starsdb_dbpf_inspect <explicit-package> <root-instance> <root-type> <root-group> [class-id-hex]\n"; return 2; }
     u32 instance=0,type=0,group=0;
     if (!hex(argv[2],instance)||!hex(argv[3],type)||!hex(argv[4],group)) { std::cerr<<"invalid ResourceKey component\n"; return 2; }
+    u32 selected_class=0;if(argc==6&&!hex(argv[5],selected_class)){std::cerr<<"invalid class id\n";return 2;}
     PhysicalContextResult result; std::string error;
     if (!inspect_physical_context(argv[1],instance,type,group,result,error)) {
         std::cerr<<"explicit DBPF context inspection blocked: "<<error<<"\n"; return 1;
@@ -66,6 +67,7 @@ int main(int argc,char** argv) {
         std::cout<<"star_record class=0x"<<std::hex<<cls.class_id<<" token=0x"<<object.token<<std::dec; print_star(s); std::cout<<'\n';
     }
     if(shown>16)std::cout<<"star_record preview limited to 16 decoded objects\n";
+    if(argc==6){for(const auto& cls:result.decoded_classes)if(cls.class_id==selected_class){std::cout<<"selected_class=0x"<<std::hex<<selected_class<<std::dec<<" objects="<<cls.objects.size()<<"\n";for(size_t i=0;i<cls.objects.size()&&i<32;++i)std::cout<<"  object["<<i<<"] token=0x"<<std::hex<<cls.objects[i].token<<" crc=0x"<<cls.objects[i].crc<<std::dec<<" offset="<<cls.objects[i].offset<<" body_offset="<<cls.objects[i].body_offset<<" end="<<cls.objects[i].end<<"\n";if(cls.objects.size()>32)std::cout<<"  object preview limited to 32\n";}}
     std::cout<<"physical resources and structural objects checked; post-load fixups/catalogue publication remain disabled\n";
     return 0;
 }

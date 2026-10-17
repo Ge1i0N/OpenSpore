@@ -116,6 +116,27 @@ an additional StarRecord. The class meanings are not inferred yet.
 (`0x066B980B` is 12 bytes rather than 4, and fields `0x07CA2687/8` are nonzero). These are observed
 save deltas with unknown semantics, not readiness signals.
 
+## Explicit UserData package inventory
+
+Package files can provide planet/editor/resource correlation, but they are not substitutes for
+StarManager vectors. Bounded DBPF inventory of the explicitly selected corpus found:
+
+```text
+                         records / groups
+UserData1 Planets.package       110 / 5
+UserData  Planets.package         7 / 3
+Ronikari Planets.package       1638 / 8
+Ronikari Planets backup        1081 / 6
+Ronikari EditorSaves.package    178 / 37
+Ronikari EditorSaves backup     103 / 34
+Ronikari RigblockInfo.package    54 / 1
+```
+
+`GraphicsCache.package` and `Pollination.package` did not pass the current DBPF magic validator;
+they remain separate cache/format inputs, not silently treated as DBPF. Ronikari's package-edited
+resources are useful for format/resource comparison, but are explicitly non-vanilla evidence. No
+package inventory result changes the candidate/refill producer gate.
+
 ## Derived snapshot boundary
 
 A temporary derived `GGE_CATALOG_V1` row was inspected, not committed:
