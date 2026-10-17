@@ -86,6 +86,8 @@ The detailed local clone revisions and licensing notes are maintained in
 corpus is described in [`analysis/additional-references.md`](analysis/additional-references.md).
 The first actual external-clone reproduction is recorded in
 [`analysis/audit/external-openspore/README.md`](analysis/audit/external-openspore/README.md).
+The methodology review of `openspore-old` is recorded in
+[`analysis/audit/external-openspore-old/README.md`](analysis/audit/external-openspore-old/README.md).
 
 ## External OpenSpore repositories
 

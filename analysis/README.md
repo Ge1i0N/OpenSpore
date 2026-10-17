@@ -49,6 +49,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE catalogue snapshot input | [gge-catalog-snapshot](gge-catalog-snapshot.md) | caller-selected strict UTF-8 capture loader + atomic Unknown/Available statuses; no discovery/generation/profile scan |
 | GGE terrain correlation | [gge-real-save](gge-real-save.md) | explicit starter-world/property matches across selected packages; duplicate package matches stay ambiguous, no native readiness claim |
 | External OpenSpore cross-check | [audit/external-openspore](audit/external-openspore/README.md) | pinned Ge1i0N fork reproduced against one explicit local GA save; structural corroboration only, CellGame package absent locally |
+| `openspore-old` methodology pass | [audit/external-openspore-old](audit/external-openspore-old/README.md) | pinned OpenSporeLabs corpus reviewed for dossier/evidence/semantic-bridge workflow; no external code or GA claims imported |
 | GA PropManager terrain lookup | [audit/gge-terrain-prop](audit/gge-terrain-prop/README.md) | vtable/getter/lookup contract cross-checked with SDK; no runtime package priority or refill claim |
 | GA StarManager candidate refill | [audit/gge-refill](audit/gge-refill/README.md) | BB61C0 quota/filter/fallback/append/write order cross-checked with StarManager field layout; static only |
 | Refill event versus GGE refresh | [audit/gge-refill-event](audit/gge-refill-event/README.md) | 0x062D91C2 consumer is StarManager-side; no direct DF95A0/GGE refresh edge claimed |
