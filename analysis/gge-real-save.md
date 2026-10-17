@@ -137,6 +137,13 @@ they remain separate cache/format inputs, not silently treated as DBPF. Ronikari
 resources are useful for format/resource comparison, but are explicitly non-vanilla evidence. No
 package inventory result changes the candidate/refill producer gate.
 
+The vanilla `Planets.package` delta is notable: `UserData1` has 105 generic `0x00B1B104` records
+plus five `0x2F7D0004` planet-package records, while post-flight `UserData` has seven records, all
+`0x2F7D0004`, with several records carrying `packed=0`/nonzero memory sizes. This is an observed
+package/cache-state change, not yet a decoded candidate vector or terrain success. Ronikari's
+`Planets.package` has 1,638 records, mostly `0x2F7D0004`, consistent with its much larger edited
+corpus but not proof of vanilla producer semantics.
+
 ## Derived snapshot boundary
 
 A temporary derived `GGE_CATALOG_V1` row was inspected, not committed:
