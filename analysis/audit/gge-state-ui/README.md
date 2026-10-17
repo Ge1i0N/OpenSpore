@@ -142,6 +142,11 @@ zeroed with neighboring `+0x30/+0x38` by the base initialization at `DE60A0`. No
 write was found in the inspected GGE constructor path, so the alternate forwarded listener route
 for payload `0x070D7509` remains Unknown.
 
+The population mechanism is now recovered outside that constructor path: `DF6820` releases the
+old `+0x34` target, stores and retains a new target, then invokes target vtable `+0x48`. Its direct
+callers are `DE317A` (target `[owner+0x48]+0xB8`) and `DF851E` (target from the per-entry/event
+path). Their relation to the Play Scenario control remains Unknown; no runtime delivery is claimed.
+
 ### Constructor boundary
 
 The direct-call scan found only one direct caller of `DE6120`:

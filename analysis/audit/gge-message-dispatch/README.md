@@ -153,6 +153,34 @@ No direct write that populates this `+0x34` forward target was recovered in the 
 constructor path. This does not prove that indirect registration never occurs, but it means the
 possible alternate handler for payload `0x070D7509` remains Unknown rather than being invented.
 
+### ✔️ Milestone: forwarded-listener setter recovered
+
+The indirect registration boundary is now concrete at `DF6820`:
+
+```text
+old_target = object +0x34
+  → release old target
+object +0x34 = new_target
+  → add-ref new target
+  → new_target vtable +0x48(...)
+```
+
+Bounded direct callers are:
+
+```text
+DE317A
+  → target = [owner +0x48] +0xB8
+  → DF6820(target)
+
+DF851E
+  → target from the current per-entry/event path
+  → DF6820(target)
+```
+
+This closes the setter/registration mechanism for `DE99B0`'s optional forward listener. It does
+not yet identify which caller/target is active for the EP1 `Play Scenario` control, and neither
+caller body contains a direct `0x070D7509`/`0x070D74E7` join in this bounded pass.
+
 The shipped EP1 layout places the two relevant identities on different branches:
 
 ```text
