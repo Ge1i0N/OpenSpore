@@ -128,6 +128,15 @@ handler `0x00DDDF40`. Its exact option table is:
 The handler routes into native level state/services through `FUN_0083BAA0`; OpenSpore keeps its host
 `levels -unlock` response explicit because that backend is not connected.
 
+### SDK ↔ GA bridge leads
+
+The pinned ModAPI SDK provides a useful method-order map: `IWinProc::HandleUIMessage` is vtable
+`+0x18`, `UTFWin::Message` stores event type at `+0x08`, virtual key at `+0x10` and modifiers at
+`+0x14`, while `IWindow::SetFlag` is `+0x7C`. The same SDK address table names GA routines
+`GameInput_KeyDown 0x00697CA0`, `MainWindow_OnKey 0x008153C0`, `CheatManager_ProcessLine 0x0067F150`
+and the window/message-manager routines. These are now focused seed targets; names remain secondary
+until their GA bodies are corroborated.
+
 A bounded immediate scan found several higher App/UI callsites carrying event id `0x1EE1001`, but
 some reported offsets are inside uncarved bodies or dispatch data rather than function entries. They
 are retained as callsite leads, not falsely promoted to standalone Ghidra functions.

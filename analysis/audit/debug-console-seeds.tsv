@@ -30,3 +30,6 @@
 0x00753C10	function	os_graphics_event_00753C10
 0x0084BCD0	function	os_canvas_listener_0084BCD0
 0x0084B6E0	function	os_canvas_listener_dispatch_0084B6E0
+0x00697CA0	function	os_sdk_gameinput_keydown_00697CA0
+0x008153C0	function	os_sdk_mainwindow_onkey_008153C0
+0x0067F150	function	os_sdk_cheatmanager_processline_0067F150
