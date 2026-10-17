@@ -117,6 +117,17 @@ Additional bounded GA command leads are `history` with `[<items:int>] Lists the 
 command history` and `levels -unlockAdventures` with `Unlocks all Maxis adventures`. They are retained
 as native leads only; OpenSpore does not report them as implemented cheat services.
 
+The native `Level Cheats` object is bounded at constructor `0x00DDDEE0`, vtable `0x0147D36C` and
+handler `0x00DDDF40`. Its exact option table is:
+
+```text
+-unlock             value 0  Unlocks all game levels
+-unlockAdventures   value 1  Unlocks all Maxis adventures
+```
+
+The handler routes into native level state/services through `FUN_0083BAA0`; OpenSpore keeps its host
+`levels -unlock` response explicit because that backend is not connected.
+
 The vtable mapping is now explicit: `AppConsole` vtable `0x0140195C + 0x00` points to
 `FUN_0067EAA0` (line parser/dispatcher), while `+0x04` points to `FUN_0067E240` (help description).
 The CheatManager vtable `0x01401B40 + 0x38` points to `FUN_0067EF20` (command execution/result
