@@ -91,15 +91,16 @@ flags at **+0xAC/+0xAD**, per-entry UI pointer at **+0xB8** (roles partly inferr
 REA static corroboration makes the projection contract more precise: `DF6010` is the `Play Spore`
 vtable `0x147EF50` slot `+0x68` method. It reads each record's position from `record +0x80`, calls
 `DE3C20`, then forwards the record pointer and projected values through the owning object's virtual
-slot `+0x64`, which resolves to `DF6110`; `DE3C20` obtains a renderer/camera-related service
-through virtual slot `+0x58` before computing normalized screen placement. The direct-call list is
-empty because this is vtable dispatch; the concrete camera owner and runtime trigger remain Unknown.
+slot `+0x64`, which resolves to `DF6110`; `DE3C20` obtains cViewer through GameModeManager
+virtual slot `+0x58` before computing normalized screen placement. The direct-call list is
+empty because this is vtable dispatch; live viewer production and runtime trigger remain Unknown.
 Instruction-level REA evidence shows the returned `+0x58` result is passed as the `this` object to
 `7C4250`; `805F90` supplies viewport state, and `DE3C20` applies the normalized screen transform.
-REA distinguishes this projection service from the controller's stored active-camera field:
+The [viewer/ICamera cross-check](gge-viewer.md) distinguishes this viewer from stored ICamera:
 `DE46D0` obtains controller `+0x198` through `0067DCD0` slot `+0x50`, then returned-object slot
 `+0x38`, while `DE3C20` uses the getter's `+0x58` path. `DF6490` also uses `+0x58` for nearest
-record selection. Their identity is therefore not assumed equivalent in the host.
+record selection. Mode+30 viewer and mode+2C CameraManager are distinct storage/type roles;
+the latter calls active ICamera Update(delta,viewer). The host never reads ICamera+C0 as a matrix.
 The [2026-10-17 receiver cross-check](gge-window-lookup.md) corrects the earlier UI-bounds
 "global service" interpretation: `DF6110` calls `00810650(0x02E5A4A8,0)` on ECX loaded from
 **record+B8**. `810650` dereferences that UILayout's `+14`; `8102A0` compares root-window ControlIDs
@@ -129,8 +130,8 @@ The call that forwards each projected record to its concrete owner is a computed
 `DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence
 shows that the `Play Spore` constructor installs vtable `0x147EF50` and slot `+0x64` points to
 `DF6110`. `DF6110` checks `record +0xB8` and uses the UI object's bounds to clamp the projected
-target. The camera owner behind `DE3C20` slot `+0x58` and runtime trigger remain Unknown; host
-selection still must not route through an invented camera/controller path.
+target. The viewer type behind `DE3C20` slot `+0x58` is now resolved; its runtime producer and GGE
+camera parameters remain Unknown. Host selection still must not invent a camera/controller path.
 
 This explains why forcing the primary layout's hidden windows visible cannot recreate game choice:
 the actual star UI is instantiated **per live game record** and driven by scene projection.

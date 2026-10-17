@@ -83,6 +83,11 @@ but no concrete mapping for this ID was executed or independently recovered in t
 
 ## Next investigation
 
+Follow-up [viewer/ICamera investigation](gge-viewer.md) corroborates the SDK names with selected GA
+vtable/constructor/getter bytes: `67DCD0` is GameModeManager; slot58 returns cViewer, while slot50
+returns CameraManager whose slot38 returns ICamera. Matrix+C0 belongs to cViewer, not ICamera.
+The update handoff is resolved statically; concrete GGE camera selection/parameters remain unknown.
+
 1. Resolve every persisted starter reference in order, retaining missing/null/unsupported outcomes.
 2. Keep that result separate from the runtime refill observation and terrain/property queries.
 3. Exact `0x02E5A4A8` default window identity and per-card lookup are now verified; preserve its

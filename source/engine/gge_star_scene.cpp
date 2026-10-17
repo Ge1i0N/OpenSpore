@@ -78,12 +78,12 @@ bool StarUiScene::update(u64 ticket,const SceneCameraObservation& camera,std::st
     }
     retire_frame(); frame_.ticket=ticket_; frame_.serial=++frame_serial_; frame_.camera_token=camera.token;
     const auto fail=[&](const char* why) { error=why; frame_.error=why; return false; };
-    if (camera.source!=SceneCameraSource::ActiveProjection||!camera.token)
-        return fail("active projection camera identity unobserved (controller-retained interface is not a substitute)");
+    if (camera.source!=SceneCameraSource::ViewerProjection||!camera.token)
+        return fail("viewer projection identity unobserved (controller-retained ICamera is not a substitute)");
     const auto& observation=camera.projection;
-    if (!observation.clip_from_world||!observation.window_rect) return fail("active camera matrix/window observation unavailable");
+    if (!observation.clip_from_world||!observation.window_rect) return fail("viewer matrix/window observation unavailable");
     if (!valid(*observation.window_rect)) return fail("invalid camera window extents");
-    for (float v:*observation.clip_from_world) if (!std::isfinite(v)) return fail("nonfinite active camera matrix");
+    for (float v:*observation.clip_from_world) if (!std::isfinite(v)) return fail("nonfinite viewer projection matrix");
     frame_.viewport={0,0,observation.window_rect->w(),observation.window_rect->h()};
     frame_.cards.reserve(cards_.size());
     for (size_t i=0;i<cards_.size();++i) {
@@ -126,7 +126,7 @@ std::optional<StarSceneHit> StarUiScene::pick(u64 serial,float x,float y) const 
     return std::nullopt;
 }
 std::optional<StarWorldHit> StarUiScene::world_pick(u64 ticket,const StarWorldRayObservation& ray) const {
-    if (!catalog_available_||!ticket||ticket!=ticket_||ray.source!=SceneCameraSource::ActiveProjection||!ray.token||
+    if (!catalog_available_||!ticket||ticket!=ticket_||ray.source!=SceneCameraSource::ViewerProjection||!ray.token||
         !std::isfinite(ray.max_distance)||ray.max_distance<=0) return std::nullopt;
     const float d2=ray.direction.x*ray.direction.x+ray.direction.y*ray.direction.y+ray.direction.z*ray.direction.z;
     if (!std::isfinite(d2)||d2<=0) return std::nullopt;

@@ -86,7 +86,7 @@ REA also confirms the projection seam used after records/UI data exist. `DF6010`
 `0xBC` record array, reads each record's position at `+0x80`, calls `DE3C20`, then invokes the
 owning object's virtual slot `+0x64` with the record pointer and the projected values
 (`ev_0dd3607a175f4fb9f1f1d193d4a7a379de07ca3f5f15f99f7d3497972d0ac353`). `DE3C20` obtains a
-renderer/camera-related service through a virtual slot `+0x58`, transforms the point with
+viewer through GameModeManager virtual slot `+0x58`, transforms the point with
 `7C4250`/`805F90`, and computes normalized screen placement (`ev_bab6284c95703cb10880ebb4965a7d5d941375eb9cd7b3975445768f22847836`). The direct caller set for
 `DF6010` is empty (`ev_645b43829cc52e50b5780dddd67b6ae73c8fd9a8771113e6ac75e88257129e6b`) because
 the function is reached through the vtable boundary rather than an ordinary direct call. The concrete
@@ -94,12 +94,13 @@ the function is reached through the vtable boundary rather than an ordinary dire
 vtable `0x147EF50` (`ev_2baa4b86c3d9685492da403fa1232e9bc49e08efc13d5089e3bd70d7a4889c1e`), and REA
 read/xref evidence maps `vtable +0x64` to `DF6110` (`ev_d9798b85c18d1c40463e43d25bc45d40d4750d2e268d22fb3abfee3af18a172b`).
 `DF6110` checks `record +0xB8`, reads UI bounds/current point and clamps the projected target
-(`ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a`). The camera owner through
-`DE3C20` slot `+0x58` and the runtime message that triggers this path remain Unknown.
+(`ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a`). The [viewer identity
+cross-check](gge-viewer.md) now resolves the returned type/storage; live viewer production and the
+runtime message that triggers this path remain Unknown.
 
-REA now separates the two native camera acquisition paths instead of merging them by field name.
+The two acquisition paths are separate viewer versus ICamera roles, not aliases of one camera.
 Instruction-level evidence shows `DE3C20` calls `0067DCD0`, loads the returned object's vtable,
-reads slot `+0x58`, and calls it; the returned camera/matrix result becomes the `this` object for
+reads slot `+0x58`, and calls it; the returned cViewer becomes the `this` object for
 `7C4250`. `805F90` then supplies the viewport/rectangle state. `DE3C20` combines those values into
 normalized screen coordinates with the observed `(+1)*0.5` and `0.5*(1-y)` style transforms
 (`ev_ba2f5a2d4cab60b689c15a3692dee19a26c74435d0cdbc96146c25a8b080bda7`,
@@ -108,9 +109,11 @@ normalized screen coordinates with the observed `(+1)*0.5` and `0.5*(1-y)` style
 `ev_00b0590ad36b8bdc1d71b8f38177ec593a29fd459378413eb42fc21e5d967f06`). Separately, `DE46D0`
 acquires the controller's `+0x198` object through `0067DCD0` slot `+0x50` and that object's slot
 `+0x38` (`ev_7fd0e4f59184119cd1ab9c128942586067b6e77967905ff23e9728419adb8c58`). `DF6490` uses
-the `+0x58` service for nearest-record selection/picking
-(`ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1`). The static binary
-therefore does not establish that controller `+0x198` and the projection service are identical.
+the `+0x58` viewer for nearest-record selection/picking
+(`ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1`). GA vtables/getters
+now corroborate: mode+30 is cViewer, mode+2C is CameraManager, whose active ICamera is retained
+at controller+198. CameraManager Update calls ICamera slot20 with the viewer; no runtime state
+or concrete GGE camera selection is inferred. See [matrix composition and handoff](gge-viewer.md).
 
 The [2026-10-17 window lookup cross-check](gge-window-lookup.md) resolves UI-bounds identity and
 corrects the earlier global-registry interpretation. `DF6110` loads **ECX from record+B8**, then

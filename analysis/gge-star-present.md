@@ -53,7 +53,13 @@ runtime GetRealArea are not claimed by this asset match.
 
 ## Projection formula
 
-The matrix is copied from camera memory **+0xC0..+0xFC**, in memory order `m[0..15]`:
+**2026-10-17 source clarification:** this matrix belongs to **cViewer**, returned by GameModeManager
+slot58, not the ICamera retained at controller+198. The new `compose_viewer_projection` helper ports
+projection coefficients/axis exchange/matrix product from explicit inputs; see [viewer evidence and
+limits](gge-viewer.md). No camera defaults, inversion or original update execution are inferred.
+Presentation verification now has **77 checks**.
+
+The matrix is copied from viewer memory **+0xC0..+0xFC**, in memory order `m[0..15]`:
 
 ```text
 w = m11*z + m7*y + m3*x + m15

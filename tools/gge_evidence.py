@@ -102,6 +102,46 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--viewer' in sys.argv:
+        from tools.find_imm import OBJDUMP
+        if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+            raise ValueError('viewer ranges require selected GA authority hash')
+        dest=ROOT/'analysis/audit/gge-viewer';dest.mkdir(parents=True,exist_ok=True)
+        ranges=[('mode-viewer-getter',0x5aadb0,0x5aadb4),('mode-camera-manager-getter',0x967d90,0x967d94),
+                ('mode-set-viewer',0x7d8510,0x7d8525),('mode-constructor-prefix',0x7d8e80,0x7d8eda),
+                ('camera-manager-constructor-prefix',0x7c7680,0x7c76bc),
+                ('camera-active-getter',0x7c6240,0x7c6257),('camera-manager-set-viewer',0x7c61a0,0x7c61ad),
+                ('camera-update-viewer-handoff',0x7c6440,0x7c64b8),
+                ('viewer-projection-builder',0x7c4370,0x7c44a1),('viewer-matrix-composition',0x7c4a10,0x7c4b25),
+                ('matrix-product',0x45ef90,0x45f097),('matrix-row-product',0x45f2c0,0x45f470),
+                ('projection-viewer-receiver',0xde3c20,0xde3c42),('retained-camera-acquisition',0xde478b,0xde47d6)]
+        for name,start,end in ranges:
+            result=subprocess.run([str(OBJDUMP),'-d','-M','intel',f'--start-address={start}',f'--stop-address={end}',str(pe.path)],
+                                  capture_output=True,text=True,errors='replace',check=True,timeout=15)
+            instructions=[line.rstrip() for line in result.stdout.splitlines() if re.match(r'^\s+[0-9a-f]+:',line)]
+            if not instructions:raise ValueError('empty viewer disassembly')
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(instructions)+'\n',encoding='utf-8')
+        tables={name:{'base':hex(base),'entries':[{'slot':hex(i),'target':hex(pe.u32(base+i))} for i in range(0,size,4)]}
+                for name,base,size in [('game_mode_manager',0x1412608,0x5c),('camera_manager',0x1410718,0x60)]}
+        expected={0x1412608+0x50:0x967d90,0x1412608+0x54:0x7d8510,0x1412608+0x58:0x5aadb0,
+                  0x1410718+0x38:0x7c6240,0x1410718+0x2c:0x7c6440}
+        if any(pe.u32(va)!=target for va,target in expected.items()):raise ValueError('viewer vtable cross-check mismatch')
+        facts={'oracle_sha256':digest,'sdk_revision':'69b27b5b407a2c76e1e701ba27630a77a9ce5d01',
+               'authority':'GA static instructions/tables with secondary SDK names; no native runtime execution',
+               'tables':tables,
+               'routes':{'projection':'67DCD0 IGameModeManager ->slot58 GetViewer ->mode+30 cViewer ->7C4250 reads viewer+C0',
+                         'controller198':'67DCD0 ->slot50 GetCameraManager ->mode+2C ->slot38 GetActiveCamera ->camera array+80 indexed by+A8; ICamera retained at controller+198',
+                         'update':'7C6440 requires active index>=0 and viewer+B0 nonnull, then calls active ICamera slot20(delta,viewer)',
+                         'set_viewer':'7D8510 stores mode+30 and forwards to CameraManager slot18; 7C61A0 stores manager+B0'},
+               'composition':'7C4370 forms projection; 7C4A10 swaps four-float rows1/2, multiplies viewer+40 by adjusted projection via45EF90/45F2C0, copies product into viewer+C0',
+               'limits':['No runtime manager/viewer pointers, active GGE camera ID/type or camera updates captured',
+                         'Host helper requires explicit world-to-view/window/offset/kind/near/far; no inversion or camera simulation',
+                         'Projection enum/positive windows/near>0/far>near validation is conservative host policy',
+                         'PerspectiveInfinite branch drops offsets; no bit-identical native floating rounding claim',
+                         'No catalogue/refill/DBCheck/MoviePlayer or native scene readiness']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8')
+        print('retained viewer/ICamera identity, matrix-builder and update-handoff evidence; no Ghidra import or target execution')
+        return
     if '--window-lookup' in sys.argv:
         # A small, explicit source/artifact cross-check. Never opens/reimports a Ghidra project.
         from tools.find_imm import OBJDUMP
@@ -209,18 +249,18 @@ def retain_static():
     if '--scene' in sys.argv:
         dest=ROOT/'analysis/audit/gge-scene'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'local Ghidra/objdump static evidence; host projection collection is separate design, not native scene execution',
-               'service_globals':{'67DCD0':'015FD8B0 renderer service; setter67DEC0','67DD10':'015FD8C0 render-stage service',
+               'service_globals':{'67DCD0':'015FD8B0 IGameModeManager; setter67DEC0','67DD10':'015FD8C0 render-stage service',
                                   '67DD40':'015FD8CC factory service; setter67DF50','67DD50':'015FD8D0 factory service; setter67DF60',
                                   '67DD90':'015FD8E8 effects service'},
-               'projection':'DE3C20 obtains renderer67DCD0 slot58 active projection camera, then7C4250; width/height-only pixel mapping with no window-origin addition',
-               'retained_controller':'DE46D0 controller+198 obtains renderer slot50 then returned interface slot38; NOT established identical to active slot58 camera',
+               'projection':'DE3C20 obtains GameModeManager67DCD0 slot58 cViewer, then7C4250 reads viewer+C0; width/height-only pixel mapping with no window-origin addition',
+               'retained_controller':'DE46D0 controller+198 obtains GameModeManager slot50 CameraManager then slot38 active ICamera; distinct from cViewer',
                'scene_chain':'DE46D0->DDD920 allocates0x74 Simulator/DDA8C0/global16A0B08 thenDDD150',
                'factory_requests':[{'owner_offset':'20','service':'67DD50','slot':'18','tag':'07B6877F'},
                                    {'owner_offset':'18','service':'67DD40','slot':'14','tag':'07B6877E','render_stage':'14'},
                                    {'owner_offset':'1C','service':'67DD40','slot':'14','tag':'07D23D15','render_stage':'1A'},
                                    {'owner_offset':'14','service':'67DD40','slot':'14','tag':'07D23D13','render_stage':'0D'}],
                'effects':'DE46D0 effects service67DD90 slot4C requests key02DDA976 GGE effects world, retained atcontroller+15C',
-               'unresolved':['concrete factory types/complete native registration semantics','active projection camera producer/updates/ownership','controller198 alias relationship',
+               'unresolved':['concrete factory types/complete native registration semantics','live GGE ICamera type/parameters and viewer state production','runtime camera/viewer ownership and scheduling',
                              'native effects/render stage execution and scene readiness'],
                'host_policy':['Available saved+candidate catalogue required, order/duplicates retained with unique caller-issued host IDs',
                               'unavailable catalogue refresh retains diagnostic ownership only, suspends old frame/assets/update/layers/picking until successful Available reopen',
@@ -385,7 +425,7 @@ def retain_static():
         value={'oracle_sha256':digest,'authority':'static instructions + real SPUI fixtures, not original runtime',
                'layout':{'name':pe.wstr(0x147d3c0),'initializer':'0x136bc90','global':'0x16a0d08 (BSS)',
                          'instance':'0x21df01f2','root_control':'0x02e5a4a8'},
-               'projection':'camera memory +C0..FC; w=m11*z+m7*y+m3*x+m15; xyz divided by w; X=window_width*(ndcX+1)*0.5, Y=(1-(ndcY+1)*0.5)*window_height; NO origin addition/cull',
+               'projection':'cViewer memory +C0..FC, NOT ICamera; w=m11*z+m7*y+m3*x+m15; xyz divided by w; X=window_width*(ndcX+1)*0.5, Y=(1-(ndcY+1)*0.5)*window_height; NO origin addition/cull',
                'placement':'0xDF6110 centers root, clamps saved x/y using window extents and observed runtime margins; move iff abs(deltaX)>4 or abs(deltaY)>4',
                'constants':{hex(a):pe.f32(a) for a in (0x145be38,0x1453740,0x148531c)},
                'saved_insets_bss':['0x16a0e98 left','0x16a0eb8 top','0x16a0ea8 right','0x16a0ec8 bottom'],

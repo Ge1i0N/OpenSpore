@@ -1,5 +1,6 @@
 #include "engine/gge_star_present.h"
 #include <filesystem>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -61,6 +62,80 @@ int main(int argc,char** argv) {
         ProjectedPoint sentinel; sentinel.x=123; return !project_star(world,c,sentinel,error)&&sentinel.x==123&&!error.empty();
     };
     camera.clip_from_world=identity;
+    ViewerProjectionInputs viewer;
+    std::array<float,16> composed=identity;
+    const auto rejected_viewer=[&](const ViewerProjectionInputs& input) {
+        auto sentinel=identity;
+        return !compose_viewer_projection(input,sentinel,error)&&sentinel==identity&&!error.empty();
+    };
+    if(!check(rejected_viewer(viewer),"missing viewer fields never fabricate an identity camera"))return 1;
+    viewer.world_to_view=identity;viewer.kind=ViewerProjectionKind::Perspective;
+    viewer.view_window=std::array<float,2>{2,4};viewer.view_offset=std::array<float,2>{.5f,-1};
+    viewer.near_plane=2.f;viewer.far_plane=10.f;
+    const std::array<float,16> perspective{.5f,0,0,0,.25f,-.25f,1.25f,1,0,.25f,0,0,0,0,-2.5f,0};
+    const std::array<float,16> parallel{.5f,0,0,0,0,0,.125f,0,0,.25f,0,0,.25f,-.25f,-.25f,1};
+    const std::array<float,16> infinite{.5f,0,0,0,0,0,1,1,0,.25f,0,0,0,0,-2,0};
+    if(!check(compose_viewer_projection(viewer,composed,error)&&composed==perspective,
+        "literal perspective coefficients + viewer axis-row exchange"))return 1;
+    CameraObservation built;built.clip_from_world=composed;built.window_rect=spui::Rect{100,200,900,800};
+    ProjectedPoint projected;
+    if(!check(project_star({2,4,8},built,projected,error)&&projected.x==600&&projected.y==225&&
+        projected.clip_w==4&&projected.ndc_z==.625f,"viewer composition feeds actual GGE perspective projector"))return 1;
+    viewer.kind=ViewerProjectionKind::Parallel;
+    if(!check(compose_viewer_projection(viewer,composed,error)&&composed==parallel,
+        "parallel projection translates offsets and uses explicit near/far"))return 1;
+    built.clip_from_world=composed;
+    if(!check(project_star({2,4,8},built,projected,error)&&projected.x==900&&projected.y==-225&&
+        projected.clip_w==1&&projected.ndc_z==.25f,"parallel composition preserves original unclipped mapping"))return 1;
+    viewer.kind=ViewerProjectionKind::PerspectiveInfinite;
+    if(!check(compose_viewer_projection(viewer,composed,error)&&composed==infinite,
+        "infinite branch ignores offset coefficients, not generalized perspective"))return 1;
+    built.clip_from_world=composed;
+    if(!check(project_star({2,4,8},built,projected,error)&&projected.x==500&&projected.y==150&&
+        projected.clip_w==4&&projected.ndc_z==.5f,"infinite projection branch end-to-end"))return 1;
+    viewer.kind=ViewerProjectionKind::Perspective;
+    (*viewer.world_to_view)[12]=3;(*viewer.world_to_view)[13]=5;(*viewer.world_to_view)[14]=7;
+    auto translated=perspective;translated[12]=2.75f;translated[13]=.5f;translated[14]=3.75f;translated[15]=5;
+    if(!check(compose_viewer_projection(viewer,composed,error)&&composed==translated,
+        "world-to-view LEFT product retains noncommuting translation; not P*V"))return 1;
+    // Independent explicit two-stage reference for a general asymmetric affine input.
+    viewer.world_to_view=std::array<float,16>{1,2,3,0,4,5,6,0,7,8,10,0,11,12,13,1};
+    if(!check(compose_viewer_projection(viewer,composed,error),"general asymmetric viewer matrix product"))return 1;
+    built.clip_from_world=composed;
+    CameraObservation projection_only=built;projection_only.clip_from_world=perspective;
+    ProjectedPoint staged;
+    if(!check(project_star({2,3,4},built,projected,error)&&
+        project_star({53,63,77},projection_only,staged,error)&&
+        std::abs(projected.x-staged.x)<.001f&&std::abs(projected.y-staged.y)<.001f&&
+        projected.clip_w==staged.clip_w&&std::abs(projected.ndc_z-staged.ndc_z)<.00001f,
+        "asymmetric composition agrees with explicit world-to-view then projection"))return 1;
+    viewer.world_to_view=identity;
+    for(int field=0;field<6;++field) {
+        auto missing_viewer=viewer;
+        switch(field){case 0:missing_viewer.world_to_view.reset();break;case 1:missing_viewer.kind.reset();break;
+        case 2:missing_viewer.view_window.reset();break;case 3:missing_viewer.view_offset.reset();break;
+        case 4:missing_viewer.near_plane.reset();break;case 5:missing_viewer.far_plane.reset();break;}
+        if(!check(rejected_viewer(missing_viewer),"each unobserved viewer field blocks atomic composition"))return 1;
+    }
+    for(float value:{0.f,-1.f,std::numeric_limits<float>::infinity(),std::numeric_limits<float>::quiet_NaN()}) {
+        auto invalid=viewer;(*invalid.view_window)[0]=value;
+        if(!check(rejected_viewer(invalid),"invalid view-window coefficient"))return 1;
+    }
+    auto invalid_viewer=viewer;invalid_viewer.far_plane=2.f;
+    if(!check(rejected_viewer(invalid_viewer),"equal near/far rejected by host policy"))return 1;
+    invalid_viewer=viewer;invalid_viewer.near_plane=0.f;
+    if(!check(rejected_viewer(invalid_viewer),"nonpositive near rejected by host policy"))return 1;
+    invalid_viewer=viewer;invalid_viewer.kind=static_cast<ViewerProjectionKind>(99);
+    if(!check(rejected_viewer(invalid_viewer),"unsupported enum not treated as perspective"))return 1;
+    invalid_viewer=viewer;(*invalid_viewer.view_offset)[1]=std::numeric_limits<float>::infinity();
+    if(!check(rejected_viewer(invalid_viewer),"nonfinite offset"))return 1;
+    invalid_viewer=viewer;(*invalid_viewer.world_to_view)[7]=std::numeric_limits<float>::quiet_NaN();
+    if(!check(rejected_viewer(invalid_viewer),"nonfinite matrix"))return 1;
+    invalid_viewer=viewer;(*invalid_viewer.view_window)[0]=std::numeric_limits<float>::denorm_min();
+    if(!check(rejected_viewer(invalid_viewer),"finite input with overflowing reciprocal rejected"))return 1;
+    invalid_viewer=viewer;(*invalid_viewer.world_to_view)[0]=std::numeric_limits<float>::max();
+    (*invalid_viewer.view_window)[0]=.25f;
+    if(!check(rejected_viewer(invalid_viewer),"overflowing product rejected without publication"))return 1;
     auto bad=camera; (*bad.clip_from_world)[15]=0;
     if (!check(rejected(bad,{}),"zero w")) return 1;
     bad=camera; (*bad.clip_from_world)[0]=std::numeric_limits<float>::infinity();

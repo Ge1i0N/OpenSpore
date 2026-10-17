@@ -26,7 +26,7 @@ os::gge::StarLifecycleInputs inputs() {
     in.configuration_choices={{0x026e0002u,45}}; return in;
 }
 os::gge::SceneCameraObservation camera() {
-    auto& d=os::render::device(); os::gge::SceneCameraObservation c; c.source=os::gge::SceneCameraSource::ActiveProjection; c.token=1;
+    auto& d=os::render::device(); os::gge::SceneCameraObservation c; c.source=os::gge::SceneCameraSource::ViewerProjection; c.token=1;
     c.projection.clip_from_world=std::array<float,16>{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
     c.projection.window_rect=os::spui::Rect{0,0,(float)d.width(),(float)d.height()}; return c;
 }

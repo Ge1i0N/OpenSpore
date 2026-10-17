@@ -9,6 +9,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 |---|---|---|
 | Community SDK / format references | [community-references](community-references.md) | pinned ModAPI/SporeModder-FX clones; secondary names/offsets, not native execution or automatic readiness |
 | GGE placement-window identity | [gge-window-lookup](gge-window-lookup.md) | actual record+B8 receiver and root177; corrects earlier global-service interpretation, not native mount/camera readiness |
+| GGE viewer versus ICamera | [gge-viewer](gge-viewer.md) | vtables/getters/update handoff and explicit projection composition; no live camera parameters or viewer producer |
 | SPUI binary framing / graph | [spui-binary](spui-binary.md) | current parser authority; 748-layout corpus |
 | Atlas / drawable subset | [spui-drawables](spui-drawables.md) | current implemented branches and GA instruction extracts |
 | UI overview | [ui](ui.md) | current navigation, links to deeper evidence |

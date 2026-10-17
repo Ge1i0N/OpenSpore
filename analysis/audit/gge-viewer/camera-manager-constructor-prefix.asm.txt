@@ -1,0 +1,18 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  7c7680:	6a ff                	push   0xffffffff
+  7c7682:	68 94 54 21 01       	push   0x1215494
+  7c7687:	64 a1 00 00 00 00    	mov    eax,fs:0x0
+  7c768d:	50                   	push   eax
+  7c768e:	64 89 25 00 00 00 00 	mov    DWORD PTR fs:0x0,esp
+  7c7695:	51                   	push   ecx
+  7c7696:	8b c1                	mov    eax,ecx
+  7c7698:	33 c9                	xor    ecx,ecx
+  7c769a:	c7 40 04 b8 b8 3e 01 	mov    DWORD PTR [eax+0x4],0x13eb8b8
+  7c76a1:	89 48 08             	mov    DWORD PTR [eax+0x8],ecx
+  7c76a4:	c7 00 18 07 41 01    	mov    DWORD PTR [eax],0x1410718
+  7c76aa:	c7 40 04 14 07 41 01 	mov    DWORD PTR [eax+0x4],0x1410714
+  7c76b1:	88 48 0c             	mov    BYTE PTR [eax+0xc],cl
+  7c76b4:	ba ac 7b 66 01       	mov    edx,0x1667bac
+  7c76b9:	89 50 10             	mov    DWORD PTR [eax+0x10],edx

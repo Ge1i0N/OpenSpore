@@ -19,11 +19,16 @@ use controlled metadata/cameras, not a complete real-save runtime producer.
 
 ## Native camera/factory findings
 
+**2026-10-17 identity correction:** [viewer evidence](gge-viewer.md) resolves the generic names in
+the original extracts. `67DCD0` returns GameModeManager, `+58` returns cViewer (matrix+C0), and
+`+50 -> +38` returns active ICamera through CameraManager. Explicit viewer-matrix composition is
+implemented; live GGE camera selection/parameters, actual updates and viewer production remain unknown.
+
 | Question | Static evidence | Status |
 |---|---|---|
-| Renderer service source | `0x67DCD0` returns global `0x015FD8B0`; setter `0x67DEC0` | Getter/storage boundary recovered; concrete producer/ownership unresolved |
-| Active projection camera | `0xDE3C20` calls renderer slot **`+0x58`**, passes the returned object as ECX to `0x7C4250` | This lookup is distinct from controller-retained interface; no host service call |
-| Controller `+0x198` | `0xDE46D0` calls renderer **`+0x50 → returned interface +0x38`**, retains/releases into controller field | **Not proven identical** to active slot58 camera |
+| GameModeManager source | `0x67DCD0` returns global `0x015FD8B0`; setter `0x67DEC0` | Table01412608 corroborates manager+2C CameraManager / +30 cViewer |
+| Viewer projection | `0xDE3C20` calls manager **`+0x58` GetViewer**, passes cViewer to `0x7C4250` | Matrix+C0 belongs to viewer; no native acquisition in host |
+| Controller `+0x198` | `0xDE46D0` calls manager **`+0x50 GetCameraManager → +0x38 GetActiveCamera`**, retains/releases ICamera | Different from viewer; Update takes `(delta,viewer)`, concrete GGE camera unknown |
 | Scene setup | `DE46D0 → DDD920`: Simulator allocation `0x74`, `DDA8C0`, global `0x16A0B08`, then `DDD150` | Chain retained, not executed; allocation/load result is not host readiness |
 | Factory services | `67DD40/67DD50` return globals `015FD8CC/015FD8D0`, setters `67DF50/67DF60` | Request slots/tags observed; concrete factory types/full semantics unresolved |
 | Stage registration | `DDD150` uses `67DD10` (global `015FD8C0`) and slot `+0x4C` with stages `0x14/0x1A/0x0D` | Contract boundary, not native render registration execution |

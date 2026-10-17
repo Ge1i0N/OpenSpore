@@ -91,6 +91,18 @@ int main(int argc,char** argv) {
             scene.card(0)->instance()->layout().runtime_animations.at(45).image.pixels->provenance.find("(file-backed)")!=std::string::npos,
             "direct original atlas retained inside scene-owned lifecycle")) return 1;
         auto c=camera();
+        static_assert(SceneCameraSource::ActiveProjection==SceneCameraSource::ViewerProjection);
+        ViewerProjectionInputs viewer;
+        viewer.world_to_view=*c.projection.clip_from_world;viewer.kind=ViewerProjectionKind::Parallel;
+        viewer.view_window=std::array<float,2>{1,1};viewer.view_offset=std::array<float,2>{0,0};
+        viewer.near_plane=1.f;viewer.far_plane=10.f;
+        std::array<float,16> viewer_matrix;
+        if(!check(compose_viewer_projection(viewer,viewer_matrix,error),"explicit viewer coefficients compose for scene input"))return 1;
+        c.source=SceneCameraSource::ViewerProjection;c.projection.clip_from_world=viewer_matrix;
+        if(!check(scene.update(ticket,c,error)&&scene.frame().status==StarSceneFrameStatus::Projected&&
+            scene.frame().cards[0].status==CardStatus::Positioned&&!scene.native_scene_ready(),
+            "composed viewer observation drives host frame without native camera readiness"))return 1;
+        c=camera();
         if (!check(scene.update(ticket,c,error)&&scene.frame().status==StarSceneFrameStatus::Projected&&scene.frame().cards.size()==3,
             "active observation drives projection/placement, not factory creation")) return 1;
         auto serial=scene.frame().serial;

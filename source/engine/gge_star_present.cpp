@@ -10,9 +10,54 @@ bool valid(const spui::Rect& r) {
         std::isfinite(r.w())&&std::isfinite(r.h())&&r.w()>0&&r.h()>0;
 }
 }
+bool compose_viewer_projection(const ViewerProjectionInputs& observed,std::array<float,16>& out,std::string& error) {
+    const auto fail=[&](const char* why){error=why;return false;};
+    if(!observed.world_to_view||!observed.kind||!observed.view_window||!observed.view_offset||
+       !observed.near_plane||!observed.far_plane)return fail("viewer projection fields unobserved");
+    const auto kind=*observed.kind;
+    if(kind!=ViewerProjectionKind::Perspective&&kind!=ViewerProjectionKind::Parallel&&kind!=ViewerProjectionKind::PerspectiveInfinite)
+        return fail("unsupported viewer projection kind");
+    const auto& view=*observed.world_to_view;
+    for(float v:view)if(!std::isfinite(v))return fail("nonfinite viewer world-to-view matrix");
+    const float wx=(*observed.view_window)[0],wy=(*observed.view_window)[1];
+    const float ox=(*observed.view_offset)[0],oy=(*observed.view_offset)[1];
+    const float near=*observed.near_plane,far=*observed.far_plane;
+    // Conservative HOST input policy, not a claim about native rejection/exception behavior.
+    if(!std::isfinite(wx)||!std::isfinite(wy)||wx<=0||wy<=0||!std::isfinite(ox)||!std::isfinite(oy)||
+       !std::isfinite(near)||!std::isfinite(far)||near<=0||far<=near||!std::isfinite(far-near))
+        return fail("invalid viewer window/offset/near/far observations");
+    std::array<float,16> projection{};
+    const float sx=1.f/wx,sy=1.f/wy;
+    projection[0]=sx;projection[5]=sy;
+    if(kind==ViewerProjectionKind::Parallel) {
+        projection[10]=1.f/(far-near);
+        projection[12]=sx*ox;projection[13]=sy*oy;
+        projection[14]=-(projection[10]*near);projection[15]=1.f;
+    }else {
+        projection[11]=1.f;
+        if(kind==ViewerProjectionKind::PerspectiveInfinite) {
+            projection[10]=1.f;projection[14]=-near;
+        }else {
+            projection[8]=sx*ox;projection[9]=sy*oy;
+            projection[10]=far/(far-near);projection[14]=-(projection[10]*near);
+        }
+    }
+    for(size_t i=0;i<4;++i)std::swap(projection[4+i],projection[8+i]);
+    for(float v:projection)if(!std::isfinite(v))return fail("nonfinite composed viewer projection coefficients");
+    std::array<float,16> result{};
+    // 45EF90/45F2C0: each row of the left matrix is multiplied by the right matrix.
+    // Preserve scalar sum order; bit-identical SSE/x87/FMA rounding is not asserted.
+    for(size_t row=0;row<4;++row)for(size_t col=0;col<4;++col) {
+        const float v=((view[row*4]*projection[col]+view[row*4+1]*projection[4+col])+
+                       view[row*4+2]*projection[8+col])+view[row*4+3]*projection[12+col];
+        if(!std::isfinite(v))return fail("nonfinite viewer matrix product");
+        result[row*4+col]=v;
+    }
+    out=result;error.clear();return true;
+}
 bool project_star(const StarPosition& world,const CameraObservation& observed,ProjectedPoint& out,std::string& error) {
     const auto fail=[&](const char* why) { error=why; return false; };
-    if (!observed.clip_from_world || !observed.window_rect) return fail("star projection camera/window observations unavailable");
+    if (!observed.clip_from_world || !observed.window_rect) return fail("star projection viewer-matrix/window observations unavailable");
     if (!valid(*observed.window_rect) || !std::isfinite(world.x)||!std::isfinite(world.y)||!std::isfinite(world.z))
         return fail("star projection invalid position/window extents");
     const auto& m=*observed.clip_from_world;

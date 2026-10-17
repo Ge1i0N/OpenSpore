@@ -2,7 +2,11 @@
 #include "engine/gge_star_lifecycle.h"
 
 namespace os::gge {
-enum class SceneCameraSource { Unknown, ActiveProjection, ControllerRetained };
+enum class SceneCameraSource {
+    Unknown, ViewerProjection, ControllerRetained,
+    // Legacy host name kept as an alias; the matrix source is cViewer, not ICamera memory.
+    ActiveProjection=ViewerProjection
+};
 struct SceneCameraObservation {
     SceneCameraSource source=SceneCameraSource::Unknown;
     u64 token=0; // caller-issued observation identity, NOT native pointer/service availability
