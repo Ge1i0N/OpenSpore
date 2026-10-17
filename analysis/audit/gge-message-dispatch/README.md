@@ -104,6 +104,28 @@ dynamic source of object `+0x80/+0x84` is still not statically joined to `0x070D
 Scenario ControlID `0x070D7509` therefore remains distinct and the GGE-specific conversion is still
 Unknown.
 
+### Payload-field ownership boundary
+
+The generic producer's object-field source is now bounded more precisely. GA `0x009640B0` reads:
+
+```text
+object +0x84; if zero, object +0x80
+```
+
+and the surrounding producer/lifecycle family has these observed vtable entries:
+
+```text
+0x0141941C → 0x009640B0
+0x014198F4 → 0x009640B0
+0x01419654 → 0x0081CF20
+0x01419600 → 0x00964370
+```
+
+The selected GA `.text` scan found no literal store that joins either field directly to
+`0x070D7509` or `0x070D74E7`; the fields are therefore runtime/object data rather than serialized
+SPUI immediates in the inspected paths. This explains why the ControlID table alone cannot close the
+payload join. The exact setter/constructor input remains Unknown.
+
 The seven state/UI constants used by the bounded handler/helper bodies were also found as actual
 SPUI `ControlID` properties in the shipped corpus; see [the data cross-check](control-id-correlation.md).
 The bounded GA immediate scan found no separate MessageManager producer for them, so they remain

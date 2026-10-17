@@ -171,6 +171,22 @@ the component ID from object fields `+0x80/+0x84`, while the Play Scenario SPUI 
 fields to `0x070D74E7`, so the final `0x070D7509 → 0x070D74E7` conversion and runtime click remain
 Unknown.
 
+### Native class/vtable cross-check
+
+The producer and its adjacent GGE lifecycle methods are also present in GA vtable data, which
+separates class ownership from accidental code adjacency:
+
+```text
+0x0141941C → 0x009640B0  generic activable-window message producer
+0x01419654 → 0x0081CF20  GGE-side activation/update entry
+0x01419600 → 0x00964370  adjacent mouse/button activation path
+0x014198F4 → 0x009640B0  second compatible interface table
+```
+
+This is a static vtable join only. It does not identify the constructor input that fills object
+fields `+0x80/+0x84`, and it does not prove that the `WinButton` object with ControlID `0x070D7509`
+receives component ID `0x070D74E7` at runtime.
+
 ## Reproduction
 
 ```powershell
