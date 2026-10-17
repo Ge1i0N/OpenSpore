@@ -73,6 +73,18 @@ ControlID `0x070D7509`; the only two direct immediate references to that value r
 state/UI-table writes in `DE48C0` and `DE5900`. Therefore `DE8A80` is a real GGE message-handler
 seam, but not yet the Play Scenario producer.
 
+The bounded `DE8A80` dispatch scan also contains none of the three IDs needed to close the current
+gap:
+
+```text
+0x070D7509  Play Scenario ControlID
+0x00E1132F  known CommandID candidate
+0x01654C10  ScenarioMode tag
+```
+
+Its role is narrowed to shared/internal GGE message handling plus lifecycle/UI helpers; the
+upstream producer and payload route remain Unknown.
+
 ## Reproduction
 
 ```powershell
