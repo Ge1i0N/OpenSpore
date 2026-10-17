@@ -95,6 +95,42 @@ For our GA path, only the following are actionable leads:
 
 The fork's Cell runtime is not evidence that those gameplay values are native GA behavior.
 
+## Semantic passport identity check
+
+The extracted tree contains `knowledge/semantic/function-passport-v1.jsonl` (about 98 MB,
+58,757 function records). Its metadata identifies the analyzed input as:
+
+```text
+program:       SporeApp.exe
+version:       3.1.0.22
+architecture:  x86:LE:32
+image_base:    0x00400000
+binary_sha256: 25d42a7a5c4d438fb155233230f57d29e2849bfdff5c889a5d0847f0469d914e
+```
+
+Our selected GA-unpacked authority is a different byte identity:
+
+```text
+refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe
+binary_sha256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+```
+
+The passport must therefore **not** be joined to our GA facts by VA alone. For example, the
+passport contains a named `Simulator::cStarManager::Get` row at `0x00b3d3a0`, but that is only a
+semantic lead until the same address/body is corroborated against our selected GA binary. The
+passport's ABI, vtable, call graph, globals, promotion and reconstruction fields remain facts about
+its own binary identity.
+
+This is exactly why the external exchange specifies `binary_sha256 + canonical VA` as its join key.
+The safe use here is:
+
+```text
+passport with mismatched SHA -> candidate name/term/probe lead
+our GA bytes + REA/Ghidra     -> address/body/ABI/vtable decision
+```
+
+No passport record was imported into `analysis/audit/`, `source/` or the runtime.
+
 ## What we must not import as a claim
 
 ```text
@@ -112,6 +148,7 @@ methodology lead       adopted in REFS.md / existing audit practice
 dossier schema         adopted as a future format lead, not copied wholesale
 semantic bridge        backlog idea; no second authority database yet
 Cell roadmap           backlog lead; blocked on local CellGame package availability
+passport address facts rejected for direct merge (binary SHA mismatch)
 source code            not imported
 ```
 

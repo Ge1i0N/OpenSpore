@@ -177,6 +177,8 @@ refs/thirdparty/manifest.tsv          # URL, pinned commit, date, purpose, licen
   `refs/thirdparty/manifest.tsv` is a convenience for the working machine, not the tracked
   authority. Keep the pinned URL/SHA/purpose in this file (and in an analysis audit when the clone
   is actually used).
+- Semantic snapshots from external projects must pass the two-part identity check
+  `binary_sha256 + canonical VA`. Same version, image base or function count is insufficient.
 - Never clone game installs, user saves or proprietary assets into the repository. Use explicit
   caller-selected paths and read-only probes.
 - A clone is not evidence by itself. Every imported lead still needs a source path, commit, local
