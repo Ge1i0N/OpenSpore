@@ -49,6 +49,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE catalogue snapshot input | [gge-catalog-snapshot](gge-catalog-snapshot.md) | caller-selected strict UTF-8 capture loader + atomic Unknown/Available statuses; no discovery/generation/profile scan |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
+| Main → playable roadmap | [main-to-playable-roadmap](main-to-playable-roadmap.md) | current layer status, priority order and parked console work |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |
 | Config | [config-scripts](config-scripts.md) | implemented script subset |
 | Locale | [text-locale](text-locale.md) | per-table keys, nested packages, precedence caveats |
