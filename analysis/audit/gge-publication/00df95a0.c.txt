@@ -1,0 +1,26 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF95A0
+
+void __fastcall FUN_00df95a0(int param_1)
+
+{
+  int iVar1;
+  int *piVar2;
+  int iVar3;
+
+  FUN_00df94e0();
+  iVar1 = FUN_00b3d3a0();
+  iVar3 = *(int *)(iVar1 + 0xf4) - *(int *)(iVar1 + 0xf0) >> 2;
+  FUN_00b3d3a0();
+  piVar2 = (int *)FUN_00ba6450();
+  iVar1 = (piVar2[1] - *piVar2 >> 2) + iVar3;
+  FUN_00de9dd0(iVar1);
+  FUN_00df7cb0(iVar3 * 0xbc + *(int *)(param_1 + 8),iVar1 - iVar3);
+  FUN_00df7f30(*(int *)(param_1 + 8),iVar3);
+  FUN_00df9200();
+  FUN_00df8300();
+  return;
+}

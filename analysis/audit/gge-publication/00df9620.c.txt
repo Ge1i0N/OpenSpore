@@ -1,0 +1,47 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF9620
+
+void __fastcall os_GGE_state2_enter(int *param_1)
+
+{
+  int iVar1;
+  int iVar2;
+  int *piVar3;
+  int *piStack_4;
+
+  iVar2 = *(int *)(DAT_016a1344 + 0x1d8);
+  iVar1 = *(int *)(DAT_016a1344 + 0x1dc);
+  piStack_4 = param_1;
+  piVar3 = (int *)FUN_0067cad0();
+  if (piVar3 != (int *)0x0) {
+    (**(code **)(*piVar3 + 0x40))(1);
+  }
+  FUN_00de52b0();
+  FUN_00e01320(1);
+  FUN_00df95a0();
+  (**(code **)(*param_1 + 0x68))();
+  FUN_00df8300();
+  param_1[0x1a] = -1;
+  FUN_0093a110(4);
+  if (iVar2 == iVar1) {
+    FUN_0093a110(4);
+    FUN_00df6950();
+  }
+  FUN_00de5210();
+  piVar3 = (int *)FUN_00810650(0x615a5ff,1);
+  if (piVar3 != (int *)0x0) {
+    (**(code **)(*piVar3 + 0x7c))(1,1);
+  }
+  FUN_00df6c10();
+  FUN_00e01320(1);
+  FUN_00dd9130();
+  FUN_00ddb700();
+  FUN_00de9e70();
+  piStack_4 = (int *)0x1;
+  piVar3 = (int *)FUN_0067dc80();
+  (**(code **)(*piVar3 + 0x14))(0x80d7451,&piStack_4,0);
+  return;
+}

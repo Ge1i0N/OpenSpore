@@ -13,8 +13,8 @@ WinMain → app/run → services/state manager → GalaxyGameEntry → Play Spor
          → catalogue → star UI/camera → selected star → stage/gameplay
 ```
 
-The DebugConsole work was a useful bounded calibration pass: it recovered a complete native
-subsystem, validated the SDK↔Ghidra workflow and closed the exact `Ctrl+Shift+C` branch. It is now
+The DebugConsole work was a useful bounded calibration pass: it recovered the main native console
+path, validated the SDK↔Ghidra workflow and closed the exact `Ctrl+Shift+C` branch. It is now
 low priority. Continuing to name every console/message-manager virtual slot would be tactical drift
 unless a later gameplay probe needs that service.
 
@@ -26,7 +26,7 @@ unless a later gameplay probe needs that service.
 | App services and state data | service getters and shipped state scripts are substantially mapped; `IStateManager` SDK contract is a secondary guide | map only the native transition boundary needed to enter state 2 |
 | GalaxyGameEntry registration/UI | registrar, controller, `GlobalUIGGE-9`, zoom layouts and lifecycle slots are recovered | serialized primary UI is not the galaxy; do not spend more time on layout enumeration alone |
 | State 2 / Play Spore | `E008B0`, name `Play Spore`, `DF9740`, `DF95A0`, `DF6010` and record layout are recovered statically | identify the outer dispatch/caller and then feed a real/explicit catalogue |
-| Catalogue | saved/candidate vectors, `DF95A0`, `BB61C0`, `BB8C90`, `BB4D40` are bounded; host readers/adapters exist | real selected save/catalogue evidence is the highest-value data milestone |
+| Catalogue | saved/candidate vectors and native builders are bounded; three authorized real-save corpora already have decoded saved/starter observations | join the existing observations without falsely promoting persisted starters to a post-refill live vector |
 | Camera/viewer/scene | projection and host scene geometry are implemented; native viewer/camera producer and mount remain Unknown | use `IGameModeManager` only to map the native camera seam, not to fabricate a camera |
 | Selection/phase callbacks | native F8/FC and phase bodies are bounded; automatic callback/CommandID route remains open | defer exact input dispatch until a real card scene exists |
 | Stage/gameplay | not implemented | only after selected-star identity and transition target are real |
@@ -35,13 +35,17 @@ unless a later gameplay probe needs that service.
 
 ### P0 — real catalogue input and one end-to-end card scene
 
-1. Validate the read-only stars.db/save adapters against one explicitly selected real file when it
-   is available. Do not scan profiles or turn missing data into an empty catalogue.
-2. Produce a typed `CatalogInput` with explicit manager, stars.db, planet, header and terrain
-   statuses. Preserve Unknown/Absent/Available/Failed separately.
-3. Run the existing scene/lifecycle path from that input and validate a real saved card, image,
-   name, position and reverse pick. This is the shortest route from current controlled preview to
-   a genuine data-backed GGE screen.
+1. Reuse the already validated, explicitly selected `UserData1`, `UserData` and `UserDataRonikari`
+   Game0 corpora. [Real-save evidence](gge-real-save.md) and `starsdb_gge_capture` already preserve
+   saved rows, all six persisted starter references, planets and individual header bindings.
+   No new profile search or save request is necessary.
+2. Resolve the remaining terrain/property, post-load and refill observations needed by typed
+   `CatalogInput`. The diagnostic `GGE_SAVE_OBSERVATIONS_V1` is intentionally **not** a production
+   `GGE_CATALOG_V1`: it must retain Unknown instead of falsely encoding an unexecuted terrain
+   lookup as query failure. Persisted starter references are not the post-refill live vector.
+3. Only when these input gates are established, run the existing scene/lifecycle path and validate
+   a real saved card, image, name, position and reverse pick. A separately labelled diagnostic
+   persisted-save view would not establish native GGE/catalogue readiness.
 
 ### P1 — one focused native state-2 pass
 
@@ -58,7 +62,7 @@ Use persistent Ghidra sequentially, with no broad import:
 4. Keep `DF9620 → DF95A0 → DF6010 → DF8300 → event 0x080D7451` and
    `DF9740 → DF95A0 → DF6C10` as the retained native orders. The current static result is:
    `state +0x108 == 2` → show `0x0615A5FF`/GlobalUI → rebuild records → continuation.
-4. Compare only the relevant SDK contracts: `IStateManager::SwitchToState` and
+5. Compare only the relevant SDK contracts: `IStateManager::SwitchToState` and
    `IGameModeManager::{SetActiveMode,GetCameraManager,GetViewer}`. Do not accept SDK addresses
    without GA body/vtable confirmation.
 
@@ -86,6 +90,9 @@ UI transition or native return value alone is not gameplay readiness.
 
 ## Immediate next probe
 
-The next reverse-engineering pass should be the narrow state-2 dispatch probe, followed by an
-explicit real-save validation if a user-selected save is supplied. This keeps the work on the
-Main→playable path while preserving the current evidence boundaries.
+The state-2 entry/refresh and destructive record rebuild are now backed by retained
+[publication extracts](audit/gge-publication/README.md). Event `0x080D7451` carries enter/exit
+payloads to a guarded flag/span handler; it is not a refill completion shortcut. Next, reuse the
+existing real-save observations and focus on the terrain/property and post-load/refill gap before
+admitting a production catalogue. The outer state-2 selector remains unresolved, not a reason to
+repeat the already recovered builder probes.

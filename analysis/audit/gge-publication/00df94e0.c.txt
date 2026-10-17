@@ -1,0 +1,41 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF94E0
+
+/* WARNING: Removing unreachable block (ram,0x00df9552) */
+
+undefined4 __fastcall FUN_00df94e0(int param_1)
+
+{
+  int *piVar1;
+  int iVar2;
+  longlong lVar3;
+  int iVar4;
+  int iVar5;
+
+  piVar1 = (int *)(param_1 + 8);
+  iVar4 = (*(int *)(param_1 + 0xc) - *piVar1) / 0xbc;
+  if (iVar4 != 0) {
+    iVar5 = 0;
+    do {
+      iVar2 = *(int *)(iVar5 + 0xb8 + *piVar1);
+      if (iVar2 != 0) {
+        FUN_00df9160(iVar2);
+      }
+      *(undefined4 *)(iVar5 + 0xb4 + *piVar1) = 0;
+      *(undefined4 *)(iVar5 + 0xb8 + *piVar1) = 0;
+      iVar5 = iVar5 + 0xbc;
+      iVar4 = iVar4 + -1;
+    } while (iVar4 != 0);
+  }
+  iVar4 = *(int *)(param_1 + 0xc);
+  iVar5 = *piVar1;
+  FUN_00de5e90(iVar5,*(undefined4 *)(param_1 + 0xc));
+  iVar4 = iVar4 - iVar5;
+  lVar3 = (longlong)iVar4 * 0x51b3bea3;
+  iVar4 = (int)((ulonglong)lVar3 >> 0x20) - iVar4;
+  *(int *)(param_1 + 0xc) = *(int *)(param_1 + 0xc) + ((iVar4 >> 7) - (iVar4 >> 0x1f)) * 0xbc;
+  return (int)lVar3;
+}

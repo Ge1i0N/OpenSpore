@@ -3,6 +3,9 @@
 No target execution or full reanalysis. Decompiled stack arguments can be incomplete;
 actual instructions and virtual slot numbers govern claims. Constructor globals can
 be in zero-fill BSS: never read them as file-backed bytes at their virtual address.
+
+Use --publication for the bounded record-reset/enter/exit signal extracts. Run via
+tools/ghidra_run.py; the persistent project must not be opened concurrently.
 """
 import hashlib
 import json
@@ -39,6 +42,8 @@ SCENE_FUNCTIONS = (0x67dcd0,0x67dec0,0x67dd10,0x67dd40,0x67df50,0x67dd50,0x67df6
                    0x67dd90,0xde46d0,0xddd920,0xddd150,0xde3c20,0x7c4250,0xdf6110)
 TRANSITION_FUNCTIONS = (0xdf6d80,0xdf7ac0,0xdf7bf0,0x436350,0x436390,0xa20670,0x67ca60,0x95f950,0x95fda0,0x95fe20)
 INPUT_FUNCTIONS = (0xdf6490,0xdf65b0,0xdf7800,0x7c45e0,0x698b30,0xdf6110,0xdf6010)
+PUBLICATION_FUNCTIONS = (0xdf94e0,0xde5e90,0xde9dd0,0xdf95a0,0xdf9620,0xdf85b0,
+                         0xe03f50,0xe03f10)
 
 
 def main():
@@ -56,8 +61,13 @@ def main():
     addresses = INPUT_FUNCTIONS if input_analysis else TRANSITION_FUNCTIONS if transition else SCENE_FUNCTIONS if scene else ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
     dest = ROOT/('analysis/audit/gge-input' if input_analysis else 'analysis/audit/gge-star-transition' if transition else 'analysis/audit/gge-scene' if scene else 'analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
+    if '--publication' in sys.argv:
+        addresses = PUBLICATION_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-publication'
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
+    if '--publication' in sys.argv and digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+        raise ValueError('publication addresses require selected GA hash')
     header = ('GA-unpacked SHA-256: %s\nStatic analysis only, not original runtime observation.\n'
               'Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.\n\n'
               % digest)

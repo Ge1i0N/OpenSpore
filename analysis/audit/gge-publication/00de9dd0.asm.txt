@@ -1,0 +1,64 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE9DD0
+
+00de9dd0  SUB ESP,0xbc
+00de9dd6  PUSH EBX
+00de9dd7  PUSH EBP
+00de9dd8  PUSH ESI
+00de9dd9  MOV ESI,ECX
+00de9ddb  MOV EBX,dword ptr [ESI + 0x4]
+00de9dde  MOV EBP,dword ptr [ESI]
+00de9de0  MOV ECX,EBX
+00de9de2  SUB ECX,EBP
+00de9de4  MOV EAX,0xae4c415d
+00de9de9  IMUL ECX
+00de9deb  ADD EDX,ECX
+00de9ded  SAR EDX,0x7
+00de9df0  MOV EAX,EDX
+00de9df2  SHR EAX,0x1f
+00de9df5  PUSH EDI
+00de9df6  MOV EDI,dword ptr [ESP + 0xd0]
+00de9dfd  ADD EAX,EDX
+00de9dff  CMP EDI,EAX
+00de9e01  JBE 0x00de9e48
+00de9e03  LEA ECX,[ESP + 0x10]
+00de9e07  CALL 0x00b26ce0
+00de9e0c  MOV EBX,dword ptr [ESI + 0x4]
+00de9e0f  PUSH EAX
+00de9e10  MOV ECX,EBX
+00de9e12  SUB ECX,dword ptr [ESI]
+00de9e14  MOV EAX,0xae4c415d
+00de9e19  IMUL ECX
+00de9e1b  ADD EDX,ECX
+00de9e1d  SAR EDX,0x7
+00de9e20  MOV ECX,EDX
+00de9e22  SHR ECX,0x1f
+00de9e25  ADD ECX,EDX
+00de9e27  SUB EDI,ECX
+00de9e29  PUSH EDI
+00de9e2a  PUSH EBX
+00de9e2b  MOV ECX,ESI
+00de9e2d  CALL 0x00de97a0
+00de9e32  LEA ECX,[ESP + 0x10]
+00de9e36  CALL 0x00b26d90
+00de9e3b  POP EDI
+00de9e3c  POP ESI
+00de9e3d  POP EBP
+00de9e3e  POP EBX
+00de9e3f  ADD ESP,0xbc
+00de9e45  RET 0x4
+00de9e48  IMUL EDI,EDI,0xbc
+00de9e4e  PUSH EBX
+00de9e4f  ADD EDI,EBP
+00de9e51  PUSH EDI
+00de9e52  MOV ECX,ESI
+00de9e54  CALL 0x00de9750
+00de9e59  POP EDI
+00de9e5a  POP ESI
+00de9e5b  POP EBP
+00de9e5c  POP EBX
+00de9e5d  ADD ESP,0xbc
+00de9e63  RET 0x4

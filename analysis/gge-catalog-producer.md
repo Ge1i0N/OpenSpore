@@ -12,8 +12,11 @@ are recorded in [gge-real-save](gge-real-save.md); no unrelated profile scan was
 The state-2 entry and refresh probes now corroborate the record publication order at instruction
 level. `DF9620` (Play Spore enter) and `DF9740` (state-2 refresh) both reach `DF95A0`; the separate
 controller route `DE32B0` reaches the same function as well. `DF95A0` first calls `DF94E0`, which
-releases existing per-record UI objects, clears record fields `+0xB4/+0xB8`, copies/rebuilds the
-record vector with stride `0xBC`, and only then obtains source vectors. Its exact body order is:
+passes non-null per-record UI objects to `DF9160`, clears record fields `+0xB4/+0xB8`, destroys
+the old record contents through `DE5E90`, and empties the logical vector before obtaining source
+vectors. **Correction:** this is not a copy of the old records. `DF954E` compares `EDI` to itself,
+so the apparent `B26F90` copy loop at `DF9552` is unreachable on this path. The backing allocation
+is not freed by `DF94E0`; record-owned buffers are released by `DE5E90`. Its exact body order is:
 
 ```text
 DF94E0
@@ -33,6 +36,16 @@ vectors and their producer readiness remain separate Unknown/Absent/Available in
 
 Static-only limitation: this observes no live vector contents, native service completion or original
 runtime card. It does not make a missing save/catalogue available.
+
+Reproducible C/instruction extracts for eight functions, including `DF94E0`, `DE5E90`,
+`DE9DD0` and `DF95A0`, are retained in [publication evidence](audit/gge-publication/README.md).
+The same pass separates event `0x080D7451` from catalogue production: the observed sender uses
+payload 1 at the end of `DF9620` and 0 at the start of `DF85B0`. The `E03F50` handler forwards
+`*payload != 0` to `E03F10` with receiver `listener + 0x0C`. That method writes receiver byte
+`+0x0D`; false returns without cleanup. True additionally calls `E03560`/`E03C00` only if byte
+`+0x0C` is zero and the `+0x34/+0x38` span is nonempty. The span's higher-level meaning and
+subscription path remain unresolved. This is not a DB/refill completion event or proof of a new
+state transition.
 
 The host `build_catalog` helper intentionally accepts already-resolved typed metadata. Static GA
 evidence now clarifies exactly what must produce that metadata:
