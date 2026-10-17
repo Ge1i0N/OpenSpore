@@ -8,6 +8,7 @@ package priority or execute a native UI message.
 
 | Value | Shipped layout/control observation |
 |---:|---|
+| `0x036C4A10` | `GlobalUIGGE-9` object 133, inline caption `Dev`, parent object 1490; the same value is handled by `DE99B0` through StateManager vtable `+0x28(1)` |
 | `0x062D88E9` | `GlobalUIGGE-9` root copy: PatchData/Spore_Graphics object 266; EP1 copy object 276 |
 | `0x0615B966` | `GGEZoomPanel` object 57; EP1 `GGEZoomPanelV2` object 53 |
 | `0x0615B616` | `GGEZoomPanel` object 35; EP1 `GGEZoomPanelV2` object 64 |
@@ -16,7 +17,7 @@ package priority or execute a native UI message.
 | `0x070D7509` | `GGEZoomPanelV2` object 74 |
 | `0x07BFB76E` | one EP1 layout record 13754, object 459 |
 
-Every listed match is a `ControlID`, not a `CommandID` in the bounded corpus; all 15 exact matches
+Every listed match is a `ControlID`, not a `CommandID` in the bounded corpus; all 18 exact matches
 carry serialized `CommandID = 0`. Their parent is a GGE panel/container (for example object 81 in
 the zoom panel and object 1319 in GlobalUIGGE-9). This strongly
 corroborates that the constants consumed by `DE99B0`/`DE48C0` belong to the GGE UI/control route.
@@ -27,6 +28,11 @@ from the control; that producer remains Unknown.
 One inline caption is already present in the bounded data: `0x070D7509` has caption text
 `Play Scenario` in the EP1 `GGEZoomPanelV2` copy. Other targeted captions are locale-table
 references whose table/key resolution is intentionally not substituted here.
+
+The `0x036C4A10` match is the strongest current UI→state corroboration: the shipped `Dev` control
+and the native handler branch share the exact value, and the native branch calls the SDK-compatible
+StateManager `+0x28(1)` slot. This still does not prove the complete UI dispatch scheduler or live
+state transition execution.
 
 The similarly named state/UI value `0x070D74E7` is a different value. `find_imm` finds
 `0x070D7509` only in the `DE48C0`/`DE5900` UI-control tables in the bounded native scan; no direct

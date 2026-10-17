@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.spui_objects import BinaryLayout, layouts
 
-DEFAULT_IDS = (0x062D88E9, 0x061DD69B, 0x0615B966, 0x070D74E7, 0x070D7509,
-               0x0615B616, 0x07BFB76E)
+DEFAULT_IDS = (0x036C4A10, 0x062D88E9, 0x061DD69B, 0x0615B966, 0x070D74E7,
+               0x070D7509, 0x0615B616, 0x07BFB76E)
 
 
 def probe(root: Path, wanted: set[int]) -> dict:
