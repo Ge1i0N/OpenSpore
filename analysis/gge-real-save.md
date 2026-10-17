@@ -74,6 +74,23 @@ the physical root/index/class/planet observations, but it does not prove the can
 `BB61C0`, candidate refill completion, terrain property success, or a complete caller catalogue.
 No empty candidate list is substituted for the absent/unknown candidate producer.
 
+The reproducible bridge is now `starsdb_gge_capture`; it accepts only explicit paths and writes a
+caller-selected new snapshot:
+
+```powershell
+cmake --build build --config Debug --target starsdb_gge_capture
+.\build\Debug\starsdb_gge_capture.exe `
+  build\bin\Debug\UserData\Games\Game0\stars.db `
+  build\bin\Debug\UserData\Games\Game0\planetRecords.pkp `
+  build\bin\Debug\UserData\Games\Game0\Золяко.spo `
+  C:\captures\game0-derived.txt
+```
+
+The tool reads the explicit DBPF/context/classes, resolves the single saved manager reference,
+unwraps the nested planet DBPF resources, reads the explicit save header, and emits one saved row.
+It deliberately emits candidate/refill Unknown and terrain QueryFailed until those observations are
+provided by a real producer/property capture. It never scans or modifies UserData.
+
 ## Next required observation
 
 Use the same explicit save corpus to add a read-only capture adapter that preserves:

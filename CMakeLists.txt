@@ -201,6 +201,8 @@ add_executable(planet_record_verify EXCLUDE_FROM_ALL tools/planet_record_verify.
 target_include_directories(planet_record_verify PRIVATE source)
 add_executable(planet_record_inspect EXCLUDE_FROM_ALL tools/planet_record_inspect.cpp source/engine/planet_record.cpp ${OS_SAVE_HEADER_SOURCES})
 target_include_directories(planet_record_inspect PRIVATE source)
+add_executable(starsdb_gge_capture EXCLUDE_FROM_ALL tools/starsdb_gge_capture.cpp source/engine/gge_saved_adapter.cpp source/engine/gge_catalog.cpp source/engine/planet_record.cpp ${OS_SAVE_HEADER_SOURCES})
+target_include_directories(starsdb_gge_capture PRIVATE source)
 add_executable(gge_star_present_verify EXCLUDE_FROM_ALL tools/gge_star_present_verify.cpp source/engine/gge_star_present.cpp
   source/engine/spui_binary.cpp source/engine/spui_geometry.cpp)
 target_include_directories(gge_star_present_verify PRIVATE source)
