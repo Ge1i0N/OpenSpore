@@ -50,6 +50,7 @@ REFILL_FUNCTIONS = (0xbb61c0, 0xbb24d0, 0xbb3e10, 0xbb9c40, 0xbb9c60, 0xbb9c70,
 REFILL_EVENT_FUNCTIONS = (0xb29960, 0xb26770)
 MESSAGE_FUNCTIONS = (0xde99b0, 0xde8680, 0xde9550)
 STATE_UI_FUNCTIONS = (0xde48c0, 0xde4a20, 0xde4ae0, 0xde4bd0)
+SCENARIO_FUNCTIONS = (0xef0210, 0xef1870, 0xef2290, 0xef24c0, 0xef2ef0)
 
 
 def main():
@@ -87,6 +88,9 @@ def main():
     if '--state-ui' in sys.argv:
         addresses = STATE_UI_FUNCTIONS
         dest = ROOT/'analysis/audit/gge-state-ui'
+    if '--scenario' in sys.argv:
+        addresses = SCENARIO_FUNCTIONS
+        dest = ROOT/'analysis/audit/scenario-mode'
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
     if '--publication' in sys.argv and digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':

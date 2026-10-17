@@ -49,6 +49,11 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   object, obtains the GameModeManager and registers a listener through MessageManager `+0x28` for
   event `0x212D3E7` plus a second listener set. This is consistent with SDK `MessageListenerData`
   ownership patterns, but does not prove listener delivery.
+- The instruction-level registration order is more precise: `EF2290` stores MessageManager and
+  listener-data fields at `+0x94/+0x98/+0x9C`, calls MessageManager `+0x28` with handler
+  `0x00EF2250` and event `0x0212D3E7`, then calls MessageManager `+0x24` for two IDs held in its
+  local array. SDK `IMessageManager` names `+0x24` `AddUnmanagedListener` and `+0x28` `AddHandler`,
+  which is a positive contract match; the callback delivery/runtime result remains Unknown.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
@@ -83,6 +88,7 @@ Reproduction:
 
 ```powershell
 python tools/ghidra_run.py --timeout 180 tools/ghidra_list.py --dump 0x0148AFD8 32
+python tools/ghidra_run.py --timeout 180 tools/gge_evidence.py --scenario
 ```
 
 Raw output is retained in [vtable.txt](vtable.txt).

@@ -1,0 +1,55 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00EF0210
+
+00ef0210  PUSH EBX
+00ef0211  XOR EBX,EBX
+00ef0213  PUSH ESI
+00ef0214  MOV ESI,ECX
+00ef0216  MOV dword ptr [ESI + 0x4],0x13eb394
+00ef021d  MOV dword ptr [ESI + 0x8],0x13ec438
+00ef0224  MOV dword ptr [ESI + 0xc],EBX
+00ef0227  MOV dword ptr [ESI],0x148afd8
+00ef022d  MOV dword ptr [ESI + 0x4],0x148afd0
+00ef0234  MOV dword ptr [ESI + 0x8],0x148afc0
+00ef023b  MOV dword ptr [ESI + 0x10],EBX
+00ef023e  MOV dword ptr [ESI + 0x14],EBX
+00ef0241  MOV dword ptr [ESI + 0x18],EBX
+00ef0244  LEA ECX,[ESI + 0x20]
+00ef0247  MOV dword ptr [ESI + 0x1c],EBX
+00ef024a  CALL 0x00697960
+00ef024f  MOV dword ptr [ESI + 0x68],EBX
+00ef0252  MOV dword ptr [ESI + 0x6c],EBX
+00ef0255  MOV dword ptr [ESI + 0x70],EBX
+00ef0258  MOV dword ptr [ESI + 0x74],EBX
+00ef025b  MOV dword ptr [ESI + 0x78],EBX
+00ef025e  MOV dword ptr [ESI + 0x7c],EBX
+00ef0261  MOV dword ptr [ESI + 0x80],EBX
+00ef0267  MOV dword ptr [ESI + 0x84],EBX
+00ef026d  MOV dword ptr [ESI + 0x88],EBX
+00ef0273  MOV dword ptr [ESI + 0x8c],EBX
+00ef0279  MOV dword ptr [ESI + 0x90],EBX
+00ef027f  MOV dword ptr [ESI + 0x94],EBX
+00ef0285  MOV dword ptr [ESI + 0x98],EBX
+00ef028b  MOV dword ptr [ESI + 0x9c],EBX
+00ef0291  MOV dword ptr [ESI + 0xa0],EBX
+00ef0297  MOV dword ptr [ESI + 0xa4],EBX
+00ef029d  MOV byte ptr [ESI + 0xa8],BL
+00ef02a3  MOV dword ptr [ESI + 0xac],EBX
+00ef02a9  MOV dword ptr [ESI + 0xb0],EBX
+00ef02af  MOV dword ptr [ESI + 0xb4],EBX
+00ef02b5  MOV dword ptr [ESI + 0xb8],EBX
+00ef02bb  MOV dword ptr [ESI + 0xbc],EBX
+00ef02c1  MOV dword ptr [ESI + 0xc0],EBX
+00ef02c7  MOV dword ptr [ESI + 0xc4],0x2
+00ef02d1  MOV dword ptr [ESI + 0xcc],EBX
+00ef02d7  MOV dword ptr [ESI + 0xd4],EBX
+00ef02dd  MOV dword ptr [ESI + 0xd8],EBX
+00ef02e3  MOV byte ptr [ESI + 0xdc],BL
+00ef02e9  MOV dword ptr [0x016c7aa4],ESI
+00ef02ef  MOV EAX,ESI
+00ef02f1  POP ESI
+00ef02f2  POP EBX
+00ef02f3  RET
