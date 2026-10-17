@@ -153,6 +153,18 @@ No direct write that populates this `+0x34` forward target was recovered in the 
 constructor path. This does not prove that indirect registration never occurs, but it means the
 possible alternate handler for payload `0x070D7509` remains Unknown rather than being invented.
 
+The shipped EP1 layout places the two relevant identities on different branches:
+
+```text
+object 138
+  ├─ object 74  ControlID 0x070D7509 (Play Scenario)
+  └─ object 114 → object 87  ControlID 0x070D74E7
+```
+
+Object 114 is the `0x0806AA00` shared GGE target used by the state-2 continuation. This makes the
+`0x070D7509` → `0x070D74E7` relationship a possible higher-level sibling/parent route, not a direct
+WinButton payload conversion. Its producer and runtime delivery remain Unknown.
+
 The confirmed owner is instead the GA WinButton family initialized by `0x00966EB0`:
 
 ```text

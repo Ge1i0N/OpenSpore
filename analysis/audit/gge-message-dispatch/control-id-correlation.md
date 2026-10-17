@@ -66,6 +66,18 @@ Object 74 has serialized `CommandID = 0`, so its generic activation payload is s
 `DE99B0(0x070D74E7)` interpretation unsupported by the selected static evidence; a forwarded or
 separate control route remains possible but Unknown.
 
+The EP1 object hierarchy further separates the two identities:
+
+```text
+object 138 (parent 139)
+  ├─ object 74  WinButton, ControlID 0x070D7509, caption Play Scenario
+  └─ object 114 panel/control 0x0806AA00
+       └─ object 87 WinButton, ControlID 0x070D74E7
+```
+
+This is shipped-data structure only. It does not identify the native message or listener that may
+connect the sibling `Play Scenario` control to the nested state-feedback control.
+
 The `0x036C4A10` match is the strongest current UI→state corroboration: the shipped `Dev` control
 and the native handler branch share the exact value, and the native branch calls the SDK-compatible
 StateManager `+0x28(1)` slot. The shipped `SporeAppStates` table assigns explicit id 1 to
