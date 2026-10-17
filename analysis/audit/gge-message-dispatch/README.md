@@ -209,6 +209,20 @@ per-star **stage caption** ControlID in both `PatchData.package` and `Spore_Grap
 The branch therefore provides a concrete working example of forwarded-target population for
 per-star presentation UI, while separating that known path from the unresolved Play Scenario route.
 
+The bounded immediate inventory reinforces that separation:
+
+```text
+0x03C4925E stage-caption event:
+  DF77C9, DF79B8, DF93C0
+
+0x070D7509 Play Scenario control:
+  DE491C, DE5963 only
+```
+
+Thus `0x070D7509` does not occur in the known `DF79FE` stage-caption activation branch. Its only
+GA immediate occurrences remain the `DE48C0`/`DE5900` control tables; a dynamic or higher-level
+producer is still required.
+
 This closes the setter/registration mechanism for `DE99B0`'s optional forward listener. It does
 not yet identify which caller/target is active for the EP1 `Play Scenario` control, and neither
 caller body contains a direct `0x070D7509`/`0x070D74E7` join in this bounded pass.
