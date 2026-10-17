@@ -27,9 +27,14 @@
 
 namespace os::cell {
 
-// What an entity is for the food chain. Food is eaten; a Creature is eaten (prey) when it is
-// smaller than the player and bites (predator) when it is larger.
-enum class Role : u8 { Food = 0, Creature = 1 };
+// What an entity is for the food chain. Food is eaten (a plant/plankton mote); Meat is a chunk a
+// cell drops when it is eaten (the carnivore diet); a Creature is eaten (prey) when it is smaller
+// than the player and bites (predator) when it is larger.
+enum class Role : u8 { Food = 0, Creature = 1, Meat = 2 };
+
+// The player's diet: which food the player has been eating. A seed model (the original tracks it
+// through the mouth parts chosen in the cell editor), but it makes eating read as a choice.
+enum class Diet : u8 { Herbivore = 0, Carnivore = 1, Omnivore = 2 };
 
 // One spawned cell: which archetype, its body-structure index, and its simulation state.
 struct Entity {
@@ -39,6 +44,7 @@ struct Entity {
     float x = 0.0f, y = 0.0f, z = 0.0f;
     float vx = 0.0f, vy = 0.0f;
     float size = 1.0f;    // body radius (world units) - seed, not a decoded stat
+    float ttl = 0.0f;     // seconds left before a dropped meat chunk rots (0 = never)
     bool alive = true;    // cleared when eaten
 };
 
@@ -82,6 +88,10 @@ public:
     float player_hp() const { return m_hp; }
     float player_max_hp() const { return m_max_hp; }
     int eaten() const { return m_eaten; }
+    int dna() const { return m_dna; }
+    Diet diet() const { return m_diet; }
+    int eaten_plant() const { return m_eaten_plant; }
+    int eaten_meat() const { return m_eaten_meat; }
     bool evolved() const { return m_evolved; }
 
     // Camera: world -> screen is (world - camera) * pixels_per_unit + screen_center.
@@ -106,12 +116,18 @@ public:
 private:
     void spawn_from_level(const Population& pop);
     void respawn_player();
+    void drop_meat(const Entity& from);
+    void update_diet();
 
     GameData m_data;
     bool m_loaded = false;
     std::string m_source;
     std::string m_level;
     std::vector<Entity> m_entities;
+    // Food archetypes captured at spawn time, so the tide pool can be restocked as it is grazed.
+    std::vector<Entity> m_food_templates;
+    int m_target_food = 0;
+    float m_refill = 0.0f;
     int m_player = -1;
     u64 m_ticks = 0;
     float m_time = 0.0f;
@@ -121,6 +137,9 @@ private:
     bool m_player_alive = true;
     float m_hp = 100.0f, m_max_hp = 100.0f;
     int m_eaten = 0;
+    int m_dna = 0;
+    Diet m_diet = Diet::Herbivore;
+    int m_eaten_plant = 0, m_eaten_meat = 0;
     bool m_evolved = false;
     float m_respawn = 0.0f;
     bool m_has_target = false;

@@ -194,6 +194,29 @@ int main(int argc, char** argv) {
             w.tick(1.0f / 60.0f);
             check(w.eaten() >= 1, "eating food increments the eaten count");
             check(w.player()->size >= before, "eating grows the player");
+            check(w.eaten_plant() >= 1, "eating plankton counts as herbivore food");
+            check(w.dna() > 0, "eating awards DNA");
+            check(w.diet() == Diet::Herbivore, "diet is herbivore after eating plants");
+        }
+
+        // Eating a smaller cell counts as flesh: the diet shifts and a meat chunk is dropped.
+        int ci = -1;
+        for (size_t i = 0; i < w.entities().size(); ++i) {
+            const Entity& e = w.entities()[i];
+            if ((int)i != w.player_index() && e.alive && e.role == Role::Creature &&
+                e.size <= w.player()->size * 1.05f) { ci = (int)i; break; }
+        }
+        check(ci >= 0, "a prey creature exists");
+        if (ci >= 0) {
+            const size_t before = w.entities().size();
+            w.teleport_player(w.entities()[ci].x, w.entities()[ci].y);
+            w.tick(1.0f / 60.0f);
+            check(w.eaten_meat() >= 1, "eating a smaller cell counts as flesh");
+            check(w.entities().size() > before, "a meat chunk is dropped where the cell died");
+            check(w.diet() != Diet::Herbivore, "diet is no longer herbivore after eating flesh");
+            bool meat = false;
+            for (const Entity& e : w.entities()) if (e.alive && e.role == Role::Meat) meat = true;
+            check(meat, "the dropped chunk is edible meat");
         }
 
         // Predator: overlap a larger creature every step until the player is bitten to death,

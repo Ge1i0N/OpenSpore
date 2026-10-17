@@ -36,13 +36,16 @@ constexpr float kPredatorAccel = 34.0f;
 constexpr float kPredatorSpeed = 13.0f;
 constexpr float kPreyAccel = 30.0f;
 constexpr float kPreySpeed = 15.0f;
-constexpr float kAggro = 36.0f;          // predator/prey reaction radius
+constexpr float kAggro = 24.0f;          // predator/prey reaction radius
 constexpr float kPredatorFraction = 1.05f;  // above player.size * this, a creature bites
 constexpr float kGrowRate = 0.55f;       // area added per eaten unit^2 (tuned so a level evolves)
 constexpr float kMaxSize = 4.0f;
 constexpr float kPlayerBaseSize = 1.0f;
 constexpr float kEvolveSize = 3.0f;      // size at which the cell could leave for the Creature stage
 constexpr float kRespawnDelay = 1.5f;
+constexpr float kMeatTtl = 14.0f;        // how long a dropped chunk stays edible
+constexpr float kRefillInterval = 3.0f;  // restock cadence for grazed plankton
+constexpr int kMeatDna = 2, kPlantDna = 1, kPreyDna = 3;
 
 bool contains_ci(const std::string& hay, const char* needle) {
     if (hay.empty()) return false;
@@ -169,14 +172,18 @@ void World::spawn_from_level(const Population& pop) {
             // Sizes are seeds: food is small and uniform-ish; a creature's size is a stable
             // function of its archetype id so one species reads consistently on screen.
             en.size = food ? (0.40f + 0.12f * hash01(e.cell))
-                           : (0.80f + 1.60f * hash01(e.cell));
+                           : (0.55f + 1.35f * hash01(e.cell));
             en.x = rng.signed_unit() * m_arena;
             en.y = rng.signed_unit() * m_arena;
             en.vx = rng.signed_unit() * 2.0f;
             en.vy = rng.signed_unit() * 2.0f;
             m_entities.push_back(en);
+            if (food) m_food_templates.push_back(en);  // remembered so the pool can be restocked
         }
     }
+    // Restock target: the plankton the level shipped with. Grazing never empties the tide pool.
+    m_target_food = 0;
+    for (const Entity& e : m_entities) if (e.role == Role::Food) ++m_target_food;
 }
 
 bool World::set_level(const std::string& level, std::string& error) {
@@ -200,6 +207,9 @@ bool World::set_level(const std::string& level, std::string& error) {
     }
     // Valid level: only now reset the world, so a bad name leaves the current world intact.
     m_entities.clear();
+    m_food_templates.clear();
+    m_target_food = 0;
+    m_refill = 0.0f;
     m_player = -1;
     m_ticks = 0;
     m_time = 0.0f;
@@ -207,6 +217,9 @@ bool World::set_level(const std::string& level, std::string& error) {
     m_player_alive = true;
     m_hp = m_max_hp = 100.0f;
     m_eaten = 0;
+    m_dna = 0;
+    m_diet = Diet::Herbivore;
+    m_eaten_plant = m_eaten_meat = 0;
     m_evolved = false;
     m_respawn = 0.0f;
     m_has_target = false;
@@ -263,6 +276,29 @@ void World::respawn_player() {
     m_player_alive = true;
     m_respawn = 0.0f;
     m_has_target = false;
+}
+
+void World::drop_meat(const Entity& from) {
+    if (static_cast<int>(m_entities.size()) >= kMaxEntities) return;
+    Entity m;
+    m.archetype = from.archetype;  // keep the species so the chunk renders as the fallen cell
+    m.structure = from.structure;
+    m.role = Role::Meat;
+    m.size = from.size * 0.6f;
+    m.x = from.x;
+    m.y = from.y;
+    m.ttl = kMeatTtl;
+    m_entities.push_back(m);
+}
+
+void World::update_diet() {
+    if (m_eaten_plant > 0 && m_eaten_meat > 0) {
+        m_diet = Diet::Omnivore;
+    } else if (m_eaten_meat > 0) {
+        m_diet = Diet::Carnivore;
+    } else {
+        m_diet = Diet::Herbivore;
+    }
 }
 
 void World::tick(float dt) {
@@ -344,6 +380,7 @@ void World::tick(float dt) {
     }
 
     // --- Collisions: eat, grow, bite -------------------------------------
+    std::vector<Entity> drops;  // corpses become chunks AFTER the loop (else they're re-eaten now)
     if (m_player_alive && pl->alive) {
         for (size_t i = 0; i < m_entities.size(); ++i) {
             if (static_cast<int>(i) == m_player) continue;
@@ -352,10 +389,20 @@ void World::tick(float dt) {
             const float dx = e.x - pl->x, dy = e.y - pl->y;
             const float reach = pl->size + e.size;
             if (dx * dx + dy * dy > reach * reach) continue;
-            if (e.role == Role::Food || e.size <= pl->size * kPredatorFraction) {
-                // Eaten: grow by area (so a big meal matters more), then retire the entity.
+            if (e.role == Role::Food || e.role == Role::Meat ||
+                e.size <= pl->size * kPredatorFraction) {
+                // Eaten: grow by area (so a big meal matters more), then retire the entity. The
+                // diet follows what was swallowed - plankton is herbivore, flesh is carnivore.
                 const float area = pl->size * pl->size + e.size * e.size * kGrowRate;
                 pl->size = std::sqrt(area) > kMaxSize ? kMaxSize : std::sqrt(area);
+                if (e.role == Role::Food) {
+                    ++m_eaten_plant;
+                    m_dna += kPlantDna;
+                } else {
+                    ++m_eaten_meat;
+                    m_dna += (e.role == Role::Meat) ? kMeatDna : kPreyDna;
+                    if (e.role == Role::Creature) drops.push_back(e);  // the corpse becomes a chunk
+                }
                 e.alive = false;
                 ++m_eaten;
             } else {
@@ -376,7 +423,37 @@ void World::tick(float dt) {
         }
     }
 
+    for (const Entity& d : drops) drop_meat(d);
+
     if (pl->alive && pl->size >= kEvolveSize) m_evolved = true;
+    update_diet();
+
+    // Dropped chunks rot: an uneaten corpse does not litter the pool forever.
+    for (Entity& e : m_entities) {
+        if (!e.alive || e.role != Role::Meat) continue;
+        e.ttl -= dt;
+        if (e.ttl <= 0.0f) e.alive = false;
+    }
+
+    // Restock: every few seconds, top the plankton back up to what the level shipped with, so a
+    // grazed tide pool refills instead of dwindling.
+    m_refill -= dt;
+    if (m_refill <= 0.0f && !m_food_templates.empty()) {
+        m_refill = kRefillInterval;
+        int alive_food = 0;
+        for (const Entity& e : m_entities) if (e.alive && e.role == Role::Food) ++alive_food;
+        Rng rng(static_cast<u32>(m_ticks * 2654435761u) ^ fnv1_lower(m_level.c_str()));
+        while (alive_food < m_target_food && static_cast<int>(m_entities.size()) < kMaxEntities) {
+            Entity en = m_food_templates[rng.next() % m_food_templates.size()];
+            en.x = rng.signed_unit() * m_arena;
+            en.y = rng.signed_unit() * m_arena;
+            en.vx = rng.signed_unit() * 2.0f;
+            en.vy = rng.signed_unit() * 2.0f;
+            en.alive = true;
+            m_entities.push_back(en);
+            ++alive_food;
+        }
+    }
 
     // --- Camera follows the player (arena centre once it is gone) ---------
     if (pl->alive) {
@@ -400,12 +477,18 @@ void World::clear() {
     m_source.clear();
     m_level.clear();
     m_entities.clear();
+    m_food_templates.clear();
+    m_target_food = 0;
+    m_refill = 0.0f;
     m_player = -1;
     m_ticks = 0;
     m_time = 0.0f;
     m_player_alive = true;
     m_hp = m_max_hp = 100.0f;
     m_eaten = 0;
+    m_dna = 0;
+    m_diet = Diet::Herbivore;
+    m_eaten_plant = m_eaten_meat = 0;
     m_evolved = false;
     m_respawn = 0.0f;
     m_has_target = false;
@@ -426,9 +509,12 @@ std::string World::status() const {
         pl = n ? std::string(n) : ("0x" + std::to_string(p->archetype));
     }
     char b[192];
-    std::snprintf(b, sizeof(b), "%s: %zu cells, player=%s, eaten=%d, hp=%.0f",
+    const char* diet = m_diet == Diet::Carnivore   ? "carnivore"
+                       : m_diet == Diet::Omnivore ? "omnivore"
+                                                  : "herbivore";
+    std::snprintf(b, sizeof(b), "%s: %zu cells, player=%s, eaten=%d, hp=%.0f, dna=%d, diet=%s",
                   m_level.empty() ? "(no level)" : m_level.c_str(), m_entities.size(), pl.c_str(),
-                  m_eaten, m_hp);
+                  m_eaten, m_hp, m_dna, diet);
     return b;
 }
 

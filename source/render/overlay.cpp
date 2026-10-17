@@ -398,10 +398,14 @@ void Overlay::image(float x, float y, float w, float h, IDirect3DTexture9* tex, 
 }
 
 void Overlay::image_uv(float x, float y, float w, float h, IDirect3DTexture9* tex,
-                       float u0, float v0, float u1, float v1) {
+                       float u0, float v0, float u1, float v1, bool smooth) {
     if (!m_dev || !tex || w <= 0.f || h <= 0.f) return;
     flush_text();
     set_text_states(m_dev, tex);
+    if (smooth) {
+        m_dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+        m_dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+    }
     Vert v[6];
     const float x1 = x + w, y1 = y + h;
     const u32 white = 0xFFFFFFFFu;

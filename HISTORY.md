@@ -7,6 +7,23 @@ Every entry ends with its verification. If a change has no measurable delta it i
 > demos and disproven hypotheses are retained as such. Start with [README](README.md),
 > [PROGRESS](PROGRESS.md) and [VERIFY](VERIFY.md) for today's verdict.
 
+## 2026-10-17 — Cell stage: hero/neutral bodies, diet + DNA + meat, murkier backdrop
+
+The hero's real body is recovered: `cell_hero_L0`'s structure has base body **0** and references the
+`neutralCells` random table at `+0x3C`, so `states/cellpresent.cpp` now draws any base-0 body with a
+`NeutralCell*` model. Those models live only in `PreBaked.package` (previously not on the runtime
+path; now copied into `build/bin/Debug/Data`), and the neutral bodies load alongside the creature
+bodies (`[cell] cell body meshes: 12 of 14 bodies ... 4 neutral`). The food chain grew a **diet**
+(plankton = herbivore, flesh = carnivore, both = omnivore), **DNA** per meal (plant 1 / chunk 2 /
+prey 3), **meat chunks** dropped where a creature is eaten (14 s TTL) and a **restock** that refills
+grazed plankton to the level's shipped count. The backdrop density field is now linearly filtered
+and tinted a dim plankton green (was a hard-edged white wash), the food motes get a soft core, and
+the cells bob gently. Balance was retuned (creature size range, aggro radius) so the player survives
+the opening. Verified: `cell_world_verify` gained diet/DNA/meat checks (all PASS, incl. the real
+package), `cell_game_verify`/`game_stages_verify` PASS, 24 unit tests, `feature_map --check`,
+`docs_check` pass; main target 0 warnings; live `-state:CellGame` capture shows the hero mesh, the
+murk backdrop and the diet/DNA HUD.
+
 ## 2026-10-17 — Cell stage: real cell-body meshes (gmdl) + textures
 
 A cell `structure`'s base-body id (header `+0x40`, e.g. `Booster`/`Squid`) turns out to be the

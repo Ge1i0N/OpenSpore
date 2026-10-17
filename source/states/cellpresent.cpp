@@ -106,10 +106,10 @@ void build_backdrop(rnd::Device& dev, const os::cell::World& world) {
                 float v = rd_f32(den->data.data() + i * 4);
                 if (v < 0.f) v = 0.f;
                 if (v > 1.f) v = 1.f;
-                const u8 a = static_cast<u8>(std::sqrt(v) * 255.0f);  // sparse -> brighter flecks
-                bgra[i * 4 + 0] = 255;  // B
-                bgra[i * 4 + 1] = 240;  // G
-                bgra[i * 4 + 2] = 180;  // R
+                const u8 a = static_cast<u8>(std::pow(v, 0.9f) * 120.0f);  // sparse -> dim flecks
+                bgra[i * 4 + 0] = 150;  // B - murky plankton green, not a white wash
+                bgra[i * 4 + 1] = 210;  // G
+                bgra[i * 4 + 2] = 130;  // R
                 bgra[i * 4 + 3] = a;    // A
             }
             g_bg.tex = dev.create_texture_bgra(bgra.data(), static_cast<int>(den->width),
@@ -154,6 +154,10 @@ struct BodyMesh {
     IDirect3DTexture9* tex = nullptr;  // paired `raster` (same instance), or null
 };
 std::map<u32, std::unique_ptr<BodyMesh>> g_bodies;  // base-body id -> uploaded mesh (+ texture)
+// The generic cell bodies (NeutralCell*, from the `neutralCells` random table). A structure with
+// base body 0 (the hero `cell_hero_L0`, whose only other field is a decorations part) uses one of
+// these: the hero's own structure references the `neutralCells` table (+0x3C).
+std::vector<u32> g_neutral;
 bool g_bodies_tried = false;
 
 void build_body_meshes(rnd::Device& dev, const cell::World& world) {
@@ -166,6 +170,13 @@ void build_body_meshes(rnd::Device& dev, const cell::World& world) {
         const u32 base = strucs[(size_t)e.structure].base;
         if (base) want.insert(base);
     }
+    for (const cell::RandomSpawn& rs : world.data().random_spawns) {
+        if (rs.name != "neutralCells") continue;
+        for (const cell::SpawnEntry& se : rs.entries) {
+            if (se.cell) g_neutral.push_back(se.cell);
+        }
+    }
+    for (u32 id : g_neutral) want.insert(id);
     const size_t total = want.size();
     size_t textured = 0;
     for (auto& sp : os::fs::search_paths()) {
@@ -213,25 +224,33 @@ void build_body_meshes(rnd::Device& dev, const cell::World& world) {
             }
         }
     }
-    LOG_INFO("cell", "cell body meshes: %zu of %zu bodies have real gmdl geometry (%zu textured)",
-             g_bodies.size(), total, textured);
+    LOG_INFO("cell",
+             "cell body meshes: %zu of %zu bodies have real gmdl geometry (%zu textured, %zu "
+             "neutral)",
+             g_bodies.size(), total, textured, g_neutral.size());
 }
 
-// The uploaded mesh for an entity's structure base, or null when it has none.
-rnd::Mesh* body_for(const cell::World& world, const cell::Entity& e) {
+// The body-mesh instance id for an entity: its structure's base body, or - when that is 0 (the
+// hero and the generic cells) - one of the NeutralCell models the `neutralCells` table names.
+u32 body_id_for(const cell::World& world, const cell::Entity& e) {
     const auto& strucs = world.data().structures;
-    if (e.structure < 0 || (size_t)e.structure >= strucs.size()) return nullptr;
-    auto it = g_bodies.find(strucs[(size_t)e.structure].base);
+    u32 base = 0;
+    if (e.structure >= 0 && (size_t)e.structure < strucs.size()) base = strucs[(size_t)e.structure].base;
+    if (base) return base;
+    if (g_neutral.empty()) return 0;
+    const float f = hash01(e.archetype ^ (u32)(e.structure + 1));
+    size_t k = (size_t)(f * (float)g_neutral.size());
+    if (k >= g_neutral.size()) k = g_neutral.size() - 1;
+    return g_neutral[k];
+}
+
+// The uploaded body (mesh + texture) for an entity, or null when it has none.
+BodyMesh* body_for(const cell::World& world, const cell::Entity& e) {
+    const u32 id = body_id_for(world, e);
+    if (!id) return nullptr;
+    auto it = g_bodies.find(id);
     if (it == g_bodies.end() || !it->second->mesh.ready()) return nullptr;
-    return &it->second->mesh;
-}
-
-// The paired texture for an entity's body, or null.
-IDirect3DTexture9* body_tex_for(const cell::World& world, const cell::Entity& e) {
-    const auto& strucs = world.data().structures;
-    if (e.structure < 0 || (size_t)e.structure >= strucs.size()) return nullptr;
-    auto it = g_bodies.find(strucs[(size_t)e.structure].base);
-    return it == g_bodies.end() ? nullptr : it->second->tex;
+    return it->second.get();
 }
 
 }  // namespace
@@ -294,7 +313,7 @@ bool present_cell_world() {
         }
         const float ax = world.arena();
         ov.image_uv(sx(-ax + shiftx), sy(-ax + shifty), (sx(ax + shiftx) - sx(-ax + shiftx)),
-                    (sy(ax + shifty) - sy(-ax + shifty)), g_bg.tex, 0.f, 0.f, 1.f, 1.f);
+                    (sy(ax + shifty) - sy(-ax + shifty)), g_bg.tex, 0.f, 0.f, 1.f, 1.f, true);
     }
     ov.end();  // backdrop done - the cells themselves are drawn as 3D meshes next
 
@@ -320,17 +339,21 @@ bool present_cell_world() {
         rnd::Mesh::set_topdown_camera(dev.d3d(), camx, camy, ppu, w, h);
         for (const cell::Entity& e : ents) {
             if (!e.alive) continue;
-            rnd::Mesh* mp = body_for(world, e);            if (!mp || mp->radius() <= 1e-6f) continue;
+            BodyMesh* bm = body_for(world, e);
+            if (!bm || bm->mesh.radius() <= 1e-6f) continue;
             const float r = e.size * ppu;
             const float x = sx(e.x), y = sy(e.y);
             if (x < -r - 16.f || y < -r - 16.f || x > w + r + 16.f || y > h + r + 16.f) continue;
             const bool food = e.role == cell::Role::Food;
             const u32 tint = food ? hsv(0.27f + 0.10f * hash01(e.archetype), 0.55f, 0.95f)
                                   : hsv(0.02f + 0.80f * hash01(e.archetype), 0.55f, 0.95f);
-            IDirect3DTexture9* tex = body_tex_for(world, e);
-            // A textured body uses its own colours; tint only its untextured fallback.
-            const D3DCOLOR col = tex ? D3DCOLOR_ARGB(255, 255, 255, 255) : (D3DCOLOR)tint;
-            mp->draw_at(dev.d3d(), e.x, e.y, e.size / mp->radius(), std::atan2(e.vy, e.vx), col, tex);
+            // A textured body uses its own colours; an untextured one takes the role tint.
+            const D3DCOLOR col =
+                bm->tex ? D3DCOLOR_ARGB(255, 255, 255, 255) : (D3DCOLOR)tint;
+            // A gentle swim bob so the shoal is not statues in a tank.
+            const float bob = 1.0f + 0.05f * std::sin(world.time() * 5.0f + (float)(e.archetype & 15));
+            bm->mesh.draw_at(dev.d3d(), e.x, e.y, e.size * bob / bm->mesh.radius(),
+                             std::atan2(e.vy, e.vx), col, bm->tex);
         }
     }
 
@@ -356,7 +379,20 @@ bool present_cell_world() {
         const float r = e.size * ppu;
         if (r < 1.2f) continue;
         if (x < -r - 8.f || y < -r - 8.f || x > w + r + 8.f || y > h + r + 8.f) continue;
-        ov.circle(x, y, r, hsv(0.27f + 0.10f * hash01(e.archetype), 0.55f, 0.80f));
+        const u32 c = hsv(0.27f + 0.10f * hash01(e.archetype), 0.55f, 0.80f);
+        ov.circle(x, y, r, c);
+        // A lighter core, so a plankton mote reads as a soft blob rather than a flat disc.
+        ov.circle(x - r * 0.3f, y - r * 0.3f, r * 0.4f, rnd::rgba(235, 255, 220, 90));
+    }
+
+    // Dropped chunks with no body mesh: a small red speck where a cell died.
+    for (const cell::Entity& e : ents) {
+        if (!e.alive || e.role != cell::Role::Meat) continue;
+        if (body_for(world, e)) continue;
+        const float x = sx(e.x), y = sy(e.y);
+        const float r = std::max(2.0f, e.size * ppu);
+        if (x < -r - 8.f || y < -r - 8.f || x > w + r + 8.f || y > h + r + 8.f) continue;
+        ov.circle(x, y, r, rnd::rgba(200, 70, 70, 230));
     }
 
     // Threat markers over the meshes: an oversized cell still reads as dangerous.
@@ -388,8 +424,14 @@ bool present_cell_world() {
     char line[192];
     std::snprintf(line, sizeof(line), "CELL STAGE  -  %s", world.level().c_str());
     ov.text_fmt(16.f, 10.f, 0xFFBEE8FF, "%s", line);
-    std::snprintf(line, sizeof(line), "cells %zu   eaten %d   size %.2f   t %.1fs",
-                  ents.size(), world.eaten(), psize, world.time());
+    size_t alive_cells = 0;
+    for (const cell::Entity& e : ents)
+        if (e.alive && e.role != cell::Role::Food && e.role != cell::Role::Meat) ++alive_cells;
+    const char* diet = world.diet() == cell::Diet::Carnivore   ? "CARNIVORE"
+                       : world.diet() == cell::Diet::Omnivore ? "OMNIVORE"
+                                                              : "HERBIVORE";
+    std::snprintf(line, sizeof(line), "cells %zu   eaten %d   DNA %d   %s   size %.2f   t %.1fs",
+                  alive_cells, world.eaten(), world.dna(), diet, psize, world.time());
     ov.text_fmt(16.f, 28.f, 0xFF8FB8D8, "%s", line);
 
     const float hpfrac = world.player_max_hp() > 0.f ? world.player_hp() / world.player_max_hp() : 0.f;

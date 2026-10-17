@@ -50,8 +50,10 @@ public:
     // or wider than the box, it is letterboxed inside it.
     void image(float x, float y, float w, float h, IDirect3DTexture9* tex, int tex_w, int tex_h,
                bool keep_aspect = true);
+    // `smooth` selects LINEAR filtering for this draw only (a magnified low-res field would
+    // otherwise show as hard blocks); the font atlas and sprite sheets keep the default POINT.
     void image_uv(float x, float y, float w, float h, IDirect3DTexture9* tex,
-                 float u0, float v0, float u1, float v1);
+                 float u0, float v0, float u1, float v1, bool smooth = false);
 
     // Flush pending text before changing the GPU scissor. Pixel boundaries use ceil so integer
     // pointer coordinates follow the same half-open interval as SPUI picking. False = skip draw.

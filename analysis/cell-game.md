@@ -167,8 +167,12 @@ A cell **body model**: an **80-byte header** followed by `N` **32-byte part entr
 The base body id doubles as a `gmdl` **model instance id** in the content packages (`Squid`,
 `Pinky`, `Booster`, ...): 28 of the tide-pool bodies carry a `gmdl` in `Spore_Content.package`, and
 every `gmdl` there has a paired `raster` (865/865). That is how the runtime draws real cell
-geometry. The hero (`cell_hero_L0`) has no such body (its template id names no structure), so it
-keeps the disc fallback.
+geometry. A structure whose base body is **0** (the hero `cell_hero_L0`, and the generic cells)
+has no single body model; its header instead references the `neutralCells` random table at `+0x3C`
+(`0x9A391385` for the hero), so the runtime draws it with one of the `NeutralCell*` models from
+`PreBaked.package` (the `neutralCells` table names `NeutralCell`, `NeutralCell_01/02/03`, all four
+shipped as `gmdl` there). Bodies with neither a base gmdl nor a neutral table (the food/flora/rock
+props - Spore renders those as effect motes, not models) keep the disc fallback.
 
 Part entry:
 
@@ -256,15 +260,21 @@ unites the decode with the engine:
   cell), found by its FNV-1 id so it resolves without the name registry.
 * `tick(dt)` runs a small food chain: a hash-stable size and a name-derived role (`Food` vs
   `Creature`) per entity, mouse steering for the player, predator/prey AI, eating/growth, HP,
-  death/respawn, an evolve threshold and a follow camera. **Positions, sizes, role split,
-  growth/HP/aggression rates and the camera are OUR seeds** (the archetype stat slots are
+  death/respawn, an evolve threshold and a follow camera. Eating splits into a **diet**: plankton
+  (`Role::Food`) is herbivore, flesh (`Role::Creature`/`Role::Meat`) is carnivore, and a diet that
+  mixes both reads omnivore. Each meal awards **DNA** (plant 1, chunk 2, live prey 3), and eating a
+  creature **drops a `Meat` chunk** where it died (`kMeatTtl` 14 s) for the carnivore loop. Grazed
+  plankton is **restocked** every 3 s back to the level's shipped count (`m_target_food`), so the
+  pool refills instead of dwindling. **Positions, sizes, role split, growth/HP/aggression/DNA rates,
+  the meat lifetime/restock cadence and the camera are OUR seeds** (the archetype stat slots are
   positional and unnamed) — the shipped spawn list and body structures are the game's data.
 * `game_stages.cpp` drives it (`cell_enter`/`cell_tick`/`cell_exit`) and
   `source/states/cellpresent.cpp` draws it (real gmdl cell bodies + HUD) and steers from the
   pointer. The presenter also loads `Data/CellGame_Layers.package` (the `density`/`advect` fields)
   and `backgroundMap` depth bands to paint a data-driven tide-pool backdrop. A structure's base
   body id (`+0x40`) doubles as a `gmdl` model instance id in the content packages, which is how
-  the cells get real geometry. See [game-stages](game-stages.md).
+  the cells get real geometry; a base-0 structure (the hero) is drawn with a `NeutralCell*` model
+  from `PreBaked.package`. See [game-stages](game-stages.md).
 
 ## Boundaries
 
