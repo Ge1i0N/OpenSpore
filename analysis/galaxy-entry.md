@@ -25,6 +25,10 @@ Static evidence does not observe the original runtime. All addresses below are G
   `0x0067DCE0` vtable `+0x28(1)`, matching the SDK `IStateManager::SwitchToState` slot. The
   later `DF9740` indirect vtable invocation remains a separate static boundary; these assignments
   are not runtime observations or readiness claims. See [message dispatch evidence](audit/gge-message-dispatch/README.md).
+- State-to-UI synchronization is also bounded at `DE48C0`: internal state 5 selects UI ID
+  `0x061DD69B`, state 13 selects `0x070D74E7`, and the helper applies control flags through
+  `00810650`/vtable `+0x28`. This is not merged with the catalogue rebuild or treated as the
+  missing `DF9740` caller. See [state/UI evidence](audit/gge-state-ui/README.md).
 - `0xDDDB80` forwards two float inputs to `0xDE8710`, converts the second to an integer using
   the binary's scale constant, then updates two further managers. Controller +0x108/+0x10C are
   current/requested internal state fields, not the outer AppState ID. Our host does not execute this.

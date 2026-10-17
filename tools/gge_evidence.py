@@ -49,6 +49,7 @@ REFILL_FUNCTIONS = (0xbb61c0, 0xbb24d0, 0xbb3e10, 0xbb9c40, 0xbb9c60, 0xbb9c70,
                    0xbad210, 0xbb5950)
 REFILL_EVENT_FUNCTIONS = (0xb29960, 0xb26770)
 MESSAGE_FUNCTIONS = (0xde99b0, 0xde8680, 0xde9550)
+STATE_UI_FUNCTIONS = (0xde48c0, 0xde4a20, 0xde4ae0, 0xde4bd0)
 
 
 def main():
@@ -83,6 +84,9 @@ def main():
     if '--message' in sys.argv:
         addresses = MESSAGE_FUNCTIONS
         dest = ROOT/'analysis/audit/gge-message-dispatch'
+    if '--state-ui' in sys.argv:
+        addresses = STATE_UI_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-state-ui'
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
     if '--publication' in sys.argv and digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':

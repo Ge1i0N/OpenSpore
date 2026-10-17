@@ -1,0 +1,33 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DE4BD0
+
+00de4bd0  PUSH ESI
+00de4bd1  MOV ESI,ECX
+00de4bd3  MOV ECX,dword ptr [0x016a15f4]
+00de4bd9  TEST ECX,ECX
+00de4bdb  JZ 0x00de4c27
+00de4bdd  PUSH EBX
+00de4bde  MOV EBX,dword ptr [ESP + 0xc]
+00de4be2  PUSH EBX
+00de4be3  CALL 0x00df5640
+00de4be8  MOV EAX,dword ptr [ESI + 0xf0]
+00de4bee  TEST BL,BL
+00de4bf0  POP EBX
+00de4bf1  JZ 0x00de4c0f
+00de4bf3  CMP dword ptr [EAX + 0x3c],0x5
+00de4bf7  JZ 0x00de4c1c
+00de4bf9  MOV dword ptr [EAX + 0x3c],0x4
+00de4c00  MOV ECX,dword ptr [ESI + 0xf0]
+00de4c06  CALL 0x00e20840
+00de4c0b  POP ESI
+00de4c0c  RET 0x4
+00de4c0f  CMP dword ptr [EAX + 0x3c],0x2
+00de4c13  JZ 0x00de4c1c
+00de4c15  MOV dword ptr [EAX + 0x3c],0x6
+00de4c1c  MOV ECX,dword ptr [ESI + 0xf0]
+00de4c22  CALL 0x00e20840
+00de4c27  POP ESI
+00de4c28  RET 0x4

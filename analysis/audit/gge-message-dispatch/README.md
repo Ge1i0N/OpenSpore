@@ -40,6 +40,11 @@ DE99B0 event branch → controller state/request fields
 The exact indirect caller that invokes the Play Spore vtable `+0x38 = DF9740` remains a separate
 boundary. Setting fields in a static branch is not runtime execution or catalogue readiness.
 
+The related state-to-UI helper `DE48C0` maps controller state 5/13 to UI IDs `0x061DD69B` and
+`0x070D74E7`, respectively, via `00810650` and control vtable `+0x28`. Its retained evidence is
+separate in [gge-state-ui](../gge-state-ui/README.md); matching IDs are not treated as a proven
+message feedback loop without a caller/payload observation.
+
 ## SDK cross-check
 
 `refs/Spore-ModAPI/Spore/App/IStateManager.h` puts `SwitchToState` at vtable `+0x28`, matching the
