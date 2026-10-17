@@ -88,7 +88,21 @@ void rows(std::ostream& out,const PhysicalContextResult& ctx,const std::optional
                 out<<",\"source_index\":"<<*selection.source_index<<",\"resource\":";key(out,records[*selection.source_index].resource);
                 out<<",\"save_stem\":"<<text(capture::utf8(selection.save_stem));
             }
-            out<<",\"error\":"<<text(error)<<"},\"header\":";
+            out<<",\"error\":"<<text(error)<<",\"records\":[";
+            if(read)for(size_t j=0;j<records.size();++j) {
+                if(j)out<<',';
+                const auto& record=records[j];
+                out<<"{\"resource\":";key(out,record.resource);
+                out<<",\"transport\":"<<text(record.envelope?"observed_prefix_nested_dbpf":"direct_counted_payload");
+                if(record.envelope) {
+                    const auto& e=*record.envelope;
+                    out<<",\"prefix_words\":["<<e.prefix_first<<','<<e.prefix_second<<"],\"inner_resource\":";key(out,e.inner_resource);
+                    out<<",\"inner_container_bytes\":"<<e.inner_container_bytes<<",\"inner_index_end\":"<<e.inner_index_end
+                       <<",\"unvalidated_container_tail_bytes\":"<<e.container_tail_bytes;
+                }
+                out<<'}';
+            }
+            out<<"]},\"header\":";
             if(binding==headers.end())out<<"{\"status\":\"Unknown\",\"reason\":\"no explicit saved-index binding\"}";
             else {
                 if(!selected)throw std::runtime_error("header binding requires selected planet/save stem");

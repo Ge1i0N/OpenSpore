@@ -1,8 +1,9 @@
 # PlanetRecord → saved-game name → typed GGE metadata
 
-Reviewed **2026-10-15**. Static GA-unpacked SHA-256
+Reviewed **2026-10-17**. Static GA-unpacked SHA-256
 `086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
-Constructed fixtures only; **no original planet-record/save corpus or original runtime replay**.
+GA instructions establish the structural record schema. Later explicitly authorized real saves
+corroborate the bounded transport subset below; **no original runtime replay**.
 
 ## What this closes — and what is still invisible
 
@@ -79,8 +80,52 @@ The factory [`0xBA6300`](audit/starsdb/planet/00ba6300.asm.txt) assigns this res
 from the serialized planet `mKey`. Neither is the context's pointer-shaped object token.
 
 `read_selected_records` reads **one explicitly selected DBPF** via exact keys; no fallback/merge,
-resource-manager wrapper emulation or profile scan. This adapter is tested on constructed DBPFs;
-its physical transport/version coverage is not yet verified on original planetRecords packages.
+resource-manager execution or profile scan. The original direct counted-payload path remains for
+explicit decoded inputs/controlled fixtures. A separate observed nested transport is now strictly
+validated rather than taking the only inner directory entry regardless of its identity.
+
+### Observed nested transport subset
+
+For 50 selected resources in six real `planetRecords.pkp` files, decoded outer bytes are:
+
+```text
+00 25 00 03                 # observed prefix, two BE halves (37,3)
+DBPF3.0 / index version3    # begins at offset4 of outer decoded resource
+  exactly one record:
+    key(instance,type,group) = (1,1,1)
+    decoded payload = counted PlanetRecord collections + field frame
+```
+
+The outer counted key remains `(starKey+i*01000000,05220CB8,1)`; the inner key `(1,1,1)` is neither
+that outer identity nor the optional serialized planet `mKey`. The four-byte prefix matches save
+version numbers visually, but its native interpretation/dispatch is **not recovered**. The reader
+accepts only the observed prefix tuple as an explicitly bounded host subset, not all compatible
+save versions.
+
+Nested DBPF now uses the same strict `ExplicitDbpfReader` preflight as the outer context path:
+version/index layout, count/stride/bounds, unique exact key, high-key word, flags, compression and
+decoded size are checked. A sole wrong-type/group/instance record is rejected, not substituted;
+multiple records (even with one matching key) are outside this observed subset. Recognized prefix
+with bad magic, or DBPF-at-offset4 with a different prefix, fails closed. No magic scanning occurs.
+
+**Index end is not EOF in 24/50 selected containers.** All referenced payloads/index spans remain
+bounded, but 1–5 bytes can remain after the inner index. Those bytes are reported as
+`container_tail_bytes`, not treated as decoded PlanetRecord data or assumed padding/garbage.
+The inner record itself must be consumed exactly; its field-frame tail remains a hard failure.
+Do not add an index-at-EOF rule based solely on shipped main packages.
+
+`ResourceRecord::envelope` retains prefix halves, exact inner key, container size, index end and
+unvalidated container-tail size. Direct payloads have no envelope observation. Both encoded outer
+transport and decoded inner payload batch sizes are separately capped at 64 MiB. The JSON diagnostic
+capture and normal planet inspector expose these distinctions; raw `--resource-counts` previews
+intentionally do not imply nested identity validation.
+
+[Corpus summary](audit/starsdb/planet/wrapper-corpus.json) records six package SHA-256 values,
+explicit key selections, counts, tail bounds and reproduction. The selected 50 comprise five
+planets per explicit star key in `Game0` and `.old`, not an inspection of every planet in Ronikari's
+large package. Inputs' SHA-256 values matched before/after. ModAPI's serializer interfaces corroborate
+the distinction between serializer stream/record and ResourceKey identity but do not establish this
+physical envelope; the targeted SporeModder-FX source search supplied no matching planet wrapper.
 
 `0xBBA900` uses the unfiltered list unless star flags include `0x40`. With that flag it excludes
 planets whose `flags +0x2C` include `0x100` (`0xB8DAC0`). Order is retained; GGE `0xDF7F30` takes the
@@ -120,18 +165,23 @@ producer. The test's explicit catalogue Available observations belong only to co
 
 ## Checks / reproduction
 
-`planet_record_verify`: **291 constructed checks PASS**. Literal independent name fixture, all
+`planet_record_verify`: **547 constructed checks PASS**. Literal independent name fixture, all
 prefix/field truncations, every collection route, city prefix and exact node cap, field/text bounds,
 duplicate fields, no magic scanning, counted resource identity/wrap, missing/duplicate DBPF entries,
 filter/order/Unknown distinctions, BAD_DATA rules, atomic rejection and decoded fields → typed
 saved adapter → real GGE projector. Optional new path writes only a labelled synthetic DBPF and
 refuses an existing destination. CLI smoke selects index 1 / `Planet Save` after filtering index 0.
+Additional nested tests cover every wrapper truncation, each wrong inner-key word, absent/duplicate/
+extra inner records, wrong prefix/magic/version/index/flags/compression/size, nested RefPack decoding,
+oversized decompression declarations and atomic failure of a later planet. An opaque container tail
+passes with its size recorded, whereas a decoded PlanetRecord tail is rejected. Capture integration
+tests verify JSON envelope provenance and failure for a sole wrong inner key.
 
 ```powershell
 cmake --build build --config Debug --target OpenSpore planet_record_verify planet_record_inspect
-.\build\Debug\planet_record_verify.exe
+.\build\bin\Debug\planet_record_verify.exe
 # Caller supplies an explicit planet-record DBPF and observed star key/count/flags, not a profile.
-.\build\Debug\planet_record_inspect.exe <explicit-planet-DBPF> <star-key-hex> <count-decimal> <flags-hex>
+.\build\bin\Debug\planet_record_inspect.exe <explicit-planet-DBPF> <star-key-hex> <count-decimal> <flags-hex>
 refs/ghidra/venv/Scripts/python.exe tools/starsdb_evidence.py --planet
 python tools/starsdb_evidence.py --static --planet
 ```

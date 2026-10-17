@@ -164,6 +164,73 @@ int main(int argc,char** argv) {
     bad_resources=resources; bad_resources.push_back(resources[1]);
     if (!check(fail_read(package(bad_resources)),"duplicate resource rejected")) return 1;
 
+    // Observed envelope transport, independently constructed nested DBPF fixtures.
+    // Direct counted fixtures above stay supported and are never confused with a native wrapper.
+    const pkg::ResourceKey inner_key{1,1,1};
+    const auto wrap=[](const Bytes& inner) { Bytes out{0,0x25,0,3};append(out,inner);return out; };
+    const auto inner=package({{inner_key,named(u"Wrapped planet")}});
+    const auto wrapper=wrap(inner);
+    auto wrapped_resources=resources;wrapped_resources[1].second=wrapper;
+    if(!check(reader.open_from_memory(package(wrapped_resources),error)&&
+        planet::read_selected_records(reader,star,planets,error)&&planets[1].record.name==std::u16string(u"Wrapped planet")&&
+        !planets[0].envelope&&planets[1].envelope&&planets[1].envelope->prefix_first==37&&
+        planets[1].envelope->prefix_second==3&&planets[1].envelope->inner_resource.instance==1&&
+        planets[1].envelope->inner_resource.type==1&&planets[1].envelope->inner_resource.group==1&&
+        planets[1].envelope->inner_container_bytes==inner.size()&&
+        planets[1].envelope->inner_index_end==inner.size()&&!planets[1].envelope->container_tail_bytes,
+        "exact observed prefix/nested key provenance; direct payload remains distinct"))return 1;
+    auto with_tail=inner;append(with_tail,Bytes{0xde,0xad,0xbe,0xef});
+    wrapped_resources[1].second=wrap(with_tail);
+    if(!check(reader.open_from_memory(package(wrapped_resources),error)&&
+        planet::read_selected_records(reader,star,planets,error)&&planets[1].envelope->container_tail_bytes==4&&
+        planets[1].envelope->inner_index_end==inner.size()&&planets[1].envelope->inner_container_bytes==with_tail.size(),
+        "inner index need not end at EOF; transport tail retained, not called decoded"))return 1;
+    const auto reject_wrapper=[&](const Bytes& bytes) {
+        auto batch=resources;batch[2].second=bytes;return fail_read(package(batch));
+    };
+    for(size_t n=0;n<wrapper.size();++n)
+        if(!check(reject_wrapper(Bytes(wrapper.begin(),wrapper.begin()+n)),"every wrapper truncation atomic; no partial planet batch"))return 1;
+    for(const auto& key:std::vector<pkg::ResourceKey>{{2,1,1},{1,2,1},{1,1,2}})
+        if(!check(reject_wrapper(wrap(package({{key,named(u"Wrong key")}}))),"sole wrong inner key is not substituted"))return 1;
+    if(!check(reject_wrapper(wrap(package({}))),"empty nested directory not a planet"))return 1;
+    if(!check(reject_wrapper(wrap(package({{inner_key,named(u"A")},{inner_key,named(u"B")}}))),
+        "duplicate exact inner key never first-match"))return 1;
+    if(!check(reject_wrapper(wrap(package({{inner_key,named(u"A")},{{2,2,2},named(u"Extra")}}))),
+        "extra inner records outside observed transport subset"))return 1;
+    for(const auto& mutation:std::vector<std::pair<size_t,u32>>{{0,0},{4,2},{8,1},{0x3c,0},{0x24,65537},
+            {0x2c,4},{0x40,0xffffffffu},{inner.size()-36,0x80000004u},
+            {inner.size()-4,0},{inner.size()-4,0x00010001u},
+            {inner.size()-8,0xffffffffu},{inner.size()-16,1},{inner.size()-32,1}}) {
+        auto changed_inner=inner;le(changed_inner,mutation.first,mutation.second);
+        if(!check(reject_wrapper(wrap(changed_inner)),"nested version/index/flags/compression/size/high-word/bounds rejected"))return 1;
+    }
+    auto wrong_prefix=wrapper;wrong_prefix[1]=0x24;
+    if(!check(reject_wrapper(wrong_prefix),"wrong wrapper prefix not accepted from DBPF magic alone"))return 1;
+    wrong_prefix=wrapper;wrong_prefix[3]=4;
+    if(!check(reject_wrapper(wrong_prefix),"unsupported prefix second half"))return 1;
+    auto wrong_magic=wrapper;wrong_magic[4]='X';
+    if(!check(reject_wrapper(wrong_magic),"recognized prefix with bad nested magic blocks"))return 1;
+    auto inner_payload_tail=named(u"Tail");inner_payload_tail.push_back(1);
+    if(!check(reject_wrapper(wrap(package({{inner_key,inner_payload_tail}}))),
+        "decoded inner PlanetRecord tail rejected, unlike opaque container tail"))return 1;
+    // RefPack literal-only stream; nested output traverses the same bounded record walker.
+    const auto literal_payload=named(u"Packed");Bytes packed{0x10,0xfb,0,0,(u8)literal_payload.size()};
+    const size_t literals=(literal_payload.size()/4)*4;
+    packed.push_back((u8)(0xe0+(literals-4)/4));
+    packed.insert(packed.end(),literal_payload.begin(),literal_payload.begin()+literals);
+    packed.push_back((u8)(0xfc+literal_payload.size()-literals));
+    packed.insert(packed.end(),literal_payload.begin()+literals,literal_payload.end());
+    auto packed_dbpf=package({{inner_key,packed}});
+    le(packed_dbpf,packed_dbpf.size()-8,(u32)literal_payload.size());le(packed_dbpf,packed_dbpf.size()-4,0x1ffff);
+    wrapped_resources=resources;wrapped_resources[1].second=wrap(packed_dbpf);
+    if(!check(reader.open_from_memory(package(wrapped_resources),error)&&planet::read_selected_records(reader,star,planets,error)&&
+        planets[1].record.name==std::u16string(u"Packed"),"nested RefPack exact output size and planet framing"))return 1;
+    le(packed_dbpf,packed_dbpf.size()-8,64*1024*1024+1);
+    if(!check(reject_wrapper(wrap(packed_dbpf)),"nested decompression declaration exceeds host bound before allocation"))return 1;
+    // Restore original direct source rows for the separate controlled metadata adapter checks.
+    if(!check(reader.open_from_memory(physical,error)&&planet::read_selected_records(reader,star,planets,error),
+        "direct transport regression after wrapper checks"))return 1;
+
     // Decoded StarRecord + planets + decoded file header + controlled terrain query -> GGE entry.
     save::FileHeader header; save::HeaderProbe probe;
     if (!check(save::read_header(frame({{0x04162d88,words({37})},{0x04162d89,words({3})}}),header,error) &&

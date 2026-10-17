@@ -229,6 +229,25 @@ class SaveCaptureTests(unittest.TestCase):
         self.assertEqual(p.returncode, 2)
         self.assertFalse(old_output.exists())
 
+    def test_wrapper_provenance_and_opaque_container_tail(self):
+        inner = package([((1, 1, 1), words(0, 0, 0, 0) + frame([(0x03d58b9a, wide('Планета 🌐'))]))])
+        self.planets.write_bytes(package([((42, 0x05220cb8, 1), b'\x00\x25\x00\x03' + inner + b'opaque-tail')]))
+        r = self.run_capture()
+        selection = r['persisted_saved']['rows'][0]['planet_selection']
+        self.assertEqual(selection['status'], 'selected')
+        envelope = selection['records'][0]
+        self.assertEqual(envelope['prefix_words'], [37, 3])
+        self.assertEqual(envelope['inner_resource'], {'instance': '0x00000001', 'type': '0x00000001', 'group': '0x00000001'})
+        self.assertEqual(envelope['unvalidated_container_tail_bytes'], 11)
+        self.assertEqual(envelope['inner_index_end'], len(inner))
+
+    def test_sole_wrong_inner_key_stays_blocked(self):
+        inner = package([((2, 1, 1), words(0, 0, 0, 0) + frame([(0x03d58b9a, wide('Планета 🌐'))]))])
+        self.planets.write_bytes(package([((42, 0x05220cb8, 1), b'\x00\x25\x00\x03' + inner)]))
+        r = self.run_capture()
+        self.assertEqual(r['persisted_saved']['rows'][0]['planet_selection']['status'], 'blocked')
+        self.assertEqual(r['persisted_saved']['rows'][0]['planet_selection']['records'], [])
+
 
 if __name__ == '__main__':
     unittest.main()

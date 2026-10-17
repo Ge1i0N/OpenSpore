@@ -118,6 +118,9 @@ name              present on StarRecord
 ```
 
 The explicitly selected `planetRecords.pkp` contains five wrapped nested DBPF planet resources.
+The initial sole-inner-record heuristic is now superseded by strict prefix/key/version/bounds
+validation with retained opaque container tails; see [planet transport subset](planet-record.md)
+and [six-file wrapper corroboration](audit/starsdb/planet/wrapper-corpus.json).
 After read-only nested-DBPF unwrapping, all five structural PlanetRecord observations parse and the
 selection adapter returns save stem `Золяко`. The `.spo` first-header reader observes
 `mFileVersionMajor=37`, `mFileVersionMinor=3`, and the bounded predicate `major >= 33` is true.
@@ -448,6 +451,9 @@ were selected by this validation. No REA/Ghidra process was launched for this ho
 Controlled integration tests cover distinct headers with `(37,3)` and `(32,99)`, Unicode paths/names,
 float precision, all reference outcomes, Unknown/absent/empty distinctions, invalid bindings,
 malformed Unicode/nonfinite rejection, blocked planets, concurrent publication and output protection.
+Planet-selection `records` additionally report direct versus observed-prefix/nested transport. Nested
+rows include exact inner resource, prefix halves, index end and unvalidated container-tail size.
+This provenance does not assert that the entire inner container or native wrapper semantics are decoded.
 
 ## Next required observation
 

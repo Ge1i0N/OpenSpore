@@ -22,7 +22,7 @@ int main(int argc,char** argv) {
     if (!reader.open(argv[1],error)) {
         std::cerr<<"planet resource read blocked: "<<error<<'\n'; return 1;
     }
-    if(counts_only){std::vector<pkg::ResourceKey> keys;if(!planet::resource_keys(star,keys,error))return 1;for(size_t i=0;i<keys.size();++i){auto r=reader.read_unique(keys[i]);if(r.status!=starsdb::ResourceReadStatus::Found){std::cerr<<"["<<i<<"] resource blocked: "<<r.error<<'\n';return 1;}std::cout<<"["<<i<<"] resource=0x"<<std::hex<<keys[i].instance<<std::dec<<" bytes="<<r.bytes.size()<<" first=";for(size_t n=0;n<r.bytes.size()&&n<16;++n)std::cout<<std::hex<<(unsigned)r.bytes[n]<<' ';std::cout<<std::dec;pkg::Package nested;if(r.bytes.size()>4&&r.bytes[4]=='D'&&r.bytes[5]=='B'&&r.bytes[6]=='P'&&r.bytes[7]=='F'&&nested.open_from_memory(r.bytes.data()+4,r.bytes.size()-4,"nested-planet")){std::cout<<" nested_records="<<nested.records().size();for(size_t j=0;j<nested.records().size()&&j<8;++j)std::cout<<" key["<<j<<"]=0x"<<std::hex<<nested.records()[j].instance()<<std::dec;}std::cout<<'\n';}return 0;}
+    if(counts_only){std::vector<pkg::ResourceKey> keys;if(!planet::resource_keys(star,keys,error))return 1;for(size_t i=0;i<keys.size();++i){auto r=reader.read_unique(keys[i]);if(r.status!=starsdb::ResourceReadStatus::Found){std::cerr<<"["<<i<<"] resource blocked: "<<r.error<<'\n';return 1;}std::cout<<"["<<i<<"] resource=0x"<<std::hex<<keys[i].instance<<std::dec<<" bytes="<<r.bytes.size()<<" first=";for(size_t n=0;n<r.bytes.size()&&n<16;++n)std::cout<<std::hex<<(unsigned)r.bytes[n]<<' ';std::cout<<std::dec;std::cout<<" raw_transport_preview_only; use normal mode for strict nested identity validation\n";}return 0;}
     if (!planet::read_selected_records(reader,star,records,error)) {
         std::cerr<<"planet resource read blocked: "<<error<<'\n'; return 1;
     }
@@ -32,6 +32,13 @@ int main(int argc,char** argv) {
         std::cout<<"["<<i<<"] resource=0x"<<std::hex<<p.resource.instance<<std::dec
                  <<" structural_frames="<<p.record.frames_walked<<" name_units=";
         if (p.record.name) std::cout<<p.record.name->size(); else std::cout<<"UNKNOWN";
+        if(p.envelope) {
+            const auto& e=*p.envelope;
+            std::cout<<" transport=observed-prefix-nested-DBPF prefix="<<e.prefix_first<<','<<e.prefix_second
+                <<" inner_key="<<e.inner_resource.instance<<','<<e.inner_resource.type<<','<<e.inner_resource.group
+                <<" inner_bytes="<<e.inner_container_bytes<<" index_end="<<e.inner_index_end
+                <<" unvalidated_container_tail="<<e.container_tail_bytes;
+        }else std::cout<<" transport=direct-counted-payload";
         std::cout<<'\n';
     }
     planet::Selection selected;

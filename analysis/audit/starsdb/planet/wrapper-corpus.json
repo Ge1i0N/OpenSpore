@@ -1,0 +1,81 @@
+{
+  "reviewed": "2026-10-17",
+  "authority": "explicit local save resources; measured transport subset, not recovered native wrapper semantics",
+  "observation_method": "outer exact counted keys, complete strict inner DBPF preflight, sole exact key(1,1,1), RefPack decode, complete structural PlanetRecord walk",
+  "selected_rows": 50,
+  "rows_with_prefix_00250003": 50,
+  "rows_with_inner_dbpf_version_3_0_index_3": 50,
+  "rows_with_sole_inner_key_instance_type_group_1_1_1": 50,
+  "rows_with_nonzero_container_tail": 24,
+  "packages": [
+    {
+      "path": "build/bin/Debug/UserData1/Games/Game0/planetRecords.pkp",
+      "sha256": "5fc5cab13ec3135784da40272717ab7d7a2d96ecfbce8a17bf57b3ea0a74a326",
+      "selected_star_keys": ["0x0041c023"],
+      "count_per_star": 5,
+      "rows": 5,
+      "with_container_tail": 0,
+      "max_container_tail_bytes": 0,
+      "input_sha256_unchanged": true
+    },
+    {
+      "path": "build/bin/Debug/UserData1/Games/Game0.old/planetRecords.pkp",
+      "sha256": "529f0658eca0b175c664710cdac210c7e1b3a589f30c95a4c7d9ec5a4a28237d",
+      "selected_star_keys": ["0x0041c023"],
+      "count_per_star": 5,
+      "rows": 5,
+      "with_container_tail": 0,
+      "max_container_tail_bytes": 0,
+      "input_sha256_unchanged": true
+    },
+    {
+      "path": "build/bin/Debug/UserData/Games/Game0/planetRecords.pkp",
+      "sha256": "95ff0fba2726b61ac0267ad03fe3a048725833fecd1341c30791b7d4d6499464",
+      "selected_star_keys": ["0x0041c023", "0x0039a02f"],
+      "count_per_star": 5,
+      "rows": 10,
+      "with_container_tail": 5,
+      "max_container_tail_bytes": 5,
+      "input_sha256_unchanged": true
+    },
+    {
+      "path": "build/bin/Debug/UserData/Games/Game0.old/planetRecords.pkp",
+      "sha256": "08ad85f49d5daaee203248f73031deb9c90724a0f0c86b4c6c2a48d1519253ac",
+      "selected_star_keys": ["0x0041c023", "0x0039a02f"],
+      "count_per_star": 5,
+      "rows": 10,
+      "with_container_tail": 5,
+      "max_container_tail_bytes": 5,
+      "input_sha256_unchanged": true
+    },
+    {
+      "path": "build/bin/Debug/UserDataRonikari/Games/Game0/planetRecords.pkp",
+      "sha256": "fed7b6887ef80d1a353794aaefd9a608fe93b0a6a08508285aa99ea75a1f8e3d",
+      "selected_star_keys": ["0x009d4020", "0x00524036"],
+      "count_per_star": 5,
+      "rows": 10,
+      "with_container_tail": 7,
+      "max_container_tail_bytes": 4,
+      "input_sha256_unchanged": true
+    },
+    {
+      "path": "build/bin/Debug/UserDataRonikari/Games/Game0.old/planetRecords.pkp",
+      "sha256": "914e82c57734485926f0ab2255dd504ae85cb45da83888f66945fff7b614cc00",
+      "selected_star_keys": ["0x009d4020", "0x00524036"],
+      "count_per_star": 5,
+      "rows": 10,
+      "with_container_tail": 7,
+      "max_container_tail_bytes": 3,
+      "input_sha256_unchanged": true
+    }
+  ],
+  "reproduction": "For each package and selected star key: build/bin/Debug/planet_record_inspect.exe <path> <star-key> 5 0. Flags0 selects the unfiltered inspection path; this is not a recovered observation of runtime star flags.",
+  "limitations": [
+    "50 explicitly selected resources, not every planet resource in these packages",
+    "The selected keys also exist in .old; they are not asserted to be all saved refs in that variant",
+    "Prefix halves37,3 are measured, not a recovered version-dispatch contract",
+    "Inner container tails remain uninterpreted; structural success does not mean every container byte decoded",
+    "No native wrapper reader, post-load services, terrain query or runtime refill executed",
+    "Real save payloads are not committed"
+  ]
+}
