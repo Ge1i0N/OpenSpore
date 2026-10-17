@@ -75,6 +75,11 @@ evidence now clarifies exactly what must produce that metadata:
   starter-world is removed from `+0xA0`, `BA8980` performs planet work, and the new record is
   AddRef'd/appended to `+0xDC/+0xE0`. If changed and controller byte `+0x64` is clear, `BB4D40`
   writes `stars.db` and MessageManager `+0x18` sends `0x062D91C2`.
+- The `0x062D91C2` follow-up is now bounded separately: consumer `0x00B29960` calls `0x00B26770`,
+  which obtains the StarManager and conditionally writes controller byte `+0x46`/calls an opaque
+  `00809E60` path. No direct `DF95A0`/`DF9740`/`DF9620` edge is present in this consumer. GGE's
+  13 registered message IDs from `DEA1B0` are retained as candidates, not promoted to refresh
+  semantics from registration alone. See [refill event evidence](audit/gge-refill-event/README.md).
 - SDK `StarManager.h` corroborates `+0xA0/+0xDC/+0xF0/+0x118/+0x228`, but address leads remain
   version-specific: SDK `0xBB61E0` is labelled Dispose while this GA `0xBB61C0` is refill; other
   nearby SDK labels likewise land on different GA bodies. Names are retained as secondary hints only.

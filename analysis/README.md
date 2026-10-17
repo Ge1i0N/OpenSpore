@@ -50,6 +50,7 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE terrain correlation | [gge-real-save](gge-real-save.md) | explicit starter-world/property matches across selected packages; duplicate package matches stay ambiguous, no native readiness claim |
 | GA PropManager terrain lookup | [audit/gge-terrain-prop](audit/gge-terrain-prop/README.md) | vtable/getter/lookup contract cross-checked with SDK; no runtime package priority or refill claim |
 | GA StarManager candidate refill | [audit/gge-refill](audit/gge-refill/README.md) | BB61C0 quota/filter/fallback/append/write order cross-checked with StarManager field layout; static only |
+| Refill event versus GGE refresh | [audit/gge-refill-event](audit/gge-refill-event/README.md) | 0x062D91C2 consumer is StarManager-side; no direct DF95A0/GGE refresh edge claimed |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
 | Main → playable roadmap | [main-to-playable-roadmap](main-to-playable-roadmap.md) | current layer status, priority order and parked console work |

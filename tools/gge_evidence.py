@@ -47,6 +47,7 @@ PUBLICATION_FUNCTIONS = (0xdf94e0,0xde5e90,0xde9dd0,0xdf95a0,0xdf9620,0xdf85b0,
 TERRAIN_PROP_FUNCTIONS = (0x67ddf0, 0x6a60e0, 0x6a61f0)
 REFILL_FUNCTIONS = (0xbb61c0, 0xbb24d0, 0xbb3e10, 0xbb9c40, 0xbb9c60, 0xbb9c70,
                    0xbad210, 0xbb5950)
+REFILL_EVENT_FUNCTIONS = (0xb29960, 0xb26770)
 
 
 def main():
@@ -75,6 +76,9 @@ def main():
     if refill:
         addresses = REFILL_FUNCTIONS
         dest = ROOT/'analysis/audit/gge-refill'
+    if '--refill-event' in sys.argv:
+        addresses = REFILL_EVENT_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-refill-event'
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
     if '--publication' in sys.argv and digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
