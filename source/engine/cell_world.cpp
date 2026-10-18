@@ -14,10 +14,6 @@
 
 namespace os::cell {
 namespace {
-
-// A tiny deterministic PRNG (xorshift32) seeded from the level name. Placement is a seed,
-// not the original's algorithm (see the header): the only thing this guarantees is that the
-// same data always produces the same world.
 struct Rng {
     u32 s;
     explicit Rng(u32 seed) : s(seed ? seed : 0x9E3779B9u) {}
@@ -32,11 +28,6 @@ struct Rng {
 };
 
 constexpr int kMaxEntities = 400;
-
-// Simulation seeds: values not recovered from shipped data, marked SEED.
-// Will be replaced with real data from the binary oracle / shipped data when recovered.
-// SEED: protectTime, hatchDuration, hp formula, chaseSpeed, fleeSpeed, growAmount,
-// spawnOutput, foodValue, digestion* are NOT in cell_properties.
 constexpr float kPlayerAccel = 70.0f;
 constexpr float kPlayerSpeed = 24.0f;
 constexpr float kDrag = 4.0f;
@@ -63,10 +54,6 @@ bool contains_ci(const std::string& hay, const char* needle) {
     for (char c : hay) h.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
     return h.find(needle) != std::string::npos;
 }
-
-// Which name does an archetype go by? The registry name for its id when the tables are loaded,
-// else the decoded display name. Empty when neither resolves (many spawn ids are assigned, not
-// hashed).
 std::string archetype_label(const GameData& d, const Archetype& a) {
     (void)d;
     if (const char* n = naming::instance_name(a.id)) return n;
@@ -78,21 +65,13 @@ bool looks_like_food(const std::string& name) {
     return contains_ci(name, "food") || contains_ci(name, "flora") || contains_ci(name, "plant") ||
            contains_ci(name, "clump") || contains_ci(name, "egg");
 }
-
-// Diet classification from the binary tuning vocabulary.
-// Returns: 0 = herbivore, 1 = carnivore, 2 = omnivore.
 int diet_from_name(const std::string& name) {
     if (contains_ci(name, "carnivore")) return 1;
     if (contains_ci(name, "herbivore")) return 0;
     if (contains_ci(name, "omnivore")) return 2;
     return -1;  // unknown
 }
-
-// Unnamed food props have consecutive assigned ids (not FNV hashes).
-// These are the food/plant/bubble tiers: 0x5a5c0f00..03, 0x63166098..9e, 0x0e09bb72..75, 0x0feb4d91..96.
 bool is_unnamed_food_prop(u32 archetype_id) {
-    // Consecutive runs: check if the id falls in a known food-prop range.
-    // These are identified by their consecutive nature and their presence in populate entries.
     static const std::vector<std::pair<u32, u32>> kFoodPropRanges = {
         {0x5a5c0f00u, 0x5a5c0f03u},  // level_water food props
         {0x63166098u, 0x6316609eu},  // level_plant food props
@@ -161,17 +140,18 @@ bool World::load_save(const std::string& path, std::string& error) {
     if (!cell::decode_save(path, creatures, info, error)) {
         return false;
     }
-    // Restore player position and stats from the first creature.
     if (!creatures.empty()) {
         const cell::CreatureStats& c = creatures[0];
-        // Position is stored as packed ints; convert to world coords.
         const float px = static_cast<float>(static_cast<i32>(c.pos_x)) / 1000.0f;
         const float py = static_cast<float>(static_cast<i32>(c.pos_y)) / 1000.0f;
+        const float vx = static_cast<float>(static_cast<i32>(c.pos_z)) / 100.0f;
+        const float vy = static_cast<float>(static_cast<i32>(c.pos_w)) / 100.0f;
         if (m_player >= 0 && static_cast<size_t>(m_player) < m_entities.size()) {
             m_entities[static_cast<size_t>(m_player)].x = px;
             m_entities[static_cast<size_t>(m_player)].y = py;
+            m_entities[static_cast<size_t>(m_player)].vx = vx;
+            m_entities[static_cast<size_t>(m_player)].vy = vy;
         }
-        // Restore size from stat9 (a float stat).
         if (c.stat9.has_value()) {
             const float sz = c.stat9.value();
             if (sz > 0.0f && m_player >= 0 && static_cast<size_t>(m_player) < m_entities.size()) {
@@ -240,8 +220,6 @@ void World::spawn_particles(float x, float y, int count, u32 color) {
         m_particles.push_back(p);
     }
 }
-
-// SEED: procedural sound via Beep is a placeholder, not game audio. Will be replaced with real audio data.
 void World::play_sound(const char* name) {
     if (!name || !*name) return;
     m_last_sound = name;
@@ -265,7 +243,6 @@ void World::play_sound(const char* name) {
 }
 
 bool World::select_part(const std::string& part_name) {
-    // Check if the part is unlocked (exists as a cell_unlock_* archetype in the world).
     const std::string unlock_name = "cell_unlock_" + part_name;
     const u32 unlock_id = fnv1_lower(unlock_name.c_str());
     bool unlocked = false;
@@ -284,40 +261,27 @@ bool World::write_save(const std::string& path, std::string& error) const {
         error = "empty save path";
         return false;
     }
-    // Write a minimal .spo save with current progress.
-    // Format: DBPF header + one record with creature stats.
     std::vector<u8> payload;
-    // Creature group: 8 frames with field counts [5][4][25][11][4][2][35][8]
-    // For simplicity, write a minimal group with position and size.
     auto put32 = [&](u32 v) { payload.push_back(v & 0xFF); payload.push_back((v >> 8) & 0xFF); payload.push_back((v >> 16) & 0xFF); payload.push_back((v >> 24) & 0xFF); };
     auto putf32 = [&](float f) { u32 bits; memcpy(&bits, &f, 4); put32(bits); };
-    // Frame 0: 5 stat ids
     put32(0x0240E421); put32(0x0240E422); put32(0x0240E423); put32(0x02E9EFD3); put32(0x03CDD54B);
-    // Frame 1: 4 packed coordinates
     const Entity* p = player();
     if (p) {
         put32(static_cast<u32>(static_cast<i32>(p->x * 1000.0f)));
         put32(static_cast<u32>(static_cast<i32>(p->y * 1000.0f)));
-        put32(0); put32(0);
+        put32(static_cast<u32>(static_cast<i32>(p->vx * 100.0f)));
+        put32(static_cast<u32>(static_cast<i32>(p->vy * 100.0f)));
     } else {
         put32(0); put32(0); put32(0); put32(0);
     }
-    // Frame 2: 25 detailed stats (simplified)
     for (int i = 0; i < 25; ++i) put32(0);
-    // Frame 3: 11 stats
     for (int i = 0; i < 11; ++i) put32(0);
-    // Frame 4: 4 stats
     for (int i = 0; i < 4; ++i) put32(0);
-    // Frame 5: 2 stats
     put32(m_dna); put32(m_eaten);
-    // Frame 6: 35 mixed stats
     for (int i = 0; i < 35; ++i) put32(0);
-    // Frame 7: 8 stats including size
     if (p) putf32(p->size); else putf32(1.0f);
     for (int i = 0; i < 7; ++i) put32(0);
-    // Object trailer (24 bytes)
     for (int i = 0; i < 24; ++i) payload.push_back(0);
-    // Write DBPF wrapper
     std::vector<u8> out;
     auto put32be = [&](u32 v) { out.push_back((v >> 24) & 0xFF); out.push_back((v >> 16) & 0xFF); out.push_back((v >> 8) & 0xFF); out.push_back(v & 0xFF); };
     out.insert(out.end(), {'D', 'B', 'P', 'F'});
@@ -327,7 +291,6 @@ bool World::write_save(const std::string& path, std::string& error) const {
     put32be(8 + 28);  // index size (1 record)
     out.resize(0x60, 0);
     out.insert(out.end(), payload.begin(), payload.end());
-    // Index entry
     put32be(0x018EB4B7);  // type
     put32be(0);  // group
     put32be(0);  // instance
@@ -354,8 +317,6 @@ bool World::load_default(std::string& error) {
         return false;
     }
     if (!load_path(path.string(), error)) return false;
-    // Background layers are optional: a missing CellGame_Layers.package disables the tide-pool
-    // backdrop but not the world. `decode` appends, so the fields join the same GameData.
     const auto layers = fs::resolve("Data/CellGame_Layers.package");
     if (!layers.empty()) {
         std::string lerr;
@@ -436,12 +397,9 @@ const std::vector<StructurePart>* World::parts_for(u32 archetype_id) const {
 }
 
 std::string World::next_level(const std::string& current) const {
-    // Find the current level's populate resource and check its type.
     const u32 cur_id = fnv1_lower(current.c_str());
     for (const Population& p : m_data.populations) {
         if (p.id == cur_id || p.name == current) {
-            // Type 4 = creature level, type 0 = background.
-            // If type 4, try to find a _2 variant.
             if (p.type == 4) {
                 std::string next = current + "_2";
                 const u32 next_id = fnv1_lower(next.c_str());
@@ -497,24 +455,17 @@ void World::spawn_from_level(const Population& pop) {
             }
         }
         const std::string name = arch ? archetype_label(m_data, *arch) : std::string();
-        // Name-based food detection; also treat unnamed consecutive-id props as food
-        // (the original's assigned ids are not FNV hashes, so naming fails).
         const bool food = looks_like_food(name) || is_unnamed_food_prop(e.cell);
         const int diet = diet_from_name(name);
         for (int k = 0; k < n && static_cast<int>(m_entities.size()) < kMaxEntities; ++k) {
             Entity en;
             en.archetype = e.cell;
             if (arch) en.structure = structure_of(*arch);
-            // Role: food if the name says so; otherwise creature with a diet tag.
             en.role = food ? Role::Food : Role::Creature;
             en.diet = diet;
-            // Eggs hatch after a delay.
-            // hatchDuration is NOT in cell_properties — use a fixed 3.0s window as a seed.
             if (contains_ci(name, "egg")) {
                 en.hatch_time = curve_value("hatchDuration", 0.0f, 3.0f);
             }
-            // Sizes: use the structure's base scale when available; fall back to a stable
-            // hash of the archetype id so one species reads consistently on screen.
             float struct_scale = 0.0f;
             if (en.structure >= 0 && static_cast<size_t>(en.structure) < m_data.structures.size()) {
                 const float s = m_data.structures[static_cast<size_t>(en.structure)].scale[0];
@@ -534,7 +485,6 @@ void World::spawn_from_level(const Population& pop) {
             if (food) m_food_templates.push_back(en);  // remembered so the pool can be restocked
         }
     }
-    // Restock target: the plankton the level shipped with. Grazing never empties the tide pool.
     m_target_food = 0;
     for (const Entity& e : m_entities) if (e.role == Role::Food) ++m_target_food;
 }
@@ -547,8 +497,6 @@ bool World::set_level(const std::string& level, std::string& error) {
     const Population* pop = nullptr;
     const u32 want = fnv1_lower(level.c_str());
     for (const Population& p : m_data.populations) {
-        // Match by resolved name, or by the level's own FNV-1 instance id (so a level still
-        // resolves when the name registry is unavailable).
         if (p.name == level || p.id == want) {
             pop = &p;
             break;
@@ -558,7 +506,6 @@ bool World::set_level(const std::string& level, std::string& error) {
         error = "unknown level '" + level + "'";
         return false;
     }
-    // Valid level: only now reset the world, so a bad name leaves the current world intact.
     m_entities.clear();
     m_food_templates.clear();
     m_target_food = 0;
@@ -579,12 +526,10 @@ bool World::set_level(const std::string& level, std::string& error) {
     m_cam_x = m_cam_y = 0.0f;
 
     spawn_from_level(*pop);
-    // Biome-specific spawn: also spawn background creatures if a _bg variant exists.
     std::string bg_level = level + "_bg";
     const u32 bg_id = fnv1_lower(bg_level.c_str());
     for (const Population& p : m_data.populations) {
         if (p.id == bg_id || p.name == bg_level) {
-            // Spawn background creatures (they don't count toward food target).
             Rng rng(fnv1_lower(bg_level.c_str()));
             for (const SpawnEntry& e : p.entries) {
                 if (e.cell == 0 || e.count <= 0.0f) continue;
@@ -614,9 +559,6 @@ bool World::set_level(const std::string& level, std::string& error) {
             break;
         }
     }
-
-    // The player: the shipped hero archetype (`cell_hero_L0`), else the Minno part cell. A
-    // seed choice, flagged as such - the original's player-creation path is not recovered.
     const Archetype* hero = find_archetype(m_data, "cell_hero_L0");
     if (!hero) hero = find_archetype(m_data, "cell_minno1");
     if (hero) {
@@ -663,8 +605,6 @@ float World::stat_for_archetype(u32 archetype_id, u32 offset) const {
 }
 
 float World::hp_for_size(float size) const {
-    // hp is NOT in cell_properties — use a simple linear scale as a seed.
-    // The original's HP formula is not recovered from shipped data.
     return 50.0f + size * 25.0f;
 }
 
@@ -699,7 +639,6 @@ void World::drop_meat(const Entity& from) {
 }
 
 void World::drop_loot(const Entity& from) {
-    // Find the loot table matching this archetype's name (e.g. "loot_squid" for cell_squid).
     const char* name = naming::instance_name(from.archetype);
     if (!name) return;
     std::string prefix = "loot_";
@@ -709,10 +648,8 @@ void World::drop_loot(const Entity& from) {
     for (const LootTable& t : m_data.loot_tables) {
         if (t.id == table_id || t.name == table_name) { lt = &t; break; }
     }
-    // Biome-specific loot: if the level has a loot_<biome> table, roll it too.
     const LootTable* biome_lt = biome_loot(m_level.c_str());
     if (biome_lt && biome_lt != lt) {
-        // Roll one entry from the biome table.
         for (const LootEntry& e : biome_lt->entries) {
             if (e.type == 1 && e.cell != 0 && e.weight > 0.0f) {
                 if (static_cast<int>(m_entities.size()) >= kMaxEntities) return;
@@ -731,20 +668,17 @@ void World::drop_loot(const Entity& from) {
         }
     }
     if (!lt || lt->entries.empty()) return;
-    // Weighted roll: sum all weights, pick a random entry proportional to weight.
     float total_weight = 0.0f;
     for (const LootEntry& e : lt->entries) {
         if (e.weight > 0.0f) total_weight += e.weight;
     }
     if (total_weight <= 0.0f) return;
-    // Deterministic pick based on tick count (no RNG needed for reproducibility).
     float roll = static_cast<float>(m_ticks % 1000) / 1000.0f * total_weight;
     float accum = 0.0f;
     for (const LootEntry& e : lt->entries) {
         if (e.weight <= 0.0f) continue;
         accum += e.weight;
         if (roll <= accum) {
-            // Apply count/countDelta/levelOffset: spawn multiple pickups.
             int count = e.count > 0 ? e.count : 1;
             if (e.count_delta > 0) count += e.count_delta;
             if (e.level_offset > 0) count += e.level_offset;
@@ -764,7 +698,6 @@ void World::drop_loot(const Entity& from) {
                     m_entities.push_back(loot);
                 }
                 if (e.type == 2 && e.table != 0) {
-                    // Nested table: roll one entry from it.
                     for (const LootTable& nested : m_data.loot_tables) {
                         if (nested.id != e.table) continue;
                         for (const LootEntry& ne : nested.entries) {
@@ -806,7 +739,6 @@ void World::tick(float dt) {
     if (!m_loaded) return;
     if (dt <= 0.0f) dt = 1.0f / 60.0f;
     if (dt > 0.1f) dt = 0.1f;  // a stalled frame must not tunnel the simulation
-    // Time dilation: game speed depends on player size (bigger = slower).
     const Entity* pl0 = player();
     if (pl0) {
         const float dilation = curve_value("time_dilation", pl0->size, 1.0f);
@@ -828,8 +760,6 @@ void World::tick(float dt) {
 
     const float px = pl->x, py = pl->y;
     const float psize = pl->size;
-
-    // --- Steering and AI --------------------------------------------------
     for (size_t i = 0; i < m_entities.size(); ++i) {
         Entity& e = m_entities[i];
         if (!e.alive) continue;
@@ -854,7 +784,6 @@ void World::tick(float dt) {
         if (!m_player_alive) continue;  // food drifts; nothing hunts a dead player
         const float dx = px - e.x, dy = py - e.y;
         const float dist = std::sqrt(dx * dx + dy * dy);
-        // Awareness: aggro radius scales with the player's eye_count parts.
         const float eye_count = curve_value("eye_count", 0.0f, 1.0f);
         const float aggro = kAggro * eye_count;
         if (dist < aggro && dist > 0.001f) {
@@ -862,11 +791,9 @@ void World::tick(float dt) {
                 (e.size > psize * kPredatorFraction || is_predator_archetype(e.archetype));
             const bool prey = e.role == Role::Food ||
                               (e.role == Role::Creature && e.size <= psize * kPredatorFraction);
-            // Look-table steering: modulate accel/speed by the creature's behavioral weights.
             const char* table = predator ? "npc_mad" : (prey ? "npc_scared" : "NPC_idle");
             const float pursue_w = look_weight(table, 4);   // pursue_target
             const float flee_w = look_weight(table, 5);     // flee_target
-            // Turn factor: NPC turn rate scales with their size.
             const float turn_factor = curve_value("npc_turn_factor", e.size, 1.0f);
             if (predator) {
                 const float w = (pursue_w > 0.f ? pursue_w : 1.0f) * turn_factor;
@@ -877,8 +804,6 @@ void World::tick(float dt) {
                 e.vx -= (dx / dist) * kPreyAccel * w * dt;
                 e.vy -= (dy / dist) * kPreyAccel * w * dt;
             }
-            // Flocking: only NPC_idle and default_look_table have object entries (weight 1.0).
-            // npc_mad/npc_scared are single-purpose (pursue/flee only).
             const float flock_w = look_weight("NPC_idle", 6);
             if (flock_w > 0.0f && e.role == Role::Creature) {
                 float avg_x = 0.0f, avg_y = 0.0f;
@@ -913,8 +838,6 @@ void World::tick(float dt) {
             }
         }
     }
-
-    // --- Integrate and wrap ----------------------------------------------
     const float span = m_arena * 2.0f;
     for (Entity& e : m_entities) {
         if (!e.alive) continue;
@@ -925,8 +848,6 @@ void World::tick(float dt) {
         if (e.y < -m_arena) e.y += span;
         if (e.y > m_arena) e.y -= span;
     }
-
-    // --- Collisions: eat, grow, bite -------------------------------------
     std::vector<Entity> drops;  // corpses become chunks AFTER the loop (else they're re-eaten now)
     if (m_player_alive && pl->alive) {
         for (size_t i = 0; i < m_entities.size(); ++i) {
@@ -938,17 +859,12 @@ void World::tick(float dt) {
             if (dx * dx + dy * dy > reach * reach) continue;
             if (e.role == Role::Food || e.role == Role::Meat ||
                 e.size <= pl->size * kPredatorFraction) {
-                // Eaten: grow by area (so a big meal matters more), then retire the entity. The
-                // diet follows what was swallowed - plankton is herbivore, flesh is carnivore.
                 const float area = pl->size * pl->size + e.size * e.size * kGrowRate;
                 pl->size = std::sqrt(area) > kMaxSize ? kMaxSize : std::sqrt(area);
                 if (e.role == Role::Food) {
                     ++m_eaten_plant;
                     m_dna += kPlantDna;
-                    // evo_points is a per-level curve (1-5 → 20-100), not per-meal.
-                    // Current use as per-meal award is a seed reinterpretation.
                     m_evo_points += 20;
-                    // Part unlock: eating a cell_unlock_* pickup unlocks that part.
                     const char* eaten_name = naming::instance_name(e.archetype);
                     if (eaten_name && strncmp(eaten_name, "cell_unlock_", 12) == 0) {
                         pl->unlocked = true;
@@ -968,16 +884,11 @@ void World::tick(float dt) {
                 pl->anim_time = 0.0f;
                 play_sound("eat");
             } else {
-                // A larger creature bites: drain HP and shove the player away.
-                // Protection window: after being hit, the player is briefly invulnerable.
-                // protectTime is NOT in cell_properties — use a fixed 0.5s window as a seed.
                 const float protect_time = curve_value("protectTime", 0.0f, 0.5f);
-                // SEED: protectTime is NOT in cell_properties. Will be replaced with real data.
                 if (pl->protect_time <= 0.0f) {
                     m_hp -= e.size * 18.0f * dt;
                     pl->protect_time = protect_time;
                 }
-                // Find the archetype label for this entity.
                 std::string attacker_label;
                 for (const Archetype& a : m_data.archetypes) {
                     if (a.id == e.archetype) {
@@ -985,7 +896,6 @@ void World::tick(float dt) {
                         break;
                     }
                 }
-                // SEED: poison DoT duration and cloud spread NOT in cell_properties. Will be replaced with real data.
                 const bool has_poison = contains_ci(attacker_label, "poison");
                 if (has_poison) {
                     pl->poison_time = 3.0f;
@@ -1001,7 +911,6 @@ void World::tick(float dt) {
                         }
                     }
                 }
-                // SEED: electric stun duration and chain mechanics NOT confirmed in cell_properties. Will be replaced with real data.
                 const bool has_electric = contains_ci(attacker_label, "elec");
                 if (has_electric) {
                     pl->electric_time = 1.0f;
@@ -1031,7 +940,6 @@ void World::tick(float dt) {
                     pl->anim_time = 0.0f;
                     play_sound("death");
                     spawn_particles(pl->x, pl->y, 15, 0xFF4040FFu);
-                    // Spawn death archetype from structure +0x10.
                     if (pl->structure >= 0 && static_cast<size_t>(pl->structure) < m_data.structures.size()) {
                         const u32 death_id = m_data.structures[static_cast<size_t>(pl->structure)].death;
                         if (death_id != 0 && death_id != 0xFFFFFFFFu && static_cast<int>(m_entities.size()) < kMaxEntities) {
@@ -1052,19 +960,13 @@ void World::tick(float dt) {
     }
 
     for (const Entity& d : drops) drop_meat(d);
-
-    // SEED: kEvolveSize is a seed value. The real evolve threshold from the binary is not recovered.
     if (pl->alive && pl->size >= kEvolveSize) m_evolved = true;
     update_diet();
-
-    // Dropped chunks rot: an uneaten corpse does not litter the pool forever.
     for (Entity& e : m_entities) {
         if (!e.alive || e.role != Role::Meat) continue;
         e.ttl -= dt;
         if (e.ttl <= 0.0f) e.alive = false;
     }
-
-    // Eggs hatch: when hatch_time expires, spawn a new creature from the egg.
     for (Entity& e : m_entities) {
         if (!e.alive || e.hatch_time <= 0.0f) continue;
         e.hatch_time -= dt;
@@ -1078,9 +980,6 @@ void World::tick(float dt) {
             spawn_particles(e.x, e.y, 8, 0xFF80FF80u);
         }
     }
-
-    // Restock: every few seconds, top the plankton back up to what the level shipped with, so a
-    // grazed tide pool refills instead of dwindling.
     m_refill -= dt;
     if (m_refill <= 0.0f && !m_food_templates.empty()) {
         m_refill = kRefillInterval;
@@ -1098,29 +997,20 @@ void World::tick(float dt) {
             ++alive_food;
         }
     }
-
-    // --- Particle update: gravity, drag, fade -----------------------------
     for (Particle& p : m_particles) {
         if (p.life <= 0.0f) continue;
-        // Gravity pulls particles down.
         p.vy += 10.0f * dt;
-        // Drag slows them.
         p.vx *= 1.0f - 0.5f * dt;
         p.vy *= 1.0f - 0.5f * dt;
         p.x += p.vx * dt;
         p.y += p.vy * dt;
         p.life -= dt * 0.5f;
     }
-    // Remove dead particles.
     m_particles.erase(std::remove_if(m_particles.begin(), m_particles.end(),
                                      [](const Particle& p) { return p.life <= 0.0f; }),
                       m_particles.end());
-
-    // --- Animation state update ------------------------------------------
     if (pl->alive) {
-        // Protection window counts down.
         if (pl->protect_time > 0.0f) pl->protect_time -= dt;
-        // Poison damage-over-time.
         if (pl->poison_time > 0.0f) {
             pl->poison_time -= dt;
             const float poison_dps = curve_value("poison_count", 0.0f, 0.0f);
@@ -1134,19 +1024,16 @@ void World::tick(float dt) {
                 pl->anim_time = 0.0f;
             }
         }
-        // Electric stun: player cannot move while stunned.
         if (pl->electric_time > 0.0f) {
             pl->electric_time -= dt;
             pl->vx = pl->vy = 0.0f;
         }
         const float sp = std::sqrt(pl->vx * pl->vx + pl->vy * pl->vy);
-        // Action animations (eat, get hit) play for a fixed duration then revert.
         const bool is_action = (pl->anim == kAnimEat || pl->anim == kAnimGetHitSpike);
         if (is_action && pl->anim_time >= kActionAnimDuration) {
             pl->anim = kAnimIdle;
             pl->anim_time = 0.0f;
         }
-        // Base animation: move when moving, idle when still.
         if (!is_action) {
             if (sp > 0.5f) {
                 if (pl->anim != kAnimMove) {
@@ -1160,14 +1047,10 @@ void World::tick(float dt) {
                 }
             }
         }
-        // Animation dilation: animation speed scales with player size.
         const float anim_dilation = curve_value("anim_dilation", pl->size, 1.0f);
         pl->anim_time += dt * (anim_dilation > 0.0f ? anim_dilation : 1.0f);
     }
-
-    // --- Camera follows the player with lookahead and smoothing ----------
     if (pl->alive) {
-        // Lookahead: camera shifts in the direction of movement.
         const float speed = std::sqrt(pl->vx * pl->vx + pl->vy * pl->vy);
         const float lookahead = curve_value("camera_lookahead", speed, 0.0f);
         const float lerp_factor = curve_value("camera_lerpfactor", speed, 0.0f);
@@ -1177,7 +1060,6 @@ void World::tick(float dt) {
             target_x += (pl->vx / speed) * lookahead;
             target_y += (pl->vy / speed) * lookahead;
         }
-        // Smooth camera: lerp toward target.
         const float lerp = lerp_factor > 0.0f ? lerp_factor * dt : 1.0f;
         m_cam_x += (target_x - m_cam_x) * lerp;
         m_cam_y += (target_y - m_cam_y) * lerp;
@@ -1187,8 +1069,6 @@ void World::tick(float dt) {
 }
 
 float World::pixels_per_unit() const {
-    // Tuned for a 720-tall reference viewport; the renderer scales by (height / 720). Zooming out
-    // as the player grows is a seed choice, but it keeps the whole arena legible at every size.
     const float s = player() ? player()->size : kPlayerBaseSize;
     return 16.0f * (1.5f / (0.5f + s));
 }
