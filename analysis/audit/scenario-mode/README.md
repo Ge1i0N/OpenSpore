@@ -61,6 +61,11 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   enter-side initialization). If the tag is `0x00DBDBA1` (`Editors`) while ScenarioMode is active,
   it calls `EF1380` (leave/cleanup-side path). This is a native mode-manager payload route, not a
   direct `Play Scenario` ControlID route.
+- The same event ID `0x0212D3E7` is also consumed by the app-level handler `0x007E7160`, which
+  clears two app/controller float fields and handles the message without comparing the ScenarioMode
+  tag. A separate lifecycle method `0x0054DF60` publishes `0x0212D3E7` alongside neighboring
+  lifecycle events `0x01EE100A` and `0x02319914`. These shared-channel edges are generic event
+  infrastructure and do not connect `Play Scenario 0x070D7509` to `0x01654C10`.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
