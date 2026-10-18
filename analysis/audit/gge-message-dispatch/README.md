@@ -677,6 +677,12 @@ outer WinButton +0x84 (CommandID)
   → IWindow::SendMsg(+0x114)
 ```
 
+The SendMsg wrapper has a separate delivery gate: `00960250` returns false when embedded IWindow
+`+0x30` is null. For a WinButton this is outer `+0x34`, which is zeroed by base construction at
+`00962950`. `00961F10` AddWinProc only updates the procedure list at `+0x60` and sends attachment
+records. Therefore native GGE attachment and later runtime delivery into `DE99B0` remain separate
+claims.
+
 Its later branches construct `kMsgButtonClick = 0x17` and `kMsgButtonSelect = 0x18`. The
 GGE-specific unresolved part is no longer generic message construction; it is the higher-level
 relationship between the Play Scenario control payload `0x070D7509` and the separate

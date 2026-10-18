@@ -68,6 +68,19 @@ written into the record by an upstream producer or handled in a callback reached
 No `ControlID 0x070D7509`, `CommandID 0x00E1132F`, or ScenarioMode tag `0x01654C10` was promoted
 from this forwarding boundary.
 
+`00960250` has an earlier delivery gate that must remain explicit:
+
+```text
+IWindow +0x30 == null
+  → return false
+```
+
+For the WinButton embedded interface, `this = outer +0x04`, so this corresponds to outer `+0x34`.
+The base constructor `00962950` initializes that field to zero. `AddWinProc(00961F10)` manages the
+native procedure list at `window +0x60` and sends attachment records, but its bounded body does not
+populate this dispatch-context field. Thus `DE5900` attachment alone does not prove that a later
+generic `SendMsg` reached `DE99B0`; a separate runtime binding gate remains.
+
 ### 👀 Exact WinProc receiver chain
 
 The bounded call chain from the producer to an attached interactive procedure is now explicit:
