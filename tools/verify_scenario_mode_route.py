@@ -135,6 +135,17 @@ def verify() -> None:
     exact(0x147EBEC, "52 00 65 00 61 00 64 00 79 00 54 00 6f 00 4c 00 61 00 75 00 6e 00 63 00 68 00 53 00 63 00 65 00 6e 00 61 00 72 00 69 00 6f 00 46 00 6f 00 72 00 45 00 64 00 69 00 74 00")
     exact(0x147EBB0, "52 00 65 00 61 00 64 00 79 00 54 00 6f 00 4c 00 61 00 75 00 6e 00 63 00 68 00 53 00 63 00 65 00 6e 00 61 00 72 00 69 00 6f 00 46 00 6f 00 72 00 50 00 6c 00 61 00 79 00")
 
+    # Native GGENewScenariov3 controller owner: observed vtable and
+    # initializer/layout identity. The vtable is an artifact relationship,
+    # not an inferred external class name.
+    exact(0x147EDCC, "c0 c6 df 00 a0 97 df 00 80 02 e0 00 10 06 e0 00 20 b4 df 00 70 01 e0 00 b0 08 de 00 40 b4 df 00 10 98 df 00 00 b4 df 00 80 b5 df 00 30 e4 df 00")
+    exact(0xDFC6C7, "b8 68 ee 47 01 33 db")
+    exact(0xDFC6E8, "50 8d 77 38 68 68 ee 47 01")
+    exact(0xDFC6F8, "8b 0e 68 fa 98 b5 05 6a 01 68 00 41 46 40")
+    exact(0xDFC7EB, "c7 44 24 2c a0 b2 bf 07")
+    exact(0xDFC7F3, "c7 44 24 30 05 4d 38 05")
+    exact(0xDFC7FB, "c7 44 24 34 e0 3f 93 05")
+
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
     exact(0xDFBD4C, "83 7e 20 09")

@@ -96,6 +96,12 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - `DFB580` names local state 9 `ReadyToLaunchScenarioForEdit` and state 10
   `ReadyToLaunchScenarioForPlay`. This upgrades the state-10 interpretation from a numeric phase
   to a native controller/UI semantic, but still does not prove runtime click delivery or launch.
+- The controller owner is the observed vtable at `0x0147EDCC`; its `+0x00` method `DFC6C0`
+  requests `GGENewScenariov3` (FNV-1 identity `0x611E869D`) and creates the labelled records
+  `choose adventure → 0x05933FE0`, `choose captain name → 0x05933FE1/2`, and
+  `choose posse → 0x05933FE3`. `DFE430` is the vtable's `+0x2C` handler. This identifies the
+  state-10 path as part of the native Scenario controller, while the object-74 click conversion
+  remains Unknown.
 - Retained shipped-binary evidence: [`scenario-mode-current-evidence.json`](scenario-mode-current-evidence.json).
    The focused REA records include `DFE430` (`ev_a8c978345364376176b078d900546eb9cf8ce24596eb4d0e9b4b16011372ed58`),
    controller UI sync (`DF9B00`/`DF9F90`, `ev_6a482fca4d92d699ab63e87065a207d8bba0d74a7655b40f8bb05a1d418e110d`,

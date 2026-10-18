@@ -124,6 +124,40 @@ Therefore `DFAE20` is not merely a numeric “playable” phase: it enters the c
 internal play mode `2`. This is static native/UI evidence only; it does not observe a click, queued
 message delivery, state acceptance, or successful launch.
 
+## Scenario controller owner and initializer
+
+The state/event handler belongs to the native controller whose vtable starts at `.rdata 0x0147EDCC`.
+The observed first twelve entries are:
+
+```text
++0x00 → DFC6C0   +0x04 → DF97A0   +0x08 → E00280   +0x0C → E00610
++0x10 → DFB420   +0x14 → E00170   +0x18 → DE08B0   +0x1C → DFB440
++0x20 → DF9810   +0x24 → DFB400   +0x28 → DFB580   +0x2C → DFE430
+```
+
+The table is not being promoted to a C++ class name from an external SDK; this is the observed
+shipped vtable/function relationship. `DFC6C0` is the initializer reached through the first slot.
+It requests layout name `GGENewScenariov3`, whose lowercase FNV-1 identity is `0x611E869D`, then
+requests the layout through `812250` with group `0x40464100` and mount `0x05B598FA`.
+
+`DFC6C0` creates four initial controller records with exact semantic labels and IDs:
+
+```text
+"choose adventure"     → 0x05933FE0
+"choose captain name"  → 0x05933FE1
+"choose captain name"  → 0x05933FE2
+"choose posse"         → 0x05933FE3
+```
+
+The records are stored in a `0x24`-byte dynamic array through `DFB100`/`DFBFD0`; later UI-sync
+helpers add the same layout's `0x05951103/04` buttons. This is the strongest recovered owner
+identity for the state-10 path: `DFE430` is part of the native `GGENewScenariov3` Scenario
+controller, not an unrelated generic event consumer.
+
+The initializer still does not prove the missing upstream click conversion. Its direct caller is
+not resolved by the bounded direct-call result because the vtable slot is invoked indirectly; the
+native object construction/scheduling edge and the route from GGE object 74 remain Unknown.
+
 ## Direct table-index selection is generic, not the missing UI join
 
 The mode table manager has two selection endpoints:
