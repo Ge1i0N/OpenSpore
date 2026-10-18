@@ -232,4 +232,22 @@ not be conflated with the ScenarioMode tag `0x01654C10` checked earlier in the s
 These are object/service-consumer effects. Their downstream acceptance and any eventual scene
 materialization remain Unknown.
 
+## Spatial/geometry consumer boundary
+
+`E0BC90` and `E0BF20` explain what the descriptor geometry is used for:
+
+- `E0BC90` obtains a global service/context, calls a virtual geometry getter, transforms the
+  returned values using scale/count fields at `+0x23C/+0x240`, and updates the local spatial
+  coordinates through `E0AA60`.
+- `E0AA60` converts a scaled coordinate into a bounded `0..0x80` lookup index, samples the
+  byte grid at `+0x280`, applies the local scale fields `+0x21C/+0x220`, and returns a spatial
+  value. It is a grid/geometry lookup, not a terrain allocator.
+- `E0BF20` computes extents and a grid index from the entry bounds, calls the entry's virtual
+  geometry method, and compares the current identity against `0x01654C02` and `0x01654C10`.
+  It then performs range checks and invokes entry virtual slots for the resulting spatial values.
+
+The ScenarioMode-specific branch can therefore affect spatial/object presentation, but the
+observed operations are bounds, grid sampling and virtual entry updates. No direct stage or
+terrain construction call appears in this boundary.
+
 The host preview remains separate and no saves were modified.

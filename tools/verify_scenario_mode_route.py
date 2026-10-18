@@ -692,6 +692,17 @@ def verify() -> None:
     exact(0xE10A81, "81 7c 24 14 10 4c 65 01 8b 17 8a d8")
     exact(0xE10A92, "f6 44 24 54 80 74 34 8b 82 e8 00 00 00")
 
+    # E0BC90/E0BF20 are spatial/grid consumers: bounds, scale and identity
+    # checks, not direct terrain/stage allocation.
+    exact(0xE0BC90, "83 ec 08 56 57 8b f9 e8 b4 17 d3 ff 85 c0 74 05")
+    call(0xE0BCF1, 0xE0B560)
+    call(0xE0BD33, 0xE0AA60)
+    exact(0xE0AA60, "83 ec 14 8b d1 f3 0f 10 82 18 02 00 00 f3 0f 59")
+    exact(0xE0AA94, "7d 04 33 c0 eb 0c 3d 80 00 00 00 7e 05")
+    exact(0xE0BF20, "83 ec 14 56 57 8b 7c 24 24 8b 07 8b 50 38 8b f1")
+    exact(0xE0BFD3, "8a 4c 24 28 3d 02 4c 65 01 74 13 3d 10 4c 65 01 0f 85")
+    exact(0xE0C062, "3d 10 4c 65 01 0f 85 e3 00 00 00 84 c9 0f 85")
+
     # Play update is a distinct dispatcher with its own phase table and
     # goal-progress entry; it is not proof of a completed gameplay tick.
     exact(0xF1F960, "83 ec 0c 53 56 8b f1 e8 c4 16 4e ff 8a 58 1c 84 db 74 1c")
