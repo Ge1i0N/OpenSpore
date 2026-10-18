@@ -102,6 +102,11 @@ at `+0x8C` when present and initializes resource key `0x2FBF2058`. These callbac
 layout/display lifecycle. They are the next native owner-callback boundary, but no static evidence
 assigns them the `Play Scenario` payload or a ScenarioMode request.
 
+A bounded scan of the inspected `0x0080xxxx` layout-owner bodies found no direct write of a function
+pointer into `owner +0x8C`; `811C70` only reads and invokes the field. This is a scoped negative
+result against the examined constructor/transition code, not an Absent claim for the whole binary.
+The callback remains a dynamic/resource/vtable binding boundary.
+
 The attached `object +0x04` is not an analyst-invented callback: constructor `DE6120` writes
 `0x0147E030` at that subobject, and vtable `0x0147E030 +0x18` is `DE99B0`. Therefore the static
 attachment edge is now:
