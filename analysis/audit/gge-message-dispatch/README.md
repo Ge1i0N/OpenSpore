@@ -651,6 +651,70 @@ compare `0x070D7509`; it is not promoted to the Play Scenario producer. Its valu
 evidence that Scenario launch surfaces use sibling component IDs and property-backed handlers,
 which narrows the missing Play Scenario route to another dynamic component/handler binding.
 
+The handler's class boundary is concrete rather than inferred from code proximity:
+
+```text
+DF3A40
+  → allocates a 0x630-byte object for type/resource key 0x013F0990
+  → DF0BD0 initializes it
+  → vtable 0x0147E61C
+  → vtable +0x18 = DF43A0
+```
+
+Thus `DF43A0` is a method of a distinct GGE-era controller object, not another branch of
+`DE99B0`'s vtable `0x0147E030`. The shared message format and Preferences service are real
+architectural commonality; the object identity and handler semantics remain separate.
+
+The sibling ID is also present in a separate GGE-side component identity registration array:
+
+```text
+DF38A7..DF38DA:
+  0x053F06E1
+  0x053F06EE
+  0x053F06F5
+  0x053F06FC
+  0x053F0707
+  ...
+```
+
+The array is inserted into a component/identity container; this is positive evidence that
+`0x053F0707` belongs to the same GA-era registered UI/component family. It does not identify the
+array as the serialized EP1 object-74 layout entry, and it does not join the sibling handler to
+`Play Scenario 0x070D7509`.
+
+### Other GGE-adjacent activation consumers
+
+Two nearby procedures are concrete activation consumers but remain separate from the `DF43A0`
+Scenario-space property route:
+
+```text
+DF5540
+  vtable 0x0147E9C0 + 0x18
+  message.type = 0x287259F6
+  component ID = 0x06383360
+    → service/mode call with key 0x06382DB7
+
+DF5D60
+  vtable 0x0147E920 + 0x18
+  message.type = 0x287259F6
+  component IDs = 0x05D2BDF8 or 0x05D66F78
+    → service/mode calls with keys 0x05D663CD or 0x05D6714B
+```
+
+`DF5540` is installed by the object constructor at `DF5C50`; `DF5D60` is installed by the
+constructor at `DF5D00`. Their bounded bodies contain none of:
+
+```text
+0x070D7509 Play Scenario
+0x070D74E7 Galactic Adventures
+0x080D7DE1 ScenarioGAButtonClicked
+0x053F0707 ScenarioSpaceGameLaunched producer ID
+```
+
+They are therefore classified as GGE-adjacent service/UI consumers, not as hidden Play Scenario
+handlers. This closes another local consumer slice without promoting unrelated component IDs to
+the missing object-74 route.
+
 ### Corroborating launch flags
 
 The same `Preferences vtable +0x14` setter shape is used by nearby Scenario editor paths for:
