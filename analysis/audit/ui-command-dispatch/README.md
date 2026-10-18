@@ -154,6 +154,26 @@ cross-check separates this ComboBoxDrawable behavior from the GGE WinButton/Play
 the setters must not be used as a GGE owner-binding claim. The exact GGE owner/context setter
 remains Unknown.
 
+### 👀 Native parent registration is a separate resolved path
+
+The actual IWindow vtable used by the resolved GGE window has the parent-management slots:
+
+```text
+IWindow vtable 0x01441270
+  +0xD8 → 0x00962780 (AddWindow)
+  +0xDC → 0x00962830 (RemoveWindow)
+```
+
+When the active layout owner changes, `812100` calls `811C20`. That routine walks the UILayout
+component span (`+0x64/+0x68`), identifies IWindow components through `0xEEEE8218`, and calls the
+active owner/root IWindow's `+0xD8` with each resolved window. `00962780` then inserts the child into
+the owner's `+0x38` child list, records the reverse owner link and invokes the child/owner
+initialization callbacks.
+
+This resolves the native **parent-registration mechanism** for the mounted layout. It does not yet
+name the semantic owner of object 74, observe the runtime callback, or turn parent registration
+into a Play Scenario/ScenarioMode transition.
+
 Therefore `DE99B0` can be reached by the common window message path, but its bounded dispatch
 body only recognizes the component-activation message type and its internal branches; no
 `0x17`/`0x18` comparison is present there. `00959240` also retains fallback paths through the

@@ -73,6 +73,19 @@ ControlID search. Thus the attached object is the window from the current mounte
 a global owner/service registry entry. This keeps the object-74 attachment fact separate from any
 later parent/context binding.
 
+The later parent-registration step is now bounded independently:
+
+```text
+active UILayout owner/root + component span
+  → 811C20
+  → owner IWindow vtable +0xD8 = 00962780
+  → resolved child window +0x38 owner/child linkage
+```
+
+`00962830` is the symmetric removal path. This is the native layout parent mechanism, not the
+ComboBoxDrawable `+0x30/+0x34` setters and not evidence of a Play Scenario producer. The semantic
+owner object and its later message callback remain Unknown.
+
 The attached `object +0x04` is not an analyst-invented callback: constructor `DE6120` writes
 `0x0147E030` at that subobject, and vtable `0x0147E030 +0x18` is `DE99B0`. Therefore the static
 attachment edge is now:
