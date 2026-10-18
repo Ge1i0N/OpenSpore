@@ -665,6 +665,14 @@ Thus `DF43A0` is a method of a distinct GGE-era controller object, not another b
 `DE99B0`'s vtable `0x0147E030`. The shared message format and Preferences service are real
 architectural commonality; the object identity and handler semantics remain separate.
 
+Its enclosing flow is also bounded at the vtable level. Constructor `DEEB80` installs outer vtable
+`0x0147E568`; that table has `DF3A40` at slot `+0x2C`, and the nearby `.rdata` text is the UTF-16
+label `New Game Flow`. `DF3A40` is the method that allocates the nested `0x013F0990`/`0x630`-byte
+controller described above. This places the `ScenarioSpaceGameLaunched` consumer in the New Game
+Flow family, not in the GGE `DE99B0` object-74 listener. The nearby flow identity arrays explain
+why its activation IDs are easy to confuse with GGE controls, but do not establish a Play Scenario
+handoff.
+
 The sibling ID is also present in a separate GGE-side component identity registration array:
 
 ```text
