@@ -111,6 +111,8 @@ DF9740 state-2 gate
   → later DF6010 viewer projection
 ```
 
-This closes the static catalogue placement and construction order. Unknown remains explicit for
+This closes the static catalogue placement and construction order. The subsequent local
+presentation-state dispatcher is documented in
+[startup-gge-presentation-state.md](startup-gge-presentation-state.md). Unknown remains explicit for
 source manager contents, successful layout/effect attachment, camera/viewer production, object-74
 Scenario launch conversion, native ScenarioMode delivery, stage/world construction and gameplay.

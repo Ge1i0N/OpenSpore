@@ -415,6 +415,16 @@ def verify() -> None:
     exact(0xDF6CB9, "68 00 aa 06 08 81 c1 44 01 00 00")
     exact(0xDF6D05, "68 fe 97 0d 08 8b ce ff d2")
     exact(0xDF6D39, "8d 75 38 6a 04 8b ce e8 cb 33 b4 ff")
+    # Local presentation-state dispatcher and its bounded caller value.
+    exact(0xDF6D9F, "83 f8 04 0f 87 b6 08 00 00 ff 24 85 70 76 df 00")
+    exact(0xDF6FF9, "6a 01 68 a8 a4 e5 02 e8 4b 96 a1 ff")
+    exact(0xDF6E25, "e8 26 f5 63 ff 50 68 82 91 6d d0")
+    exact(0xDF6EE3, "e8 68 f4 63 ff 50 68 d5 3a fc d2")
+    exact(0xDF6F3B, "e8 10 f4 63 ff 50 68 89 a8 6d 6c")
+    exact(0xDF6E13, "89 6e 2c b0 01")
+    exact(0xDF7730, "e8 4b f6 ff ff 84 c0 0f 84 a8 00 00 00")
+    exact(0xDF77B4, "83 b8 a8 00 00 00 05 75 28 80 3d 88 0f 6a 01 00")
+    exact(0xDF77C6, "6a 01 68 5e 92 c4 03 8b ce e8 7c 8e a1 ff")
 
     # Negative controls for prior timing/slot conflation.
 
