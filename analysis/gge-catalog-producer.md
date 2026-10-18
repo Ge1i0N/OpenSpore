@@ -259,6 +259,11 @@ at object `+0x30` and record `+0xB8`, then performs the stage/icon and save-flag
 itself has only `DE32B0` and `DF9740` in the resolved caller set (`ev_50fb51055abb84f6c4dda34ad2f90309a63e1ef6cc0371560ec69cb6a4a7e818`).
 No resolved direct edge from the `GalaxyGameEntry` registrar (`DDDE30`) to `DF95A0` was observed.
 
+The per-record effect side is now also separated from the launch path. `DF8300` creates/configures
+marker-effect objects for eligible records and calls `DF6820` (`effect vtable +0x48` followed by
+GGE `+0x34` installation); `DF9160` performs the symmetric effect cleanup. This forwarded target
+is visual catalogue infrastructure, not the `Play Scenario` producer or a ScenarioMode handoff.
+
 The record rebuild now has a concrete native lifecycle slot. REA xrefs and vtable bytes place
 `DF9740` at `Play Spore` vtable `0x147EF50 +0x38` and `DF6010` at `+0x68`
 (`ev_bbccd5c81c566a10aa5c7400984c9686151b7ab4b994fa8f66dfa2cd60fda57f`,

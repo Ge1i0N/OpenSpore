@@ -186,6 +186,16 @@ write `0x016A11B4 +0x48 = controller +0xFC`. The known forwarded caption target 
 controller/service-owned infrastructure, not object 74 (`Play Scenario`) or object 87 (`Galactic
 Adventures`).
 
+The other direct setter caller, `DF851E`, is inside the `DF8300` per-record marker/effect loop. It
+passes the selected effect object to `DF6820` after configuring that effect with the record's
+projected transform. This bounds the optional GGE `+0x34` forwarding path as visual marker/effect
+infrastructure in the observed per-entry route. It must not be promoted to the Play Scenario or
+ScenarioMode handoff without a separate payload and target observation.
+
+`DF9160` is the matching per-record cleanup path: it sends the effect's internal message `9`, then
+releases and clears the target. This lifecycle symmetry reinforces the effect/marker classification,
+while leaving the Play Scenario producer and selected-star-to-ScenarioMode boundary unresolved.
+
 ### Constructor boundary
 
 The direct-call scan found only one direct caller of `DE6120`:
