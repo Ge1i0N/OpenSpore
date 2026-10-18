@@ -63,6 +63,11 @@ run  0x00f47e90
 - **The app-mode / state-manager host is created by `0x007e8a00`** (496-byte object, ctor
   `0x007e76e0`) and stored at `[app+0x20]`; the whole run method then dispatches through its vtable.
   This is the object whose state machinery we reversed (`AppStateManager`, the `state` verb).
+- Before the later `SporeAppStates` load, `run` reaches a separate data/config-root setup at
+  `0x00f47c20` (called from `0x00f48054`). It handles `shipDirs`/`devDirs` and nearby shipped
+  roots such as `../Data/`, `../EP1Data/` and `../BP1Data/`, using temporary descriptor/range
+  objects. See [startup-pre-state.md](startup-pre-state.md). This is startup configuration, not
+  Scenario resource readiness.
 
 ## run `0x00f47e90` — full extent and what it does
 
