@@ -376,6 +376,14 @@ def verify() -> None:
     exact(0xDF9740, "56 8b f1 e8 c8 6e 00 00 a1 44 13 6a 01 83 b8 08 01 00 00 02")
     exact(0xDF6010, "83 ec 14 53 56 8b f1 8b 4e 0c 2b 4e 08")
     exact(0xDE871A, "38 1d 48 13 6a 01 74 21")
+    exact(0xDE868A, "8b 86 08 01 00 00 8d 96 08 01 00 00 83 f8 01")
+    exact(0xDE86A9, "c7 02 02 00 00 00")
+    exact(0xDE95A0, "6a 01 6a 0a 8b ce e8 d5 f0 ff ff")
+    exact(0xDF9793, "8b ce 5e e9 75 d4 ff ff")
+    exact(0xDF6C20, "85 f6 74 29 8b 06 8b 50 24")
+    exact(0xDF6C53, "6a 01 68 10 a3 06 08 81 c1 44 01 00 00")
+    exact(0xDF6CA3, "e8 38 7c 62 ff 80 38 00")
+    exact(0xDF6CD3, "8b 42 7c 6a 01 ff d0")
 
     # Negative controls for prior timing/slot conflation.
 

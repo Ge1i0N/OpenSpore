@@ -123,6 +123,7 @@ mode driver activation
   → live-record rebuild and projected per-star UI path
 ```
 
-The arrows after the Intro gate are conditional static branches. Unknown remains explicit for
+The arrows after the Intro gate are conditional static branches. The state-2 catalogue boundary
+is expanded in [startup-gge-play-spore.md](startup-gge-play-spore.md). Unknown remains explicit for
 MoviePlayer runtime state, DBCheck manager availability, message delivery, record availability,
 camera/viewer production, native UI attachment, Scenario launch and playable world ticks.
