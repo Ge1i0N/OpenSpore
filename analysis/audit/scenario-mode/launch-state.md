@@ -63,9 +63,12 @@ mode writes, so the final `EF11F0` request must not be replaced by its first tem
 
 Consequently **DFAD20's state-9 route is editing preparation, not evidence of the playable route**.
 Both routes select the same outer ScenarioMode state/tag; the record chooses the internal strategy.
-The producer of local state 10 for the requested Play Scenario action remains Unknown. A bounded
-`.text` scan found no direct immediate write of `10` into the controller's local state field; an
-indirect/table/resource-mediated writer is therefore not promoted to `Absent`.
+The producer of local state 10 for the requested Play Scenario action remains Unknown. The exact
+controller writer is now recovered through `DFE430 → DFAE20`, and the corresponding IDs are present
+as serialized controller `WinButton` ControlIDs; what remains unresolved is whether object 74's
+activation selects either controller button. The absence of a direct `0x070D7509` comparison or
+conversion is not promoted to `Absent` because the native payload may be forwarded or dynamically
+constructed.
 
 ## Adjacent controller event map
 
@@ -88,12 +91,38 @@ action or by another Scenario UI action; that upstream semantic join remains Unk
 The IDs occur in a packed adjacent controller/state data region around `.data 0x015A4318`, together
 with neighboring event identities such as `0x05933FE0..E3`, `0x073BBA58` and `0x074D0932`. The
 selected binary has no direct xref to the absolute data address in the provider's reference result;
-the table is therefore classified as internal state/event data, not a recovered UI layout resource.
-The IDs are not producer immediates in `.text`; DFE430 recognizes the pair through the bounded
-arithmetic branch (`uStack_c + 0xFA6AEEFD < 2`), giving exact values `0x05951103/04`. The adjacent
-`0x0733FE08` branch calls `DFE1F0`, not `DFAE20`; it is a separate UI action. The handler payload
-remains a dynamic/component context. This does not establish that the state-10 IDs are absent from
-the shipped UI layout.
+that table remains classified as internal state/event data. Separately, the controller's UI-sync
+helpers contain explicit uses of the same IDs: `DF9B00` resolves each through `810650` on the
+controller layout and calls the resolved component's vtable `+0x7C(2, param)`, while `DF9F90`
+resolves `0x05951103` and updates it through `+0x7C(1, condition)`. These are UI synchronization
+paths, not proof of the click producer.
+
+The shipped SPUI corpus independently contains exact `ControlID` matches in EP1 layout record
+`13754`, instance `0x611E869D`: object `1375` is `0x05951103` and object `1580` is `0x05951104`,
+both class `0xEEEFE2C3` (`WinButton`). The same `0x05951103` button also occurs in the PatchData
+and Spore_Graphics copies of instance `0x43DD7F6B`. This establishes concrete serialized Scenario-
+controller buttons, while their caption and the native click-to-event conversion remain Unknown.
+It does not identify either button with GGE object 74 (`Play Scenario`, `0x070D7509`).
+
+DFE430 still recognizes the pair through the bounded arithmetic branch
+(`uStack_c + 0xFA6AEEFD < 2`), giving exact values `0x05951103/04`. The adjacent `0x0733FE08`
+branch calls `DFE1F0`, not `DFAE20`; it is a separate UI action. The handler payload remains a
+dynamic/component context, and the semantic join from object 74 to these buttons is not recovered.
+
+## Controller state names and the narrowed UI boundary
+
+`DFB580` formats the controller's local state using the shipped wide-string table. The relevant
+entries are exact:
+
+```text
+state 9  → ReadyToLaunchScenarioForEdit
+state 10 → ReadyToLaunchScenarioForPlay
+```
+
+Therefore `DFAE20` is not merely a numeric “playable” phase: it enters the controller state named
+`ReadyToLaunchScenarioForPlay`, then the existing `DFBD40 → ScenarioMode` record path selects
+internal play mode `2`. This is static native/UI evidence only; it does not observe a click, queued
+message delivery, state acceptance, or successful launch.
 
 ## Direct table-index selection is generic, not the missing UI join
 

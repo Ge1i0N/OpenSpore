@@ -86,11 +86,21 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   The [launch-state audit](launch-state.md) also resolves generic name/tag table setters without
   claiming original queued-command delivery or successful OnEnter.
 - The adjacent `DFE430` component-activation family contains the exact playable-state candidate:
-  event `0x05951103/04` reaches `DFAE20`, which writes local state `+0x20 = 10`, context `+0x28 = 10`
-  and enables `+0x80`. Other bounded IDs map to state 9 (`0x05933FE0..E3`), state 5
-  (`0x073BBA58`) and state 7 (`0x074D0932`). `0x0733FE08` is a separate branch to `DFE1F0`, not
-  the state-10 writer. The event-to-Play-Scenario semantic join remains Unknown because no
-  `0x070D7509` comparison is present.
+   event `0x05951103/04` reaches `DFAE20`, which writes local state `+0x20 = 10`, context `+0x28 = 10`
+   and enables `+0x80`. Other bounded IDs map to state 9 (`0x05933FE0..E3`), state 5
+   (`0x073BBA58`) and state 7 (`0x074D0932`). `0x0733FE08` is a separate branch to `DFE1F0`, not
+   the state-10 writer. `DF9B00` and `DF9F90` also use `0x05951103/04` in the controller's
+   layout-local UI synchronization path. EP1 SPUI record `13754` contains those IDs as concrete
+   `WinButton` objects `1375` and `1580`; they are not GGE object 74. The event-to-Play-Scenario
+   semantic join remains Unknown because no `0x070D7509 → 0x05951103/04` conversion is present.
+- `DFB580` names local state 9 `ReadyToLaunchScenarioForEdit` and state 10
+  `ReadyToLaunchScenarioForPlay`. This upgrades the state-10 interpretation from a numeric phase
+  to a native controller/UI semantic, but still does not prove runtime click delivery or launch.
+- Retained shipped-binary evidence: [`scenario-mode-current-evidence.json`](scenario-mode-current-evidence.json).
+   The focused REA records include `DFE430` (`ev_a8c978345364376176b078d900546eb9cf8ce24596eb4d0e9b4b16011372ed58`),
+   controller UI sync (`DF9B00`/`DF9F90`, `ev_6a482fca4d92d699ab63e87065a207d8bba0d74a7655b40f8bb05a1d418e110d`,
+   `ev_b2fe7003d0e60764742542aa4c8df3f18dece1cfda44d7982bbd9e06a73e0204`) and the state-name table
+   (`DFB580`, `ev_e30359937af9477c2104c3ff1e79aeee82e07240c9b9343c4d5ee9b2362f5982`).
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.

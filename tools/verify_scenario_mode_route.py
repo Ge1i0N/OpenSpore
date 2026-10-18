@@ -116,12 +116,24 @@ def verify() -> None:
     # Exact playable controller phase writer: DFE430's arithmetic branch
     # recognizes 0x05951103/0x05951104 and routes to DFAE20. The adjacent
     # 0x0733FE08 branch is a different DFE1F0 action.
-    # through DFAE20 and enters local state 10.
     exact(0xDFE517, "05 fd ee 6a fa 83 f8 01 0f 87")
     exact(0xDFE53A, "e8 e1 c8 ff ff 5f b0 01")
     call(0xDFE53A, 0xDFAE20)
     exact(0xDFAE31, "b8 0a 00 00 00 89 46 20 c6 86 80 00 00 00 01")
     exact(0xDFAE40, "89 46 28 8b 0d 44 13 6a 01")
+
+    # The same event IDs are explicit controller-layout component IDs in the
+    # native UI synchronization path. This is not the missing object-74 click
+    # conversion: it proves only lookup/update of the controller buttons.
+    exact(0xDF9B22, "c7 44 24 18 03 11 95 05")
+    exact(0xDF9B2A, "c7 44 24 1c 04 11 95 05")
+    exact(0xDF9B37, "8b 44 b4 0c 6a 01 50 8b cf e8 0b 6b a1 ff")
+    exact(0xDF9F97, "6a 01 8d 6f 48 68 03 11 95 05 8b cd e8 a8 66 a1 ff")
+
+    # DFB580's state-name table: the controller labels state 9/10 as edit/play
+    # launch readiness. UTF-16 strings are checked at their shipped addresses.
+    exact(0x147EBEC, "52 00 65 00 61 00 64 00 79 00 54 00 6f 00 4c 00 61 00 75 00 6e 00 63 00 68 00 53 00 63 00 65 00 6e 00 61 00 72 00 69 00 6f 00 46 00 6f 00 72 00 45 00 64 00 69 00 74 00")
+    exact(0x147EBB0, "52 00 65 00 61 00 64 00 79 00 54 00 6f 00 4c 00 61 00 75 00 6e 00 63 00 68 00 53 00 63 00 65 00 6e 00 61 00 72 00 69 00 6f 00 46 00 6f 00 72 00 50 00 6c 00 61 00 79 00")
 
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
