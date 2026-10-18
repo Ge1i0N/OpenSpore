@@ -302,6 +302,18 @@ add_executable(cell_world_verify EXCLUDE_FROM_ALL tools/cell_world_verify.cpp
 target_include_directories(cell_world_verify PRIVATE source)
 target_compile_definitions(cell_world_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_link_libraries(cell_world_verify PRIVATE user32 gdi32)
+add_executable(dump_cell_stats EXCLUDE_FROM_ALL tools/dump_cell_stats.cpp
+  source/engine/cell_game.cpp source/engine/cell_save.cpp source/engine/naming.cpp
+  source/engine/pkg.cpp source/engine/refpack.cpp source/engine/fs.cpp source/engine/log.cpp)
+target_include_directories(dump_cell_stats PRIVATE source)
+target_compile_definitions(dump_cell_stats PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_link_libraries(dump_cell_stats PRIVATE user32 gdi32)
+add_executable(dump_cell_ui EXCLUDE_FROM_ALL tools/dump_cell_ui.cpp
+  source/engine/spui.cpp source/engine/spui_binary.cpp source/engine/naming.cpp
+  source/engine/pkg.cpp source/engine/refpack.cpp source/engine/fs.cpp source/engine/log.cpp)
+target_include_directories(dump_cell_ui PRIVATE source)
+target_compile_definitions(dump_cell_ui PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_link_libraries(dump_cell_ui PRIVATE user32 gdi32)
 add_executable(gge_catalog_snapshot_verify EXCLUDE_FROM_ALL tools/gge_catalog_snapshot_verify.cpp
   source/engine/gge_catalog_snapshot.cpp source/engine/gge_catalog.cpp)
 target_include_directories(gge_catalog_snapshot_verify PRIVATE source)

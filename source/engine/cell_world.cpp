@@ -31,13 +31,13 @@ constexpr int kMaxEntities = 400;
 constexpr float kPlayerAccel = 70.0f;
 constexpr float kPlayerSpeed = 24.0f;
 constexpr float kDrag = 4.0f;
-constexpr float kPredatorAccel = 34.0f;
-constexpr float kPredatorSpeed = 13.0f;
-constexpr float kPreyAccel = 30.0f;
-constexpr float kPreySpeed = 15.0f;
-constexpr float kAggro = 24.0f;
-constexpr float kPredatorFraction = 1.05f;
-constexpr float kGrowRate = 0.55f;
+constexpr float kPredatorAccel = 34.0f;  // SEED: not recovered
+constexpr float kPredatorSpeed = 10.0f;   // from cell_hero_L0 +0x0E0=10
+constexpr float kPreyAccel = 20.0f;       // SEED: not recovered
+constexpr float kPreySpeed = 5.0f;        // from Cell_DuckyMed +0x0E0=5
+constexpr float kAggro = 24.0f;           // SEED: not recovered
+constexpr float kGrowRate = 0.55f;        // SEED: not recovered
+constexpr float kPredatorFraction = 1.05f;  // SEED: not recovered
 constexpr float kMaxSize = 16.0f;
 constexpr float kPlayerBaseSize = 1.0f;
 constexpr float kEvolveSize = 8.0f;  // SEED: not recovered
@@ -165,13 +165,9 @@ bool World::load_save(const std::string& path, std::string& error) {
 bool World::is_predator_archetype(u32 archetype_id) const {
     for (const Archetype& a : m_data.archetypes) {
         if (a.id != archetype_id) continue;
-        const std::string name = archetype_label(m_data, a);
-        if (contains_ci(name, "chomper") || contains_ci(name, "jawhead") ||
-            contains_ci(name, "megamouth") || contains_ci(name, "squid") ||
-            contains_ci(name, "poker") || contains_ci(name, "puffish") ||
-            contains_ci(name, "booster") || contains_ci(name, "charger")) {
-            return true;
-        }
+        float e0 = a.stat(0x0E0);
+        float e8 = a.stat(0x0E8);
+        if (e0 > 0.0f || e8 > 0.0f) return true;
         return false;
     }
     return false;
@@ -519,8 +515,11 @@ void World::spawn_from_level(const Population& pop) {
             if (struct_scale > 0.0f) {
                 en.size = food ? struct_scale * 0.3f : struct_scale;
             } else {
-                en.size = food ? (0.40f + 0.12f * hash01(e.cell))
-                               : (0.55f + 1.35f * hash01(e.cell));
+                float real_size = stat_for_archetype(e.cell, 0x17C);
+                if (real_size <= 0.0f) real_size = stat_for_archetype(e.cell, 0x180);
+                if (real_size > 0.0f) en.size = real_size;
+                else en.size = food ? (0.40f + 0.12f * hash01(e.cell))
+                                    : (0.55f + 1.35f * hash01(e.cell));
             }
             en.x = rng.signed_unit() * m_arena;
             en.y = rng.signed_unit() * m_arena;
@@ -650,7 +649,15 @@ float World::stat_for_archetype(u32 archetype_id, u32 offset) const {
 }
 
 float World::hp_for_size(float size) const {
-    return 50.0f + size * 25.0f;
+    // Real HP from the archetype record +0x148 (game data).
+    // cell_hero_L0 has +0x148=10000, cell_poisonerMed has +0x148=8.
+    float real_hp = 0.0f;
+    if (m_player >= 0 && static_cast<size_t>(m_player) < m_entities.size()) {
+        const Entity& p = m_entities[static_cast<size_t>(m_player)];
+        real_hp = stat_for_archetype(p.archetype, 0x148);
+    }
+    if (real_hp > 0.0f) return real_hp;
+    return 50.0f + size * 25.0f;  // fallback
 }
 
 void World::respawn_player() {
