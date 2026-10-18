@@ -202,6 +202,13 @@ loading-UI preparation, not by itself a GameModeManager switch. Instruction fall
 `E001E9`. REA did not carve `E00170` in this ephemeral import; its empty direct-caller result for
 `DFAD20` did not establish absence of that call. The upstream object-74 join remains Unknown.
 
+Follow-up [launch completion audit](launch-state.md) recovers `DFC210 → DFBD40` after local
+state-9/10 countdown, a concrete StateManager request for `ScenarioMode` state ID `0x21851EBE`,
+and the matching launch-record consumer in `EF1D20`. Crucially, state 9 requests internal edit
+mode 1; state 10 requests play mode 2. `DFAD20` alone is therefore not the playable launch path.
+The generic name/tag table setters are recovered there, while object-74 action selection and
+end-to-end queued command execution remain separate unknowns.
+
 The current route boundary is:
 
 ```text
@@ -241,8 +248,9 @@ python tools/verify_scenario_mode_route.py
 ```
 
 Windows launcher: `tools/run_scenario_mode_route_verify.bat`. The verifier pins the full GA digest
-and checks 25 authority/instruction assertions for table payload construction, call targets,
-separate pair-guard phases, subscription slots, Editors exclusion and launch-record preparation.
+and checks 53 authority/instruction/script assertions for table payload construction, call targets,
+separate pair-guard phases, subscription slots, Editors exclusion, table setters and launch-state
+record preparation/consumption.
 It is a byte-regression test, not a runtime test or a general x86 decoder. A failed address guard
 must be investigated rather than weakening the expected result. REA pseudocode can have incomplete
 stack/register calling conventions; the instruction guards independently cover the key joins.

@@ -74,6 +74,55 @@ def verify() -> None:
     call(0xDFADBE, 0xE3E350)
     exact(0xB3D510, "a1 28 eb 67 01 c3")
 
+    # A tag is selected by exact comparison with registered entry +0x04.
+    # Miss returns false, not an invented fallback index.
+    exact(0x7D8D20, "39 3a 74 0f 46 83 c2 18 3b f0 7c f4")
+    exact(0x7D8D2C, "5f 32 c0 5e c2 04 00")
+    call(0x7D8D34, 0x7D8670)
+    call(0x7D8D65, 0x7D8670)
+    exact(0x1412630, "f0 8c 7d 00")  # manager vtable +0x28
+    exact(0x1412648, "40 8d 7d 00")  # manager vtable +0x40
+
+    # ArgScript 'mode' executor records a by-name command; handler dispatches
+    # through manager +0x4C, whose name lookup reaches index setter +0x40.
+    exact(0x153F614, "04 25 41 01")
+    exact(0x1412504, "6d 6f 64 65 00")
+    exact(0x7E1EA4, "c7 07 2c 33 41 01")
+    exact(0x141332C, "90 46 7e 00")
+    exact(0x7E46F1, "c7 46 30 33 13 e1 00")
+    exact(0x7D826A, "8b 51 fc 83 c1 fc 50 8b 42 4c ff d0")
+    exact(0x1412654, "20 84 7d 00")  # manager +0x4C
+    exact(0x7D847C, "8b 03 8b 50 40 57 8b cb ff d2")
+
+    # Countdown completion requests the named state; it does not rely on
+    # interpreting the loading UI's +0x45C field as a switch command.
+    exact(0xDFC486, "8b 45 20 83 f8 0a 74 2b 83 f8 09 74 26")
+    call(0xDFC4BB, 0xDFBD40)
+    call(0xDFBD47, 0xEF1910)
+    call(0xDFBFAF, 0x67DCE0)
+    exact(0xDFBFB4, "8b 10 8b c8 8b 42 28 68 be 1e 85 21 ff d0")
+    script = (Path(__file__).resolve().parent.parent /
+              "analysis/scripts/SporeAppStates.txt").read_bytes()
+    script = script.replace(b"\r\n", b"\n")
+    if b"state ScenarioMode\n   entry\n      mode ScenarioMode\n   exit\nend" not in script:
+        raise ValueError("retained ScenarioMode state block changed")
+    state_id = 0x811C9DC5
+    for byte in b"scenariomode":
+        state_id = ((state_id * 0x1000193) & 0xFFFFFFFF) ^ byte
+    if state_id != 0x21851EBE:
+        raise ValueError("ScenarioMode state-name hash mismatch")
+    checks += 2
+
+    # Launch record +0x24 is final requested internal mode; +0x28 is a
+    # separate provenance/context value, read into ScenarioMode +0xD0.
+    exact(0xDFBD4C, "83 7e 20 09")
+    exact(0xDFBD86, "b9 01 00 00 00 89 57 14 89 4f 24 33 db 89 5f 28")
+    exact(0xDFBDE9, "c7 47 24 02 00 00 00 89 5f 28")
+    exact(0xEF1D8C, "a1 f0 cc 5a 01")
+    exact(0xEF1DA3, "89 86 d0 00 00 00")
+    exact(0xEF2218, "a1 ec cc 5a 01 50 8b ce")
+    call(0xEF2220, 0xEF11F0)
+
     print(f"PASS: {checks} static authority/instruction guards")
     print("Unknown: Play Scenario -> table-index selection; native execution/readiness")
 

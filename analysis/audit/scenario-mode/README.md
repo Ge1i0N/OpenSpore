@@ -80,8 +80,11 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   is `B5DCD0 → B336E0 → B33650`. These callbacks consume a selected pair, not request the switch.
 - `DFAD20` prepares a shared launch record through `EF1910`, then passes `0x01654C10` to
   loading-UI helper `E3E350`. This is a concrete launch-preparation candidate, but its upstream
-  connection to object 74 and later table-index selection remain Unknown. Exact phases and retained
-  REA records are in [message-route.md](message-route.md).
+  connection to object 74 remains Unknown. `DFC210 → DFBD40` later rebuilds the record and requests
+  state ID `0x21851EBE` (`ScenarioMode`); local state 9 selects internal edit mode 1 and state 10
+  selects play mode 2. This prevents mistaking DFAD20's edit route for playable launch.
+  The [launch-state audit](launch-state.md) also resolves generic name/tag table setters without
+  claiming original queued-command delivery or successful OnEnter.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
