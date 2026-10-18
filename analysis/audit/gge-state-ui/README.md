@@ -49,6 +49,23 @@ The locale reference on EP1 object 87 resolves to **Galactic Adventures** (`tabl
 is therefore semantically the Galactic Adventures control/state identity, not a hidden generic
 payload name for object 74. A parent/controller route between the two controls remains Unknown.
 
+### 👀 Static feedback-loop cross-check
+
+The same identity is present on both sides of the bounded GA path:
+
+```text
+DE99B0 component 0x070D74E7
+  → ScenarioGAButtonClicked = true
+  → state 13
+
+DE48C0 state 13
+  → lookup/update control 0x070D74E7
+```
+
+Together with the resolved `Galactic Adventures` caption, this is a strong static explanation of
+the GA-tab feedback surface. It remains separate from the unresolved `Play Scenario` object 74
+producer and from runtime ScenarioMode entry.
+
 ### Direct caller inventory
 
 The local `.text` scan for direct `E8 rel32` calls found:

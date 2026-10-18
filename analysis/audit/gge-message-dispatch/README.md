@@ -605,6 +605,25 @@ control identity actively branched inside `DE99B0`, while `0x070D7509` is the se
 `Play Scenario` control found in `DE48C0`/`DE5900` setup tables. No native parent/controller route
 from the latter to the former has been found.
 
+### 👀 Excellent finding: static Galactic Adventures feedback loop
+
+Two independent GA paths converge on the same semantic control:
+
+```text
+DE99B0:
+  component ID 0x070D74E7
+    → Preferences::SetProperty(ScenarioGAButtonClicked, true)
+    → controller state 13
+
+DE48C0:
+  controller state 13
+    → UI target/control 0x070D74E7
+```
+
+The shipped locale caption identifies that control as `Galactic Adventures`. This forms a coherent
+static feedback loop for the Galactic Adventures tab/state surface. It is not runtime execution and
+does not connect `Play Scenario` object 74 (`0x070D7509`) to this loop.
+
 ## SDK cross-check
 
 `refs/Spore-ModAPI/Spore/App/IStateManager.h` puts `SwitchToState` at vtable `+0x28`, matching the
