@@ -215,4 +215,21 @@ Thus the downstream side is a service/UI registry plus ordered descriptor owners
 real native consumer of the Scenario path, but it remains separate from stage/terrain creation
 and from observed gameplay readiness.
 
+## Registry node and consumer details
+
+The allocator-facing helpers preserve the same boundary:
+
+- `921930` initializes a node's key/value/links and inserts it into an ordered tree. Its writes
+  are generic node bookkeeping; no Scenario or terrain identity is hard-coded there.
+- `928CC0` retains the registry's allocator-side object at `+0x4E4`, calls `928570` with the
+  supplied construction arguments, and releases the temporary retained object afterward.
+- `810650` is an owner wrapper: it follows owner `+0x14` and delegates lookup to `8102A0`.
+
+After the entry is obtained, the tail of `E10560` calls entry virtual slots for values, bounds,
+flags and object state, and submits descriptor geometry through `E0BC90`/`E0BF20`. The branch
+checks descriptor flags and identity values, including a distinct `0x01654C02` case; this must
+not be conflated with the ScenarioMode tag `0x01654C10` checked earlier in the same dispatcher.
+These are object/service-consumer effects. Their downstream acceptance and any eventual scene
+materialization remain Unknown.
+
 The host preview remains separate and no saves were modified.

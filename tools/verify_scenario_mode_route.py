@@ -681,6 +681,16 @@ def verify() -> None:
     exact(0x8062E3, "68 cf 47 3c ef")
     exact(0x8062FF, "68 08 19 3c 10")
     exact(0x966CE0, "8b c1 c7 40 04 40 4c 44 01 33 c9 89 48 08")
+    exact(0x921930, "8b 44 24 04 8b 4c 24 08 53 33 db 56 8b 74 24 14")
+    exact(0x921943, "89 18 89 58 04 88 58 0c")
+    exact(0x928CC0, "56 57 8b f9 8b b7 e4 04 00 00 85 f6 74 0a")
+    call(0x928CEE, 0x928570)
+    exact(0x928CF3, "8b f8 85 f6 74 0a ff 4e 18")
+    exact(0x810650, "8b 49 14 85 c9 74 05 e9 44 fc ff ff")
+    exact(0xE108AB, "6a 00 53 8b cf ff d0 f3 0f 2a 43 20")
+    exact(0xE10957, "81 7c 24 14 02 4c 65 01 0f 84 41 01 00 00")
+    exact(0xE10A81, "81 7c 24 14 10 4c 65 01 8b 17 8a d8")
+    exact(0xE10A92, "f6 44 24 54 80 74 34 8b 82 e8 00 00 00")
 
     # Play update is a distinct dispatcher with its own phase table and
     # goal-progress entry; it is not proof of a completed gameplay tick.
