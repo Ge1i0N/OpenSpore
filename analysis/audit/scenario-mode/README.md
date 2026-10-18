@@ -70,6 +70,10 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   invoke it with dynamic state values (`-1`, `2`, `1`, `0`), but the bounded callsites contain no
   `0x01654C10` or `0x070D7509`. This establishes the native enter-mode channel without promoting
   it to the unresolved Play Scenario → ScenarioMode route.
+- For `ED57A0`, the apparent dynamic value is now bounded: `ED5130` initializes object `+0x1C` to
+  `-1`, and all five direct callers pass only `-1`, `2`, `1` or `0`; `ED6910` later reduces the
+  value through lifecycle branches `0/1/2`. No resource/property-derived ScenarioMode tag is
+  recovered in this producer family.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.

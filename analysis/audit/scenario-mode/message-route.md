@@ -97,3 +97,32 @@ Those callsites are lifecycle/state transitions and contain no literal `0x01654C
 `0x070D7509`. The producer therefore proves a native enter-mode channel and a GGE-side caller, but
 not the semantic conversion `Play Scenario → ScenarioMode`. The mode value remains a dynamic
 state/context field, not an inferred ScenarioMode tag.
+
+### Dynamic-value source is bounded for this producer
+
+The producer's dynamic value is the caller argument copied into object field `+0x1C`:
+
+```text
+ED57A0:
+  argument → EDI
+  if EDI != object +0x1C:
+    publish kMsgEnterMode
+    object +0x1C = EDI
+```
+
+Constructor `ED5130` initializes both `object +0x1C` and `object +0x20` to `-1`. A complete direct
+caller inventory for `ED57A0` in the selected `.text` gives:
+
+```text
+ED628A → -1
+ED6429 → -1
+ED672A →  2
+ED67F0 →  1
+ED6836 →  0
+```
+
+No bounded direct caller supplies a resource/property-derived value or `0x01654C10`. Teardown
+method `ED6910` consumes `+0x20`, falls back to `+0x1C` when it is `-1`, and passes the resulting
+value to `ED6620`, whose local lifecycle dispatch is limited to branches `0`, `1` and `2`. This
+closes the dynamic-source question for this producer: it is a small numeric lifecycle state
+machine, not the missing Play Scenario-to-ScenarioMode tag conversion.
