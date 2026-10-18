@@ -19,3 +19,24 @@ that would turn the `Play Scenario` UI action into a state/mode request remains 
 
 The handler returns handled=1 on the observed branches. Static instructions do not establish that
 `EF1D20` ran in the original process or that its services/resources were available.
+
+### Same event ID, separate global handler
+
+The selected GA binary also registers the same event ID `0x0212D3E7` through a separate global
+controller path:
+
+```text
+E81DFA
+  → GameModeManager/AddHandler(+0x28)
+  → event 0x0212D3E7
+  → handler E81C90
+
+E82050
+  → corresponding removal/teardown path
+```
+
+`E81C90` is not the ScenarioMode handler `EF2250`. Its bounded checks use adjacent mode-state
+values `0x01654C00` at payload `+0x08` and `0x01654C08` at payload `+0x10`, then call its own
+global-state helpers. It contains neither `0x01654C10` nor `0x070D7509`. Therefore the event ID is a
+shared MessageManager channel with multiple consumers; its presence alone cannot join the GGE
+`Play Scenario` control to ScenarioMode.
