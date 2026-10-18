@@ -65,7 +65,9 @@ DE5900
       → rollback on false / list synchronization on true
 ```
 
-This establishes attachment/configuration infrastructure only. It does not establish:
+This establishes attachment/configuration infrastructure only. The subsequent generic message
+walk and DE99B0 fall-through boundary is documented in
+[startup-gge-message-fallthrough.md](startup-gge-message-fallthrough.md). It does not establish:
 
 - a user click or WinProc callback delivery;
 - the object-74 action producer;

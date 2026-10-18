@@ -566,6 +566,20 @@ def verify() -> None:
     exact(0x96285B, "8b 46 0c 8b 4e 08 89 08 89 41 04 c7 46 08 00 00 00 00 c7 46 0c 00 00 00 00")
     exact(0x960190, "8b 44 24 04 56 57 8b f9 85 c0 74 14 8d 70 fc 85 f6 74 0f")
     exact(0x9601B4, "8b 17 50 8b 82 dc 00 00 00 8b cf ff d0 8b 16 8b 42 1c 8b ce ff d0")
+    # Generic message producer/walk and DE99B0 negative controls remain separate from Play Scenario.
+    exact(0x964129, "8b 86 84 00 00 00 c7 44 24 10 f6 59 72 28 85 c0 74 06 89 44 24 14")
+    exact(0x96414B, "8b 17 8b 42 20 8b cf ff d0 8b 8e ac 00 00 00 8b 54 24 44")
+    exact(0x964191, "8b 86 84 00 00 00 c7 44 24 2c 17 00 00 00 89 44 24 30 eb 2a")
+    exact(0x9641A5, "8b 96 ac 00 00 00 8b 8e 84 00 00 00 c1 ea 02 83 e2 01")
+    exact(0x9641CF, "8b 07 8b 90 14 01 00 00 8d 4c 24 24 51 8b cf ff d2")
+    exact(0x958880, "53 55 56 8b 74 24 10 8b 06 8b 10 8b ce 8d 5e 64 c6 44 24 10 00")
+    exact(0x9588CB, "8b 4c 24 18 8b 17 8b 52 18 51 8d 46 04 50 8b cf ff d2 84 c0 75 16")
+    exact(0x958917, "80 7c 24 1c 00 75 19 80 7c 24 10 00 75 12 8b 4c 24 14 8b 06 8b 50 20")
+    exact(0xDE99F1, "81 7f 08 f6 59 72 28 0f 85 59 03 00 00 8b 0f 8b 01 8b 50 1c")
+    exact(0xDE9A18, "3d 0a 06 47 04 77 70 74 52 3d 10 4a 6c 03 77 40 74 12")
+    exact(0xDE9B7D, "3d e9 88 2d 06 0f 87 82 00 00 00 74 19 3d 16 b6 15 06")
+    exact(0xDE9C0A, "3d 13 9a 70 06 0f 84 12 01 00 00 3d e7 74 0d 07 74 32")
+    exact(0xDE9D57, "5f 32 c0 5e 83 c4 14 c2 08 00")
 
     # Negative controls for prior timing/slot conflation.
 
