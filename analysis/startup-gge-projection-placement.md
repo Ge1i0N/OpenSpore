@@ -74,7 +74,9 @@ These are layout coordinates and serialized/runtime UI state, not camera visibil
 Finally, the function compares the desired coordinates with the current UI position using the
 native threshold at `0x0148531C`. Only when the observed strict-difference tests pass does it
 call the owner vtable slot `+0x64` with the two float coordinates. The call is a UI placement
-operation; its success does not establish that the UI is mounted or rendered.
+operation; its success does not establish that the UI is mounted or rendered. Lookup versus the
+separate layout attachment path is detailed in
+[startup-gge-ui-lookup-attachment.md](startup-gge-ui-lookup-attachment.md).
 
 ## Boundary result
 

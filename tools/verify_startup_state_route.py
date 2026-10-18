@@ -507,6 +507,18 @@ def verify() -> None:
     exact(0xDF61EB, "0f 84 90 00 00 00 f3 0f 10 44 24 30 f3 0f 10 4c 24 2c")
     exact(0xDF6281, "d9 44 24 34 d9 44 24 48 dc e9 d9 c9 d9 e1 d9 05 1c 53 48 01")
     exact(0xDF62D3, "8b 16 8b 42 64 83 ec 08 d9 5c 24 04 8b ce d9 1c 24 ff d0")
+    # Receiver-local UI lookup is distinct from the separate layout attachment path.
+    exact(0x810650, "8b 49 14 85 c9 74 05 e9 44 fc ff ff 33 c0 c2 08 00")
+    exact(0x8102A0, "53 55 56 8b d9 57 8b 7b 64 3b 7b 68 74 47 8b 6c 24 14")
+    exact(0x8102B2, "8b 0f 8b 01 8b 50 0c 68 18 82 ee ee 83 c7 04 ff d2")
+    exact(0x8102C9, "8b 06 8b 50 1c 8b ce ff d2 3b c5 74 28 80 7c 24 18 00")
+    exact(0x8102DD, "8b 06 8b 90 f0 00 00 00 6a 01 55 8b ce ff d2")
+    exact(0x811C20, "57 8b f9 83 bf 88 00 00 00 00 74 3d 56 8b 77 64 3b 77 68")
+    exact(0x811C35, "8b 0e 8b 01 8b 50 0c 68 18 82 ee ee 83 c6 04 ff d2")
+    exact(0x811C4A, "8b 8f 88 00 00 00 8b 11 50 8b 82 d8 00 00 00 ff d0")
+    call(0x811C7C, 0x811C20)
+    exact(0x811C81, "8b 87 8c 00 00 00 85 c0 74 15 8b 8f 88 00 00 00 8b 97 90 00 00 00")
+    exact(0x811CA0, "e8 5b 0e 15 00 f6 46 20 01 74 5e")
 
     # Negative controls for prior timing/slot conflation.
 
