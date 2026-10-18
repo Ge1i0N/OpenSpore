@@ -74,6 +74,10 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   `-1`, and all five direct callers pass only `-1`, `2`, `1` or `0`; `ED6910` later reduces the
   value through lifecycle branches `0/1/2`. No resource/property-derived ScenarioMode tag is
   recovered in this producer family.
+- A separate native mode-transition coordinator now supplies the missing middle seam: its bounded
+  guard is `current 0x01654C05 (Game_Space/SpaceGame) → target 0x01654C10 (ScenarioMode)`, followed
+  by `B335F0` ScenarioMode bootstrap. This joins SpaceGame to ScenarioMode, but the upstream target
+  selection from GGE `Play Scenario 0x070D7509` remains unresolved.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.

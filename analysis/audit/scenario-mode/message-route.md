@@ -126,3 +126,37 @@ method `ED6910` consumes `+0x20`, falls back to `+0x1C` when it is `-1`, and pas
 value to `ED6620`, whose local lifecycle dispatch is limited to branches `0`, `1` and `2`. This
 closes the dynamic-source question for this producer: it is a small numeric lifecycle state
 machine, not the missing Play Scenario-to-ScenarioMode tag conversion.
+
+### 🔥 Native SpaceGame → ScenarioMode transition seam
+
+A separate mode-transition coordinator in the `0x00B33xxx` family contains the exact mode-pair
+guard:
+
+```text
+current mode = 0x01654C05 (Game_Space / SpaceGame)
+target mode  = 0x01654C10 (ScenarioMode)
+  → B335F0
+```
+
+The guard is visible at `B337E6..B337F4`, and the transition continuation invokes `B335F0` at
+`B33C94`. `B335F0` then performs the ScenarioMode-specific bootstrap using the tag `0x01654C10`:
+
+```text
+B335F0
+  → mode/service lookup
+  → ScenarioMode tag 0x01654C10
+  → mode object/service vtable calls
+  → common mode-transition continuation
+```
+
+This is the first direct static join between the native `Game_Space` mode and `ScenarioMode`. It
+does **not** identify the upstream UI producer: the guard already receives target mode
+`0x01654C10`, while object-74 `Play Scenario 0x070D7509` still occurs only in GGE UI setup tables.
+The recovered chain is therefore:
+
+```text
+Play Scenario producer: Unknown
+  → mode target 0x01654C10: still unresolved
+  → SpaceGame → ScenarioMode coordinator: recovered
+  → B335F0 ScenarioMode bootstrap: recovered
+```

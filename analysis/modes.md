@@ -212,6 +212,18 @@ Those are the very state names our script defines, so the original's flow is
 manual `-id` values and the mode enum's object addresses are different namespaces, and conflating
 them would be the classic "confident garbage" error.
 
+Static transition evidence now adds a concrete native edge inside this tag space:
+
+```text
+Game_Space / SpaceGame 0x01654C05
+  → ScenarioMode 0x01654C10
+  → B335F0 ScenarioMode bootstrap
+```
+
+The edge is guarded in the `0x00B33xxx` mode-transition coordinator. It proves the native
+SpaceGame-to-ScenarioMode continuation, but not the unresolved upstream selection of the ScenarioMode
+target by GGE `Play Scenario 0x070D7509`.
+
 ## What this changed in the plan (historical; superseded by current header)
 
 The next step on Main→playable is **not** modes. It is **input driving the UI**: we already read each
