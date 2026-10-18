@@ -250,4 +250,23 @@ The ScenarioMode-specific branch can therefore affect spatial/object presentatio
 observed operations are bounds, grid sampling and virtual entry updates. No direct stage or
 terrain construction call appears in this boundary.
 
+## Higher spatial consumer: `E0D0E0`
+
+`E0D0E0` is a caller of `E0BF20` and provides the next presentation-side boundary. It:
+
+1. requires a current object/context at `+0x98C`;
+2. calls `E0BF20` with the current spatial entry;
+3. reads position/rotation data from the entry and applies `sin/cos` transforms;
+4. selects a ScenarioMode-specific scalar when identity `0x01654C10` is active;
+5. submits the resulting bounds/geometry to `807430`, `8082E0` and `8082C0`;
+6. calls object virtual `+0x7C` with the resulting visibility/active Boolean.
+
+The `0x01654C10` branch changes geometry/presentation parameters; it does not call a terrain
+factory. The final Boolean is a local spatial-consumer result, not observed gameplay readiness.
+
+`806E00`, used by this family of consumers, converts object bounds to spatial deltas and invokes
+an object virtual `+0x64`; its inputs and output remain geometric. These functions establish
+spatial presentation/collision-style processing, while world/stage materialization remains an
+unresolved downstream effect.
+
 The host preview remains separate and no saves were modified.
