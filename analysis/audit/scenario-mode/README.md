@@ -97,6 +97,10 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - `DFB580` names local state 9 `ReadyToLaunchScenarioForEdit` and state 10
   `ReadyToLaunchScenarioForPlay`. This upgrades the state-10 interpretation from a numeric phase
   to a native controller/UI semantic, but still does not prove runtime click delivery or launch.
+- The [selection-flow audit](selection-flow.md) resolves forward/back record navigation, conditional
+  panel skips, pending-to-selected key promotion, state 8 `WaitingForAutoPollinate`, and the
+  separate internal-message wait route. Selected key, name and `EC42D0` conditions feed UI gates;
+  resource-service readiness and notification delivery are not assumed.
 - The constructor-established primary vtable is `0x0147EDA0`; its `+0x2C` method `DFC6C0`
   requests `GGENewScenariov3` (FNV-1 identity `0x611E869D`) and creates the labelled records
   `choose adventure → 0x05933FE0`, `choose captain name → 0x05933FE1/2`, and

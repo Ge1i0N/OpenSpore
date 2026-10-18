@@ -115,6 +115,10 @@ dynamic/component context, and the semantic join from object 74 to these buttons
 
 ## Controller state names and the narrowed UI boundary
 
+The preceding adventure/captain selection and state-8 pending-key handling are mapped separately
+in [selection flow](selection-flow.md). A selected key or an enabled host button is not a substitute
+for the native wait/launch gates below.
+
 `DFB580` formats the controller's local state using the shipped wide-string table. The relevant
 entries are exact:
 

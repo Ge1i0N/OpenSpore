@@ -45,6 +45,17 @@ def verify() -> None:
             raise ValueError(f"vtable slot mismatch {base:#x}+{offset:#x}: {actual:#x}")
         checks += 1
 
+    def wide(address: int, expected: str) -> None:
+        exact(address, (expected + "\0").encode("utf-16le").hex())
+
+    def je_target(address: int) -> int:
+        data = pe.read(address, 6)
+        if data[0] == 0x74:
+            return address + 2 + int.from_bytes(data[1:2], "little", signed=True)
+        if data[:2] == b"\x0f\x84":
+            return address + 6 + int.from_bytes(data[2:], "little", signed=True)
+        raise ValueError(f"expected JE at {address:#x}")
+
     # Table-driven producer: old OnExit, select index, new tag / old tag,
     # pre-enter notification, then new object's OnEnter.
     exact(0x7D86CF, "8b 01 8b 50 1c ff d2")
@@ -220,6 +231,91 @@ def verify() -> None:
     if control_table[19:21] != [0x05951103, 0x05951104]:
         raise ValueError("playable controls missing from native attachment table")
     checks += 1
+
+    # Four native wizard records: verify panel/forward/back/state, not just
+    # nearby string presence. Names are diagnostic record labels, not captions.
+    for start, label_address, label, panel, forward, back, state_offset, state in (
+        (0xDFC7E2, 0x147EE44, "choose adventure", 0x07BFB2A0, 0x05384D05, 0x05933FE0, 0x38, 1),
+        (0xDFC86E, 0x147EE1C, "choose captain name", 0x07BFB2A1, 0x05384D06, 0x05933FE1, 0x35, 2),
+        (0xDFC8F7, 0x147EE1C, "choose captain name", 0x07BFB2A2, 0x05384D07, 0x05933FE2, 0x35, 3),
+        (0xDFC980, 0x147EE00, "choose posse", 0x07BFB2A3, 0x05384D08, 0x05933FE3, 0x35, 4),
+    ):
+        exact(start, (b"\x68" + label_address.to_bytes(4, "little")).hex())
+        wide(label_address, label)
+        for delta, displacement, value in ((9, 0x2C, panel), (17, 0x30, forward),
+                                            (25, 0x34, back), (state_offset, 0x48, state)):
+            exact(start + delta, (bytes((0xC7, 0x44, 0x24, displacement)) +
+                                  value.to_bytes(4, "little")).hex())
+
+    state_names = ("Neutral", "SelectingScenarioForPlay", "SelectingAvatarForPlay",
+                   "NamingAvatar", "SelectingPosse", "SelectingTerrainForEdit",
+                   "SelectingAvatarForEdit", "SelectingScenarioForEdit", "WaitingForAutoPollinate",
+                   "ReadyToLaunchScenarioForEdit", "ReadyToLaunchScenarioForPlay", "DoingModeSelectZoomIn")
+    for index, name in enumerate(state_names):
+        instruction = 0xDFB589 + index * 8
+        exact(instruction, bytes((0xC7, 0x44, 0x24, 0x2C + index * 4)).hex())
+        wide(int.from_bytes(pe.read(instruction + 4, 4), "little"), name)
+    exact(0xDFB5E9, "8b 4c 84 2c")
+
+    # Direction is determined by index changes and record +0x20 reads.
+    call(0xDFE508, 0xDF9E30)
+    call(0xDFE4E4, 0xDF9EC0)
+    exact(0xDF9E3D, "48 89 46 2c 8d 04 c0 8b 54 81 20 8b ce 89 56 20")
+    exact(0xDF9EE5, "ff 46 2c 8b 46 2c 8d 14 c0 8b 46 0c 8b 4c 90 20 89 4e 20")
+    exact(0xDF9EC3, "8b 4e 10 2b 4e 0c b8 39 8e e3 38 f7 e9 c1 fa 03")
+    exact(0xDF9EDC, "39 4e 2c 0f 83 9e 00 00 00")
+    exact(0xDF9F45, "83 f8 02 75 06 80 7e 7c 00 74 0b 83 f8 04 75 2a 80 7e 7d 00 75 24")
+    call(0xDF9E61, 0xDF9C50)
+    call(0xDF9F0E, 0xDF9C50)
+
+    # Selection may remain pending; service success is not forced.
+    exact(0xE000B7, "84 c0 0f 84 94 00 00 00")
+    exact(0xE000BF, "8b 03 89 87 98 00 00 00")
+    call(0xE000E8, 0xEC5A10)
+    call(0xE00103, 0xEC42D0)
+    exact(0xE00115, "8b 4f 20 89 4f 24 c7 47 20 08 00 00 00")
+    exact(0xE0012C, "89 97 8c 00 00 00 89 87 90 00 00 00 89 8f 94 00 00 00")
+    call(0xE0014E, 0xDFFD70)
+
+    # Internal messages use GGE root+8 -> active root+0x38 -> primary+0x34.
+    exact(0xDE6BB1, "c7 46 08 20 e0 47 01")
+    vslot(0x147E020, 4, 0xDE8A80)
+    exact(0xDE8A8C, "8b 4e 30")
+    exact(0xDE8A9A, "8b 01 8b 50 34 53 57 ff d2")
+    vslot(primary, 0x34, 0xE00280)
+    exact(0xE002A2, "3d 23 f7 0b cc 74 0b")
+    exact(0xE002B4, "83 7e 20 08 bb 01 00 00 00 75 20")
+    exact(0xE002C9, "8b 00 2b c3 0f 84 d1 00 00 00 2b c3 74 13 2b c3 0f 84 c5 00 00 00")
+    # Follow the three successive subtract-one/JE branches, including their
+    # decoded destinations. Status 2 alone takes the pending-key promotion.
+    decrement = int.from_bytes(pe.read(0xE002B9, 4), "little")
+    for status, expected in ((0, None), (1, 0xE003A4), (2, 0xE002EA),
+                             (3, 0xE003A4), (4, None), (0xFFFFFFFF, None)):
+        value = status
+        target = None
+        for branch in (0xE002CD, 0xE002D5, 0xE002D9):
+            value = (value - decrement) & 0xFFFFFFFF
+            if value == 0:
+                target = je_target(branch)
+                break
+        if target != expected:
+            raise ValueError(f"wait-status route mismatch for {status:#x}: {target}")
+        checks += 1
+    exact(0xE002EA, "8b 8e 98 00 00 00 8b 96 9c 00 00 00 8b 46 24 89 8e 8c 00 00 00")
+    exact(0xE00321, "89 46 20 89 be a0 00 00 00")
+    call(0xE00330, 0xDFFD70)
+    exact(0xE003A4, "8b 46 24 3b c3 75 08 89 5e 20 88 5e 7e eb 20")
+    exact(0xE003B3, "83 f8 09 75 33")
+
+    # Gates feed DF9B00; no inferred-ready fallback replaces EC42D0.
+    exact(0xDFA2F5, "83 bf a4 00 00 00 00 0f 95 c2")
+    exact(0xDFA305, "83 bf 8c 00 00 00 00 0f 95 c0")
+    exact(0xDFA2E0, "8b 87 68 01 00 00 3b 87 6c 01 00 00 0f 95 c1")
+    call(0xDFA31C, 0xEC42D0)
+    exact(0xDFA321, "84 c0 74 05 c6 44 24 08 00")
+    call(0xDFA331, 0xDF9B00)
+    exact(0xDFFEDA, "88 4b 7d 89 43 30")
+    exact(0xDFFEF4, "83 44 24 0c 38 8b f0 b9 0e 00 00 00 42 f3 a5")
 
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
