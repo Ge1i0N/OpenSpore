@@ -10,6 +10,7 @@ int g_x = 0, g_y = 0;
 bool g_left = false;
 bool g_press_left = false;    // accumulated since the last begin_frame()
 bool g_press_right = false;
+int g_wheel = 0;             // accumulated wheel delta since last end_frame
 
 // The frame-consistent view: latched at begin_frame(), so a click is visible for exactly one frame
 // no matter how many messages arrived while it was being drawn.
@@ -21,6 +22,10 @@ bool g_fclicked = false, g_fright = false;
 void on_move(int x, int y) {
     g_x = x;
     g_y = y;
+}
+
+void on_wheel(int delta) {
+    g_wheel += delta;
 }
 
 void on_button(bool left, bool down) {
@@ -48,12 +53,13 @@ void begin_frame() {
 }
 
 void end_frame() {
-    // Nothing to clear: the edges were already consumed by begin_frame(). Present so the caller does
-    // not have to know that, and so a later change (a queue, a repeat count) has the obvious home.
+    // Clear the wheel delta so it is visible for exactly one frame.
+    g_wheel = 0;
 }
 
 int x() { return g_fx; }
 int y() { return g_fy; }
+int wheel() { return g_wheel; }
 bool left_down() { return g_left; }
 bool clicked() { return g_fclicked; }
 bool right_clicked() { return g_fright; }

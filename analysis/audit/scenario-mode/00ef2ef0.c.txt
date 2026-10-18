@@ -1,0 +1,141 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00EF2EF0
+
+void __thiscall FUN_00ef2ef0(int param_1,undefined4 param_2,float param_3)
+
+{
+  float fVar1;
+  char cVar2;
+  int iVar3;
+  int *piVar4;
+  undefined1 uVar5;
+  float unaff_retaddr;
+  undefined4 uVar6;
+  undefined *puVar7;
+  undefined4 uVar8;
+  undefined4 local_8;
+
+  iVar3 = FUN_00b3d420();
+  if (*(char *)(iVar3 + 0x28) == '\0') {
+    if (DAT_015acc34 != 4) {
+      if (DAT_015acc40 != 0) {
+        DAT_015acc40 = DAT_015acc40 + 1;
+      }
+      FUN_00ef2930();
+      return;
+    }
+    if (*(char *)(param_1 + 0xdc) != '\0') {
+      *(undefined1 *)(param_1 + 0xdc) = 0;
+      FUN_00b3d480();
+      FUN_00b32360(0x4bf38a7);
+      FUN_00b3d510();
+      cVar2 = FUN_00e36f50();
+      if (cVar2 != '\0') {
+        uVar8 = 1;
+        puVar7 = &DAT_01654c10;
+        uVar6 = 0;
+        FUN_00b3d510(0,&DAT_01654c10,1);
+        FUN_00e3e350(uVar6,puVar7,uVar8);
+      }
+      thunk_FUN_0080ff80();
+      cVar2 = FUN_00810800(0x614de4c);
+      if (cVar2 == '\x01') {
+        FUN_00810700(0x614de4c,0);
+      }
+      if (*(int *)(param_1 + 0xcc) == 2) {
+        FUN_00ef0e00();
+      }
+      else {
+        FUN_00ef0990(0);
+      }
+      piVar4 = DAT_0167ea54;
+      uVar6 = FUN_00932e50("ScenarioPlanet",0x811c9dc5,1);
+      (**(code **)(*piVar4 + 0x30))(uVar6);
+      return;
+    }
+    FUN_00ef0490();
+    local_8 = (undefined4)(longlong)ROUND(param_3 * DAT_0148ba68);
+    piVar4 = (int *)FUN_00b3d330();
+    (**(code **)(*piVar4 + 0x2c))(local_8);
+    if (*(int *)(param_1 + 0xcc) == 1) {
+      iVar3 = FUN_00b3d410();
+      *(undefined1 *)(iVar3 + 0x24) = 0;
+      if (*(int *)(*(int *)(param_1 + 0x74) + 0x18) == 0) {
+        iVar3 = FUN_00b3d5d0();
+        if (*(char *)(iVar3 + 0x2a) == '\0') {
+          piVar4 = (int *)FUN_0067dcd0();
+          piVar4 = (int *)(**(code **)(*piVar4 + 0x50))();
+          uVar6 = (**(code **)(*piVar4 + 0x38))();
+          FUN_00b5cd30(uVar6);
+          uVar6 = FUN_00b10160();
+          FUN_00b2f9b0(uVar6);
+        }
+        FUN_00efe120(param_2);
+        FUN_00f3d680(*(undefined4 *)(param_1 + 0xcc));
+        if (*(int *)(param_1 + 0x14) != 0) {
+          FUN_00ed6440(local_8);
+        }
+        FUN_00ebe370(param_2);
+        FUN_00ef2e90(local_8);
+        FUN_00ecb690(param_2);
+        FUN_00f0c1f0(param_2);
+        FUN_00f3c050();
+        FUN_00efbdf0();
+        FUN_00ef8490();
+        FUN_00f06690(local_8);
+        FUN_00f3d740();
+      }
+      else {
+        FUN_00f459f0();
+      }
+    }
+    else if (*(int *)(param_1 + 0xcc) == 2) {
+      iVar3 = *(int *)(*(int *)(param_1 + 0x78) + 0x90);
+      if ((iVar3 == 0) || (iVar3 == 1)) {
+        uVar5 = 0;
+      }
+      else {
+        uVar5 = 1;
+      }
+      iVar3 = FUN_00b3d410();
+      fVar1 = unaff_retaddr * DAT_0148ba68;
+      *(undefined1 *)(iVar3 + 0x24) = uVar5;
+      FUN_00f1f960((int)(longlong)ROUND(fVar1));
+      FUN_00ef0d00(local_8);
+      iVar3 = FUN_00b3d5d0();
+      if (*(char *)(iVar3 + 0x2a) == '\0') {
+        piVar4 = (int *)FUN_0067dcd0();
+        piVar4 = (int *)(**(code **)(*piVar4 + 0x50))();
+        uVar6 = (**(code **)(*piVar4 + 0x38))();
+        FUN_00b60bb0(uVar6);
+        uVar6 = FUN_00d20610();
+        FUN_00b2f9b0(uVar6);
+      }
+      if (*(int *)(param_1 + 0x6c) != 0) {
+        FUN_00f117c0(local_8);
+      }
+      FUN_00ef2eb0(local_8);
+      FUN_00f3d680(*(undefined4 *)(param_1 + 0xcc));
+      FUN_00ebe370(param_2);
+      FUN_00f0a320(param_2);
+      FUN_00f0ab20(param_2);
+      FUN_00f20390(unaff_retaddr);
+      FUN_00f24c40(unaff_retaddr);
+      FUN_00ef2a40(unaff_retaddr);
+      if (*(int *)(param_1 + 0xd4) != 0) {
+        FUN_00efbdf0();
+      }
+      if (*(int *)(param_1 + 0xd8) != 0) {
+        FUN_00f06690(local_8);
+      }
+    }
+    piVar4 = (int *)FUN_00b3d330();
+    (**(code **)(*piVar4 + 0x30))(local_8);
+    FUN_00b3d330(local_8);
+    FUN_00b5eae0(local_8);
+  }
+  return;
+}

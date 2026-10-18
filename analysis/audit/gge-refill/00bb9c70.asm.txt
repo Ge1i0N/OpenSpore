@@ -1,0 +1,15 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00BB9C70
+
+00bb9c70  CMP byte ptr [ESP + 0x8],0x0
+00bb9c75  JZ 0x00bb9c81
+00bb9c77  MOV EAX,dword ptr [ESP + 0x4]
+00bb9c7b  OR dword ptr [ECX + 0x5c],EAX
+00bb9c7e  RET 0x8
+00bb9c81  MOV EDX,dword ptr [ESP + 0x4]
+00bb9c85  NOT EDX
+00bb9c87  AND dword ptr [ECX + 0x5c],EDX
+00bb9c8a  RET 0x8

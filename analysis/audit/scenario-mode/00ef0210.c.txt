@@ -1,0 +1,51 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00EF0210
+
+undefined4 * __fastcall FUN_00ef0210(undefined4 *param_1)
+
+{
+  param_1[1] = &PTR_FUN_013eb394;
+  param_1[2] = &PTR_FUN_013ec438;
+  param_1[3] = 0;
+  *param_1 = &PTR_FUN_0148afd8;
+  param_1[1] = &PTR_LAB_0148afd0;
+  param_1[2] = &PTR_LAB_0148afc0;
+  param_1[4] = 0;
+  param_1[5] = 0;
+  param_1[6] = 0;
+  param_1[7] = 0;
+  FUN_00697960();
+  param_1[0x1a] = 0;
+  param_1[0x1b] = 0;
+  param_1[0x1c] = 0;
+  param_1[0x1d] = 0;
+  param_1[0x1e] = 0;
+  param_1[0x1f] = 0;
+  param_1[0x20] = 0;
+  param_1[0x21] = 0;
+  param_1[0x22] = 0;
+  param_1[0x23] = 0;
+  param_1[0x24] = 0;
+  param_1[0x25] = 0;
+  param_1[0x26] = 0;
+  param_1[0x27] = 0;
+  param_1[0x28] = 0;
+  param_1[0x29] = 0;
+  *(undefined1 *)(param_1 + 0x2a) = 0;
+  param_1[0x2b] = 0;
+  param_1[0x2c] = 0;
+  param_1[0x2d] = 0;
+  param_1[0x2e] = 0;
+  param_1[0x2f] = 0;
+  param_1[0x30] = 0;
+  param_1[0x31] = 2;
+  param_1[0x33] = 0;
+  param_1[0x35] = 0;
+  param_1[0x36] = 0;
+  *(undefined1 *)(param_1 + 0x37) = 0;
+  DAT_016c7aa4 = param_1;
+  return param_1;
+}

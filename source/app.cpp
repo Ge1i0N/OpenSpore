@@ -35,6 +35,7 @@
 #include "render/overlay.h"
 #include "states/statemgr.h"
 #include "states/uipresent.h"   // requested_by_state: which layout the current state asked for
+#include "states/debugmenu.h"
 
 namespace os::app {
 namespace {
@@ -213,10 +214,23 @@ LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
             input::on_button(false, true);
             return 0;
         case WM_KEYDOWN:
+            if (states::debugmenu::handle_keydown((unsigned)wp, (long)lp)) return 0;
+            if (wp == 'C' && !(lp & (1LL << 30)) && (GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_SHIFT) & 0x8000)) {
+#ifdef OS_ENABLE_DEV_COMMANDS
+                states::debugmenu::toggle();
+#endif
+                return 0;
+            }
             if (wp == VK_ESCAPE) {
+#ifdef OS_ENABLE_DEV_COMMANDS
+                if (states::debugmenu::open()) { states::debugmenu::toggle(); return 0; }
+#endif
                 PostQuitMessage(0);
                 return 0;
             }
+            break;
+        case WM_CHAR:
+            if (states::debugmenu::handle_char((wchar_t)wp)) return 0;
             break;
         case WM_ACTIVATEAPP:
             LOG_DEBUG("app", "activate=%d", (int)wp);
@@ -410,6 +424,25 @@ void pump_messages() {
     }
 }
 
+struct RunLogPaths { std::string normal="OpenSpore.log", crash="OpenSpore.crash.log"; };
+RunLogPaths make_run_log_paths() {
+    RunLogPaths paths; SYSTEMTIME now{}; GetLocalTime(&now); char stem[96]{};
+    _snprintf_s(stem,sizeof(stem),_TRUNCATE,"OpenSpore-%04u%02u%02u-%02u%02u%02u-%03u-pid%lu",
+                now.wYear,now.wMonth,now.wDay,now.wHour,now.wMinute,now.wSecond,now.wMilliseconds,GetCurrentProcessId());
+    wchar_t module[MAX_PATH]{};
+    const DWORD length=GetModuleFileNameW(nullptr,module,MAX_PATH);
+    std::error_code ec;
+    if(length>0&&length<MAX_PATH) {
+        const auto log_directory=std::filesystem::path(module).parent_path()/"logs";
+        std::filesystem::create_directories(log_directory,ec);
+        if(!ec) {
+            paths.normal=(log_directory/(std::string(stem)+".log")).string();
+            paths.crash=(log_directory/(std::string(stem)+".crash.log")).string();
+        }
+    }
+    return paths;
+}
+
 }  // namespace
 
 void request_quit(int code) {
@@ -426,10 +459,11 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     // and the only thing that turns that into "log + continue" instead of a modal dialog is
     // the harness being already in place.
     std::string console_how = attach_console();
-    diag::install("OpenSpore.crash.log");
-    log::init("OpenSpore.log", log::Level::Trace, log::Level::Debug);
+    const RunLogPaths log_paths=make_run_log_paths();
+    diag::install(log_paths.crash.c_str());
+    log::init(log_paths.normal.c_str(), log::Level::Trace, log::Level::Debug);
     mark(0, true, "harness up before the log existed");
-    mark(1, true, "file=OpenSpore.log console=" + console_how);
+    mark(1, true, "file="+log_paths.normal+" crash="+log_paths.crash+" console="+console_how);
     // Name resolution (id -> name) is data, loaded once. Failure is not fatal: every name
     // falls back to hex rather than to a guess.
     {
@@ -541,6 +575,7 @@ int run(HINSTANCE inst, HINSTANCE, LPWSTR cmdline_wide, int) {
     states::install_console_command(states::manager());
     states::install_loader(states::manager());
     states::install_title(states::manager());
+    states::debugmenu::install(states::manager());
     // The game's 60 states, with their real ids, into our state manager, so `-state:Main` and
     // `-state:TribalAccessoriesEditor` resolve against the shipped table rather than only ours.
     appstates::install(states::manager());

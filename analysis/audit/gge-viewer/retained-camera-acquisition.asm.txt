@@ -1,0 +1,31 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  de478b:	83 be 98 01 00 00 00 	cmp    DWORD PTR [esi+0x198],0x0
+  de4792:	75 42                	jne    0xde47d6
+  de4794:	e8 37 95 89 ff       	call   0x67dcd0
+  de4799:	8b 10                	mov    edx,DWORD PTR [eax]
+  de479b:	8b c8                	mov    ecx,eax
+  de479d:	8b 42 50             	mov    eax,DWORD PTR [edx+0x50]
+  de47a0:	ff d0                	call   eax
+  de47a2:	8b 10                	mov    edx,DWORD PTR [eax]
+  de47a4:	8b c8                	mov    ecx,eax
+  de47a6:	8b 42 38             	mov    eax,DWORD PTR [edx+0x38]
+  de47a9:	ff d0                	call   eax
+  de47ab:	8b 9e 98 01 00 00    	mov    ebx,DWORD PTR [esi+0x198]
+  de47b1:	8b f8                	mov    edi,eax
+  de47b3:	3b fb                	cmp    edi,ebx
+  de47b5:	74 1f                	je     0xde47d6
+  de47b7:	85 ff                	test   edi,edi
+  de47b9:	74 08                	je     0xde47c3
+  de47bb:	8b 17                	mov    edx,DWORD PTR [edi]
+  de47bd:	8b 02                	mov    eax,DWORD PTR [edx]
+  de47bf:	8b cf                	mov    ecx,edi
+  de47c1:	ff d0                	call   eax
+  de47c3:	89 be 98 01 00 00    	mov    DWORD PTR [esi+0x198],edi
+  de47c9:	85 db                	test   ebx,ebx
+  de47cb:	74 09                	je     0xde47d6
+  de47cd:	8b 13                	mov    edx,DWORD PTR [ebx]
+  de47cf:	8b 42 04             	mov    eax,DWORD PTR [edx+0x4]
+  de47d2:	8b cb                	mov    ecx,ebx
+  de47d4:	ff d0                	call   eax

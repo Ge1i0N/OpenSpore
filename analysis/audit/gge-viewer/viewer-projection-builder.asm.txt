@@ -1,0 +1,80 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  7c4370:	56                   	push   esi
+  7c4371:	8b 74 24 08          	mov    esi,DWORD PTR [esp+0x8]
+  7c4375:	57                   	push   edi
+  7c4376:	8b b9 70 01 00 00    	mov    edi,DWORD PTR [ecx+0x170]
+  7c437c:	6a 10                	push   0x10
+  7c437e:	6a 00                	push   0x0
+  7c4380:	56                   	push   esi
+  7c4381:	e8 ea 89 16 00       	call   0x92cd70
+  7c4386:	8b 47 6c             	mov    eax,DWORD PTR [edi+0x6c]
+  7c4389:	f3 0f 10 2d 40 37 45 	movss  xmm5,DWORD PTR ds:0x1453740
+  7c4390:	01
+  7c4391:	f3 0f 10 57 58       	movss  xmm2,DWORD PTR [edi+0x58]
+  7c4396:	f3 0f 10 67 70       	movss  xmm4,DWORD PTR [edi+0x70]
+  7c439b:	f3 0f 10 5f 74       	movss  xmm3,DWORD PTR [edi+0x74]
+  7c43a0:	f3 0f 10 7f 54       	movss  xmm7,DWORD PTR [edi+0x54]
+  7c43a5:	83 c4 0c             	add    esp,0xc
+  7c43a8:	0f 28 c5             	movaps xmm0,xmm5
+  7c43ab:	f3 0f 5e 47 5c       	divss  xmm0,DWORD PTR [edi+0x5c]
+  7c43b0:	0f 28 cd             	movaps xmm1,xmm5
+  7c43b3:	f3 0f 5e 4f 60       	divss  xmm1,DWORD PTR [edi+0x60]
+  7c43b8:	f3 0f 11 54 24 0c    	movss  DWORD PTR [esp+0xc],xmm2
+  7c43be:	f3 0f 11 06          	movss  DWORD PTR [esi],xmm0
+  7c43c2:	f3 0f 11 4e 14       	movss  DWORD PTR [esi+0x14],xmm1
+  7c43c7:	83 f8 02             	cmp    eax,0x2
+  7c43ca:	75 50                	jne    0x7c441c
+  7c43cc:	0f 57 f6             	xorps  xmm6,xmm6
+  7c43cf:	f3 0f 59 4c 24 0c    	mulss  xmm1,DWORD PTR [esp+0xc]
+  7c43d5:	f3 0f 5c dc          	subss  xmm3,xmm4
+  7c43d9:	0f 28 d5             	movaps xmm2,xmm5
+  7c43dc:	f3 0f 5e d3          	divss  xmm2,xmm3
+  7c43e0:	f3 0f 11 56 28       	movss  DWORD PTR [esi+0x28],xmm2
+  7c43e5:	f3 0f 11 76 20       	movss  DWORD PTR [esi+0x20],xmm6
+  7c43ea:	f3 0f 11 76 24       	movss  DWORD PTR [esi+0x24],xmm6
+  7c43ef:	f3 0f 11 76 2c       	movss  DWORD PTR [esi+0x2c],xmm6
+  7c43f4:	f3 0f 59 c7          	mulss  xmm0,xmm7
+  7c43f8:	f3 0f 11 46 30       	movss  DWORD PTR [esi+0x30],xmm0
+  7c43fd:	f3 0f 11 4e 34       	movss  DWORD PTR [esi+0x34],xmm1
+  7c4402:	f3 0f 59 d4          	mulss  xmm2,xmm4
+  7c4406:	0f 57 15 70 e9 4c 01 	xorps  xmm2,XMMWORD PTR ds:0x14ce970
+  7c440d:	5f                   	pop    edi
+  7c440e:	f3 0f 11 56 38       	movss  DWORD PTR [esi+0x38],xmm2
+  7c4413:	f3 0f 11 6e 3c       	movss  DWORD PTR [esi+0x3c],xmm5
+  7c4418:	5e                   	pop    esi
+  7c4419:	c2 04 00             	ret    0x4
+  7c441c:	f3 0f 11 6e 2c       	movss  DWORD PTR [esi+0x2c],xmm5
+  7c4421:	83 f8 03             	cmp    eax,0x3
+  7c4424:	75 32                	jne    0x7c4458
+  7c4426:	0f 57 c0             	xorps  xmm0,xmm0
+  7c4429:	f3 0f 11 46 20       	movss  DWORD PTR [esi+0x20],xmm0
+  7c442e:	f3 0f 11 46 24       	movss  DWORD PTR [esi+0x24],xmm0
+  7c4433:	f3 0f 11 6e 28       	movss  DWORD PTR [esi+0x28],xmm5
+  7c4438:	f3 0f 11 46 30       	movss  DWORD PTR [esi+0x30],xmm0
+  7c443d:	f3 0f 11 46 34       	movss  DWORD PTR [esi+0x34],xmm0
+  7c4442:	0f 57 25 70 e9 4c 01 	xorps  xmm4,XMMWORD PTR ds:0x14ce970
+  7c4449:	5f                   	pop    edi
+  7c444a:	f3 0f 11 66 38       	movss  DWORD PTR [esi+0x38],xmm4
+  7c444f:	f3 0f 11 46 3c       	movss  DWORD PTR [esi+0x3c],xmm0
+  7c4454:	5e                   	pop    esi
+  7c4455:	c2 04 00             	ret    0x4
+  7c4458:	f3 0f 59 c7          	mulss  xmm0,xmm7
+  7c445c:	f3 0f 11 46 20       	movss  DWORD PTR [esi+0x20],xmm0
+  7c4461:	0f 28 c3             	movaps xmm0,xmm3
+  7c4464:	f3 0f 5c c4          	subss  xmm0,xmm4
+  7c4468:	f3 0f 5e d8          	divss  xmm3,xmm0
+  7c446c:	0f 57 c0             	xorps  xmm0,xmm0
+  7c446f:	f3 0f 11 5e 28       	movss  DWORD PTR [esi+0x28],xmm3
+  7c4474:	f3 0f 59 ca          	mulss  xmm1,xmm2
+  7c4478:	f3 0f 11 4e 24       	movss  DWORD PTR [esi+0x24],xmm1
+  7c447d:	f3 0f 11 46 30       	movss  DWORD PTR [esi+0x30],xmm0
+  7c4482:	f3 0f 11 46 34       	movss  DWORD PTR [esi+0x34],xmm0
+  7c4487:	f3 0f 59 dc          	mulss  xmm3,xmm4
+  7c448b:	0f 57 1d 70 e9 4c 01 	xorps  xmm3,XMMWORD PTR ds:0x14ce970
+  7c4492:	5f                   	pop    edi
+  7c4493:	f3 0f 11 5e 38       	movss  DWORD PTR [esi+0x38],xmm3
+  7c4498:	f3 0f 11 46 3c       	movss  DWORD PTR [esi+0x3c],xmm0
+  7c449d:	5e                   	pop    esi
+  7c449e:	c2 04 00             	ret    0x4

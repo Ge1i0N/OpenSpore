@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 project(OpenSpore LANGUAGES CXX)
 
+# Keep every executable (main app and explicit read-only utilities) together in the
+# canonical review/runtime directory. Multi-config generators expand $<CONFIG>.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
+
 # ---------------------------------------------------------------------------
 # Target shape, decided by evidence, not taste:
 #   * The original (refs/bins/ReleaseGA/SporeApp.exe) is 32-bit (machine 0x14c),
@@ -160,7 +164,7 @@ set(OS_SOURCES
   source/states/title.cpp
   source/states/uipresent.cpp
   source/states/cellpresent.cpp
-  source/states/ggehostpreview.cpp
+  source/states/ggehostpreview.cpp source/states/debugmenu.cpp
 )
 
 add_executable(OpenSpore WIN32 ${OS_SOURCES} ${OS_RC_FILE})
@@ -190,6 +194,12 @@ add_executable(starsdb_context_inspect EXCLUDE_FROM_ALL tools/starsdb_context_in
 target_include_directories(starsdb_context_inspect PRIVATE source)
 add_executable(starsdb_dbpf_inspect EXCLUDE_FROM_ALL tools/starsdb_dbpf_inspect.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp source/engine/starsdb_context.cpp source/engine/starsdb_dbpf.cpp)
 target_include_directories(starsdb_dbpf_inspect PRIVATE source)
+add_executable(dbpf_inventory_inspect EXCLUDE_FROM_ALL tools/dbpf_inventory_inspect.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
+target_include_directories(dbpf_inventory_inspect PRIVATE source)
+add_executable(dbpf_resource_inspect EXCLUDE_FROM_ALL tools/dbpf_resource_inspect.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
+target_include_directories(dbpf_resource_inspect PRIVATE source)
+add_executable(dbpf_serialized_frame_inspect EXCLUDE_FROM_ALL tools/dbpf_serialized_frame_inspect.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp source/engine/serialized_frame.cpp)
+target_include_directories(dbpf_serialized_frame_inspect PRIVATE source)
 add_executable(starsdb_dbpf_verify EXCLUDE_FROM_ALL tools/starsdb_dbpf_verify.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp source/engine/starsdb_links.cpp source/engine/starsdb_context.cpp source/engine/starsdb_dbpf.cpp)
 target_include_directories(starsdb_dbpf_verify PRIVATE source)
 add_executable(starsdb_postload_verify EXCLUDE_FROM_ALL tools/starsdb_postload_verify.cpp source/engine/serialized_frame.cpp source/engine/starsdb.cpp)
@@ -197,6 +207,8 @@ target_include_directories(starsdb_postload_verify PRIVATE source)
 set(OS_SAVE_HEADER_SOURCES source/engine/save_header.cpp source/engine/starsdb_dbpf.cpp
   source/engine/starsdb_context.cpp source/engine/starsdb_links.cpp source/engine/starsdb.cpp
   source/engine/serialized_frame.cpp source/engine/pkg.cpp source/engine/refpack.cpp source/engine/log.cpp)
+add_executable(starsdb_save_corpus_inspect EXCLUDE_FROM_ALL tools/starsdb_save_corpus_inspect.cpp source/engine/planet_record.cpp ${OS_SAVE_HEADER_SOURCES})
+target_include_directories(starsdb_save_corpus_inspect PRIVATE source)
 add_executable(save_header_verify EXCLUDE_FROM_ALL tools/save_header_verify.cpp source/engine/gge_catalog.cpp ${OS_SAVE_HEADER_SOURCES})
 target_include_directories(save_header_verify PRIVATE source)
 add_executable(save_header_inspect EXCLUDE_FROM_ALL tools/save_header_inspect.cpp ${OS_SAVE_HEADER_SOURCES})
@@ -206,6 +218,8 @@ add_executable(planet_record_verify EXCLUDE_FROM_ALL tools/planet_record_verify.
 target_include_directories(planet_record_verify PRIVATE source)
 add_executable(planet_record_inspect EXCLUDE_FROM_ALL tools/planet_record_inspect.cpp source/engine/planet_record.cpp ${OS_SAVE_HEADER_SOURCES})
 target_include_directories(planet_record_inspect PRIVATE source)
+add_executable(starsdb_gge_capture EXCLUDE_FROM_ALL tools/starsdb_gge_capture.cpp source/engine/planet_record.cpp ${OS_SAVE_HEADER_SOURCES})
+target_include_directories(starsdb_gge_capture PRIVATE source)
 add_executable(gge_star_present_verify EXCLUDE_FROM_ALL tools/gge_star_present_verify.cpp source/engine/gge_star_present.cpp
   source/engine/spui_binary.cpp source/engine/spui_geometry.cpp)
 target_include_directories(gge_star_present_verify PRIVATE source)
@@ -297,11 +311,17 @@ target_include_directories(cell_game_verify PRIVATE source)
 target_compile_definitions(cell_game_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_link_libraries(cell_game_verify PRIVATE user32 gdi32)
 add_executable(cell_world_verify EXCLUDE_FROM_ALL tools/cell_world_verify.cpp
-  source/engine/cell_world.cpp source/engine/cell_game.cpp source/engine/naming.cpp
+  source/engine/cell_world.cpp source/engine/cell_game.cpp source/engine/cell_save.cpp source/engine/naming.cpp
   source/engine/pkg.cpp source/engine/refpack.cpp source/engine/fs.cpp source/engine/log.cpp)
 target_include_directories(cell_world_verify PRIVATE source)
 target_compile_definitions(cell_world_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_link_libraries(cell_world_verify PRIVATE user32 gdi32)
+add_executable(dump_cell_stats EXCLUDE_FROM_ALL tools/dump_cell_stats.cpp
+  source/engine/cell_game.cpp source/engine/cell_save.cpp source/engine/naming.cpp
+  source/engine/pkg.cpp source/engine/refpack.cpp source/engine/fs.cpp source/engine/log.cpp)
+target_include_directories(dump_cell_stats PRIVATE source)
+target_compile_definitions(dump_cell_stats PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_link_libraries(dump_cell_stats PRIVATE user32 gdi32)
 add_executable(gge_catalog_snapshot_verify EXCLUDE_FROM_ALL tools/gge_catalog_snapshot_verify.cpp
   source/engine/gge_catalog_snapshot.cpp source/engine/gge_catalog.cpp)
 target_include_directories(gge_catalog_snapshot_verify PRIVATE source)
@@ -335,6 +355,7 @@ if(MSVC)
   target_compile_options(save_header_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(planet_record_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(planet_record_inspect PRIVATE /W4 /permissive- /utf-8 /EHsc)
+  target_compile_options(starsdb_gge_capture PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_star_present_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_star_instance_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(gge_star_phase1_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)

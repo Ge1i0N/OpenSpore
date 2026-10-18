@@ -24,6 +24,7 @@ namespace os::input {
 // Called from the window procedure. Safe to call before init(); state is simply latched.
 void on_move(int x, int y);
 void on_button(bool left, bool down);
+void on_wheel(int delta);
 
 // Frame boundaries. begin_frame() latches the accumulated button edges so a click that arrived mid-
 // frame is visible for exactly one frame; end_frame() clears what the frame did not consume.
@@ -32,6 +33,7 @@ void end_frame();
 
 int x();
 int y();
+int wheel();                    // accumulated wheel delta since last end_frame
 bool left_down();               // level: the button is currently held
 bool clicked();                 // edge: a left press completed during THIS frame
 bool right_clicked();

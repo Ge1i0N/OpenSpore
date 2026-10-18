@@ -91,6 +91,30 @@ int main(int argc,char** argv) {
             scene.card(0)->instance()->layout().runtime_animations.at(45).image.pixels->provenance.find("(file-backed)")!=std::string::npos,
             "direct original atlas retained inside scene-owned lifecycle")) return 1;
         auto c=camera();
+        static_assert(SceneCameraSource::ActiveProjection==SceneCameraSource::ViewerProjection);
+        ViewerProjectionInputs viewer;
+        viewer.world_to_view=*c.projection.clip_from_world;viewer.kind=ViewerProjectionKind::Parallel;
+        viewer.view_window=std::array<float,2>{1,1};viewer.view_offset=std::array<float,2>{0,0};
+        viewer.near_plane=1.f;viewer.far_plane=10.f;
+        std::array<float,16> viewer_matrix;
+        if(!check(compose_viewer_projection(viewer,viewer_matrix,error),"explicit viewer coefficients compose for scene input"))return 1;
+        c.source=SceneCameraSource::ViewerProjection;c.projection.clip_from_world=viewer_matrix;
+        if(!check(scene.update(ticket,c,error)&&scene.frame().status==StarSceneFrameStatus::Projected&&
+            scene.frame().cards[0].status==CardStatus::Positioned&&!scene.native_scene_ready(),
+            "composed viewer observation drives host frame without native camera readiness"))return 1;
+        CameraOrbitObservation orbit;
+        orbit.basis=std::array<float,9>{1,0,0,0,1,0,0,0,1};orbit.pivot=StarPosition{};
+        orbit.additional_offset=StarPosition{};orbit.first_angle=0.f;orbit.second_angle=0.f;orbit.distance=10.f;
+        CameraPose pose;
+        if(!check(compose_camera_orbit(orbit,pose,error)&&camera_pose_world_to_view(pose,viewer_matrix,error),
+            "explicit orbit pose -> rigid viewer inverse for scene"))return 1;
+        viewer.world_to_view=viewer_matrix;viewer.kind=ViewerProjectionKind::Perspective;
+        if(!check(compose_viewer_projection(viewer,viewer_matrix,error),"pose-derived viewer matrix composes"))return 1;
+        c.projection.clip_from_world=viewer_matrix;
+        if(!check(scene.update(ticket,c,error)&&scene.frame().cards[0].status==CardStatus::Positioned&&
+            scene.frame().cards[0].projection->clip_w==10.f&&!scene.native_scene_ready(),
+            "pose->viewer->actual card projection preserves independent native-readiness gate"))return 1;
+        c=camera();
         if (!check(scene.update(ticket,c,error)&&scene.frame().status==StarSceneFrameStatus::Projected&&scene.frame().cards.size()==3,
             "active observation drives projection/placement, not factory creation")) return 1;
         auto serial=scene.frame().serial;

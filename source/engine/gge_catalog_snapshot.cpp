@@ -40,7 +40,8 @@ bool load_catalog_snapshot(const std::string& path,CatalogInput& out,std::string
     std::istringstream in(body);std::string line,version;CatalogInput result;size_t saved_count=0,candidate_count=0,saved_rows=0,candidate_rows=0;bool saw_saved=false,saw_candidate=false,saw_saved_count=false,saw_candidate_count=false,saw_manager=false,saw_starsdb=false,saw_planet=false,saw_refill=false,saw_resource_root=false,saw_resource_index=false,saw_resource_context=false,saw_resource_class=false,saw_refill_append=false,end=false;
     if(!std::getline(in,line)){error="catalog snapshot version header missing";return false;}
     if(line.size()>=3&&(u8)line[0]==0xef&&(u8)line[1]==0xbb&&(u8)line[2]==0xbf)line.erase(0,3);
-    if(trim(line)!="GGE_CATALOG_V1"){error="catalog snapshot version header missing";return false;}
+    const bool host_real_save=trim(line)=="GGE_HOST_REAL_SAVE_V1";
+    if(!host_real_save&&trim(line)!="GGE_CATALOG_V1"){error="catalog snapshot version header missing";return false;}
     while(std::getline(in,line)){line=trim(line);if(line.empty()||line[0]=='#')continue;std::vector<std::string> t;std::istringstream ls(line);std::string x;while(std::getline(ls,x,'\t'))t.push_back(x);
         if(t.size()==2&&t[0]=="saved_status"){if(saw_saved||!status(t[1],result.saved_status)){error="catalog snapshot saved_status invalid/duplicate";return false;}saw_saved=true;continue;}
         if(t.size()==2&&t[0]=="candidate_status"){if(saw_candidate||!status(t[1],result.candidate_status)){error="catalog snapshot candidate_status invalid/duplicate";return false;}saw_candidate=true;continue;}
@@ -60,6 +61,6 @@ bool load_catalog_snapshot(const std::string& path,CatalogInput& out,std::string
         if(t.size()==1&&t[0]=="END"){end=true;break;} error="catalog snapshot unknown line";return false;
     }
     if(!saw_saved||!saw_candidate||!saw_manager||!saw_starsdb||!saw_planet||!saw_refill||!saw_saved_count||!saw_candidate_count||!end||saved_rows!=saved_count||candidate_rows!=candidate_count){error="catalog snapshot incomplete/status/count/producer observation mismatch";return false;}
-    result.source_label=path; out=std::move(result);error.clear();return true;
+    result.source_label=(host_real_save?"host-real-save:":"")+path; out=std::move(result);error.clear();return true;
 }
 } // namespace os::gge

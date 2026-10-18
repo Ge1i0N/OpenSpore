@@ -1,0 +1,28 @@
+{
+  "reviewed": "2026-10-17",
+  "authority": "secondary community source references; not native runtime evidence",
+  "repositories": [
+    {
+      "path": "refs/Spore-ModAPI",
+      "url": "https://github.com/Spore-Community/Spore-ModAPI.git",
+      "commit": "69b27b5b407a2c76e1e701ba27630a77a9ce5d01",
+      "clone": "depth 1",
+      "use": "read-only interface/member/address comparison",
+      "executed": false
+    },
+    {
+      "path": "refs/SporeModder-FX",
+      "url": "https://github.com/Spore-Community/SporeModder-FX.git",
+      "commit": "a482c51d8d37fc8cf416acecc3c00a5b0723f2e5",
+      "clone": "depth 1",
+      "use": "read-only property framing/type-registry comparison",
+      "executed": false
+    }
+  ],
+  "limits": [
+    "GPL source notices require licensing review before implementation reuse",
+    "No SDK code copied into runtime or SDK importer executed",
+    "No blanket address equivalence across game versions",
+    "No new terrain/refill/camera readiness from SDK declarations"
+  ]
+}

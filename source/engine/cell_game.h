@@ -55,6 +55,7 @@ inline constexpr u32 kTypeGlobals = 0x2A3CE5B7u;
 inline constexpr u32 kTypeAdvect = 0x04805684u;
 inline constexpr u32 kTypeDensity = 0x5C74D18Bu;
 inline constexpr u32 kTypeBackgroundMap = 0x612B3191u;
+inline constexpr u32 kTypeProp = 0x00B1B104u;
 
 struct LookEntry {
     u32 type = 0;      // see LOOK_ENTRY: 0 up, 1 forward, ... 11 player
@@ -136,6 +137,13 @@ struct Globals {
     std::vector<float> floats;  // tuning floats from +0x40
 };
 
+// A tuning curve from the prop/cell_properties resource (type 0x00B1B104).
+// Each curve maps a named parameter to (x, y) pairs for interpolation.
+struct PropertyCurve {
+    std::string key;
+    std::vector<std::pair<float, float>> points;
+};
+
 // A background advection/density field from CellGame_Layers.package.
 // advect = 128x128x3 f32 (196608 B), density = 128x128 f32 (65536 B).
 struct LayerField {
@@ -188,9 +196,49 @@ struct GameData {
     std::vector<Globals> globals;
     std::vector<LayerField> layers;
     std::vector<BackgroundBand> background;  // `backgroundMap` parallax bands (12 typical)
+    std::vector<PropertyCurve> properties;   // `prop`/`cell_properties` tuning curves
     std::map<u32, u32> type_counts;  // type id -> resource count (every type in the package)
     u32 total_resources = 0;
 };
+
+// Diet tags from the binary tuning vocabulary (Simulator/Cell/Data).
+// These classify a cell archetype's diet for the food chain.
+inline constexpr const char* kDietCarnivore = "cell_carnivore";
+inline constexpr const char* kDietHerbivore = "cell_herbivore";
+inline constexpr const char* kDietOmnivore = "cell_omnivore";
+
+// Animation event names from the xls animation table (type 0x1F639D98).
+// These map game events to animation clips for the cell stage.
+inline constexpr const char* kAnimMove = "ANIM_MOVE";
+inline constexpr const char* kAnimIdle = "ANIM_IDLE";
+inline constexpr const char* kAnimEat = "ANIM_EAT_JAW";
+inline constexpr const char* kAnimEatFail = "ANIM_EAT_FAIL_JAW";
+inline constexpr const char* kAnimDeath = "ANIM_DEATH";
+inline constexpr const char* kAnimDead = "ANIM_DEAD";
+inline constexpr const char* kAnimGrow = "ANIM_GROW";
+inline constexpr const char* kAnimAttack = "ANIM_ATTACK_JAW";
+inline constexpr const char* kAnimHatch = "ANIM_HATCH";
+inline constexpr const char* kAnimPop = "ANIM_POP";
+inline constexpr const char* kAnimZap = "ANIM_ZAP";
+inline constexpr const char* kAnimScared = "ANIM_SCARED";
+inline constexpr const char* kAnimMoveMad = "ANIM_MOVE_MAD";
+inline constexpr const char* kAnimMoveScared = "ANIM_MOVE_SCARED";
+inline constexpr const char* kAnimGetHitElec = "ANIM_GET_HIT_ELEC";
+inline constexpr const char* kAnimGetHitPoison = "ANIM_GET_HIT_POISON";
+inline constexpr const char* kAnimGetHitSpike = "ANIM_GET_HIT_SPIKE";
+inline constexpr const char* kAnimPokeSpike = "ANIM_POKE_SPIKE";
+inline constexpr const char* kAnimAttackSpike = "ANIM_ATTACK_SPIKE";
+inline constexpr const char* kAnimAttackPosion = "ANIM_ATTACK_POSION";
+inline constexpr const char* kAnimGlanceJaw = "ANIM_GLANCE_JAW";
+inline constexpr const char* kAnimGlanceSpike = "ANIM_GLANCE_SPIKE";
+inline constexpr const char* kAnimJoustSpike = "ANIM_JOUST_SPIKE";
+inline constexpr const char* kAnimEatFilter = "ANIM_EAT_FILTER";
+inline constexpr const char* kAnimEatFailFilter = "ANIM_EAT_FAIL_FILTER";
+inline constexpr const char* kAnimEatProb = "ANIM_EAT_PROB";
+inline constexpr const char* kAnimProbTargetExpel = "ANIM_PROB_TARGET_EXPEL";
+inline constexpr const char* kAnimProbSourceExpelled = "ANIM_PROB_SOURCE_EXPELED";
+inline constexpr const char* kAnimProbStun = "ANIM_PROB_STUN";
+inline constexpr const char* kAnimStartled = "ANIM_STARTLED";
 
 // Documented float offsets inside a cell archetype record (see header comment). These are
 // offsets that were observed to carry gameplay-scale floats; the mapping to a specific stat is

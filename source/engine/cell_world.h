@@ -24,6 +24,7 @@
 
 #include "common.h"
 #include "engine/cell_game.h"
+#include "engine/cell_anims.inc"
 
 namespace os::cell {
 
@@ -36,6 +37,14 @@ enum class Role : u8 { Food = 0, Creature = 1, Meat = 2 };
 // through the mouth parts chosen in the cell editor), but it makes eating read as a choice.
 enum class Diet : u8 { Herbivore = 0, Carnivore = 1, Omnivore = 2 };
 
+// A simple particle for visual effects (eat, death, evolve).
+struct Particle {
+    float x = 0.0f, y = 0.0f;
+    float vx = 0.0f, vy = 0.0f;
+    float life = 0.0f;
+    u32 color = 0xFFFFFFFF;
+};
+
 // One spawned cell: which archetype, its body-structure index, and its simulation state.
 struct Entity {
     u32 archetype = 0;    // cell archetype id
@@ -46,6 +55,15 @@ struct Entity {
     float size = 1.0f;    // body radius (world units) - seed, not a decoded stat
     float ttl = 0.0f;     // seconds left before a dropped meat chunk rots (0 = never)
     bool alive = true;    // cleared when eaten
+    const char* anim = kAnimIdle;  // current animation event (from xls table)
+    float anim_time = 0.0f;        // time in current animation
+    int diet = -1;                 // 0=herbivore, 1=carnivore, 2=omnivore, -1=unknown
+    float protect_time = 0.0f;     // remaining invulnerability seconds
+    float poison_time = 0.0f;      // remaining poison damage-over-time seconds
+    float electric_time = 0.0f;     // remaining electric stun seconds
+    float hatch_time = 0.0f;       // seconds until this egg hatches (0 = not an egg)
+    bool unlocked = false;         // whether this entity has been unlocked as a part
+    float anim_duration = 0.0f;    // duration of current animation clip
 };
 
 class World {
@@ -57,6 +75,41 @@ public:
     // Resolve Data/CellGame.package through os::fs and decode it. Missing data is an error,
     // not a crash: the caller reports "no world data" and keeps running.
     bool load_default(std::string& error);
+    // Load a .spo save file to restore player position and stats.
+    bool load_save(const std::string& path, std::string& error);
+    // Write a .spo save file with current progress (DNA, eaten, unlocked parts).
+    bool write_save(const std::string& path, std::string& error) const;
+    // Select a part for the cell editor (before evolve). Returns true if the part was unlocked.
+    bool select_part(const std::string& part_name);
+    // Get the currently selected part.
+    const std::string& selected_part() const { return m_selected_part; }
+    // List all available parts (unlocked or not) with their names and costs.
+    struct PartInfo {
+        std::string name;
+        std::string display;
+        int cost;
+        bool unlocked;
+    };
+    std::vector<PartInfo> parts_list() const;
+    // Get the list of selected parts.
+    const std::vector<std::string>& selected_parts() const { return m_selected_parts; }
+    // Toggle a part selection (add/remove from selected_parts).
+    bool toggle_part(const std::string& part_name);
+    // Clear all selected parts.
+    void clear_selected_parts();
+    // Play a procedural sound effect (simple tone).
+    void play_sound(const char* name);
+    // Get the name of the last played sound (for UI display).
+    const std::string& last_sound() const { return m_last_sound; }
+    // Spawn particles at a world position (for eat, death, evolve effects).
+    void spawn_particles(float x, float y, int count, u32 color);
+    // Get active particles for rendering.
+    const std::vector<Particle>& particles() const { return m_particles; }
+
+    // Electric chain: find nearby creatures to chain to.
+    std::vector<const Entity*> electric_targets(const Entity& source, float range) const;
+    // Poison cloud: find creatures within poison radius.
+    std::vector<const Entity*> poison_targets(const Entity& source, float range) const;
 
     // Spawn the entities for a `populate` level (e.g. "level_water") and place the player.
     // Returns false and sets `error` when the level is unknown. A no-op error when not loaded.
@@ -69,6 +122,8 @@ public:
     // Dev/test affordance: move the player to a world point (zeroing its velocity). Used by
     // tools/cell_world_verify.cpp to drive collisions deterministically; no-op with no player.
     void teleport_player(float wx, float wy);
+    // Dev/test affordance: reset the player's protection window.
+    void reset_protection();
 
     // Integrate one step: steering, predator/prey AI, collisions, eating/growth, HP, respawn,
     // camera. Dropped (counter only) while no world is loaded.
@@ -93,6 +148,7 @@ public:
     int eaten_plant() const { return m_eaten_plant; }
     int eaten_meat() const { return m_eaten_meat; }
     bool evolved() const { return m_evolved; }
+    int evo_points() const { return m_evo_points; }
 
     // Camera: world -> screen is (world - camera) * pixels_per_unit + screen_center.
     float camera_x() const { return m_cam_x; }
@@ -113,11 +169,37 @@ public:
     const LayerField* layer_named(const std::string& name) const;
     const LayerField* first_layer(u32 components) const;
 
+    // Look up a steering table by name (e.g. "NPC_idle", "player_moving"). Null when absent.
+    const LookTable* look_table(const char* name) const;
+    // Get a steering weight from a table by entry type (0=up, 1=forward, ..., 11=player).
+    float look_weight(const char* table_name, u32 entry_type) const;
+
+    // Look up a property tuning curve by name (e.g. "hp", "chaseSpeed"). Null when absent.
+    const PropertyCurve* property_curve(const char* name) const;
+    // Evaluate a property curve at x (linear interpolation). Returns default_val if not found.
+    float curve_value(const char* name, float x, float default_val = 0.0f) const;
+
+    // List available world biomes (level names from `world` resources).
+    std::vector<std::string> biome_names() const;
+    // List available level names from `populate` resources.
+    std::vector<std::string> level_names() const;
+    // Get the next level name in progression (e.g. "level_water" -> "level_water_2").
+    std::string next_level(const std::string& current) const;
+
+    // Get the structure parts for an archetype (part entries with parent/flag/scale).
+    const std::vector<StructurePart>* parts_for(u32 archetype_id) const;
+    // Get the loot table for a biome (e.g. "loot_water" for level_water).
+    const LootTable* biome_loot(const char* biome_name) const;
+
 private:
     void spawn_from_level(const Population& pop);
     void respawn_player();
     void drop_meat(const Entity& from);
     void update_diet();
+    float hp_for_size(float size) const;
+    float stat_for_archetype(u32 archetype_id, u32 offset) const;
+    bool is_predator_archetype(u32 archetype_id) const;
+    void drop_loot(const Entity& from);
 
     GameData m_data;
     bool m_loaded = false;
@@ -141,6 +223,11 @@ private:
     Diet m_diet = Diet::Herbivore;
     int m_eaten_plant = 0, m_eaten_meat = 0;
     bool m_evolved = false;
+    int m_evo_points = 0;
+    std::string m_selected_part;
+    std::vector<std::string> m_selected_parts;
+    std::vector<Particle> m_particles;
+    std::string m_last_sound;
     float m_respawn = 0.0f;
     bool m_has_target = false;
     float m_target_x = 0.0f, m_target_y = 0.0f;

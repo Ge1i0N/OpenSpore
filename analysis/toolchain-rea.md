@@ -8,9 +8,10 @@ Two instruments over the same Ghidra 12.1.4 engine, deliberately kept side by si
 
 ## Primary: REA (`rea` CLI + its MCP server)
 
-Installed globally (`npm install --global rea-agents`, v6.4.0) and registered as an MCP server for
-OpenCode in `C:\Users\DartPower\.config\opencode\opencode.json`. Readiness:
-`rea doctor --provider ghidra --json` → `healthy: true` (Ghidra 12.1.4, native `decompile.exe` for
+Installed globally (`npm install --global rea-agents`, v6.x) and registered as an MCP server for
+OpenCode in that user's global `opencode.jsonc`/`opencode.json` (`rea setup --client opencode`).
+Readiness:
+`rea doctor --provider ghidra --json` → `healthy: true` (Ghidra 12.1.x, native `decompile.exe` for
 `win_x86_64`, JDK 21 64-bit, Windows native Job Object / DACL authority verified).
 
 **Why primary:** it is the maintained workflow, and its evidence contract is stricter than anything I
@@ -30,15 +31,17 @@ would write myself. Two of its rules directly govern claims in this project:
 ### The settings this target needs
 
 ```powershell
-$env:GHIDRA_INSTALL_DIR = "C:\Users\DartPower\scoop\apps\ghidra\current"
-$env:JAVA_HOME          = "C:\Program Files\Zulu\zulu-21"
+$env:GHIDRA_INSTALL_DIR = "<path to an extracted Ghidra 12.1.x>"   # e.g. ...\ghidra_12.1.4_PUBLIC
+$env:JAVA_HOME          = "<path to a JDK 21+>"                    # e.g. ...\jdk-21.0.x
 $env:REA_ANALYSIS_PROVIDER   = "ghidra"
 $env:REA_GHIDRA_STARTUP_TIMEOUT_MS = "5400000"   # default 330,000 ms CANNOT hold: see below
 $env:GHIDRA_HEADLESS_MAXMEM             = "4G"                     # default is 2G
-$env:REA_GHIDRA_SEED_FILE      = "E:\...\analysis\audit\seeds_rea.tsv"
+$env:REA_GHIDRA_SEED_FILE      = "<repo>\analysis\audit\seeds_rea.tsv"   # absolute path
 ```
 
-All five are now in the MCP registration's `environment` block, so a restarted client inherits them.
+All six are normally placed in the MCP registration's `environment` block (or the shell), so a
+restarted client inherits them; two of them (`GHIDRA_INSTALL_DIR`, `JAVA_HOME`) are host paths, the
+rest are REA settings.
 
 **`REA_GHIDRA_STARTUP_TIMEOUT_MS` is not optional for this binary.** Our own headless import of the
 25 MB `.text` took **1,197 s**; REA's default deadline is 330 s. The first CLI run died with

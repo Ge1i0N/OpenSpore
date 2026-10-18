@@ -1,0 +1,85 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static file bytes and PE imports; explicit controlled host inputs, no runtime pose capture",
+  "mode_objects": [
+    {
+      "object": "0x15a30b4",
+      "initial_table": "0x147da0c",
+      "slots": [
+        {
+          "slot": "0x0",
+          "target": "0xdde810"
+        },
+        {
+          "slot": "0x4",
+          "target": "0xddf2b0"
+        }
+      ]
+    },
+    {
+      "object": "0x15a30b8",
+      "initial_table": "0x147da14",
+      "slots": [
+        {
+          "slot": "0x0",
+          "target": "0xddfea0"
+        },
+        {
+          "slot": "0x4",
+          "target": "0xddf480"
+        }
+      ]
+    },
+    {
+      "object": "0x15a3110",
+      "initial_table": "0x147da1c",
+      "slots": [
+        {
+          "slot": "0x0",
+          "target": "0xdde300"
+        },
+        {
+          "slot": "0x4",
+          "target": "0xddf610"
+        }
+      ]
+    }
+  ],
+  "trig_imports": [
+    {
+      "iat": "0x13cc46c",
+      "dll": "MSVCR90.dll",
+      "name": "_CIcos"
+    },
+    {
+      "iat": "0x13cc470",
+      "dll": "MSVCR90.dll",
+      "name": "_CIsin"
+    }
+  ],
+  "dynamics_constants": {
+    "damping_base": 0.1,
+    "stiffness": 2.0,
+    "smoothing_factor": 0.1,
+    "delta_units": "DDE810 converts milliseconds to seconds before DDE580",
+    "helper_input_import": "DDE580 calls _CIpow through 11E0930",
+    "wrap": "DDE762..791 one correction: >period subtract, <0 add"
+  },
+  "pose_sources": {
+    "basis": "16A10E0..1103 BSS; initializer136CF30 writes nine floats identity, no runtime immutability claim",
+    "pivot": "16A10CC..D4 BSS, copied into Transform+04",
+    "normal_angles": "first=-15A308C then second=15A3090",
+    "normal_distance": "15A3088 clamped then copied from15A3094 for Transform displacement; host accepts post-clamp explicit distance",
+    "normal_additional_offset": "15A3048..50",
+    "transition_angles_distance_offset": "-mode+30, +mode+20, mode+28, mode+34..3C"
+  },
+  "rotation_rows": "row0=c1*a+s1*b; intermediate_row1=-s1*a+c1*b; row1=c2*intermediate+s2*c; row2=-s2*intermediate+c2*c",
+  "position": "pivot -distance*rotation.row1 +additional_offset; scale1",
+  "host_inverse": "explicit orthonormal scale1 pose only, transpose rotation and -dot(position,row_i); not native generic inverse or viewer ownership",
+  "limitations": [
+    "Mode objects are statically identified, not live current-mode pointer observations",
+    "No claim to full DDE580 damping/clamps, timed interpolation or user-input dispatch",
+    "Property-reader sibling-angle scratch behavior not generalized into defaults",
+    "No normal-GGE automatic caller, complete catalogue/refill or native camera readiness"
+  ]
+}

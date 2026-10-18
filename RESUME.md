@@ -226,9 +226,9 @@ test with `-w -devDirs`; retain evidence and commit.
   thin disk (X/Y ±700, Z ±9); all named; planet histogram {0: ~41980, …} moves with
   play; 14/14 field presence with zero unknown IDs closes the schema. Versions opaque.
 - Planet transport gap closed: real pkp resources are prefix(`00250003`)+nested DBPF/1
-  record; `read_transport_record` branches on fixed offsets (direct bytes still parse).
+  record; `unwrap_planet_resource` branches on fixed offsets (direct bytes still parse).
   Values on both saves clean (114/114, 97/97; all named; civs 1→2, tribes static 22,
-  nodes 46→61). C++ `planet_record_verify` now 295 checks PASS on MSVC and MinGW.
+  nodes 46→61). C++ `planet_record_verify` now 547 checks PASS on MSVC and MinGW.
 - Successive saves (fresh → Game0.old → Game0): same 5 classes, all decodes clean;
   StarRecords fixed at 42,010 while classes `0x042232A1` (1 → 5) and `0x018EB9D2`
   (+4) and planet rows (65 → 97 → 114) grow with play. Six creature `.spo` in

@@ -1,0 +1,16 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  df6110:	83 ec 3c             	sub    esp,0x3c
+  df6113:	56                   	push   esi
+  df6114:	57                   	push   edi
+  df6115:	8b 7c 24 48          	mov    edi,DWORD PTR [esp+0x48]
+  df6119:	8b 8f b8 00 00 00    	mov    ecx,DWORD PTR [edi+0xb8]
+  df611f:	85 c9                	test   ecx,ecx
+  df6121:	0f 84 99 01 00 00    	je     0xdf62c0
+  df6127:	6a 00                	push   0x0
+  df6129:	68 a8 a4 e5 02       	push   0x2e5a4a8
+  df612e:	e8 1d a5 a1 ff       	call   0x810650
+  df6133:	8b f0                	mov    esi,eax
+  df6135:	85 f6                	test   esi,esi
+  df6137:	0f 84 74 01 00 00    	je     0xdf62b1

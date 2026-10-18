@@ -1,0 +1,51 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  8102a0:	53                   	push   ebx
+  8102a1:	55                   	push   ebp
+  8102a2:	56                   	push   esi
+  8102a3:	8b d9                	mov    ebx,ecx
+  8102a5:	57                   	push   edi
+  8102a6:	8b 7b 64             	mov    edi,DWORD PTR [ebx+0x64]
+  8102a9:	3b 7b 68             	cmp    edi,DWORD PTR [ebx+0x68]
+  8102ac:	74 47                	je     0x8102f5
+  8102ae:	8b 6c 24 14          	mov    ebp,DWORD PTR [esp+0x14]
+  8102b2:	8b 0f                	mov    ecx,DWORD PTR [edi]
+  8102b4:	8b 01                	mov    eax,DWORD PTR [ecx]
+  8102b6:	8b 50 0c             	mov    edx,DWORD PTR [eax+0xc]
+  8102b9:	68 18 82 ee ee       	push   0xeeee8218
+  8102be:	83 c7 04             	add    edi,0x4
+  8102c1:	ff d2                	call   edx
+  8102c3:	8b f0                	mov    esi,eax
+  8102c5:	85 f6                	test   esi,esi
+  8102c7:	74 27                	je     0x8102f0
+  8102c9:	8b 06                	mov    eax,DWORD PTR [esi]
+  8102cb:	8b 50 1c             	mov    edx,DWORD PTR [eax+0x1c]
+  8102ce:	8b ce                	mov    ecx,esi
+  8102d0:	ff d2                	call   edx
+  8102d2:	3b c5                	cmp    eax,ebp
+  8102d4:	74 28                	je     0x8102fe
+  8102d6:	80 7c 24 18 00       	cmp    BYTE PTR [esp+0x18],0x0
+  8102db:	74 13                	je     0x8102f0
+  8102dd:	8b 06                	mov    eax,DWORD PTR [esi]
+  8102df:	8b 90 f0 00 00 00    	mov    edx,DWORD PTR [eax+0xf0]
+  8102e5:	6a 01                	push   0x1
+  8102e7:	55                   	push   ebp
+  8102e8:	8b ce                	mov    ecx,esi
+  8102ea:	ff d2                	call   edx
+  8102ec:	85 c0                	test   eax,eax
+  8102ee:	75 07                	jne    0x8102f7
+  8102f0:	3b 7b 68             	cmp    edi,DWORD PTR [ebx+0x68]
+  8102f3:	75 bd                	jne    0x8102b2
+  8102f5:	33 c0                	xor    eax,eax
+  8102f7:	5f                   	pop    edi
+  8102f8:	5e                   	pop    esi
+  8102f9:	5d                   	pop    ebp
+  8102fa:	5b                   	pop    ebx
+  8102fb:	c2 08 00             	ret    0x8
+  8102fe:	5f                   	pop    edi
+  8102ff:	8b c6                	mov    eax,esi
+  810301:	5e                   	pop    esi
+  810302:	5d                   	pop    ebp
+  810303:	5b                   	pop    ebx
+  810304:	c2                   	.byte 0xc2

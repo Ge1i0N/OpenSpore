@@ -1,5 +1,6 @@
 #include "engine/starsdb_dbpf.h"
 #include <fstream>
+#include <filesystem>
 #include <utility>
 
 namespace os::starsdb {
@@ -11,7 +12,8 @@ u32 le32(const std::vector<u8>& bytes,size_t at) {
 }
 bool ExplicitDbpfReader::open(const std::string& explicit_path,std::string& error) {
     opened_=false; package_.close();
-    std::ifstream file(explicit_path,std::ios::binary|std::ios::ate);
+    const std::u8string utf8_path(reinterpret_cast<const char8_t*>(explicit_path.data()),explicit_path.size());
+    std::ifstream file(std::filesystem::path(utf8_path),std::ios::binary|std::ios::ate);
     if (!file) { error="cannot open explicitly selected DBPF"; return false; }
     const auto size=file.tellg();
     if (size<0 || size>kMaxPackageBytes) { error="DBPF exceeds 256 MiB host package limit"; return false; }

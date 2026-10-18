@@ -201,8 +201,8 @@ checks established: a constant 4-byte prefix plus a nested DBPF v3 (header invar
 holds exactly) with 1 record whose bytes are the `read_record` input (zero counts,
 then the frame). Fixed-offset branch, never a magic search; prefix meaning
 unestablished and pinned. Values then decode clean: 114/114 + 97/97, zero tails,
-all named, civs 1→2, tribes static 22, nodes 46→61. C++ `read_transport_record`
-implements the same branch; `planet_record_verify` grows 291 → 295 checks PASS on
+all named, civs 1→2, tribes static 22, nodes 46→61. C++ `unwrap_planet_resource`
+implements the same branch; `planet_record_verify` grows 291 → 547 checks PASS on
 MSVC (0 warnings) and MinGW. Findings in `analysis/planet-record.md`, values in
 `analysis/audit/planet-real/`. The gap the doc itself anticipated ("not yet verified
 on original planetRecords packages") is now closed.

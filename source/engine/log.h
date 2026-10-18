@@ -10,8 +10,8 @@
 //   0x01413bf0 u 'Logging.txt'        referenced from 0x007e7c85
 //   0x01413c08 u 'LocalLogging.txt'   referenced from 0x007e7c5b
 //   0x013f8cb0 a 'Stack trace is:'    referenced from 0x007e... (crash path)
-// We keep our own filenames (OpenSpore.log) so we never collide with a real install, and
-// keep the same "one file, tailable" property: the file is opened share-readable
+// The app normally supplies unique logs/OpenSpore-<timestamp>-pid<id>.log paths, so every run
+// remains available for comparison. The sink keeps the same share-readable/tailable property.
 // (_SH_DENYNO) precisely so it can be tailed while the process is alive (field guide §2).
 #include <cstdarg>
 

@@ -1,0 +1,87 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF9620
+
+00df9620  PUSH ECX
+00df9621  MOV EAX,[0x016a1344]
+00df9626  PUSH EBX
+00df9627  PUSH ESI
+00df9628  MOV ESI,ECX
+00df962a  MOV ECX,dword ptr [EAX + 0x1d8]
+00df9630  CMP ECX,dword ptr [EAX + 0x1dc]
+00df9636  SETZ BL
+00df9639  CALL 0x0067cad0
+00df963e  TEST EAX,EAX
+00df9640  JZ 0x00df964d
+00df9642  MOV EDX,dword ptr [EAX]
+00df9644  MOV ECX,EAX
+00df9646  MOV EAX,dword ptr [EDX + 0x40]
+00df9649  PUSH 0x1
+00df964b  CALL EAX
+00df964d  MOV ECX,dword ptr [0x016a1344]
+00df9653  CALL 0x00de52b0
+00df9658  MOV ECX,dword ptr [0x016a1344]
+00df965e  MOV ECX,dword ptr [ECX + 0x184]
+00df9664  PUSH 0x1
+00df9666  CALL 0x00e01320
+00df966b  MOV ECX,ESI
+00df966d  CALL 0x00df95a0
+00df9672  MOV EDX,dword ptr [ESI]
+00df9674  MOV EAX,dword ptr [EDX + 0x68]
+00df9677  MOV ECX,ESI
+00df9679  CALL EAX
+00df967b  MOV ECX,ESI
+00df967d  CALL 0x00df8300
+00df9682  PUSH 0x4
+00df9684  LEA ECX,[ESI + 0x70]
+00df9687  MOV dword ptr [ESI + 0x68],0xffffffff
+00df968e  CALL 0x0093a110
+00df9693  TEST BL,BL
+00df9695  JZ 0x00df96a8
+00df9697  PUSH 0x4
+00df9699  LEA ECX,[ESI + 0x20]
+00df969c  CALL 0x0093a110
+00df96a1  MOV ECX,ESI
+00df96a3  CALL 0x00df6950
+00df96a8  MOV ECX,dword ptr [0x016a1344]
+00df96ae  CALL 0x00de5210
+00df96b3  MOV ECX,dword ptr [0x016a1344]
+00df96b9  PUSH 0x1
+00df96bb  PUSH 0x615a5ff
+00df96c0  ADD ECX,0x144
+00df96c6  CALL 0x00810650
+00df96cb  TEST EAX,EAX
+00df96cd  JZ 0x00df96dc
+00df96cf  MOV EDX,dword ptr [EAX]
+00df96d1  PUSH 0x1
+00df96d3  MOV ECX,EAX
+00df96d5  MOV EAX,dword ptr [EDX + 0x7c]
+00df96d8  PUSH 0x1
+00df96da  CALL EAX
+00df96dc  MOV ECX,ESI
+00df96de  CALL 0x00df6c10
+00df96e3  MOV ECX,dword ptr [0x016a1344]
+00df96e9  MOV ECX,dword ptr [ECX + 0x184]
+00df96ef  PUSH 0x1
+00df96f1  CALL 0x00e01320
+00df96f6  CALL 0x00dd9130
+00df96fb  MOV ECX,EAX
+00df96fd  CALL 0x00ddb700
+00df9702  MOV ECX,dword ptr [0x016a1344]
+00df9708  CALL 0x00de9e70
+00df970d  MOV dword ptr [ESP + 0x8],0x1
+00df9715  CALL 0x0067dc80
+00df971a  MOV EDX,dword ptr [EAX]
+00df971c  MOV EDX,dword ptr [EDX + 0x14]
+00df971f  PUSH 0x0
+00df9721  LEA ECX,[ESP + 0xc]
+00df9725  PUSH ECX
+00df9726  PUSH 0x80d7451
+00df972b  MOV ECX,EAX
+00df972d  CALL EDX
+00df972f  POP ESI
+00df9730  POP EBX
+00df9731  POP ECX
+00df9732  RET

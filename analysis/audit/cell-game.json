@@ -1,24 +1,26 @@
 {
   "packages": [
+    "C:\\Users\\gelion\\Desktop\\OpenSpore\\build\\bin\\Debug\\Data\\CellGame.package",
+    "C:\\Users\\gelion\\Desktop\\OpenSpore\\build\\bin\\Debug\\Data\\CellGame_Layers.package",
     "S:\\Games\\Other\\Spore\\Data\\CellGame.package",
     "S:\\Games\\Other\\Spore\\Data\\CellGame_Layers.package"
   ],
   "types": {
-    "cell": 189,
-    "world": 13,
-    "loottable": 48,
-    "structure": 144,
-    "populate": 23,
-    "look_table": 9,
-    "random_creature": 10,
-    "look_algorithm": 1,
-    "effectmap": 1,
-    "prop": 1,
-    "backgroundmap": 1,
-    "xls": 1,
-    "globals": 1,
-    "advect": 28,
-    "density": 5
+    "cell": 378,
+    "world": 26,
+    "loottable": 96,
+    "structure": 288,
+    "populate": 46,
+    "look_table": 18,
+    "random_creature": 20,
+    "look_algorithm": 2,
+    "effectmap": 2,
+    "prop": 2,
+    "backgroundmap": 2,
+    "xls": 2,
+    "globals": 2,
+    "advect": 56,
+    "density": 10
   },
   "prop": {
     "0xc951eb63": [

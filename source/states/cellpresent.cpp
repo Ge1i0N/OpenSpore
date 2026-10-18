@@ -1,5 +1,6 @@
 #include "states/cellpresent.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -282,14 +283,20 @@ bool present_cell_world() {
     // Reference viewport height 720: the world's pixels_per_unit is tuned there, scaled to the
     // real device so the field of view is resolution-independent.
     const float scale = static_cast<float>(h) / 720.0f;
-    const float ppu = world.pixels_per_unit() * scale;
+    // Mouse wheel zoom: use the mouse_zoom curve to scale pixels_per_unit.
+    float zoom = 1.0f;
+    if (input::wheel() != 0) {
+        const float wheel = static_cast<float>(input::wheel());
+        zoom = world.curve_value("mouse_zoom", wheel, 1.0f);
+    }
+    const float ppu = world.pixels_per_unit() * scale * zoom;
     const float cx = static_cast<float>(w) * 0.5f;
     const float cy = static_cast<float>(h) * 0.5f;
     const float camx = world.camera_x(), camy = world.camera_y();
     const auto sx = [&](float wx) { return (wx - camx) * ppu + cx; };
     const auto sy = [&](float wy) { return (wy - camy) * ppu + cy; };
 
-    // --- Backdrop: the `backgroundMap` depth-band gradient, then the plankton density field ----
+    // --- Backdrop: the `backgroundMap` depth-band gradient with parallax scroll ----
     const auto& bands = world.data().background;
     if (!bands.empty()) {
         const float bh = static_cast<float>(h) / static_cast<float>(bands.size());
@@ -298,8 +305,18 @@ bool present_cell_world() {
             const u8 r = static_cast<u8>(bnd.r * 130.f);
             const u8 g = static_cast<u8>(bnd.g * 130.f);
             const u8 b = static_cast<u8>(bnd.b * 130.f);
+            // Parallax: deeper bands scroll slower.
+            float parallax = 0.0f;
+            if (bnd.depth > 0.0f) {
+                parallax = std::fmod(world.time() * 2.0f / bnd.depth, 1.0f);
+            }
             ov.rect(0.f, static_cast<float>(i) * bh, static_cast<float>(w), bh + 1.f,
                     rnd::rgba(r, g, b));
+            // Subtle horizontal shift for depth effect.
+            if (parallax > 0.0f) {
+                ov.rect(parallax * 4.0f, static_cast<float>(i) * bh, 2.0f, bh + 1.f,
+                        rnd::rgba(r + 20, g + 20, b + 20));
+            }
         }
     }
     build_backdrop(dev, world);
@@ -323,6 +340,24 @@ bool present_cell_world() {
                          (static_cast<float>(input::y()) - cy) / ppu + camy);
     } else {
         world.clear_target();
+    }
+
+    // Cell editor: click a glowing pickup to select it as a part.
+    if (world.evolved() && input::clicked()) {
+        const float click_x = (static_cast<float>(input::x()) - cx) / ppu + camx;
+        const float click_y = (static_cast<float>(input::y()) - cy) / ppu + camy;
+        for (const cell::Entity& e : world.entities()) {
+            if (!e.alive || e.role != cell::Role::Food) continue;
+            const char* nm = naming::instance_name(e.archetype);
+            if (!nm || strncmp(nm, "cell_unlock_", 12) != 0) continue;
+            const float dx = e.x - click_x, dy = e.y - click_y;
+            const float reach = e.size + 1.0f;
+            if (dx * dx + dy * dy <= reach * reach) {
+                std::string part = nm + 12;  // strip "cell_unlock_" prefix
+                world.select_part(part);
+                break;
+            }
+        }
     }
 
     const float psize = world.player() ? world.player()->size : 1.0f;
@@ -371,6 +406,17 @@ bool present_cell_world() {
         if (x < -r - 8.f || y < -r - 8.f || x > w + r + 8.f || y > h + r + 8.f) continue;
         ov.circle(x, y, r, hsv(0.02f + 0.80f * hash01(e.archetype), 0.5f, 0.92f));
         ov.ring(x, y, r, 2.0f, e.size > psize * 1.05f ? 0xFFE4584Cu : 0x50202028u);
+        // Draw structure parts as small circles around the body.
+        const std::vector<cell::StructurePart>* parts = world.parts_for(e.archetype);
+        if (parts) {
+            for (const cell::StructurePart& part : *parts) {
+                if (part.flag) continue;  // skip flagged parts
+                const float px = x + part.scale[0] * ppu * 0.5f;
+                const float py = y + part.scale[1] * ppu * 0.5f;
+                const float pr = std::max(1.5f, part.scale[0] * ppu * 0.15f);
+                ov.circle(px, py, pr, 0xFF8090A0u);
+            }
+        }
     }
     for (const cell::Entity& e : ents) {
         if (!e.alive || e.role != cell::Role::Food) continue;
@@ -395,6 +441,19 @@ bool present_cell_world() {
         ov.circle(x, y, r, rnd::rgba(200, 70, 70, 230));
     }
 
+    // Unlock pickups: pulsing glow to draw attention.
+    for (const cell::Entity& e : ents) {
+        if (!e.alive || e.role != cell::Role::Food) continue;
+        const char* nm = naming::instance_name(e.archetype);
+        if (!nm || strncmp(nm, "cell_unlock_", 12) != 0) continue;
+        const float x = sx(e.x), y = sy(e.y);
+        const float pulse = 1.0f + 0.3f * std::sin(world.time() * 4.0f);
+        const float r = std::max(3.0f, e.size * ppu) * pulse;
+        if (x < -r - 8.f || y < -r - 8.f || x > w + r + 8.f || y > h + r + 8.f) continue;
+        ov.circle(x, y, r, rnd::rgba(100, 220, 100, 180));
+        ov.ring(x, y, r + 2.0f, 2.0f, rnd::rgba(150, 255, 150, 200));
+    }
+
     // Threat markers over the meshes: an oversized cell still reads as dangerous.
     for (const cell::Entity& e : ents) {
         if (!e.alive || e.role != cell::Role::Creature || !body_for(world, e)) continue;
@@ -404,12 +463,75 @@ bool present_cell_world() {
         ov.ring(x, y, r, 2.0f, 0xFFE4584Cu);
     }
 
+    // Damage flash: recently-hit creatures flash red.
+    for (const cell::Entity& e : ents) {
+        if (!e.alive || e.role != cell::Role::Creature) continue;
+        if (e.anim_time > 0.0f && e.anim == cell::kAnimGetHitSpike) {
+            const float x = sx(e.x), y = sy(e.y), r = e.size * ppu;
+            if (x < -r - 8.f || y < -r - 8.f || x > w + r + 8.f || y > h + r + 8.f) continue;
+            ov.ring(x, y, r + 3.0f, 2.0f, 0xFF4040u);
+        }
+    }
+
+    // Particle UI: show active particle count.
+    size_t active_particles = 0;
+    for (const cell::Particle& p : world.particles()) if (p.life > 0.0f) ++active_particles;
+    if (active_particles > 0) {
+        ov.text_fmt(16.f, static_cast<float>(h) - 140.f, 0xFF80C0FFu,
+                    "particles: %zu", active_particles);
+    }
+
+    // Sound UI: show last played sound.
+    if (!world.last_sound().empty()) {
+        ov.text_fmt(16.f, static_cast<float>(h) - 156.f, 0xFFFFC080u,
+                    "sound: %s", world.last_sound().c_str());
+    }
+
+    // Animation UI: show current xls clip name from cell_anims.inc.
+    if (world.player()) {
+        const char* anim = world.player()->anim;
+        const char* clip = "unknown";
+        for (size_t i = 0; i < cell::kCellAnimCount; ++i) {
+            if (anim && strcmp(anim, cell::kCellAnims[i].event) == 0) {
+                clip = cell::kCellAnims[i].clip;
+                break;
+            }
+        }
+        ov.text_fmt(16.f, static_cast<float>(h) - 172.f, 0xFF80C0FFu,
+                    "clip: %s", clip);
+    }
+
+    // Particles: eat, death, evolve effects.
+    for (const cell::Particle& p : world.particles()) {
+        if (p.life <= 0.0f) continue;
+        const float x = sx(p.x), y = sy(p.y);
+        const float r = std::max(1.0f, 3.0f * p.life);
+        u32 col = p.color;
+        u8 alpha = static_cast<u8>(p.life * 200.0f);
+        ov.circle(x, y, r, (col & 0xFFFFFF) | (alpha << 24));
+    }
+
     // The player, with a cyan ring so it never gets lost in the shoal.
     if (pi >= 0 && static_cast<size_t>(pi) < ents.size()) {
         const cell::Entity& p = ents[static_cast<size_t>(pi)];
         if (p.alive) {
-            const float x = sx(p.x), y = sy(p.y), r = p.size * ppu;
+            const float x = sx(p.x), y = sy(p.y);
+            // Eat animation: brief size pulse while eating.
+            float draw_size = p.size;
+            if (p.anim == cell::kAnimEat && p.anim_time < 0.3f) {
+                draw_size *= 1.0f + 0.15f * (1.0f - p.anim_time / 0.3f);
+            }
+            const float r = draw_size * ppu;
             if (!body_for(world, p)) ov.circle(x, y, r, 0xFFF2F6FAu);
+            // Poison tint: green ring while poisoned.
+            if (p.poison_time > 0.0f) {
+                ov.ring(x, y, r + 4.0f, 3.0f, 0xFF50E050u);
+            }
+            // Electric stun: yellow sparks.
+            if (p.electric_time > 0.0f) {
+                ov.ring(x, y, r + 6.0f, 2.0f, 0xFFE0E050u);
+            }
+            // Normal ring.
             ov.ring(x, y, r, 3.0f, 0xFF57D0FFu);
             // A heading notch: the way the cell is pushing.
             const float sp = std::sqrt(p.vx * p.vx + p.vy * p.vy);
@@ -428,11 +550,13 @@ bool present_cell_world() {
     for (const cell::Entity& e : ents)
         if (e.alive && e.role != cell::Role::Food && e.role != cell::Role::Meat) ++alive_cells;
     const char* diet = world.diet() == cell::Diet::Carnivore   ? "CARNIVORE"
-                       : world.diet() == cell::Diet::Omnivore ? "OMNIVORE"
-                                                              : "HERBIVORE";
+                        : world.diet() == cell::Diet::Omnivore ? "OMNIVORE"
+                                                               : "HERBIVORE";
+    const char* anim_name = world.player() ? world.player()->anim : "ANIM_IDLE";
     std::snprintf(line, sizeof(line), "cells %zu   eaten %d   DNA %d   %s   size %.2f   t %.1fs",
                   alive_cells, world.eaten(), world.dna(), diet, psize, world.time());
     ov.text_fmt(16.f, 28.f, 0xFF8FB8D8, "%s", line);
+    ov.text_fmt(16.f, 44.f, 0xFF6A8AAA, "anim: %s  evo: %d", anim_name, world.evo_points());
 
     const float hpfrac = world.player_max_hp() > 0.f ? world.player_hp() / world.player_max_hp() : 0.f;
     ov.text_fmt(16.f, 48.f, 0xFFC8D8E4, "HP");
@@ -451,6 +575,102 @@ bool present_cell_world() {
                     "READY TO EVOLVE  -  click to enter the Creature stage");
     }
 
+    // Cell editor: show available parts when evolved.
+    if (world.evolved()) {
+        const auto parts = world.parts_list();
+        if (!parts.empty()) {
+            const float panel_w = 280.f;
+            const float panel_h = 30.f + parts.size() * 22.f + 40.f;
+            const float panel_x = cx - panel_w / 2.f;
+            const float panel_y = cy + 60.f;
+            ov.rect(panel_x, panel_y, panel_w, panel_h, 0xD0102030u);
+            ov.ring(panel_x, panel_y, panel_w, panel_h, 2u, 0xFF50A060u);
+            ov.text_fmt(panel_x + 16.f, panel_y + 10.f, 0xFFE8FFE8u, "CELL EDITOR");
+            ov.text_fmt(panel_x + 16.f, panel_y + 30.f, 0xFF80C0FFu, "click a part to select");
+            int y_off = 54;
+            for (const auto& part : parts) {
+                const bool selected = std::find(world.selected_parts().begin(),
+                    world.selected_parts().end(), part.name) != world.selected_parts().end();
+                u32 col = part.unlocked ? (selected ? 0xFF80FF80u : 0xFFC0D0E0u) : 0xFF606060u;
+                const char* mark = part.unlocked ? (selected ? "[x]" : "[ ]") : "[-]";
+                ov.text_fmt(panel_x + 16.f, panel_y + (float)y_off, col,
+                            "%s %s (%d DNA)", mark, part.display.c_str(), part.cost);
+                y_off += 22;
+            }
+            ov.text_fmt(panel_x + 16.f, panel_y + (float)y_off + 8.f, 0xFFE8FFE8u,
+                        "click a part again to deselect");
+        }
+    }
+
+    // Cell editor click handling: toggle part selection when clicking on a part row.
+    if (world.evolved() && input::clicked()) {
+        const auto parts = world.parts_list();
+        if (!parts.empty()) {
+            const float panel_w = 280.f;
+            const float panel_h = 30.f + parts.size() * 22.f + 40.f;
+            const float panel_x = cx - panel_w / 2.f;
+            const float panel_y = cy + 60.f;
+            const float click_x = (static_cast<float>(input::x()) - cx) / ppu + camx;
+            const float click_y = (static_cast<float>(input::y()) - cy) / ppu + camy;
+            const float sx_click = sx(click_x);
+            const float sy_click = sy(click_y);
+            if (sx_click >= panel_x && sx_click <= panel_x + panel_w &&
+                sy_click >= panel_y && sy_click <= panel_y + panel_h) {
+                int y_off = 54;
+                for (const auto& part : parts) {
+                    const float row_y = panel_y + (float)y_off;
+                    if (sy_click >= row_y && sy_click <= row_y + 22.f) {
+                        if (part.unlocked) {
+                            world.toggle_part(part.name);
+                            world.play_sound("select");
+                        }
+                        break;
+                    }
+                    y_off += 22;
+                }
+            }
+        }
+    }
+
+    // Cell editor UI: show selected part.
+    if (!world.selected_part().empty()) {
+        ov.text_fmt(16.f, static_cast<float>(h) - 40.f, 0xFF80FF80u,
+                    "PART: %s", world.selected_part().c_str());
+    }
+
+    // Stage progression UI: show current level, next, and evolve progress.
+    std::string next = world.next_level(world.level());
+    if (!next.empty()) {
+        ov.text_fmt(16.f, static_cast<float>(h) - 188.f, 0xFF80C0FFu,
+                    "NEXT: %s", next.c_str());
+    }
+    if (world.evolved()) {
+        ov.text_fmt(static_cast<float>(w) / 2.f - 80.f, static_cast<float>(h) / 2.f + 40.f,
+                    0xFFE8FFE8u, "CLICK TO EVOLVE");
+    }
+
+    // Loottable UI: show available drops with names.
+    int loot_count = 0;
+    for (const cell::Entity& e : ents) {
+        if (!e.alive || e.role != cell::Role::Food) continue;
+        const char* nm = naming::instance_name(e.archetype);
+        if (nm && strncmp(nm, "cell_unlock_", 12) == 0) ++loot_count;
+    }
+    if (loot_count > 0) {
+        ov.text_fmt(16.f, static_cast<float>(h) - 204.f, 0xFFFFC080u,
+                    "LOOT: %d pickups", loot_count);
+        // Show first few loot names.
+        int shown = 0;
+        for (const cell::Entity& e : ents) {
+            if (!e.alive || e.role != cell::Role::Food) continue;
+            const char* nm = naming::instance_name(e.archetype);
+            if (!nm || strncmp(nm, "cell_unlock_", 12) != 0) continue;
+            ov.text_fmt(16.f, static_cast<float>(h) - 220.f - static_cast<float>(shown) * 16.f,
+                        0xFFFFC080u, "  %s", nm);
+            if (++shown >= 3) break;
+        }
+    }
+
     ov.text_fmt(16.f, static_cast<float>(h) - 24.f, 0xFF7E98A8,
                 "Steer with the mouse. Eat food and smaller cells; flee the ones with a red ring.");
 
@@ -464,6 +684,14 @@ bool present_cell_world() {
         const os::stages::Stage* st = os::stages::find_by_state("CellGame");
         if (st && st->next[0]) {
             LOG_INFO("cell", "evolved -> goto %s (shipped CellGame progression)", st->next);
+            world.play_sound("evolve");
+            // Save progress before transitioning.
+            std::string save_err;
+            world.write_save("cell_progress.spo", save_err);
+            // Spawn evolve particles.
+            if (world.player()) {
+                world.spawn_particles(world.player()->x, world.player()->y, 20, 0xFF80FF80u);
+            }
             states::manager().request_goto(st->next);
         }
     }

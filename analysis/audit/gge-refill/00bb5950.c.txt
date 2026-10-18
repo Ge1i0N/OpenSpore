@@ -1,0 +1,75 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00BB5950
+
+void FUN_00bb5950(int param_1,undefined4 param_2)
+
+{
+  float fVar1;
+  undefined1 uVar2;
+  char cVar3;
+  int iVar4;
+  undefined4 uVar5;
+  uint uVar6;
+  int iVar7;
+  int iVar8;
+  float10 fVar9;
+  float10 fVar10;
+
+  FUN_00bb4c90(param_1,param_2);
+  iVar8 = 0;
+  if (*(char *)(param_1 + 0xac) != '\0') {
+    do {
+      iVar4 = FUN_00bbabd0(iVar8);
+      if (*(char *)(iVar4 + 0x30) == '\0') {
+        return;
+      }
+      iVar8 = iVar8 + 1;
+    } while (iVar8 < (int)(uint)*(byte *)(param_1 + 0xac));
+  }
+  FUN_00bafc70(param_1);
+  uVar5 = FUN_00801a60();
+  fVar9 = (float10)FUN_00c84df0(uVar5,1);
+  fVar10 = (float10)FUN_00c84df0(uVar5,2);
+  iVar8 = 0;
+  if (*(char *)(param_1 + 0xac) != '\0') {
+    do {
+      iVar4 = FUN_00bbabd0(iVar8);
+      if ((*(byte *)(iVar4 + 0x2c) & 2) == 0) {
+        uVar2 = 0xff;
+      }
+      else {
+        uVar2 = FUN_00a68f70(0xc);
+      }
+      *(undefined1 *)(iVar4 + 0xac) = uVar2;
+      if (*(int *)(iVar4 + 0x28) == 1) {
+        uVar2 = FUN_00a68f70(0xc);
+        *(undefined1 *)(iVar4 + 0xad) = uVar2;
+      }
+      cVar3 = FUN_00b8dc10();
+      iVar7 = iVar4;
+      if (cVar3 != '\0') {
+        uVar6 = FUN_00b8dbc0();
+        if (uVar6 == 0xffffffff) {
+          iVar7 = 0;
+        }
+        else {
+          iVar7 = FUN_00bbabd0(uVar6 >> 0x18);
+        }
+      }
+      fVar1 = SQRT(*(float *)(iVar7 + 0x44) * *(float *)(iVar7 + 0x44) +
+                   *(float *)(iVar7 + 0x48) * *(float *)(iVar7 + 0x48) +
+                   *(float *)(iVar7 + 0x4c) * *(float *)(iVar7 + 0x4c));
+      if ((fVar1 < (float)fVar9) && ((*(uint *)(iVar4 + 0x2c) & 1) == 0)) {
+        *(uint *)(iVar4 + 0x2c) = *(uint *)(iVar4 + 0x2c) | 0x1000;
+      }
+      if (((float)fVar10 < fVar1) && ((*(uint *)(iVar4 + 0x2c) & 1) == 0)) {
+        *(uint *)(iVar4 + 0x2c) = *(uint *)(iVar4 + 0x2c) | 0x2000;
+      }
+      iVar8 = iVar8 + 1;
+    } while (iVar8 < (int)(uint)*(byte *)(param_1 + 0xac));
+  }
+  return;
+}

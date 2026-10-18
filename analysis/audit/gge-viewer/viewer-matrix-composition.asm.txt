@@ -1,0 +1,80 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  7c4a10:	83 ec 54             	sub    esp,0x54
+  7c4a13:	53                   	push   ebx
+  7c4a14:	55                   	push   ebp
+  7c4a15:	56                   	push   esi
+  7c4a16:	57                   	push   edi
+  7c4a17:	8d 44 24 10          	lea    eax,[esp+0x10]
+  7c4a1b:	8b d9                	mov    ebx,ecx
+  7c4a1d:	50                   	push   eax
+  7c4a1e:	8d 4c 24 28          	lea    ecx,[esp+0x28]
+  7c4a22:	53                   	push   ebx
+  7c4a23:	51                   	push   ecx
+  7c4a24:	e8 37 9a c9 ff       	call   0x45e460
+  7c4a29:	8d 6b 40             	lea    ebp,[ebx+0x40]
+  7c4a2c:	b9 10 00 00 00       	mov    ecx,0x10
+  7c4a31:	8d 74 24 30          	lea    esi,[esp+0x30]
+  7c4a35:	8b fd                	mov    edi,ebp
+  7c4a37:	f3 a5                	rep movs DWORD PTR es:[edi],DWORD PTR ds:[esi]
+  7c4a39:	83 c4 0c             	add    esp,0xc
+  7c4a3c:	8d b3 80 00 00 00    	lea    esi,[ebx+0x80]
+  7c4a42:	56                   	push   esi
+  7c4a43:	8b cb                	mov    ecx,ebx
+  7c4a45:	e8 26 f9 ff ff       	call   0x7c4370
+  7c4a4a:	f3 0f 10 83 90 00 00 	movss  xmm0,DWORD PTR [ebx+0x90]
+  7c4a51:	00
+  7c4a52:	8b 93 a0 00 00 00    	mov    edx,DWORD PTR [ebx+0xa0]
+  7c4a58:	f3 0f 11 44 24 14    	movss  DWORD PTR [esp+0x14],xmm0
+  7c4a5e:	f3 0f 10 83 94 00 00 	movss  xmm0,DWORD PTR [ebx+0x94]
+  7c4a65:	00
+  7c4a66:	f3 0f 11 44 24 18    	movss  DWORD PTR [esp+0x18],xmm0
+  7c4a6c:	f3 0f 10 83 98 00 00 	movss  xmm0,DWORD PTR [ebx+0x98]
+  7c4a73:	00
+  7c4a74:	f3 0f 11 44 24 1c    	movss  DWORD PTR [esp+0x1c],xmm0
+  7c4a7a:	f3 0f 10 83 9c 00 00 	movss  xmm0,DWORD PTR [ebx+0x9c]
+  7c4a81:	00
+  7c4a82:	89 93 90 00 00 00    	mov    DWORD PTR [ebx+0x90],edx
+  7c4a88:	8b 83 a4 00 00 00    	mov    eax,DWORD PTR [ebx+0xa4]
+  7c4a8e:	89 83 94 00 00 00    	mov    DWORD PTR [ebx+0x94],eax
+  7c4a94:	8b 8b a8 00 00 00    	mov    ecx,DWORD PTR [ebx+0xa8]
+  7c4a9a:	8b 44 24 14          	mov    eax,DWORD PTR [esp+0x14]
+  7c4a9e:	89 8b 98 00 00 00    	mov    DWORD PTR [ebx+0x98],ecx
+  7c4aa4:	8b 93 ac 00 00 00    	mov    edx,DWORD PTR [ebx+0xac]
+  7c4aaa:	8b 4c 24 18          	mov    ecx,DWORD PTR [esp+0x18]
+  7c4aae:	89 93 9c 00 00 00    	mov    DWORD PTR [ebx+0x9c],edx
+  7c4ab4:	8b 54 24 1c          	mov    edx,DWORD PTR [esp+0x1c]
+  7c4ab8:	89 83 a0 00 00 00    	mov    DWORD PTR [ebx+0xa0],eax
+  7c4abe:	89 8b a4 00 00 00    	mov    DWORD PTR [ebx+0xa4],ecx
+  7c4ac4:	56                   	push   esi
+  7c4ac5:	f3 0f 11 44 24 24    	movss  DWORD PTR [esp+0x24],xmm0
+  7c4acb:	8b 44 24 24          	mov    eax,DWORD PTR [esp+0x24]
+  7c4acf:	8d 4c 24 28          	lea    ecx,[esp+0x28]
+  7c4ad3:	55                   	push   ebp
+  7c4ad4:	89 93 a8 00 00 00    	mov    DWORD PTR [ebx+0xa8],edx
+  7c4ada:	51                   	push   ecx
+  7c4adb:	89 83 ac 00 00 00    	mov    DWORD PTR [ebx+0xac],eax
+  7c4ae1:	e8 aa a4 c9 ff       	call   0x45ef90
+  7c4ae6:	8d 54 24 1c          	lea    edx,[esp+0x1c]
+  7c4aea:	8d 83 c0 00 00 00    	lea    eax,[ebx+0xc0]
+  7c4af0:	52                   	push   edx
+  7c4af1:	8b f8                	mov    edi,eax
+  7c4af3:	50                   	push   eax
+  7c4af4:	8d 44 24 38          	lea    eax,[esp+0x38]
+  7c4af8:	b9 10 00 00 00       	mov    ecx,0x10
+  7c4afd:	8d 74 24 38          	lea    esi,[esp+0x38]
+  7c4b01:	50                   	push   eax
+  7c4b02:	f3 a5                	rep movs DWORD PTR es:[edi],DWORD PTR ds:[esi]
+  7c4b04:	e8 57 99 c9 ff       	call   0x45e460
+  7c4b09:	83 c4 18             	add    esp,0x18
+  7c4b0c:	8d bb 00 01 00 00    	lea    edi,[ebx+0x100]
+  7c4b12:	b9 10 00 00 00       	mov    ecx,0x10
+  7c4b17:	8d 74 24 24          	lea    esi,[esp+0x24]
+  7c4b1b:	f3 a5                	rep movs DWORD PTR es:[edi],DWORD PTR ds:[esi]
+  7c4b1d:	5f                   	pop    edi
+  7c4b1e:	5e                   	pop    esi
+  7c4b1f:	5d                   	pop    ebp
+  7c4b20:	5b                   	pop    ebx
+  7c4b21:	83 c4 54             	add    esp,0x54
+  7c4b24:	c3                   	ret

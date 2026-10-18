@@ -7,6 +7,19 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 
 | Topic | Document | Scope / caution |
 |---|---|---|
+| Community SDK / format references | [community-references](community-references.md) | pinned ModAPI/SporeModder-FX clones; secondary names/offsets, not native execution or automatic readiness |
+| Additional local references | [additional-references](additional-references.md) | user-supplied `_Also` beta/readme/package/SporeMaster corpus; secondary evidence and leads |
+| FLARE-FLOSS strings | [floss](floss.md) | pinned source/release reference and reproducible GA string JSON dump |
+| Bounded Ghidra runs | [ghidra-runner](ghidra-runner.md) | persistent PyGhidra probes with heartbeat, deadline and graceful/hard-stop policy |
+| MiniWiki references | [miniwiki-references](miniwiki-references.md) | local historical console/cheat/command-line leads, explicitly secondary to GA evidence |
+| MiniWiki command comparison | [miniwiki-command-compare](miniwiki-command-compare.md) | bounded historical-token vs GA-string report; no string-only readiness claims |
+| SDK ↔ Ghidra bridge | [sdk-ghidra-bridge](sdk-ghidra-bridge.md) | cross-checked SDK method order, GA bodies/vtables and next focused probe ideas |
+| Local launch modes | [launch-modes](launch-modes.md) | Debug batch launchers for Loader, DevLauncher, controlled GGE preview and Debug Cheat Console |
+| OpenSpore Debug Cheat Console | [debug-menu](debug-menu.md) | Debug-only Ctrl+Shift+C command-entry state; uses host registry, not recovered EA ConsoleWindow |
+| GGE placement-window identity | [gge-window-lookup](gge-window-lookup.md) | actual record+B8 receiver and root177; corrects earlier global-service interpretation, not native mount/camera readiness |
+| GGE viewer versus ICamera | [gge-viewer](gge-viewer.md) | vtables/getters/update handoff and explicit projection composition; no live camera parameters or viewer producer |
+| GGE camera factory / property | [gge-camera-controller](gge-camera-controller.md) | requested ID780786FD, factory type043C6E06, complete shipped prop and bounded FOV step; no live selection/pose readiness |
+| GGE camera pose / modes | [gge-camera-pose](gge-camera-pose.md) | exact mode tables, explicit orbit transform and rigid inverse bridge; no default/live pose or full mode dynamics |
 | SPUI binary framing / graph | [spui-binary](spui-binary.md) | current parser authority; 748-layout corpus |
 | Atlas / drawable subset | [spui-drawables](spui-drawables.md) | current implemented branches and GA instruction extracts |
 | UI overview | [ui](ui.md) | current navigation, links to deeper evidence |
@@ -34,8 +47,21 @@ and [current verification ledger](../VERIFY.md). Not every analysis document is 
 | GGE controlled clickable preview | [gge-host-preview](gge-host-preview.md) | Debug-only 3-card host screen with real SPUI/atlas, explicit camera and normal input latch; clearly not native GGE/catalogue |
 | GGE catalogue producer boundary | [gge-catalog-producer](gge-catalog-producer.md) | manager vectors/DF95A0 ordering/refill/save persistence recovered; live producer and original stars.db corpus still absent |
 | GGE catalogue snapshot input | [gge-catalog-snapshot](gge-catalog-snapshot.md) | caller-selected strict UTF-8 capture loader + atomic Unknown/Available statuses; no discovery/generation/profile scan |
+| GGE terrain correlation | [gge-real-save](gge-real-save.md) | explicit starter-world/property matches across selected packages; duplicate package matches stay ambiguous, no native readiness claim |
+| External OpenSpore cross-check | [audit/external-openspore](audit/external-openspore/README.md) | pinned Ge1i0N fork reproduced against one explicit local GA save; structural corroboration only, CellGame package absent locally |
+| `openspore-old` methodology pass | [audit/external-openspore-old](audit/external-openspore-old/README.md) | pinned OpenSporeLabs corpus reviewed for dossier/evidence/semantic-bridge workflow; no external code or GA claims imported |
+| GA PropManager terrain lookup | [audit/gge-terrain-prop](audit/gge-terrain-prop/README.md) | vtable/getter/lookup contract cross-checked with SDK; no runtime package priority or refill claim |
+| GA StarManager candidate refill | [audit/gge-refill](audit/gge-refill/README.md) | BB61C0 quota/filter/fallback/append/write order cross-checked with StarManager field layout; static only |
+| Refill event versus GGE refresh | [audit/gge-refill-event](audit/gge-refill-event/README.md) | 0x062D91C2 consumer is StarManager-side; no direct DF95A0/GGE refresh edge claimed |
+| GGE message-to-state dispatch | [audit/gge-message-dispatch](audit/gge-message-dispatch/README.md) | DE99B0 event IDs update internal state fields; 0x036C4A10 matches SDK IStateManager +0x28 contract |
+| GA StateManager command dispatch | [audit/state-manager-dispatch](audit/state-manager-dispatch/README.md) | 0x007E5050 directly corroborates SDK StateIDFromName +0x38 and SwitchToState +0x28; distinct from GGE DF9740 |
+| GGE internal state → UI | [audit/gge-state-ui](audit/gge-state-ui/README.md) | DE48C0 maps internal state 5/13 to UI control IDs; no direct DF9740/catalogue claim |
+| GGE IDs ↔ SPUI ControlIDs | [audit/gge-message-dispatch/control-id-correlation](audit/gge-message-dispatch/control-id-correlation.md) | seven DE99B0/DE48C0 constants found as shipped GGE ControlIDs; producer remains Unknown |
+| GA ScenarioMode vtable | [audit/scenario-mode](audit/scenario-mode/README.md) | 0xEF1870/0x148AFD8 positive SDK IGameMode order match; Play Scenario producer remains Unknown |
+| UTFWin CommandID boundary | [audit/ui-command-dispatch](audit/ui-command-dispatch/README.md) | SDK window/message offsets confirmed; GA CommandID literal handler not recovered, host bridge stays bounded |
 | State script | [states](states.md) | recovered state data, not proof of gameplay |
 | Startup | [startup](startup.md) | GA execution chain and addresses |
+| Main → playable roadmap | [main-to-playable-roadmap](main-to-playable-roadmap.md) | current layer status, priority order and parked console work |
 | Resource loading | [content-loading](content-loading.md) | resource-manager observations, unresolved virtual boundaries |
 | Config | [config-scripts](config-scripts.md) | implemented script subset |
 | Locale | [text-locale](text-locale.md) | per-table keys, nested packages, precedence caveats |
@@ -72,6 +98,9 @@ environment; PNG bytes can differ between operating systems/fonts. Generated tex
   required build/runtime dependency or permission to make new network requests.
 - [Archived root notebooks](../docs/archive/README.md) and [HISTORY](../HISTORY.md) preserve earlier
   conclusions. Do not execute an old "next step" just because it appears in a snapshot.
+- [Community resources](community-resources.md) catalogs externally hosted Spore Community Hub
+  preservation projects (creation/PNG decoders, Sporepedia archive, custom servers, modding) as
+  optional *sources of game-related data*. External and unvetted; not a build or runtime dependency.
 
 ## Evidence contract
 

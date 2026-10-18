@@ -1,0 +1,260 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "authority": "static GA instructions + decoded shipped SPUI; no target execution",
+  "sdk_revision": "69b27b5b407a2c76e1e701ba27630a77a9ce5d01",
+  "receiver": "DF6119 loads ECX from record+B8; 810650 dereferences that UILayout receiver+14, not a global registry",
+  "lookup": "8102A0 enumerates receiver components +64/+68; IWindow Cast EEEE8218, GetControlID +1C; bool0 skips child search +F0",
+  "control": "0x02e5a4a8",
+  "layouts": [
+    {
+      "package": "PatchData.package",
+      "record": 3113,
+      "instance": "0xcb6a4669",
+      "bytes": 17091,
+      "sha256": "411a699e00aa87817b0803e1acfcbb3ccd140af21c6d8afe5d35fcb2421e5bb0",
+      "consumed": 17091,
+      "objects": 67,
+      "windows": 13,
+      "matches": []
+    },
+    {
+      "package": "PatchData.package",
+      "record": 10642,
+      "instance": "0x52c07413",
+      "bytes": 249031,
+      "sha256": "febb3552414790b104e0263170cdc9a86365d2d4aec792f4553d35ec66a10d9d",
+      "consumed": 249031,
+      "objects": 1368,
+      "windows": 320,
+      "matches": []
+    },
+    {
+      "package": "PatchData.package",
+      "record": 19201,
+      "instance": "0x21df01f2",
+      "bytes": 24812,
+      "sha256": "23087d7ae97793db2e9c550fa0ffdd27f5b4738ea90d5f8b43c25ecac22f01f5",
+      "consumed": 24812,
+      "objects": 152,
+      "windows": 58,
+      "matches": [
+        {
+          "object": 177,
+          "class": "0x4ec1b8d8",
+          "serialized_root_flag": true,
+          "parent": null,
+          "children": [
+            28,
+            41,
+            90,
+            176
+          ],
+          "properties": [
+            {
+              "offset": 24692,
+              "id": 4005670912,
+              "code": 9,
+              "count": 1,
+              "raw": "13000000",
+              "end": 24704
+            },
+            {
+              "offset": 24704,
+              "id": 4005670913,
+              "code": 9,
+              "count": 1,
+              "raw": "a8a4e502",
+              "end": 24716
+            },
+            {
+              "offset": 24716,
+              "id": 4005670914,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 24728
+            },
+            {
+              "offset": 24728,
+              "id": 4005670917,
+              "code": 16,
+              "count": 1,
+              "raw": "00009842000027430000f84200005743",
+              "end": 24752
+            },
+            {
+              "offset": 24752,
+              "id": 4005670918,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 24764
+            },
+            {
+              "offset": 24764,
+              "id": 4005670916,
+              "code": 9,
+              "count": 1,
+              "raw": "ffffffff",
+              "end": 24776
+            },
+            {
+              "offset": 24776,
+              "id": 4005670926,
+              "code": 9,
+              "count": 1,
+              "raw": "69bbae00",
+              "end": 24788
+            },
+            {
+              "offset": 24788,
+              "id": 4005670923,
+              "code": 19,
+              "count": 4,
+              "refs": [
+                28,
+                41,
+                90,
+                176
+              ],
+              "end": 24804
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "package": "Spore_Graphics.package",
+      "record": 2987,
+      "instance": "0xcb6a4669",
+      "bytes": 17091,
+      "sha256": "110e20fbc8ee50fd439f22a319c3db0a044b1bd2cb207648540f442291685fd0",
+      "consumed": 17091,
+      "objects": 67,
+      "windows": 13,
+      "matches": []
+    },
+    {
+      "package": "Spore_Graphics.package",
+      "record": 10399,
+      "instance": "0x52c07413",
+      "bytes": 249031,
+      "sha256": "a7c3c676231e2c9509253d370cc107353ea756b8ee16b65dce42e54b03746802",
+      "consumed": 249031,
+      "objects": 1368,
+      "windows": 320,
+      "matches": []
+    },
+    {
+      "package": "Spore_Graphics.package",
+      "record": 18791,
+      "instance": "0x21df01f2",
+      "bytes": 24812,
+      "sha256": "6fe95d3998eacbfcfd8747d152709a0e45650cff10d0d85f15f4b6393d96fe61",
+      "consumed": 24812,
+      "objects": 152,
+      "windows": 58,
+      "matches": [
+        {
+          "object": 177,
+          "class": "0x4ec1b8d8",
+          "serialized_root_flag": true,
+          "parent": null,
+          "children": [
+            28,
+            41,
+            90,
+            176
+          ],
+          "properties": [
+            {
+              "offset": 24692,
+              "id": 4005670912,
+              "code": 9,
+              "count": 1,
+              "raw": "13000000",
+              "end": 24704
+            },
+            {
+              "offset": 24704,
+              "id": 4005670913,
+              "code": 9,
+              "count": 1,
+              "raw": "a8a4e502",
+              "end": 24716
+            },
+            {
+              "offset": 24716,
+              "id": 4005670914,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 24728
+            },
+            {
+              "offset": 24728,
+              "id": 4005670917,
+              "code": 16,
+              "count": 1,
+              "raw": "00009842000027430000f84200005743",
+              "end": 24752
+            },
+            {
+              "offset": 24752,
+              "id": 4005670918,
+              "code": 9,
+              "count": 1,
+              "raw": "00000000",
+              "end": 24764
+            },
+            {
+              "offset": 24764,
+              "id": 4005670916,
+              "code": 9,
+              "count": 1,
+              "raw": "ffffffff",
+              "end": 24776
+            },
+            {
+              "offset": 24776,
+              "id": 4005670926,
+              "code": 9,
+              "count": 1,
+              "raw": "69bbae00",
+              "end": 24788
+            },
+            {
+              "offset": 24788,
+              "id": 4005670923,
+              "code": 19,
+              "count": 4,
+              "refs": [
+                28,
+                41,
+                90,
+                176
+              ],
+              "end": 24804
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "package": "Spore_EP1_Data.package",
+      "record": 12415,
+      "instance": "0x28f6d535",
+      "bytes": 28910,
+      "sha256": "49e24564e56fca7f3104082dc5b38814a2ff3857bc9084193bdfa47cebe408a1",
+      "consumed": 28910,
+      "objects": 117,
+      "windows": 21,
+      "matches": []
+    }
+  ],
+  "limitations": [
+    "Serialized root/component matches are not an original runtime mount observation",
+    "Root geometry is the serialized local Area, not runtime GetRealArea output",
+    "No automatic first-match duplicate resolution, camera/refill/scene admission or service readiness"
+  ]
+}
