@@ -703,6 +703,20 @@ generic top-level UI root procedure, distinct from `DE5900`'s GGE procedure atta
 `DE99B0`'s component-ID branches. It is a plausible higher window-hierarchy source, but no static
 GGE-specific join from this root procedure to `Play Scenario` has been recovered.
 
+The attached root procedure is a concrete parent-side receiver:
+
+```text
+Simulator/cSPUIGlobalUIRootWinProc
+  → vtable 0x0147F118 +0x18
+  → E02ED0
+  → kMsgComponentActivated dispatch
+```
+
+The bounded `E02ED0` body contains no direct immediate for `0x070D7509`, `0x070D74E7` or
+`ScenarioGAButtonClicked 0x080D7DE1`. Its comparison of `0x01654C10` occurs in a separate current-
+mode branch, not as a Play Scenario payload consumer. Thus the parent/root fallback is now located,
+but it does not close the GGE-specific producer.
+
 Its later branches construct `kMsgButtonClick = 0x17` and `kMsgButtonSelect = 0x18`. The
 GGE-specific unresolved part is no longer generic message construction; it is the higher-level
 relationship between the Play Scenario control payload `0x070D7509` and the separate
