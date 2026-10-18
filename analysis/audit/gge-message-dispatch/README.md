@@ -124,10 +124,21 @@ at `+0x8C` when present and initializes resource key `0x2FBF2058`. These callbac
 layout/display lifecycle. They are the next native owner-callback boundary, but no static evidence
 assigns them the `Play Scenario` payload or a ScenarioMode request.
 
-A bounded scan of the inspected `0x0080xxxx` layout-owner bodies found no direct write of a function
-pointer into `owner +0x8C`; `811C70` only reads and invokes the field. This is a scoped negative
-result against the examined constructor/transition code, not an Absent claim for the whole binary.
-The callback remains a dynamic/resource/vtable binding boundary.
+The callback's subobject-relative layout is now exact. `811C70` receives the `owner + 0x08`
+subobject, normalizes `owner = subobject - 0x08`, and reads:
+
+```text
+subobject +0x88 = owner +0x90  → callback context
+subobject +0x8C = owner +0x94  → callback function
+subobject +0x90 = owner +0x98  → callback argument/context
+```
+
+Constructor `810170` initializes the owner/subobject pair and zeros these callback-related fields
+(`owner +0x90/+0x94/+0x98`, with the subobject flag at `owner +0x8C`). A candidate writer exists
+in the same UI resource helper family at `810130`: when `[this +0x14]` is non-null it writes the
+target's `+0x90 = this`, `+0x94 = arg1`, and `+0x98 = arg2`. This is positive setter evidence for
+the dynamic callback binding, but its caller/target population is not statically joined to GGE
+object 74 or `Play Scenario`.
 
 The attached `object +0x04` is not an analyst-invented callback: constructor `DE6120` writes
 `0x0147E030` at that subobject, and vtable `0x0147E030 +0x18` is `DE99B0`. Therefore the static
