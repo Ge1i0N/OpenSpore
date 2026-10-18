@@ -75,15 +75,14 @@ bounded state writes in that dispatch are:
 
 ```text
 0x05933FE0..0x05933FE3 → state +0x20 = 9
-0x0733FE08             → DFAE20 → state +0x20 = 10, +0x28 = 10, +0x80 = 1
-0x0733FE09             → same DFAE20 route (range arithmetic)
+0x05951103/0x05951104 → DFAE20 → state +0x20 = 10, +0x28 = 10, +0x80 = 1
 0x073BBA58             → state +0x20 = 5
 0x074D0932             → state +0x20 = 7
 ```
 
 This is positive evidence that local states 5–10 are event-driven controller phases. `DFAE20` is
 the exact state-10 writer, but the inspected family contains no `0x070D7509` comparison. The
-remaining question is whether event `0x0733FE08/09` is emitted by the selected-star Play Scenario
+remaining question is whether event `0x05951103/04` is emitted by the selected-star Play Scenario
 action or by another Scenario UI action; that upstream semantic join remains Unknown.
 
 ## Direct table-index selection is generic, not the missing UI join

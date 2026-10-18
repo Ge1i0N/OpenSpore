@@ -86,7 +86,7 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   The [launch-state audit](launch-state.md) also resolves generic name/tag table setters without
   claiming original queued-command delivery or successful OnEnter.
 - The adjacent `DFE430` component-activation family contains the exact playable-state candidate:
-  event `0x0733FE08/09` reaches `DFAE20`, which writes local state `+0x20 = 10`, context `+0x28 = 10`
+  event `0x05951103/04` reaches `DFAE20`, which writes local state `+0x20 = 10`, context `+0x28 = 10`
   and enables `+0x80`. Other bounded IDs map to state 9 (`0x05933FE0..E3`), state 5
   (`0x073BBA58`) and state 7 (`0x074D0932`). The event-to-Play-Scenario semantic join remains
   Unknown because no `0x070D7509` comparison is present.

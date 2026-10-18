@@ -113,7 +113,8 @@ def verify() -> None:
         raise ValueError("ScenarioMode state-name hash mismatch")
     checks += 2
 
-    # Exact playable controller phase writer: event 0x0733FE08/09 routes
+    # Exact playable controller phase writer: DFE430's arithmetic branch
+    # recognizes 0x05951103/0x05951104 and routes
     # through DFAE20 and enters local state 10.
     exact(0xDFE517, "05 fd ee 6a fa 83 f8 01 0f 87")
     exact(0xDFE53A, "e8 e1 c8 ff ff 5f b0 01")
