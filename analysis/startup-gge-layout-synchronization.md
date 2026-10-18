@@ -72,6 +72,8 @@ when the new object's `+0x88` is not initialized. The key is an indirect caller-
 identity, not the per-card root ControlID `0x02E5A4A8`.
 
 `812250` is a caller-side name/key framing helper and forwards the resulting values to `8121C0`.
+The two bounded GGE callers are detailed in
+[startup-gge-layout-request-callers.md](startup-gge-layout-request-callers.md).
 This narrows the static bridge from GGE UI initialization to layout-owner lifecycle, but does not
 observe resource loading or runtime mount completion.
 

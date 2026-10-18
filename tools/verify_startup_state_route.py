@@ -536,6 +536,22 @@ def verify() -> None:
     call(0x8121D6, 0x811070)
     exact(0x812203, "14 85 c9 74 35 8b 45 00 89 46 08 8b 55 04 89 56 0c 8b 45 08 89 46 10")
     exact(0x812250, "83 ec 0c 33 c0 56 89 44 24 04 89 44 24 08 89 44 24 0c 8b 44 24 18")
+    # GGE layout request callers remain distinct from resource/mount success and Scenario launch.
+    exact(0xDE5907, "6a 02 8b f1 e8 d0 fb 89 ff 83 c4 04 68 fa 98 b5 05 6a 01")
+    exact(0xDE5913, "68 fa 98 b5 05 6a 01 8d ae 44 01 00 00 68 00 41 46 40 84 c0")
+    call(0xDE593A, 0x812250)
+    exact(0xDE593F, "c7 44 24 24 66 b9 15 06 c7 44 24 28 9b d6 1d 06 c7 44 24 2c 16 b6 15 06")
+    exact(0xDE597B, "8b 54 bc 24 6a 01 52 8b cd e8 c7 ac a2 ff")
+    call(0xDE5984, 0x810650)
+    exact(0xDE5989, "8b 10 8b c8 8b 82 04 01 00 00 53 ff d0 47 83 ff 03 72 d4")
+    exact(0xDE59A3, "83 c4 04 84 c0 0f 84 d6 00 00 00 bf 03 00 00 00 85 f6 74 05")
+    exact(0xDE59B3, "85 f6 74 05 8d 5e 04 eb 02 33 db 8b 4c bc 24 6a 01 51 8b cd")
+    exact(0xDE59D0, "8b 82 04 01 00 00 53 ff d0 47 83 ff 05 72 d4")
+    exact(0xE035F0, "53 56 57 8b f1 e8 86 dc fc ff e8 e1 5f 00 00 e8 7c a6 87 ff")
+    exact(0xE03649, "6a 00 6a 00 6a 00 6a 00 68 90 09 3f 01 6a 18 e8 e3 3b 14 00")
+    exact(0xE03695, "8b 4e 08 32 db 85 c9 74 26 8b 44 24 10 68 ca 95 dd 2e 6a 01 50")
+    call(0xE036AA, 0x8121C0)
+    exact(0xE036AF, "84 c0 74 0f 8b ce e8 06 f4 ff ff 84 c0 74 04 b3 01")
 
     # Negative controls for prior timing/slot conflation.
 
