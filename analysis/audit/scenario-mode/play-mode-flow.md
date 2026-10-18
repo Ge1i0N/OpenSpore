@@ -195,4 +195,24 @@ from the input descriptor context. This proves a ScenarioMode-specific downstrea
 not a world/terrain allocation. The registry and service/UI entry may be necessary for later
 presentation or object control, but their successful downstream effects remain Unknown.
 
+## Service/UI registry implementation details
+
+The immediate consumers are bounded as follows:
+
+- `951220` returns global registry pointer `0x0166AAB4`.
+- `951230` normalizes an allocation size, then either calls a registry virtual slot on the
+  supplied service object or falls back to `928CC0`; on success it stores the service owner at
+  the returned block and returns `block + 8`.
+- `966CE0` initializes one of the concrete entry interfaces used by this service/UI layer. Its
+  writes install vtables and initialize entry fields; they do not call a terrain/world factory.
+- `F0F050` creates a small descriptor node, copies the three-word vector, calls `921930`, and
+  increments the owning registry count at `+0x14`. It returns that node to `ABFE60`/`F0FD40`.
+- `8062B0` looks up a service by hash through `810650`, then queries identities
+  `0xEF3C47CF` or `0x103C1908` through virtual slots. A null result is returned when neither
+  lookup succeeds.
+
+Thus the downstream side is a service/UI registry plus ordered descriptor ownership. It is a
+real native consumer of the Scenario path, but it remains separate from stage/terrain creation
+and from observed gameplay readiness.
+
 The host preview remains separate and no saves were modified.

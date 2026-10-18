@@ -668,6 +668,20 @@ def verify() -> None:
     call(0xE10887, 0x966CE0)
     exact(0xE10957, "81 7c 24 14 02 4c 65 01")
 
+    # Immediate service/UI registry consumers of E10560.
+    exact(0x951220, "a1 b4 aa 66 01 c3")
+    exact(0x951230, "8b 44 24 08 48 83 c8 07 56 8b 74 24 14 40 85 f6")
+    call(0x95127A, 0x928CC0)
+    exact(0x95127F, "85 c0 75 02 5e c3")
+    exact(0xF0F050, "80 7c 24 10 00 53 55 8b 6c 24 10 56 57 8b f1")
+    call(0xF0F0BD, 0x921930)
+    exact(0xF0F0C6, "ff 46 14 83 c4 10 89 38")
+    exact(0x8062B0, "8b 4c 24 04 85 c9 75 03 33 c0 c3")
+    call(0x8062C2, 0x810650)
+    exact(0x8062E3, "68 cf 47 3c ef")
+    exact(0x8062FF, "68 08 19 3c 10")
+    exact(0x966CE0, "8b c1 c7 40 04 40 4c 44 01 33 c9 89 48 08")
+
     # Play update is a distinct dispatcher with its own phase table and
     # goal-progress entry; it is not proof of a completed gameplay tick.
     exact(0xF1F960, "83 ec 0c 53 56 8b f1 e8 c4 16 4e ff 8a 58 1c 84 db 74 1c")
