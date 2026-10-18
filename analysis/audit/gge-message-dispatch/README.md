@@ -204,24 +204,6 @@ global owner 0x016A11B4 +0x48
 target is a controller-owned resource/service object, not the Play Scenario object 74 or nested
 object 87. The Play Scenario target remains a separate unresolved route.
 
-### 👀 Excellent finding: `DF851E` installs a marker/effect target
-
-The second `DF6820` caller is now bounded by the complete `DF8300` per-record loop. For each
-eligible catalogue record, `DF8300` chooses an effect resource, builds a transform from the record
-position (`+0x80/+0x84/+0x88`) and shared projection constants, then performs:
-
-```text
-effect vtable +0x48(8, &transform, 1)
-  → DF6820(effect)
-  → GGE object +0x34 = effect
-```
-
-The same target field is released/reset by `DF9160`, which repeats the target's vtable `+0x48`
-message with internal ID `9` before releasing it. Therefore the recovered `DE99B0` forwarding slot
-is, in this concrete route, an effect/marker lifecycle bridge. It is not a Play Scenario controller,
-selected-star launcher, or ScenarioMode factory. Any effect-side handling of an incoming UI message
-remains Unknown; no Play Scenario handoff is promoted from this path.
-
 ### 👀 Excellent finding: the per-entry forwarded target is a marker effect
 
 The `DF851E` callsite is now semantically bounded by its containing `DF8300` loop. For each eligible
