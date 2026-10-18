@@ -615,6 +615,42 @@ call SetProperty(0x080D97FE, value)
 The setter call is visible at `DF6D05..DF6D0C`, after the `0x080D97FE` property query and related
 UI target `0x0806AA00` handling.
 
+### 🔥 Nuclear finding: sibling Scenario launch consumer at `DF43A0`
+
+A separate GA-era `kMsgComponentActivated` consumer is recovered at `DF43A0`:
+
+```text
+message.type = 0x287259F6
+component ID = 0x053F0707
+  → Preferences::SetProperty(0x080EAA93, value)
+  → UI target 0x0809B720 visibility/state update
+```
+
+The shipped secondary property registry labels `0x080EAA93` as:
+
+```text
+ScenarioSpaceGameLaunched
+```
+
+This is a sibling Scenario launch surface to the already bounded GA route:
+
+```text
+DE99B0:
+  0x070D74E7
+    → ScenarioGAButtonClicked 0x080D7DE1
+    → GGE state 13
+
+DF43A0:
+  0x053F0707
+    → ScenarioSpaceGameLaunched 0x080EAA93
+    → UI target 0x0809B720
+```
+
+The two consumers share the Preferences service/property-writing shape, but `DF43A0` does not
+compare `0x070D7509`; it is not promoted to the Play Scenario producer. Its value is architectural
+evidence that Scenario launch surfaces use sibling component IDs and property-backed handlers,
+which narrows the missing Play Scenario route to another dynamic component/handler binding.
+
 ### Corroborating launch flags
 
 The same `Preferences vtable +0x14` setter shape is used by nearby Scenario editor paths for:

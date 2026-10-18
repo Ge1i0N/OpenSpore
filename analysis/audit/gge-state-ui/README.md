@@ -66,6 +66,11 @@ Together with the resolved `Galactic Adventures` caption, this is a strong stati
 the GA-tab feedback surface. It remains separate from the unresolved `Play Scenario` object 74
 producer and from runtime ScenarioMode entry.
 
+The wider Scenario property family has a sibling activation consumer at `DF43A0`: component
+`0x053F0707` writes `ScenarioSpaceGameLaunched` (`0x080EAA93`) through Preferences and updates UI
+target `0x0809B720`. This corroborates the property-backed design of Scenario launch surfaces while
+remaining distinct from object 74 / `Play Scenario 0x070D7509`.
+
 ### Direct caller inventory
 
 The local `.text` scan for direct `E8 rel32` calls found:
