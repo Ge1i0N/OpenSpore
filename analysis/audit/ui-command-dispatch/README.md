@@ -117,8 +117,14 @@ object +0x38 = 0
 ```
 
 The WinButton constructor `0x00966EB0` then installs the outer/embedded vtables and does not supply
-a serialized Play Scenario owner. A related GA UI interface table at `0x01441868` contains later
-setter bodies:
+a serialized Play Scenario owner. A separate nearby vtable begins at `0x01441860`; its surrounding
+RTTI/name data identifies the class as:
+
+```text
+UTFWin/EA::UTFWinControls::ComboBoxDrawable
+```
+
+That generic ComboBoxDrawable table contains later setter bodies:
 
 ```text
 0x00967980 → writes interface +0x30, then invokes base callback +0x8C
@@ -136,9 +142,17 @@ A bounded direct-call scan adds a negative constraint:
 00967DA0: no direct E8 callers in selected .text
 ```
 
-The two bodies are present as virtual entries at `0x01441868 +0x00` and `0x014418A8 +0x00`.
-Their invocation is therefore dynamic in the inspected image; the absence of direct callers does
-not promote them to Absent, but it prevents a static GGE/Play Scenario ownership claim.
+The two bodies are present as virtual entries at:
+
+```text
+0x01441860 +0x08 → 0x00967980
+0x01441860 +0x48 → 0x00967DA0
+```
+
+Their invocation is therefore dynamic in the inspected image. More importantly, the class-name
+cross-check separates this ComboBoxDrawable behavior from the GGE WinButton/Play Scenario object;
+the setters must not be used as a GGE owner-binding claim. The exact GGE owner/context setter
+remains Unknown.
 
 Therefore `DE99B0` can be reached by the common window message path, but its bounded dispatch
 body only recognizes the component-activation message type and its internal branches; no
