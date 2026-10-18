@@ -175,4 +175,24 @@ These values are not promoted to semantic names and are not treated as generic "
 ready" or "world ready" without a proven consumer mapping. The function returns a Boolean
 alongside this local result, so the caller's `F1C390` decision remains a separate gate.
 
+## Descriptor registry boundary: `F0FD40 → ABFE60` and `E10560`
+
+The descriptor path itself is now bounded more precisely:
+
+- `F0FD40` performs a tree lower-bound search using descriptor key `+0x00`; on a miss it calls
+  `ABFE60` and returns the entry payload at `+0x14`;
+- `ABFE60` performs the ordered-tree insertion/rebalance and returns the inserted node; it does
+  not call a terrain or stage constructor;
+- `E10560` reads the descriptor vector/flags, resolves an identity through the descriptor's
+  service vtable, and maps flags to downstream command/identity constants in the `0x05E51A..`
+  range;
+- it then looks up a service entry through `8062B0`, creates/gets an entry through
+  `951220/951230`, initializes its interface and sends descriptor-derived values through virtual
+  slots.
+
+`E10560` has explicit handling for ScenarioMode tag `0x01654C10`; that branch selects a value
+from the input descriptor context. This proves a ScenarioMode-specific downstream command path,
+not a world/terrain allocation. The registry and service/UI entry may be necessary for later
+presentation or object control, but their successful downstream effects remain Unknown.
+
 The host preview remains separate and no saves were modified.

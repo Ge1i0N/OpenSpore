@@ -651,6 +651,23 @@ def verify() -> None:
                             (0xF41F36, 0x16)):
         exact(address, "c7 86 84 01 00 00 " + status.to_bytes(4, "little").hex())
 
+    # Descriptor registry boundary: ordered lookup/insert, then E10560 maps
+    # descriptor flags to downstream command/service entries. No terrain claim.
+    exact(0xF0FD40, "8b 41 0c 83 ec 0c 53 56 8d 51 04 57 8b 7c 24 1c")
+    call(0xF0FDA1, 0xABFE60)
+    exact(0xF0FDB6, "5f 8d 46 14 5e 5b 83 c4 0c c2 04 00")
+    exact(0xABFE60, "83 ec 08 56 8b f1 8b 46 04 8b 4c 24 14 8d 56 04")
+    call(0xABFE7A, 0x921810)
+    call(0xABFEA6, 0xF0F050)
+    call(0xABFF0C, 0xF0F0E0)
+    exact(0xE1060D, "e8 be d6 86 ff 8b 10 8b c8 8b 42 38 ff d0")
+    exact(0xE106EC, "81 fe 10 4c 65 01 75 09")
+    call(0xE107FB, 0x8062B0)
+    call(0xE10868, 0x951220)
+    call(0xE10877, 0x951230)
+    call(0xE10887, 0x966CE0)
+    exact(0xE10957, "81 7c 24 14 02 4c 65 01")
+
     # Play update is a distinct dispatcher with its own phase table and
     # goal-progress entry; it is not proof of a completed gameplay tick.
     exact(0xF1F960, "83 ec 0c 53 56 8b f1 e8 c4 16 4e ff 8a 58 1c 84 db 74 1c")
