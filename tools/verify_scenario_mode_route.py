@@ -619,6 +619,38 @@ def verify() -> None:
     exact(0xF1F4B7, "c6 86 ec 00 00 00 00")
     call(0xF1F4C7, 0xF0E5A0)
 
+    # F0E5A0 is only a launch-context transition gate; nonzero context returns.
+    exact(0xF0E5A0, "a1 a4 7a 6c 01 83 b8 d0 00 00 00 00 75 0b")
+    exact(0xF0E5B4, "e9 27 63 f0 ff")
+
+    # F11380 consumes act/Scenario records into descriptors through E10560 and
+    # F0FD40. It is not classified as terrain construction.
+    exact(0xF11380, "81 ec 90 00 00 00 53 8b d9 8b 8b e0 02 00 00 55 33 ed")
+    call(0xF113A0, 0xE0FB30)
+    call(0xF113AD, 0xE0ACE0)
+    call(0xF113C1, 0x10212D0)
+    exact(0xF11472, "c7 44 24 10 00 00 e0 17")
+    call(0xF11464, 0xE10560)
+    call(0xF114B6, 0xF3D620)
+    call(0xF114C8, 0xF3E7A0)
+    exact(0xF114E6, "69 c9 e0 04 00 00 80 3c 11 00")
+    call(0xF1151B, 0xF3BD00)
+    exact(0xF11540, "8b 4e 04 83 f9 fe 0f 84 07 01 00 00 80 7e 10 00")
+    call(0xF11601, 0xE10560)
+    call(0xF11618, 0xF0FD40)
+    call(0xF11717, 0xE10560)
+    call(0xF11731, 0xF0FD40)
+
+    # F41C60 initializes and writes bounded local outcome codes; preserve them
+    # as Unknown classifications rather than universal readiness meanings.
+    exact(0xF41C60, "83 ec 08 55 56 8b 74 24 14 8b e9 8b 4c 24 1c")
+    exact(0xF41C75, "c7 86 84 01 00 00 ff ff ff ff")
+    for address, status in ((0xF41D31, 0x11), (0xF41D5B, 0x14),
+                            (0xF41E0F, 0x11), (0xF41E6A, 0x14),
+                            (0xF41EA9, 0x15), (0xF41ECD, 0x13),
+                            (0xF41F36, 0x16)):
+        exact(address, "c7 86 84 01 00 00 " + status.to_bytes(4, "little").hex())
+
     # Play update is a distinct dispatcher with its own phase table and
     # goal-progress entry; it is not proof of a completed gameplay tick.
     exact(0xF1F960, "83 ec 0c 53 56 8b f1 e8 c4 16 4e ff 8a 58 1c 84 db 74 1c")

@@ -149,4 +149,30 @@ Still unresolved:
 - the exact queued execution of state requests;
 - native evidence of a completed playable gameplay tick.
 
+## Post-act record consumer: `F11380`
+
+`F11380` is reached from the ScenarioMode transition path after `F0E5A0`. It requires a
+non-null service/context at `+0x2E0`, initializes a descriptor/list at `+0x2EC`, and submits an
+initial descriptor through `E10560`. It then walks the Scenario record range with the familiar
+`0x238` stride, resolves record objects through `F3D620/F3E7A0`, checks the selected byte in the
+`0x4E0` payload, obtains the act-side entry through `F3BD00`, and walks act entries with `0x188`
+stride. Entries with `+4 == -2` or inactive `+0x10` are skipped. Matching entries are converted
+to descriptors and submitted through `E10560` and `F0FD40`.
+
+After the record walk it submits a final descriptor through the same service path. This is a
+concrete post-act record/descriptor consumer and may be part of scene presentation or object
+registration. The native bytes do not identify the descriptor as terrain, nor do they prove that
+the downstream service accepted or materialized it.
+
+## `F41C60`: bounded goal/resource outcome classifier
+
+`F41C60` initializes record result field `+0x184` to `-1`, dispatches on record state through a
+local table, and evaluates object/resource conditions via `F41550`, `F3B210`, `F40370`, `F3E740`
+and `F25D50`. Depending on those conditions it writes local outcome values including `0x11`,
+`0x13`, `0x14`, `0x15` and `0x16`.
+
+These values are not promoted to semantic names and are not treated as generic "resource not
+ready" or "world ready" without a proven consumer mapping. The function returns a Boolean
+alongside this local result, so the caller's `F1C390` decision remains a separate gate.
+
 The host preview remains separate and no saves were modified.
