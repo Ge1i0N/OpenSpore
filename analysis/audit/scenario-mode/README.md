@@ -153,6 +153,9 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - [scene-object-flow.md](scene-object-flow.md) separates `EF25E0` object-list preparation,
   `F45E70/F45AD0` record synchronization and conditional object construction from `F40210/F400E0`
   readiness aggregation. These edges do not prove terrain or stage creation.
+- [play-mode-flow.md](play-mode-flow.md) follows `ScenarioPlayMode::Initialize`, current-act setup,
+  goal scanning and act advancement. It establishes the next native state-machine boundary without
+  promoting play-mode entry to successful world/gameplay readiness.
 
 This makes ScenarioMode a real next reverse-engineering target after a selected star, but it does
 not connect the GGE `Play Scenario` ControlID `0x070D7509` to `ScenarioMode` or prove an adventure

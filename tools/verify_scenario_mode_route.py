@@ -566,6 +566,65 @@ def verify() -> None:
     call(0xF402BE, 0xF400E0)
     call(0xF4032C, 0xF400E0)
 
+    # ScenarioPlayMode initialization and act/goal lifecycle. These are
+    # separate local play-mode phases, not the GGE controller states or the
+    # global loading-context phase.
+    call(0xEF0E63, 0xF1F060)
+    call(0xF1F066, 0xF1DF00)
+    exact(0xF1F06B, "c6 83 b4 00 00 00 00")
+    call(0xF1F081, 0xEED7E0)
+    exact(0xF1F089, "83 bb 90 00 00 00 02 89 83 c4 00 00 00 0f 85 e2 01 00 00")
+    exact(0xF1F0A2, "c7 83 90 00 00 00 00 00 00 00")
+    call(0xF1F0AC, 0xF1EE70)
+    exact(0xF1F0B1, "8b 0d a4 7a 6c 01 8b 81 d0 00 00 00 83 f8 01 74 43 83 f8 02 74 3e")
+    call(0xF1F0C9, 0xF1C390)
+    exact(0xF1F0DB, "c7 83 90 00 00 00 03 00 00 00")
+    exact(0xF1F100, "e9 ab 57 ef ff")
+    exact(0xF1EE7B, "57 89 be b8 00 00 00")
+    call(0xF1EE82, 0xF1ABE0)
+    call(0xF1EE8C, 0xF1EBD0)
+    call(0xF1EED4, 0xF3BD00)
+    exact(0xF1EF02, "c7 86 f0 00 00 00 00 00 00 00 c7 86 f4 00 00 00 00 00 00 00")
+    exact(0xF1EF39, "89 86 f4 00 00 00")
+    call(0xF1EF3F, 0xA20670)
+    call(0xF1F02F, 0xF0E5A0)
+    call(0xF1F03D, 0xF11380)
+    exact(0xF1F273, "c7 83 90 00 00 00 01 00 00 00")
+
+    # Update-goal scan: inactive act records use 0x1AC stride; successful
+    # checks request ScenarioMode through the shipped state hash.
+    exact(0xF1C390, "83 ec 28 a1 a4 7a 6c 01 53 55 56 57 8b f9")
+    exact(0xF1C3C3, "89 5c 24 14 89 44 24 20 0f 84 33 01 00 00")
+    exact(0xF1C3EC, "8b 77 64 03 74 24 18 80 3e 00 75 3f")
+    call(0xF1C408, 0xF41C60)
+    call(0xF1C42D, 0xF1B610)
+    exact(0xF1C474, "c7 87 b0 00 00 00 04 00 00 00")
+    exact(0xF1C47E, "e8 6d 8b 79 ff")
+    exact(0xF1C48A, "68 be 1e 85 21")
+    call(0xF1C493, 0x6B5440)
+    call(0xF1C49C, 0x6B5550)
+    call(0xF1C4D7, 0xF1A9C0)
+    call(0xF1C51C, 0xF41F70)
+    call(0xF1C54F, 0xF1B610)
+
+    # Jump/advance path synchronizes Scenario records, selects the next act,
+    # re-runs current-act setup and then goal scanning.
+    exact(0xF1F3C0, "51 56 8b f1 83 be 90 00 00 00 03 0f 85 fd 00 00 00")
+    exact(0xF1F3F1, "c6 86 ec 00 00 00 01 e8 53 e0 c1 ff")
+    call(0xF1F417, 0xF45E70)
+    call(0xF1F428, 0xF1EE70)
+    call(0xF1F48D, 0xF462B0)
+    call(0xF1F4A2, 0xF1EE70)
+    call(0xF1F4B2, 0xF1C390)
+    exact(0xF1F4B7, "c6 86 ec 00 00 00 00")
+    call(0xF1F4C7, 0xF0E5A0)
+
+    # Play update is a distinct dispatcher with its own phase table and
+    # goal-progress entry; it is not proof of a completed gameplay tick.
+    exact(0xF1F960, "83 ec 0c 53 56 8b f1 e8 c4 16 4e ff 8a 58 1c 84 db 74 1c")
+    call(0xF1F9B1, 0xF1F4E0)
+    exact(0xF1F9B6, "8b 86 90 00 00 00 48 83 f8 05 0f 87")
+
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
     exact(0xDFBD4C, "83 7e 20 09")
