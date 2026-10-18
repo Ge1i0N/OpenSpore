@@ -108,6 +108,10 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - A secondary controller interface table at `0x0147ED9C` contains `E00170`, `DFBD20`, `DFAE60`,
   `DFA7E0` and `DFC210`. `E00170` handles internal payload IDs `0x366A930D`/`0x2B978C46` and
   dispatches existing controller states; it has no direct `0x070D7509` or `0x01654C10` branch.
+- Constructor `DFB990` writes primary vtable `0x0147EDA0` and secondary interface `0x0147ED9C`,
+  while `DE7660` allocates the `0x178`-byte `Simulator` object, invokes the constructor and
+  publishes it at registry slot/index `13` under feature guard `6854E0(2)`. The higher-level
+  caller remains indirect; this is construction evidence, not runtime readiness.
 - Retained shipped-binary evidence: [`scenario-mode-current-evidence.json`](scenario-mode-current-evidence.json).
    The focused REA records include `DFE430` (`ev_a8c978345364376176b078d900546eb9cf8ce24596eb4d0e9b4b16011372ed58`),
    controller UI sync (`DF9B00`/`DF9F90`, `ev_6a482fca4d92d699ab63e87065a207d8bba0d74a7655b40f8bb05a1d418e110d`,

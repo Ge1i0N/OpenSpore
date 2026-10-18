@@ -179,6 +179,36 @@ The initializer still does not prove the missing upstream click conversion. Its 
 not resolved by the bounded direct-call result because the vtable slot is invoked indirectly; the
 native object construction/scheduling edge and the route from GGE object 74 remain Unknown.
 
+### Constructor and owner registration
+
+The controller constructor is now recovered at `DFB990`. Its observed initialization writes are:
+
+```text
+object +0x00 = 0x0147EDA0  (primary controller vtable)
+object +0x08 = 0x0147ED9C  (secondary controller interface)
+```
+
+It then initializes the controller arrays, UI/resource fields, state flags, event/context pointers,
+and three-element per-entry storage. The constructor's direct caller is `DE7660`.
+
+`DE7660` is a simulator/controller registration routine. Under the observed feature guard
+`6854E0(2)`, it allocates `0x178` bytes with heap tag `Simulator`, invokes `DFB990`, invokes the
+new object's vtable `+0x2C` initialization slot, and publishes the resulting object through
+registry slot/index `13`. This closes the native construction/registration edge:
+
+```text
+DE7660
+  → allocate 0x178 (Simulator)
+  → DFB990
+  → controller vtables 0x0147EDA0 / 0x0147ED9C
+  → vtable +0x2C → DFE430
+  → registry slot 13
+```
+
+The direct caller of `DE7660` is not recovered by the bounded direct-call scan, so the higher-level
+owner/scheduler remains indirect. This is still not evidence that GGE object 74 activates the
+controller or that the native registry reached runtime readiness.
+
 ### Secondary controller interface
 
 The same controller family has a second observed function table at `.rdata 0x0147ED9C`:

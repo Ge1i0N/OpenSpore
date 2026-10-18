@@ -153,6 +153,13 @@ def verify() -> None:
     exact(0xE001E7, "8b cf e8 32 ab ff ff eb 3c")  # state 5 -> DFAD20
     exact(0xE0020B, "50 8b cf e8 dd 9a ff ff eb 17")
 
+    # Native Scenario controller construction/registration boundary.
+    exact(0xDFB996, "e8 65 4c 00 00 c7 46 08 88 49 41 01")
+    exact(0xDFB9A4, "c7 06 a0 ed 47 01 c7 46 08 9c ed 47 01")
+    exact(0xDE7702, "68 a8 00 00 00 89 18 e8 32 fb 15 00")
+    exact(0xDE7883, "e8 b8 f9 15 00 83 c4 18 3b c5")
+    exact(0xDE78AC, "c7 44 24 14 0b 00 00 00 e8 27 fd ff ff")
+
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
     exact(0xDFBD4C, "83 7e 20 09")
