@@ -68,6 +68,35 @@ The `SporeAppStates` call at `F48505` supplies instance/group identity `0xD63969
 does not claim that `F47C20` parses the trigger text. The trigger-resource query/parser boundary
 remains the separate item documented in [content-loading.md](content-loading.md).
 
+## State-list load call and post-load handoff
+
+At `F48505`, the object returned by startup getter `67DCE0` is called through virtual slot
+`+0x1C` with instance/group identity `0xD6396913`. This is the concrete `SporeAppStates` load
+call. The surrounding sequence then:
+
+```text
+AppMode/state host +0x1C(0xD6396913)
+  → 6A17E0(..., 0x2A)
+  → 571E60()
+  → 93A3E0() clock/timing conversions
+  → continue AppMode startup dispatch
+```
+
+The resource-manager path at `847780` obtains the manager through `8DE4B0`, calls manager virtual
+`+0x58` with the resource descriptor, and on success constructs/returns a loaded resource object.
+This is the generic trigger/resource load boundary used by startup. `930C20` is a bounded UTF-16
+copy/path helper used while building startup descriptors; it is not evidence of parsing
+`SporeAppStates` into state records.
+
+The remaining unresolved startup consumer is therefore narrower:
+
+- the virtual `+0x1C` implementation/consumer after the resource load;
+- the trigger text parser and its state/mode registration writes;
+- the exact meaning of post-load `6A17E0(..., 0x2A)` and `571E60` for AppMode timing/config.
+
+The shipped ArgScript extraction and `Main → GalaxyGameEntry` data are already available, but
+they must not be treated as runtime parser observation.
+
 ## Current conclusion
 
 This startup pass adds a concrete data-root/config handoff before `Main → GalaxyGameEntry`. It
