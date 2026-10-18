@@ -63,6 +63,7 @@ struct Entity {
     float electric_time = 0.0f;     // remaining electric stun seconds
     float hatch_time = 0.0f;       // seconds until this egg hatches (0 = not an egg)
     bool unlocked = false;         // whether this entity has been unlocked as a part
+    float anim_duration = 0.0f;    // duration of current animation clip
 };
 
 class World {

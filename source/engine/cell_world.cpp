@@ -976,6 +976,7 @@ void World::tick(float dt) {
             e.size = 0.3f;
             e.anim = kAnimHatch;
             e.anim_time = 0.0f;
+            e.anim_duration = 0.5f;
             play_sound("hatch");
             spawn_particles(e.x, e.y, 8, 0xFF80FF80u);
         }
@@ -1015,14 +1016,17 @@ void World::tick(float dt) {
             pl->poison_time -= dt;
             const float poison_dps = curve_value("poison_count", 0.0f, 0.0f);
             m_hp -= poison_dps * dt;
-            if (m_hp <= 0.0f) {
-                m_hp = 0.0f;
-                m_player_alive = false;
-                m_respawn = kRespawnDelay;
-                pl->alive = false;
-                pl->anim = kAnimDeath;
-                pl->anim_time = 0.0f;
-            }
+                if (m_hp <= 0.0f) {
+                    m_hp = 0.0f;
+                    m_player_alive = false;
+                    m_respawn = kRespawnDelay;
+                    pl->alive = false;
+                    pl->anim = kAnimDeath;
+                    pl->anim_time = 0.0f;
+                    pl->anim_duration = 0.5f;
+                    play_sound("death");
+                    spawn_particles(pl->x, pl->y, 15, 0xFF4040FFu);
+                }
         }
         if (pl->electric_time > 0.0f) {
             pl->electric_time -= dt;
