@@ -685,6 +685,18 @@ when owner `+0x30` is present, and `0095AD30` writes child outer `+0x34 = owner 
 static binding chain is now resolved up to the parent owner's own `+0x30` source; runtime execution
 and the semantic Play Scenario handler remain separate claims.
 
+The direct-call inventory for `0095AD30` is also bounded:
+
+```text
+009627E5 → AddWindow path
+0095AE04 → internal child-list propagation
+0095B15A → generic window-list insertion
+```
+
+No separate GGE `DE/DF` caller was found. This is a scoped negative result: the top-level owner
+`+0x30` source is generic window hierarchy/resource binding rather than a recovered GGE-specific
+literal producer.
+
 Its later branches construct `kMsgButtonClick = 0x17` and `kMsgButtonSelect = 0x18`. The
 GGE-specific unresolved part is no longer generic message construction; it is the higher-level
 relationship between the Play Scenario control payload `0x070D7509` and the separate
