@@ -51,6 +51,8 @@ not a later proof that a frame was rendered. `7C4A10`:
 
 The broader coefficient layout and matrix order are documented in
 [startup-gge-viewer-projection.md](startup-gge-viewer-projection.md) and [gge-viewer.md](gge-viewer.md).
+The distinct intermediate blocks and final publication are bounded in
+[startup-gge-viewer-matrix-refresh.md](startup-gge-viewer-matrix-refresh.md).
 
 ## Relation to camera-manager update
 

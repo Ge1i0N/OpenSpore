@@ -478,6 +478,20 @@ def verify() -> None:
     call(0x7C4A45, 0x7C4370)
     call(0x7C4AE1, 0x45EF90)
     exact(0x7C4AF1, "8b f8 50 8d 44 24 38 b9 10 00 00 00 8d 74 24 38 50")
+    # Distinct viewer matrix intermediates and final +C0 publication.
+    call(0x7C4A24, 0x45E460)
+    exact(0x7C4A29, "8d 6b 40 b9 10 00 00 00 8d 74 24 30 8b fd f3 a5")
+    exact(0x7C4A3C, "8d b3 80 00 00 00 56 8b cb e8 26 f9 ff ff")
+    exact(0x7C4A4A, "f3 0f 10 83 90 00 00 00 8b 93 a0 00 00 00")
+    exact(0x7C4AC4, "56 f3 0f 11 44 24 24 8b 44 24 24 8d 4c 24 28 55 89 93 a8 00 00 00")
+    exact(0x7C4AE6, "8d 54 24 1c 8d 83 c0 00 00 00 52 8b f8 50")
+    call(0x7C4B04, 0x45E460)
+    exact(0x7C4B0C, "8d bb 00 01 00 00 b9 10 00 00 00 8d 74 24 24 f3 a5")
+    call(0x45E46D, 0x45F100)
+    call(0x45E495, 0x45E170)
+    exact(0x45E481, "0f 2e 05 b4 52 48 01 9f f6 c4 44 7a 19")
+    exact(0x45F2C0, "55 8b ec 83 ec 20 8b 45 10 8b 4d 0c f3 0f 10 40 30")
+    exact(0x45F304, "f3 0f 58 da f3 0f 58 d9 f3 0f 58 d8 f3 0f 11 5d e0")
 
     # Negative controls for prior timing/slot conflation.
 
