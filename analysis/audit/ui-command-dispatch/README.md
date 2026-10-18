@@ -89,6 +89,22 @@ The GGE attached interface is a concrete receiver in this family:
 GGE interface vtable 0x0147E030 +0x18 = DE99B0
 ```
 
+### Native `AddWinProc` list ownership
+
+The `IWindow::AddWinProc(+0x104)` body is recovered at `0x00961F10`. It inserts the supplied
+procedure into the window's native procedure list at `window +0x60`, ordering entries by the
+procedure's vtable `+0x10` priority. The GGE interface uses:
+
+```text
+0x0147E030 +0x10 = 0x00E310C0
+0x00E310C0 → priority 0
+```
+
+After insertion, `00961F10` sends the new procedure initialization records with message types
+`0x1000` and, when the window has an owner/context, `0x11`. This is a native attachment/list-order
+fact, not runtime click evidence; it explains why a false return from `DE99B0` can expose later
+procedures in the same window chain.
+
 Therefore `DE99B0` can be reached by the common window message path, but its bounded dispatch
 body only recognizes the component-activation message type and its internal branches; no
 `0x17`/`0x18` comparison is present there. `00959240` also retains fallback paths through the

@@ -631,6 +631,12 @@ The receiver path is also bounded one layer further:
   → WinProc vtable +0x18
 ```
 
+`IWindow::AddWinProc(+0x104)` is implemented at `00961F10`: it stores procedures in the native
+window list at `+0x60`, orders them by vtable `+0x10`, and sends attachment-time records (`0x1000`
+and conditionally `0x11`). The GGE interface priority method is `0x00E310C0` and returns `0`.
+Thus the shared GGE attachment is a real list member, while its unhandled message result still
+leaves the later list/owner route open.
+
 The attached GGE interface at `0x0147E030 +0x18` reaches `DE99B0`, but `DE99B0` has no bounded
 `0x17`/`0x18` branch. The generic dispatcher retains window `+0xC8`/owner fallback paths, so the
 missing `Play Scenario` producer must still be sought among those dynamic receivers or another
