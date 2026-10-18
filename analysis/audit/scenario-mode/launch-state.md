@@ -63,7 +63,23 @@ mode writes, so the final `EF11F0` request must not be replaced by its first tem
 
 Consequently **DFAD20's state-9 route is editing preparation, not evidence of the playable route**.
 Both routes select the same outer ScenarioMode state/tag; the record chooses the internal strategy.
-The producer of local state 10 for the requested Play Scenario action remains Unknown.
+The producer of local state 10 for the requested Play Scenario action remains Unknown. A bounded
+`.text` scan found no direct immediate write of `10` into the controller's local state field; an
+indirect/table/resource-mediated writer is therefore not promoted to `Absent`.
+
+## Direct table-index selection is generic, not the missing UI join
+
+The mode table manager has two selection endpoints:
+
+```text
+7D8CF0  find entry by tag at entry +0x04 → index
+7D8D40  validate index → 7D8670(index)
+7D8D20  find entry by name at entry +0x08 → index
+```
+
+`7D8670` publishes the mode-change pair around the selected table entry. These endpoints establish
+how a mode index is selected once a command reaches the manager. They do not show that object 74's
+ControlID is converted into a tag, a name, or local state 10.
 
 ## State script's `mode` verb and table-index setters
 

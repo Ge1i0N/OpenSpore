@@ -85,6 +85,9 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   selects play mode 2. This prevents mistaking DFAD20's edit route for playable launch.
   The [launch-state audit](launch-state.md) also resolves generic name/tag table setters without
   claiming original queued-command delivery or successful OnEnter.
+- A bounded scan found no direct immediate write of local state `10` in the inspected `.text`; the
+  playable writer remains Unknown rather than Absent because an indirect/table/resource-mediated
+  writer is still possible.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
