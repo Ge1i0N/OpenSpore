@@ -94,6 +94,17 @@ GGE attached vtable 0x0147E030 +0x18    = DE99B0
 ```
 
 If that outer lifecycle call returns false, owner `+0xE0` / `00960190` rolls back the child
+registration. This parent lifecycle callback is distinct from the GGE message receiver and is not
+itself a Play Scenario fallback.
+
+`00962780` invokes the resolved child's **outer** vtable `+0x18` during AddWindow:
+
+```text
+WinButton outer vtable 0x01441390 +0x18 = 0x0081D530
+GGE attached vtable 0x0147E030 +0x18    = DE99B0
+```
+
+If that outer lifecycle call returns false, owner `+0xE0` / `00960190` rolls back the child
 registration. This parent lifecycle callback is therefore distinct from the GGE message receiver
 and is not itself a Play Scenario fallback.
 

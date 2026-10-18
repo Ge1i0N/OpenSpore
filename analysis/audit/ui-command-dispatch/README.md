@@ -186,6 +186,18 @@ If the outer lifecycle call returns false, `00962780` invokes owner `+0xE0`; the
 body is `00960190`, which undoes/removes the child registration. This is layout mount/readiness
 lifecycle, not the fallback receiver for an unhandled `Play Scenario` message.
 
+The child callback used by `00962780` is the **outer window** vtable, not the separately attached
+GGE listener:
+
+```text
+WinButton outer vtable 0x01441390 +0x18 = 0x0081D530
+GGE attached vtable 0x0147E030 +0x18    = DE99B0
+```
+
+If the outer lifecycle call returns false, `00962780` invokes owner `+0xE0`; the corresponding GA
+body is `00960190`, which undoes/removes the child registration. This is layout mount/readiness
+lifecycle, not the fallback receiver for an unhandled `Play Scenario` message.
+
 Therefore `DE99B0` can be reached by the common window message path, but its bounded dispatch
 body only recognizes the component-activation message type and its internal branches; no
 `0x17`/`0x18` comparison is present there. `00959240` also retains fallback paths through the
