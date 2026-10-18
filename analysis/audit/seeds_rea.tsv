@@ -13,10 +13,19 @@
 #
 # The holes inside those bodies (see the note in seeds.tsv). Kind `code` is REA's
 # documented answer for 'code auto-analysis cannot reach'.
-0x007ab849	code	os_gap_007ab849
-0x007e71c5	code	os_gap_007e71c5
-0x0084a08d	code	os_gap_0084a08d
-0x0092c62d	code	os_gap_0092c62d
-0x0092c6ed	code	os_gap_0092c6ed
-0x011e109b	code	os_gap_011e109b
-0x011e10e7	code	os_gap_011e10e7
+0x007ab849	code
+0x007e71c5	code
+0x0084a08d	code
+0x0092c62d	code
+0x0092c6ed	code
+0x011e109b	code
+0x011e10e7	code
+#
+# Label seeds for the same gap addresses, so the carved code carries a name.
+0x007ab849	label	os_gap_007ab849
+0x007e71c5	label	os_gap_007e71c5
+0x0084a08d	label	os_gap_0084a08d
+0x0092c62d	label	os_gap_0092c62d
+0x0092c6ed	label	os_gap_0092c6ed
+0x011e109b	label	os_gap_011e109b
+0x011e10e7	label	os_gap_011e10e7

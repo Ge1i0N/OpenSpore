@@ -72,6 +72,9 @@ environment; PNG bytes can differ between operating systems/fonts. Generated tex
   required build/runtime dependency or permission to make new network requests.
 - [Archived root notebooks](../docs/archive/README.md) and [HISTORY](../HISTORY.md) preserve earlier
   conclusions. Do not execute an old "next step" just because it appears in a snapshot.
+- [Community resources](community-resources.md) catalogs externally hosted Spore Community Hub
+  preservation projects (creation/PNG decoders, Sporepedia archive, custom servers, modding) as
+  optional *sources of game-related data*. External and unvetted; not a build or runtime dependency.
 
 ## Evidence contract
 

@@ -40,6 +40,11 @@ point. [Full historical notebook](docs/archive/MEMORY-2026-10-15.md) is retained
 Deep evidence: [binary SPUI](analysis/spui-binary.md), [drawables](analysis/spui-drawables.md),
 [locale](analysis/text-locale.md), [formats](analysis/formats.md), [current VERIFY](VERIFY.md).
 
+Community data sources (optional, unvetted): [community resources](analysis/community-resources.md) —
+Spore Community Hub preservation projects: creation/PNG decoders (.NET/Python/Rust), Sporepedia
+Archive + Server IDs, SporeServer netcode, modding tools (SMFX, ModAPI). Use as input only, never
+as GA authority and never on the build/runtime path.
+
 ## Do not repeat these mistakes
 
 1. **A plausible log line is not a consequence.** `queued goto` once never executed. Verify the
