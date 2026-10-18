@@ -79,6 +79,8 @@ DF9740 state-2 admission
   → later DF6010 viewer projection
 ```
 
-This dispatcher does not create terrain, actors, a stage world or ScenarioMode. A successful
+The later projection continuation is detailed in
+[startup-gge-presentation-dispatch.md](startup-gge-presentation-dispatch.md). This dispatcher
+does not create terrain, actors, a stage world or ScenarioMode. A successful
 local state write or UI flag call is not a readiness observation. Object-74 `Play Scenario`,
 native mounts, camera/viewer availability and playable gameplay remain Unknown.
