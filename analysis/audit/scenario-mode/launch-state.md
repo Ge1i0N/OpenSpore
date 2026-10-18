@@ -89,7 +89,8 @@ The IDs occur in a packed adjacent controller/state data region around `.data 0x
 with neighboring event identities such as `0x05933FE0..E3`, `0x073BBA58` and `0x074D0932`. The
 selected binary has no direct xref to the absolute data address in the provider's reference result;
 the table is therefore classified as internal state/event data, not a recovered UI layout resource.
-No direct `.text` producer for the state-10 IDs was recovered in this bounded pass; the handler
+The IDs are not producer immediates in `.text`; DFE430 recognizes the pair through the bounded
+arithmetic branch (`uStack_c + 0xFA6AEEFD < 2`), giving exact values `0x05951103/04`. The handler
 payload remains a dynamic/component context. This does not establish that the IDs are absent from
 the shipped UI layout.
 
