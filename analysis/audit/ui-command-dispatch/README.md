@@ -266,6 +266,31 @@ Play Scenario WinButton
 This is static route evidence only. It removes the assumption that `DE99B0` must consume every
 message attached by `DE5900`; the later producer/owner callback remains Unknown.
 
+### 👀 Exact ButtonClick consumer classified outside GGE
+
+The selected GA `.text` contains a concrete `kMsgButtonClick = 0x17` consumer at `0x00EA2650`.
+Its bounded behavior is:
+
+```text
+message.type == 0x17
+  → payload/component ID 0x050229B0 or 0x050229B8
+  → lookup/control 0x050232C0
+  → UI visibility/media-thumbnail operations
+```
+
+The associated vtable neighborhood at `0x014871E4` is adjacent to the shipped name string
+`CityMusicThumbnail`. This identifies a generic media/UI button procedure, not a GGE handler:
+
+```text
+0x070D7509 Play Scenario: absent from this branch
+0x070D74E7 Galactic Adventures: absent from this branch
+0x080D7DE1 ScenarioGAButtonClicked: absent from this branch
+```
+
+Other exact `0x17`/`0x18` consumers in the bounded scan belong to separate simulator/gameplay
+paths. Thus generic Button dispatch is not a sufficient semantic join: the Play Scenario producer
+still requires a GGE-specific consumer or dynamic route.
+
 ### Direct-call inventory for the inspected seam
 
 The local `.text` scan for direct `E8 rel32` calls found:
