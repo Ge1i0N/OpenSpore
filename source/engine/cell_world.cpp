@@ -1053,6 +1053,7 @@ void World::tick(float dt) {
 
     for (const Entity& d : drops) drop_meat(d);
 
+    // SEED: kEvolveSize is a seed value. The real evolve threshold from the binary is not recovered.
     if (pl->alive && pl->size >= kEvolveSize) m_evolved = true;
     update_diet();
 
