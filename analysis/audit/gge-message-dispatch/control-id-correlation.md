@@ -78,6 +78,34 @@ object 138 (parent 139)
 This is shipped-data structure only. It does not identify the native message or listener that may
 connect the sibling `Play Scenario` control to the nested state-feedback control.
 
+## 🔥 Nuclear finding: object 87 is `Galactic Adventures`
+
+The locale-table caption reference on EP1 object 87 resolves against the explicitly shipped locale
+corpus as:
+
+```text
+table = 0x3DADE1BB
+key   = 0x074BDFBA
+text  = Galactic Adventures
+```
+
+The two relevant controls are therefore semantically distinct:
+
+```text
+object 74:
+  caption   = Play Scenario
+  ControlID = 0x070D7509
+
+object 87:
+  caption   = Galactic Adventures
+  ControlID = 0x070D74E7
+```
+
+This is a major correction: the `DE99B0` branch for `0x070D74E7` and its
+`ScenarioGAButtonClicked` write are the Galactic Adventures control/state route, not proof that
+the `Play Scenario` captioned object 74 directly emits that ID. A parent/controller route between
+them remains possible but is not statically recovered.
+
 The `0x036C4A10` match is the strongest current UI→state corroboration: the shipped `Dev` control
 and the native handler branch share the exact value, and the native branch calls the SDK-compatible
 StateManager `+0x28(1)` slot. The shipped `SporeAppStates` table assigns explicit id 1 to

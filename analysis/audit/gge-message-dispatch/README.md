@@ -573,19 +573,19 @@ of the chain and final ScenarioMode entry.
 
 ## Component-activation producer boundary
 
-The selected `.text` contains many consumers that validate UTFWin message type `0x287259F6`, including
-the GGE `DE99B0` listener. A bounded raw-form scan found:
+The generic GA activable-window producer is recovered at `0x009640B0`:
 
 ```text
-push imm32 0x287259F6: 0
-obvious mov [object+offset], 0x287259F6 constructor writes: 0
+outer WinButton +0x84 (CommandID)
+  → fallback outer +0x80 (ControlID)
+  → message.type = 0x287259F6
+  → IWindow::SendMsg(+0x114)
 ```
 
-This is not a whole-binary semantic absence proof. It does show that the component-activation
-message is not constructed by a simple local literal in the inspected consumer paths; the producer
-likely uses the generic UTFWin message path, registry or indirect UI callback. `DE99B0` is now
-identified as a component-activation consumer, while the exact `ControlID 0x070D7509` → activation
-producer remains Unknown.
+Its later branches construct `kMsgButtonClick = 0x17` and `kMsgButtonSelect = 0x18`. The
+GGE-specific unresolved part is no longer generic message construction; it is the higher-level
+relationship between the Play Scenario control payload `0x070D7509` and the separate
+`Galactic Adventures` control/event `0x070D74E7`.
 
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
@@ -600,10 +600,10 @@ DE99B0 listener body
   DE9D0C: controller +0x108/+0x104 = 13
 ```
 
-This strengthens the existing classification of `0x070D74E7` as a listener/event state value. It
-also makes the separation from `0x070D7509` sharper: the latter has only the two setup-table
-references in `DE48C0` and `DE5900`, while the former is actively branched inside the `DE99B0`
-listener. No producer for the `0x070D7509` control has been found.
+This strengthens the semantic separation: `0x070D74E7` is the shipped `Galactic Adventures`
+control identity actively branched inside `DE99B0`, while `0x070D7509` is the separate captioned
+`Play Scenario` control found in `DE48C0`/`DE5900` setup tables. No native parent/controller route
+from the latter to the former has been found.
 
 ## SDK cross-check
 

@@ -44,6 +44,11 @@ it receives the same native GGE listener attachment as `0x070D74E7`. This proves
 listener registration edge, but not the later event payload conversion. The listener's recognized
 component ID remains `0x070D74E7`, distinct from the Play Scenario ControlID `0x070D7509`.
 
+The locale reference on EP1 object 87 resolves to **Galactic Adventures** (`table 0x3DADE1BB`,
+`key 0x074BDFBA`), while object 74 has the inline caption **Play Scenario**. The state-13 UI value
+is therefore semantically the Galactic Adventures control/state identity, not a hidden generic
+payload name for object 74. A parent/controller route between the two controls remains Unknown.
+
 ### Direct caller inventory
 
 The local `.text` scan for direct `E8 rel32` calls found:
