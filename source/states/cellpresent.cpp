@@ -1,5 +1,6 @@
 #include "states/cellpresent.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -476,13 +477,13 @@ bool present_cell_world() {
     size_t active_particles = 0;
     for (const cell::Particle& p : world.particles()) if (p.life > 0.0f) ++active_particles;
     if (active_particles > 0) {
-        ov.text_fmt(16.f, static_cast<float>(h) - 72.f, 0xFF80C0FFu,
+        ov.text_fmt(16.f, static_cast<float>(h) - 140.f, 0xFF80C0FFu,
                     "particles: %zu", active_particles);
     }
 
     // Sound UI: show last played sound.
     if (!world.last_sound().empty()) {
-        ov.text_fmt(16.f, static_cast<float>(h) - 88.f, 0xFFFFC080u,
+        ov.text_fmt(16.f, static_cast<float>(h) - 156.f, 0xFFFFC080u,
                     "sound: %s", world.last_sound().c_str());
     }
 
@@ -496,7 +497,7 @@ bool present_cell_world() {
                 break;
             }
         }
-        ov.text_fmt(16.f, static_cast<float>(h) - 104.f, 0xFF80C0FFu,
+        ov.text_fmt(16.f, static_cast<float>(h) - 172.f, 0xFF80C0FFu,
                     "clip: %s", clip);
     }
 
@@ -574,6 +575,63 @@ bool present_cell_world() {
                     "READY TO EVOLVE  -  click to enter the Creature stage");
     }
 
+    // Cell editor: show available parts when evolved.
+    if (world.evolved()) {
+        const auto parts = world.parts_list();
+        if (!parts.empty()) {
+            const float panel_w = 280.f;
+            const float panel_h = 30.f + parts.size() * 22.f + 40.f;
+            const float panel_x = cx - panel_w / 2.f;
+            const float panel_y = cy + 60.f;
+            ov.rect(panel_x, panel_y, panel_w, panel_h, 0xD0102030u);
+            ov.ring(panel_x, panel_y, panel_w, panel_h, 2u, 0xFF50A060u);
+            ov.text_fmt(panel_x + 16.f, panel_y + 10.f, 0xFFE8FFE8u, "CELL EDITOR");
+            ov.text_fmt(panel_x + 16.f, panel_y + 30.f, 0xFF80C0FFu, "click a part to select");
+            int y_off = 54;
+            for (const auto& part : parts) {
+                const bool selected = std::find(world.selected_parts().begin(),
+                    world.selected_parts().end(), part.name) != world.selected_parts().end();
+                u32 col = part.unlocked ? (selected ? 0xFF80FF80u : 0xFFC0D0E0u) : 0xFF606060u;
+                const char* mark = part.unlocked ? (selected ? "[x]" : "[ ]") : "[-]";
+                ov.text_fmt(panel_x + 16.f, panel_y + (float)y_off, col,
+                            "%s %s (%d DNA)", mark, part.display.c_str(), part.cost);
+                y_off += 22;
+            }
+            ov.text_fmt(panel_x + 16.f, panel_y + (float)y_off + 8.f, 0xFFE8FFE8u,
+                        "click a part again to deselect");
+        }
+    }
+
+    // Cell editor click handling: toggle part selection when clicking on a part row.
+    if (world.evolved() && input::clicked()) {
+        const auto parts = world.parts_list();
+        if (!parts.empty()) {
+            const float panel_w = 280.f;
+            const float panel_h = 30.f + parts.size() * 22.f + 40.f;
+            const float panel_x = cx - panel_w / 2.f;
+            const float panel_y = cy + 60.f;
+            const float click_x = (static_cast<float>(input::x()) - cx) / ppu + camx;
+            const float click_y = (static_cast<float>(input::y()) - cy) / ppu + camy;
+            const float sx_click = sx(click_x);
+            const float sy_click = sy(click_y);
+            if (sx_click >= panel_x && sx_click <= panel_x + panel_w &&
+                sy_click >= panel_y && sy_click <= panel_y + panel_h) {
+                int y_off = 54;
+                for (const auto& part : parts) {
+                    const float row_y = panel_y + (float)y_off;
+                    if (sy_click >= row_y && sy_click <= row_y + 22.f) {
+                        if (part.unlocked) {
+                            world.toggle_part(part.name);
+                            world.play_sound("select");
+                        }
+                        break;
+                    }
+                    y_off += 22;
+                }
+            }
+        }
+    }
+
     // Cell editor UI: show selected part.
     if (!world.selected_part().empty()) {
         ov.text_fmt(16.f, static_cast<float>(h) - 40.f, 0xFF80FF80u,
@@ -583,7 +641,7 @@ bool present_cell_world() {
     // Stage progression UI: show current level, next, and evolve progress.
     std::string next = world.next_level(world.level());
     if (!next.empty()) {
-        ov.text_fmt(16.f, static_cast<float>(h) - 104.f, 0xFF80C0FFu,
+        ov.text_fmt(16.f, static_cast<float>(h) - 188.f, 0xFF80C0FFu,
                     "NEXT: %s", next.c_str());
     }
     if (world.evolved()) {
@@ -599,7 +657,7 @@ bool present_cell_world() {
         if (nm && strncmp(nm, "cell_unlock_", 12) == 0) ++loot_count;
     }
     if (loot_count > 0) {
-        ov.text_fmt(16.f, static_cast<float>(h) - 56.f, 0xFFFFC080u,
+        ov.text_fmt(16.f, static_cast<float>(h) - 204.f, 0xFFFFC080u,
                     "LOOT: %d pickups", loot_count);
         // Show first few loot names.
         int shown = 0;
@@ -607,7 +665,7 @@ bool present_cell_world() {
             if (!e.alive || e.role != cell::Role::Food) continue;
             const char* nm = naming::instance_name(e.archetype);
             if (!nm || strncmp(nm, "cell_unlock_", 12) != 0) continue;
-            ov.text_fmt(16.f, static_cast<float>(h) - 72.f - static_cast<float>(shown) * 16.f,
+            ov.text_fmt(16.f, static_cast<float>(h) - 220.f - static_cast<float>(shown) * 16.f,
                         0xFFFFC080u, "  %s", nm);
             if (++shown >= 3) break;
         }

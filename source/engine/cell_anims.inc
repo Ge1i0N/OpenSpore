@@ -2,7 +2,7 @@
 // Maps ANIM_EVENT names to animation clip names, movement styles and speed flags.
 // Do not edit manually - regenerate from the game data.
 #pragma once
-
+#include <cstring>
 namespace os::cell {
 
 struct AnimationDef {
@@ -89,5 +89,13 @@ inline constexpr AnimationDef kCellAnims[] = {
 };
 
 inline constexpr size_t kCellAnimCount = sizeof(kCellAnims) / sizeof(kCellAnims[0]);
+
+inline const AnimationDef* find_anim(const char* event) {
+    if (!event) return nullptr;
+    for (const auto& a : kCellAnims) {
+        if (a.event[0] && strcmp(a.event, event) == 0) return &a;
+    }
+    return nullptr;
+}
 
 }  // namespace os::cell

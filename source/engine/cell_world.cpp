@@ -256,6 +256,51 @@ bool World::select_part(const std::string& part_name) {
     return false;
 }
 
+std::vector<World::PartInfo> World::parts_list() const {
+    static const char* kParts[] = {
+        "mandible", "spike", "filter", "proboscis", "flagellum",
+        "stinger", "electrocyte", "poison"
+    };
+    static const int kCosts[] = {10, 15, 10, 20, 15, 20, 25, 25};
+    std::vector<PartInfo> parts;
+    for (size_t i = 0; i < sizeof(kParts) / sizeof(kParts[0]); ++i) {
+        PartInfo info;
+        info.name = kParts[i];
+        info.display = kParts[i];
+        info.cost = kCosts[i];
+        const std::string unlock_name = "cell_unlock_" + std::string(kParts[i]);
+        const u32 unlock_id = fnv1_lower(unlock_name.c_str());
+        info.unlocked = false;
+        for (const Archetype& a : m_data.archetypes) {
+            if (a.id == unlock_id) { info.unlocked = true; break; }
+        }
+        parts.push_back(info);
+    }
+    return parts;
+}
+
+bool World::toggle_part(const std::string& part_name) {
+    const std::string unlock_name = "cell_unlock_" + part_name;
+    const u32 unlock_id = fnv1_lower(unlock_name.c_str());
+    bool unlocked = false;
+    for (const Archetype& a : m_data.archetypes) {
+        if (a.id == unlock_id) { unlocked = true; break; }
+    }
+    if (!unlocked) return false;
+    for (auto it = m_selected_parts.begin(); it != m_selected_parts.end(); ++it) {
+        if (*it == part_name) {
+            m_selected_parts.erase(it);
+            return true;
+        }
+    }
+    m_selected_parts.push_back(part_name);
+    return true;
+}
+
+void World::clear_selected_parts() {
+    m_selected_parts.clear();
+}
+
 bool World::write_save(const std::string& path, std::string& error) const {
     if (path.empty()) {
         error = "empty save path";

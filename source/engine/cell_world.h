@@ -83,6 +83,20 @@ public:
     bool select_part(const std::string& part_name);
     // Get the currently selected part.
     const std::string& selected_part() const { return m_selected_part; }
+    // List all available parts (unlocked or not) with their names and costs.
+    struct PartInfo {
+        std::string name;
+        std::string display;
+        int cost;
+        bool unlocked;
+    };
+    std::vector<PartInfo> parts_list() const;
+    // Get the list of selected parts.
+    const std::vector<std::string>& selected_parts() const { return m_selected_parts; }
+    // Toggle a part selection (add/remove from selected_parts).
+    bool toggle_part(const std::string& part_name);
+    // Clear all selected parts.
+    void clear_selected_parts();
     // Play a procedural sound effect (simple tone).
     void play_sound(const char* name);
     // Get the name of the last played sound (for UI display).
@@ -211,6 +225,7 @@ private:
     bool m_evolved = false;
     int m_evo_points = 0;
     std::string m_selected_part;
+    std::vector<std::string> m_selected_parts;
     std::vector<Particle> m_particles;
     std::string m_last_sound;
     float m_respawn = 0.0f;
