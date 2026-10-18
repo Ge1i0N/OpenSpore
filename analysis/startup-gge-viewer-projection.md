@@ -45,7 +45,8 @@ runtime proof that a window or renderer supplied valid dimensions.
 
 The arithmetic in `DE3C20` adds the native `1.0` term, multiplies by the normalized coordinates
 and writes the result through the caller's two output pointers. `DF6010` passes those outputs
-to its vtable `+0x64` consumer, resolved separately as `DF6110`.
+to its vtable `+0x64` consumer, resolved separately as `DF6110`. The projection-to-placement
+boundary is documented in [startup-gge-projection-placement.md](startup-gge-projection-placement.md).
 
 ## Separate ICamera handoff
 

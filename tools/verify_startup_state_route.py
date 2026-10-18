@@ -492,6 +492,21 @@ def verify() -> None:
     exact(0x45E481, "0f 2e 05 b4 52 48 01 9f f6 c4 44 7a 19")
     exact(0x45F2C0, "55 8b ec 83 ec 20 8b 45 10 8b 4d 0c f3 0f 10 40 30")
     exact(0x45F304, "f3 0f 58 da f3 0f 58 d9 f3 0f 58 d8 f3 0f 11 5d e0")
+    # Projection output has no local clip/cull; layout placement is the later boundary.
+    exact(0x7C433E, "f3 0f 5e c4 0f 28 e0 f3 0f 59 e1 0f 28 c8 f3 0f 59 ca")
+    exact(0x7C4354, "f3 0f 11 20 f3 0f 11 48 04 f3 0f 11 40 08 c2 08 00")
+    exact(0xDE3C4C, "f3 0f 10 05 40 37 45 01 f3 0f 10 54 24 18 f3 0f 5c 54 24 10")
+    exact(0xDE3C6E, "f3 0f 58 c8 f3 0f 59 d1 f3 0f 10 0d 38 be 45 01")
+    exact(0xDE3C82, "f3 0f 11 11 f3 0f 10 54 24 08 f3 0f 58 d0 f3 0f 59 d1")
+    exact(0xDE3CA0, "f3 0f 5c c2 f3 0f 59 c1 f3 0f 11 02 83 c4 20 c3")
+    exact(0xDF6038, "8b 7e 08 8d 4c 24 14 51 8d 54 24 14 03 fd 52 8d 87 80 00 00 00")
+    exact(0xDF6047, "8d 87 80 00 00 00 50 e8 cd db fe ff d9 44 24 20 8b 16 d9 5c 24 08")
+    exact(0xDF6086, "43 03 ca 81 c5 bc 00 00 00 3b d9 72 a5")
+    exact(0xDF6119, "8b 8f b8 00 00 00 85 c9 0f 84 99 01 00 00")
+    exact(0xDF6141, "50 e8 49 fe a0 ff 8b 16 8b 42 38 83 c4 04 8b ce ff d0")
+    exact(0xDF61EB, "0f 84 90 00 00 00 f3 0f 10 44 24 30 f3 0f 10 4c 24 2c")
+    exact(0xDF6281, "d9 44 24 34 d9 44 24 48 dc e9 d9 c9 d9 e1 d9 05 1c 53 48 01")
+    exact(0xDF62D3, "8b 16 8b 42 64 83 ec 08 d9 5c 24 04 8b ce d9 1c 24 ff d0")
 
     # Negative controls for prior timing/slot conflation.
 
