@@ -29,14 +29,15 @@ mounted successfully.
 
 ## Shipped option/root strings
 
-The nearby UTF-16 data contains the following concrete strings and option fragments:
+The nearby mixed ASCII/UTF-16 data contains the following concrete strings and option fragments:
 
 ```text
 Spore(TM) Galactic Adventures
 ../Data/
 ../EP1Data/       ep1
 ../BP1Data/       bp1
-include "localCheats.txt"
+sinclude "   (ASCII prefix; localCheats.txt is a separate UTF-16 string)
+localCheats.txt
 isHost
 clientIP
 hostIP
@@ -58,25 +59,28 @@ The relevant ordering is:
 AppRun / AppMode setup
   → F48054
       → F47C20 data/config-root setup
-  → AppMode virtual +0x1C load with instance 0xD6396913
+  → state-manager virtual +0x1C = 7E2370, instance 0xD6396913
       → trigger resource SporeAppStates
   → timing/config values and state dispatch
   → main loop
 ```
 
-The `SporeAppStates` call at `F48505` supplies instance/group identity `0xD6396913`; this audit
-does not claim that `F47C20` parses the trigger text. The trigger-resource query/parser boundary
-remains the separate item documented in [content-loading.md](content-loading.md).
+The `SporeAppStates` push at `F48505` supplies **instance** `0xD6396913`, not a group ID;
+the actual indirect call is at `F4850A`. Group is zero. `F47C20` does not parse the trigger text.
+The concrete consumer is now traced in [startup-state-registration.md](startup-state-registration.md).
 
 ## State-list load call and post-load handoff
 
 At `F48505`, the object returned by startup getter `67DCE0` is called through virtual slot
-`+0x1C` with instance/group identity `0xD6396913`. This is the concrete `SporeAppStates` load
-call. The surrounding sequence then:
+`+0x1C = 7E2370` with instance `0xD6396913`. This is the concrete `SporeAppStates` load
+path; it is a **different object/vtable from AppMode**. The surrounding sequence is:
 
 ```text
-AppMode/state host +0x1C(0xD6396913)
-  → 6A17E0(..., 0x2A)
+state manager +0x1C(0xD6396913, 0, launchArgs, 1)
+  → 847780(parser, resourceKey)
+  → on success: initial-state name lookup and switch request
+return to run
+  → 6A17E0(0x2A, 0)
   → 571E60()
   → 93A3E0() clock/timing conversions
   → continue AppMode startup dispatch
@@ -88,11 +92,15 @@ This is the generic trigger/resource load boundary used by startup. `930C20` is 
 copy/path helper used while building startup descriptors; it is not evidence of parsing
 `SporeAppStates` into state records.
 
-The remaining unresolved startup consumer is therefore narrower:
+The manager constructor, parser registration, resource-load/parser invocation, state-record
+commit and initial-state selection are now linked statically in
+[startup-state-registration.md](startup-state-registration.md). The full lexer/line-dispatch
+implementation and downstream execution of every state action are not claimed complete.
 
-- the virtual `+0x1C` implementation/consumer after the resource load;
-- the trigger text parser and its state/mode registration writes;
-- the exact meaning of post-load `6A17E0(..., 0x2A)` and `571E60` for AppMode timing/config.
+`571E60` is a `QueryPerformanceCounter` wrapper (IAT `013CC2B8`) returning the counter in
+`EDX:EAX`. `93A3E0` returns the two words at `0154EAE8/0154EAEC`; it does not itself read the
+clock. `6A17E0` stores an indexed byte-valued flag in a dword array (`+0x38/+0x3C`), extending it
+on demand. The meaning of index `0x2A` remains Unknown; none of these is a state registrar.
 
 The shipped ArgScript extraction and `Main → GalaxyGameEntry` data are already available, but
 they must not be treated as runtime parser observation.
@@ -111,16 +119,18 @@ already documented initialization slots are `+0x14 = 0x7E6850`, `+0x18 = 0x7E93D
 `+0x1C = 0x7E7430` and `+0x20 = 0x7EAAE0`. Nearby slots include:
 
 ```text
-+0x24 = 0x7E6520   ++0x28 = 0x7E9520
++0x24 = 0x7E6520   +0x28 = 0x7E9520
 +0x2C..+0x3C = 0x7E5F20..0x7E5F70   (counters/timing fields)
-+0x40 = 0x7E6680   ++0x44 = 0x7E66E0
-+0x48 = 0xE310C0   ++0x5C = 0x7E9DD0
++0x40 = 0x7E6680   +0x44 = 0x7E66E0
++0x48 = 0xE310C0   +0x5C = 0x7E9DD0
 ```
 
 The `+0x24` slot performs AppMode teardown/cleanup and emits the hashed app events
-`0x00F62ADD`, `0xAE1CFE73`, `0x0255ABF5` and `0x0212D3E7`. The `+0x48` slot is a small boolean
-test over AppMode `+0x68`, and `+0x5C` is the AppMode dispose/cleanup entry. These slots are
-startup lifecycle infrastructure, not alternate Scenario launch producers.
+`0x00F62ADD`, `0xAE1CFE73`, `0x0255ABF5` and `0x0212D3E7`. **Correction:** `+0x48 = E310C0`
+is only `xor eax,eax; ret` (constant zero); the field test previously attributed to it starts at
+the different function `E310D0`. The earlier dispose label for `+0x5C` is withdrawn pending a
+focused body audit. The table entries alone do not establish those methods' semantics or exclude
+all downstream Scenario effects.
 
 `F47C20` is called at `F48054`; `F48054` continues with the AppMode vtable operations and later
 the `F48505` trigger load. This closes the ordering question without claiming that the trigger

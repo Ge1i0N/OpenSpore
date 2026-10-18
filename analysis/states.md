@@ -75,6 +75,10 @@ goes to `GalaxyGameEntry`. `-preload` enters the empty `Preload`. There is a com
 `# gotoState DevLauncher` in `Main` — the dev launcher is the alternate boot path, and `LaunchScreen`
 exists only as "backwards compat. for sniffs" forwarding to `DevLauncher`.
 
+**Native startup nuance:** the later audit of `7E2370` shows that `-preload` requests `Preload`
+but then continues to the normal Demo / explicit `-state` / Main selection; it is not an exclusive
+early-return branch. See [startup-state-registration.md](startup-state-registration.md).
+
 **The five game stages**, each a real `mode`, each with `From*` forwarding states:
 
 | stage state | mode | entered from |
@@ -138,6 +142,11 @@ can look up in the package indexes. That is a much better door into the layout f
 field order from bytes.
 
 ## The `-id` semantics, SETTLED BY DISASSEMBLY (it changes how a state is addressed)
+
+**Later native-owner clarification:** [startup-state-registration.md](startup-state-registration.md)
+links the callback's `[handler+0x30]` to the manager. Thus `+0x28` in the open callback below is
+the manager's staged identity, not a separately allocated state's field. The close callback
+commits a `0x50`-byte record and the name/ID indexes. The explicit-ID conclusion is unchanged.
 
 The state-add method is `0x007e3fb0`, and its branch structure answers the question our engine had to
 get right before `-state:<Name>` could work at all:
