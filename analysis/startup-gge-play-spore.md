@@ -100,6 +100,9 @@ Intro post-title gate
   → later DF6010 record projection
 ```
 
+The exact source counts, saved-prefix/candidate-suffix placement, per-record UI-data creation and
+marker/effect pass are documented in [startup-gge-catalogue-rebuild.md](startup-gge-catalogue-rebuild.md).
+
 Still Unknown: the runtime conditions that make controller `+0x108 == 2`, successful internal
 handler entry, MoviePlayer/DBCheck completion, live game records, viewer/camera production,
 native UI attachment, Scenario launch delivery and playable gameplay tick.
