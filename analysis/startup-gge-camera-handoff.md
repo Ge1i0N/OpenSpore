@@ -93,7 +93,8 @@ slot `0` with the update arguments. Later it:
 4. passes the resulting transform to `7C4DD0`.
 
 The mode tables and transform arithmetic are documented in
-[gge-camera-pose.md](gge-camera-pose.md). `DDFB90` therefore produces/forwards pose state; it
+[gge-camera-pose.md](gge-camera-pose.md). The Transform-to-viewer conversion is bounded in
+[startup-gge-viewer-transform.md](startup-gge-viewer-transform.md). `DDFB90` therefore produces/forwards pose state; it
 does not call `SetActiveCameraByID` and does not itself establish that the manager's active
 camera update ran.
 

@@ -465,6 +465,19 @@ def verify() -> None:
     exact(0xDDFB9B, "8b 0d c8 10 6a 01 57 8b 7c 24 48 85 c9 74 08")
     exact(0xDDFBA6, "85 c9 74 08 8b 01 8b 10 53 57 ff d2")
     call(0xDDFDC0, 0x7C4DD0)
+    # Transform-to-viewer mutation and projection refresh remain separate from camera selection.
+    exact(0x7C4DD0, "56 8b f1 8b 4c 24 08 56 e8 13 46 ef ff 56 8b ce e8 2b ff ff ff")
+    call(0x7C4DD8, 0x6B93F0)
+    call(0x7C4DE0, 0x7C4D10)
+    exact(0x6B93F0, "f3 0f 10 41 10 f3 0f 10 49 14 f3 0f 10 51 18 f3 0f 10 59 1c")
+    exact(0x6B9408, "f3 0f 59 c8 f3 0f 11 08 f3 0f 59 d0 f3 0f 11 50 04")
+    exact(0x7C4D24, "b9 10 00 00 00 f3 a5 f3 0f 10 25 70 e9 4c 01")
+    exact(0x7C4D9D, "8b 82 70 01 00 00 0f 28 e3 0f 14 dd 0f 29 00")
+    call(0x7C4DBE, 0x7C4A10)
+    exact(0x7C4A17, "8d 44 24 10 8b d9 50 8d 4c 24 28 53 51 e8 37 9a c9 ff")
+    call(0x7C4A45, 0x7C4370)
+    call(0x7C4AE1, 0x45EF90)
+    exact(0x7C4AF1, "8b f8 50 8d 44 24 38 b9 10 00 00 00 8d 74 24 38 50")
 
     # Negative controls for prior timing/slot conflation.
 
