@@ -55,6 +55,11 @@ UTFWin `kMsgComponentActivated` and recognizes `0x070D74E7`, while the attached 
 is `0x070D7509`. Static attachment does not by itself establish the click-to-payload conversion or
 runtime execution.
 
+The generic WinProc dispatcher also continues after an unhandled result. Since the bounded `DE99B0`
+body has no `0x17`/`0x18` or direct `0x070D7509` branch, attachment of `DE99B0` to object 74 must
+not be interpreted as proof that it consumes `Play Scenario`; a later procedure or owner callback
+remains possible and unresolved.
+
 The generic WinButton payload rule is now bounded separately from this object correlation:
 
 ```text

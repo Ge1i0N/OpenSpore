@@ -96,6 +96,24 @@ window's `+0xC8` callback/owner chain. The unresolved Play Scenario route is con
 to that parent/owner or another attached WinProc path, rather than being attributed to the known
 `DE99B0` component-ID branch.
 
+### `DE99B0` is a fall-through receiver for Button/Play Scenario payloads
+
+The bounded `DE99B0` switch returns unhandled for message types/component IDs outside its explicit
+branches. In particular, no `0x17`/`0x18` branch and no direct `0x070D7509` branch is present.
+The `00958880` WinProc walk tests that result and continues to the next procedure when it is not
+handled:
+
+```text
+Play Scenario WinButton
+  → generic component/button message
+  → attached GGE DE99B0
+  → handled = false for bounded click/Play Scenario cases
+  → next WinProc or window +0xC8/owner fallback
+```
+
+This is static route evidence only. It removes the assumption that `DE99B0` must consume every
+message attached by `DE5900`; the later producer/owner callback remains Unknown.
+
 ### Direct-call inventory for the inspected seam
 
 The local `.text` scan for direct `E8 rel32` calls found:

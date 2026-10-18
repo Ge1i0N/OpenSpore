@@ -636,6 +636,19 @@ The attached GGE interface at `0x0147E030 +0x18` reaches `DE99B0`, but `DE99B0` 
 missing `Play Scenario` producer must still be sought among those dynamic receivers or another
 attached procedure. This does not establish runtime delivery or a ScenarioMode post.
 
+The return behavior narrows the candidate boundary: `DE99B0` falls through with `handled = false`
+for unrecognized message types/component IDs, including the bounded Play Scenario identities. The
+`00958880` WinProc walk continues after such a result, so the safe native route model is:
+
+```text
+DE99B0
+  → unhandled Button/Play Scenario message
+  → next attached WinProc
+  → window +0xC8 or owner fallback
+```
+
+No later handler has been assigned a Play Scenario meaning; `Unknown` is retained.
+
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
 The apparent continuation at `DE9AD0` is not a separate message handler: the preceding `int3` run
