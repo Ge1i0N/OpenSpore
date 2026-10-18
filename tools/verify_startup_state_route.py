@@ -438,6 +438,16 @@ def verify() -> None:
     exact(0xDE3C2C, "8b 42 58 ff d0")
     call(0xDE3C3D, 0x7C4250)
     call(0xDE3C47, 0x805F90)
+    # cViewer projection arithmetic and viewport extraction are separate from ICamera update.
+    exact(0xDE3C23, "e8 a8 a0 89 ff 8b 10 8b c8 8b 42 58 ff d0")
+    call(0xDE3C3D, 0x7C4250)
+    call(0xDE3C47, 0x805F90)
+    exact(0x7C4250, "8b 44 24 08 f3 0f 10 68 04 f3 0f 10 70 08 f3 0f 10 00")
+    exact(0x7C433E, "f3 0f 5e c4 0f 28 e0 f3 0f 59 e1")
+    exact(0x805F90, "e8 cb 6a e7 ff 8b 10 8b c8 8b 42 04 ff d0")
+    exact(0x805FB4, "d9 00 8b 4c 24 04 d9 19 d9 40 04 d9 59 04")
+    slot(0x1412608, 0x50, 0x967D90)
+    exact(0x967D90, "8b 41 2c c3")
 
     # Negative controls for prior timing/slot conflation.
 

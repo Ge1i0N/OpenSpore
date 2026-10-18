@@ -55,7 +55,8 @@ DF9740: controller +0x108 == 2 gate
 
 `DF6010` loops over `0xBC` records, calls `DE3C20` using `record+0x80`, and dispatches the
 projected result through vtable slot `+0x64` (`DF6110`). `DE3C20` obtains a viewer from
-GameModeManager `+0x58`; `DF6110` separately uses `record+0xB8` per-record UI data and the
+GameModeManager `+0x58`; the arithmetic and separate ICamera path are detailed in
+[startup-gge-viewer-projection.md](startup-gge-viewer-projection.md). `DF6110` separately uses `record+0xB8` per-record UI data and the
 layout root bounds. These are geometry/presentation consumers, not world construction.
 
 ## Result
