@@ -68,6 +68,34 @@ written into the record by an upstream producer or handled in a callback reached
 No `ControlID 0x070D7509`, `CommandID 0x00E1132F`, or ScenarioMode tag `0x01654C10` was promoted
 from this forwarding boundary.
 
+### 👀 Exact WinProc receiver chain
+
+The bounded call chain from the producer to an attached interactive procedure is now explicit:
+
+```text
+009640B0
+  → IWindow vtable +0x114
+  → 00960250
+  → 0095A010 (message snapshot/normalization)
+  → 00959240
+  → 00958950
+  → 00958880 (WinProc-list walk)
+  → receiver vtable +0x18
+```
+
+The GGE attached interface is a concrete receiver in this family:
+
+```text
+GGE interface vtable 0x0147E030 +0x18 = DE99B0
+```
+
+Therefore `DE99B0` can be reached by the common window message path, but its bounded dispatch
+body only recognizes the component-activation message type and its internal branches; no
+`0x17`/`0x18` comparison is present there. `00959240` also retains fallback paths through the
+window's `+0xC8` callback/owner chain. The unresolved Play Scenario route is consequently narrowed
+to that parent/owner or another attached WinProc path, rather than being attributed to the known
+`DE99B0` component-ID branch.
+
 ### Direct-call inventory for the inspected seam
 
 The local `.text` scan for direct `E8 rel32` calls found:

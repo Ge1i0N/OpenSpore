@@ -620,6 +620,22 @@ GGE-specific unresolved part is no longer generic message construction; it is th
 relationship between the Play Scenario control payload `0x070D7509` and the separate
 `Galactic Adventures` control/event `0x070D74E7`.
 
+The receiver path is also bounded one layer further:
+
+```text
+009640B0
+  → IWindow +0x114 / 00960250
+  → 0095A010
+  → 00959240
+  → 00958950 → 00958880
+  → WinProc vtable +0x18
+```
+
+The attached GGE interface at `0x0147E030 +0x18` reaches `DE99B0`, but `DE99B0` has no bounded
+`0x17`/`0x18` branch. The generic dispatcher retains window `+0xC8`/owner fallback paths, so the
+missing `Play Scenario` producer must still be sought among those dynamic receivers or another
+attached procedure. This does not establish runtime delivery or a ScenarioMode post.
+
 ## `0x070D74E7` belongs to the `DE99B0` listener body
 
 The apparent continuation at `DE9AD0` is not a separate message handler: the preceding `int3` run
