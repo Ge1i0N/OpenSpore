@@ -105,6 +105,30 @@ After insertion, `00961F10` sends the new procedure initialization records with 
 fact, not runtime click evidence; it explains why a false return from `DE99B0` can expose later
 procedures in the same window chain.
 
+### Runtime owner/context binding remains a later seam
+
+The generic WinButton/base construction path at `0x00962950` initializes the relevant base fields
+as empty:
+
+```text
+object +0x30 = 0
+object +0x34 = 0
+object +0x38 = 0
+```
+
+The WinButton constructor `0x00966EB0` then installs the outer/embedded vtables and does not supply
+a serialized Play Scenario owner. A related GA UI interface table at `0x01441868` contains later
+setter bodies:
+
+```text
+0x00967980 → writes interface +0x30, then invokes base callback +0x8C
+0x00967DA0 → writes interface +0x34, then invokes base callback +0x8C
+```
+
+The exact interface-to-window instance join and semantic owner are still Unknown. This is a useful
+runtime-binding seam, not evidence that either setter launches ScenarioMode or handles
+`0x070D7509`.
+
 Therefore `DE99B0` can be reached by the common window message path, but its bounded dispatch
 body only recognizes the component-activation message type and its internal branches; no
 `0x17`/`0x18` comparison is present there. `00959240` also retains fallback paths through the
