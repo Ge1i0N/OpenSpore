@@ -88,6 +88,10 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - A bounded scan found no direct immediate write of local state `10` in the inspected `.text`; the
   playable writer remains Unknown rather than Absent because an indirect/table/resource-mediated
   writer is still possible.
+- The adjacent `DFE430` component-activation family maps several event IDs to controller states
+  5–9 (`0x05933FE0..E3 → 9`, `0x0733FE08..09 → 6`, `0x073BBA58 → 5`, `0x074D0932 → 7`) but has
+  no state-10 write or `Play Scenario` comparison. This bounds the local event family without
+  promoting it to the missing playable producer.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
