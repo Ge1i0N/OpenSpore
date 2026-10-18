@@ -697,6 +697,12 @@ No separate GGE `DE/DF` caller was found. This is a scoped negative result: the 
 `+0x30` source is generic window hierarchy/resource binding rather than a recovered GGE-specific
 literal producer.
 
+The adjacent global-root path is separately identified: `E02AC0` looks up root window identity
+`0xFFFFFFFF` through `00810650` and attaches `Simulator/cSPUIGlobalUIRootWinProc`. This is a
+generic top-level UI root procedure, distinct from `DE5900`'s GGE procedure attachment and from
+`DE99B0`'s component-ID branches. It is a plausible higher window-hierarchy source, but no static
+GGE-specific join from this root procedure to `Play Scenario` has been recovered.
+
 Its later branches construct `kMsgButtonClick = 0x17` and `kMsgButtonSelect = 0x18`. The
 GGE-specific unresolved part is no longer generic message construction; it is the higher-level
 relationship between the Play Scenario control payload `0x070D7509` and the separate
