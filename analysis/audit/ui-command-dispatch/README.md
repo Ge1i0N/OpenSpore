@@ -291,6 +291,22 @@ Other exact `0x17`/`0x18` consumers in the bounded scan belong to separate simul
 paths. Thus generic Button dispatch is not a sufficient semantic join: the Play Scenario producer
 still requires a GGE-specific consumer or dynamic route.
 
+The two remaining exact consumers are separately classified:
+
+```text
+0x01076D3A
+  → kMsgButtonClick
+  → simulator resource/progression branch
+
+0x0107333B
+  → kMsgButtonSelect
+  → simulator state/visibility branch
+```
+
+Neither bounded body contains `0x070D7509`, `0x070D74E7` or `0x080D7DE1`. Together with the
+`CityMusicThumbnail` result, this is a bounded negative result for the inspected exact Button
+consumers: generic `0x17/0x18` handling does not statically identify the GGE Play Scenario route.
+
 ### Direct-call inventory for the inspected seam
 
 The local `.text` scan for direct `E8 rel32` calls found:
