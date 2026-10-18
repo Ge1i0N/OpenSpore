@@ -317,6 +317,39 @@ def verify() -> None:
     exact(0xDFFEDA, "88 4b 7d 89 43 30")
     exact(0xDFFEF4, "83 44 24 0c 38 8b f0 b9 0e 00 00 00 42 f3 a5")
 
+    # WinProc fallback phases: source-only=1 suppresses the outer default;
+    # parent=0 permits it. +0xC8 below belongs to manager, not parent window.
+    exact(0x9588D1, "8b 52 18 51 8d 46 04 50 8b cf ff d2 84 c0 75 16")
+    exact(0x958917, "80 7c 24 1c 00 75 19 80 7c 24 10 00 75 12")
+    exact(0x95892B, "8b 50 20 51 8b ce ff d2")
+    exact(0x95925C, "6a 01 53 50")
+    call(0x959260, 0x958950)
+    exact(0x9592B8, "6a 00 53 56 8b cf")
+    call(0x9592BE, 0x958950)
+    exact(0x9592C3, "84 c0 75 27 8b 76 38 85 f6 75 ea")
+    exact(0x958C54, "c7 06 68 08 44 01")
+    exact(0x958CF6, "89 9e c8 00 00 00")
+    vslot(0x1440868, 0x20, 0x957EC0)
+    exact(0x957EDF, "89 b3 c8 00 00 00")
+    exact(0x9592DA, "8b 42 0c 53 6a 00 6a 05 8b cf ff d0 5e 5f 32 c0")
+    exact(0x959303, "8b 42 0c 6a 04 8b cf ff d0 5e 5f b0 01")
+
+    # Plain window dispatcher is NOT InteractiveWinProc::HandleUIMessage.
+    vslot(0x1441390, 0x20, 0x950B10)
+    vslot(0x1441390, 0x70, 0x950E00)
+    vslot(0x1441390, 0x74, 0x951190)
+    exact(0x950E00, "32 c0 c2 08 00")
+    exact(0x951190, "32 c0 c2 0c 00")
+    vslot(0x950D88, (0x17 - 1) * 4, 0x950C8B)
+    vslot(0x950D88, (0x18 - 1) * 4, 0x950CA0)
+    exact(0x950C92, "8b 40 70")
+    exact(0x950CA7, "8b 52 74")
+    call(0x950D54, 0x960370)
+    # Own serialized button type 3 chooses 0x18 in the separate producer
+    # branch. It never changes the component activation ControlID to GA ID.
+    exact(0x964181, "8b 86 14 02 00 00 83 f8 02 74 19 83 f8 03 74 14")
+    exact(0x9641B7, "c7 44 24 2c 18 00 00 00")
+
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
     exact(0xDFBD4C, "83 7e 20 09")

@@ -5,6 +5,10 @@ no original process was executed. The generated C/instruction pairs are retained
 
 ## Handler contract
 
+Current object-74 follow-up: [source/parent fallback and serialized button flags](fallback-route.md).
+Object 74 has local WindowFlags `0x0A` versus object 87's `0x0B`; it is not evidence of a normally
+visible gameplay entry. Manager callback `+0xC8` is distinct from the parent window default handler.
+
 The GGE object vtable at `0x0147E030` contains `0x00DE99B0` at slot `+0x18` (`0x0147E048`).
 The body has the shape of a GGE message listener.
 It first forwards the message through receiver `+0x34` (GGE root `+0x38`, because the receiver is

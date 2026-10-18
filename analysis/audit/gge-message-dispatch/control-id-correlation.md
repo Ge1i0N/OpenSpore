@@ -44,6 +44,11 @@ Drawable     object 73
 serialized   WinProcs property absent
 ```
 
+The expanded [flags/fallback audit](fallback-route.md) finds WindowFlags `0x0A` on object 74
+versus `0x0B` on object 87: object 74 lacks its own serialized Visible bit. Both are type `3`,
+button group `2`, CommandID `0`. This is local shipped state, not runtime visibility or proof of
+an unused action. The [probe report](zoom-button-flags.json) retains the exact payload digest.
+
 This proves the control is a real serialized window/object with the expected caption and parent,
 but its event/WinProc attachment is not present in the serialized SPUI object. GA `DE5900` now
 provides the native explanation: after the GGE layout request it resolves `0x070D7509` through

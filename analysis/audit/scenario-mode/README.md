@@ -148,6 +148,12 @@ This makes ScenarioMode a real next reverse-engineering target after a selected 
 not connect the GGE `Play Scenario` ControlID `0x070D7509` to `ScenarioMode` or prove an adventure
 resource/planet was loaded.
 
+The [zoom-button flags audit](../gge-message-dispatch/fallback-route.md) further limits that
+object-74 hypothesis: its own serialized Visible bit is false (`0x0A`), while the distinct
+`Galactic Adventures` object's bit is true (`0x0B`). Neither implies effective runtime visibility.
+The recovered state-13 entry is a separate candidate route; a missing object-74 consumer is not
+proof that every playable entry must pass through that hidden serialized control.
+
 ## Separate mode-message corroboration
 
 The SDK `ScenarioMode.h` comments identify general mode-manager messages:

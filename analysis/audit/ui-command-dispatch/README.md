@@ -250,6 +250,13 @@ to that parent/owner or another attached WinProc path, rather than being attribu
 
 ### `DE99B0` is a fall-through receiver for Button/Play Scenario payloads
 
+**Coordinate/phase correction:** `+0xC8` in `959240` is the **manager's** callback field, not
+the window/parent handler. Callback return is not used for handled selection. Source dispatch
+suppresses the outer `+0x20` default; parent-chain dispatch permits it. See the focused
+[fallback and flags audit](../gge-message-dispatch/fallback-route.md) for the real default-handler
+targets and the locally hidden serialized state of object 74. The older shorthand below must not
+be read as proof of a gameplay handler at manager `+0xC8`.
+
 The bounded `DE99B0` switch returns unhandled for message types/component IDs outside its explicit
 branches. In particular, no `0x17`/`0x18` branch and no direct `0x070D7509` branch is present.
 The `00958880` WinProc walk tests that result and continues to the next procedure when it is not

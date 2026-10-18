@@ -7,6 +7,7 @@ priority merge, writes or native message execution. Package copies remain separa
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import struct
 import sys
@@ -49,12 +50,28 @@ def probe(root: Path, wanted: set[int]) -> dict:
                             command = (struct.unpack("<I", bytes.fromhex(command_raw[:8]))[0]
                                        if len(command_raw) >= 8 else None)
                             caption = properties.get(0xEEC1B00A)
+
+                            def scalar(property_id):
+                                item = properties.get(property_id)
+                                raw_value = item.get("raw", "") if item else ""
+                                return (struct.unpack("<I", bytes.fromhex(raw_value))[0]
+                                        if item and item.get("code") == 9 and item.get("count") == 1
+                                        and len(raw_value) == 8 else None)
+
+                            flags = scalar(0xEEC1B000)
                             matches[value].append({"package": package.name,
                                                    "record": ordinal,
                                                    "instance": f"0x{instance:08x}",
-                                                   "object": object_index,
-                                                   "property": label,
-                                                   "command_id": None if command is None else f"0x{command:08x}",
+                                                    "object": object_index,
+                                                    "class": f"0x{window['class']:08x}",
+                                                    "layout_sha256": hashlib.sha256(data).hexdigest(),
+                                                    "property": label,
+                                                    "command_id": None if command is None else f"0x{command:08x}",
+                                                    "window_flags": flags,
+                                                    "own_visible_bit": None if flags is None else bool(flags & 1),
+                                                    "button_type": scalar(0xEEC1D003),
+                                                    "button_group_id": scalar(0xEEC1D005),
+                                                    "serialized_winprocs": properties.get(0xEEC1B00C, {}).get("refs"),
                                                    "parent": reader.parents.get(object_index),
                                                    "children": reader.children.get(object_index, []),
                                                    "caption": (caption.get("strings") if caption else None)})
@@ -65,7 +82,8 @@ def probe(root: Path, wanted: set[int]) -> dict:
             "failed_layouts": failed, "skipped_packages": skipped,
             "ids": {f"0x{value:08x}": rows for value, rows in matches.items()},
             "limitations": ["shipped SPUI data only", "no runtime message execution",
-                            "no package priority merge", "ControlID match is not proof of producer"]}
+                             "no package priority merge", "ControlID match is not proof of producer",
+                             "own_visible_bit is serialized local state, not effective or runtime visibility"]}
 
 
 def main() -> int:
