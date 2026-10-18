@@ -105,6 +105,9 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - In EP1 layout record `13754`, the state-10 buttons share parent panels with initializer buttons:
   `0x05951103` and `0x05933FE2` both use parent `1552`; `0x05951104` and `0x05933FE3` both use
   parent `1975`. This is a shipped-layout owner correlation, not runtime click evidence.
+- A secondary controller interface table at `0x0147ED9C` contains `E00170`, `DFBD20`, `DFAE60`,
+  `DFA7E0` and `DFC210`. `E00170` handles internal payload IDs `0x366A930D`/`0x2B978C46` and
+  dispatches existing controller states; it has no direct `0x070D7509` or `0x01654C10` branch.
 - Retained shipped-binary evidence: [`scenario-mode-current-evidence.json`](scenario-mode-current-evidence.json).
    The focused REA records include `DFE430` (`ev_a8c978345364376176b078d900546eb9cf8ce24596eb4d0e9b4b16011372ed58`),
    controller UI sync (`DF9B00`/`DF9F90`, `ev_6a482fca4d92d699ab63e87065a207d8bba0d74a7655b40f8bb05a1d418e110d`,

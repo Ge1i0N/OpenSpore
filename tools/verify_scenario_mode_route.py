@@ -146,6 +146,13 @@ def verify() -> None:
     exact(0xDFC7F3, "c7 44 24 30 05 4d 38 05")
     exact(0xDFC7FB, "c7 44 24 34 e0 3f 93 05")
 
+    # Secondary controller interface table and its internal message handler.
+    exact(0x147ED9C, "20 05 e0 00 20 2a 08 01 d0 67 b2 00 20 bd df 00 60 ae df 00 e0 a7 df 00 10 c2 df 00 10 b0 df 00 30 06 e0 00")
+    exact(0xE00182, "8b 48 04 81 f9 0d 93 6a 36 75 76")
+    exact(0xE001DD, "83 f8 05 75 0e 8b 4c 24 0c 51")
+    exact(0xE001E7, "8b cf e8 32 ab ff ff eb 3c")  # state 5 -> DFAD20
+    exact(0xE0020B, "50 8b cf e8 dd 9a ff ff eb 17")
+
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
     exact(0xDFBD4C, "83 7e 20 09")

@@ -179,6 +179,32 @@ The initializer still does not prove the missing upstream click conversion. Its 
 not resolved by the bounded direct-call result because the vtable slot is invoked indirectly; the
 native object construction/scheduling edge and the route from GGE object 74 remain Unknown.
 
+### Secondary controller interface
+
+The same controller family has a second observed function table at `.rdata 0x0147ED9C`:
+
+```text
++0x00 → E00520   (this-adjustor thunk to E00170)
++0x04 → 01082A20 (empty body)
++0x08 → B267D0   (empty body)
++0x0C → DFBD20
++0x10 → DFAE60
++0x14 → DFA7E0
++0x18 → DFC210
++0x1C → DFB010
++0x20 → E00630
+```
+
+This is positive multi-interface evidence: update (`DFC210`), teardown/UI synchronization
+(`DFAE60`, `DFA7E0`) and message handling (`E00170`) are adjacent to the Scenario controller's
+`DFC6C0`/`DFE430` table, while direct vtable-slot calls remain indirect.
+
+`E00170` is bounded as an internal controller message handler. It checks payload word `+0x04`
+against `0x366A930D` and `0x2B978C46`, rebuilds local per-entry state, and dispatches based on
+controller state `7`, `5` or `1` to `DFAC70`, `DFAD20` or `E00070`. The inspected body contains
+neither `0x070D7509` nor ScenarioMode tag `0x01654C10`; it therefore narrows, but does not close,
+the object-74-to-controller producer boundary.
+
 ## Direct table-index selection is generic, not the missing UI join
 
 The mode table manager has two selection endpoints:
