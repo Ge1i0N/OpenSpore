@@ -153,7 +153,8 @@ The startup `+0xC3=0` setting means do **not** assert that GGE's newly queued mo
 delivered in the same pump invocation as Main's gotoState. Same-frame versus later-frame
 activation requires following actual queue contents and other pump sites or observing runtime.
 
-Next: continue from the mode-manager listener into its activation/update calls and connect
-them to the outer frame loop, without equating successful state requests with UI/world readiness.
+Continuation: [startup-mode-frame.md](startup-mode-frame.md) connects the mode-manager listener
+to driver lifecycle and selected-driver update in the outer frame, keeping setup-all and
+activation-one distinct and not equating state requests with UI/world readiness.
 Native mounts, actual queue contents, completed GGE activation, object-74 Scenario launch delivery
 and playable world ticks remain Unknown.

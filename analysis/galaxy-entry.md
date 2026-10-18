@@ -35,6 +35,11 @@ Static evidence does not observe the original runtime. All addresses below are G
 
 ## Vtable slots retained, not guessed into a renderer
 
+**Startup caller update:** [startup-mode-frame.md](startup-mode-frame.md) now joins mode-manager
+`7D8670` to GGE activation `DDD960`/deactivation `DDD9E0`, and AppMode frame `7E9E80` via
+selected-driver lookup `7D8380` to `DDDB80 → DE8710`. Driver `+0x10` controller setup occurs
+in a separate setup-all loop. These are static caller joins, not observed activation or readiness.
+
 | Offset | Target | Observed side effect / boundary |
 |---:|---|---|
 | +0x00 / +0x04 | `0xC6AB00` / `0x7B87B0` | reference count at +8 |

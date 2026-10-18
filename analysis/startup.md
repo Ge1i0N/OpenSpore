@@ -153,6 +153,12 @@ update (`F47945`, AppMode `+0x78 = 7E9E80`). See
 startup setting that disables drain-until-empty. These static call sites do not prove a
 successful native frame or playable tick.
 
+The selected mode's frame continuation is now linked in
+[startup-mode-frame.md](startup-mode-frame.md): AppMode `7E9E80` asks its mode manager for
+the selected driver through `+0x2C` and invokes driver `+0x3C`; for GGE this is
+`DDDB80 → DE8710`. Manager `+0x50` returns a different auxiliary owner. Driver setup-all,
+selection/activation and internal GGE handler updates are separate lifecycle stages.
+
 Note there are **two** PeekMessage users: this main loop uses **`PeekMessageW`** (via `edi`), while
 the mouse-coalescing helper `0x84a050` uses **`PeekMessageA`** directly (IAT 0x13cc5f0). That is why
 a search for direct callers of the pump missed the loop: the loop calls `PeekMessageW` through a

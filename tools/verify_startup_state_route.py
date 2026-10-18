@@ -264,6 +264,80 @@ def verify() -> None:
         raise ValueError("bounded .text E1132D immediate inventory changed")
     checks += 1
 
+    # Mode manager identity, setup-all loops and distinct selected-driver/auxiliary getters.
+    call(0x7E90F2, 0x7D8E80)
+    exact(0x7D8E8C, "6a 34")
+    exact(0x7D8EAE, "c7 00 08 26 41 01")
+    exact(0x7D8ECB, "c7 40 28 ff ff ff ff 89 58 2c")
+    exact(0x7E910F, "89 be c8 00 00 00")
+    call(0x7E9129, 0x67DEC0)
+    exact(0x67DCD0, "a1 b0 d8 5f 01 c3")
+    exact(0x67DEC0, "8b 44 24 04 a3 b0 d8 5f 01 c3")
+    for off, target in [(0x0C, 0x7D8120), (0x14, 0x7D82B0),
+                        (0x18, 0x7D82F0), (0x20, 0x7D9320),
+                        (0x2C, 0x7D8380), (0x40, 0x7D8D40),
+                        (0x4C, 0x7D8420), (0x50, 0x967D90)]:
+        slot(0x1412608, off, target)
+    exact(0x967D90, "8b 41 2c c3")
+    exact(0x7D82D4, "8b 47 14 8b 0c 06 8b 11 8b 42 0c ff d0 83 c6 18")
+    exact(0x7D8314, "8b 46 14 8b 0c 07 8b 11 8b 42 10 56 ff d0 83 c7 18")
+    exact(0x7D9348, "80 7f 10 00 74 09 8b 06 8b 50 0c 8b ce ff d2")
+    call(0x7D93BE, 0x7D9160)
+    exact(0x7EACAB, "8b 8e c8 00 00 00 8b 11 8b 42 0c ff d0")
+    exact(0xF484B0, "8b 55 00 8b 42 18 8b cd ff d0")
+    exact(0xF484E8, "8b 55 00 8b 42 40 33 db 53 8b cd ff d0")
+
+    # Concrete GGE registrar and setup/activation/update slots.
+    exact(0xDDDE59, "c7 00 b0 d2 47 01")
+    text(0x14627EC, "GalaxyGameEntry")
+    exact(0xDDDE77, "68 ec 27 46 01 68 d2 d1 cc 02 50 8b 42 20 ff d0")
+    for off, target in [(0x0C, 0xDDDBE0), (0x10, 0xDDDF80),
+                        (0x18, 0xDDD960), (0x1C, 0xDDD9E0), (0x3C, 0xDDDB80)]:
+        slot(0x147D2B0, off, target)
+    call(0xDDDFA7, 0xDE6B90)
+    exact(0xDDDFB0, "a3 44 13 6a 01")
+    exact(0xDDDFC7, "89 81 f0 00 00 00")
+    call(0xDDD99F, 0xDEA1B0)
+    exact(0xDDDA20, "e9 3b a7 00 00")  # tail jump to DE8160
+
+    # Name-selection and lifecycle order, including unchecked activation return.
+    slot(0x14125F4, 4, 0x7D8240)
+    exact(0x7D826A, "8b 51 fc 83 c1 fc 50 8b 42 4c ff d0")
+    exact(0x7D847C, "8b 03 8b 50 40 57 8b cb ff d2")
+    call(0x7D8D65, 0x7D8670)
+    exact(0x7D86CF, "8b 01 8b 50 1c ff d2")
+    exact(0x7D86E3, "89 7e 28")
+    call(0x7D86E6, 0x883950)
+    exact(0x7D872D, "68 e7 d3 12 02")
+    exact(0x7D873F, "ff d2")
+    exact(0x7D8761, "8b 11 8b 42 18 ff d0 3b fd 74 6e")
+    exact(0x7D87AE, "68 dc 1a 2d 02")
+
+    # AppMode fetches selected driver, not +50 auxiliary owner, for driver +3C update.
+    exact(0x7EA25A, "8b 8d c8 00 00 00 8b 01 8b 50 50 ff d2")
+    exact(0x7EA285, "8b 8d c8 00 00 00 8b 01 8b 50 2c ff d2 85 c0 74 1b")
+    exact(0x7D8380, "56 8b 71 28 85 f6 7c 26")
+    exact(0x7D839F, "3b f0 7d 0b")
+    exact(0x7D83A3, "8b 41 14 8d 14 76 8b 04 d0")
+    exact(0x7D83AE, "33 c0 5e c3")
+    exact(0x7EA29F, "d9 5c 24 04 8b c8 d9 44 24 1c 8b 42 3c d9 1c 24 ff d0")
+    exact(0x7EA042, "d8 0d 58 94 3f 01")
+    exact(0x148BA68, "00 00 7a 44")  # 1000.0f
+    exact(0x13F9458, "6f 12 83 3a")  # 0.001f
+    call(0xDDDBB6, 0xDE8710)
+    call(0xDDDBBC, 0xB3D330)
+    call(0xDDDBC3, 0xB5EAE0)
+    exact(0xB3D330, "a1 c0 ea 67 01 c3")
+    exact(0xDE8771, "8b 4e 38 3b cb 74 0f")
+    exact(0xDE877E, "8b 42 14 51 d9 1c 24 ff d0")
+    call(0xDE88BF, 0xDE6600)
+    call(0xDE89F7, 0xDE75E0)
+    exact(0xDE8A2C, "8b 01 8b 50 10 ff d2")
+    exact(0xDE8A33, "89 7e 38")
+    exact(0xDE8A3A, "8b 07 8b 50 0c 8b cf ff d2")
+    call(0xDE8A6A, 0xDE44A0)
+    call(0xDE8A71, 0xDE48C0)
+
     # Negative controls for prior timing/slot conflation.
     exact(0xE310C0, "33 c0 c3")
     exact(0x571E67, "ff 15 b8 c2 3c 01")
