@@ -552,6 +552,20 @@ def verify() -> None:
     exact(0xE03695, "8b 4e 08 32 db 85 c9 74 26 8b 44 24 10 68 ca 95 dd 2e 6a 01 50")
     call(0xE036AA, 0x8121C0)
     exact(0xE036AF, "84 c0 74 0f 8b ce e8 06 f4 ff ff 84 c0 74 04 b3 01")
+    # DE5900 WinProc configuration and parent registration are not event delivery.
+    exact(0xDE4939, "8b 10 8b c8 8b 42 0c 68 7a 7e d2 8e ff d0 8b f0 85 f6 74 3b")
+    exact(0xDE494D, "8b 16 8b 52 28 3b ef 0f 94 c0 0f b6 c8 51 6a 04 8b ce ff d2")
+    exact(0xDE4961, "8b 06 8b 50 28 6a 00 6a 02 8b ce ff d2 8b 06 8b 50 28 6a 00 6a 08")
+    exact(0xDE497B, "8b 06 8b 50 28 6a 00 6a 10 8b ce ff d2 43 83 fb 03 72 97")
+    exact(0xDE49C9, "8b 16 8b 52 28 3b ef 0f 94 c0 0f b6 c8 51 6a 04 8b ce ff d2")
+    exact(0xDE49EA, "8b 06 8b 50 28 6a 00 6a 08 8b ce ff d2 8b 06 8b 50 28 6a 00 6a 10")
+    exact(0x962780, "55 56 8b 74 24 0c 57 8b f9 56 b9 90 b1 66 01 e8 ac fd ff ff")
+    exact(0x9627EA, "8b 06 8b 50 18 8b ce ff d2 84 c0 75 18 8b 17 8d 46 04 50 8b 82 e0 00 00 00")
+    exact(0x962807, "32 c0 5f 5e 5d c2 04 00 8b cd e8 8a e2 ff ff 8b cd e8 23 e2 ff ff")
+    exact(0x962830, "56 8b 74 24 08 57 8b f9 56 b9 90 b1 66 01 e8 fd fc ff ff")
+    exact(0x96285B, "8b 46 0c 8b 4e 08 89 08 89 41 04 c7 46 08 00 00 00 00 c7 46 0c 00 00 00 00")
+    exact(0x960190, "8b 44 24 04 56 57 8b f9 85 c0 74 14 8d 70 fc 85 f6 74 0f")
+    exact(0x9601B4, "8b 17 50 8b 82 dc 00 00 00 8b cf ff d0 8b 16 8b 42 1c 8b ce ff d0")
 
     # Negative controls for prior timing/slot conflation.
 

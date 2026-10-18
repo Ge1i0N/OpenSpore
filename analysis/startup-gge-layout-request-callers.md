@@ -41,7 +41,9 @@ the second group adds:
 ```
 
 The latter is the serialized EP1 `Play Scenario` control identity. This call site proves control
-lookup/configuration operands, not the object-74 action execution or ScenarioMode conversion.
+lookup/configuration operands, not the object-74 action execution or ScenarioMode conversion. The
+subsequent WinProc and parent-registration boundary is documented in
+[startup-gge-winproc-parent-registration.md](startup-gge-winproc-parent-registration.md).
 
 ## `E035F0`: GlobalUI layout owner
 
