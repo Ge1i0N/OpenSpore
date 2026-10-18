@@ -70,20 +70,21 @@ indirect/table/resource-mediated writer is therefore not promoted to `Absent`.
 ## Adjacent controller event map
 
 The nearby component-activation handler `DFE430` compares payload type
-`0x287259F6` and dispatches selected component/event IDs to local controller helpers. The bounded
-state writes in its surrounding dispatch family are:
+`0x287259F6` and dispatches selected component/event IDs to local controller helpers. The exact
+bounded state writes in that dispatch are:
 
 ```text
 0x05933FE0..0x05933FE3 → state +0x20 = 9
-0x0733FE08..0x0733FE09 → state +0x20 = 6
+0x0733FE08             → DFAE20 → state +0x20 = 10, +0x28 = 10, +0x80 = 1
+0x0733FE09             → same DFAE20 route (range arithmetic)
 0x073BBA58             → state +0x20 = 5
 0x074D0932             → state +0x20 = 7
 ```
 
-This is positive evidence that local states 5–9 are event-driven controller phases. The inspected
-family contains no direct state-10 write and no `0x070D7509` comparison. It narrows the missing
-playable producer to an indirect/data-driven event or another controller family, without calling
-the result `Absent`.
+This is positive evidence that local states 5–10 are event-driven controller phases. `DFAE20` is
+the exact state-10 writer, but the inspected family contains no `0x070D7509` comparison. The
+remaining question is whether event `0x0733FE08/09` is emitted by the selected-star Play Scenario
+action or by another Scenario UI action; that upstream semantic join remains Unknown.
 
 ## Direct table-index selection is generic, not the missing UI join
 

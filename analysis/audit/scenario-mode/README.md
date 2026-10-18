@@ -85,13 +85,11 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   selects play mode 2. This prevents mistaking DFAD20's edit route for playable launch.
   The [launch-state audit](launch-state.md) also resolves generic name/tag table setters without
   claiming original queued-command delivery or successful OnEnter.
-- A bounded scan found no direct immediate write of local state `10` in the inspected `.text`; the
-  playable writer remains Unknown rather than Absent because an indirect/table/resource-mediated
-  writer is still possible.
-- The adjacent `DFE430` component-activation family maps several event IDs to controller states
-  5–9 (`0x05933FE0..E3 → 9`, `0x0733FE08..09 → 6`, `0x073BBA58 → 5`, `0x074D0932 → 7`) but has
-  no state-10 write or `Play Scenario` comparison. This bounds the local event family without
-  promoting it to the missing playable producer.
+- The adjacent `DFE430` component-activation family contains the exact playable-state candidate:
+  event `0x0733FE08/09` reaches `DFAE20`, which writes local state `+0x20 = 10`, context `+0x28 = 10`
+  and enables `+0x80`. Other bounded IDs map to state 9 (`0x05933FE0..E3`), state 5
+  (`0x073BBA58`) and state 7 (`0x074D0932`). The event-to-Play-Scenario semantic join remains
+  Unknown because no `0x070D7509` comparison is present.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.

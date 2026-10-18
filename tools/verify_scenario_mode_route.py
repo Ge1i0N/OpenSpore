@@ -113,6 +113,14 @@ def verify() -> None:
         raise ValueError("ScenarioMode state-name hash mismatch")
     checks += 2
 
+    # Exact playable controller phase writer: event 0x0733FE08/09 routes
+    # through DFAE20 and enters local state 10.
+    exact(0xDFE517, "05 fd ee 6a fa 83 f8 01 0f 87")
+    exact(0xDFE53A, "e8 e1 c8 ff ff 5f b0 01")
+    call(0xDFE53A, 0xDFAE20)
+    exact(0xDFAE31, "b8 0a 00 00 00 89 46 20 c6 86 80 00 00 00 01")
+    exact(0xDFAE40, "89 46 28 8b 0d 44 13 6a 01")
+
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
     exact(0xDFBD4C, "83 7e 20 09")
