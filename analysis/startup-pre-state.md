@@ -74,3 +74,25 @@ This startup pass adds a concrete data-root/config handoff before `Main → Gala
 does not alter any ScenarioMode readiness conclusion and does not connect object 74's
 `Play Scenario` control to a native state request. The unresolved producer and runtime delivery
 boundaries remain unchanged.
+
+## AppMode state-host slots around the handoff
+
+The AppMode vtable at `0x01413B50` also makes the startup state-host boundary explicit. The
+already documented initialization slots are `+0x14 = 0x7E6850`, `+0x18 = 0x7E93D0`,
+`+0x1C = 0x7E7430` and `+0x20 = 0x7EAAE0`. Nearby slots include:
+
+```text
++0x24 = 0x7E6520   ++0x28 = 0x7E9520
++0x2C..+0x3C = 0x7E5F20..0x7E5F70   (counters/timing fields)
++0x40 = 0x7E6680   ++0x44 = 0x7E66E0
++0x48 = 0xE310C0   ++0x5C = 0x7E9DD0
+```
+
+The `+0x24` slot performs AppMode teardown/cleanup and emits the hashed app events
+`0x00F62ADD`, `0xAE1CFE73`, `0x0255ABF5` and `0x0212D3E7`. The `+0x48` slot is a small boolean
+test over AppMode `+0x68`, and `+0x5C` is the AppMode dispose/cleanup entry. These slots are
+startup lifecycle infrastructure, not alternate Scenario launch producers.
+
+`F47C20` is called at `F48054`; `F48054` continues with the AppMode vtable operations and later
+the `F48505` trigger load. This closes the ordering question without claiming that the trigger
+parser itself is inside `F47C20`.
