@@ -129,6 +129,17 @@ The exact interface-to-window instance join and semantic owner are still Unknown
 runtime-binding seam, not evidence that either setter launches ScenarioMode or handles
 `0x070D7509`.
 
+A bounded direct-call scan adds a negative constraint:
+
+```text
+00967980: no direct E8 callers in selected .text
+00967DA0: no direct E8 callers in selected .text
+```
+
+The two bodies are present as virtual entries at `0x01441868 +0x00` and `0x014418A8 +0x00`.
+Their invocation is therefore dynamic in the inspected image; the absence of direct callers does
+not promote them to Absent, but it prevents a static GGE/Play Scenario ownership claim.
+
 Therefore `DE99B0` can be reached by the common window message path, but its bounded dispatch
 body only recognizes the component-activation message type and its internal branches; no
 `0x17`/`0x18` comparison is present there. `00959240` also retains fallback paths through the
