@@ -58,7 +58,8 @@ The layout attachment helper has a different receiver and lifecycle:
 This is the static `AddWindow`-like attachment path. `811C70` calls `811C20`, optionally invokes
 the owner callback at `+0x8C` with owner fields `+0x88/+0x90`, and then performs a separate resource
 initialization branch keyed by `0x2FBF2058`. These lifecycle calls are not called by the bounded
-`DF6110` placement tail.
+`DF6110` placement tail. The post-attachment synchronization and owner replacement paths are
+bounded in [startup-gge-layout-synchronization.md](startup-gge-layout-synchronization.md).
 
 ## Boundary separation
 

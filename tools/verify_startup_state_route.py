@@ -519,6 +519,23 @@ def verify() -> None:
     call(0x811C7C, 0x811C20)
     exact(0x811C81, "8b 87 8c 00 00 00 85 c0 74 15 8b 8f 88 00 00 00 8b 97 90 00 00 00")
     exact(0x811CA0, "e8 5b 0e 15 00 f6 46 20 01 74 5e")
+    # Post-attachment layout synchronization and owner replacement are separate lifecycle stages.
+    exact(0x8113D0, "81 ec 2c 01 00 00 53 8b d9 83 bb 88 00 00 00 00 75 0a")
+    exact(0x8113EC, "56 6a 01 6a ff e8 aa ee ff ff 8b f0 85 f6 0f 85 9c 01 00 00")
+    exact(0x811425, "8b 0e 8b 01 8b 50 0c 68 18 82 ee ee 83 c6 04 ff d2")
+    exact(0x811475, "8b d1 2b d0 c1 fa 02 33 f6 85 d2 0f 86 9a 00 00 00")
+    exact(0x811486, "8b 04 b0 8b 10 8b c8 8b 42 38 ff d0 f3 0f 10 00 85 f6 76 47")
+    exact(0x811530, "8b 04 b0 8b 10 8b c8 8b 42 38 ff d0 8b 4c 24 1c 8b 0c b1")
+    exact(0x81155A, "8b 42 64 83 ec 08 f3 0f 11 44 24 04 f3 0f 11 0c 24 ff d0")
+    exact(0x811612, "0f b6 8b 8c 00 00 00 51 8b cb e8 8f ed ff ff 5e b0 01")
+    exact(0x812100, "56 8b 74 24 08 57 8b f9 85 f6 75 19 80 7c 24 10 00 74 12")
+    call(0x81211E, 0x8106C0)
+    exact(0x812125, "8b 87 88 00 00 00 3b f0 74 46 85 c0 74 07 8b cf e8 a6 e0 ff ff")
+    exact(0x812164, "83 bf 88 00 00 00 00 5b 74 07 8b cf e8 ab fa ff ff 5f b0 01")
+    exact(0x8121C0, "53 55 56 57 8b f1 e8 35 09 15 00 8b 6c 24 14 8b 0d 5c cf 64 01")
+    call(0x8121D6, 0x811070)
+    exact(0x812203, "14 85 c9 74 35 8b 45 00 89 46 08 8b 55 04 89 56 0c 8b 45 08 89 46 10")
+    exact(0x812250, "83 ec 0c 33 c0 56 89 44 24 04 89 44 24 08 89 44 24 0c 8b 44 24 18")
 
     # Negative controls for prior timing/slot conflation.
 
