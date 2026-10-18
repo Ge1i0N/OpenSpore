@@ -154,5 +154,6 @@ Setup-all, activation-one, auxiliary-owner update and internal-controller dispat
 Still Unknown: successful native delivery/activation, runtime resources and service availability,
 GGE object-74 Scenario action, stage/world creation and a playable gameplay tick. The next useful
 step is to trace the current-handler setup/update handoff into GGE Intro/scene gates and identify
-which startup-provided prerequisites those paths actually consume, rather than revisiting table
-selection alone. No host runtime code or readiness policy changes in this pass.
+which startup-provided prerequisites those paths actually consume. See
+[startup-gge-internal.md](startup-gge-internal.md). No host runtime code or readiness policy
+changes in this pass.
