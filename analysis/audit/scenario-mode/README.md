@@ -1,6 +1,6 @@
 # GA ScenarioMode ↔ SDK IGameMode vtable cross-check
 
-Reviewed **2026-10-17**. Static GA-unpacked evidence only; no original process execution.
+Reviewed **2026-10-18**. Static GA-unpacked evidence only; no original process execution.
 
 ## Registrar and object shape
 
@@ -58,26 +58,30 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - `EF23F0` removes the handler through MessageManager `+0x30` and the listener through `+0x20`.
 - The registered handler `EF2250` reads message payload word `+0x08` as a mode tag. If it is
   `0x01654C10` (`ScenarioMode`) and `mMode` at `+0xCC` is zero, it calls `EF1D20` (ScenarioMode
-  enter-side initialization). If the tag is `0x00DBDBA1` (`Editors`) while ScenarioMode is active,
-  it calls `EF1380` (leave/cleanup-side path). This is a native mode-manager payload route, not a
+  enter-side initialization). If the tag is neither ScenarioMode nor `0x00DBDBA1` (`Editors`) while
+  ScenarioMode is active, it calls `EF1380` (leave/cleanup-side path). Editors is excluded, not the
+  cleanup trigger. This is a native mode-manager payload route, not a
   direct `Play Scenario` ControlID route.
 - The same event ID `0x0212D3E7` is also consumed by the app-level handler `0x007E7160`, which
   clears two app/controller float fields and handles the message without comparing the ScenarioMode
-  tag. A separate lifecycle method `0x0054DF60` publishes `0x0212D3E7` alongside neighboring
-  lifecycle events `0x01EE100A` and `0x02319914`. These shared-channel edges are generic event
-  infrastructure and do not connect `Play Scenario 0x070D7509` to `0x01654C10`.
-- A concrete `kMsgEnterMode = 0x074BAF67` producer exists at `ED57A0`. GGE lifecycle callsites
-  invoke it with dynamic state values (`-1`, `2`, `1`, `0`), but the bounded callsites contain no
-  `0x01654C10` or `0x070D7509`. This establishes the native enter-mode channel without promoting
-  it to the unresolved Play Scenario → ScenarioMode route.
+  tag. `54DF60` subscribes to the event alongside `0x01EE100A` and `0x02319914`; its earlier
+  classification as a producer was wrong. The real table-driven producer `7D8670` sends
+  `0x0212D3E7` before OnEnter and `0x022D1ADC` after OnEnter, with new/old tags at payload
+  `+0x08/+0x10`.
+- A numeric-state notification `0x074BAF67` producer exists at `ED57A0`. Its local controller
+  callers pass states `-1`, `2`, `1`, `0`; this is not an `IGameMode` tag-selection command, and
+  the calls do not establish GGE ownership of that controller.
 - For `ED57A0`, the apparent dynamic value is now bounded: `ED5130` initializes object `+0x1C` to
   `-1`, and all five direct callers pass only `-1`, `2`, `1` or `0`; `ED6910` later reduces the
   value through lifecycle branches `0/1/2`. No resource/property-derived ScenarioMode tag is
   recovered in this producer family.
-- A separate native mode-transition coordinator now supplies the missing middle seam: its bounded
-  guard is `current 0x01654C05 (Game_Space/SpaceGame) → target 0x01654C10 (ScenarioMode)`, followed
-  by `B335F0` ScenarioMode bootstrap. This joins SpaceGame to ScenarioMode, but the upstream target
-  selection from GGE `Play Scenario 0x070D7509` remains unresolved.
+- `B63650` routes the pre-enter mode message through `B5F180 → B33A80`. The exact pair
+  `old 0x01654C05 → new 0x01654C10` invokes `B335F0` service preparation; the post-enter route
+  is `B5DCD0 → B336E0 → B33650`. These callbacks consume a selected pair, not request the switch.
+- `DFAD20` prepares a shared launch record through `EF1910`, then passes `0x01654C10` to
+  loading-UI helper `E3E350`. This is a concrete launch-preparation candidate, but its upstream
+  connection to object 74 and later table-index selection remain Unknown. Exact phases and retained
+  REA records are in [message-route.md](message-route.md).
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
@@ -99,12 +103,10 @@ kMsgEnterMode = 0x074BAF67
 kMsgExitMode  = 0x0462C656
 ```
 
-Bounded GA immediate scans find both values in ScenarioMode/mode-message handlers. The exit value
-is also sent through a MessageManager dispatch path in a separate mode lifecycle. This corroborates
-These two IDs are not the two ScenarioMode-specific listener IDs registered by `EF2290`; this
-distinction prevents promoting a generic mode-manager message into the ScenarioMode producer route.
-It still corroborates a real message-driven mode contract, but it does not identify the `Play
-Scenario` button's producer or prove that the button reaches this mode.
+Bounded GA immediate scans find both values in Scenario-related numeric-mode handlers. They are
+distinct from the table-driven `IGameMode` notifications `0x0212D3E7`/`0x022D1ADC` and from the
+two Scenario-specific listener IDs registered by `EF2290`. A shared word "mode" does not make
+these channels equivalent or identify the `Play Scenario` button's semantic consumer.
 
 The SDK `cGameModeManager` also identifies `kScenarioMode = 0x01654C10` and classifies it as a
 simulator game mode. GA registration uses the same tag. The state script's standalone `ScenarioMode`

@@ -217,12 +217,15 @@ Static transition evidence now adds a concrete native edge inside this tag space
 ```text
 Game_Space / SpaceGame 0x01654C05
   → ScenarioMode 0x01654C10
-  → B335F0 ScenarioMode bootstrap
+  → pre-enter callback B33A80 → B335F0 service preparation
+  → post-enter callback B336E0 → B33650 service preparation
 ```
 
-The edge is guarded in the `0x00B33xxx` mode-transition coordinator. It proves the native
-SpaceGame-to-ScenarioMode continuation, but not the unresolved upstream selection of the ScenarioMode
-target by GGE `Play Scenario 0x070D7509`.
+The pair is guarded in two distinct `0x00B33xxx` callbacks, not one continuous guard/call body.
+The producer `7D8670` publishes tags from its registered table around the new object's OnEnter;
+`B63650` consumes the messages and reaches these callbacks. This proves static transition handling,
+not the unresolved upstream selection of the ScenarioMode target by GGE `Play Scenario 0x070D7509`.
+See [the retained evidence and phase correction](audit/scenario-mode/message-route.md).
 
 ## What this changed in the plan (historical; superseded by current header)
 
