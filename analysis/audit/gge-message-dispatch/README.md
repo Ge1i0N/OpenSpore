@@ -67,6 +67,12 @@ The first three identities are attached unconditionally; the final two, includin
 `Play Scenario` ControlID `0x070D7509`, are attached under the observed `6854E0(2)` feature guard.
 `DE5900` is called by `DEA1B0`, not by the generic UTFWin Button dispatcher.
 
+The `00810650` receiver is also scoped: `DE5900` supplies `controller +0x144`, which is the active
+`UILayout`; the wrapper reads its `+0x14` layout-object span and forwards to `008102A0` for the
+ControlID search. Thus the attached object is the window from the current mounted GGE layout, not
+a global owner/service registry entry. This keeps the object-74 attachment fact separate from any
+later parent/context binding.
+
 The attached `object +0x04` is not an analyst-invented callback: constructor `DE6120` writes
 `0x0147E030` at that subobject, and vtable `0x0147E030 +0x18` is `DE99B0`. Therefore the static
 attachment edge is now:
