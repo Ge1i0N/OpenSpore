@@ -87,7 +87,8 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   claiming original queued-command delivery or successful OnEnter.
 - The adjacent `DFE430` component-activation family contains the exact playable-state candidate:
    event `0x05951103/04` reaches `DFAE20`, which writes local state `+0x20 = 10`, context `+0x28 = 10`
-   and enables `+0x80`. Other bounded IDs map to state 9 (`0x05933FE0..E3`), state 5
+   and enables `+0x80`. Other bounded IDs route to `DF9E30` (`0x05933FE0..E3`), state 9
+   (`0x0733B57F`), state 5
    (`0x073BBA58`) and state 7 (`0x074D0932`). `0x0733FE08` is a separate branch to `DFE1F0`, not
    the state-10 writer. `DF9B00` and `DF9F90` also use `0x05951103/04` in the controller's
    layout-local UI synchronization path. EP1 SPUI record `13754` contains those IDs as concrete
@@ -96,22 +97,36 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - `DFB580` names local state 9 `ReadyToLaunchScenarioForEdit` and state 10
   `ReadyToLaunchScenarioForPlay`. This upgrades the state-10 interpretation from a numeric phase
   to a native controller/UI semantic, but still does not prove runtime click delivery or launch.
-- The controller owner is the observed vtable at `0x0147EDCC`; its `+0x00` method `DFC6C0`
+- The constructor-established primary vtable is `0x0147EDA0`; its `+0x2C` method `DFC6C0`
   requests `GGENewScenariov3` (FNV-1 identity `0x611E869D`) and creates the labelled records
   `choose adventure → 0x05933FE0`, `choose captain name → 0x05933FE1/2`, and
-  `choose posse → 0x05933FE3`. `DFE430` is the vtable's `+0x2C` handler. This identifies the
+  `choose posse → 0x05933FE3`. `DFE430` is the vtable's `+0x58` handler. `0x0147EDCC` was
+  previously mislabeled as a table base; it is the initializer slot inside the primary table. This identifies the
   state-10 path as part of the native Scenario controller, while the object-74 click conversion
   remains Unknown.
 - In EP1 layout record `13754`, the state-10 buttons share parent panels with initializer buttons:
   `0x05951103` and `0x05933FE2` both use parent `1552`; `0x05951104` and `0x05933FE3` both use
   parent `1975`. This is a shipped-layout owner correlation, not runtime click evidence.
-- A secondary controller interface table at `0x0147ED9C` contains `E00170`, `DFBD20`, `DFAE60`,
-  `DFA7E0` and `DFC210`. `E00170` handles internal payload IDs `0x366A930D`/`0x2B978C46` and
-  dispatches existing controller states; it has no direct `0x070D7509` or `0x01654C10` branch.
+- The secondary interface at object `+8` uses `0x0147ED9C`, with one observed slot `E00520`:
+  subtract `8` from ECX, then jump to `E00170`. Adjacent words belong to the primary vtable,
+  not extra secondary methods. `E00170` handles internal payload IDs `0x366A930D`/`0x2B978C46`
+  and dispatches existing controller states; it has no direct `0x070D7509` or `0x01654C10` branch.
 - Constructor `DFB990` writes primary vtable `0x0147EDA0` and secondary interface `0x0147ED9C`,
   while `DE7660` allocates the `0x178`-byte `Simulator` object, invokes the constructor and
-  publishes it at registry slot/index `13` under feature guard `6854E0(2)`. The higher-level
-  caller remains indirect; this is construction evidence, not runtime readiness.
+  invokes primary `+0x2C = DFC6C0`, and publishes it in the ordered map at GGE root `+0x124`
+  under key `13`, guarded by `6854E0(2)`. Direct call `DDE1B0 → DE7660` exists even though
+  the provider does not carve its containing procedure. This is construction evidence, not runtime readiness.
+- `DE8710` selects map[current GGE state], except for the explicit `+0x1EC in 1..5 → key 1`
+  override, and writes the active controller at root `+0x38`. It calls primary exit `+0x10`,
+  enter `+0x0C`, and update `+0x14` (`DFA7E0`, `DFAE60`, `DFC210` for Scenario).
+  `DE99B0` receives **root+4**, so its `+0x34` is active **root+0x38**; its forwarding
+  `+0x58` is `DFE430`. This closes a static GGE-to-Scenario-controller routing edge for the
+  distinct `Galactic Adventures 0x070D74E7 → state 13` branch, not object 74's Play Scenario action.
+- [Controller route evidence](controller-route-evidence.json) retains the new REA observations
+  (`ev_cae5a3b713879dea52342d92d2e1b6a2d1e9ab3cf88ee3f8a8b7c72c662963e5`,
+  `ev_0b6d72174988bb5124ea7649f3db8be93373b783cb62438b7e7bbdfed4d776bf`,
+  `ev_2593c32aa01598cd2a9de96c36b7da110847561da38e09fbe795f60b2bc1f887`,
+  `ev_881b0ef7f732c1e509181dba6bdfde7ef80d68118e038cacb4002d83955345fb`).
 - Retained shipped-binary evidence: [`scenario-mode-current-evidence.json`](scenario-mode-current-evidence.json).
    The focused REA records include `DFE430` (`ev_a8c978345364376176b078d900546eb9cf8ce24596eb4d0e9b4b16011372ed58`),
    controller UI sync (`DF9B00`/`DF9F90`, `ev_6a482fca4d92d699ab63e87065a207d8bba0d74a7655b40f8bb05a1d418e110d`,

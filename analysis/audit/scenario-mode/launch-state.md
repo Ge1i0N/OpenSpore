@@ -77,8 +77,11 @@ The nearby component-activation handler `DFE430` compares payload type
 bounded state writes in that dispatch are:
 
 ```text
-0x05933FE0..0x05933FE3 → state +0x20 = 9
+0x05933FE0..0x05933FE3 → DF9E30 (not a direct state-9 write)
+0x0733B57F             → state +0x20 = 9
 0x05951103/0x05951104 → DFAE20 → state +0x20 = 10, +0x28 = 10, +0x80 = 1
+0x0733FE08             → DFE1F0
+0x0733FE09             → DFA430, then state +0x20 = 6
 0x073BBA58             → state +0x20 = 5
 0x074D0932             → state +0x20 = 7
 ```
@@ -90,8 +93,9 @@ action or by another Scenario UI action; that upstream semantic join remains Unk
 
 The IDs occur in a packed adjacent controller/state data region around `.data 0x015A4318`, together
 with neighboring event identities such as `0x05933FE0..E3`, `0x073BBA58` and `0x074D0932`. The
-selected binary has no direct xref to the absolute data address in the provider's reference result;
-that table remains classified as internal state/event data. Separately, the controller's UI-sync
+table is read with indexed addressing by `DFAE60`/`DFA7E0`, which find these controls through
+`810650` and add/remove the GGE `root +4` WinProc. An empty exact-address xref for an interior
+table word does not exclude these indexed readers. Separately, the controller's UI-sync
 helpers contain explicit uses of the same IDs: `DF9B00` resolves each through `810650` on the
 controller layout and calls the resolved component's vtable `+0x7C(2, param)`, while `DF9F90`
 resolves `0x05951103` and updates it through `+0x7C(1, condition)`. These are UI synchronization
@@ -126,17 +130,22 @@ message delivery, state acceptance, or successful launch.
 
 ## Scenario controller owner and initializer
 
-The state/event handler belongs to the native controller whose vtable starts at `.rdata 0x0147EDCC`.
-The observed first twelve entries are:
+Constructor `DFB990` establishes the primary vtable at `.rdata 0x0147EDA0`, not `0x0147EDCC`.
+The latter is an interior address (primary `+0x2C`). The corrected primary slots are:
 
 ```text
-+0x00 → DFC6C0   +0x04 → DF97A0   +0x08 → E00280   +0x0C → E00610
-+0x10 → DFB420   +0x14 → E00170   +0x18 → DE08B0   +0x1C → DFB440
-+0x20 → DF9810   +0x24 → DFB400   +0x28 → DFB580   +0x2C → DFE430
++0x00 → 1082A20  +0x04 → B267D0   +0x08 → DFBD20
++0x0C → DFAE60   +0x10 → DFA7E0   +0x14 → DFC210
++0x18 → DFB010   +0x1C → E00630   +0x20 → A6C9A0
++0x24 → A6C990   +0x28 → A6C990   +0x2C → DFC6C0
++0x30 → DF97A0   +0x34 → E00280   +0x38 → E00610
++0x3C → DFB420   +0x40 → E00170   +0x44 → DE08B0
++0x48 → DFB440   +0x4C → DF9810   +0x50 → DFB400
++0x54 → DFB580   +0x58 → DFE430
 ```
 
 The table is not being promoted to a C++ class name from an external SDK; this is the observed
-shipped vtable/function relationship. `DFC6C0` is the initializer reached through the first slot.
+shipped vtable/function relationship. `DFC6C0` is the initializer reached through primary `+0x2C`.
 It requests layout name `GGENewScenariov3`, whose lowercase FNV-1 identity is `0x611E869D`, then
 requests the layout through `812250` with group `0x40464100` and mount `0x05B598FA`.
 
@@ -150,7 +159,7 @@ requests the layout through `812250` with group `0x40464100` and mount `0x05B598
 ```
 
 The records are stored in a `0x24`-byte dynamic array through `DFB100`/`DFBFD0`; later UI-sync
-helpers add the same layout's `0x05951103/04` buttons. This is the strongest recovered owner
+helpers find/update the same layout's `0x05951103/04` buttons (not create them). This is a recovered owner
 identity for the state-10 path: `DFE430` is part of the native `GGENewScenariov3` Scenario
 controller, not an unrelated generic event consumer.
 
@@ -175,9 +184,8 @@ objects are serialized `WinButton` instances with `CommandID = 0` in the bounded
 layout ownership/correlation evidence only; it does not establish that GGE object 74 selects one
 of these panels or that a native click was delivered.
 
-The initializer still does not prove the missing upstream click conversion. Its direct caller is
-not resolved by the bounded direct-call result because the vtable slot is invoked indirectly; the
-native object construction/scheduling edge and the route from GGE object 74 remain Unknown.
+The initializer does not prove the missing upstream click conversion. Its virtual caller is now
+resolved below in `DE7660`; this is static dispatch resolution, not observed execution.
 
 ### Constructor and owner registration
 
@@ -201,39 +209,65 @@ DE7660
   → allocate 0x178 (Simulator)
   → DFB990
   → controller vtables 0x0147EDA0 / 0x0147ED9C
-  → vtable +0x2C → DFE430
-  → registry slot 13
+  → primary +0x2C → DFC6C0 (layout initialization, not DFE430)
+  → ordered controller map at GGE root +0x124, key 13
 ```
 
-The direct caller of `DE7660` is not recovered by the bounded direct-call scan, so the higher-level
-owner/scheduler remains indirect. This is still not evidence that GGE object 74 activates the
-controller or that the native registry reached runtime readiness.
+`DDE1B0` is a direct call instruction to `DE7660`, with ECX loaded from GGE global `0x016A1344`.
+The provider does not carve that call site into a containing function; raw call decoding still
+resolves the edge. The enclosing procedure's identity remains Unknown. Registration does not prove
+that GGE object 74 activates the controller or that the native registry reached runtime readiness.
 
 ### Secondary controller interface
 
-The same controller family has a second observed function table at `.rdata 0x0147ED9C`:
+The secondary interface at object `+8` has a single observed slot at `.rdata 0x0147ED9C`:
 
 ```text
 +0x00 → E00520   (this-adjustor thunk to E00170)
-+0x04 → 01082A20 (empty body)
-+0x08 → B267D0   (empty body)
-+0x0C → DFBD20
-+0x10 → DFAE60
-+0x14 → DFA7E0
-+0x18 → DFC210
-+0x1C → DFB010
-+0x20 → E00630
 ```
 
-This is positive multi-interface evidence: update (`DFC210`), teardown/UI synchronization
-(`DFAE60`, `DFA7E0`) and message handling (`E00170`) are adjacent to the Scenario controller's
-`DFC6C0`/`DFE430` table, while direct vtable-slot calls remain indirect.
+`E00520` subtracts `8` from ECX and jumps to `E00170`, restoring the complete-object receiver.
+The following word at `0x0147EDA0` begins the primary table, not a second secondary slot. Earlier
+reports incorrectly counted those adjacent primary methods as secondary-interface entries.
 
 `E00170` is bounded as an internal controller message handler. It checks payload word `+0x04`
 against `0x366A930D` and `0x2B978C46`, rebuilds local per-entry state, and dispatches based on
 controller state `7`, `5` or `1` to `DFAC70`, `DFAD20` or `E00070`. The inspected body contains
 neither `0x070D7509` nor ScenarioMode tag `0x01654C10`; it therefore narrows, but does not close,
 the object-74-to-controller producer boundary.
+
+### GGE state selection, update and UI forwarding
+
+`DE75E0` is an ordered integer-key map lookup/insertion helper, not a fixed array-slot accessor.
+`DE7660` supplies `GGE root +0x124` and key `13`. `DE8710` uses the same map with the current
+GGE state at `root +0x108`. A separate guard overrides the selected key with `1` while
+`root +0x1EC` is in `1..5`; this guard must not be bypassed.
+
+On a selected-object change, `DE8710` calls old primary `+0x10`, stores the new pointer at
+`root +0x38`, then calls new primary `+0x0C`. For key `13`, these are `DFA7E0` (exit/remove
+WinProcs) and `DFAE60` (enter/add WinProcs). Earlier in the same Update body, an existing active
+controller receives primary `+0x14`, resolving to `DFC210` for the Scenario controller.
+
+`DE99B0` is invoked on the GGE WinProc interface, **root +4**. Therefore its receiver-relative
+`+0x34` reads **root +0x38**, the active controller selected above. Its forwarding slot is
+`+0x58`, resolving to `DFE430`. It is not the per-star marker/effect `DF6820` field merely
+because both bodies mention a relative `+0x34`.
+The state-13 writes at `DE9D11/17` likewise use interface-relative `+0x108/+0x104`, hence
+root `+0x10C/+0x108` (requested/current GGE state), matching the `DE8710` selector.
+
+```text
+Galactic Adventures control 0x070D74E7 (not object 74)
+  → DE99B0 guarded state-13 write
+  → DE8710 map[13], unless the explicit key-1 override applies
+  → active controller at GGE root +0x38
+  → DFAE60 attaches GGE root+4 WinProc to Scenario layout controls
+  → later DE99B0 forwards to active primary +0x58 = DFE430
+  → component 0x05951103/04 → DFAE20
+```
+
+These are resolved static edges with normal entry/update/message guards retained. They do not
+observe a native click, successful layout load, readiness, or game launch. The distinct object-74
+`0x070D7509` action remains unjoined; no ID conversion to `0x070D74E7` or `0x05951103/04` is claimed.
 
 ## Direct table-index selection is generic, not the missing UI join
 
@@ -242,7 +276,7 @@ The mode table manager has two selection endpoints:
 ```text
 7D8CF0  find entry by tag at entry +0x04 → index
 7D8D40  validate index → 7D8670(index)
-7D8D20  find entry by name at entry +0x08 → index
+7D8420  find entry by name at entry +0x08 → index
 ```
 
 `7D8670` publishes the mode-change pair around the selected table entry. These endpoints establish
@@ -299,5 +333,6 @@ errors. Focused objdump instructions and the verifier cover the joins instead. P
 implicit `this`/stack arguments; key offsets are checked against instructions.
 
 Reproduction: `python tools/verify_scenario_mode_route.py` or
-`tools/run_scenario_mode_route_verify.bat`. **53** pinned static authority/instruction/script checks
-pass. They do not prove execution, resource availability, ScenarioPlanet creation or gameplay.
+`tools/run_scenario_mode_route_verify.bat`. Guards include constructor-derived vtable slot arithmetic
+and accepted/rejected state-10 IDs, not only byte equality. They do not prove execution, resource
+availability, ScenarioPlanet creation or gameplay. See also [retained controller route evidence](controller-route-evidence.json).

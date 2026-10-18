@@ -7,9 +7,18 @@ no original process was executed. The generated C/instruction pairs are retained
 
 The GGE object vtable at `0x0147E030` contains `0x00DE99B0` at slot `+0x18` (`0x0147E048`).
 The body has the shape of a GGE message listener.
-It first forwards the message to an optional object at controller `+0x34`, requires UTFWin message
+It first forwards the message through receiver `+0x34` (GGE root `+0x38`, because the receiver is
+the root `+4` WinProc interface), requires UTFWin message
 type `0x287259F6` (`kMsgComponentActivated`) at payload word `+0x08`, then calls the component
 payload's vtable `+0x1C` to obtain the component/event ID.
+
+The forwarded object is the active GGE controller selected by `DE8710`, not the per-star
+`DF6820` effect target merely because both use a relative `+0x34`. With map key `13` active,
+forwarding primary `+0x58` resolves to Scenario handler `DFE430`. The corrected construction,
+selection and UI-forwarding edges are retained in the [Scenario controller audit](../scenario-mode/launch-state.md).
+
+Offsets in the following handler-effect table are `DE99B0` receiver-relative. In particular,
+`+0x104/+0x108` mean complete-root `+0x108/+0x10C` (current/requested GGE state).
 
 Observed GA branches:
 
@@ -148,7 +157,7 @@ target's `+0x90 = this`, `+0x94 = arg1`, and `+0x98 = arg2`. This is positive se
 the dynamic callback binding, but its caller/target population is not statically joined to GGE
 object 74 or `Play Scenario`.
 
-The attached `object +0x04` is not an analyst-invented callback: constructor `DE6120` writes
+The attached `object +0x04` is not an analyst-invented callback: lifecycle body `DE6120` writes
 `0x0147E030` at that subobject, and vtable `0x0147E030 +0x18` is `DE99B0`. Therefore the static
 attachment edge is now:
 
@@ -219,6 +228,12 @@ CommandID if nonzero, otherwise ControlID
 ```
 
 ### DE99B0 forwarded-listener field
+
+**Historical interpretation superseded:** the following `DF6820`/effect investigation conflated
+receiver-relative offsets. `DE99B0`'s `this+0x34` is complete GGE root `+0x38`, populated by
+`DE8710` map selection. `DF6820` is a distinct per-star/effect receiver. It is not the setter of
+that active-controller field. Read these historical scans with this correction, not as a second
+current GGE forwarding route. `DE60A0` likewise does not by itself establish GGE-root coordinates.
 
 `DE99B0` first checks controller/object field `+0x34` and, when non-null, forwards the incoming
 message through that object's vtable `+0x58` before applying its own component-ID branches. The

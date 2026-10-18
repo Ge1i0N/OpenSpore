@@ -38,6 +38,13 @@ def verify() -> None:
             raise ValueError(f"direct call mismatch at {address:#010x}")
         checks += 1
 
+    def vslot(base: int, offset: int, target: int) -> None:
+        nonlocal checks
+        actual = int.from_bytes(pe.read(base + offset, 4), "little")
+        if actual != target:
+            raise ValueError(f"vtable slot mismatch {base:#x}+{offset:#x}: {actual:#x}")
+        checks += 1
+
     # Table-driven producer: old OnExit, select index, new tag / old tag,
     # pre-enter notification, then new object's OnEnter.
     exact(0x7D86CF, "8b 01 8b 50 1c ff d2")
@@ -117,6 +124,15 @@ def verify() -> None:
     # recognizes 0x05951103/0x05951104 and routes to DFAE20. The adjacent
     # 0x0733FE08 branch is a different DFE1F0 action.
     exact(0xDFE517, "05 fd ee 6a fa 83 f8 01 0f 87")
+    addend = int.from_bytes(pe.read(0xDFE518, 4), "little")
+    for component, expected in ((0x05951103, True), (0x05951104, True),
+                                (0x05951102, False), (0x05951105, False),
+                                (0x0733FE08, False), (0x0733FE09, False),
+                                (0x070D7509, False), (0, False), (0xFFFFFFFF, False)):
+        accepted = ((component + addend) & 0xFFFFFFFF) <= 1
+        if accepted != expected:
+            raise ValueError(f"state-10 arithmetic mismatch for {component:#x}")
+        checks += 1
     exact(0xDFE53A, "e8 e1 c8 ff ff 5f b0 01")
     call(0xDFE53A, 0xDFAE20)
     exact(0xDFAE31, "b8 0a 00 00 00 89 46 20 c6 86 80 00 00 00 01")
@@ -135,9 +151,8 @@ def verify() -> None:
     exact(0x147EBEC, "52 00 65 00 61 00 64 00 79 00 54 00 6f 00 4c 00 61 00 75 00 6e 00 63 00 68 00 53 00 63 00 65 00 6e 00 61 00 72 00 69 00 6f 00 46 00 6f 00 72 00 45 00 64 00 69 00 74 00")
     exact(0x147EBB0, "52 00 65 00 61 00 64 00 79 00 54 00 6f 00 4c 00 61 00 75 00 6e 00 63 00 68 00 53 00 63 00 65 00 6e 00 61 00 72 00 69 00 6f 00 46 00 6f 00 72 00 50 00 6c 00 61 00 79 00")
 
-    # Native GGENewScenariov3 controller owner: observed vtable and
-    # initializer/layout identity. The vtable is an artifact relationship,
-    # not an inferred external class name.
+    # This block begins INSIDE the primary vtable (base+0x2C), not at a
+    # separate vptr. Constructor-derived slot arithmetic is checked below.
     exact(0x147EDCC, "c0 c6 df 00 a0 97 df 00 80 02 e0 00 10 06 e0 00 20 b4 df 00 70 01 e0 00 b0 08 de 00 40 b4 df 00 10 98 df 00 00 b4 df 00 80 b5 df 00 30 e4 df 00")
     exact(0xDFC6C7, "b8 68 ee 47 01 33 db")
     exact(0xDFC6E8, "50 8d 77 38 68 68 ee 47 01")
@@ -146,8 +161,9 @@ def verify() -> None:
     exact(0xDFC7F3, "c7 44 24 30 05 4d 38 05")
     exact(0xDFC7FB, "c7 44 24 34 e0 3f 93 05")
 
-    # Secondary controller interface table and its internal message handler.
-    exact(0x147ED9C, "20 05 e0 00 20 2a 08 01 d0 67 b2 00 20 bd df 00 60 ae df 00 e0 a7 df 00 10 c2 df 00 10 b0 df 00 30 06 e0 00")
+    # Secondary interface has one observed slot, immediately before primary.
+    vslot(0x147ED9C, 0, 0xE00520)
+    exact(0xE00520, "83 e9 08 e9 48 fc ff ff")
     exact(0xE00182, "8b 48 04 81 f9 0d 93 6a 36 75 76")
     exact(0xE001DD, "83 f8 05 75 0e 8b 4c 24 0c 51")
     exact(0xE001E7, "8b cf e8 32 ab ff ff eb 3c")  # state 5 -> DFAD20
@@ -156,9 +172,54 @@ def verify() -> None:
     # Native Scenario controller construction/registration boundary.
     exact(0xDFB996, "e8 65 4c 00 00 c7 46 08 88 49 41 01")
     exact(0xDFB9A4, "c7 06 a0 ed 47 01 c7 46 08 9c ed 47 01")
-    exact(0xDE7702, "68 a8 00 00 00 89 18 e8 32 fb 15 00")
-    exact(0xDE7883, "e8 b8 f9 15 00 83 c4 18 3b c5")
-    exact(0xDE78AC, "c7 44 24 14 0b 00 00 00 e8 27 fd ff ff")
+    primary = int.from_bytes(pe.read(0xDFB9A6, 4), "little")
+    for offset, target in ((0x0C, 0xDFAE60), (0x10, 0xDFA7E0),
+                           (0x14, 0xDFC210), (0x2C, 0xDFC6C0),
+                           (0x40, 0xE00170), (0x58, 0xDFE430)):
+        vslot(primary, offset, target)
+    exact(0xDE793F, "6a 02 89 18")
+    call(0xDE7943, 0x6854E0)
+    exact(0xDE794B, "84 c0 74 46")
+    exact(0xDE7958, "68 78 01 00 00")
+    call(0xDE795D, 0xF47240)
+    call(0xDE796B, 0xDFB990)
+    exact(0xDE7976, "8b 13 8b 42 2c 8b cb ff d0")
+    exact(0xDE7986, "c7 44 24 14 0d 00 00 00")
+    call(0xDE798E, 0xDE75E0)
+    exact(0xDE7993, "89 18")
+    exact(0xDDE1AA, "8b 0d 44 13 6a 01")
+    call(0xDDE1B0, 0xDE7660)
+
+    # GGE map selection and active controller: preserve key-1 override.
+    exact(0xDE89EE, "8d ae 24 01 00 00 57 8b cd")
+    call(0xDE89F7, 0xDE75E0)
+    exact(0xDE89FE, "8b 86 ec 01 00 00 48 83 f8 04 77 16")
+    exact(0xDE8A11, "c7 44 24 3c 01 00 00 00")
+    call(0xDE8A19, 0xDE75E0)
+    exact(0xDE8A2C, "8b 01 8b 50 10 ff d2")
+    exact(0xDE8A33, "89 7e 38")
+    exact(0xDE8A3A, "8b 07 8b 50 0c 8b cf ff d2")
+    exact(0xDE8771, "8b 4e 38 3b cb 74 0f")
+    exact(0xDE877E, "8b 42 14 51 d9 1c 24 ff d0")
+
+    # UI receiver is root+4, so its +0x34 aliases active root+0x38.
+    # Do not merge this with the per-star DF6820 effect receiver's +0x34.
+    exact(0xDE6BAA, "c7 46 04 30 e0 47 01")
+    vslot(0x147E030, 0x18, 0xDE99B0)
+    exact(0xDE99D8, "8b 4e 34")
+    exact(0xDE99EA, "8b 52 58 57 50 ff d2")
+    exact(0xDE9D0C, "b8 0d 00 00 00 89 86 08 01 00 00 89 86 04 01 00 00")
+    exact(0xDFAE70, "8b 86 18 43 5a 01 6a 01 50 8b cb")
+    call(0xDFAE7B, 0x810650)
+    exact(0xDFAE84, "a1 44 13 6a 01 85 c0 74 05 8d 78 04")
+    exact(0xDFAEA8, "8b 82 04 01 00 00 57 ff d0")
+    exact(0xDFAEB1, "83 c6 04 81 fe 80 00 00 00 72 b4")
+    # Both playable IDs are within that indexed 32-control attachment table.
+    control_table = [int.from_bytes(pe.read(0x15A4318 + i * 4, 4), "little")
+                     for i in range(32)]
+    if control_table[19:21] != [0x05951103, 0x05951104]:
+        raise ValueError("playable controls missing from native attachment table")
+    checks += 1
 
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
@@ -171,7 +232,7 @@ def verify() -> None:
     call(0xEF2220, 0xEF11F0)
 
     print(f"PASS: {checks} static authority/instruction guards")
-    print("Unknown: Play Scenario -> table-index selection; native execution/readiness")
+    print("Unknown: object-74 Play Scenario action; native execution/readiness")
 
 
 if __name__ == "__main__":

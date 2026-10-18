@@ -87,14 +87,13 @@ DE5900 callers:
 `DE5900` is therefore only reached directly from the already mapped
 `GalaxyGameEntry` activation-shaped path `DEA1B0`; this supports its lifecycle/UI-initialization
 classification rather than a button producer role. `DE48C0` is reached from that initialization
-via `DE5A86` and from the separate `DE8A71` helper/update path. No direct caller from the bounded
+via `DE5A86` and from the `DE8A71` call instruction inside `DE8710`. No direct caller from the bounded
 UTFWin Button/CommandID route was found in this inventory.
 
-`DE8A71` itself has no direct `E8` caller in the selected `.text`, and its exact entry/dispatch
-owner was not recovered from simple `.rdata`/`.data` function-pointer scans. The bounded body still
-shows a state `+0x108/+0x10C` normalization path followed by `DE44A0` and `DE48C0`. Its dispatch
-mechanism therefore remains Unknown; it is not renamed to a vtable slot or per-frame callback from
-this negative search.
+`DE8A71` is an interior call instruction in `DE8710`, not a separate function entry needing its own
+caller. The full Update-shaped body normalizes `+0x108/+0x10C`, selects a controller from the
+ordered map at root `+0x124`, switches root `+0x38` with exit/enter virtual calls, then invokes
+`DE44A0` and `DE48C0`. See the [corrected controller route](../scenario-mode/launch-state.md).
 
 ### Adjacent GGE message-handler slot
 
@@ -164,6 +163,7 @@ functions. `DE99B0` remains the observed event-listener/state branch; `DE8A80` i
 internal message-handler interface. This structural connection still does not identify the
 upstream `Play Scenario` producer or a ScenarioMode post.
 
+**Historical interpretation, superseded by receiver-coordinate correction below.**
 `DE99B0`'s optional forward target is also bounded separately: its controller/object `+0x34` is
 zeroed with neighboring `+0x30/+0x38` by the base initialization at `DE60A0`. No direct population
 write was found in the inspected GGE constructor path, so the alternate forwarded listener route
@@ -200,6 +200,21 @@ ScenarioMode handoff without a separate payload and target observation.
 `DF9160` is the matching per-record cleanup path: it sends the effect's internal message `9`, then
 releases and clears the target. This lifecycle symmetry reinforces the effect/marker classification,
 while leaving the Play Scenario producer and selected-star-to-ScenarioMode boundary unresolved.
+
+### Receiver-coordinate correction (2026-10-18)
+
+`DE99B0` receives the attached GGE WinProc interface at **GGE root +4**, not the complete root.
+Its relative `+0x34` therefore reads **root +0x38**, the active controller selected by `DE8710`.
+The forwarding slot `+0x58` resolves to `DFE430` when key `13` selects the Scenario controller.
+`DF6820` accesses a different receiver's relative `+0x34` in marker/effect infrastructure. Its
+callers do not establish writers of the GGE active-controller field. The earlier shared-offset
+interpretation above is retained only as superseded investigation history.
+
+`DE8710` is now a resolved writer: map at root `+0x124`, key current state `+0x108`, conditional
+override to key `1` when `+0x1EC` is in `1..5`; then old exit `+0x10`, store root `+0x38`, new
+enter `+0x0C`. `DE7660` registers the `DFB990` Scenario instance under key `13`. The distinct
+`0x070D74E7` event writes state `13`; the `0x070D7509` action remains unjoined. These are static
+edges, not native execution or readiness observations.
 
 ### Constructor boundary
 
