@@ -309,9 +309,10 @@ Focused instruction inspection resolves the generic selection machinery:
    `+0x28 = 7D8CF0` searches tags at entry `+0x04` and calls `7D8670` on a match; a miss returns
    false, not a fallback index. The earlier [mode-message route](message-route.md) then applies.
 
-This supplies name-based and tag-based selection endpoints. The state command-list executor and
-actual delivery are not re-established end-to-end here: script/registration, command producer,
-listener branch and setters remain separate static observations, not a runtime trace. SDK names
+This supplies name-based and tag-based selection endpoints. The later
+[startup dispatch audit](../../startup-state-dispatch.md) supplies the command-list executor
+`7E3BF0 → 7E2D90` and its message-service calls. Actual delivery/scheduling and successful
+activation remain unobserved; these are linked static endpoints, not a runtime trace. SDK names
 `kMsgSetGameModeByName`/`SetActiveMode` are semantic corroboration only; addresses and calls above
 come from the selected binary.
 

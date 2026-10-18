@@ -127,8 +127,9 @@ logic, not proof that the requested state, GGE UI or a playable world completed 
 ## Next boundary
 
 The coarse startup gap is now connected: native manager creation → grammar registration →
-trigger parser invocation → state-record indexing → initial-state request. The next focused
-startup pass should trace parser `+0x3C` dispatch to these callbacks and `7E3BF0` through
-`Main`'s `gotoState` action to the mode activation path, keeping each runtime outcome Unknown.
+trigger parser invocation → state-record indexing → initial-state request. The continuation
+[startup-state-dispatch.md](startup-state-dispatch.md) traces parser `+0x3C`, callback resolution,
+the switch/action executor and `Main`'s message-based `gotoState` to the mode activation endpoints.
+Message delivery/order and every runtime outcome remain Unknown.
 The lexer, every action handler, actual mounts, graphics/world readiness and Scenario launch
 delivery are not claimed complete by this audit.
