@@ -101,6 +101,10 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   panel skips, pending-to-selected key promotion, state 8 `WaitingForAutoPollinate`, and the
   separate internal-message wait route. Selected key, name and `EC42D0` conditions feed UI gates;
   resource-service readiness and notification delivery are not assumed.
+- The [launch-gates audit](launch-gates.md) separates waiting subphases `0/1/2`, service/list
+  guards, presentation latch `0x016A0B04` and countdown. Ten decrementing Update calls return;
+  only a later call observing zero can reach completion. The latch has a timed presentation
+  writer and an alternative lookup-miss write, so it must not be treated as universal resource readiness.
 - The constructor-established primary vtable is `0x0147EDA0`; its `+0x2C` method `DFC6C0`
   requests `GGENewScenariov3` (FNV-1 identity `0x611E869D`) and creates the labelled records
   `choose adventure → 0x05933FE0`, `choose captain name → 0x05933FE1/2`, and

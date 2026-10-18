@@ -15,6 +15,11 @@ DFC210: after its guards/countdown, local state 9 or 10
   → StateManager +0x28(0x21851EBE)
 ```
 
+The [launch-gates audit](launch-gates.md) resolves those prerequisites: waiting subphases,
+service/list predicates, presentation latch and a decrement-and-return countdown. A countdown
+transition `1 → 0` does not call `DFBD40` until a subsequent Update sees zero; no resource-readiness
+shortcut or native save-writing probe is permitted.
+
 `0x21851EBE` is the lowercase FNV-1 state-name identity of `ScenarioMode`, not its mode tag
 `0x01654C10`. The retained shipped [state script](../../scripts/SporeAppStates.txt) contains:
 

@@ -16,6 +16,53 @@ from tools.pe import PE
 AUTHORITY = "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7"
 
 
+def countdown_tail(pe: PE, countdown: int, state: int) -> tuple[str, int]:
+    """Interpret only DFC210's pinned countdown tail; never run PE/services.
+
+    Caller must already have selected +0x80 == 0, local state != 11.
+    The count/state arguments are controlled verifier inputs, not native state.
+    """
+    pc, eax, zero = 0xDFC473, 0, False
+    countdown &= 0xFFFFFFFF
+    for _ in range(32):
+        if pc == 0xDFC493:
+            return "other-state-route", countdown
+        data = pe.read(pc, 6)
+        if data[:3] in (b"\x8b\x45\x28", b"\x8b\x45\x20"):
+            eax = countdown if data[2] == 0x28 else state & 0xFFFFFFFF
+            pc += 3
+        elif data[:2] == b"\x85\xc0":  # TEST clears CF; JBE below means ZF.
+            zero = eax == 0
+            pc += 2
+        elif data[:3] == b"\x83\xf8\x0a" or data[:3] == b"\x83\xf8\x09":
+            zero = eax == data[2]
+            pc += 3
+        elif data[0] in (0x74, 0x76):
+            pc += 2 + (int.from_bytes(data[1:2], "little", signed=True) if zero else 0)
+        elif data[0] == 0x48:  # DEC EAX
+            eax = (eax - 1) & 0xFFFFFFFF
+            pc += 1
+        elif data[:3] == b"\x89\x45\x28":
+            countdown = eax
+            pc += 3
+        elif data[0] in (0x5E, 0x5D):  # POP ESI/EBP: no abstract state effect.
+            pc += 1
+        elif data[:3] == b"\x83\xc4\x44":
+            pc += 3
+        elif data[:3] == b"\xc2\x04\x00":
+            return "returned", countdown
+        elif data[:2] == b"\x8b\xcd":
+            pc += 2
+        elif data[0] == 0xE8:
+            target = pc + 5 + int.from_bytes(data[1:5], "little", signed=True)
+            if target != 0xDFBD40:
+                raise ValueError(f"unexpected countdown-tail call {target:#x}")
+            return "completion-call", countdown
+        else:
+            raise ValueError(f"unsupported countdown-tail instruction at {pc:#x}")
+    raise ValueError("countdown-tail instruction budget exceeded")
+
+
 def verify() -> None:
     pe = PE()
     if hashlib.sha256(pe.raw).hexdigest() != AUTHORITY:
@@ -349,6 +396,62 @@ def verify() -> None:
     # branch. It never changes the component activation ControlID to GA ID.
     exact(0x964181, "8b 86 14 02 00 00 83 f8 02 74 19 83 f8 03 74 14")
     exact(0x9641B7, "c7 44 24 2c 18 00 00 00")
+
+    # Launch waiting subphases are not skipped by a zero countdown.
+    call(0xDFAE23, 0xDF9AA0)
+    call(0xDFAE2C, 0xDFAAF0)
+    exact(0xDFAE59, "e9 52 ed ff ff")  # tail-jump DF9BB0
+    exact(0xDF9BF8, "c7 46 78 00 00 00 00")
+    call(0xDF9C41, 0xDDBA70)
+    exact(0xDFC246, "83 7d 20 0b 0f 84 71 02 00 00")
+    exact(0xDFC32D, "80 bd 80 00 00 00 00 0f 84 39 01 00 00")
+    call(0xDFC345, 0x93A310)
+    exact(0x145BE38, "00 00 00 3f")  # 0.5 threshold, not a frame count.
+    exact(0xDFC356, "d8 4e 14 d9 05 38 be 45 01 d9 c9 df f1 dd d8 76 10")
+    call(0xDFC36B, 0xDFA760)
+    exact(0xDFC370, "c7 45 78 01 00 00 00")
+    exact(0xDFC385, "e8 d6 10 d4 ff 83 c0 20 39 00 74 02 32 db")
+    exact(0xDFC39C, "8b 42 28 ff d0 85 c0 7e 02 32 db")
+    call(0xDFC3B0, 0xEC42D0)
+    exact(0xDFC3B5, "84 c0 75 07 84 db 74 03 89 75 78")
+    exact(0xDFC3C1, "39 75 78 0f 85 f6 00 00 00")
+    call(0xDFC3D1, 0xDD9140)
+    exact(0xDD9140, "a0 04 0b 6a 01 c3")
+    exact(0xDFC3D6, "84 c0 0f 84 e2 00 00 00")
+    exact(0xDFC3E4, "c6 85 80 00 00 00 00 c7 45 28 0a 00 00 00")
+    call(0xDFC466, 0xE3E350)
+    exact(0xDFC46B, "5e 5d 83 c4 44 c2 04 00")
+    exact(0xEC42D0, "33 c0 83 79 1c 01 0f 94 c0 c3")
+
+    # Latch provenance: reset, alternate write and the uncarved timed phase.
+    exact(0xDDBA7C, "33 db")
+    exact(0xDDBA87, "88 1d 04 0b 6a 01")
+    exact(0xDDBDC7, "c6 05 04 0b 6a 01 01")
+    vslot(0x147D1F0, 0, 0xDD96F0)
+    vslot(0x147D1F0, 4, 0xDD9740)
+    exact(0x15A2DB0, "f0 d1 47 01")
+    exact(0xDDD655, "c7 44 24 14 b0 2d 5a 01")
+    exact(0xDDD673, "c7 01 b0 2d 5a 01")
+    call(0xDD97C5, 0x93A310)
+    exact(0xDD97D6, "b0 01 d8 4e 14 5e d9 e8 d9 c9 df f1 dd d8 76 05 a2 04 0b 6a 01")
+
+    # Zero is observed on the next Update, not when DEC first produces zero.
+    exact(0xDFC473, "8b 45 28 85 c0 76 0c 48 5e 89 45 28 5d 83 c4 44 c2 04 00")
+    for state in (0, 1, 8, 9, 10, 12):
+        for count in (0, 1, 10, 0xFFFFFFFF):
+            expected = (("returned", count - 1) if count else
+                        ("completion-call" if state in (9, 10) else "other-state-route", 0))
+            if countdown_tail(pe, count, state) != expected:
+                raise ValueError(f"countdown-tail mismatch state={state} count={count}")
+            checks += 1
+    count = 10
+    for _ in range(10):
+        action, count = countdown_tail(pe, count, 10)
+        if action != "returned":
+            raise ValueError("countdown completion occurred during decrement")
+    if count != 0 or countdown_tail(pe, count, 10) != ("completion-call", 0):
+        raise ValueError("countdown did not complete on the following Update")
+    checks += 1
 
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
