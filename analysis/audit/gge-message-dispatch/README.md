@@ -119,6 +119,14 @@ DE5900 → 812250 → 8121C0
   → 811C20 window registration
 ```
 
+The `8106C0` replacement lookup is an ordered-container lookup, not an opaque global callback
+service. It passes the requested three-word layout/resource key into `E5C780`, which walks the
+ordered tree rooted at `[container +0x0C]` against the sentinel at `[container +0x10]`. On a match,
+`8106C0` converts the tree node through its `+0x14` record link and returns the record's `+0x08`
+object; a sentinel/miss returns null. This explains the concrete source of the owner/root object
+selected by `00812100`, while leaving the later callback-field population and Play Scenario semantic
+binding separate.
+
 `811C70` is the adjacent synchronization path: it calls `811C20`, then invokes the owner callback
 at `+0x8C` when present and initializes resource key `0x2FBF2058`. These callbacks belong to the
 layout/display lifecycle. They are the next native owner-callback boundary, but no static evidence
