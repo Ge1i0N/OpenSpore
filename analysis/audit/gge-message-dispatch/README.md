@@ -86,6 +86,22 @@ active UILayout owner/root + component span
 ComboBoxDrawable `+0x30/+0x34` setters and not evidence of a Play Scenario producer. The semantic
 owner object and its later message callback remain Unknown.
 
+The owner acquisition lifecycle is also bounded:
+
+```text
+DE5900 → 812250 → 8121C0
+  → create/select UI/LayoutObjects (+0x14)
+  → copy caller-supplied layout key fields
+  → 812100
+  → replace owner/root at +0x88 via 8106C0 when needed
+  → 811C20 window registration
+```
+
+`811C70` is the adjacent synchronization path: it calls `811C20`, then invokes the owner callback
+at `+0x8C` when present and initializes resource key `0x2FBF2058`. These callbacks belong to the
+layout/display lifecycle. They are the next native owner-callback boundary, but no static evidence
+assigns them the `Play Scenario` payload or a ScenarioMode request.
+
 The attached `object +0x04` is not an analyst-invented callback: constructor `DE6120` writes
 `0x0147E030` at that subobject, and vtable `0x0147E030 +0x18` is `DE99B0`. Therefore the static
 attachment edge is now:
