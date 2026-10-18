@@ -90,8 +90,9 @@ with neighboring event identities such as `0x05933FE0..E3`, `0x073BBA58` and `0x
 selected binary has no direct xref to the absolute data address in the provider's reference result;
 the table is therefore classified as internal state/event data, not a recovered UI layout resource.
 The IDs are not producer immediates in `.text`; DFE430 recognizes the pair through the bounded
-arithmetic branch (`uStack_c + 0xFA6AEEFD < 2`), giving exact values `0x05951103/04`. The handler
-payload remains a dynamic/component context. This does not establish that the IDs are absent from
+arithmetic branch (`uStack_c + 0xFA6AEEFD < 2`), giving exact values `0x05951103/04`. The adjacent
+`0x0733FE08` branch calls `DFE1F0`, not `DFAE20`; it is a separate UI action. The handler payload
+remains a dynamic/component context. This does not establish that the state-10 IDs are absent from
 the shipped UI layout.
 
 ## Direct table-index selection is generic, not the missing UI join

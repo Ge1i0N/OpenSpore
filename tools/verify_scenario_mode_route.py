@@ -114,7 +114,8 @@ def verify() -> None:
     checks += 2
 
     # Exact playable controller phase writer: DFE430's arithmetic branch
-    # recognizes 0x05951103/0x05951104 and routes
+    # recognizes 0x05951103/0x05951104 and routes to DFAE20. The adjacent
+    # 0x0733FE08 branch is a different DFE1F0 action.
     # through DFAE20 and enters local state 10.
     exact(0xDFE517, "05 fd ee 6a fa 83 f8 01 0f 87")
     exact(0xDFE53A, "e8 e1 c8 ff ff 5f b0 01")

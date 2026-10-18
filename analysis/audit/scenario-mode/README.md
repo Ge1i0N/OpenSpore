@@ -88,8 +88,9 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
 - The adjacent `DFE430` component-activation family contains the exact playable-state candidate:
   event `0x05951103/04` reaches `DFAE20`, which writes local state `+0x20 = 10`, context `+0x28 = 10`
   and enables `+0x80`. Other bounded IDs map to state 9 (`0x05933FE0..E3`), state 5
-  (`0x073BBA58`) and state 7 (`0x074D0932`). The event-to-Play-Scenario semantic join remains
-  Unknown because no `0x070D7509` comparison is present.
+  (`0x073BBA58`) and state 7 (`0x074D0932`). `0x0733FE08` is a separate branch to `DFE1F0`, not
+  the state-10 writer. The event-to-Play-Scenario semantic join remains Unknown because no
+  `0x070D7509` comparison is present.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
