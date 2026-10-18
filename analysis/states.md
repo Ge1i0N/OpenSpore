@@ -192,6 +192,11 @@ and invokes the switch body. The nesting diagnostic guards script declarations, 
 runtime switch reentrancy. Message delivery timing, native chain limits and the `00E1132D`
 pending-field event producer remain unresolved. The host's 32-hop cap is a host policy.
 
+**Message-service continuation:** [startup-message-delivery.md](startup-message-delivery.md)
+resolves `00E1132D` as the console `state -next` direct-listener call and identifies queued
+delivery from the app frame. State-manager constructor policy is zero (queued actions);
+startup clears the service's drain-until-empty flag. Actual activation remains unobserved.
+
 `endChain` (`0x014130f8`) sits in the same .rdata cluster as `entry`/`exit`/`onExit`/`transition`, and
 `Main`'s body is a bare `gotoState` with no `entry` block — so a state's transition fires as part of
 entering it. But the state-ADD path asserts `can't nest states or transitions` (`0x014135dc`, at

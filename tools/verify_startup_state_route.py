@@ -193,6 +193,77 @@ def verify() -> None:
     slot(0x141332C, 0, 0x7E4690)
     exact(0x7E46F1, "c7 46 30 33 13 e1 00")
 
+    # Message-service identity: construction/publication, not SDK-address substitution.
+    exact(0x67DC80, "a1 90 d8 5f 01 c3")
+    exact(0x67DE70, "8b 44 24 04 a3 90 d8 5f 01 c3")
+    exact(0x7E8ECB, "68 c8 00 00 00")
+    call(0x7E8EED, 0x884B10)
+    exact(0x884B17, "c7 06 c0 7a 42 01")
+    exact(0x7E8EF6, "89 46 14")
+    call(0x7E8F1B, 0x883960)
+    call(0x7E8F24, 0x67DE70)
+    for off, target in [(0x10, 0x883A00), (0x14, 0x8854A0),
+                        (0x18, 0x885980), (0x34, 0x8841F0), (0x38, 0x8847F0)]:
+        slot(0x1427AC0, off, target)
+
+    # Startup option 4 clears +C3: do not infer drain-until-empty from constructor alone.
+    exact(0x884B99, "88 9e c0 00 00 00 88 9e c1 00 00 00 88 9e c2 00 00 00")
+    exact(0x884BAB, "88 9e c3 00 00 00 88 9e c4 00 00 00 88 9e c5 00 00 00")
+    exact(0x7E8F0E, "8b 42 10 6a 00 6a 04 ff d0")
+    slot(0x883A78, 3 * 4, 0x883A44)
+    exact(0x883A44, "83 7c 24 08 00 0f 95 c2 88 91 c3 00 00 00 c2 08 00")
+    exact(0x7E52F7, "33 c9")
+    exact(0x7E5317, "89 48 14")  # ECX zeroed by ctor; policy defaults to queued.
+
+    # +14 invokes callbacks before returning, including the listener-snapshot route.
+    exact(0x8854B0, "85 c9 74 21")
+    exact(0x8854BB, "8b 01 8b 40 04")
+    exact(0x8854C9, "ff d0 5b 81 c4 2c 0a 00 00 c2 0c 00")
+    exact(0x885570, "80 bb c1 00 00 00 00")
+    exact(0x88557C, "80 bb c0 00 00 00 00")
+    exact(0x885685, "8b 52 04 50 55 ff d2")
+    exact(0x88569B, "50 51 55 ff d2")
+
+    # +18 stores six dwords; order-value insertion compares signed +0C fields.
+    exact(0x8859CA, "8b 4c 24 30 8b 44 24 28")
+    exact(0x8859E2, "89 6c 24 14 89 7c 24 18")
+    call(0x8859FA, 0x885800)
+    exact(0x885830, "8b 75 0c 83 e8 18 39 70 0c")
+    exact(0x88583D, "0f 8d f1 00 00 00")
+    exact(0x885934, "8d 42 18")
+    exact(0x885943, "8b 45 00 89 02")
+    exact(0x885960, "8b 4d 14 89 4a 14")
+
+    # Pump removes record first, then targeted/function/broadcast delivery; C3 loop switch.
+    call(0x88489D, 0x884640)
+    exact(0x884671, "8b 46 08 83 c0 18")
+    exact(0x88467C, "89 46 08 b0 01")
+    exact(0x8848E1, "8b 03 8b 50 04 55 51 8b cb ff d2")
+    exact(0x88490C, "50 55 51 ff d3")
+    exact(0x88492D, "8b 06 8b 50 14 6a 00 55 51 8b ce ff d2")
+    exact(0x884951, "80 be c3 00 00 00 00 0f 85 22 ff ff ff")
+    exact(0x88496D, "8b 4e 68 3b 4c 24 14 0f 82 06 ff ff ff")
+    exact(0x8841FC, "38 9e c2 00 00 00")
+    exact(0x884282, "8b 16 8b 42 38 8b ce ff d0")
+
+    # Outer frame pump occurs before AppMode update; distinct from shutdown use.
+    call(0xF478E5, 0x67DC80)
+    exact(0xF478EA, "8b 10 8b c8 8b 42 38 ff d0")
+    exact(0xF4793C, "8b 4e 20 8b 11 8b 42 78 53 ff d0")
+    slot(0x1413B50, 0x78, 0x7E9E80)
+    exact(0x7EA24C, "8b 4d 34 85 c9 74 07 8b 01 8b 50 18 ff d2")
+
+    # Found E1132D producer is console -next, direct listener call, not frame posting.
+    slot(0x14137BC, 0, 0x7E4FF0)
+    exact(0x7E4F9E, "68 60 37 41 01 6a 01 68 58 37 41 01")
+    text(0x1413758, "-next^")
+    exact(0x7E5119, "d1 e8 a8 01 74 14")
+    exact(0x7E511F, "8b 46 10 8b 50 04 8d 48 04 8b 42 04 57 68 2d 13 e1 00 ff d0")
+    exact(0x7E514E, "68 2e 13 e1 00 ff d0")
+    if list(pe.refs_to(0xE1132D)) != [0x7E512D]:
+        raise ValueError("bounded .text E1132D immediate inventory changed")
+    checks += 1
+
     # Negative controls for prior timing/slot conflation.
     exact(0xE310C0, "33 c0 c3")
     exact(0x571E67, "ff 15 b8 c2 3c 01")

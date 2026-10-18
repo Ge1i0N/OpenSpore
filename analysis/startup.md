@@ -146,6 +146,13 @@ So the engine's frame/event pump is: `PeekMessageW` -> (WM_QUIT check) -> dispat
 window-event handlers -> `TranslateMessage` -> `DispatchMessageW`, repeated until the queue is
 empty, then return 1 (the caller loops). `PM_REMOVE = 1`.
 
+The Win32 pump is separate from the app's **queued-message pump**: frame routine `F477D0`
+calls `67DC80` at `F478E5` and service virtual `+0x38 = 8847F0` at `F478F1`, before AppMode
+update (`F47945`, AppMode `+0x78 = 7E9E80`). See
+[startup-message-delivery.md](startup-message-delivery.md) for queued state actions and the
+startup setting that disables drain-until-empty. These static call sites do not prove a
+successful native frame or playable tick.
+
 Note there are **two** PeekMessage users: this main loop uses **`PeekMessageW`** (via `edi`), while
 the mouse-coalescing helper `0x84a050` uses **`PeekMessageA`** directly (IAT 0x13cc5f0). That is why
 a search for direct callers of the pump missed the loop: the loop calls `PeekMessageW` through a

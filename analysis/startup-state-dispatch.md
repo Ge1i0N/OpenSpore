@@ -128,6 +128,9 @@ the declaration/parser staging state. It does not by itself establish a runtime 
 guard or prove the host's queued `request_goto()` / 32-hop cap reproduces native scheduling.
 No host runtime code or gameplay-readiness status is changed in this pass.
 
-Next: identify the message service's `+0x14/+0x18` implementations and the `00E1132D` producer,
-then trace ordering into the already-known mode activation phases. World/stage readiness,
-GGE object-74 launch delivery and actual successful parser execution remain Unknown.
+Continuation: [startup-message-delivery.md](startup-message-delivery.md) resolves the concrete
+service, same-call versus queued delivery, the outer frame pump, and the console `state -next`
+producer of `00E1132D`. The delivery-time Unknown labels above describe this earlier pass;
+service mechanics are now statically resolved, but actual runtime delivery remains Unknown.
+World/stage readiness, GGE object-74 launch delivery and actual successful parser execution
+also remain Unknown.
