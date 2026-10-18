@@ -191,6 +191,19 @@ target produced by its current entry/event path. Neither bounded caller contains
 `0x070D7509` or `0x070D74E7` immediate, so the target identity and Play Scenario relation remain
 Unknown.
 
+The owner source is now separated from per-entry object creation. `DF9288` creates each per-entry
+presentation object and initializes its own fields, including `+0x48 = &object+0x4C`. By contrast,
+the known stage-caption activation branch at `DF79FE` writes:
+
+```text
+global owner 0x016A11B4 +0x48
+  = controller 0x016A1344 +0xFC
+```
+
+`DE317A` later consumes that owner field through `+0xB8`. Thus the known forwarded stage-caption
+target is a controller-owned resource/service object, not the Play Scenario object 74 or nested
+object 87. The Play Scenario target remains a separate unresolved route.
+
 ### 👀 Excellent finding: one population branch is for stage-caption UI
 
 The bounded `DF79FE` writer supplies one concrete population branch:

@@ -180,6 +180,12 @@ The target source is also resource-backed: `DF1A55` loads a value under key `0xD
 related object's `+0xB8`, which is the value later consumed by the `DE317A → DF6820` registration
 expression. The key's semantic name and relation to Play Scenario remain Unknown.
 
+`DF9288` independently creates per-entry presentation objects and initializes their local `+0x48`
+to an internal `+0x4C` storage area. This is distinct from the stage-caption branch's global owner
+write `0x016A11B4 +0x48 = controller +0xFC`. The known forwarded caption target is therefore
+controller/service-owned infrastructure, not object 74 (`Play Scenario`) or object 87 (`Galactic
+Adventures`).
+
 ### Constructor boundary
 
 The direct-call scan found only one direct caller of `DE6120`:
