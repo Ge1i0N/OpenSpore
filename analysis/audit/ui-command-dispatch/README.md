@@ -81,6 +81,36 @@ native procedure list at `window +0x60` and sends attachment records, but its bo
 populate this dispatch-context field. Thus `DE5900` attachment alone does not prove that a later
 generic `SendMsg` reached `DE99B0`; a separate runtime binding gate remains.
 
+### 🔥 Native SendMsg gate writer recovered
+
+The missing binding is supplied by the **parent-registration** path, not by `AddWinProc`. When
+`00962780(AddWindow)` sees a non-null parent/owner `+0x30`, it calls `0095AD30(child)`. That body
+performs the exact write:
+
+```text
+child outer +0x34 = parent owner +0x30
+```
+
+Because the embedded IWindow is `child outer +0x04`, this is simultaneously:
+
+```text
+child IWindow +0x30 = child outer +0x34
+```
+
+The complete static gate is therefore:
+
+```text
+UILayout owner/root +0x30
+  → AddWindow(00962780)
+  → 0095AD30(child)
+  → child outer +0x34
+  → child IWindow +0x30
+  → 00960250 SendMsg gate opens
+```
+
+The source/initialization of the parent owner's `+0x30` and original runtime execution remain
+Unknown, but the intermediate writer is no longer Unknown.
+
 ### 👀 Exact WinProc receiver chain
 
 The bounded call chain from the producer to an attached interactive procedure is now explicit:

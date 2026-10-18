@@ -680,8 +680,10 @@ outer WinButton +0x84 (CommandID)
 The SendMsg wrapper has a separate delivery gate: `00960250` returns false when embedded IWindow
 `+0x30` is null. For a WinButton this is outer `+0x34`, which is zeroed by base construction at
 `00962950`. `00961F10` AddWinProc only updates the procedure list at `+0x60` and sends attachment
-records. Therefore native GGE attachment and later runtime delivery into `DE99B0` remain separate
-claims.
+records. The parent-registration path can later populate that gate: `00962780` calls `0095AD30`
+when owner `+0x30` is present, and `0095AD30` writes child outer `+0x34 = owner +0x30`. Thus the
+static binding chain is now resolved up to the parent owner's own `+0x30` source; runtime execution
+and the semantic Play Scenario handler remain separate claims.
 
 Its later branches construct `kMsgButtonClick = 0x17` and `kMsgButtonSelect = 0x18`. The
 GGE-specific unresolved part is no longer generic message construction; it is the higher-level
