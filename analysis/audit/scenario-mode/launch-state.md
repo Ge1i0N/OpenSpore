@@ -154,6 +154,27 @@ helpers add the same layout's `0x05951103/04` buttons. This is the strongest rec
 identity for the state-10 path: `DFE430` is part of the native `GGENewScenariov3` Scenario
 controller, not an unrelated generic event consumer.
 
+The serialized hierarchy provides a second, bounded owner cross-check in the same EP1 layout
+record `13754`:
+
+```text
+initializer ID       object  parent   native label
+0x05933FE0           914     958      choose adventure
+0x05933FE1           1328    1344     choose captain name
+0x05933FE2           1536    1552     choose captain name
+0x05933FE3           1961    1975     choose posse
+
+state-10 UI ID       object  parent
+0x05951103           1375    1552
+0x05951104           1580    1975
+```
+
+Thus `0x05951103` shares its serialized controller panel with the `choose captain name` record
+`0x05933FE2`, and `0x05951104` shares its panel with `choose posse` record `0x05933FE3`. All six
+objects are serialized `WinButton` instances with `CommandID = 0` in the bounded probe. This is
+layout ownership/correlation evidence only; it does not establish that GGE object 74 selects one
+of these panels or that a native click was delivered.
+
 The initializer still does not prove the missing upstream click conversion. Its direct caller is
 not resolved by the bounded direct-call result because the vtable slot is invoked indirectly; the
 native object construction/scheduling edge and the route from GGE object 74 remain Unknown.

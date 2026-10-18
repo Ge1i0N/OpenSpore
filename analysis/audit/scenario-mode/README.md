@@ -102,6 +102,9 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   `choose posse → 0x05933FE3`. `DFE430` is the vtable's `+0x2C` handler. This identifies the
   state-10 path as part of the native Scenario controller, while the object-74 click conversion
   remains Unknown.
+- In EP1 layout record `13754`, the state-10 buttons share parent panels with initializer buttons:
+  `0x05951103` and `0x05933FE2` both use parent `1552`; `0x05951104` and `0x05933FE3` both use
+  parent `1975`. This is a shipped-layout owner correlation, not runtime click evidence.
 - Retained shipped-binary evidence: [`scenario-mode-current-evidence.json`](scenario-mode-current-evidence.json).
    The focused REA records include `DFE430` (`ev_a8c978345364376176b078d900546eb9cf8ce24596eb4d0e9b4b16011372ed58`),
    controller UI sync (`DF9B00`/`DF9F90`, `ev_6a482fca4d92d699ab63e87065a207d8bba0d74a7655b40f8bb05a1d418e110d`,
