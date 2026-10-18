@@ -717,6 +717,25 @@ The bounded `E02ED0` body contains no direct immediate for `0x070D7509`, `0x070D
 mode branch, not as a Play Scenario payload consumer. Thus the parent/root fallback is now located,
 but it does not close the GGE-specific producer.
 
+### Root receiver dispatch classification
+
+`E02ED0` is a generic root/global UI state machine rather than a hidden GGE Play Scenario handler.
+Its bounded `kMsgComponentActivated` branch compares a separate root-ID set, including values such
+as `0x0447060A`, `0x010F366E`, `0xD305CA84`, `0x010ED852`, `0x010F366D`, `0x062D88E9` and
+root-adjacent paths, then updates its own state field at `+0x24` or calls root-side helpers. No GGE
+EP1 Play Scenario/GA-tab ID occurs in that branch.
+
+The later comparison with `0x01654C10` is reached after a mode-manager getter and checks the current
+mode before selecting root state values (`2`, `4`, `10`, etc.). It is a mode/state synchronization
+branch, not a conversion of `0x070D7509` into a ScenarioMode request. The safe route remains:
+
+```text
+DE99B0 unhandled
+  → global root E02ED0
+  → generic root/state handling
+  → no Play Scenario ID match
+```
+
 Its later branches construct `kMsgButtonClick = 0x17` and `kMsgButtonSelect = 0x18`. The
 GGE-specific unresolved part is no longer generic message construction; it is the higher-level
 relationship between the Play Scenario control payload `0x070D7509` and the separate
