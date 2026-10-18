@@ -70,3 +70,30 @@ same service interface. The payload is the lifecycle object's context; no litera
 `0x01654C10`, `0x070D7509` or `ScenarioGAButtonClicked` is constructed at this producer. Its
 bounded role is therefore generic lifecycle/event publication, not the missing GGE Play Scenario
 conversion.
+
+### Explicit `kMsgEnterMode` producer
+
+The selected binary contains a concrete mode-enter producer at `ED57A0`. Its message construction
+uses the mode-manager enter ID:
+
+```text
+ED57A0
+  → MessageManager service
+  → event/tag 0x074BAF67 (kMsgEnterMode)
+  → dynamic mode/state value from the caller context
+```
+
+The GGE lifecycle class invokes this producer at several bounded callsites:
+
+```text
+ED628A → ED57A0(-1)
+ED6429 → ED57A0(-1)
+ED672A → ED57A0(2)
+ED67F0 → ED57A0(1)
+ED6836 → ED57A0(0)
+```
+
+Those callsites are lifecycle/state transitions and contain no literal `0x01654C10` or
+`0x070D7509`. The producer therefore proves a native enter-mode channel and a GGE-side caller, but
+not the semantic conversion `Play Scenario → ScenarioMode`. The mode value remains a dynamic
+state/context field, not an inferred ScenarioMode tag.

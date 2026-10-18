@@ -66,6 +66,10 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   tag. A separate lifecycle method `0x0054DF60` publishes `0x0212D3E7` alongside neighboring
   lifecycle events `0x01EE100A` and `0x02319914`. These shared-channel edges are generic event
   infrastructure and do not connect `Play Scenario 0x070D7509` to `0x01654C10`.
+- A concrete `kMsgEnterMode = 0x074BAF67` producer exists at `ED57A0`. GGE lifecycle callsites
+  invoke it with dynamic state values (`-1`, `2`, `1`, `0`), but the bounded callsites contain no
+  `0x01654C10` or `0x070D7509`. This establishes the native enter-mode channel without promoting
+  it to the unresolved Play Scenario → ScenarioMode route.
 - `EF24C0` (`OnEnter`) starts ScenarioMode services, sets the enter latch at `+0xDC`, calls the
   scenario initialization helper `EF1BC0`, and starts the effect/simulator side. It returns success
   statically; no runtime ScenarioMode instance was observed.
