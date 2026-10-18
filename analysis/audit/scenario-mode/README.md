@@ -150,6 +150,9 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   [pre-play audit](preplay.md) resolves the preceding separate loading-context phases `0..4`,
   service count, model predicates and the concrete graphics receiver chain. All remain static
   observations, not host readiness or successful world creation.
+- [scene-object-flow.md](scene-object-flow.md) separates `EF25E0` object-list preparation,
+  `F45E70/F45AD0` record synchronization and conditional object construction from `F40210/F400E0`
+  readiness aggregation. These edges do not prove terrain or stage creation.
 
 This makes ScenarioMode a real next reverse-engineering target after a selected star, but it does
 not connect the GGE `Play Scenario` ControlID `0x070D7509` to `ScenarioMode` or prove an adventure

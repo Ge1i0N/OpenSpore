@@ -524,6 +524,48 @@ def verify() -> None:
         raise ValueError("ScenarioPlanet lighting-name hash mismatch")
     checks += 1
 
+    # EF25E0 prepares existing Scenario objects, then synchronizes records. It
+    # is not itself a terrain/world loader.
+    call(0xEF25EB, 0xB3D400)
+    call(0xEF25F2, 0xB228F0)
+    exact(0xEF25F7, "8b 0d 18 d9 5f 01 32 db 85 c9 74 27")
+    exact(0xEF2630, "83 b9 cc 00 00 00 02 0f 85 65 01 00 00 84 db 0f 84 5d 01 00 00")
+    call(0xEF26AC, 0xEF18B0)
+    call(0xEF26B7, 0x4E08F0)
+    call(0xEF2797, 0xF45E70)
+    call(0xEF27BF, 0xF40210)
+    call(0xEF27EB, 0xF45E70)
+    call(0xEF2801, 0xF42660)
+    exact(0xEF2700, "83 60 04 fe bb 01 00 00 00 01 58 40")
+
+    # F45E70 is a two-pass wrapper around F45AD0 with an intervening service
+    # call; F45AD0 uses 0x238 Scenario records and 0x4E0 payloads.
+    call(0xF45E91, 0xF45AD0)
+    call(0xF45E96, 0xB3D400)
+    call(0xF45E9D, 0xB228F0)
+    call(0xF45EAA, 0xF45AD0)
+    exact(0xF45B32, "69 c0 e0 04 00 00")
+    call(0xF45B51, 0xED36D0)
+    call(0xF45B80, 0xF3F8C0)
+    call(0xF45BC2, 0xB475C0)
+    call(0xF45BD3, 0xB70020)
+    call(0xF45C3A, 0xF3D930)
+    call(0xF45DC2, 0xF3C4B0)
+    call(0xF45E58, 0xF432C0)
+    exact(0xF3F8FB, "56 e8 af 3e fe ff 8b 16 83 c4 04 89 50 1c 89 70 18")
+
+    # F40210 aggregates F400E0 results; F400E0 delegates classification to
+    # F3EFB0 and sets record wait/error bits rather than constructing terrain.
+    call(0xF400EE, 0xF3D620)
+    call(0xF400F6, 0xB18D40)
+    call(0xF4014D, 0xB18470)
+    call(0xF40158, 0xF25D50)
+    call(0xF401BE, 0xF3EFB0)
+    exact(0xF40131, "83 8d 24 02 00 00 10 eb 07 83 a5 24 02 00 00")
+    exact(0xF40227, "21 b0 24 02 00 00")
+    call(0xF402BE, 0xF400E0)
+    call(0xF4032C, 0xF400E0)
+
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
     exact(0xDFBD4C, "83 7e 20 09")
