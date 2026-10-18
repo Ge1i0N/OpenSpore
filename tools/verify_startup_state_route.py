@@ -448,6 +448,23 @@ def verify() -> None:
     exact(0x805FB4, "d9 00 8b 4c 24 04 d9 19 d9 40 04 d9 59 04")
     slot(0x1412608, 0x50, 0x967D90)
     exact(0x967D90, "8b 41 2c c3")
+    # Camera selection, viewer publication and active ICamera update are distinct boundaries.
+    exact(0xDE477A, "68 fd 86 07 78 e8 ac 8b d5 ff 8b c8 e8 65 87 d7 ff")
+    call(0xB5CF10, 0xB3D320)
+    exact(0xB5CEF4, "e8 d7 0d b2 ff 8b 10 8b c8 8b 42 50 ff d0")
+    exact(0xB5CF02, "8b 4c 24 0c 8b 10 8b 52 34 51 8b c8 ff d2")
+    exact(0xDE478B, "83 be 98 01 00 00 00 75 42 e8 37 95 89 ff")
+    slot(0x1410718, 0x18, 0x7C61A0)
+    slot(0x1410718, 0x2C, 0x7C6440)
+    slot(0x1410718, 0x38, 0x7C6240)
+    exact(0x7C61A0, "8b 44 24 04 89 81 b0 00 00 00 c2 04 00")
+    exact(0x7C6440, "57 8b f9 8b 87 a8 00 00 00 85 c0 7c 67 83 bf b0 00 00 00 00 74")
+    exact(0x7C64A0, "b0 00 00 00 8b 4c 24 0c 8b 16 8b 52 20 50 51 8b ce ff d2")
+    exact(0x7C6240, "8b 81 a8 00 00 00 85 c0 7c 0a 8b 89 80 00 00 00 8b 04 81 c3")
+    slot(0x147DA38, 0x20, 0xDDFB90)
+    exact(0xDDFB9B, "8b 0d c8 10 6a 01 57 8b 7c 24 48 85 c9 74 08")
+    exact(0xDDFBA6, "85 c9 74 08 8b 01 8b 10 53 57 ff d2")
+    call(0xDDFDC0, 0x7C4DD0)
 
     # Negative controls for prior timing/slot conflation.
 
