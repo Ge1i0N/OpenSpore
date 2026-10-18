@@ -1,0 +1,26 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+ 136cf30:	83 ec 24             	sub    esp,0x24
+ 136cf33:	0f 57 c0             	xorps  xmm0,xmm0
+ 136cf36:	f3 0f 10 0d 40 37 45 	movss  xmm1,DWORD PTR ds:0x1453740
+ 136cf3d:	01
+ 136cf3e:	56                   	push   esi
+ 136cf3f:	57                   	push   edi
+ 136cf40:	b9 09 00 00 00       	mov    ecx,0x9
+ 136cf45:	8d 74 24 08          	lea    esi,[esp+0x8]
+ 136cf49:	bf e0 10 6a 01       	mov    edi,0x16a10e0
+ 136cf4e:	f3 0f 11 4c 24 08    	movss  DWORD PTR [esp+0x8],xmm1
+ 136cf54:	f3 0f 11 44 24 0c    	movss  DWORD PTR [esp+0xc],xmm0
+ 136cf5a:	f3 0f 11 44 24 10    	movss  DWORD PTR [esp+0x10],xmm0
+ 136cf60:	f3 0f 11 44 24 14    	movss  DWORD PTR [esp+0x14],xmm0
+ 136cf66:	f3 0f 11 4c 24 18    	movss  DWORD PTR [esp+0x18],xmm1
+ 136cf6c:	f3 0f 11 44 24 1c    	movss  DWORD PTR [esp+0x1c],xmm0
+ 136cf72:	f3 0f 11 44 24 20    	movss  DWORD PTR [esp+0x20],xmm0
+ 136cf78:	f3 0f 11 44 24 24    	movss  DWORD PTR [esp+0x24],xmm0
+ 136cf7e:	f3 0f 11 4c 24 28    	movss  DWORD PTR [esp+0x28],xmm1
+ 136cf84:	f3 a5                	rep movs DWORD PTR es:[edi],DWORD PTR ds:[esi]
+ 136cf86:	5f                   	pop    edi
+ 136cf87:	5e                   	pop    esi
+ 136cf88:	83 c4 24             	add    esp,0x24
+ 136cf8b:	c3                   	ret

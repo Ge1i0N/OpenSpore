@@ -1,0 +1,13 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  dde390:	8b c1                	mov    eax,ecx
+  dde392:	8b 4c 24 04          	mov    ecx,DWORD PTR [esp+0x4]
+  dde396:	81 f9 f3 65 ba 07    	cmp    ecx,0x7ba65f3
+  dde39c:	74 0e                	je     0xdde3ac
+  dde39e:	33 d2                	xor    edx,edx
+  dde3a0:	81 f9 6e 51 3f ee    	cmp    ecx,0xee3f516e
+  dde3a6:	0f 95 c2             	setne  dl
+  dde3a9:	4a                   	dec    edx
+  dde3aa:	23 c2                	and    eax,edx
+  dde3ac:	c2 04 00             	ret    0x4

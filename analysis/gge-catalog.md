@@ -98,10 +98,13 @@ this helper does not discover scripts/stars, generate names, decode saves or exe
 It is not ABI-compatible with the pointer-bearing 0xBC original and must not be `memcpy`ed to/from
 a stars.db file. No fake binary fixture is called original-runtime evidence.
 
-**No live catalogue producer is attached yet.** A [saved metadata adapter](planet-record.md) now joins
+**A real save corpus is now present in the explicitly selected build UserData path.** The physical
+DBPF/context reader and nested planet-record adapter parse one saved manager row from `Game0`; see
+[the real save capture note](gge-real-save.md). A [saved metadata adapter](planet-record.md) now joins
 decoded StarRecord/planet name with explicit file-header and terrain observations; only verification
 supplies complete observations today. GGE's existing
-MoviePlayer/DBCheck wait is unchanged; no star UI, galaxy scene or game stage is made ready.
+MoviePlayer/DBCheck wait is unchanged; the derived real-save snapshot remains blocked because candidate
+refill, terrain property and complete producer provenance are still Unknown.
 
 ## Validation / continuation
 
@@ -121,7 +124,7 @@ Follow-up: [stars.db serializer prefix](starsdb.md) now recovers framing, the si
 StarManager descriptor names. Explicit modes now decode wire references/grid and 14 StarRecord
 fields; [context subset](starsdb-context.md) now links class/token identities to fields using explicit
 decoded streams; [physical DBPF subset](starsdb-dbpf.md) now supplies exact keys on constructed
-files, not a real-save corpus or executed post-load fixups. Next concrete sources
+files, and the first real-save corpus is now structurally parsed without executed post-load fixups. Next concrete sources
 are the StarRecord name/resource and save-metadata producers consumed by `0xBB8C90` and the
 galaxy/star grid populated by its generation path. Separately, implement a real host MoviePlayer
 and DBCheck adapter before driving the state-2 scene. Do not use the typed test entries as shipped

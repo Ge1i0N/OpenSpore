@@ -1,0 +1,64 @@
+{
+  "format": "GGE_CONTROL_ID_CORRELATION_V1",
+  "root": "E:\\_DPT_Projects_E\\_Harness\\OpenSpore\\build\\bin\\Debug",
+  "packages": 73,
+  "parsed_layouts": 748,
+  "failed_layouts": 0,
+  "skipped_packages": 5,
+  "ids": {
+    "0x070d74e7": [
+      {
+        "package": "Spore_EP1_Data.package",
+        "record": 12415,
+        "instance": "0x28f6d535",
+        "object": 87,
+        "class": "0xeeefe2c3",
+        "layout_sha256": "49e24564e56fca7f3104082dc5b38814a2ff3857bc9084193bdfa47cebe408a1",
+        "property": "ControlID",
+        "command_id": "0x00000000",
+        "window_flags": 11,
+        "own_visible_bit": true,
+        "button_type": 3,
+        "button_group_id": 2,
+        "serialized_winprocs": null,
+        "parent": 114,
+        "children": [],
+        "caption": [
+          {
+            "table": 1034805691,
+            "key": 122412986
+          }
+        ]
+      }
+    ],
+    "0x070d7509": [
+      {
+        "package": "Spore_EP1_Data.package",
+        "record": 12415,
+        "instance": "0x28f6d535",
+        "object": 74,
+        "class": "0xeeefe2c3",
+        "layout_sha256": "49e24564e56fca7f3104082dc5b38814a2ff3857bc9084193bdfa47cebe408a1",
+        "property": "ControlID",
+        "command_id": "0x00000000",
+        "window_flags": 10,
+        "own_visible_bit": false,
+        "button_type": 3,
+        "button_group_id": 2,
+        "serialized_winprocs": null,
+        "parent": 138,
+        "children": [],
+        "caption": [
+          "Play Scenario"
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "shipped SPUI data only",
+    "no runtime message execution",
+    "no package priority merge",
+    "ControlID match is not proof of producer",
+    "own_visible_bit is serialized local state, not effective or runtime visibility"
+  ]
+}

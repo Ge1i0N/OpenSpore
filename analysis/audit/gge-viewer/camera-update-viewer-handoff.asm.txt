@@ -1,0 +1,49 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  7c6440:	57                   	push   edi
+  7c6441:	8b f9                	mov    edi,ecx
+  7c6443:	8b 87 a8 00 00 00    	mov    eax,DWORD PTR [edi+0xa8]
+  7c6449:	85 c0                	test   eax,eax
+  7c644b:	7c 67                	jl     0x7c64b4
+  7c644d:	83 bf b0 00 00 00 00 	cmp    DWORD PTR [edi+0xb0],0x0
+  7c6454:	74 5e                	je     0x7c64b4
+  7c6456:	8b 8f 80 00 00 00    	mov    ecx,DWORD PTR [edi+0x80]
+  7c645c:	56                   	push   esi
+  7c645d:	8b 34 81             	mov    esi,DWORD PTR [ecx+eax*4]
+  7c6460:	8b 16                	mov    edx,DWORD PTR [esi]
+  7c6462:	8b 42 4c             	mov    eax,DWORD PTR [edx+0x4c]
+  7c6465:	8b ce                	mov    ecx,esi
+  7c6467:	ff d0                	call   eax
+  7c6469:	85 c0                	test   eax,eax
+  7c646b:	74 31                	je     0x7c649e
+  7c646d:	8b 16                	mov    edx,DWORD PTR [esi]
+  7c646f:	8b 42 4c             	mov    eax,DWORD PTR [edx+0x4c]
+  7c6472:	53                   	push   ebx
+  7c6473:	8b ce                	mov    ecx,esi
+  7c6475:	ff d0                	call   eax
+  7c6477:	8b d8                	mov    ebx,eax
+  7c6479:	8b 4b 30             	mov    ecx,DWORD PTR [ebx+0x30]
+  7c647c:	85 c9                	test   ecx,ecx
+  7c647e:	74 07                	je     0x7c6487
+  7c6480:	e8 4b d3 e5 ff       	call   0x6237d0
+  7c6485:	eb 02                	jmp    0x7c6489
+  7c6487:	33 c0                	xor    eax,eax
+  7c6489:	8b 4b 34             	mov    ecx,DWORD PTR [ebx+0x34]
+  7c648c:	03 c8                	add    ecx,eax
+  7c648e:	5b                   	pop    ebx
+  7c648f:	3b 8f ac 00 00 00    	cmp    ecx,DWORD PTR [edi+0xac]
+  7c6495:	74 07                	je     0x7c649e
+  7c6497:	8b cf                	mov    ecx,edi
+  7c6499:	e8 02 fe ff ff       	call   0x7c62a0
+  7c649e:	8b 87 b0 00 00 00    	mov    eax,DWORD PTR [edi+0xb0]
+  7c64a4:	8b 4c 24 0c          	mov    ecx,DWORD PTR [esp+0xc]
+  7c64a8:	8b 16                	mov    edx,DWORD PTR [esi]
+  7c64aa:	8b 52 20             	mov    edx,DWORD PTR [edx+0x20]
+  7c64ad:	50                   	push   eax
+  7c64ae:	51                   	push   ecx
+  7c64af:	8b ce                	mov    ecx,esi
+  7c64b1:	ff d2                	call   edx
+  7c64b3:	5e                   	pop    esi
+  7c64b4:	5f                   	pop    edi
+  7c64b5:	c2 04 00             	ret    0x4

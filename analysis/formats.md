@@ -33,6 +33,15 @@ fields open · **TODO** = only the type id / count known.
 
 ## `prop` (0x00b1b104, 30,645) — big-endian, two sections
 
+**2026-10-17 correction for the real-save subset:** the old `tools/prop.py` uniform-entry model below
+does not decode general `.prop` files. `tools/prop_table.py` instead handles BE id/type/flags headers,
+scalar versus counted-array framing, LE composite values, and the 16-byte slot for scalar keys.
+Using the historical SporeMaster format guide as a hypothesis, this parser consumes all bytes of the
+12 selected GGE-related script payloads (7 UserData, 5 Ronikari). The earlier apparent "second
+section" is not established as a separate section by that old walk. This is a bounded property-table
+subset verified against save bytes, not full shipped-corpus coverage or native-reader evidence. See
+[real-save observations](gge-real-save.md) for scope, exact counts and limitations.
+
 BIG-endian integers (like RefPack). `NameGeneration` rec[5] (365 B) begins with `u32 count = 11`,
 then entries. The **first section** parses cleanly as `{key, type, item_count, item_size, data}`:
 

@@ -44,9 +44,22 @@ byte identity or original priority rule. The verifier finds:
 Controls are lookup targets within each mounted instance, not globally unique objects. Their
 presence does not establish event behavior or reproduce the native mount `0xDF7690`.
 
+**2026-10-17 receiver/object cross-check:** `DF6110` explicitly loads ECX from `record+B8` before
+calling `810650`; that wrapper reads this UILayout's `+14`, not a global registry. Root ControlID
+`02E5A4A8` is unique object177, class `4EC1B8D8`, local Area `(76,167,124,215)`, Children
+`[28,41,90,176]`, no parent and a serialized root flag in both resources. Strengthened C++ corpus
+checks cover those facts. See [per-card lookup evidence](gge-window-lookup.md); native mounting and
+runtime GetRealArea are not claimed by this asset match.
+
 ## Projection formula
 
-The matrix is copied from camera memory **+0xC0..+0xFC**, in memory order `m[0..15]`:
+**2026-10-17 source clarification:** this matrix belongs to **cViewer**, returned by GameModeManager
+slot58, not the ICamera retained at controller+198. The new `compose_viewer_projection` helper ports
+projection coefficients/axis exchange/matrix product from explicit inputs; see [viewer evidence and
+limits](gge-viewer.md). No camera defaults, inversion or original update execution are inferred.
+Presentation verification now has **77 checks**.
+
+The matrix is copied from viewer memory **+0xC0..+0xFC**, in memory order `m[0..15]`:
 
 ```text
 w = m11*z + m7*y + m3*x + m15

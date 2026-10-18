@@ -91,45 +91,48 @@ flags at **+0xAC/+0xAD**, per-entry UI pointer at **+0xB8** (roles partly inferr
 REA static corroboration makes the projection contract more precise: `DF6010` is the `Play Spore`
 vtable `0x147EF50` slot `+0x68` method. It reads each record's position from `record +0x80`, calls
 `DE3C20`, then forwards the record pointer and projected values through the owning object's virtual
-slot `+0x64`, which resolves to `DF6110`; `DE3C20` obtains a renderer/camera-related service
-through virtual slot `+0x58` before computing normalized screen placement. The direct-call list is
-empty because this is vtable dispatch; the concrete camera owner and runtime trigger remain Unknown.
+slot `+0x64`, which resolves to `DF6110`; `DE3C20` obtains cViewer through GameModeManager
+virtual slot `+0x58` before computing normalized screen placement. The direct-call list is
+empty because this is vtable dispatch; live viewer production and runtime trigger remain Unknown.
 Instruction-level REA evidence shows the returned `+0x58` result is passed as the `this` object to
 `7C4250`; `805F90` supplies viewport state, and `DE3C20` applies the normalized screen transform.
-REA distinguishes this projection service from the controller's stored active-camera field:
+The [viewer/ICamera cross-check](gge-viewer.md) distinguishes this viewer from stored ICamera:
 `DE46D0` obtains controller `+0x198` through `0067DCD0` slot `+0x50`, then returned-object slot
 `+0x38`, while `DE3C20` uses the getter's `+0x58` path. `DF6490` also uses `+0x58` for nearest
-record selection. Their identity is therefore not assumed equivalent in the host.
-REA also separates the UI-bounds service used by `DF6110`: it is acquired through registry lookup
-`00810650(0x02E5A4A8,0)`, whose `008102A0` implementation queries interface `0xEEEE8218` and
-matches the requested service ID. `DF6110` then uses that service's `+0x34/+0x38` values together
-with `805F90` viewport state. The service identity is Unknown; it is not treated as the projection
-camera or controller camera.
-The registry is shared more broadly: REA reports callers `00810650`, `008113D0`, and `00812590`.
-`008113D0`'s no-match branch enumerates providers implementing `0xEEEE8218`, combines their
-`+0x38` rectangles, and applies provider `+0x64`; the concrete provider for `0x02E5A4A8` remains
-Unknown. This supports a UI/display-service registry interpretation, not a camera identity claim.
+record selection. Mode+30 viewer and mode+2C CameraManager are distinct storage/type roles;
+the latter calls active ICamera Update(delta,viewer). The host never reads ICamera+C0 as a matrix.
+The [2026-10-17 receiver cross-check](gge-window-lookup.md) corrects the earlier UI-bounds
+"global service" interpretation: `DF6110` calls `00810650(0x02E5A4A8,0)` on ECX loaded from
+**record+B8**. `810650` dereferences that UILayout's `+14`; `8102A0` compares root-window ControlIDs
+through `IWindow` interface `EEEE8218`. Both default per-star assets have exactly one matching root,
+object177. `DF6110` reads its GetArea/GetRealArea slots `+34/+38` and uses SetLocation at `+64`.
+This window identity is resolved, not a camera identity or proof of native mount completion.
+The component lookup has broader REA callers `00810650`, `008113D0`, and `00812590`.
+`008113D0`'s no-match branch enumerates windows implementing `0xEEEE8218`, combines their
+GetRealArea (`+0x38`) rectangles, and applies SetLocation (`+0x64`). This is layout/window geometry,
+not camera acquisition; native mount success remains unobserved.
 The broader REA call chain is `00812100/00811C70 → 00811C20 → 008113D0 → 008102A0`;
-`00811C20` invokes the active display/layout object's `+0xD8` for each provider exposing
-`0xEEEE8218`. This confirms provider synchronization, but still does not identify which provider
-satisfies `0x02E5A4A8`. The owner-switch callers for `00812100` resolve to `008121C0` and
-`008122A0`; `00811C70` itself has no resolved direct callers. The remaining gap is the concrete
-provider/owner creation path, not the registry matching or synchronization semantics.
+`00811C20` invokes the container window's AddWindow (`+0xD8`) for each component exposing
+`0xEEEE8218`. This confirms a window attachment path, not a separate camera service.
+The owner-switch callers for `00812100` resolve to `008121C0` and
+`008122A0`; `00811C70` itself has no resolved direct callers. The remaining gap is native
+creation/attachment execution, not the default root identity.
 REA further shows `008121C0` creates/selects a `UI/LayoutObjects` instance through `00811070`,
 copies its caller-supplied three-word key into owner fields, and only then calls `00812100`; the
-factory publishes resource key `0x022568E7`. The key's relation to provider ID `0x02E5A4A8` is not
-resolved, so the concrete display provider remains Unknown.
+factory publishes resource key `0x022568E7`. This is distinct from a window ControlID; finding
+root177 does not claim the native factory/attachment path has executed successfully.
 REA resolves the lifecycle around that registry: `00812100` replaces the display/layout owner at
-`+0x88` through `008106C0` and calls `00811C20`; `00811C70` syncs the providers, invokes owner
-callback `+0x8C`, and initializes resource key `0x2FBF2058`. This remains a display/layout path;
-no projection-camera identity is inferred from it.
+`+0x88` through `008106C0` and calls `00811C20`; `00811C70` syncs the providers, invokes the
+subobject-relative owner callback at `+0x8C` (base-owner field `+0x94`), and initializes resource
+key `0x2FBF2058`. This remains a display/layout path; no projection-camera identity is inferred
+from it.
 This is static shipped-artifact evidence, not an observation of a running GA process.
 The call that forwards each projected record to its concrete owner is a computed `CALL EAX` at
 `DF606D`; the reference-only resolver cannot resolve computed calls, but REA static vtable evidence
 shows that the `Play Spore` constructor installs vtable `0x147EF50` and slot `+0x64` points to
 `DF6110`. `DF6110` checks `record +0xB8` and uses the UI object's bounds to clamp the projected
-target. The camera owner behind `DE3C20` slot `+0x58` and runtime trigger remain Unknown; host
-selection still must not route through an invented camera/controller path.
+target. The viewer type behind `DE3C20` slot `+0x58` is now resolved; its runtime producer and GGE
+camera parameters remain Unknown. Host selection still must not invent a camera/controller path.
 
 This explains why forcing the primary layout's hidden windows visible cannot recreate game choice:
 the actual star UI is instantiated **per live game record** and driven by scene projection.
@@ -148,6 +151,31 @@ Retained assembly confirms the exact order before that unknown: state `+0x108 ==
 `0x0615A5FF`, `GlobalUI::show(1)`, `DF95A0`, then unconditional jump to `DF6C10`. Thus the state-2
 admission and catalogue rebuild are observed static edges; only the post-jump continuation remains
 unresolved.
+
+### Bounded `DF6C10` continuation prefix
+
+A local GA `objdump` pass now closes part of that post-jump boundary without claiming the whole
+continuation. The observed prefix of `DF6C10`:
+
+```text
+resource/event lookup 0x080D7DE1
+  → inspect returned record word +0x12 == 1
+  → helper 0x0041E8E0 supplies a boolean
+  → lookup UI target 0x0806A310
+  → UI vtable +0x7C(1, !boolean)
+
+resource/event lookup 0x080D97FE
+  → inspect returned record word +0x12 == 1
+  → conditional lookup UI target 0x0806AA00
+  → UI vtable +0x7C(1, 0)
+  → construct/forward a bounded payload through the observed event helpers
+```
+
+The body also reads a timing/configuration record around `this +0x38`, with an `RDTSC`/QPC-style
+fallback path in the surrounding helper. This is a structural prefix only: exact resource semantics,
+message payload meaning, camera/effects ownership, and the outer caller remain Unknown. The prefix
+contains no `Play Scenario` ControlID `0x070D7509`, no CommandID `0x00E1132F`, and no ScenarioMode
+tag `0x01654C10`.
 
 ## Verification and next boundary
 

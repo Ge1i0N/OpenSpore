@@ -13,6 +13,7 @@ struct ResourceReadResult {
 };
 class ExplicitDbpfReader {
 public:
+    // Explicit path uses UTF-8; Windows consumers needing non-ASCII paths must supply Unicode argv.
     bool open(const std::string& explicit_path, std::string& error);
     bool open_from_memory(const std::vector<u8>& bytes, std::string& error);
     ResourceReadResult read_unique(const pkg::ResourceKey& key);

@@ -24,6 +24,10 @@
 0x007ab7f0	function	os_007ab7f0
 0x007ab050	function	os_007ab050
 0x006ac3e0	function	os_006ac3e0
+0x007e4ff0	function	os_state_console_command_dispatch_007e4ff0
+0x00ef2250	function	os_scenario_mode_message_handler_00ef2250
+0x00ef1d20	function	os_scenario_mode_message_enter_00ef1d20
+0x00ef1380	function	os_scenario_mode_message_exit_00ef1380
 #
 # Second-order: the HOLES inside those function bodies. Creating a function does not
 # make Ghidra disassemble its interior - it stops at MSVC alignment padding

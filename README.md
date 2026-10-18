@@ -15,6 +15,10 @@ OpenSpore — самостоятельная реимплементация **Sp
 > Последняя сверка: **15 октября 2026**. [Текущий статус](PROGRESS.md) ·
 > [Чеклист функций](analysis/features.md) · [Доказательства](VERIFY.md) · [План продолжения](RESUME.md)
 
+Порядок источников, pinned revisions внешних OpenSpore-репозиториев и правила их клонирования
+собраны в [REFS.md](REFS.md); связанные авторы и attribution notes — в
+[CONTRIBUTORS.md](CONTRIBUTORS.md).
+
 ## Уже не просто прямоугольники
 
 ![Настоящий E3LaunchScreen: логотип Spore, иконки стадий и плитки редакторов, отрисованные OpenSpore](analysis/shots/spui_e3launch_uv.png)
@@ -132,120 +136,102 @@ cd build/bin/Debug
 ```
 
 `-quitAfter` задаётся **в кадрах**, не секундах. Для автоматических запусков задавайте его явно.
-Лог — `build/bin/Debug/OpenSpore.log`, открыт для параллельного чтения и дописывается между запусками.
+Логи каждой сессии находятся в `build/bin/Debug/logs/` и имеют timestamp/PID в имени. Старый
+`OpenSpore.log` может остаться как история прежних запусков. Batch-файлы и режимы собраны в
+[local launch modes](analysis/launch-modes.md).
 
-### Проверки
+Для supplementary static/deobfuscated string extraction есть [FLOSS workflow](analysis/floss.md):
+`python tools/floss_dump.py` пишет JSON в `analysis/strings/` и отключает cache.
+
+Для PyGhidra используй [bounded Ghidra runner](analysis/ghidra-runner.md): по умолчанию 120 секунд,
+heartbeat в лог, graceful stop и hard-kill только после grace period. Для большой фичи deadline
+задаётся явно через `--timeout 600` или больше.
+
+### Debug Cheat Console
+
+В Debug-сборке **Ctrl+Shift+C** открывает не список режимов, а command-entry окно. Вводите команды
+с клавиатуры, **Enter** выполняет их, **Up/Down** листает историю, **Esc** возвращает предыдущий
+state. Начните с `help`, затем попробуйте `state -list`, `state -next`, `state DevLauncher`,
+`cfg -list`, `txt -ambig`, `levels -unlock` или `quit`. Последняя команда пока честно сообщает,
+что native level service не подключён, и не меняет saves.
+
+В GA native command registry отдельно наблюдаются `history`, `clear` и
+`levels -unlockAdventures` (`Unlocks all Maxis adventures`); в OpenSpore они пока остаются
+явными host-boundaries и не должны восприниматься как выполненные cheat services.
+
+Это host-реконструкция через наш command registry. Исторический Beta README описывает Cheat Console
+и отдельный in-window shortcut Ctrl+Shift+Alt+C; GA `UI/DebugConsole` уже найден и анализируется,
+но native creation/parenting/dispatch chain ещё не объявлена восстановленной. Подробнее:
+[Debug Cheat Console](analysis/debug-menu.md).
+
+### Полные проверки
 
 Из корня репозитория:
 
 ```powershell
 $fixtures = Join-Path $env:TEMP 'OpenSpore-spui-fixtures'
 python tools/spui_objects.py --parse --all --output analysis/audit/spui_objects.json --extract $fixtures
-.\build\Debug\spui_verify.exe $fixtures
-.\build\Debug\mode_ui_verify.exe
-.\build\Debug\gge_intro_verify.exe
-.\build\Debug\gge_dbcheck_verify.exe $fixtures
-.\build\Debug\gge_catalog_verify.exe
-.\build\Debug\starsdb_verify.exe
-.\build\Debug\starsdb_links_verify.exe
-.\build\Debug\starsdb_context_verify.exe
-.\build\Debug\starsdb_dbpf_verify.exe
-.\build\Debug\starsdb_postload_verify.exe
-.\build\Debug\save_header_verify.exe
-.\build\Debug\planet_record_verify.exe
-.\build\Debug\gge_star_present_verify.exe $fixtures
-.\build\Debug\gge_star_instance_verify.exe $fixtures
-.\build\Debug\gge_star_phase1_verify.exe $fixtures
+.\build\bin\Debug\spui_verify.exe $fixtures
+.\build\bin\Debug\mode_ui_verify.exe
+.\build\bin\Debug\gge_intro_verify.exe
+.\build\bin\Debug\gge_dbcheck_verify.exe $fixtures
+.\build\bin\Debug\gge_catalog_verify.exe
+.\build\bin\Debug\starsdb_verify.exe
+.\build\bin\Debug\starsdb_links_verify.exe
+.\build\bin\Debug\starsdb_context_verify.exe
+.\build\bin\Debug\starsdb_dbpf_verify.exe
+.\build\bin\Debug\starsdb_postload_verify.exe
+.\build\bin\Debug\save_header_verify.exe
+.\build\bin\Debug\planet_record_verify.exe
+.\build\bin\Debug\gge_star_present_verify.exe $fixtures
+.\build\bin\Debug\gge_star_instance_verify.exe $fixtures
+.\build\bin\Debug\gge_star_phase1_verify.exe $fixtures
 $imageCapture = Join-Path $env:TEMP ('OpenSpore-image-' + [guid]::NewGuid() + '.bmp')
-.\build\Debug\gge_image_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package $imageCapture
+.\build\bin\Debug\gge_image_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package $imageCapture
 $frameCapture = Join-Path $env:TEMP ('OpenSpore-frame-' + [guid]::NewGuid() + '.bmp')
-.\build\Debug\gge_animated_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package $frameCapture
-.\build\Debug\gge_star_lifecycle_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package .\build\bin\Debug\Data\Spore_Graphics.package
+.\build\bin\Debug\gge_animated_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package $frameCapture
+.\build\bin\Debug\gge_star_lifecycle_verify.exe $fixtures .\build\bin\Debug\Data\PatchData.package .\build\bin\Debug\Data\Spore_Graphics.package
 $streamDir = Join-Path $env:TEMP ('OpenSpore-stream-' + [guid]::NewGuid())
-.\build\Debug\gge_streaming_image_verify.exe .\build\bin\Debug\Data\Spore_Graphics.package $streamDir
-.\build\Debug\gge_star_scene_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package
-.\build\Debug\gge_star_transition_verify.exe $fixtures
-.\build\Debug\gge_star_input_verify.exe $fixtures
-.\build\Debug\game_stages_verify.exe
+.\build\bin\Debug\gge_streaming_image_verify.exe .\build\bin\Debug\Data\Spore_Graphics.package $streamDir
+.\build\bin\Debug\gge_star_scene_verify.exe $fixtures .\build\bin\Debug\Data\Spore_Graphics.package
+.\build\bin\Debug\gge_star_transition_verify.exe $fixtures
+.\build\bin\Debug\gge_star_input_verify.exe $fixtures
+.\build\bin\Debug\game_stages_verify.exe
 
 # controlled clickable host-card preview (Debug/dev only; not native GGE)
 .\build\bin\Debug\OpenSpore.exe -w -devDirs -state:GGEHostPreview
-.\build\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
+.\build\bin\Debug\pkg_lifetime_verify.exe .\build\bin\Debug\Data\Locale\en-us\UI.package
 $clipCapture = Join-Path $env:TEMP ('OpenSpore-scissor-' + [guid]::NewGuid() + '.bmp')
-.\build\Debug\overlay_clip_verify.exe $clipCapture
+.\build\bin\Debug\overlay_clip_verify.exe $clipCapture
 python tools/pkg_kinds.py
 python -m unittest discover -s tools/tests -p 'test_*.py'
 python tools/feature_map.py --check
 python tools/docs_check.py
 ```
 
-Последняя проверка: **748** corpus matches, **486** malformed inputs rejected атомарно,
-drawable UV/state/scale/alignment и ancestor Clip checks PASS; **544** scoped package cycles при CRT-лимите **512**.
-Отдельный D3D9 readback проверяет реальные пиксели flat/image quad, text flush и scissor reset.
-Post-title gate GGE проходит **2040** проверок на контролируемых сигналах; это не наблюдение
-оригинальной игры и не реализация MoviePlayer/DBCheck.
-`gge_dbcheck_verify` отдельно проверяет DBCheck-поднабор через явный backend и реальный fixture
-диалога: ветки отсутствующего/неизвестного manager, callback-порядок, cleanup и связку с Intro.
-Live backend ещё не подключён; [state 2 Play Spore](analysis/gge-dbcheck-play.md) требует настоящего
-каталога игр, per-star UI и сцены, а не принудительного раскрытия скрытых панелей.
-Добавлена [сборка записей каталога](analysis/gge-catalog.md) из типизированных метаданных: порядок,
-индексы, позиции, стадии, image fallback и сравнение двух полей заголовка сохранения. Проверена на контролируемых входах;
-producer каталога и live-галактика ещё не реализованы. Для [сериализатора `stars.db`](analysis/starsdb.md)
-добавлен read-only инспектор префикса и caller-selected wire subset: framing, шесть полей метаданных,
-ссылки/ячейки и 14 полей StarRecord. [Контекст объектов](analysis/starsdb-context.md) теперь читает
-индекс и class stream, проверяет envelope CRC и связывает `(class_id, token)` с записью.
-Read-only [DBPF-адаптер](analysis/starsdb-dbpf.md) подключает эти readers к точным root/index/class keys.
-**240 + 362 + 126 + 266** синтетических проверок проходят; post-load fixups и live producer
-не подключены, настоящие сохранения этим тестом не проверены.
-Отдельно [save-header reader](analysis/save-header.md) читает настоящие по схеме GA поля
-`mFileVersionMajor/Minor` из явно выбранного DBPF: **116** контролируемых проверок, без поиска сохранений.
-Post-load модель исправлена: **15** проверок ветки пустого имени / маркера `BAD_DATA`; прежнее
-описание «canonical-name mismatch cleanup» было ошибочным. Генератор и сервисы пока не выполняются.
-[Planet-record reader и saved adapter](analysis/planet-record.md) связывают имя выбранной планеты,
-поля звезды и header/terrain-наблюдения с типизированной GGE-записью: **291** контролируемая проверка.
-Это ещё не галактика на экране: camera/effects/per-star UI и реальные источники не подключены.
-[Визуальный участок GGE](analysis/gge-star-present.md) теперь включает расчёт проекции, размещение
-и stage-конфигурацию UI каждой звезды: **50** проверок, два настоящих layout по **152 объекта / 58 окон**.
-Создание камеры и монтаж этих экземпляров в runtime ещё отсутствуют; видимый GGE пока не изменён.
-Добавлен [host-слой независимых star UI instances](analysis/gge-star-instance.md): **167** проверок
-владения, перемещения, флагов, caption refs и pixel picking. Общий renderer теперь имеет pixel-layer hook;
-native plugins/callbacks/сцена и автоматическое подключение к GGE всё ещё не реализованы.
-[Phase-1 binding plan](analysis/gge-star-phase1.md) добавляет **247** проверок порядка и веток привязки
-изображений/controls, не исполняя сервисы. Поиск уникального target или наличие resource key не
-считается успешной загрузкой; видимый экран пока не изменён.
-Следующий [image-путь](analysis/gge-image-bindings.md) уже применяет реально декодированный PNG к
-ImageDrawable host-экземпляра: **80** проверок, сохранение atlas UV/размеров, изоляция экземпляров
-и контролируемый D3D9 pixel-readback. Animated Icon и вся GGE-сцена этим не реализованы.
-Отдельный [статический Animated Icon selector](analysis/gge-animated-icon.md) теперь добавляет
-**159** проверок: выбор кадра в atlas, отдельное состояние окон и контролируемый multi-row GPU test.
-Auto Play/native-нормализация/полная GGE-сцена остаются вне этого шага.
-Новый [host lifecycle](analysis/gge-star-lifecycle.md) объединяет эти операции: **232** проверки
-владения, повторных попыток, stale tickets, отдельных action statuses, UTF-имени и центрирования.
-Его независимые host-действия не означают завершение native phase-1; автоматического GGE caller пока нет.
-Теперь [streaming provider](analysis/gge-streaming-images.md) подаёт atlas прямо из большого оригинального
-`Spore_Graphics.package`, без тестового DBPF-carrier: **95** проверок, bounded index/resource reads и
-64-битные смещения (проверены sparse data/index выше 2 ГиБ). Старый memory-adapter лимиты не меняет.
-Добавлен [host scene collector](analysis/gge-star-scene.md): **204** проверки явного Available-каталога,
-active-camera observation, размещения/layer views и picking. Потеря камеры/каталога отключает старые
-draw/pick frames; native factories/effects/видимая галактика и автоматический GGE caller не реализованы.
-Восстановлен [explicit show/phase subset](analysis/gge-star-transition.md): **195** проверок cases2..5
-с отдельным current-phase observation. Case2 делает настоящую панель hittable без снятия root IgnoreMouse;
-case4 не записывает native latch даже при return1. Сервисы/input dispatch/latch и GGE runtime не подменяются.
-Отдельный [input seam](analysis/gge-star-input.md) добавляет **29** проверок world-ray picker:
-он отделён от UI-window hit и не вызывает F8/FC, phase или CommandID.
-Для ручного тыканья есть явно маркированный [GGEHostPreview](analysis/gge-host-preview.md): три
-карточки, реальный SPUI/atlas и настоящий input latch. Это controlled reconstruction, не live GGE state.
-Проверенный unattended запуск пишет `picked host card 20481 (host only)` и завершает работу с exit code 0.
-Следующий блокер описан в [catalogue producer boundary](analysis/gge-catalog-producer.md): native manager
-вектора/порядок `DF95A0` восстановлены, но настоящих `stars.db`/save данных нет и synthetic entries
-не подключаются как production catalogue.
-Для явно переданного capture-файла появился `ggepreview:load,<path>`; формат и строгие проверки описаны
-в [gge-catalog-snapshot.md](analysis/gge-catalog-snapshot.md). Без команды preview остаётся controlled.
-Проверить snapshot отдельно можно через `gge_catalog_snapshot_inspect <snapshot>` без запуска UI.
-Проверить snapshot отдельно можно через `gge_catalog_snapshot_inspect <snapshot>` без запуска UI.
-Это разные проверки: parser correctness не доказывает полноту UI/gameplay.
-Первый шаг геймплея: скелет-драйвер `Game_Cell` (счётчик тиков без симуляции) на состоянии
-`CellGame`; остальные стадии и редакторы не реализованы. Подробнее: [game-stages](analysis/game-stages.md).
+#### Recorded results
+
+- **SPUI:** 748/748 corpus matches; 486 malformed inputs rejected atomically; drawable UV/state/
+  scale/alignment and ancestor Clip checks pass.
+- **Packages:** 57 packages, 150,945 records and 544 scoped package cycles at the CRT limit of 512.
+- **D3D9:** flat/image quad, text flush and scissor reset are checked by pixel readback.
+- **GGE intro/DBCheck:** 2,040 controlled checks; this is not observation of MoviePlayer/DBCheck or a
+  live `Play Spore` transition. See [DBCheck boundary](analysis/gge-dbcheck-play.md).
+- **Catalogue and saves:** typed catalogue projection, stars.db readers, save-header and planet-record
+  readers are checked on controlled inputs; producer, fixups, discovery and live galaxy remain absent.
+- **GGE host presentation:** projection, owned instances, image/animation/lifecycle/scene/input seams
+  are checked independently. They do not imply native camera, callback, scene or catalogue readiness.
+- **Controlled preview:** `GGEHostPreview` uses real SPUI/atlas bytes and explicit host metadata; it is
+  not the automatic native GGE state. The expected unattended smoke result is
+  `picked host card 20481 (host only)` with exit code 0.
+- **Snapshot bridge:** `ggepreview:load,<path>` and `gge_catalog_snapshot_inspect` validate caller-selected
+  snapshots; parser correctness does not prove UI/gameplay completeness.
+- **Cell stage:** the `Game_Cell` skeleton driver runs on the `CellGame` state (enter/tick/exit without
+  simulation); the other stages and editors are not implemented. See [game-stages](analysis/game-stages.md).
+
+The detailed counts, commands and evidence links live in [PROGRESS.md](PROGRESS.md) and the
+[feature ledger](analysis/features.md). This separation keeps a parser check from looking like a
+claim that the corresponding game subsystem is finished.
 
 ### Полезный CLI
 

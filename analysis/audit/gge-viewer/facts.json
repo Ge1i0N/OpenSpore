@@ -1,0 +1,219 @@
+{
+  "oracle_sha256": "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7",
+  "sdk_revision": "69b27b5b407a2c76e1e701ba27630a77a9ce5d01",
+  "authority": "GA static instructions/tables with secondary SDK names; no native runtime execution",
+  "tables": {
+    "game_mode_manager": {
+      "base": "0x1412608",
+      "entries": [
+        {
+          "slot": "0x0",
+          "target": "0x671f20"
+        },
+        {
+          "slot": "0x4",
+          "target": "0xae0620"
+        },
+        {
+          "slot": "0x8",
+          "target": "0x7d8ee0"
+        },
+        {
+          "slot": "0xc",
+          "target": "0x7d8120"
+        },
+        {
+          "slot": "0x10",
+          "target": "0x7d91e0"
+        },
+        {
+          "slot": "0x14",
+          "target": "0x7d82b0"
+        },
+        {
+          "slot": "0x18",
+          "target": "0x7d82f0"
+        },
+        {
+          "slot": "0x1c",
+          "target": "0x7d8530"
+        },
+        {
+          "slot": "0x20",
+          "target": "0x7d9320"
+        },
+        {
+          "slot": "0x24",
+          "target": "0x7d90b0"
+        },
+        {
+          "slot": "0x28",
+          "target": "0x7d8cf0"
+        },
+        {
+          "slot": "0x2c",
+          "target": "0x7d8380"
+        },
+        {
+          "slot": "0x30",
+          "target": "0x7d8330"
+        },
+        {
+          "slot": "0x34",
+          "target": "0x7d84d0"
+        },
+        {
+          "slot": "0x38",
+          "target": "0x7d83c0"
+        },
+        {
+          "slot": "0x3c",
+          "target": "0x7d8400"
+        },
+        {
+          "slot": "0x40",
+          "target": "0x7d8d40"
+        },
+        {
+          "slot": "0x44",
+          "target": "0x7d8490"
+        },
+        {
+          "slot": "0x48",
+          "target": "0x111cd70"
+        },
+        {
+          "slot": "0x4c",
+          "target": "0x7d8420"
+        },
+        {
+          "slot": "0x50",
+          "target": "0x967d90"
+        },
+        {
+          "slot": "0x54",
+          "target": "0x7d8510"
+        },
+        {
+          "slot": "0x58",
+          "target": "0x5aadb0"
+        }
+      ]
+    },
+    "camera_manager": {
+      "base": "0x1410718",
+      "entries": [
+        {
+          "slot": "0x0",
+          "target": "0x7c7780"
+        },
+        {
+          "slot": "0x4",
+          "target": "0x7c66b0"
+        },
+        {
+          "slot": "0x8",
+          "target": "0xc6ab00"
+        },
+        {
+          "slot": "0xc",
+          "target": "0x7b87b0"
+        },
+        {
+          "slot": "0x10",
+          "target": "0x7c7150"
+        },
+        {
+          "slot": "0x14",
+          "target": "0x7c6e50"
+        },
+        {
+          "slot": "0x18",
+          "target": "0x7c61a0"
+        },
+        {
+          "slot": "0x1c",
+          "target": "0xa21090"
+        },
+        {
+          "slot": "0x20",
+          "target": "0x7c6f30"
+        },
+        {
+          "slot": "0x24",
+          "target": "0x7c7310"
+        },
+        {
+          "slot": "0x28",
+          "target": "0x7c6c20"
+        },
+        {
+          "slot": "0x2c",
+          "target": "0x7c6440"
+        },
+        {
+          "slot": "0x30",
+          "target": "0x7c61b0"
+        },
+        {
+          "slot": "0x34",
+          "target": "0x7c6750"
+        },
+        {
+          "slot": "0x38",
+          "target": "0x7c6240"
+        },
+        {
+          "slot": "0x3c",
+          "target": "0x7c61f0"
+        },
+        {
+          "slot": "0x40",
+          "target": "0x7c67a0"
+        },
+        {
+          "slot": "0x44",
+          "target": "0x7c6580"
+        },
+        {
+          "slot": "0x48",
+          "target": "0x7c6260"
+        },
+        {
+          "slot": "0x4c",
+          "target": "0x7c6270"
+        },
+        {
+          "slot": "0x50",
+          "target": "0x7c6520"
+        },
+        {
+          "slot": "0x54",
+          "target": "0x7c64c0"
+        },
+        {
+          "slot": "0x58",
+          "target": "0x98f870"
+        },
+        {
+          "slot": "0x5c",
+          "target": "0x7c6f50"
+        }
+      ]
+    }
+  },
+  "routes": {
+    "projection": "67DCD0 IGameModeManager ->slot58 GetViewer ->mode+30 cViewer ->7C4250 reads viewer+C0",
+    "controller198": "67DCD0 ->slot50 GetCameraManager ->mode+2C ->slot38 GetActiveCamera ->camera array+80 indexed by+A8; ICamera retained at controller+198",
+    "update": "7C6440 requires active index>=0 and viewer+B0 nonnull, then calls active ICamera slot20(delta,viewer)",
+    "set_viewer": "7D8510 stores mode+30 and forwards to CameraManager slot18; 7C61A0 stores manager+B0"
+  },
+  "composition": "7C4370 forms projection; 7C4A10 swaps four-float rows1/2, multiplies viewer+40 by adjusted projection via45EF90/45F2C0, copies product into viewer+C0",
+  "limits": [
+    "No runtime manager/viewer pointers, active GGE camera ID/type or camera updates captured",
+    "Host helper requires explicit world-to-view/window/offset/kind/near/far; no inversion or camera simulation",
+    "Projection enum/positive windows/near>0/far>near validation is conservative host policy",
+    "PerspectiveInfinite branch drops offsets; no bit-identical native floating rounding claim",
+    "No catalogue/refill/DBCheck/MoviePlayer or native scene readiness"
+  ]
+}

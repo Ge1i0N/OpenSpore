@@ -20,6 +20,38 @@ Rules for this file (from `reimplementation-field-guide.md` §1):
 > `.text` (denominator) and `analysis/functions_named.json` (what we reversed). The beta PDB is a
 > different link, so it is a NAME source only, never an address source.
 
+> **Reference registry:** [REFS.md](REFS.md) is the normative source-priority and external-repo
+> pipeline. External implementations are leads until independently checked against the GA oracle.
+
+---
+
+## 0. External OpenSpore leads to audit (not imported claims)
+
+The pinned revisions, cloning policy and authority boundaries are in [REFS.md](REFS.md). Keep these
+items as a backlog rather than silently treating a fork's implementation as native GA behavior:
+
+1. **High priority — real GA saves:** compare `Ge1i0N/OpenSpore`'s `analysis/real-saves.md`,
+   `analysis/starsdb-real.md`, decoder and audit JSON with our `starsdb_dbpf`, context,
+   `StarRecord`, `planet_record` and `gge_saved_adapter` readers on one explicitly selected save.
+   Potential payoff: close structural `stars.db`/planet payload Unknowns without claiming that the
+   native catalogue producer or refill ran.
+2. **High priority — first gameplay data:** compare its `analysis/cell-game.md` and
+   `analysis/game-stages.md` against our GA `CellGame` packages and mode registrations. Resource
+   identities and tables are candidates for byte correlation; positions, balance, AI, camera and
+   other seeds remain host policy until GA evidence exists.
+3. **Medium priority — evidence machinery:** borrow the `openspore-old` dossier schema,
+   semantic-passport/KG shape and seven-stage RE workflow where they fit our `analysis/audit`
+   artifacts. Do not create a second authority database without a provenance/identity plan.
+4. **Medium priority — shared engine seams:** use the external roadmaps to prioritize UTFWin/Button
+   events, `cResourceManager`, property serialization, RW4 and Terrain only when they advance the
+   forward Main → playable path.
+5. **Deferred:** online/Sporepedia, multiplayer, broad Bevy migration and large external code
+   imports are not current blockers for GGE → selected star → first stage.
+
+⚠️ **Do not repeat:** “the fork has a playable slice” is not evidence that our GA binary has the
+same behavior. Import the data schema/idea, preserve seed values as seeds, and require a local
+byte-level or runtime check before changing a native claim.
+
 ---
 
 ## 1. Renderer abstraction: thin internal wrapper NOW, OpenGL backend LATER

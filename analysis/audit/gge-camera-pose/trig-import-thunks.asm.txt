@@ -1,0 +1,5 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+ 11e076c:	ff 25 6c c4 3c 01    	jmp    DWORD PTR ds:0x13cc46c
+ 11e0772:	ff 25 70 c4 3c 01    	jmp    DWORD PTR ds:0x13cc470

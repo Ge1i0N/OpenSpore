@@ -18,6 +18,14 @@ bool read_record(const std::vector<u8>& bytes,Record& out,std::string& error);
 struct ResourceRecord {
     pkg::ResourceKey resource;
     Record record;
+    struct Envelope {
+        // Observed BE halves of 00 25 00 03. Not native version/compatibility validation.
+        u16 prefix_first=0, prefix_second=0;
+        pkg::ResourceKey inner_resource;
+        size_t inner_container_bytes=0, inner_index_end=0, container_tail_bytes=0;
+    };
+    // Absent for a direct counted payload; present only after exact nested-key validation.
+    std::optional<Envelope> envelope;
     // An explicitly observed result from native-style name generation, not a replacement name.
     // Only needed for selected BAD_DATA when flags bit0 permits assignment; empty result keeps marker.
     std::optional<std::u16string> generated_name;
@@ -33,11 +41,8 @@ bool select_save_stem(const starsdb::StarRecord& star,const std::vector<Resource
                       Selection& out,std::string& error);
 // One explicitly selected planet-record DBPF; no fallback across packages or save/profile scans.
 // Materializes counted records only; generation, selection and live readiness are separate.
+// Nested subset: observed prefix00250003 + DBPF3.0/index3, sole exact inner key(1,1,1).
+// Bounds/read flags and transport+decoded batch caps enforced; container tail retained, not decoded.
 bool read_selected_records(starsdb::ExplicitDbpfReader& reader,const starsdb::StarRecord& star,
                            std::vector<ResourceRecord>& out,std::string& error);
-// Real planetRecords.pkp transport: each resource is a 4-byte prefix (constant
-// 0x00250003 on every observed record; meaning unestablished) followed by a nested
-// DBPF v3 holding exactly 1 record whose bytes are the read_record input.
-// Direct (unwrapped) bytes keep parsing as before, so constructed fixtures stay valid.
-bool read_transport_record(const std::vector<u8>& bytes,Record& out,std::string& error);
 }  // namespace os::planet

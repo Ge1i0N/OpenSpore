@@ -2,15 +2,60 @@
 
 Reviewed **2026-10-17**. GA static authority SHA-256
 `086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7`.
-No original runtime capture, `stars.db` corpus or user profile was used.
+The original function extracts are static-only. Later explicitly authorized real-save observations
+are recorded in [gge-real-save](gge-real-save.md); no unrelated profile scan was performed.
 
 ## Recovered producer chain
+
+### Exact `DF95A0` publication boundary
+
+The state-2 entry and refresh probes now corroborate the record publication order at instruction
+level. `DF9620` (Play Spore enter) and `DF9740` (state-2 refresh) both reach `DF95A0`; the separate
+controller route `DE32B0` reaches the same function as well. `DF95A0` first calls `DF94E0`, which
+passes non-null per-record UI objects to `DF9160`, clears record fields `+0xB4/+0xB8`, destroys
+the old record contents through `DE5E90`, and empties the logical vector before obtaining source
+vectors. **Correction:** this is not a copy of the old records. `DF954E` compares `EDI` to itself,
+so the apparent `B26F90` copy loop at `DF9552` is unreachable on this path. The backing allocation
+is not freed by `DF94E0`; record-owned buffers are released by `DE5E90`. Its exact body order is:
+
+```text
+DF94E0
+  → B3D3A0: saved span +F0/+F4
+  → BA6450: candidate span +DC/+E0
+  → DE9DD0: resize total record count
+  → DF7CB0: write candidates at record + saved_count * 0xBC
+  → DF7F30: write saved records at the front
+  → DF9200: create/configure per-record UI data
+  → DF8300: create/update marker effects
+```
+
+This confirms that the earlier candidate-first call order is an implementation detail, not the
+published card order. It also closes the remaining ambiguity about whether `DF95A0` merely reads a
+static list: it owns a destructive refresh/rebuild of the live record array, while the source
+vectors and their producer readiness remain separate Unknown/Absent/Available inputs.
+
+Static-only limitation: this observes no live vector contents, native service completion or original
+runtime card. It does not make a missing save/catalogue available.
+
+Reproducible C/instruction extracts for eight functions, including `DF94E0`, `DE5E90`,
+`DE9DD0` and `DF95A0`, are retained in [publication evidence](audit/gge-publication/README.md).
+The same pass separates event `0x080D7451` from catalogue production: the observed sender uses
+payload 1 at the end of `DF9620` and 0 at the start of `DF85B0`. The `E03F50` handler forwards
+`*payload != 0` to `E03F10` with receiver `listener + 0x0C`. That method writes receiver byte
+`+0x0D`; false returns without cleanup. True additionally calls `E03560`/`E03C00` only if byte
+`+0x0C` is zero and the `+0x34/+0x38` span is nonempty. The span's higher-level meaning and
+subscription path remain unresolved. This is not a DB/refill completion event or proof of a new
+state transition.
 
 The host `build_catalog` helper intentionally accepts already-resolved typed metadata. Static GA
 evidence now clarifies exactly what must produce that metadata:
 
 - `B3D3A0` returns global `0x0167EAE4`, the game catalogue/StarManager owner.
 - Existing/saved vector is `+0xF0/+0xF4`; `BA6450` exposes candidate vector `+0xDC/+0xE0`.
+  The retained serializer descriptor names `+0xDC` as `mStarterStarRecords` (field `0x03EA8676`),
+  which the real-save inspector already resolves. Persisted candidate-source references are therefore
+  available; the live post-refill vector remains a separate Unknown. See the pinned
+  [community-reference cross-check](community-references.md), which also agrees with these offsets.
 - `DF95A0` rebuilds the 0xBC record array, calls `DF7CB0` for candidates at
   `entry_begin + saved_count*0xBC`, then `DF7F30` for saved records at the front. It calls
   `DF9200` for per-record `UI/GGE_game_ui_data`, then `DF8300` effects. Thus candidate-first
@@ -23,6 +68,21 @@ evidence now clarifies exactly what must produce that metadata:
   not export pointer-bearing `+0xB8` runtime UI objects.
 - `BB61C0` removes/refills candidates using count/quota, `BB24D0` eligibility, fallback selection
   and planet work, then appends to `+0xDC`. It is runtime generation, not a static package list.
+- The bounded `BB61C0` body now makes the refill gate concrete: it counts candidate entries whose
+  `BB9C60(2)` state bit is clear, combines that count with saved span `+0xF0/+0xF4`, clamps a
+  quota using globals `0x0156C518`/`0x0156C508`, scans possible starts `+0x118/+0x11C` through
+  `BB24D0`, then falls back to `BB3E10` after up to 1000 random-position attempts. A selected
+  starter-world is removed from `+0xA0`, `BA8980` performs planet work, and the new record is
+  AddRef'd/appended to `+0xDC/+0xE0`. If changed and controller byte `+0x64` is clear, `BB4D40`
+  writes `stars.db` and MessageManager `+0x18` sends `0x062D91C2`.
+- The `0x062D91C2` follow-up is now bounded separately: consumer `0x00B29960` calls `0x00B26770`,
+  which obtains the StarManager and conditionally writes controller byte `+0x46`/calls an opaque
+  `00809E60` path. No direct `DF95A0`/`DF9740`/`DF9620` edge is present in this consumer. GGE's
+  13 registered message IDs from `DEA1B0` are retained as candidates, not promoted to refresh
+  semantics from registration alone. See [refill event evidence](audit/gge-refill-event/README.md).
+- SDK `StarManager.h` corroborates `+0xA0/+0xDC/+0xF0/+0x118/+0x228`, but address leads remain
+  version-specific: SDK `0xBB61E0` is labelled Dispose while this GA `0xBB61C0` is refill; other
+  nearby SDK labels likewise land on different GA bodies. Names are retained as secondary hints only.
 - `BB8C90` initializes serializer-backed `stars.db`, planet records and refill. `BB4D40` writes
   `stars.db.tmp` and renames it to `stars.db`; OpenSpore performs no such writes.
 
@@ -81,7 +141,7 @@ REA also confirms the projection seam used after records/UI data exist. `DF6010`
 `0xBC` record array, reads each record's position at `+0x80`, calls `DE3C20`, then invokes the
 owning object's virtual slot `+0x64` with the record pointer and the projected values
 (`ev_0dd3607a175f4fb9f1f1d193d4a7a379de07ca3f5f15f99f7d3497972d0ac353`). `DE3C20` obtains a
-renderer/camera-related service through a virtual slot `+0x58`, transforms the point with
+viewer through GameModeManager virtual slot `+0x58`, transforms the point with
 `7C4250`/`805F90`, and computes normalized screen placement (`ev_bab6284c95703cb10880ebb4965a7d5d941375eb9cd7b3975445768f22847836`). The direct caller set for
 `DF6010` is empty (`ev_645b43829cc52e50b5780dddd67b6ae73c8fd9a8771113e6ac75e88257129e6b`) because
 the function is reached through the vtable boundary rather than an ordinary direct call. The concrete
@@ -89,12 +149,13 @@ the function is reached through the vtable boundary rather than an ordinary dire
 vtable `0x147EF50` (`ev_2baa4b86c3d9685492da403fa1232e9bc49e08efc13d5089e3bd70d7a4889c1e`), and REA
 read/xref evidence maps `vtable +0x64` to `DF6110` (`ev_d9798b85c18d1c40463e43d25bc45d40d4750d2e268d22fb3abfee3af18a172b`).
 `DF6110` checks `record +0xB8`, reads UI bounds/current point and clamps the projected target
-(`ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a`). The camera owner through
-`DE3C20` slot `+0x58` and the runtime message that triggers this path remain Unknown.
+(`ev_caa2640c50b5514d16c81fa05cd5fb6b9c3b3f33eea6b28a99500b96a033847a`). The [viewer identity
+cross-check](gge-viewer.md) now resolves the returned type/storage; live viewer production and the
+runtime message that triggers this path remain Unknown.
 
-REA now separates the two native camera acquisition paths instead of merging them by field name.
+The two acquisition paths are separate viewer versus ICamera roles, not aliases of one camera.
 Instruction-level evidence shows `DE3C20` calls `0067DCD0`, loads the returned object's vtable,
-reads slot `+0x58`, and calls it; the returned camera/matrix result becomes the `this` object for
+reads slot `+0x58`, and calls it; the returned cViewer becomes the `this` object for
 `7C4250`. `805F90` then supplies the viewport/rectangle state. `DE3C20` combines those values into
 normalized screen coordinates with the observed `(+1)*0.5` and `0.5*(1-y)` style transforms
 (`ev_ba2f5a2d4cab60b689c15a3692dee19a26c74435d0cdbc96146c25a8b080bda7`,
@@ -103,28 +164,32 @@ normalized screen coordinates with the observed `(+1)*0.5` and `0.5*(1-y)` style
 `ev_00b0590ad36b8bdc1d71b8f38177ec593a29fd459378413eb42fc21e5d967f06`). Separately, `DE46D0`
 acquires the controller's `+0x198` object through `0067DCD0` slot `+0x50` and that object's slot
 `+0x38` (`ev_7fd0e4f59184119cd1ab9c128942586067b6e77967905ff23e9728419adb8c58`). `DF6490` uses
-the `+0x58` service for nearest-record selection/picking
-(`ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1`). The static binary
-therefore does not establish that controller `+0x198` and the projection service are identical.
+the `+0x58` viewer for nearest-record selection/picking
+(`ev_2044e2f71fbd41f37dfff1dc2bce5d80528c08868baa47ce37ef2a59d829cca1`). GA vtables/getters
+now corroborate: mode+30 is cViewer, mode+2C is CameraManager, whose active ICamera is retained
+at controller+198. CameraManager Update calls ICamera slot20 with the viewer; no runtime state
+or concrete GGE camera selection is inferred. See [matrix composition and handoff](gge-viewer.md).
 
-REA also identifies the UI-bounds acquisition as a different registry path, not another camera
-getter. `DF6110` calls `00810650(0x02E5A4A8,0)`. The wrapper forwards through the registry object at
-`+0x14` to `008102A0`; that lookup walks registered services, queries interface `0xEEEE8218` at
-service slot `+0x0C`, compares the requested ID through slot `+0x1C`, and optionally invokes slot
-`+0xF0` (`ev_d2b10723dab7915c5fb7ecb22a4c7d132a0df5ffa003d1792dd8fdc968ec13c8`,
-`ev_a8cf6c11bc9c47ccba1819b66f0a798e410315bff6845c2ab36ff099356d25ff`). The concrete service
-behind ID `0x02E5A4A8` and its semantic name remain Unknown. `DE3C20` therefore uses global
-`0x015FD8B0`/slot `+0x58`, while `DF6110` uses the registry ID plus `805F90` viewport state and
-service slots `+0x34/+0x38`; neither route is synthesized as the other.
+The [2026-10-17 window lookup cross-check](gge-window-lookup.md) resolves UI-bounds identity and
+corrects the earlier global-registry interpretation. `DF6110` loads **ECX from record+B8**, then
+calls `00810650(0x02E5A4A8,0)`. `810650` reads that UILayout's `+14` and forwards to `8102A0`.
+The latter queries `IWindow` interface `EEEE8218`, compares ControlID through `+1C`, and only
+recurses through `+F0` when requested. The default matching window is unique root object177 in
+both `GGEGameStarUIv4` assets. Its `+34/+38/+64` are GetArea/GetRealArea/SetLocation; this is not
+another camera getter. Earlier REA IDs retain the static instructions
+(`ev_d2b10723dab7915c5fb7ecb22a4c7d132a0df5ffa003d1792dd8fdc968ec13c8`,
+`ev_a8cf6c11bc9c47ccba1819b66f0a798e410315bff6845c2ab36ff099356d25ff`), not the old inference.
+`DE3C20` still uses global `015FD8B0`/slot58 separately. Native mount/component registration and
+runtime window geometry are not observed by finding the serialized root.
 
-The registry boundary has three resolved callers in REA: `00810650`, `008113D0`, and `00812590`
+The layout-component lookup boundary has three resolved callers in REA: `00810650`, `008113D0`, and `00812590`
 (`ev_182693150ec2aca09aca6eda83664ce25962446a7f1fe1d7683ce2ae9db31b2f`). `008113D0` first asks
-`008102A0(0xFFFFFFFF,1)` for a matching service; on the no-match branch it enumerates registered
-providers exposing `0xEEEE8218`, reads each provider's `+0x38` rectangle, combines the bounds, and
-invokes provider slot `+0x64` with the resulting offsets
+`008102A0(0xFFFFFFFF,1)` for a matching window; on the no-match branch it enumerates components
+exposing `0xEEEE8218`, reads each window's GetRealArea (`+0x38`), combines the bounds, and
+invokes SetLocation (`+0x64`) with the resulting offsets
 (`ev_059d4b922486de4e38ad78a79eef526f05fd34590b13ef28c7cb627189c9341f`). This corroborates a
-shared UI/display-service registry, but does not reveal which provider satisfies ID `0x02E5A4A8`.
-`008102A0` has no resolved direct callees because its provider calls are indirect; its High-Pcode
+layout-local window geometry path, not a global display-service registry.
+`008102A0` has no resolved direct callees because its interface calls are indirect; its High-Pcode
 summary is complete at 48 operations, 46 def-use links and 19 effects
 (`ev_07e0833e81604fbd1b1e7aab897d1d75f1cacc7fe1d4c63f6d2195a50f428eb2`).
 The higher-level registry path is also resolved: `008102A0` is called by `00810650`, `008113D0`,
@@ -132,8 +197,8 @@ and `00812590` (`ev_914b77ace5048cc0224e6a298cd0b7436f678d46390b4d938e0918812f21
 is called by `00811C20`, and `00811C20` is called by `00811C70` and `00812100`
 (`ev_4871815c0c0827cad1bab36b921a0a82232c491db33e80ddd54076a159ccbdf2`,
 `ev_d87f299f55916acf12ddda64a9c89eac9bbda90e92cb84c691ac443708d456e6`). `00811C20` invokes
-the active display/layout object's `+0xD8` with every provider exposing `0xEEEE8218`; this is a
-provider synchronization path, not a recovered concrete provider identity.
+the container window's AddWindow (`+0xD8`) with every component exposing `0xEEEE8218`;
+this is a native window-attachment path, not camera identity or mount-success evidence.
 
 REA resolves the two upstream display-object transitions. `00812100` selects/replaces the object at
 owner `+0x88` (using `008106C0` for a non-null lookup key), releases the previous object, retains the
@@ -147,7 +212,7 @@ The direct lifecycle callers are bounded as well: `00812100` is called by `00812
 (`ev_127d3eefd901589373b362845d6b57f8744677820181fbf2e4209e4480249fbe`), while `00811C20` is
 called only by `00811C70` and `00812100`. `00811C70` has no resolved direct callers, so its entry
 into synchronization is itself an indirect/object-lifecycle boundary. No retained static caller
-names a concrete `0xEEEE8218` provider; this is the remaining registration gap.
+observes successful runtime window registration; that execution boundary remains unobserved.
 
 `008121C0` narrows owner creation further: it calls `00811070(param_1)`, stores the returned
 `UI/LayoutObjects` object in its own `+0x14`, copies the three-word lookup key into `+0x08/+0x10`,
@@ -158,10 +223,10 @@ resource key `0x022568E7`; `00810170` initializes the object vtables/fields
 (`ev_e50eb9ee18bc8bd439a8f5f4105b78cc09732b401de716957dfb1864fe3d780d`,
 `ev_e18e0694347d83d8fba1a7315c0a09f70e820d7fbacd06968672a33a91cd018b`,
 `ev_268b4ab66c5326de72fdce74b332194e360f7460f8bcf276ee710041916c52a8`). The lookup key is
-caller-supplied/indirect at this boundary; REA does not connect it to provider ID `0x02E5A4A8`.
+caller-supplied/indirect at this boundary; a layout resource key is not ControlID `0x02E5A4A8`.
 The GGE callers are now explicit: `DE5900` invokes `812250` for `GGEZoomPanel`/`GGEZoomPanelV2`,
 while `E035F0` invokes `8121C0` for `UI/GGE/GlobalUI` with operand `0x2EDD95CA`. These establish
-the GGE layout-owner path but do not identify the separate `0x02E5A4A8` provider
+the GGE layout-owner path; the separate per-card root identity is verified in the SPUI cross-check
 (`ev_34068f9104b19813a3645104c02fb607788751fbe79b5dca154ae7e978743635`,
 `ev_4319d8ea585fb38746db054f3e40a2ee71cd433e9ef30fc667e867f732422452`,
 `ev_1e4b5b023c205f50f186157c64950c166ebeb1cbb9ab7a417a9294ef6fa65b14`).
@@ -171,15 +236,14 @@ optional suffix text is parsed independently (`ev_1774a78a641dee54932082d8e71e87
 These values frame a layout lookup and remain distinct from SPUI root IDs and PNG resource IDs.
 The native handoff is corroborated at the caller level: `DE5900 → 812250 → 8121C0` handles the
 zoom-panel layout, while `E035F0 → 8121C0(...,0x2EDD95CA)` handles `UI/GGE/GlobalUI`. This is the
-strongest static bridge from GGE controller UI initialization to `UI/LayoutObjects`; it still does
-not identify the runtime provider selected by registry ID `0x02E5A4A8`.
+strongest static bridge from GGE controller UI initialization to `UI/LayoutObjects`; it does not
+observe runtime mount completion for the now-identified per-card root177.
 REA's `00812590` caller is a layout command/diagnostic path rather than provider registration: its
 strings and control flow list loaded UI layouts, accept `load`/`unload`, parse the layout name and
 hex arguments, and call `812250` with tag/descriptor values (`ev_3c8284d4d0a73a9441ea9657942c0b91e8bede6bf2d418cb38b79c74aff9c49a`,
 `ev_b4b177ba74aa2280d66904471eb58a6683316d6d41fb048f2d5fcc7a7eca809b`,
 `ev_dcea6f959caf6ac5dd61ac3987b488b73f2b3ee160829f80060ad4a36c82b8b5`). It has no resolved
-direct callers. Therefore this path explains layout command ingestion but does not reveal the
-concrete provider behind registry ID `0x02E5A4A8`.
+direct callers. Therefore this path explains layout command ingestion, not runtime card mounting.
 
 The record-to-owner call at `DF606D` is specifically `CALL EAX`. REA's typed call-target resolver
 classifies it as `computed/unresolved` with no static target
@@ -194,6 +258,11 @@ it allocates one `0x90`-byte `UI/GGE_game_ui_data` object per `0xBC` record, sto
 at object `+0x30` and record `+0xB8`, then performs the stage/icon and save-flag setup. `DF95A0`
 itself has only `DE32B0` and `DF9740` in the resolved caller set (`ev_50fb51055abb84f6c4dda34ad2f90309a63e1ef6cc0371560ec69cb6a4a7e818`).
 No resolved direct edge from the `GalaxyGameEntry` registrar (`DDDE30`) to `DF95A0` was observed.
+
+The per-record effect side is now also separated from the launch path. `DF8300` creates/configures
+marker-effect objects for eligible records and calls `DF6820` (`effect vtable +0x48` followed by
+GGE `+0x34` installation); `DF9160` performs the symmetric effect cleanup. This forwarded target
+is visual catalogue infrastructure, not the `Play Scenario` producer or a ScenarioMode handoff.
 
 The record rebuild now has a concrete native lifecycle slot. REA xrefs and vtable bytes place
 `DF9740` at `Play Spore` vtable `0x147EF50 +0x38` and `DF6010` at `+0x68`
@@ -238,10 +307,11 @@ service provenance facts yet.
 
 ## Why this is not attached
 
-The workspace has no original `stars.db` or save corpus, and requirements prohibit scanning user
-profiles. Package terrain/property resources are not StarManager vectors or generated positions.
-Native manager/service pointers, candidate grid generation, planet producer, save discovery and
-post-load fixups remain unavailable. A bounded negative workspace search is not an empty catalogue.
+The workspace now has explicitly authorized real-save corpora; persisted saved/starter references
+and selected planet/save records are decoded. This supersedes the original lack-of-corpus blocker.
+Package terrain/property resources still are not automatically post-load StarManager vectors or
+generated positions. Native manager/service pointers, candidate refill, terrain lookup and post-load
+fixups remain unobserved. No unrequested profile scan or empty/ready fallback is allowed.
 
 `CatalogInput` therefore remains strict: both availability values must be explicit `Available`.
 Unknown does not become empty, and controlled verifier entries do not become production data.

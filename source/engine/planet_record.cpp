@@ -1,5 +1,4 @@
 #include "engine/planet_record.h"
-#include <cstring>
 #include <utility>
 
 namespace os::planet {
@@ -94,6 +93,33 @@ bool resource_keys(const starsdb::StarRecord& star,std::vector<pkg::ResourceKey>
     for (u32 i=0;i<*star.planet_count;++i) result.push_back({*star.key+i*0x01000000u,kResourceType,kResourceGroup});
     out=std::move(result); error.clear(); return true;
 }
+static bool unwrap_planet_resource(const std::vector<u8>& bytes,std::vector<u8>& out,
+                                  std::optional<ResourceRecord::Envelope>& envelope,std::string& error) {
+    constexpr size_t kMaxPayload=64*1024*1024;
+    if(bytes.size()>kMaxPayload){error="planet transport exceeds 64 MiB host limit";return false;}
+    const bool prefix=bytes.size()>=4&&be32(bytes,0)==0x00250003u;
+    const bool nested_magic=bytes.size()>=8&&bytes[4]=='D'&&bytes[5]=='B'&&bytes[6]=='P'&&bytes[7]=='F';
+    if(prefix||nested_magic) {
+        if(!prefix||!nested_magic){error="unsupported planet wrapper prefix/magic";return false;}
+        // Use the strict DBPF preflight and exact-resource lookup, not generic record[0].
+        const std::vector<u8> inner(bytes.begin()+4,bytes.end());
+        starsdb::ExplicitDbpfReader nested;
+        if(!nested.open_from_memory(inner,error)){error="nested planet DBPF rejected: "+error;return false;}
+        if(nested.package().records().size()!=1){error="nested planet DBPF requires sole exact key(1,1,1)";return false;}
+        constexpr pkg::ResourceKey expected{1,1,1};
+        auto resource=nested.read_unique(expected);
+        if(resource.status!=starsdb::ResourceReadStatus::Found){error="nested planet key(1,1,1): "+resource.error;return false;}
+        const auto le32=[&](size_t at){return u32(inner[at])|(u32(inner[at+1])<<8)|(u32(inner[at+2])<<16)|(u32(inner[at+3])<<24);};
+        const size_t index=le32(0x40)?le32(0x40):le32(0x28);
+        const size_t index_end=index+le32(0x2c); // already bounded by strict reader preflight
+        ResourceRecord::Envelope observed;
+        observed.prefix_first=0x25;observed.prefix_second=3;observed.inner_resource=resource.key;
+        observed.inner_container_bytes=inner.size();observed.inner_index_end=index_end;
+        observed.container_tail_bytes=inner.size()-index_end;
+        envelope=observed;out=std::move(resource.bytes);return true;
+    }
+    envelope.reset();out=bytes;return true;
+}
 bool select_save_stem(const starsdb::StarRecord& star,const std::vector<ResourceRecord>& records,
                       Selection& out,std::string& error) {
     std::vector<pkg::ResourceKey> expected;
@@ -133,44 +159,22 @@ bool select_save_stem(const starsdb::StarRecord& star,const std::vector<Resource
     }
     out=std::move(result); error.clear(); return true;
 }
-bool read_transport_record(const std::vector<u8>& bytes,Record& out,std::string& error) {
-    // Real-save transport branch, at fixed offsets (not a magic search): the 4-byte
-    // prefix is pinned to the observed constant because its meaning is unestablished;
-    // anything else falls through to the direct read_record shape below.
-    constexpr u8 kPrefix[4]={0x00,0x25,0x00,0x03};
-    if (bytes.size()>=4+0x60 && std::memcmp(bytes.data(),kPrefix,sizeof(kPrefix))==0 &&
-        std::memcmp(bytes.data()+4,"DBPF",4)==0) {
-        pkg::Package nested;
-        if (!nested.open_from_memory(bytes.data()+4,bytes.size()-4,"planet-record-nested")) {
-            error=nested.why();
-            return false;
-        }
-        if (nested.records().size()!=1) {
-            error="nested planet DBPF does not hold exactly 1 record";
-            return false;
-        }
-        std::vector<u8> inner;
-        if (!nested.read_resource_decoded(0,inner)) {
-            error="nested planet record unreadable";
-            return false;
-        }
-        return read_record(inner,out,error);
-    }
-    return read_record(bytes,out,error);
-}
 bool read_selected_records(starsdb::ExplicitDbpfReader& reader,const starsdb::StarRecord& star,
                            std::vector<ResourceRecord>& out,std::string& error) {
     std::vector<pkg::ResourceKey> keys;
     if (!resource_keys(star,keys,error)) return false;
     std::vector<ResourceRecord> result; result.reserve(keys.size());
-    size_t aggregate=0;
+    size_t aggregate=0,decoded_aggregate=0;
     for (const auto& key:keys) {
         auto resource=reader.read_unique(key);
         if (resource.status!=starsdb::ResourceReadStatus::Found) { error=resource.error; return false; }
         if (resource.bytes.size()>64*1024*1024-aggregate) { error="planet batch exceeds 64 MiB host limit"; return false; }
         aggregate+=resource.bytes.size();
         ResourceRecord planet; planet.resource=key;
-        if (!read_transport_record(resource.bytes,planet.record,error)) return false;
+        std::vector<u8> payload; if(!unwrap_planet_resource(resource.bytes,payload,planet.envelope,error)) return false;
+        if(payload.size()>64*1024*1024-decoded_aggregate){error="decoded planet batch exceeds 64 MiB host limit";return false;}
+        decoded_aggregate+=payload.size();
+        if (!read_record(payload,planet.record,error)) return false;
         if (planet.record.unvalidated_tail) { error="planet resource has unsupported trailing bytes"; return false; }
         result.push_back(std::move(planet));
     }

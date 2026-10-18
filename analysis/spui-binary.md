@@ -144,8 +144,11 @@ The diagnostic renderer does not yet apply ancestor scissor clipping to all text
 whose Visible bit is off. The old flat hit-test selected it anyway. The new tree hides that branch,
 and the old point `(942,261)` no longer enters GalaxyGameEntry. A visible tile at `(311,550)` does
 enter **CreatureEditor `0x022D9E01`**, verified on the windowed engine. This is a reconstructed launcher
-ControlID-to-state bridge, gated on command `0x00E1132F`; the original general message dispatcher is
-not implemented. Entering an editor state does not implement the editor or its AppMode.
+ControlID-to-state bridge, gated on serialized command `0x00E1132F`; the original general
+CommandID/WinProc dispatcher is not implemented. `find_imm` finds no literal GA `.text` immediate
+for that value, consistent with it being read from an `IWindow`/SPUI object rather than compared as
+a constant. Entering an editor state does not implement the editor or its AppMode. See the
+[bounded CommandID boundary](audit/ui-command-dispatch/README.md).
 
 ## Validation and reproduction
 

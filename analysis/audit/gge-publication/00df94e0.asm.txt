@@ -1,0 +1,74 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static analysis only, not original runtime observation.
+Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.
+
+Function VA: 0x00DF94E0
+
+00df94e0  PUSH ECX
+00df94e1  PUSH EBX
+00df94e2  PUSH EBP
+00df94e3  PUSH ESI
+00df94e4  LEA ESI,[ECX + 0x8]
+00df94e7  MOV ECX,dword ptr [ESI + 0x4]
+00df94ea  SUB ECX,dword ptr [ESI]
+00df94ec  MOV EAX,0xae4c415d
+00df94f1  IMUL ECX
+00df94f3  ADD EDX,ECX
+00df94f5  SAR EDX,0x7
+00df94f8  MOV EAX,EDX
+00df94fa  SHR EAX,0x1f
+00df94fd  ADD EAX,EDX
+00df94ff  PUSH EDI
+00df9500  JZ 0x00df9543
+00df9502  XOR EBP,EBP
+00df9504  XOR EDI,EDI
+00df9506  MOV EBX,EAX
+00df9508  JMP 0x00df9510
+00df9510  MOV EAX,dword ptr [ESI]
+00df9512  MOV EAX,dword ptr [EDI + EAX*0x1 + 0xb8]
+00df9519  CMP EAX,EBP
+00df951b  JZ 0x00df9526
+00df951d  PUSH EAX
+00df951e  CALL 0x00df9160
+00df9523  ADD ESP,0x4
+00df9526  MOV ECX,dword ptr [ESI]
+00df9528  MOV dword ptr [EDI + ECX*0x1 + 0xb4],EBP
+00df952f  MOV EDX,dword ptr [ESI]
+00df9531  MOV dword ptr [EDI + EDX*0x1 + 0xb8],EBP
+00df9538  ADD EDI,0xbc
+00df953e  SUB EBX,0x1
+00df9541  JNZ 0x00df9510
+00df9543  MOV EDI,dword ptr [ESI + 0x4]
+00df9546  MOV EBP,dword ptr [ESI]
+00df9548  MOV dword ptr [ESP + 0x10],EBP
+00df954c  MOV EBX,EDI
+00df954e  CMP EDI,EDI
+00df9550  JZ 0x00df956a
+00df9552  PUSH EBX
+00df9553  MOV ECX,EBP
+00df9555  CALL 0x00b26f90
+00df955a  ADD EBX,0xbc
+00df9560  ADD EBP,0xbc
+00df9566  CMP EBX,EDI
+00df9568  JNZ 0x00df9552
+00df956a  MOV EAX,dword ptr [ESI + 0x4]
+00df956d  PUSH EAX
+00df956e  PUSH EBP
+00df956f  MOV ECX,ESI
+00df9571  CALL 0x00de5e90
+00df9576  SUB EDI,dword ptr [ESP + 0x10]
+00df957a  MOV EAX,0x51b3bea3
+00df957f  IMUL EDI
+00df9581  SUB EDX,EDI
+00df9583  SAR EDX,0x7
+00df9586  MOV ECX,EDX
+00df9588  SHR ECX,0x1f
+00df958b  ADD ECX,EDX
+00df958d  IMUL ECX,ECX,0xbc
+00df9593  ADD dword ptr [ESI + 0x4],ECX
+00df9596  POP EDI
+00df9597  POP ESI
+00df9598  POP EBP
+00df9599  POP EBX
+00df959a  POP ECX
+00df959b  RET

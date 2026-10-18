@@ -1,0 +1,55 @@
+GA-unpacked SHA-256: 086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7
+Static file bytes / objdump x86, no target execution.
+
+  b5cef0:	53                   	push   ebx
+  b5cef1:	56                   	push   esi
+  b5cef2:	32 db                	xor    bl,bl
+  b5cef4:	e8 d7 0d b2 ff       	call   0x67dcd0
+  b5cef9:	8b 10                	mov    edx,DWORD PTR [eax]
+  b5cefb:	8b c8                	mov    ecx,eax
+  b5cefd:	8b 42 50             	mov    eax,DWORD PTR [edx+0x50]
+  b5cf00:	ff d0                	call   eax
+  b5cf02:	8b 4c 24 0c          	mov    ecx,DWORD PTR [esp+0xc]
+  b5cf06:	8b 10                	mov    edx,DWORD PTR [eax]
+  b5cf08:	8b 52 34             	mov    edx,DWORD PTR [edx+0x34]
+  b5cf0b:	51                   	push   ecx
+  b5cf0c:	8b c8                	mov    ecx,eax
+  b5cf0e:	ff d2                	call   edx
+  b5cf10:	e8 0b 04 fe ff       	call   0xb3d320
+  b5cf15:	8b f0                	mov    esi,eax
+  b5cf17:	85 f6                	test   esi,esi
+  b5cf19:	74 49                	je     0xb5cf64
+  b5cf1b:	e8 b0 0d b2 ff       	call   0x67dcd0
+  b5cf20:	8b 10                	mov    edx,DWORD PTR [eax]
+  b5cf22:	8b c8                	mov    ecx,eax
+  b5cf24:	8b 42 50             	mov    eax,DWORD PTR [edx+0x50]
+  b5cf27:	ff d0                	call   eax
+  b5cf29:	8b 10                	mov    edx,DWORD PTR [eax]
+  b5cf2b:	8b c8                	mov    ecx,eax
+  b5cf2d:	8b 42 38             	mov    eax,DWORD PTR [edx+0x38]
+  b5cf30:	ff d0                	call   eax
+  b5cf32:	85 c0                	test   eax,eax
+  b5cf34:	74 1d                	je     0xb5cf53
+  b5cf36:	8b 10                	mov    edx,DWORD PTR [eax]
+  b5cf38:	8b c8                	mov    ecx,eax
+  b5cf3a:	8b 42 0c             	mov    eax,DWORD PTR [edx+0xc]
+  b5cf3d:	68 ed 66 19 01       	push   0x11966ed
+  b5cf42:	ff d0                	call   eax
+  b5cf44:	85 c0                	test   eax,eax
+  b5cf46:	89 46 0c             	mov    DWORD PTR [esi+0xc],eax
+  b5cf49:	0f 95 c1             	setne  cl
+  b5cf4c:	5e                   	pop    esi
+  b5cf4d:	8a c1                	mov    al,cl
+  b5cf4f:	5b                   	pop    ebx
+  b5cf50:	c2 04 00             	ret    0x4
+  b5cf53:	33 c0                	xor    eax,eax
+  b5cf55:	85 c0                	test   eax,eax
+  b5cf57:	89 46 0c             	mov    DWORD PTR [esi+0xc],eax
+  b5cf5a:	0f 95 c1             	setne  cl
+  b5cf5d:	5e                   	pop    esi
+  b5cf5e:	8a c1                	mov    al,cl
+  b5cf60:	5b                   	pop    ebx
+  b5cf61:	c2 04 00             	ret    0x4
+  b5cf64:	5e                   	pop    esi
+  b5cf65:	8a c3                	mov    al,bl
+  b5cf67:	5b                   	pop    ebx

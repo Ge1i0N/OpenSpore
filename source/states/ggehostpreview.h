@@ -3,6 +3,7 @@
 
 namespace os::states {
 // Debug-only controlled reconstruction: explicit typed catalogue/camera, real shipped atlas PNG,
-// owned host scene and UI picking. It is not registered in release builds and is not native GGE.
+// owned host scene and UI picking. It also owns the separate ScenarioHostDiagnostic handoff. Neither
+// state is registered in release builds and neither is native GGE/ScenarioMode execution.
 void install_gge_host_preview(Manager& manager);
 }  // namespace os::states

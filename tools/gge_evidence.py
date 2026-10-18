@@ -3,10 +3,15 @@
 No target execution or full reanalysis. Decompiled stack arguments can be incomplete;
 actual instructions and virtual slot numbers govern claims. Constructor globals can
 be in zero-fill BSS: never read them as file-backed bytes at their virtual address.
+
+Use --publication for the bounded record-reset/enter/exit signal extracts. Run via
+tools/ghidra_run.py; the persistent project must not be opened concurrently.
 """
 import hashlib
 import json
 import os
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -37,6 +42,16 @@ SCENE_FUNCTIONS = (0x67dcd0,0x67dec0,0x67dd10,0x67dd40,0x67df50,0x67dd50,0x67df6
                    0x67dd90,0xde46d0,0xddd920,0xddd150,0xde3c20,0x7c4250,0xdf6110)
 TRANSITION_FUNCTIONS = (0xdf6d80,0xdf7ac0,0xdf7bf0,0x436350,0x436390,0xa20670,0x67ca60,0x95f950,0x95fda0,0x95fe20)
 INPUT_FUNCTIONS = (0xdf6490,0xdf65b0,0xdf7800,0x7c45e0,0x698b30,0xdf6110,0xdf6010)
+PUBLICATION_FUNCTIONS = (0xdf94e0,0xde5e90,0xde9dd0,0xdf95a0,0xdf9620,0xdf85b0,
+                         0xe03f50,0xe03f10)
+TERRAIN_PROP_FUNCTIONS = (0x67ddf0, 0x6a60e0, 0x6a61f0)
+REFILL_FUNCTIONS = (0xbb61c0, 0xbb24d0, 0xbb3e10, 0xbb9c40, 0xbb9c60, 0xbb9c70,
+                   0xbad210, 0xbb5950)
+REFILL_EVENT_FUNCTIONS = (0xb29960, 0xb26770)
+MESSAGE_FUNCTIONS = (0xde99b0, 0xde8680, 0xde9550)
+STATE_UI_FUNCTIONS = (0xde48c0, 0xde4a20, 0xde4ae0, 0xde4bd0)
+SCENARIO_FUNCTIONS = (0xef0210, 0xef1870, 0xef2290, 0xef24c0, 0xef2ef0)
+SCENARIO_MESSAGE_FUNCTIONS = (0xef1d20, 0xef2250, 0xef1380)
 
 
 def main():
@@ -51,11 +66,39 @@ def main():
     scene = '--scene' in sys.argv
     transition = '--transition' in sys.argv
     input_analysis = '--input' in sys.argv
+    terrain_prop = '--terrain-prop' in sys.argv
+    refill = '--refill' in sys.argv
     addresses = INPUT_FUNCTIONS if input_analysis else TRANSITION_FUNCTIONS if transition else SCENE_FUNCTIONS if scene else ANIMATED_FUNCTIONS if animated else IMAGE_FUNCTIONS if images else PHASE1_FUNCTIONS if phase1 else MOUNT_FUNCTIONS if mount else PRESENT_FUNCTIONS if present else CATALOG_FUNCTIONS if catalog else FLOW_FUNCTIONS if flow else INTRO_FUNCTIONS if intro else FUNCTIONS
     dest = ROOT/('analysis/audit/gge-input' if input_analysis else 'analysis/audit/gge-star-transition' if transition else 'analysis/audit/gge-scene' if scene else 'analysis/audit/gge-animated' if animated else 'analysis/audit/gge-images' if images else 'analysis/audit/gge-star-phase1' if phase1 else 'analysis/audit/gge-star-mount' if mount else 'analysis/audit/gge-star-present' if present else 'analysis/audit/gge-catalog' if catalog else 'analysis/audit/gge-flow' if flow else
                  'analysis/audit/gge-intro' if intro else 'analysis/audit/galaxy-entry')
+    if '--publication' in sys.argv:
+        addresses = PUBLICATION_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-publication'
+    if terrain_prop:
+        addresses = TERRAIN_PROP_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-terrain-prop'
+    if refill:
+        addresses = REFILL_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-refill'
+    if '--refill-event' in sys.argv:
+        addresses = REFILL_EVENT_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-refill-event'
+    if '--message' in sys.argv:
+        addresses = MESSAGE_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-message-dispatch'
+    if '--state-ui' in sys.argv:
+        addresses = STATE_UI_FUNCTIONS
+        dest = ROOT/'analysis/audit/gge-state-ui'
+    if '--scenario' in sys.argv:
+        addresses = SCENARIO_FUNCTIONS
+        dest = ROOT/'analysis/audit/scenario-mode'
+    if '--scenario-message' in sys.argv:
+        addresses = SCENARIO_MESSAGE_FUNCTIONS
+        dest = ROOT/'analysis/audit/scenario-mode'
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256((ROOT/'refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe').read_bytes()).hexdigest()
+    if '--publication' in sys.argv and digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+        raise ValueError('publication addresses require selected GA hash')
     header = ('GA-unpacked SHA-256: %s\nStatic analysis only, not original runtime observation.\n'
               'Persistent Ghidra 12.1.4; pseudocode calling conventions/stack arguments may be incomplete.\n\n'
               % digest)
@@ -100,6 +143,185 @@ def retain_static():
     dest.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(pe.raw).hexdigest()
     header = 'GA-unpacked SHA-256: %s\nStatic file bytes / objdump x86, no target execution.\n\n' % digest
+    if '--camera-pose' in sys.argv:
+        from tools.find_imm import OBJDUMP
+        if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+            raise ValueError('camera pose ranges require selected GA hash')
+        dest=ROOT/'analysis/audit/gge-camera-pose';dest.mkdir(parents=True,exist_ok=True)
+        ranges=[('normal-mode-transform',0xddf2b0,0xddf47f),('dynamics-helper',0xdde580,0xdde798),('transition-expiry-sampler',0xdde300,0xdde38f),('transition-mode-transform',0xddf480,0xddf604),
+                ('normal-mode-update',0xdde810,0xdde8ad),('transition-setup',0xdde260,0xdde2f8),
+                ('transition-expiry',0xdde300,0xdde38f),('timed-mode-setup',0xdde8b0,0xdde92e),
+                ('basis-initializer',0x136cf30,0x136cf8c),('first-row-rotation',0x4099b0,0x409b2a),
+                ('second-row-rotation',0x5a2d70,0x5a2ea4),('transform-to-matrix',0x6b93f0,0x6b94b5),
+                ('property-pose-fields',0xddebcf,0xdded6b),('trig-import-thunks',0x11e076c,0x11e0778)]
+        for name,start,end in ranges:
+            r=subprocess.run([str(OBJDUMP),'-d','-M','intel',f'--start-address={start}',f'--stop-address={end}',str(pe.path)],
+                             capture_output=True,text=True,errors='replace',check=True,timeout=15)
+            instructions=[line.rstrip() for line in r.stdout.splitlines() if re.match(r'^\s+[0-9a-f]+:',line)]
+            if not instructions:raise ValueError('empty pose disassembly')
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(instructions)+'\n',encoding='utf-8')
+        objects=[]
+        for base,count in ((0x15a30b4,2),(0x15a30b8,2),(0x15a3110,2)):
+            table=pe.u32(base)
+            objects.append({'object':hex(base),'initial_table':hex(table),
+                            'slots':[{'slot':hex(i*4),'target':hex(pe.u32(table+i*4))} for i in range(count)]})
+        if [(pe.u32(pe.u32(base)),pe.u32(pe.u32(base)+4)) for base in (0x15a30b4,0x15a30b8,0x15a3110)] != [
+            (0xdde810,0xddf2b0),(0xddfea0,0xddf480),(0xdde300,0xddf610)]:
+            raise ValueError('pose mode tables mismatch')
+        pe.pe.parse_data_directories(directories=[1])
+        imports=[{'iat':hex(item.address),'dll':desc.dll.decode(),'name':item.name.decode() if item.name else None}
+                 for desc in pe.pe.DIRECTORY_ENTRY_IMPORT for item in desc.imports
+                 if item.address in (0x13cc46c,0x13cc470)]
+        facts={'oracle_sha256':digest,'authority':'static file bytes and PE imports; explicit controlled host inputs, no runtime pose capture',
+               'mode_objects':objects,'trig_imports':imports,
+               'dynamics_constants':{'damping_base':0.1,'stiffness':2.0,'smoothing_factor':0.1,'delta_units':'DDE810 converts milliseconds to seconds before DDE580','helper_input_import':'DDE580 calls _CIpow through 11E0930','wrap':'DDE762..791 one correction: >period subtract, <0 add'},
+               'pose_sources':{'basis':'16A10E0..1103 BSS; initializer136CF30 writes nine floats identity, no runtime immutability claim',
+                               'pivot':'16A10CC..D4 BSS, copied into Transform+04',
+                               'normal_angles':'first=-15A308C then second=15A3090',
+                               'normal_distance':'15A3088 clamped then copied from15A3094 for Transform displacement; host accepts post-clamp explicit distance',
+                               'normal_additional_offset':'15A3048..50',
+                               'transition_angles_distance_offset':'-mode+30, +mode+20, mode+28, mode+34..3C'},
+               'rotation_rows':'row0=c1*a+s1*b; intermediate_row1=-s1*a+c1*b; row1=c2*intermediate+s2*c; row2=-s2*intermediate+c2*c',
+               'position':'pivot -distance*rotation.row1 +additional_offset; scale1',
+               'host_inverse':'explicit orthonormal scale1 pose only, transpose rotation and -dot(position,row_i); not native generic inverse or viewer ownership',
+               'limitations':['Mode objects are statically identified, not live current-mode pointer observations',
+                              'No claim to full DDE580 damping/clamps, timed interpolation or user-input dispatch',
+                              'Property-reader sibling-angle scratch behavior not generalized into defaults',
+                              'No normal-GGE automatic caller, complete catalogue/refill or native camera readiness']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8')
+        print('retained mode tables/transform builders/basis initializer/trig imports; no native pose observation')
+        return
+    if '--camera-controller' in sys.argv:
+        from tools.find_imm import OBJDUMP
+        from tools.gge_camera_property import report
+        if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+            raise ValueError('camera controller ranges require selected GA hash')
+        dest=ROOT/'analysis/audit/gge-camera-controller';dest.mkdir(parents=True,exist_ok=True)
+        ranges=[('factory-registration',0xdddfe3,0xdde004),('active-camera-choice',0xde477a,0xde47d6),
+                ('camera-choice-wrapper',0xb5cef0,0xb5cf68),('factory',0xddfe70,0xddfe9b),
+                ('constructor',0xddf940,0xddfa4a),('cast',0xdde390,0xdde3af),
+                ('update',0xddfb90,0xddfe6a),('property-reader',0xdde9f0,0xddf2ad),
+                ('viewer-fov-setter',0x7c5400,0x7c547f),('camera-property-factory-dispatch',0x7c6cd3,0x7c6dc1)]
+        for name,start,end in ranges:
+            r=subprocess.run([str(OBJDUMP),'-d','-M','intel',f'--start-address={start}',f'--stop-address={end}',str(pe.path)],
+                             capture_output=True,text=True,errors='replace',check=True,timeout=15)
+            instructions=[line.rstrip() for line in r.stdout.splitlines() if re.match(r'^\s+[0-9a-f]+:',line)]
+            if not instructions:raise ValueError('empty camera controller disassembly')
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(instructions)+'\n',encoding='utf-8')
+        if pe.u32(0x147da38+0x20)!=0xddfb90 or pe.u32(0x147da38+0x50)!=0xdde9f0:
+            raise ValueError('camera vtable mismatch')
+        prop=report(ROOT/'build/bin/Debug/Data/Spore_Graphics.package')
+        facts={'oracle_sha256':digest,'authority':'GA static instructions + one exact shipped camera property table; not original runtime',
+               'factory_type':'0x043c6e06','factory':'0x00ddfe70','constructor':'0x00ddf940','allocation_bytes':0x44,
+               'camera_id_requested_at_DE477A':'0x780786fd','selection_result_checked':False,
+               'vtable':{'base':'0x0147da38','entries':[{'slot':hex(i),'target':hex(pe.u32(0x147da38+i))} for i in range(0,0x58,4)]},
+               'property':prop,
+               'fov_subset':{'current_offset':'0x28','target_offset':'0x2c','threshold_offset':'0x34',
+                             'unset_sentinel':pe.f32(0x13eb1bc),'degrees_per_radian':pe.f32(0x147d9ec),
+                             'smoothing_factor':pe.f32(0x147d9d0),
+                             'order':'if OLD current>0 request viewer FOV first; then sentinel branches; abs(target-current)<threshold snaps else .1 smoothing'},
+               'limits':['Requested camera ID is static; no successful runtime selection or retained object identity observed',
+                         'DDFB90 also depends on shared BSS pose/mode pointers, transform builders and audio calls; not a complete camera port',
+                         'Generic camera property dispatcher creates via type00ED3928 and labels via00ED3929; package priority/runtime overrides unobserved',
+                         'No original process/Ghidra import, save mutation or native scene readiness']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8')
+        print('retained GGE camera factory/selection/update, complete exact prop table and FOV subset evidence')
+        return
+    if '--viewer' in sys.argv:
+        from tools.find_imm import OBJDUMP
+        if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+            raise ValueError('viewer ranges require selected GA authority hash')
+        dest=ROOT/'analysis/audit/gge-viewer';dest.mkdir(parents=True,exist_ok=True)
+        ranges=[('mode-viewer-getter',0x5aadb0,0x5aadb4),('mode-camera-manager-getter',0x967d90,0x967d94),
+                ('mode-set-viewer',0x7d8510,0x7d8525),('mode-constructor-prefix',0x7d8e80,0x7d8eda),
+                ('camera-manager-constructor-prefix',0x7c7680,0x7c76bc),
+                ('camera-active-getter',0x7c6240,0x7c6257),('camera-manager-set-viewer',0x7c61a0,0x7c61ad),
+                ('camera-update-viewer-handoff',0x7c6440,0x7c64b8),
+                ('viewer-projection-builder',0x7c4370,0x7c44a1),('viewer-matrix-composition',0x7c4a10,0x7c4b25),
+                ('matrix-product',0x45ef90,0x45f097),('matrix-row-product',0x45f2c0,0x45f470),
+                ('projection-viewer-receiver',0xde3c20,0xde3c42),('retained-camera-acquisition',0xde478b,0xde47d6)]
+        for name,start,end in ranges:
+            result=subprocess.run([str(OBJDUMP),'-d','-M','intel',f'--start-address={start}',f'--stop-address={end}',str(pe.path)],
+                                  capture_output=True,text=True,errors='replace',check=True,timeout=15)
+            instructions=[line.rstrip() for line in result.stdout.splitlines() if re.match(r'^\s+[0-9a-f]+:',line)]
+            if not instructions:raise ValueError('empty viewer disassembly')
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(instructions)+'\n',encoding='utf-8')
+        tables={name:{'base':hex(base),'entries':[{'slot':hex(i),'target':hex(pe.u32(base+i))} for i in range(0,size,4)]}
+                for name,base,size in [('game_mode_manager',0x1412608,0x5c),('camera_manager',0x1410718,0x60)]}
+        expected={0x1412608+0x50:0x967d90,0x1412608+0x54:0x7d8510,0x1412608+0x58:0x5aadb0,
+                  0x1410718+0x38:0x7c6240,0x1410718+0x2c:0x7c6440}
+        if any(pe.u32(va)!=target for va,target in expected.items()):raise ValueError('viewer vtable cross-check mismatch')
+        facts={'oracle_sha256':digest,'sdk_revision':'69b27b5b407a2c76e1e701ba27630a77a9ce5d01',
+               'authority':'GA static instructions/tables with secondary SDK names; no native runtime execution',
+               'tables':tables,
+               'routes':{'projection':'67DCD0 IGameModeManager ->slot58 GetViewer ->mode+30 cViewer ->7C4250 reads viewer+C0',
+                         'controller198':'67DCD0 ->slot50 GetCameraManager ->mode+2C ->slot38 GetActiveCamera ->camera array+80 indexed by+A8; ICamera retained at controller+198',
+                         'update':'7C6440 requires active index>=0 and viewer+B0 nonnull, then calls active ICamera slot20(delta,viewer)',
+                         'set_viewer':'7D8510 stores mode+30 and forwards to CameraManager slot18; 7C61A0 stores manager+B0'},
+               'composition':'7C4370 forms projection; 7C4A10 swaps four-float rows1/2, multiplies viewer+40 by adjusted projection via45EF90/45F2C0, copies product into viewer+C0',
+               'limits':['No runtime manager/viewer pointers, active GGE camera ID/type or camera updates captured',
+                         'Host helper requires explicit world-to-view/window/offset/kind/near/far; no inversion or camera simulation',
+                         'Projection enum/positive windows/near>0/far>near validation is conservative host policy',
+                         'PerspectiveInfinite branch drops offsets; no bit-identical native floating rounding claim',
+                         'No catalogue/refill/DBCheck/MoviePlayer or native scene readiness']}
+        (dest/'facts.json').write_text(json.dumps(facts,indent=2)+'\n',encoding='utf-8')
+        print('retained viewer/ICamera identity, matrix-builder and update-handoff evidence; no Ghidra import or target execution')
+        return
+    if '--window-lookup' in sys.argv:
+        # A small, explicit source/artifact cross-check. Never opens/reimports a Ghidra project.
+        from tools.find_imm import OBJDUMP
+        if digest != '086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7':
+            raise ValueError('window-lookup ranges require the selected GA authority hash')
+        dest = ROOT/'analysis/audit/gge-window-lookup'
+        dest.mkdir(parents=True, exist_ok=True)
+        ranges = [('layout-window-wrapper', 0x810650, 0x810661),
+                  ('layout-root-window-search', 0x8102a0, 0x810305),
+                  ('card-placement-receiver', 0xdf6110, 0xdf613d)]
+        for name, start, end in ranges:
+            result = subprocess.run([str(OBJDUMP), '-d', '-M', 'intel',
+                                     f'--start-address={start}', f'--stop-address={end}', str(pe.path)],
+                                    capture_output=True, text=True, errors='replace', check=True, timeout=15)
+            instructions = [line.rstrip() for line in result.stdout.splitlines()
+                            if re.match(r'^\s+[0-9a-f]+:', line)]
+            if not instructions:
+                raise ValueError('empty bounded window-lookup disassembly')
+            (dest/(name+'.asm.txt')).write_text(header+'\n'.join(instructions)+'\n', encoding='utf-8')
+        facts = {'oracle_sha256': digest, 'authority': 'static GA instructions + decoded shipped SPUI; no target execution',
+                 'sdk_revision': '69b27b5b407a2c76e1e701ba27630a77a9ce5d01',
+                 'receiver': 'DF6119 loads ECX from record+B8; 810650 dereferences that UILayout receiver+14, not a global registry',
+                 'lookup': '8102A0 enumerates receiver components +64/+68; IWindow Cast EEEE8218, GetControlID +1C; bool0 skips child search +F0',
+                 'control': '0x02e5a4a8', 'layouts': [],
+                 'limitations': ['Serialized root/component matches are not an original runtime mount observation',
+                                'Root geometry is the serialized local Area, not runtime GetRealArea output',
+                                'No automatic first-match duplicate resolution, camera/refill/scene admission or service readiness']}
+        wanted = {0x21df01f2, 0x52c07413, 0xcb6a4669, 0x28f6d535}
+        selected = [ROOT/'build/bin/Debug/Data'/name for name in
+                    ('PatchData.package', 'Spore_Graphics.package', 'Spore_EP1_Data.package')]
+        for package, record, instance, data in layouts(selected):
+            if instance not in wanted:
+                continue
+            parsed = BinaryLayout(data).parse()
+            matches = []
+            for index, obj in parsed.windows.items():
+                controls = [p for p in obj['properties'] if p['id'] == 0xeec1b001]
+                if not any(p.get('raw') == 'a8a4e502' and p['code'] == 9 and p['count'] == 1 for p in controls):
+                    continue
+                matches.append({'object': index, 'class': hex(obj['class']), 'serialized_root_flag': obj['root'],
+                                'parent': parsed.parents.get(index), 'children': parsed.children.get(index, []),
+                                'properties': obj['properties']})
+            facts['layouts'].append({'package': package.name, 'record': record, 'instance': hex(instance),
+                                     'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest(),
+                                     'consumed': parsed.pos, 'objects': len(parsed.objects),
+                                     'windows': len(parsed.windows), 'matches': matches})
+        expected = {(name, instance) for name in ('PatchData.package', 'Spore_Graphics.package')
+                    for instance in (0x21df01f2, 0x52c07413, 0xcb6a4669)}
+        expected.add(('Spore_EP1_Data.package', 0x28f6d535))
+        actual = [(row['package'], int(row['instance'], 16)) for row in facts['layouts']]
+        if len(actual) != len(expected) or set(actual) != expected:
+            raise ValueError('selected window-lookup corpus missing/duplicated resources; no complete report')
+        (dest/'facts.json').write_text(json.dumps(facts, indent=2)+'\n', encoding='utf-8')
+        print('retained bounded per-card UILayout lookup evidence and explicit three-package SPUI comparison')
+        return
     if '--input' in sys.argv:
         dest=ROOT/'analysis/audit/gge-input'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'GA static instructions + actual SPUI host verifier; no original input runtime',
@@ -152,18 +374,18 @@ def retain_static():
     if '--scene' in sys.argv:
         dest=ROOT/'analysis/audit/gge-scene'; dest.mkdir(parents=True,exist_ok=True)
         facts={'oracle_sha256':digest,'authority':'local Ghidra/objdump static evidence; host projection collection is separate design, not native scene execution',
-               'service_globals':{'67DCD0':'015FD8B0 renderer service; setter67DEC0','67DD10':'015FD8C0 render-stage service',
+               'service_globals':{'67DCD0':'015FD8B0 IGameModeManager; setter67DEC0','67DD10':'015FD8C0 render-stage service',
                                   '67DD40':'015FD8CC factory service; setter67DF50','67DD50':'015FD8D0 factory service; setter67DF60',
                                   '67DD90':'015FD8E8 effects service'},
-               'projection':'DE3C20 obtains renderer67DCD0 slot58 active projection camera, then7C4250; width/height-only pixel mapping with no window-origin addition',
-               'retained_controller':'DE46D0 controller+198 obtains renderer slot50 then returned interface slot38; NOT established identical to active slot58 camera',
+               'projection':'DE3C20 obtains GameModeManager67DCD0 slot58 cViewer, then7C4250 reads viewer+C0; width/height-only pixel mapping with no window-origin addition',
+               'retained_controller':'DE46D0 controller+198 obtains GameModeManager slot50 CameraManager then slot38 active ICamera; distinct from cViewer',
                'scene_chain':'DE46D0->DDD920 allocates0x74 Simulator/DDA8C0/global16A0B08 thenDDD150',
                'factory_requests':[{'owner_offset':'20','service':'67DD50','slot':'18','tag':'07B6877F'},
                                    {'owner_offset':'18','service':'67DD40','slot':'14','tag':'07B6877E','render_stage':'14'},
                                    {'owner_offset':'1C','service':'67DD40','slot':'14','tag':'07D23D15','render_stage':'1A'},
                                    {'owner_offset':'14','service':'67DD40','slot':'14','tag':'07D23D13','render_stage':'0D'}],
                'effects':'DE46D0 effects service67DD90 slot4C requests key02DDA976 GGE effects world, retained atcontroller+15C',
-               'unresolved':['concrete factory types/complete native registration semantics','active projection camera producer/updates/ownership','controller198 alias relationship',
+               'unresolved':['concrete factory types/complete native registration semantics','live GGE ICamera type/parameters and viewer state production','runtime camera/viewer ownership and scheduling',
                              'native effects/render stage execution and scene readiness'],
                'host_policy':['Available saved+candidate catalogue required, order/duplicates retained with unique caller-issued host IDs',
                               'unavailable catalogue refresh retains diagnostic ownership only, suspends old frame/assets/update/layers/picking until successful Available reopen',
@@ -328,7 +550,7 @@ def retain_static():
         value={'oracle_sha256':digest,'authority':'static instructions + real SPUI fixtures, not original runtime',
                'layout':{'name':pe.wstr(0x147d3c0),'initializer':'0x136bc90','global':'0x16a0d08 (BSS)',
                          'instance':'0x21df01f2','root_control':'0x02e5a4a8'},
-               'projection':'camera memory +C0..FC; w=m11*z+m7*y+m3*x+m15; xyz divided by w; X=window_width*(ndcX+1)*0.5, Y=(1-(ndcY+1)*0.5)*window_height; NO origin addition/cull',
+               'projection':'cViewer memory +C0..FC, NOT ICamera; w=m11*z+m7*y+m3*x+m15; xyz divided by w; X=window_width*(ndcX+1)*0.5, Y=(1-(ndcY+1)*0.5)*window_height; NO origin addition/cull',
                'placement':'0xDF6110 centers root, clamps saved x/y using window extents and observed runtime margins; move iff abs(deltaX)>4 or abs(deltaY)>4',
                'constants':{hex(a):pe.f32(a) for a in (0x145be38,0x1453740,0x148531c)},
                'saved_insets_bss':['0x16a0e98 left','0x16a0eb8 top','0x16a0ea8 right','0x16a0ec8 bottom'],

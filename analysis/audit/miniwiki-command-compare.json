@@ -1,0 +1,366 @@
+{
+  "authority": "historical MiniWiki leads compared with GA plaintext string pool",
+  "sources": [
+    "refs\\MiniWiki\\ConsoleCommands.md",
+    "refs\\MiniWiki\\OldBetaResearch\\Cheats_2.txt"
+  ],
+  "candidate_count": 99,
+  "string_present": [
+    "addCargo",
+    "addDNA",
+    "alex",
+    "allEmpires",
+    "ariwip",
+    "atmosphere",
+    "biosphere",
+    "blocksmode",
+    "bullseye",
+    "capturePlanetGIF",
+    "clear",
+    "clearplanet",
+    "commui",
+    "ctmg",
+    "cubemap",
+    "debug",
+    "debugdraw",
+    "demo",
+    "dump",
+    "dumpEventTimes",
+    "dumprel",
+    "enableGetOut",
+    "eradicate",
+    "evoadvantage",
+    "flood",
+    "floodstop",
+    "flyto",
+    "force",
+    "forceautosave",
+    "freeCam",
+    "freecam",
+    "freeze",
+    "getBatch",
+    "help",
+    "initPlanetRecords",
+    "initStarRecords",
+    "killallhints",
+    "lateGame",
+    "limit",
+    "list",
+    "listcomm",
+    "money",
+    "monolith",
+    "moreMoney",
+    "oursystem",
+    "pause",
+    "picking",
+    "planet",
+    "plantsFlood",
+    "plantsKill",
+    "preroll",
+    "raid",
+    "rares",
+    "reach",
+    "refillMotives",
+    "rename",
+    "runcinematic",
+    "serverID",
+    "setarchetype",
+    "setempiretrait",
+    "setRelationship",
+    "siderealDay",
+    "size",
+    "solarrollover",
+    "spaceCreate",
+    "startEvent",
+    "stopcheats",
+    "temperature",
+    "terraform",
+    "testTravel",
+    "trade",
+    "unlock",
+    "unlockSuperWeapons",
+    "vtune",
+    "waterLava",
+    "wildlife",
+    "year",
+    "zones"
+  ],
+  "string_absent": [
+    "addAllies",
+    "bake",
+    "biomecolors",
+    "Cheats",
+    "colladaexport",
+    "cubemep",
+    "day",
+    "debugUI",
+    "describeBlocks",
+    "dumpProfs",
+    "freedom",
+    "get",
+    "noCrop",
+    "noUI",
+    "processQueue",
+    "rtts",
+    "speedUI",
+    "toData",
+    "ufo",
+    "war",
+    "water"
+  ],
+  "observed_native_registration": [
+    "clear",
+    "help",
+    "history",
+    "levels",
+    "unlockadventures"
+  ],
+  "locations": {
+    "dump": [
+      "0x13f0d44"
+    ],
+    "limit": [
+      "0x13f2244"
+    ],
+    "size": [
+      "0x13f292c",
+      "0x13fda34",
+      "0x1427d60"
+    ],
+    "adddna": [
+      "0x13f5690"
+    ],
+    "list": [
+      "0x13f58b4",
+      "0x1409098"
+    ],
+    "rename": [
+      "0x13f5f00"
+    ],
+    "floodstop": [
+      "0x13fbbf8"
+    ],
+    "flood": [
+      "0x13fbc2c"
+    ],
+    "serverid": [
+      "0x13fbd0c"
+    ],
+    "getbatch": [
+      "0x13fbfd8"
+    ],
+    "killallhints": [
+      "0x1401590"
+    ],
+    "clear": [
+      "0x1401b10",
+      "0x14397a4"
+    ],
+    "help": [
+      "0x1401b34"
+    ],
+    "trade": [
+      "0x14025fc",
+      "0x1437234",
+      "0x149882c"
+    ],
+    "debug": [
+      "0x140a048",
+      "0x140b608"
+    ],
+    "demo": [
+      "0x1413594",
+      "0x1413db0",
+      "0x1498438"
+    ],
+    "pause": [
+      "0x14363b4"
+    ],
+    "blocksmode": [
+      "0x1448980"
+    ],
+    "preroll": [
+      "0x1457e50"
+    ],
+    "force": [
+      "0x145838c"
+    ],
+    "planet": [
+      "0x146126c",
+      "0x14987c8"
+    ],
+    "moremoney": [
+      "0x1463664"
+    ],
+    "freecam": [
+      "0x1463688"
+    ],
+    "spacecreate": [
+      "0x14636d0"
+    ],
+    "refillmotives": [
+      "0x14636f4"
+    ],
+    "captureplanetgif": [
+      "0x1463764"
+    ],
+    "unlocksuperweapons": [
+      "0x1463790"
+    ],
+    "evoadvantage": [
+      "0x147e6f0"
+    ],
+    "unlock": [
+      "0x1482760"
+    ],
+    "commui": [
+      "0x1495c38"
+    ],
+    "raid": [
+      "0x1495c6c"
+    ],
+    "ctmg": [
+      "0x14983d8"
+    ],
+    "monolith": [
+      "0x14983e0"
+    ],
+    "debugdraw": [
+      "0x14984c4"
+    ],
+    "eradicate": [
+      "0x149883c"
+    ],
+    "terraform": [
+      "0x1498858"
+    ],
+    "listcomm": [
+      "0x1498960"
+    ],
+    "runcinematic": [
+      "0x14989e4"
+    ],
+    "clearplanet": [
+      "0x1498a00"
+    ],
+    "forceautosave": [
+      "0x1498a0c"
+    ],
+    "setempiretrait": [
+      "0x1498ab8"
+    ],
+    "setarchetype": [
+      "0x1498ba0"
+    ],
+    "flyto": [
+      "0x1498c2c"
+    ],
+    "oursystem": [
+      "0x1498c38"
+    ],
+    "wildlife": [
+      "0x1498f54"
+    ],
+    "dumprel": [
+      "0x1498fb4"
+    ],
+    "initstarrecords": [
+      "0x14990bc"
+    ],
+    "initplanetrecords": [
+      "0x14990cc"
+    ],
+    "lategame": [
+      "0x1499154"
+    ],
+    "money": [
+      "0x1499160"
+    ],
+    "rares": [
+      "0x14991ac"
+    ],
+    "alex": [
+      "0x1499278"
+    ],
+    "dumpeventtimes": [
+      "0x14992ec"
+    ],
+    "reach": [
+      "0x14992fc"
+    ],
+    "vtune": [
+      "0x1499304"
+    ],
+    "allempires": [
+      "0x149930c"
+    ],
+    "zones": [
+      "0x1499324"
+    ],
+    "testtravel": [
+      "0x1499334"
+    ],
+    "picking": [
+      "0x1499340"
+    ],
+    "solarrollover": [
+      "0x1499348"
+    ],
+    "enablegetout": [
+      "0x1499358"
+    ],
+    "addcargo": [
+      "0x1499388"
+    ],
+    "setrelationship": [
+      "0x14993ac"
+    ],
+    "startevent": [
+      "0x14993d4"
+    ],
+    "siderealday": [
+      "0x14993fc"
+    ],
+    "year": [
+      "0x1499408"
+    ],
+    "freeze": [
+      "0x149a654"
+    ],
+    "biosphere": [
+      "0x149a65c"
+    ],
+    "waterlava": [
+      "0x149a668"
+    ],
+    "bullseye": [
+      "0x149a674"
+    ],
+    "cubemap": [
+      "0x149a680"
+    ],
+    "ariwip": [
+      "0x149a688"
+    ],
+    "plantskill": [
+      "0x149a690"
+    ],
+    "plantsflood": [
+      "0x149a69c"
+    ],
+    "stopcheats": [
+      "0x149a6a8"
+    ],
+    "temperature": [
+      "0x149a6b4"
+    ],
+    "atmosphere": [
+      "0x149a6c0"
+    ]
+  },
+  "limitations": [
+    "A GA string match is not command registration or runtime execution evidence.",
+    "MiniWiki mixes retail/wiki and old Beta/debug material.",
+    "The candidate extractor is bounded to command-shaped tokens and may omit aliases."
+  ]
+}
