@@ -453,6 +453,77 @@ def verify() -> None:
         raise ValueError("countdown did not complete on the following Update")
     checks += 1
 
+    # ScenarioMode has a SEPARATE global loading context, not mMode fields.
+    exact(0xEF252B, "c6 86 dc 00 00 00 01")
+    exact(0xEF2543, "b9 30 cc 5a 01")
+    call(0xEF2548, 0xEF1BC0)
+    exact(0xEF1BCC, "89 46 04 0b d1 89 4e 08 57 33 ff 89 56 0c 8b ce 89 7e 10")
+    exact(0xEF2EFB, "80 78 28 00 0f 85 71 03 00 00")
+    exact(0xEF2F05, "83 3d 34 cc 5a 01 04 74 20")
+    exact(0xEF2F1D, "b9 30 cc 5a 01")
+    call(0xEF2F22, 0xEF2930)
+    exact(0xEF2F27, "5e 83 c4 0c c2 08 00")
+    exact(0xEF2933, "8b 46 04 83 f8 03 0f 87 e4 00 00 00 ff 24 85 28 2a ef 00")
+    for index, target in enumerate((0xEF2946, 0xEF29AE, 0xEF29C5, 0xEF29DA)):
+        vslot(0xEF2A28, index * 4, target)
+    exact(0xEF2981, "80 3e 00 74 0b 8b 56 10 3b 15 1c cd 5a 01 73 0a")
+    exact(0xEF2991, "83 7e 10 1e 0f 86 88 00 00 00")
+    call(0xEF299D, 0xEF2860)
+    call(0xEF29A4, 0xEF0140)
+    exact(0xEF29A9, "ff 46 04 5e c3")
+    exact(0xEF29B7, "8b 42 28 ff d0 85 c0 75 63 ff 46 04 5e c3")
+    call(0xEF29C5, 0xEF01C0)
+    exact(0xEF29CA, "84 c0 74 55")
+    call(0xEF29D0, 0xEF1B60)
+    call(0xEF29DB, 0xEF25E0)
+    exact(0xEF2A1F, "ff 46 04 5f 5e c3")
+
+    # Actual model predicate: each pointer must exist, bit14 set, bit18 clear.
+    exact(0xEF01C4, "8b 73 64 2b 73 60 57 c1 fe 02 33 ff 85 f6 76 2d")
+    exact(0xEF01DC, "8b 82 ac 00 00 00 ff d0 85 c0 74 1f")
+    exact(0xEF01E8, "8b 40 04 8b c8 c1 e9 0e f6 c1 01 74 12 c1 e8 12 a8 01 75 0b")
+    exact(0xEF0201, "5f 5e b0 01 5b c3 5f 5e 32 c0 5b c3")
+    required_shift = pe.read(0xEF01EF, 1)[0]
+    rejected_shift = pe.read(0xEF01F7, 1)[0]
+    for flags, expected in ((0, False), (1 << 14, True), (1 << 18, False),
+                             ((1 << 14) | (1 << 18), False), (0xFFFFFFFF, False)):
+        actual = bool(flags & (1 << required_shift)) and not bool(flags & (1 << rejected_shift))
+        if actual != expected:
+            raise ValueError(f"pre-play model flag predicate mismatch: {flags:#x}")
+        checks += 1
+
+    # Enter latch is a one-shot setup call with return before ordinary play.
+    exact(0xEF2F2E, "80 be dc 00 00 00 00 57 0f 84 a7 00 00 00")
+    exact(0xEF2F3C, "c6 86 dc 00 00 00 00")
+    exact(0xEF2F9E, "83 be cc 00 00 00 02 8b ce 75 07")
+    call(0xEF2FA9, 0xEF0E00)
+    call(0xEF2FB2, 0xEF0990)
+    exact(0xEF2FDB, "5f 5e 83 c4 0c c2 08 00")
+
+    # ScenarioPlanet is a LIGHTING config on a concrete Graphics world.
+    exact(0xEF2FB7, "8b 35 54 ea 67 01")
+    exact(0x148B0FC, b"ScenarioPlanet\0".hex())
+    exact(0xEF2FC4, "68 fc b0 48 01")
+    call(0xEF2FC9, 0x932E50)
+    exact(0xEF2FD3, "50 8b 42 30 8b ce ff d0")
+    call(0xB3AE69, 0x67DD50)
+    exact(0xB3AE74, "8b 42 18 68 a0 de a4 04 ff d0")
+    exact(0xB3AE9A, "89 0d 54 ea 67 01")
+    exact(0x67DD50, "a1 d0 d8 5f 01 c3")
+    exact(0x709CC5, "c7 00 5c c7 40 01")
+    vslot(0x140C75C, 0x18, 0x70DD00)
+    exact(0x70D372, "c7 06 a0 c7 40 01")
+    vslot(0x140C7A0, 0x30, 0x70A5D0)
+    call(0x70A5E5, 0x705B60)
+    exact(0x70A5EC, "89 46 10 89 7e 14")
+    call(0x70A5F2, 0x709530)
+    lighting_id = 0x811C9DC5
+    for byte in b"scenarioplanet":
+        lighting_id = ((lighting_id * 0x1000193) & 0xFFFFFFFF) ^ byte
+    if lighting_id != 0x24720859:
+        raise ValueError("ScenarioPlanet lighting-name hash mismatch")
+    checks += 1
+
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.
     exact(0xDFBD4C, "83 7e 20 09")

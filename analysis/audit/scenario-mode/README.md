@@ -145,8 +145,11 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   statically; no runtime ScenarioMode instance was observed.
 - `EF2EF0` (`Update`) branches on `cScenarioMode::mMode` at `+0xCC`: mode `1` follows the edit
   path; mode `2` follows the play path and invokes play-mode/goal/terrain helpers. When the initial
-  latch is set it requests the `ScenarioPlanet` simulator resource and performs the play/edit
-  transition work. These calls are retained as native candidates, not host readiness.
+  latch is set it performs play/edit setup and selects the **ScenarioPlanet lighting configuration**
+  on graphics world global `0x0167EA54`; this is not a simulator planet-creation request. The
+  [pre-play audit](preplay.md) resolves the preceding separate loading-context phases `0..4`,
+  service count, model predicates and the concrete graphics receiver chain. All remain static
+  observations, not host readiness or successful world creation.
 
 This makes ScenarioMode a real next reverse-engineering target after a selected star, but it does
 not connect the GGE `Play Scenario` ControlID `0x070D7509` to `ScenarioMode` or prove an adventure
