@@ -51,7 +51,8 @@ controller +0x108 == 2
   → DF6C10 continuation
 ```
 
-The state-13 feedback branch also does not prove:
+The state-13 feedback branch and its separate controller-selection continuation are bounded in
+[startup-gge-state13-scenario-controller.md](startup-gge-state13-scenario-controller.md). It also does not prove:
 
 - `0x00E1132F` CommandID dispatch;
 - `0x01654C10` ScenarioMode delivery;

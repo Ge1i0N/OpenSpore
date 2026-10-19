@@ -607,6 +607,18 @@ def verify() -> None:
     exact(0xDE9C4E, "6a 02 e8 8b b8 89 ff 83 c4 04 84 c0 0f 84 f7 00 00 00")
     exact(0xDE9C85, "6a 01 68 10 a3 06 08 8d 8e 40 01 00 00 e8 b9 69 a2 ff")
     exact(0xDE9D0C, "b8 0d 00 00 00 89 86 08 01 00 00 89 86 04 01 00 00")
+    # State-13 controller selection and Scenario-controller feedback remain separate from object 74.
+    exact(0xDE8710, "83 ec 20 53 56 33 db 57 8b f1 38 1d 48 13 6a 01 74 21")
+    exact(0xDE8970, "01 00 00 3b c8 74 76 2b cb 74 09 83 e9 01 74 27 89 07 eb 69")
+    exact(0xDE89ED, "55 8d ae 24 01 00 00 57 8b cd e8 e4 eb ff ff 8b 38 8b 86 ec 01 00 00")
+    exact(0xDE8A20, "8b 4e 38 5d 3b f9 74 4e 3b cb 74 07 8b 01 8b 50 10 ff d2")
+    slot(0x147EDA0, 0x58, 0xDFE430)
+    exact(0xDFE430, "83 ec 0c 56 57 8b 7c 24 1c 8b 47 08 8b f1 3d f6 59 72 28")
+    exact(0xDFE43E, "3d f6 59 72 28 0f 85 92 03 00 00 83 7e 20 0b 0f 84 82 04 00 00")
+    exact(0xDFE549, "6a 00 8b ce e8 9e c5 ff ff 5f c7 46 20 09 00 00 00")
+    exact(0xDFE66B, "83 7e 20 00 75 53 6a 00 8b ce e8 76 c4 ff ff e8 d1 7c 63 ff")
+    exact(0xDFE6A4, "6a 00 6a 02 e8 d3 9f fe ff 8b 0d 44 13 6a 01 6a 01")
+    exact(0xDFAD9C, "6a 01 89 50 14 33 c9 33 d2 89 48 18 68 10 4c 65 01 33 f6")
 
     # Negative controls for prior timing/slot conflation.
 
