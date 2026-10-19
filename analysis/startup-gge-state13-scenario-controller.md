@@ -51,8 +51,9 @@ set of serialized Scenario-controller IDs. The bounded family includes:
 ```
 
 `DFAE20` writes controller local state `+0x20 = 10`, `+0x28 = 10` and `+0x80 = 1`. The shipped
-state label for local state 10 is `ReadyToLaunchScenarioForPlay`; later ScenarioMode logic maps
-the internal play strategy separately.
+state label for local state 10 is `ReadyToLaunchScenarioForPlay`; the subsequent launch-record and
+ScenarioMode internal-strategy boundary is documented in
+[startup-gge-play-record-preparation.md](startup-gge-play-record-preparation.md).
 
 These are positive Scenario-controller edges, but the upstream event that would select
 `0x05951103/04` is not statically joined to object-74 ControlID `0x070D7509`.

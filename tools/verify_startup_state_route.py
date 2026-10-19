@@ -619,6 +619,19 @@ def verify() -> None:
     exact(0xDFE66B, "83 7e 20 00 75 53 6a 00 8b ce e8 76 c4 ff ff e8 d1 7c 63 ff")
     exact(0xDFE6A4, "6a 00 6a 02 e8 d3 9f fe ff 8b 0d 44 13 6a 01 6a 01")
     exact(0xDFAD9C, "6a 01 89 50 14 33 c9 33 d2 89 48 18 68 10 4c 65 01 33 f6")
+    # Local state 10, launch-record preparation and ScenarioMode internal strategy are distinct.
+    exact(0xDFAE20, "56 8b f1 e8 78 ec ff ff 6a 00 8b ce e8 bf fc ff ff b8 0a 00 00 00")
+    exact(0xDFAE31, "b8 0a 00 00 00 89 46 20 c6 86 80 00 00 00 01 89 46 28")
+    exact(0xDFBD40, "51 53 55 56 57 8b f1 e8 c4 5b 0f 00 83 7e 20 09 8b f8 75 5d")
+    exact(0xDFBD54, "8b 86 8c 00 00 00 89 07 8b 8e 90 00 00 00 89 4f 04 8b 96 94 00 00 00")
+    exact(0xDFBDD4, "8b 8e 90 00 00 00 89 4f 04 8b 96 94 00 00 00 8d 6f 30 89 57 08")
+    exact(0xDFBDE9, "c7 47 24 02 00 00 00 89 5f 28 8b 45 04 8b 4d 00 50 51")
+    exact(0xEF11F0, "56 8b f1 8b 86 cc 00 00 00 8b 4c 24 08 3b c1 74 70 83 f8 01")
+    exact(0xEF1201, "83 f8 01 75 2f 83 f9 02 75 2a 8b ce e8 8e f9 ff ff 8b 4e 74")
+    exact(0xEF1219, "6a 02 c7 86 cc 00 00 00 02 00 00 00 e8 46 4c 05 00 8b ce e8 cf fb ff ff")
+    exact(0xEF1235, "83 f8 02 75 31 83 f9 01 75 2c 8b ce e8 9a fd ff ff 8b 4e 74")
+    exact(0xEF124D, "6a 01 c7 86 cc 00 00 00 01 00 00 00 e8 12 4c 05 00 6a 00 8b ce")
+    exact(0xEF126B, "89 8e cc 00 00 00 5e c2 04 00")
 
     # Negative controls for prior timing/slot conflation.
 
