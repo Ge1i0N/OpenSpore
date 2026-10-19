@@ -22,9 +22,12 @@ If that branch is not taken, the function computes an index from local range fie
 `EEDD40` with the source pointer, range/index values, a transform/position-related float and
 additional arguments. The returned object receives the same `+0x18/+0x1C` back-links.
 
-This is the most direct object-construction edge in the bounded record path. The native bytes do
-not identify the returned class as terrain, planet, avatar or stage, and no downstream world
-consumer is established here.
+This is the most direct object-construction edge in the bounded record path. `EEDD40` is an
+identity dispatcher with a shared object/service finalizer rather than a single proven world
+factory; the detailed boundary is documented in
+[startup-gge-scenario-object-factory-dispatch.md](startup-gge-scenario-object-factory-dispatch.md).
+The native bytes do not identify the returned class as terrain, planet, avatar or stage, and no
+downstream world consumer is established here.
 
 ## `F3F8C0` guards and failure shape
 

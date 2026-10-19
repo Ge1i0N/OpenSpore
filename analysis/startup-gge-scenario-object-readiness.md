@@ -80,9 +80,12 @@ ScenarioMode +0xCC == 2
   → F40210 record/status aggregate
 ```
 
+The `EEDD40` dispatcher, play-specific `F237B0` lookup, and separate `F432C0` marker path are
+documented in [startup-gge-scenario-object-factory-dispatch.md](startup-gge-scenario-object-factory-dispatch.md).
+
 Remaining Unknown:
 
-- successful `EEDD40` object creation semantics;
+- successful object lookup/allocation and returned-class semantics;
 - resource mount/completion and consumer mapping;
 - terrain/world/stage activation;
 - actor/input activation and playable gameplay.

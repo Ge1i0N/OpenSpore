@@ -690,6 +690,19 @@ def verify() -> None:
     exact(0xF3F8ED, "a1 a4 7a 6c 01 83 b8 cc 00 00 00 02 75 13 56 e8 af 3e fe ff")
     exact(0xF3F906, "89 50 1c 89 70 18 59 c3 8b 4e 2c 2b 4e 28 b8 4f ec c4 4e")
     call(0xF3F950, 0xEEDD40)
+    # EEDD40 is an identity dispatcher with common object finalization; F237B0 is a named
+    # play-side lookup/setup path, and F432C0 is a separate ScenarioMarker path.
+    exact(0xEEDD40, "83 ec 20 53 8b 5c 24 28 55 56 57 8d 44 24 18 53 50 33 ed 33 f6 e8 26 ec")
+    exact(0xEEDD55, "e8 26 ec ff ff 8b 44 24 24 83 c4 08 c6 44 24 13 01 3d a7 8b b3 07")
+    exact(0xEEDD66, "3d a7 8b b3 07 0f 87 16 02 00 00 0f 84 95 01 00 00 3d 1e 51 a2 03")
+    exact(0xEEE285, "85 f6 0f 84 a8 01 00 00 8b 16 8b 42 0c 68 77 65 18 01 8b ce ff d0")
+    exact(0xEEE29B, "80 7c 24 13 00 8b f8 74 07 81 4f 50 00 80 00 00 8b 17 8b 6c 24 38")
+    exact(0xEEE3CA, "8b 44 24 4c 8b 4c 24 48 89 4e 1c 89 46 18 85 c0 74 18")
+    exact(0xF237B0, "51 55 56 57 6a 01 68 c5 9d 1c 81 68 18 c3 48 01 c7 44 24 18 00 00 00 00")
+    exact(0xF237F0, "8b 06 8b 50 2c 8d 4c 24 0c 51 68 e6 54 74 d8 57 8b ce ff d2")
+    exact(0xF2381F, "83 ba cc 00 00 00 01 8b e8 74 3a 85 ed 74 13 8b 45 00 8b 50 0c")
+    exact(0xF432C0, "83 ec 0c 53 8b d9 8b 83 8c 00 00 00 8b 4c 24 14 8b 11 85 c0")
+    exact(0xF4331B, "8b 49 0c 68 c0 d2 48 01 68 34 02 00 00 89 48 0c e8 10 3f 00 00")
 
     # Negative controls for prior timing/slot conflation.
 

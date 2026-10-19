@@ -66,8 +66,10 @@ in the mode-2 path, while the selected object flags use bit `0x2000` in the serv
 `+0x50`. The decompiler's names are not reliable, so this audit keeps them as offsets and bits.
 
 When `param_3 != 0` and the existing object is absent, `F3F8C0` can call `EEDD40`. That is the
-strongest recovered object-construction edge in this slice. `F3F8C0` then writes the resulting
-object back-links:
+strongest recovered object-construction edge in this slice. `EEDD40` is an identity dispatcher
+with a shared object/service finalizer, not a proven terrain/world factory; see
+[startup-gge-scenario-object-factory-dispatch.md](../../startup-gge-scenario-object-factory-dispatch.md).
+`F3F8C0` then writes the resulting object back-links:
 
 ```text
 object +0x18 = Scenario record pointer
@@ -110,7 +112,8 @@ a universal world-ready signal.
 
 ## Remaining world boundary
 
-The next unresolved edges are the successful results and consumers of `EEDD40`, `B228F0`,
+The next unresolved edges are the successful results and consumers of the `EEDD40` identity
+branches, `B228F0`,
 `F3D620/F3EFB0`, and the object virtual methods reached through `+0xAC`. The current evidence
 does not show a native terrain loader or stage activation in this slice. The separate
 `ScenarioPlanet` call remains a lighting-configuration selection as documented in
