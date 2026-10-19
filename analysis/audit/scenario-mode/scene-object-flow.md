@@ -135,10 +135,16 @@ also published by independent cleanup/reset paths. `B48870`/`B56160` provide a s
 remain lifecycle/phantom handling, not proof of terrain or playable-stage construction. See
 [startup-gge-scenario-event-phantom-boundary.md](../../startup-gge-scenario-event-phantom-boundary.md).
 
-The follow-on `F47240 → AEFBB00 → B55750` slice establishes generic manager allocation, native
+The follow-on `F47240 → AEFB00 → B55750` slice establishes generic allocation, native
 proxy/object initialization, bounds preparation and update/attachment cases. It still has no
 direct terrain/stage/world factory join. See
 [startup-gge-scenario-simulator-proxy-ownership.md](../../startup-gge-scenario-simulator-proxy-ownership.md).
+
+The subsequent `B540D0` query-result loop (interior address `B54180`) reaches
+`B53AB0/B538C0 → B55750` through keyed-value and component gates. It establishes table lookup and
+existing-object coordinate/vector synchronization, not registration or removal. No direct
+world/stage consumer join is established in this slice. See
+[startup-gge-scenario-simulator-proxy-registry.md](../../startup-gge-scenario-simulator-proxy-registry.md).
 
 ## Remaining world boundary
 

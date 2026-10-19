@@ -6,6 +6,8 @@ This is a bounded `objdump` audit of the shipped bytes. No native execution, res
 terrain/world creation or gameplay tick was observed.
 
 Continuation of [startup-gge-scenario-event-phantom-boundary.md](startup-gge-scenario-event-phantom-boundary.md).
+The subsequent registry/table update boundary is documented in
+[startup-gge-scenario-simulator-proxy-registry.md](startup-gge-scenario-simulator-proxy-registry.md).
 
 ## `F47240`: generic manager allocation boundary
 
@@ -14,13 +16,13 @@ manager routine through global manager state at `0x016C8B44` / `0x016C8B40`. The
 native object pointer or null. Its bytes do not contain a terrain/stage-specific constructor or a
 Scenario-mode acceptance transition.
 
-Therefore the strongest supported meaning is **generic manager allocation/registration request**.
-The returned object's ownership and manager-side registration remain only partially observable.
+Therefore the strongest supported meaning is **generic allocation request**. Registration is not
+established by forwarding arguments to `928C80`; the returned object's ownership remains Unknown.
 
-## `AEFBB00`: proxy/object state initializer
+## `AEFB00`: proxy/object state initializer
 
-The object initializer reached by the surrounding simulator family writes a distinct vtable/object
-identity (`0x0145C100`) and initializes:
+The object initializer reached by the surrounding simulator family writes a table pointer
+(`0x0145C100`) at object `+0x58` and initializes:
 
 - bounds/storage at `+0x64..+0x6C`;
 - list/state fields at `+0x58..+0x60` and `+0x70`;
@@ -45,9 +47,11 @@ does not call a terrain loader or publish a playable-stage state.
 
 ## `B55750`: update/attachment continuation
 
-`B55750` requires object byte `+0xA7` and a status bit in `+0xA8`. It derives mode flags from
-`+0xB0/+0xB8`, calls `B53380` and `B3E720` to prepare/update the proxy, then invokes component
-virtual `+0xB8` and `B538C0` with the resulting object/context.
+One branch of `B55750` requires object byte `+0xA7` and a status bit in `+0xA8`. It derives mode
+flags from `+0xB0/+0xB8`, calls `B53380` and `B3E720` to prepare/update the proxy, then invokes
+component virtual `+0xB8` and `B538C0` with the resulting object/context. A zero `+0xA7` instead
+branches to `B559C4`, which has a separate table lookup/update path; these are not universal
+entry preconditions for the function.
 
 Its continuation has separate mode cases. Depending on flags and returned proxy state it:
 
@@ -57,8 +61,10 @@ Its continuation has separate mode cases. Depending on flags and returned proxy 
 - may emit additional typed setup records;
 - handles object flag `0x2000` and byte `+0x71` as policy gates.
 
-These are proxy update/attachment operations. No direct call to a world/terrain/stage factory is
-present in this bounded slice.
+These are proxy update operations, not proof of completed attachment. The follow-on lookup and
+manager-table boundary is
+documented in [startup-gge-scenario-simulator-proxy-registry.md](startup-gge-scenario-simulator-proxy-registry.md).
+No direct call to a world/terrain/stage factory is present in this bounded slice.
 
 ## Boundary result
 
@@ -66,7 +72,7 @@ present in this bounded slice.
 B56160 phantom policy
   → B550F0 geometry/proxy preparation
   → F47240 generic manager allocation
-  → AEFBB00 native proxy/object initialization
+  → AEFB00 native proxy/object initialization
   → B55750 update/attachment cases
   → simulator/object lifecycle helpers
 ```
