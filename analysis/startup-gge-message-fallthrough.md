@@ -72,7 +72,8 @@ The window walk and parent-registration rollback paths are distinct from the GGE
 ```
 
 The existence of an unhandled return does not identify the later owner callback payload or prove a
-command dispatch. No static join in this bounded pass connects `0x070D7509` to `0x070D74E7`,
+command dispatch. The generic owner fallback modes are bounded in
+[startup-gge-owner-fallback.md](startup-gge-owner-fallback.md). No static join in this bounded pass connects `0x070D7509` to `0x070D74E7`,
 `0x00E1132F`, `0x01654C10`, or ScenarioMode.
 
 ## Status

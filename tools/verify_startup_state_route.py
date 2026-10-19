@@ -580,6 +580,17 @@ def verify() -> None:
     exact(0xDE9B7D, "3d e9 88 2d 06 0f 87 82 00 00 00 74 19 3d 16 b6 15 06")
     exact(0xDE9C0A, "3d 13 9a 70 06 0f 84 12 01 00 00 3d e7 74 0d 07 74 32")
     exact(0xDE9D57, "5f 32 c0 5e 83 c4 14 c2 08 00")
+    # Generic owner fallback remains separate from GGE-specific Play Scenario conversion.
+    exact(0x959240, "80 7c 24 08 00 53 8b 5c 24 08 57 8b f9 74 5c")
+    exact(0x95925C, "6a 01 53 50 e8 eb f6 ff ff 84 c0 74 42 8b bf c8 00 00 00")
+    exact(0x959269, "8b bf c8 00 00 00 85 ff 74 31 8b 03 85 c0 74 1c")
+    exact(0x959288, "6a 04 8b cf ff d0 5f 32 c0 5b c2 08 00")
+    exact(0x9592AB, "56 8b 73 04 85 f6 74 1b 83 c6 fc 74 16 6a 00 53 56")
+    exact(0x9592CE, "8b bf c8 00 00 00 85 ff 74 0e 8b 17 8b 42 0c 53 6a 00 6a 05")
+    exact(0x9592EE, "8b bf c8 00 00 00 85 ff 74 2b 85 f6 74 18 8b 17 53 8d 46 04")
+    exact(0x959330, "53 8b 5c 24 10 55 8b 6c 24 0c 8b 45 38 56 57 8b 7c 24 18")
+    exact(0x95935B, "e8 f0 f5 ff ff 84 c0 74 21 8b 8e c8 00 00 00 85 c9 74 0e")
+    exact(0x9593E7, "8b 8e c8 00 00 00 85 c9 74 14 8d 45 04 3b 47 04 75 0c")
 
     # Negative controls for prior timing/slot conflation.
 
