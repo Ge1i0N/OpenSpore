@@ -723,6 +723,19 @@ def verify() -> None:
     exact(0xB22C87, "8b 44 24 1c 85 c0 74 0a 8b 17 50 8b 42 38 8b cf ff d0 8b 44 24 20 85 c0")
     exact(0xB22CB6, "8d 4c 24 14 51 68 15 8e d0 03 50 c6 44 24 20 00 e8 c5 44 8e ff 83 c4 0c")
     exact(0xB22D38, "8b 44 24 1c 8b 4c 24 18 8b 16 8b 52 24 50 51 55 8b ce ff d2 5f 84 c0")
+    # Event 0x01A0219E is generic lifecycle signaling; phantom setup is separate from gameplay.
+    exact(0xAC1430, "56 8b f1 e8 48 c8 bb ff 8b 10 68 9e 21 a0 01 83 c6 fc 8b c8")
+    exact(0xB452F0, "56 57 8b f9 e8 87 89 b3 ff 85 c0 0f 84 80 00 00 00 e8 7a 89 b3 ff")
+    exact(0xFDE170, "53 55 56 57 8b d9 e8 35 fa e3 ff 8b ab 44 01 00 00 8b b3 48 01 00 00")
+    exact(0xB48870, "83 ec 0c 53 55 57 8b 7c 24 1c 8b d9 85 ff 0f 84 61 01 00 00 8b 07 8b 50")
+    exact(0xB488B9, "f6 05 c0 ec 67 01 01 75 20 83 0d c0 ec 67 01 01 6a 01 68 c5 9d 1c 81 68 48 11 46 01")
+    exact(0xB48935, "8b 17 8b 42 0c 68 77 65 18 01 8b cf ff d0 8b f0 85 f6 0f 84 c2 00 00 00")
+    exact(0xB48992, "8b 43 20 83 e8 00 74 52 83 e8 01 75 70 8b 3d 70 eb 67 01 8d 4c 24 24")
+    exact(0xB489EC, "80 7c 24 24 00 74 13 55 56 8b cb e8 34 19 01 00 5e 5f 5d 5b 83 c4 0c")
+    exact(0xB4B690, "83 ec 10 55 8b e9 83 7d 20 01 56 8b 74 24 1c 89 6c 24 08 75 70 8b 06 8b 50")
+    exact(0xB4B791, "68 48 11 46 01 e8 b5 76 de ff 83 c4 0c a3 c8 ec 67 01 8b 16 8b 42 20 8b ce")
+    exact(0xB56160, "55 8b ec 83 e4 f0 81 ec 14 02 00 00 53 56 57 e8 9c 72 fe ff 89 44 24 34")
+    exact(0xB56276, "68 48 11 46 01 e8 d0 cb dd ff 83 c4 0c a3 10 6a 68 01 8b 0d 10 6a 68 01")
 
     # Negative controls for prior timing/slot conflation.
 

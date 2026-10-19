@@ -6,6 +6,8 @@ Static shipped-binary evidence only. No native execution, resource completion, t
 creation or gameplay tick was observed.
 
 Continuation of [startup-gge-scenario-object-finalizer-lifecycle.md](startup-gge-scenario-object-finalizer-lifecycle.md).
+The event and phantom/collision proxy boundary is detailed in
+[startup-gge-scenario-event-phantom-boundary.md](startup-gge-scenario-event-phantom-boundary.md).
 
 ## `F3D930`: record/component synchronization
 
@@ -53,9 +55,11 @@ the tags' semantic names and their relation to world construction remain Unknown
 
 `B48870`, reached from the synchronization path, observes the configuration key
 `useGameplayPhantom`. Depending on that key, object identity and controller mode, it invokes
-phantom-related component methods and update helpers. This is evidence of a gameplay-adjacent
-phantom policy, not evidence that a gameplay tick, actor spawn, input activation or playable stage
-was reached.
+phantom-related component methods and update helpers. The concrete proxy/collision continuation
+through `B56160` and its optional `Simulator` allocation is documented in
+[startup-gge-scenario-event-phantom-boundary.md](startup-gge-scenario-event-phantom-boundary.md).
+This is evidence of a gameplay-adjacent phantom policy, not evidence that a gameplay tick, actor
+spawn, input activation or playable stage was reached.
 
 ```text
 F3D930
