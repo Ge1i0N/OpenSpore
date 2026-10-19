@@ -112,7 +112,11 @@ virtual slot. This is a concrete optional owner notification, not identified inp
 The raw exact-ID scan found one other occurrence, decoded in `C88680`, which accepts
 `0x07BBC4FF` and `0x01186577`. That is an interface candidate, **not** proof that the selected
 creature's vtable returns it or that this launch executes the callback. The containing class,
-caller/interface delegation and first-slot behavior remain a separate unresolved join.
+caller/interface delegation and first-slot behavior were unresolved in that slice. The later
+[creature notification audit](startup-gge-creature-scene-owner-notification.md) resolves the
+constructed creature query to component `+0xC0` and first slot `C88600`: only byte `+0xA5=1`,
+without reading the supplied wrapper pointer. The constructor already initializes that byte
+to `1`; callback occurrence is not proof of a new activation/readiness transition.
 
 ## `754C00 → 7549C0`: concrete child acquisition
 
@@ -147,6 +151,6 @@ Decoded focused slices cover `7535A0..7535DC`, `752680..7526A1`, `751E50..751F3F
 `C88680..C8869E`. Selected predicates/slots/calls are pinned in
 `tools/verify_startup_state_route.py`. Cached disassembly is temporary, not an imported runtime.
 
-Next choose a concrete unresolved join: the graphics/Scenario caller of manager `+0x38`, or
-the class/interface/first-slot dispatch for owner notification `0x07BBC4FF`. Do not expand child
-resource helpers indefinitely as a substitute for attachment/input or actual gameplay evidence.
+The owner notification is resolved by the follow-up above; its flag's later role remains
+Unknown. Next choose a concrete scheduling edge into manager `+0x38` or a direct actor/input
+consumer, rather than expanding child resource helpers indefinitely as a substitute for gameplay.

@@ -188,6 +188,12 @@ with a separate wait/force route. Its Scenario caller remains unresolved. `74A99
 child resources and can notify owner interface `0x07BBC4FF`; that notification is not yet a
 proven input or captain-activation callback.
 
+The [creature owner-notification audit](../../startup-gge-creature-scene-owner-notification.md)
+resolves `0x07BBC4FF` on the constructed creature to component `+0xC0`, first slot `C88600`.
+It only sets component byte `+0xA5=1`, already initialized to `1` by the shared constructor;
+it does not read the wrapper argument or activate input. A later flag reset/consumer and the
+upstream Scenario scheduler remain Unknown.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual
