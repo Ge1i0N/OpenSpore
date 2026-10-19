@@ -147,10 +147,12 @@ the creature at model-side `+0x180 → +0x64`, then walks additional entries thr
 dereferences model `+0x17C` without a null gate at that point. This is concrete object
 association, not a checked scene-attachment transaction.
 
-The `B34050` global is populated by a service lookup named UTF-16 `Gonzago` in the examined
-`B357B1..B357DD` prefix. This does not yet bind a concrete returned provider/vtable or establish
-world registration. `C21600` internals and the returned service class were not fully
-traced here. Therefore model-side association is established statically, full scene attachment
+The `B34050` global is populated by a manager virtual call carrying UTF-16 `Gonzago` in the
+examined `B357B1..B357DD` prefix. The later
+[animation-world audit](startup-gge-captain-key-anim-world.md) resolves that constructed manager
+slot as world creation (`A0BB30`), not lookup, and pins the resulting model-provider slot.
+`C21600` internals and full scene-registration semantics remain outside this slice.
+Therefore model-side association is established statically, full scene attachment
 and resource completion are not.
 
 **Important failure distinction:** `C21D50` can return false while `+0xB20` remains non-null;
@@ -190,7 +192,9 @@ slices, `C09B40..C09C96`, `C03920..C03AA4`, `C22450..C225C8`, `C21D50..C2216B`,
 Raw store/pointer scan hits were discovery only, not exhaustive decoded xrefs.
 Selected instruction/slot/label anchors are in `tools/verify_startup_state_route.py`.
 
-Next: connect the selected launch/captain key to `mAvatarAsset` without substituting the fallback
-query, then identify the concrete Gonzago `+0x30` implementation and its model/resource success
-contract. Native startup delivery, playable stage/world, input and completed gameplay ticks remain
+The [selected-key/animation-world follow-up](startup-gge-captain-key-anim-world.md) connects
+controller selection through record `+0x18` and `F42420` to `mAvatarAsset`, after first Scenario
+synchronization. It also resolves the constructed Gonzago provider `+0x30` to `A0B8E0/A0B1C0`.
+Its model/resource success remains conditional. Native startup delivery, playable stage/world,
+input and completed gameplay ticks remain
 Unknown. Object-74 `Play Scenario 0x070D7509` has no new producer/delivery join.

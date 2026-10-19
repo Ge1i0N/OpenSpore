@@ -39,8 +39,10 @@ other completion branch (including state 10 path)
   → prepare additional key/asset collection fields
 ```
 
-The exact semantic types of the copied three-word keys and auxiliary collection remain Unknown.
-`DFBD40` is record preparation, not terrain/world creation.
+The [selected captain-key follow-up](startup-gge-captain-key-anim-world.md) identifies controller
+`+0xA4` as the state-2 avatar-selection key, copied to launch record `+0x18` in the play branch
+and later applied to `mAvatarAsset` through `F42420`. Other copied keys/collection entries must
+remain separately classified. `DFBD40` is record preparation, not terrain/world creation.
 
 ## `EF1D20 → EF11F0`: ScenarioMode internal strategy
 

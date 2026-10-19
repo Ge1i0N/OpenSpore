@@ -167,6 +167,11 @@ the discarded model-setup result. Failure can clear the current reference throug
 cleanup virtual, but a complete rollback, selected launch captain and model/world/input success
 remain Unknown.
 
+The [selected captain-key/Anim world audit](../../startup-gge-captain-key-anim-world.md) closes
+the controller-selected key to `mAvatarAsset` writer after initial Scenario synchronization.
+The constructed Gonzago receiver is an animation world with `+0x30 → A0B8E0 → A0B1C0`,
+not proof of gameplay world creation. Model/resource success and input remain Unknown.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual

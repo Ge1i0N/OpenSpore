@@ -52,7 +52,10 @@ carried unchanged into ScenarioMode. The completion branches write:
 State 9 additionally copies a three-word key from controller `+0xB0/+0xB4/+0xB8` to record
 `+0x0C/+0x10/+0x14`. Both branches copy the primary three-word key from `+0x8C/+0x90/+0x94`.
 The other branch prepares an asset-key collection and a key at record `+0x18..+0x20`. The semantic
-types of every key are not established by these copies alone.
+types of every key are not established by these copies alone. The later
+[captain-key follow-up](../../startup-gge-captain-key-anim-world.md) joins controller state-2
+selection `+0xA4` to record `+0x18` and then `mAvatarAsset` through `EF1D20 → F42420`.
+It is applied after first Scenario synchronization, not necessarily before initial creature creation.
 
 `EF1D20` supplies the matching consumer:
 

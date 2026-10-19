@@ -106,6 +106,11 @@ remain unclassified; their existence must not be synthesized from host preview m
 
 ## Remaining boundary and evidence
 
+The [selected captain-key follow-up](../../startup-gge-captain-key-anim-world.md) decodes the
+`DF9CF0` state-2 writer at controller `+0xA4`, its copy to launch record `+0x18`, and the later
+`EF1D20 → F42420` application to `mAvatarAsset`. That application occurs after first Scenario
+synchronization and may update an existing creature; it is not native captain-spawn success.
+
 The explicit launch control branch is still `0x05951103/04 → DFAE20 → state 10`, with its own
 guards and later readiness/countdown work. No selection helper inspected here proves native
 launch completion, asset mounts, ScenarioPlanet creation or the object-74 action `0x070D7509`.
