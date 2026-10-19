@@ -147,6 +147,11 @@ the creature at model-side `+0x180 → +0x64`, then walks additional entries thr
 dereferences model `+0x17C` without a null gate at that point. This is concrete object
 association, not a checked scene-attachment transaction.
 
+The [resource-materialization audit](startup-gge-model-resource-materialization.md) establishes
+that the positive herd caller stores `+0xB34=1` and so selects profile `+0x504`, not `+0x510`.
+It separately follows the later `A05B60` producer of instance `+0x180`; this is not input/world
+readiness.
+
 The `B34050` global is populated by a manager virtual call carrying UTF-16 `Gonzago` in the
 examined `B357B1..B357DD` prefix. The later
 [animation-world audit](startup-gge-captain-key-anim-world.md) resolves that constructed manager

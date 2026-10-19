@@ -169,6 +169,8 @@ in `F44A90..F44C64` and `F464D0..F4672E`, `5D818F..5D820D`, `67CAE0/67CBE0`,
 Raw scans found candidates only; alternate global writers, indirect edges and model internals
 are not exhaustively covered.
 
-Next useful boundary is the resource load/materialization `4BB500 → 9CBE10` and the selected
-captain profile's model key choice on replacement. Follow the native result to an actual
-attachment/input consumer rather than treating the animation-world instance as a playable actor.
+The [resource/materialization follow-up](startup-gge-model-resource-materialization.md) bounds
+`4BB500`'s derived type/interface request and fallback, the `9C4950` structural/count acceptance
+returned by `9CBE10`, and `A05B60`'s scene-side pointer producer. The positive herd path selects
+profile `+0x504` via creature `+0xB34=1`. Native resource, scene/input and playable success
+remain unobserved; the next concrete edge is world `+0x44` service dispatch.

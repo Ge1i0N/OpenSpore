@@ -172,6 +172,11 @@ the controller-selected key to `mAvatarAsset` writer after initial Scenario sync
 The constructed Gonzago receiver is an animation world with `+0x30 → A0B8E0 → A0B1C0`,
 not proof of gameplay world creation. Model/resource success and input remain Unknown.
 
+The [model resource/materialization audit](../../startup-gge-model-resource-materialization.md)
+separates the derived `0x0F43029A` resource/interface request, conversion fallback,
+`9CBE10 → 9C4950` structural/count acceptance, and `A05B60` scene-side pointer production.
+None of those static contracts establishes native attachment/input or playable readiness.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual
