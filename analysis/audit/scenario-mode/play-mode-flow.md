@@ -182,6 +182,12 @@ world `+0x44` to `74D520`, its loaded-definition/pooled-wrapper registration and
 return. Child initialization can be queued; neither wrapper existence nor creature association
 establishes completed native rendering, input or a gameplay tick.
 
+The [queue completion/children audit](../../startup-gge-scene-queue-completion-children.md)
+classifies the replay inside `7515D0`: manager `+0x38` pumps eight status-gated async slots,
+with a separate wait/force route. Its Scenario caller remains unresolved. `74A990` acquires
+child resources and can notify owner interface `0x07BBC4FF`; that notification is not yet a
+proven input or captain-activation callback.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual

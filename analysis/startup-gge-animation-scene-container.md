@@ -117,7 +117,8 @@ Do not replace a missing definition or failed operation with a safe/ready placeh
 
 ## Immediate versus deferred initialization
 
-`74C980(container, record, definition, arg1, arg2)` clears a flag, checks control/sign state,
+`74C980` uses container in ECX and four stack arguments `(record, definition, arg1, arg2)`;
+it clears a flag, checks control/sign state,
 examines eight container-local slots and evaluates a service/property-dependent condition.
 The decisive split is:
 
@@ -136,6 +137,11 @@ the consumer retains the embedded record reference and definition, subtracts `8`
 the wrapper, and invokes `74A990` with the stored owner/control. It can then invoke a stored
 callback and release temporary references. The enclosing consumer's scheduling/tick join is
 not established by that local callsite; queue submission does not prove consumption occurred.
+
+The [queue/completion follow-up](startup-gge-scene-queue-completion-children.md) identifies that
+enclosing helper as `7515D0`, reached through status-gated async slots or a wait/force path.
+Constructed manager `+0x38` walks containers and pumps those slots, but its Scenario Update
+caller remains unresolved. The local replay is not an unconditional ordinary frame drain.
 
 `74A990` begins by clearing/releasing per-record child reference slots, then queries definition
 properties and delegates selected parts through `754C00`. This is an initialization/child
@@ -170,6 +176,7 @@ Decoded slices: `7A7FCA..7A8012`, `74FEE0..74FF04`, `74FE00..74FE5E`,
 Selected slots, argument/control predicates, pointer adjustment, links and direct edges are
 pinned in `tools/verify_startup_state_route.py`. Raw ID/table/edge scans found candidates only.
 
-Next: decode `74A990`'s concrete definition-to-render-object children and/or establish the
-container queue/update consumer's Scenario tick callsite. Input activation is a separate
-unresolved contract; do not expand resource configuration indefinitely as if it were input.
+The [child/completion follow-up](startup-gge-scene-queue-completion-children.md) bounds
+`74A990`'s child-resource slots and optional owner notification `0x07BBC4FF`. The next useful
+join is that callback's concrete receiver or the upstream Scenario scheduling call. Input and
+playable readiness remain Unknown.
