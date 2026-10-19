@@ -104,9 +104,10 @@ was delivered or the property persisted. It was not executed in this investigati
   activation, world attachment, terrain/stage construction, input and gameplay readiness.
 - Object-74 `Play Scenario 0x070D7509` still has no new producer/delivery join here.
 
-Next focused work should return to actual player/avatar association writers or entry setup (for
-example player field `+0x1248` setter `C755B0` and its decoded call sites), not treat these metadata
-or tutorial paths as launch gates. Byte-search candidates require instruction/caller validation.
+The [scalar/current-creature follow-up](startup-gge-player-scalar-current-creature.md) checks the
+`+0x1248` hypothesis: `C755B0` receives immediate `0/1/2`, not an avatar pointer. The separate
+object-manager `+0x54` reference has conditional creature assignment through `B1FCA0/C09B40`.
+Scenario actor selection is still unresolved; metadata/tutorial paths are not launch gates.
 
 ## Reproduction scope
 

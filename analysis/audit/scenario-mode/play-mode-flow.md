@@ -144,6 +144,12 @@ corrects `C79F70` (`cPlayer +0x1C`) to a metadata/descriptor association wrapper
 after return even when those requests are skipped. Neither slot nor latch proves player activation
 or successful world loading.
 
+The [scalar/current-creature follow-up](../../startup-gge-player-scalar-current-creature.md)
+rules out player `+0x1248` as an avatar pointer: its decoded writer passes `0/1/2`. The separate
+manager `+0x54` getter/setter is `B1FD00/B1FCA0`; `C09B40` can create a cCreatureAnimal and
+conditionally assign it there. The examined Scenario record callsites use assignment flag zero,
+so they do not establish current captain/avatar selection.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual

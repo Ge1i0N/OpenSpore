@@ -102,6 +102,11 @@ the two candidates: slot `+0x1C = C79F70` is a metadata association wrapper, not
 activation/Update; `EF72C0` is a gated tutorial/service-request continuation. Neither establishes
 avatar/world attachment. Actual association writers remain a separate next boundary.
 
+The [scalar/current-creature audit](startup-gge-player-scalar-current-creature.md) distinguishes
+player `+0x1248` (numeric policy selector) from object-manager `+0x54` (retained current-object
+reference). A cCreatureAnimal creation path can assign the latter, but the examined Scenario
+record callsites pass a zero assignment flag. Captain/avatar selection remains Unknown.
+
 ## Static evidence scope
 
 Instruction anchors: `C7C870..C7C959`, `B18490..B184C9`, `C7C640..C7C6BE`,
