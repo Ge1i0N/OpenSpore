@@ -182,8 +182,10 @@ Decoded `4BB500..4BB9C7`, `4BC4A0..4BC4E6`, `4BB1C0..4BB1EF`, focused constructo
 true/false tails, `A05B60..A05C94`, and caller/profile-key slices. Raw constant/return scans
 were candidate discovery only. Selected anchors are in `tools/verify_startup_state_route.py`.
 
-Next useful edge: identify world `+0x44` concrete service and the return of
-`+0x0C(0x2EBCD6A6, 0xD94352ED, 0)`, then follow attachment/registration and input separately.
+The [scene-container follow-up](startup-gge-animation-scene-container.md) identifies world
+`+0x44` as the constructed container table `0x0140D7D8` and its `+0x0C = 74D520` definition
+request. It registers a pooled wrapper and returns wrapper `+8`, with separate immediate and
+deferred initialization. The runtime queue/update and input contracts remain unresolved.
 Alternatively expand the resource converter if an actual failed model input requires it.
 Do not promote resource/interface acceptance, model-data validity, instance existence or
 scene-side reference assignment into observed playable readiness. Object-74 delivery remains

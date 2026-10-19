@@ -177,6 +177,11 @@ separates the derived `0x0F43029A` resource/interface request, conversion fallba
 `9CBE10 → 9C4950` structural/count acceptance, and `A05B60` scene-side pointer production.
 None of those static contracts establishes native attachment/input or playable readiness.
 
+The [animation scene-container audit](../../startup-gge-animation-scene-container.md) follows
+world `+0x44` to `74D520`, its loaded-definition/pooled-wrapper registration and embedded `+8`
+return. Child initialization can be queued; neither wrapper existence nor creature association
+establishes completed native rendering, input or a gameplay tick.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual
