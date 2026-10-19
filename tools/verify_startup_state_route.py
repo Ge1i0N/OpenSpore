@@ -666,6 +666,24 @@ def verify() -> None:
     exact(0xF1F344, "e8 87 c9 01 00 48 39 86 b8 00 00 00 75 0e 6a 05 8b ce e8 65 b6 ff ff")
     exact(0xF1F3C4, "83 be 90 00 00 00 03 0f 85 fd 00 00 00 a1 a4 7a 6c 01")
     exact(0xF1F4E0, "55 8b ec 83 e4 f8 83 ec 58 53 55 56 57 8b f9 83 bf 90 00 00 00 03")
+    # Scenario object synchronization and readiness aggregation remain separate from world creation.
+    exact(0xEF25E0, "83 ec 08 53 57 8b f9 89 7c 24 0c e8 10 ae c4 ff 8b c8 e8 f9 02 c3 ff")
+    exact(0xEF262A, "8b 0d a4 7a 6c 01 83 b9 cc 00 00 00 02 0f 85 65 01 00 00 84 db")
+    exact(0xEF2680, "8b 86 24 2c 00 00 8b 8e 14 2c 00 00 81 c6 10 2c 00 00 3d ff ff ff 3f")
+    exact(0xEF26EC, "85 c0 74 75 8b 10 8b c8 8b 82 ac 00 00 00 ff d0 85 c0 74 65")
+    exact(0xEF2700, "83 60 04 fe bb 01 00 00 00 01 58 40 8b 4f 04 89 44 24 10")
+    exact(0xEF2791, "6a 00 6a 00 6a 02 e8 d4 36 05 00 8b 7c 24 14 5e 5d")
+    exact(0xEF27B9, "80 79 14 00 74 33 e8 4c da 04 00 8b 0d a4 7a 6c 01 8b 89 cc 00 00 00")
+    exact(0xF45E70, "80 7c 24 0c 00 53 56 57 8b f1 75 05 e8 1f b3 ff ff 8b 7c 24 14")
+    exact(0xF45E8F, "8b ce e8 3a fc ff ff e8 65 75 bf ff 8b c8 e8 4e ca bd ff 6a 00 6a 00")
+    exact(0xF45EAA, "e8 21 fc ff ff 5f 5e 5b c2 0c 00")
+    exact(0xF45F20, "56 8b 47 10 8d 75 04 56 8d 88 f4 2b 00 00 e8 9d d7 f8 ff")
+    exact(0xF45F92, "8b 44 24 30 50 53 8b c7 e8 21 99 ff ff 8b 57 10 8b 4c 24 1c")
+    exact(0xF45FD5, "89 5c 24 30 89 45 00 e8 df 15 c0 ff 8b 55 00 55 8d 8f b0 00 00 00")
+    exact(0xF40210, "51 53 55 8b e9 8b 85 8c 00 00 00 56 b3 01 be fb ff ff ff")
+    exact(0xF40260, "21 b0 28 02 00 00 8b c8 8b 09 c1 e9 1e 05 38 02 00 00")
+    exact(0xF4028F, "8b 4d 10 8b 81 24 2c 00 00 81 c1 10 2c 00 00 3d ff ff ff 3f")
+    exact(0xF40353, "a1 a4 7a 6c 01 83 b8 cc 00 00 00 02 5f 74 07 8b cd e8 37 d4 ff ff")
 
     # Negative controls for prior timing/slot conflation.
 
