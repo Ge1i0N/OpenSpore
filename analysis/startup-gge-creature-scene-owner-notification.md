@@ -115,8 +115,9 @@ An exploratory disassembly command with an unresolved address placeholder failed
 reading a slice; it contributes no evidence. Subsequent concrete-address slices above succeeded.
 
 This candidate is resolved as a flag-only notification, not an unclassified activation helper.
-Next useful work is a concrete scheduling edge into manager `+0x38` or a direct input/current
-actor consumer. Only pursue the A5 flag further with a decoded reset/consumer lead; do not
+The [outer-frame follow-up](startup-gge-scene-pump-outer-frame.md) closes scheduling into
+manager `+0x38` as common AppMode service work after mode Update. Next useful work is a
+direct input/current-actor consumer. Only pursue A5 further with a decoded reset/consumer lead; do not
 expand arbitrary adjacent transform/resource helpers as if they were input activation.
 Native delivery, resource success, rendering, input, playable readiness and object-74 delivery
 remain Unknown.

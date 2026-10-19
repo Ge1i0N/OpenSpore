@@ -1313,6 +1313,28 @@ def verify() -> None:
     exact(0xC89918, "88 88 a4 00 00 00 88 90 a5 00 00 00 88 90 a6 00 00 00 88 88 a7 00 00 00")
     exact(0xC886A0, "80 b9 a7 00 00 00 00 75 09 80 b9 a6 00 00 00 00 74 0a")
 
+    # Common outer-frame scene pump follows selected driver Update; receiver is retained, not getter.
+    call(0x7E6FB4, 0x7A68A0)
+    call(0x7A68E1, 0x7A60D0)
+    exact(0x7A60FA, "c7 06 38 f8 40 01")
+    exact(0x7E6FCE, "89 7e 5c")
+    slot(0x140F838, 0x08, 0x7A4D70)
+    slot(0x140F838, 0x0C, 0x7A7E00)
+    slot(0x140F838, 0x18, 0x7A4E50)
+    exact(0x7E6FDF, "8b 4e 5c 8b 01 8b 50 08 ff d2")
+    exact(0x7EAC15, "8b 4e 5c 83 c4 04 85 c9 74 07 8b 01 8b 50 0c ff d2")
+    exact(0x7A7FE4, "89 7e 28")
+    call(0x7A8003, 0x67DF50)
+    slot(0x148AFD8, 0x3C, 0xEF2EF0)
+    exact(0x7EA2B1, "8b 4d 3c 85 c9 74 07 8b 11 8b 42 14 ff d0")
+    exact(0x7EA2BF, "8b 4d 5c 85 c9 74 19 d9 44 24 10 8b 11 8b 42 18 83 ec 08 d9 5c 24 04 d9 44 24 1c d9 1c 24 ff d0")
+    exact(0x7A4ED8, "8b 4e 28 5e 85 c9 74 19 d9 44 24 0c 8b 11 8b 42 38 83 ec 08 d9 5c 24 04 d9 44 24 10 d9 1c 24 ff d0")
+    slot(0x140D768, 0x38, 0x7535A0)
+    exact(0x7535A1, "8b 71 14 57 8d 79 10 3b f7 74 2d")
+    call(0x7535C5, 0x752680)
+    call(0x752693, 0x751E50)
+    exact(0x752698, "80 7d 1d 00 0f 84 23 0c 00 00")
+
     # Negative controls for prior timing/slot conflation.
     exact(0xE310C0, "33 c0 c3")
     exact(0x571E67, "ff 15 b8 c2 3c 01")

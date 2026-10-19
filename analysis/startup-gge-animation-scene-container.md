@@ -143,6 +143,10 @@ enclosing helper as `7515D0`, reached through status-gated async slots or a wait
 Constructed manager `+0x38` walks containers and pumps those slots, but its Scenario Update
 caller remains unresolved. The local replay is not an unconditional ordinary frame drain.
 
+The later [outer-frame audit](startup-gge-scene-pump-outer-frame.md) resolves the upstream
+caller through AppMode `+0x5C` graphics host `7A4E50`, after selected-driver Update. This
+supersedes the unresolved scheduling boundary, without claiming native async completion.
+
 `74A990` begins by clearing/releasing per-record child reference slots, then queries definition
 properties and delegates selected parts through `754C00`. This is an initialization/child
 configuration boundary, not a Boolean whole-scene-ready contract. Its full definition schema,

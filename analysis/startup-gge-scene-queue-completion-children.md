@@ -29,6 +29,12 @@ readiness. Static manager traversal is not evidence that an original gameplay ti
 
 ## Deferred scheduling: manager → container → eight async slots
 
+Follow-up: the [outer-frame scheduling audit](startup-gge-scene-pump-outer-frame.md) closes
+the upstream caller as `7E9E80 → AppMode +0x5C / 7A4E50 → host +0x28 / manager +0x38`.
+It is common graphics/service work after selected-driver Update, not a direct call inside
+ScenarioMode Update or proof of native frame execution. Earlier unresolved-caller statements
+below describe the boundary of this original slice and are superseded by that positive join.
+
 The preceding audit pins manager primary table `0x0140D768` and the container map rooted at
 manager `+0x0C`. An additional slot has now been decoded:
 
@@ -152,5 +158,6 @@ Decoded focused slices cover `7535A0..7535DC`, `752680..7526A1`, `751E50..751F3F
 `tools/verify_startup_state_route.py`. Cached disassembly is temporary, not an imported runtime.
 
 The owner notification is resolved by the follow-up above; its flag's later role remains
-Unknown. Next choose a concrete scheduling edge into manager `+0x38` or a direct actor/input
-consumer, rather than expanding child resource helpers indefinitely as a substitute for gameplay.
+Unknown. The outer-frame follow-up also closes manager `+0x38` scheduling. Next choose a
+concrete actor/input consumer rather than expanding child resource helpers indefinitely as a
+substitute for gameplay.

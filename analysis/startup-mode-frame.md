@@ -147,6 +147,11 @@ as a playable game tick, nor claim all branches of `DE8710` are recovered.
 
 ## Result and remaining boundary
 
+The [scene-pump follow-up](startup-gge-scene-pump-outer-frame.md) extends this same frame
+after selected-driver `+0x3C`: `7EA2DD` invokes AppMode `+0x5C` host `+0x18 = 7A4E50`,
+which forwards to its retained scene manager `+0x38 = 7535A0`. Registered containers' async
+slots are pumped separately from ScenarioMode Update; invocation does not prove completion.
+
 The startup traversal now connects queued `mode GalaxyGameEntry` → manager name selection →
 selected-driver activation → outer frame → selected-driver update → GGE internal handler update.
 Setup-all, activation-one, auxiliary-owner update and internal-controller dispatch are separate.

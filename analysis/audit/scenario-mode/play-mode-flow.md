@@ -194,6 +194,11 @@ It only sets component byte `+0xA5=1`, already initialized to `1` by the shared 
 it does not read the wrapper argument or activate input. A later flag reset/consumer and the
 upstream Scenario scheduler remain Unknown.
 
+The [outer-frame scene-pump audit](../../startup-gge-scene-pump-outer-frame.md) resolves that
+scheduling boundary: common AppMode graphics/service work after selected-driver Update
+reaches manager `+0x38`, containers and their async pump. It is not a direct call inside
+ScenarioMode Update, nor evidence of observed resource completion, rendering or gameplay ticks.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual
