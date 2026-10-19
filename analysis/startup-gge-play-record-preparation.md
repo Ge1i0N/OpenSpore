@@ -84,8 +84,10 @@ DFBD40 completion
 ```
 
 `0x21851EBE` is the lowercase FNV-1 identity of the state name `ScenarioMode`; it is not mode tag
-`0x01654C10`. This is a state-request edge only. Queued delivery, state acceptance, mode-driver
-activation, world construction and gameplay remain separate boundaries.
+`0x01654C10`. The subsequent registration/mode-change/entry boundary is documented in
+[startup-gge-scenariomode-entry.md](startup-gge-scenariomode-entry.md). This is a state-request
+edge only. Queued delivery, state acceptance, mode-driver activation, world construction and
+gameplay remain separate boundaries.
 
 ## Current unresolved join
 

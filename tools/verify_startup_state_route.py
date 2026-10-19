@@ -632,6 +632,15 @@ def verify() -> None:
     exact(0xEF1235, "83 f8 02 75 31 83 f9 01 75 2c 8b ce e8 9a fd ff ff 8b 4e 74")
     exact(0xEF124D, "6a 01 c7 86 cc 00 00 00 01 00 00 00 e8 12 4c 05 00 6a 00 8b ce")
     exact(0xEF126B, "89 8e cc 00 00 00 5e c2 04 00")
+    # ScenarioMode registration, tag identity and mode-change publication are separate from world readiness.
+    exact(0xEF1870, "6a 00 6a 00 6a 00 6a 00 68 48 bc 3e 01 68 e0 00 00 00 e8 b9 59 05 00")
+    exact(0xEF1899, "8b 4c 24 04 8b 11 68 fc 27 46 01 68 10 4c 65 01 50 8b 42 20 ff d0")
+    exact(0xEF0210, "53 33 db 56 8b f1 c7 46 04 94 b3 3e 01 c7 46 08 38 c4 3e 01 89 5e 0c")
+    exact(0xEF0227, "c7 06 d8 af 48 01 c7 46 04 d0 af 48 01 c7 46 08 c0 af 48 01 89 5e 10")
+    exact(0xEF2250, "8b 44 24 08 8b 40 08 8b 0d a4 7a 6c 01 3d 10 4c 65 01 75")
+    exact(0x7D8670, "64 a1 00 00 00 00 6a ff 68 23 60 21 01 50 64 89 25 00 00 00 00")
+    exact(0x7D86A5, "33 db 3b cd 7c 38 8b 56 18 2b 56 14 b8 ab aa aa 2a f7 ea c1 fa 02")
+    exact(0x7D8520, "8b 42 18 ff e0")
 
     # Negative controls for prior timing/slot conflation.
 
