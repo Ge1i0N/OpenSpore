@@ -97,8 +97,10 @@ An output address alone is not evidence of mounting, avatar population or world 
   or terrain/stage construction, input activation and completed gameplay tick.
 - Object-74 `Play Scenario 0x070D7509` producer/delivery join is unchanged.
 
-Next useful candidates are player activation/update slot `+0x1C = C79F70` and the ordinary
-ScenarioPlayMode phase-3 continuation `EF72C0`, rather than expanding collectables/UI details.
+The [metadata/tutorial follow-up](startup-gge-scenarioplay-metadata-tutorial-boundary.md) resolves
+the two candidates: slot `+0x1C = C79F70` is a metadata association wrapper, not player
+activation/Update; `EF72C0` is a gated tutorial/service-request continuation. Neither establishes
+avatar/world attachment. Actual association writers remain a separate next boundary.
 
 ## Static evidence scope
 

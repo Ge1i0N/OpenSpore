@@ -137,6 +137,13 @@ resolves `cPlayer +0x28(0) → C7C870`: local state/vector setup, allocation/con
 `0x01A0219E` listener reconfigures collectables only for payload code `5`; previously inspected
 codes `3`/`4` do not pass it. Query success, avatar/world attachment and input remain Unknown.
 
+The [metadata/tutorial follow-up](../../startup-gge-scenarioplay-metadata-tutorial-boundary.md)
+corrects `C79F70` (`cPlayer +0x1C`) to a metadata/descriptor association wrapper. The phase-3
+`EF72C0` continuation checks launch context, tutorial option `0x04EA96CB` and property key
+`0x07BE69AD`, then conditionally submits four service-queue requests. The caller sets `+0xFD`
+after return even when those requests are skipped. Neither slot nor latch proves player activation
+or successful world loading.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual

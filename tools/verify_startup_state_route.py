@@ -873,6 +873,42 @@ def verify() -> None:
     exact(0xC7C934, "c7 06 00 00 00 00 8b 11 8b 42 04 ff d0")
     exact(0xC7C941, "8b 17 8b 42 2c 56 68 7e 0c ae 02 68 81 25 ca 02 8b cf ff d0 5f 5e c2 04 00")
 
+    # cPlayer +0x1C is metadata; phase-3 EF72C0 queues tutorial/service requests, not world load.
+    slot(0x1472CC8, 0x1C, 0xC79F70)
+    text(0x1472D1C, "cPlayer", "utf-16le")
+    exact(0xC79F70, "68 1c 2d 47 01 68 18 8d 57 01 51 8b 4c 24 10")
+    call(0xC79F7F, 0x695B20)
+    exact(0xC79F84, "c2 04 00")
+    exact(0x695B37, "b9 9c d6 52 01")
+    call(0x695B68, 0x695120)
+    call(0x695B81, 0x692840)
+    call(0x695B87, 0x695750)
+    exact(0x695BDD, "89 38 5f b0 01 5e 81 c4 1c 0a 00 00 c2 0c 00")
+    exact(0xF1FBB0, "80 be fd 00 00 00 00 0f 85 96 03 00 00 81 be c0 00 00 00 e8 03 00 00 0f 86 86 03 00 00")
+    call(0xF1FBCD, 0xEF72C0)
+    exact(0xF1FBD2, "5f 5d c6 86 fd 00 00 00 01")
+    exact(0xEF72D5, "c7 05 80 7b 6c 01 04 b5 48 01")
+    exact(0xEF72F0, "83 f8 01 74 0a c6 44 24 0a 00 83 f8 02 75 05 c6 44 24 0a 01")
+    exact(0xEF7310, "68 cb 96 ea 04 ff d0 85 c0 0f 95 44 24 0b")
+    exact(0xEF732E, "68 ad 69 be 07 8b ce ff d2 84 c0 74 12")
+    exact(0xEF733F, "66 83 79 12 01 75 07")
+    exact(0xEF734D, "80 7c 24 0a 00 0f 84 4b 01 00 00 80 7c 24 0b 00 0f 84 40 01 00 00 84 db 0f 85 38 01 00 00")
+    for site in (0xEF73C0, 0xEF7409, 0xEF7452, 0xEF749E):
+        call(site, 0x67AAB0)
+    exact(0x67CAB0, "a1 60 cc 5f 01 c3")
+    call(0x67AAEE, 0x679040)
+    call(0x67AB0C, 0x679B00)
+    call(0x67AB16, 0x679FB0)
+    exact(0x67AC15, "83 f8 01 75 0c 8b 4c 24 10 50 6a 00")
+    call(0x67AC21, 0x67A550)
+    slot(0x148B504, 0, 0xEF7C00)
+    call(0x67A1D3, 0xF47240)
+    call(0x67A1E8, 0x816DA0)
+    call(0x67A226, 0x817120)
+    exact(0x67A22B, "88 44 24 38 84 c0 0f 84 e8 02 00 00")
+    exact(0xEF7C3B, "68 ad 69 be 07 8b ce ff d2")
+    call(0xEF7C69, 0xB32360)
+
     # Negative controls for prior timing/slot conflation.
 
     # Negative controls for prior timing/slot conflation.

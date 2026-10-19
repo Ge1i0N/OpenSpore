@@ -114,5 +114,7 @@ confused with global loading phase, ScenarioMode strategy or GGE state numbers.
   input activation, native gameplay tick and playable readiness.
 - Object-74 `Play Scenario 0x070D7509` still has no new producer join to ScenarioMode here.
 
-Next focused candidates are the returned cPlayer initialization callback and the ordinary phase-3
-continuation `EF72C0`. These are not authorization to execute the native game/save paths.
+The [metadata/tutorial continuation audit](startup-gge-scenarioplay-metadata-tutorial-boundary.md)
+now bounds `EF72C0`: option/property gates and four service-queue requests, not a world loader.
+The caller sets `+0xFD` even if the continuation skips its guarded actions. This is not
+authorization to execute native game/save paths or a proof of readiness.
