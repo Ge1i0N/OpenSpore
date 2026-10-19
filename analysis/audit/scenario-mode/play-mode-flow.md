@@ -131,6 +131,12 @@ from its registered `Simulator/cPlayer` factory `B1E960 → C7B930`. The
 the conditional virtual factory join and requested interface-query route. Successful native object
 creation, avatar/world attachment and input remain Unknown.
 
+The [player initialization follow-up](../../startup-gge-scenarioplay-player-initialization.md)
+resolves `cPlayer +0x28(0) → C7C870`: local state/vector setup, allocation/configuration of
+`Simulator/cCollectableItems`, listener subscription and a final service query. A concrete
+`0x01A0219E` listener reconfigures collectables only for payload code `5`; previously inspected
+codes `3`/`4` do not pass it. Query success, avatar/world attachment and input remain Unknown.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual

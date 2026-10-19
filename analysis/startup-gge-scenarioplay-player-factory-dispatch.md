@@ -101,8 +101,10 @@ for the constructed cPlayer family, conditional on successful construction and s
   attachment, input activation and completed gameplay tick.
 - **Unchanged:** object-74 `Play Scenario 0x070D7509` delivery/producer join is not answered here.
 
-Next boundary: the returned player's `+0x28(0)` initialization callback (`C7C870` for this vtable)
-and its avatar/world consumers. No native initialization callback was executed.
+The returned player's `+0x28(0)` initialization callback (`C7C870` for this vtable) is now bounded in
+[player initialization](startup-gge-scenarioplay-player-initialization.md): collectables setup,
+listener registration and a separate service query. It does not establish avatar/world attachment.
+No native initialization callback was executed.
 
 ## Reproduction scope
 

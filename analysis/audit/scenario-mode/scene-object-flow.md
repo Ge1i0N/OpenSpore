@@ -129,8 +129,10 @@ failed virtual validity predicate to `B22560/B20CC0` release handling. The `B488
 key `useGameplayPhantom` is gameplay-adjacent policy only, not gameplay readiness. See
 [startup-gge-scenario-object-state-sync.md](../../startup-gge-scenario-object-state-sync.md).
 
-The invalidation event `0x01A0219E` is not Scenario-specific in the static reference set: it is
-also published by independent cleanup/reset paths. `B48870`/`B56160` provide a separate
+The invalidation event `0x01A0219E` reference set includes sends, listener subscription and
+removal: `AC1430` subscribes; `B452F0/FDE170` remove subscriptions rather than publishing.
+The player consumer gates collectables reconfiguration on payload code `5`, distinct from the
+examined cleanup codes `3`/`4`. `B48870`/`B56160` provide a separate
 `useGameplayPhantom` and collision/proxy branch with optional `Simulator` allocation. These paths
 remain lifecycle/phantom handling, not proof of terrain or playable-stage construction. See
 [startup-gge-scenario-event-phantom-boundary.md](../../startup-gge-scenario-event-phantom-boundary.md).

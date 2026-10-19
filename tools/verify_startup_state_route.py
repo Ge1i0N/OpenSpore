@@ -723,7 +723,7 @@ def verify() -> None:
     exact(0xB22C87, "8b 44 24 1c 85 c0 74 0a 8b 17 50 8b 42 38 8b cf ff d0 8b 44 24 20 85 c0")
     exact(0xB22CB6, "8d 4c 24 14 51 68 15 8e d0 03 50 c6 44 24 20 00 e8 c5 44 8e ff 83 c4 0c")
     exact(0xB22D38, "8b 44 24 1c 8b 4c 24 18 8b 16 8b 52 24 50 51 55 8b ce ff d2 5f 84 c0")
-    # Event 0x01A0219E is generic lifecycle signaling; phantom setup is separate from gameplay.
+    # Event references include subscription/removal, not just sends; phantom setup is separate.
     exact(0xAC1430, "56 8b f1 e8 48 c8 bb ff 8b 10 68 9e 21 a0 01 83 c6 fc 8b c8")
     exact(0xB452F0, "56 57 8b f9 e8 87 89 b3 ff 85 c0 0f 84 80 00 00 00 e8 7a 89 b3 ff")
     exact(0xFDE170, "53 55 56 57 8b d9 e8 35 fa e3 ff 8b ab 44 01 00 00 8b b3 48 01 00 00")
@@ -841,6 +841,37 @@ def verify() -> None:
     exact(0xC755D0, "8b 44 24 04 3d ed 16 c2 02 75 05 8b c1 c2 04 00")
     exact(0xC755E4, "e9 b7 2d ea ff")
     exact(0xB183B6, "33 d2 81 f9 3b 24 7f 01 0f 95 c2 4a 23 c2 c2 04 00")
+
+    # cPlayer +0x28 initializes collectables/resources/listener, not proven avatar/world attachment.
+    slot(0x1472CC8, 0x28, 0xC7C870)
+    call(0xC7C879, 0xB18490)
+    exact(0xB184BC, "85 f6 74 06 8b 46 30 89 43 30 5f 5e 5b c2 04 00")
+    call(0xC7C885, 0x9201E0)
+    exact(0xC7C88D, "6a 0a 8d 8e 3c 11 00 00")
+    call(0xC7C895, 0xC7C640)
+    exact(0xC7C8A2, "68 2c 2d 47 01 68 ac 6d 00 00")
+    text(0x1472D2C, "Simulator/cCollectableItems")
+    call(0xC7C8AC, 0xF47240)
+    exact(0xC7C8B4, "85 c0 74 0b 8b c8 e8 41 b5 91 ff 8b f8 eb 02 33 ff")
+    exact(0xC7C8DC, "89 be e8 10 00 00 85 db 74 09")
+    exact(0xC7C8EF, "8b 0d dc d6 50 01 51 8b 8e e8 10 00 00 68 93 44 5c 4a 68 0c 08 56 ad")
+    call(0xC7C906, 0x599440)
+    exact(0x599440, "8b 44 24 0c 8b 54 24 08 89 81 74 6d 00 00 8b 44 24 04 52 50")
+    call(0x599454, 0x599040)
+    exact(0x599459, "b0 01 c2 0c 00")
+    call(0xC7C917, 0xC75380)
+    slot(0x1427AC0, 0x20, 0x883AD0)
+    slot(0x1427AC0, 0x2C, 0x883B90)
+    slot(0x1472CA4, 0x04, 0xC77ED0)
+    exact(0xC7538F, "e8 ec 88 a0 ff 8b 10 68 e3 f1 be 04 8b c8 8b 42 20 57 ff d0")
+    exact(0xC754A6, "e8 d5 87 a0 ff 8b 10 68 9e 21 a0 01 8b c8 8b 42 20 56 ff d0")
+    exact(0x883AE0, "89 4c 24 04 89 44 24 08 c6 44 24 0c 01")
+    exact(0x883B04, "8b 4c 24 20 8b 06 8b 40 44 51 8d 54 24 08 52 8b ce ff d0")
+    exact(0xC7816F, "3d 9e 21 a0 01 75 32 8b 54 24 18 83 7a 08 05 75 1f 8b 89 b4 10 00 00 85 c9 74 15")
+    call(0xC7819A, 0x599440)
+    exact(0xC7819F, "b0 01 5e 83 c4 0c c2 08 00")
+    exact(0xC7C934, "c7 06 00 00 00 00 8b 11 8b 42 04 ff d0")
+    exact(0xC7C941, "8b 17 8b 42 2c 56 68 7e 0c ae 02 68 81 25 ca 02 8b cf ff d0 5f 5e c2 04 00")
 
     # Negative controls for prior timing/slot conflation.
 

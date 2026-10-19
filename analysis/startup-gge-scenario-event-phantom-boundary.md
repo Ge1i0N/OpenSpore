@@ -11,14 +11,18 @@ The allocator, initializer and proxy update continuation is documented in
 
 ## Event `0x01A0219E` is generic lifecycle signaling
 
-The event value `0x01A0219E` appears in multiple independent paths. The bounded references include
-object invalidation/release, a manager shutdown/reset path, and another subsystem cleanup path. One
-small producer (`AC1430`) forwards the event through manager virtual `+0x20`; another (`B452F0`)
-publishes a group of event values including `0x0182C582`, `0x01A0219E`, `0x025630B7`, `0x031018B9`
-and `0x00F62DEF`; `FDE170` publishes `0x01A0219E` together with `0x03795725`.
+The event value `0x01A0219E` appears in multiple independent paths. **Correction from the concrete
+message-service slots:** `AC1430` subscribes a listener through virtual `+0x20`, while `B452F0`
+and `FDE170` remove subscriptions through `+0x2C`. They are not additional message producers.
+`B452F0` removes a group including `0x0182C582`, `0x01A0219E`, `0x025630B7`, `0x031018B9`
+and `0x00F62DEF`; `FDE170` removes `0x01A0219E` and `0x03795725` subscriptions.
 
-Therefore the event proves internal lifecycle/message publication, not a Scenario-only completion
-signal. Its consumers, payload interpretation and runtime delivery remain Unknown.
+The earlier interpretation of those calls as publications was unsupported. `B20CC0` and `B228F0`
+do send this channel through service `+0x14`, with different payload codes. A concrete player
+consumer is documented in [player initialization](startup-gge-scenarioplay-player-initialization.md):
+`C77ED0` reconfigures collectables for payload code `5`, not the examined cleanup codes `3`/`4`.
+The channel is not a Scenario-only completion signal; code-5 production and runtime delivery
+remain Unknown.
 
 The object invalidation producer remains concrete:
 
@@ -74,7 +78,7 @@ B48870
 
 Established statically:
 
-- `0x01A0219E` is emitted by multiple lifecycle/cleanup producers;
+- event references include sends, subscriptions and removals, which must be distinguished;
 - `B20CC0` emits it on object invalidation before release cleanup;
 - `B48870` selects phantom-related policy by configuration and controller mode;
 - `B56160` contains a `Simulator` proxy/collision setup branch under `useGameplayPhantom` and
@@ -82,7 +86,7 @@ Established statically:
 
 Still Unknown:
 
-- event consumer behavior and runtime delivery;
+- code-5 production and runtime event delivery (the player consumer is statically bounded);
 - exact `Simulator` class and attachment ownership;
 - resource population, terrain/world/stage construction;
 - actor/avatar activation, input activation, gameplay tick and playable readiness.
@@ -95,12 +99,12 @@ Focused REA records for the selected authority:
   `0x01A0219E`;
 - `ev_6d1c8bca771c7bb51e8375392039dee74be5aab0e6fd9fd3232a7466c1478a54` — `B20CC0` event and
   invalidation path;
-- `ev_ef15ce6fd3148ba04adca9a4d5d15f8b54f4c533f819bad97413eff0d05f9d0a` — `AC1430` event
-  forwarding;
+- `ev_ef15ce6fd3148ba04adca9a4d5d15f8b54f4c533f819bad97413eff0d05f9d0a` — `AC1430` listener
+  subscription (corrected interpretation);
 - `ev_3d997c5272d824be9aba6954ecf863af91305f68ac9e28ca98e3c55d2d8cdbfe` — `B452F0` grouped
-  event publication;
+  subscription removal (corrected interpretation);
 - `ev_bf084d581a199cd026d475c2b5baf522baeac3c5118ae9f70d5ad0bf600285e8` — `FDE170` cleanup
-  event publication;
+  subscription removal (corrected interpretation);
 - `ev_1b53857d8179ca457df2f7d5741d086dfa0f5842ee6dbaaed4dc062c6acc3af1` — `B48870` phantom
   policy;
 - `ev_b1d2dac8a0f323bf7e0d74299b71089463d8d647572ecb9106a50af9b1905a9b` — `B56160` phantom/
