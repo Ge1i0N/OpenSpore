@@ -161,6 +161,12 @@ Scenario marker-record join into `C6E690`; successful native captain creation re
 `F1F060` consumes the separate manager `+0x54` reference after earlier virtual/service calls;
 its non-null branch is not evidence that it selected the actor itself.
 
+The [avatar asset/profile audit](../../startup-gge-avatar-asset-profile-setup.md) identifies
+Scenario data `+0x130` as `mAvatarAsset` and separates `C03920`'s profile-pointer return from
+the discarded model-setup result. Failure can clear the current reference through the creature
+cleanup virtual, but a complete rollback, selected launch captain and model/world/input success
+remain Unknown.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual

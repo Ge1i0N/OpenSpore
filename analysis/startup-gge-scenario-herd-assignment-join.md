@@ -128,8 +128,11 @@ Evidence: decoded focused slices at `B1EE70..B1EE97`, `B251D9..B25224`,
 Selected byte, slot, label and call anchors are pinned in `tools/verify_startup_state_route.py`.
 Raw scans were candidate discovery only; indirect/inlined/alias writes are not exhaustively covered.
 
-Next boundary: determine the actual marker resource-key producer/selection and then trace
-`C03920` population/attachment and failure handling on this ownership-enabled route. Do not
+The [avatar-asset/profile follow-up](startup-gge-avatar-asset-profile-setup.md) identifies data
+`+0x130` as `mAvatarAsset`, bounds fallback/normalization producers, establishes that `C03920`
+returns profile-pointer presence rather than model success, and follows conditional cleanup to
+the current-reference clear. Actual selected captain key and concrete model-provider success
+remain unresolved. Do not
 equate the ownership byte, reference assignment, object flags, or source record with a completed
 captain spawn. Native delivery, resources, world/stage activation, input, gameplay ticks and
 object-74 `Play Scenario 0x070D7509` join remain Unknown.

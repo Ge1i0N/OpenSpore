@@ -87,8 +87,10 @@ then C03920(...) checks further setup
 ```
 
 Assignment precedes the `C03920` result check. If that setup returns false, the body calls
-`B22560(selectedCreature)` and returns null. This pass does not claim a complete rollback of
-the manager reference or successful native activation.
+`B22560(selectedCreature)` and returns null. The later
+[profile/setup audit](startup-gge-avatar-asset-profile-setup.md) follows a conditional cleanup
+join through `B20CC0 → C083D0 → B1FCA0(null)`, and establishes that `C03920` returns only
+profile-pointer presence. Complete transactional rollback and native activation remain unproven.
 
 ## Scenario record creation does not automatically select the creature
 
@@ -117,8 +119,9 @@ object-lifecycle handling, not launch or spawn.
 
 The [assignment caller follow-up](startup-gge-current-creature-assignment-callers.md) checks twenty
 direct-call prefixes and identifies three with nonzero fifth argument: `C6E861`, `D44187`,
-`D444DE`. Their Scenario play-entry join remains unresolved. Do not expand scalar-policy
-consumers as if they were avatar pointers.
+`D444DE`. The [herd follow-up](startup-gge-scenario-herd-assignment-join.md) establishes a
+conditional Scenario marker-record join into `C6E690`, not runtime captain success. Do not
+expand scalar-policy consumers as if they were avatar pointers.
 
 ## Reproduction scope
 
