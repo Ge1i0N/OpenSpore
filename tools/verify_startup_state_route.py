@@ -736,6 +736,16 @@ def verify() -> None:
     exact(0xB4B791, "68 48 11 46 01 e8 b5 76 de ff 83 c4 0c a3 c8 ec 67 01 8b 16 8b 42 20 8b ce")
     exact(0xB56160, "55 8b ec 83 e4 f0 81 ec 14 02 00 00 53 56 57 e8 9c 72 fe ff 89 44 24 34")
     exact(0xB56276, "68 48 11 46 01 e8 d0 cb dd ff 83 c4 0c a3 10 6a 68 01 8b 0d 10 6a 68 01")
+    # Simulator allocation/initializer/proxy update remain separate from world materialization.
+    exact(0xAEFB00, "f3 0f 10 05 d4 87 48 01 53 33 db 56 8b f1 8d 46 64 c7 46 58 00 c1 45 01")
+    exact(0xB550F0, "55 8b ec 83 e4 f0 83 ec 54 53 56 8b 75 0c 57 85 f6 75 09 33 c0 5f 5e 5b")
+    exact(0xB5510C, "8b 4d 08 8b 01 8b 90 ac 00 00 00 ff d2 89 44 24 20 85 c0 74 e2 83 b8 90 00 00 00 00")
+    exact(0xB551BF, "80 7d 1c 00 0f 84 f5 00 00 00 f6 05 08 6a 68 01 01 75 19 83 0d 08 6a 68 01")
+    exact(0xB55750, "55 8b ec 83 e4 f0 81 ec 34 01 00 00 53 56 8b 75 08 80 be a7 00 00 00 00")
+    exact(0xB557DB, "85 ff 74 45 8b 54 24 24 8b 44 24 28 8b 4c 24 2c 52 8b 54 24 14 50 51")
+    exact(0xB55998, "80 3d b8 9a 56 01 00 0f 84 28 07 00 00 f7 46 50 00 20 00 00 0f 84")
+    exact(0xF47240, "8b 44 24 18 8b 4c 24 14 8b 54 24 08 50 8b 44 24 14 51 8b 4c 24 14 52")
+    exact(0xF4725D, "8b 0d 44 8b 6c 01 52 e8 17 1a 9e ff c3")
 
     # Negative controls for prior timing/slot conflation.
 

@@ -6,6 +6,8 @@ Static shipped-binary evidence only. No native execution, resource completion, t
 creation or gameplay tick was observed.
 
 Continuation of [startup-gge-scenario-object-state-sync.md](startup-gge-scenario-object-state-sync.md).
+The allocator, initializer and proxy update continuation is documented in
+[startup-gge-scenario-simulator-proxy-ownership.md](startup-gge-scenario-simulator-proxy-ownership.md).
 
 ## Event `0x01A0219E` is generic lifecycle signaling
 
@@ -56,8 +58,9 @@ fields, and publishes internal setup records. The exact native class and success
 attachment remain Unknown.
 
 The observed `Simulator` allocation is evidence of a collision/phantom proxy family, not proof of
-terrain, planet, stage, actor or avatar creation. The mode tag remains distinct from the hashed
-state name `ScenarioMode`.
+terrain, planet, stage, actor or avatar creation. The allocator/initializer/update boundary is
+documented in [startup-gge-scenario-simulator-proxy-ownership.md](startup-gge-scenario-simulator-proxy-ownership.md).
+The mode tag remains distinct from the hashed state name `ScenarioMode`.
 
 ```text
 B48870

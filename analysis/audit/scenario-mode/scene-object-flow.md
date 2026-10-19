@@ -135,6 +135,11 @@ also published by independent cleanup/reset paths. `B48870`/`B56160` provide a s
 remain lifecycle/phantom handling, not proof of terrain or playable-stage construction. See
 [startup-gge-scenario-event-phantom-boundary.md](../../startup-gge-scenario-event-phantom-boundary.md).
 
+The follow-on `F47240 → AEFBB00 → B55750` slice establishes generic manager allocation, native
+proxy/object initialization, bounds preparation and update/attachment cases. It still has no
+direct terrain/stage/world factory join. See
+[startup-gge-scenario-simulator-proxy-ownership.md](../../startup-gge-scenario-simulator-proxy-ownership.md).
+
 ## Remaining world boundary
 
 The next unresolved edges are the successful results and consumers of the `EEDD40` identity
