@@ -591,6 +591,14 @@ def verify() -> None:
     exact(0x959330, "53 8b 5c 24 10 55 8b 6c 24 0c 8b 45 38 56 57 8b 7c 24 18")
     exact(0x95935B, "e8 f0 f5 ff ff 84 c0 74 21 8b 8e c8 00 00 00 85 c9 74 0e")
     exact(0x9593E7, "8b 8e c8 00 00 00 85 c9 74 14 8d 45 04 3b 47 04 75 0c")
+    # Generic Button dispatch and object-74 payload source remain separate from GGE conversion.
+    exact(0x950E50, "8b 44 24 08 8b 50 08 56 81 fa 00 10 00 00 0f 87 8d 02 00 00")
+    exact(0x950E74, "ff 24 95 0c 11 95 00 8b 70 14 8b 11 8b 52 1c 56 8b 70 10")
+    exact(0x950FD0, "8b 70 0c 8b 00 8b 11 8b 52 68 56 50 8b 44 24 10 50 ff d2")
+    exact(0x950FE7, "8b 70 0c 8b 11 8b 52 6c 50 8b 00 56 50 8b 44 24 14 50 ff d2")
+    exact(0x964129, "8b 86 84 00 00 00 c7 44 24 10 f6 59 72 28 85 c0 74 06 89 44 24 14")
+    exact(0x964191, "8b 86 84 00 00 00 c7 44 24 2c 17 00 00 00 89 44 24 30 eb 2a")
+    exact(0x9641A5, "8b 96 ac 00 00 00 8b 8e 84 00 00 00 c1 ea 02 83 e2 01")
 
     # Negative controls for prior timing/slot conflation.
 
