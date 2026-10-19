@@ -110,10 +110,22 @@ It does **not** establish that a resource mounted, a terrain was built, or an ad
 playable. A host implementation must preserve Unknown/Failed rather than treating the Boolean as
 a universal world-ready signal.
 
+## Finalizer/lifecycle boundary
+
+The common `EEDD40` tail calls `EED640` for status synthesis when its caller parameter is nonzero,
+then reaches `B3D400/B228F0`. `EED640` writes derived predicates/classification and status bits
+into a five-word record. `B228F0` walks the owner object list, checks component `0x01186577` and
+virtual lifecycle predicates, retains passing objects, and unlinks/releases failing entries while
+publishing internal event `0x01A0219E`. Its cleanup helpers release lists and compact vectors.
+
+These are lifecycle/status operations, not proof of resource mounting, terrain creation, stage
+activation or playable gameplay. See
+[startup-gge-scenario-object-finalizer-lifecycle.md](../../startup-gge-scenario-object-finalizer-lifecycle.md).
+
 ## Remaining world boundary
 
 The next unresolved edges are the successful results and consumers of the `EEDD40` identity
-branches, `B228F0`,
+branches and the component virtual methods used by `B228F0`,
 `F3D620/F3EFB0`, and the object virtual methods reached through `+0xAC`. The current evidence
 does not show a native terrain loader or stage activation in this slice. The separate
 `ScenarioPlanet` call remains a lighting-configuration selection as documented in

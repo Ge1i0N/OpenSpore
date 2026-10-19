@@ -6,6 +6,8 @@ The findings below are static shipped-binary observations. They do not claim nat
 resource completion, terrain/world creation or gameplay readiness.
 
 Continuation of [startup-gge-scenario-object-construction.md](startup-gge-scenario-object-construction.md).
+The common-tail status and lifecycle boundary is detailed in
+[startup-gge-scenario-object-finalizer-lifecycle.md](startup-gge-scenario-object-finalizer-lifecycle.md).
 
 ## `EEDD40`: identity dispatcher, not a single world factory
 
@@ -37,9 +39,10 @@ When a branch returns a non-null object, the common tail:
 6. when the third caller parameter is nonzero, calls `EED640` and sets a local/component byte;
 7. calls `B3D400` and `B228F0` before returning.
 
-The common tail is concrete object initialization and service synchronization. The meaning of the
-component and virtual methods remains Unknown; no terrain or world materialization contract is
-present in this tail.
+The common tail is concrete object initialization and service synchronization. `EED640` synthesizes
+status fields and `B228F0` performs object-list lifecycle checks/cleanup; neither establishes a
+terrain or world materialization contract. The component and virtual method meanings remain
+Unknown.
 
 ## `F237B0`: play-specific named lookup
 

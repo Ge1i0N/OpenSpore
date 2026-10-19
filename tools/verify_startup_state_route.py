@@ -703,6 +703,18 @@ def verify() -> None:
     exact(0xF2381F, "83 ba cc 00 00 00 01 8b e8 74 3a 85 ed 74 13 8b 45 00 8b 50 0c")
     exact(0xF432C0, "83 ec 0c 53 8b d9 8b 83 8c 00 00 00 8b 4c 24 14 8b 11 85 c0")
     exact(0xF4331B, "8b 49 0c 68 c0 d2 48 01 68 34 02 00 00 89 48 0c e8 10 3f 00 00")
+    # EEDD40 finalization is status/lifecycle synchronization, not world materialization.
+    exact(0xEED640, "51 8b 0d a4 7a 6c 01 a0 40 cb 5a 01 53 55 56 8b 71 74 57 8b ce bd 01 00 00 00")
+    exact(0xEED65E, "e8 4d 67 10 00 8b 4c 24 18 3b c8 0f 84 8f 00 00 00 8b 11 52 8b ce e8 c7 10 05 00")
+    exact(0xEED702, "8b 44 24 20 83 08 02 80 7c 24 13 00 8b 08 74 05 83 c9 10 eb 03 83 e1 ef")
+    exact(0xEED72E, "d9 58 0c 5d 84 db c7 40 10 00 00 00 00 5b 74 0e 83 48 10 10 83 60 10 fb 83 48 10 02")
+    exact(0xB228F0, "83 ec 50 56 8b f1 57 b9 88 c9 67 01 89 74 24 10 e8 3b bd 10 00 e8 36 b4 b5 ff")
+    exact(0xB22959, "8b 55 00 8b 42 0c 68 77 65 18 01 8b cd ff d0 8b f0 85 f6 0f 84 e4 00 00 00")
+    exact(0xB229C7, "8b 46 50 a8 20 75 39 8b 4f 04 c1 e9 0e f6 c1 01 74 26 8b 2e 8b 55 34")
+    exact(0xB22A07, "85 ff 74 43 f7 46 50 00 80 00 00 74 3a 8b 47 04 8b c8 c1 e9 0e f6 c1 01")
+    exact(0xB22A56, "8b 4c 24 10 8b 39 8b 77 04 8b 56 04 8b 06 89 02 8b 0e 8b 56 04 89 51 04")
+    exact(0xB22A8F, "c7 44 24 20 00 b9 3e 01 33 c0 8d 4c 24 24 87 01 c7 44 24 20 44 b8 3e 01")
+    exact(0xB22AE5, "8b 44 24 18 05 0c 01 00 00 39 44 24 10 0f 85 4c fe ff ff 8b 74 24 18")
 
     # Negative controls for prior timing/slot conflation.
 
