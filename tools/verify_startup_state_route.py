@@ -655,6 +655,17 @@ def verify() -> None:
     exact(0xEF29AE, "e8 5d e6 50 ff 8b 10 8b c8 8b 42 28 ff d0 85 c0 75 63")
     exact(0xEF2FBD, "6a 01 68 c5 9d 1c 81 68 fc b0 48 01 e8 82 fe a3 ff 8b 16 83 c4 0c")
     exact(0xEF3023, "8b 86 cc 00 00 00 83 e8 01 0f 84 44 01 00 00 83 e8 01")
+    # ScenarioPlayMode service/act initialization is separate from world/stage readiness.
+    exact(0xEF0E00, "56 8b f1 e8 f8 c5 c4 ff 8b c8 e8 31 6f 07 00 85 c0 75 0c")
+    call(0xEF0E63, 0xF1F060)
+    exact(0xF1F060, "83 ec 10 53 8b d9 e8 95 ee ff ff c6 83 b4 00 00 00 00 a1 a4 7a 6c 01")
+    exact(0xF1F09C, "6a 00 6a 00 8b cb c7 83 90 00 00 00 00 00 00 00 e8 bf fd ff ff")
+    exact(0xF1F105, "8b 49 74 55 8b 69 10 56 57 e8 ed ec 75 ff 8b 10 8b c8 8b 42 20 ff d0")
+    exact(0xF1F14A, "81 8e 58 0b 00 00 00 08 00 00 e8 e7 eb 75 ff 8b 10 8b be 54 0b 00 00")
+    exact(0xF1F2F1, "83 7f 24 0b 8b 57 30 c6 07 01 89 57 04 75 24 ff 46 18")
+    exact(0xF1F344, "e8 87 c9 01 00 48 39 86 b8 00 00 00 75 0e 6a 05 8b ce e8 65 b6 ff ff")
+    exact(0xF1F3C4, "83 be 90 00 00 00 03 0f 85 fd 00 00 00 a1 a4 7a 6c 01")
+    exact(0xF1F4E0, "55 8b ec 83 e4 f8 83 ec 58 53 55 56 57 8b f9 83 bf 90 00 00 00 03")
 
     # Negative controls for prior timing/slot conflation.
 
