@@ -115,9 +115,10 @@ object-lifecycle handling, not launch or spawn.
   population, world attachment, input activation and playable gameplay.
 - Object-74 `Play Scenario 0x070D7509` still has no new producer/delivery join.
 
-Next useful work: find Scenario play-entry callers that supply a **nonzero fifth argument** to
-`C09B40`, or a distinct actor assignment path; do not expand the scalar-policy consumers as if
-they were avatar pointers.
+The [assignment caller follow-up](startup-gge-current-creature-assignment-callers.md) checks twenty
+direct-call prefixes and identifies three with nonzero fifth argument: `C6E861`, `D44187`,
+`D444DE`. Their Scenario play-entry join remains unresolved. Do not expand scalar-policy
+consumers as if they were avatar pointers.
 
 ## Reproduction scope
 

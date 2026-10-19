@@ -150,6 +150,13 @@ manager `+0x54` getter/setter is `B1FD00/B1FCA0`; `C09B40` can create a cCreatur
 conditionally assign it there. The examined Scenario record callsites use assignment flag zero,
 so they do not establish current captain/avatar selection.
 
+The [assignment caller audit](../../startup-gge-current-creature-assignment-callers.md)
+distinguishes the fifth (assignment) and sixth (earlier reuse) arguments of `C09B40`. Three of
+twenty decoded direct-call prefixes pass assignment `1`: `C6E861`, `D44187`, `D444DE`.
+Their join to Scenario play entry and successful native captain creation remain Unknown.
+`F1F060` consumes the separate manager `+0x54` reference after earlier virtual/service calls;
+its non-null branch is not evidence that it selected the actor itself.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual

@@ -946,6 +946,33 @@ def verify() -> None:
     exact(0xEF1162, "6a 00 e8 97 c2 c4 ff 8b c8")
     call(0xEF116B, 0xB1FCA0)
 
+    # Assignment is C09B40 fifth argument, not sixth; positive callers do not prove Scenario spawn.
+    exact(0xC6E820, "80 be 84 00 00 00 00 74 47 e8 d2 eb ec ff 8b c8 e8 cb 14 eb ff 85 c0 75 37")
+    exact(0xC6E858, "6a 00 6a 01 56 6a 01 51 50")
+    call(0xC6E861, 0xC09B40)
+    call(0xC6E86B, 0xC6B6E0)
+    exact(0xD44170, "6a 00 6a 01 56 6a 01 52 8b ce c6 86 84 00 00 00 01")
+    call(0xD44187, 0xC09B40)
+    exact(0xD441BC, "3b f3 0f 84 ae 00 00 00")
+    call(0xD4447D, 0xB1FD00)
+    exact(0xD44482, "85 c0 0f 85 9b 03 00 00")
+    exact(0xD444CA, "6a 00 6a 01 56 6a 01 8b cb e8 b8 af 79 ff 50 8d 44 24 3c 50")
+    call(0xD444DE, 0xC09B40)
+    # Examples of zero-assignment calls with trailing reuse flag one.
+    exact(0xAD048F, "6a 01 6a 00 56 6a 01 57 55")
+    call(0xAD0498, 0xC09B40)
+    exact(0xC6B4A1, "6a 01 6a 00 56 6a 00 52")
+    call(0xC6B4B1, 0xC09B40)
+    exact(0xFEFADD, "53 0f 9d c1 6a 00 55 8d 44 24 24 51 52 50")
+    call(0xFEFAEB, 0xC09B40)
+    exact(0xFF00EC, "6a 01 0f 9d c1 6a 00 55 8d 44 24 34 51 52 50")
+    call(0xFF00FB, 0xC09B40)
+    call(0xF1F128, 0xF261E0)
+    exact(0xF1F12D, "8b 16 50 8b cf ff d2")
+    call(0xF1F13B, 0xB1FD00)
+    exact(0xF1F140, "8b f0 85 f6 0f 84 dd 00 00 00")
+    exact(0xF261E0, "83 79 28 00 74 0b 83 79 24 00 74 05 e9 5f f3 78 ff 8b 41 14 c3")
+
     # Negative controls for prior timing/slot conflation.
 
     # Negative controls for prior timing/slot conflation.
