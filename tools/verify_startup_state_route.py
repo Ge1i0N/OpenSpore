@@ -599,6 +599,14 @@ def verify() -> None:
     exact(0x964129, "8b 86 84 00 00 00 c7 44 24 10 f6 59 72 28 85 c0 74 06 89 44 24 14")
     exact(0x964191, "8b 86 84 00 00 00 c7 44 24 2c 17 00 00 00 89 44 24 30 eb 2a")
     exact(0x9641A5, "8b 96 ac 00 00 00 8b 8e 84 00 00 00 c1 ea 02 83 e2 01")
+    # DE99B0 component activation feedback is state-13 infrastructure, not object-74 conversion.
+    exact(0xDE99F1, "81 7f 08 f6 59 72 28 0f 85 59 03 00 00 8b 0f 8b 01 8b 50 1c")
+    exact(0xDE9A07, "3d a8 e0 95 05 0f 87 6b 01 00 00 0f 84 53 01 00 00 3d 0a 06 47 04")
+    exact(0xDE9BEC, "8b 4e 34 85 c9 0f 84 60 01 00 00 6a 00 6a 42 e8 40 6a 01 00")
+    exact(0xDE9C0A, "3d 13 9a 70 06 0f 84 12 01 00 00 3d e7 74 0d 07 74 32")
+    exact(0xDE9C4E, "6a 02 e8 8b b8 89 ff 83 c4 04 84 c0 0f 84 f7 00 00 00")
+    exact(0xDE9C85, "6a 01 68 10 a3 06 08 8d 8e 40 01 00 00 e8 b9 69 a2 ff")
+    exact(0xDE9D0C, "b8 0d 00 00 00 89 86 08 01 00 00 89 86 04 01 00 00")
 
     # Negative controls for prior timing/slot conflation.
 
