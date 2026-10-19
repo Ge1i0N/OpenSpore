@@ -49,7 +49,10 @@ object +0x1C = record identity/value
 ```
 
 When the transform differs from graphics/service defaults, the path reaches `F432C0`, which is a
-`Simulator/cScenarioMarker` path. That marker result must not be renamed as terrain construction.
+`Simulator/cScenarioMarker` record path. Its creation branch also calls `F3F8C0` and can reach
+conditional current-creature assignment; see the
+[herd assignment follow-up](startup-gge-scenario-herd-assignment-join.md). Neither the marker
+record nor that conditional assignment proves terrain construction or playable readiness.
 
 ## `F40210`: readiness bookkeeping
 

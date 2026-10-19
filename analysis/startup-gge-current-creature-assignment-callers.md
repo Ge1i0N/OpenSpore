@@ -121,6 +121,10 @@ selected object; it does not prove who selected it or when.
 
 ## Result and next boundary
 
+This section records the direct-call audit boundary. The later
+[herd assignment follow-up](startup-gge-scenario-herd-assignment-join.md) establishes a conditional
+Scenario producer join into `C6E690`; native success and captain identity remain unobserved.
+
 - **Established statically:** six-argument distinction, twenty decoded direct-call prefixes and
   three conditional current-creature assignment callers.
 - **Not established:** Scenario play-entry reachability of those three callers, successful
@@ -128,9 +132,10 @@ selected object; it does not prove who selected it or when.
 - **Unchanged:** world/terrain/stage construction and object-74 `Play Scenario 0x070D7509`
   producer/delivery join remain Unknown.
 
-Next useful work is the caller/vtable link into `C6E690` and the relevant source role-byte writer,
-or the pre-`B1FD00` virtual call in `F1F060`. Do not infer that the inventory closes the Scenario
-spawn route just because it contains positive assignment flags.
+The [herd assignment follow-up](startup-gge-scenario-herd-assignment-join.md) resolves `C6E690`
+as `cHerd +0x54` and finds a conditional Scenario marker-record join through `B23920`'s role
+writer. It also resolves the pre-getter virtual call in `F1F060` as string setup, not a factory.
+This closes static caller joins, not runtime spawn, captain identity or playable readiness.
 
 ## Static evidence scope
 

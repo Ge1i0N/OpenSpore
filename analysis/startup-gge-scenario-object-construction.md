@@ -8,8 +8,9 @@ creation or gameplay tick was observed. Continuation of [startup-gge-scenario-ob
 ## `F3F8C0`: conditional object creation
 
 `F3F8C0` first compares the candidate/current record object with the owner-side object at `+0x8C`.
-When the candidate is not already the current object, it resolves the Scenario service object and
-requires the play strategy `ScenarioMode +0xCC == 2` before taking the play-side back-link branch.
+It records equality as a Boolean. When the candidate differs from that owner-side record, it
+resolves the Scenario service object and requires the play strategy `ScenarioMode +0xCC == 2`
+before taking the play-side back-link branch.
 
 The play-side branch calls `F237B0`, then writes:
 
@@ -34,15 +35,20 @@ downstream world consumer is established here.
 Observed guards include:
 
 ```text
-candidate == owner +0x8C → no replacement construction
+candidate == owner +0x8C → skip F237B0, use EEDD40 fallback with fifth argument 1
 service lookup failure → no play back-link branch
 ScenarioMode +0xCC != 2 → no play-specific branch
 EEDD40 result → back-links only after returned object is available
 ```
 
-The function also has a non-play/index-based branch that computes a count from `+0x28/+0x2C` and
+The function also has a fallback branch that computes a count from `+0x28/+0x2C` and
 passes the resulting index into the construction call. The count/index arithmetic is retained as
 native structure, not given a guessed semantic name.
+
+Correction/follow-up: [Scenario herd assignment join](startup-gge-scenario-herd-assignment-join.md).
+The equality Boolean can become `cHerd +0x84` through `EEDD40 → B23920`; virtual herd
+initialization can conditionally assign a current creature before `B23920` returns. This does
+not prove a successful captain spawn or world activation.
 
 ## Relation to readiness aggregation
 

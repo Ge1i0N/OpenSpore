@@ -80,8 +80,11 @@ These writes prove association of a native object with a Scenario record. They d
 the object as terrain, a planet, an avatar, or a playable stage.
 
 At the end, when the supplied transform differs from the graphics/service defaults,
-`F45AD0` calls `F432C0`, which creates/updates a `Simulator/cScenarioMarker` when needed. That is
-explicitly a marker path, not terrain construction.
+`F45AD0` calls `F432C0`, which creates/updates a `Simulator/cScenarioMarker` record when needed.
+Correction: its creation branch also invokes `F3F8C0`; the
+[herd assignment follow-up](../../startup-gge-scenario-herd-assignment-join.md) connects it
+conditionally through `EEDD40 → B23920 → cHerd +0x54 → C09B40` to current-creature assignment.
+This is not evidence of successful captain setup, terrain construction or playable readiness.
 
 ## `F40210`: readiness aggregation, not a loader
 

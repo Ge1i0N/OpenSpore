@@ -31,14 +31,17 @@ play-mode storage `+0x78`. `F1F060` then:
 5. reads the ScenarioMode launch context at global `+0xD0`.
 
 For launch-context values `1` or `2`, it enters the initialization branch at `F1F105`. The
-instructions there obtain a manager object through `67DE00`, call its virtual `+0x20`, create a
-service/resource object, set a service bit (`+0xB58 |= 0x800`), set a manager bit selected by
+instructions there obtain a manager object through `67DE00` and use its virtual `+0x20` result
+for string setup. They then read the existing current-creature reference through `B1FD00` and,
+only when non-null, set its bit (`+0xB58 |= 0x800`), set a manager bit selected by
 identity `0x06669387`, clear a timer/accumulator at the selected service `+0x80`, and walk a
 linked object list. For each eligible object, its virtual methods `+0x10`, `+0x2C` and `+0x30`
 are called with `1`.
 
-The list walk and service fields are concrete observations. Their resource names, completion
-meaning and relation to terrain are not established here.
+The list walk and service fields are concrete observations. Their completion meaning and
+relation to terrain are not established here. The
+[herd assignment/string follow-up](../../startup-gge-scenario-herd-assignment-join.md) pins the
+early string-manager slot and a separate conditional Scenario current-creature producer.
 
 For other launch-context values, `F1F060` calls `F1C390`, and if the phase remains zero it writes
 phase `3` and conditionally jumps to `E148B0`. Thus the mode does not unconditionally become
@@ -153,7 +156,8 @@ so they do not establish current captain/avatar selection.
 The [assignment caller audit](../../startup-gge-current-creature-assignment-callers.md)
 distinguishes the fifth (assignment) and sixth (earlier reuse) arguments of `C09B40`. Three of
 twenty decoded direct-call prefixes pass assignment `1`: `C6E861`, `D44187`, `D444DE`.
-Their join to Scenario play entry and successful native captain creation remain Unknown.
+The [herd follow-up](../../startup-gge-scenario-herd-assignment-join.md) establishes a conditional
+Scenario marker-record join into `C6E690`; successful native captain creation remains Unknown.
 `F1F060` consumes the separate manager `+0x54` reference after earlier virtual/service calls;
 its non-null branch is not evidence that it selected the actor itself.
 

@@ -62,17 +62,20 @@ playable world. The exact ownership and runtime success of the named lookup rema
 
 ## Separation from `F432C0`
 
-`F432C0` is a separate transform/marker path. If its owner-side marker pointer at `+0x8C` exists,
-it updates marker vectors and calls `F3D930`. If absent, it creates `Simulator/cScenarioMarker`
-through the observed `F47240` allocation path, copies source vectors, and then synchronizes the
-marker. This marker creation is not evidence that `EEDD40` returned a world or that terrain was
-materialized.
+`F432C0` has separate existing-marker and creation branches. If its owner-side marker pointer at
+`+0x8C` exists, it updates marker vectors and calls `F3D930`. If absent, it allocates a
+`Simulator/cScenarioMarker` record, copies source vectors and also calls `F3F8C0` with that
+record. Thus it is **not marker-only**: the nested `EEDD40 → B23920 → cHerd +0x54` path can
+conditionally assign a current creature. The
+[herd assignment follow-up](startup-gge-scenario-herd-assignment-join.md) pins this join and
+corrects the earlier scope limit. Neither record allocation nor conditional assignment proves
+successful creature setup, captain identity, world materialization or playable readiness.
 
 ```text
 F3F8C0
   ├─ play strategy → F237B0 → named powerup-spawner lookup/setup
   ├─ fallback      → EEDD40 → identity-dispatched object setup
-  └─ transform diff → F432C0 → cScenarioMarker update/create
+  └─ transform diff → F432C0 → marker-record update/create, nested F3F8C0 on creation
 ```
 
 ## Evidence and residual Unknowns
