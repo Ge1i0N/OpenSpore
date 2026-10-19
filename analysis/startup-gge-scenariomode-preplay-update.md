@@ -79,6 +79,11 @@ ScenarioMode OnEnter
   → Scenario play/edit helpers
 ```
 
+The later play-side object request and ordinary-update phase table are bounded in
+[startup-gge-scenarioplay-service-phase-progression.md](startup-gge-scenarioplay-service-phase-progression.md).
+That slice identifies a registered cPlayer factory candidate but does not prove native avatar
+creation or world attachment.
+
 Nearby `EF25E0`, `F40210`, `F45E70`, `F1F060` and later ScenarioPlayMode paths are retained as
 world/scene-adjacent candidates, but their return values, resource population and stage semantics
 remain separate investigations. No native terrain/world factory success is promoted here.

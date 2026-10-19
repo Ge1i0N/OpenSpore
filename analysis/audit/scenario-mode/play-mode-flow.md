@@ -123,6 +123,12 @@ then dispatches local phase `+0x90 - 1` through a six-entry jump table at `0x00F
 The update path includes timer arithmetic, service lookup, list traversal and state transitions;
 it is not equivalent to `F1F060` initialization.
 
+The [service/phase continuation](../../startup-gge-scenarioplay-service-phase-progression.md)
+pins the exact phase targets: phases 1/3/5/6 select `F1F9CF/F1FB3B/F1FBE3/F1FD7A`; phases 2/4
+select the return path after `F1F4E0`. It also separates the `0x02C21781` player-object request
+from its registered `Simulator/cPlayer` factory candidate `B1E960 → C7B930`. The virtual factory
+join, successful object creation, avatar/world attachment and input remain Unknown.
+
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic
 corroboration only; the native bytes establish the writes and comparisons, not successful visual

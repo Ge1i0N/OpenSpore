@@ -70,6 +70,9 @@ ScenarioMode +0xCC == 2
   → local play phases and requests
 ```
 
+The ordinary-update phase table, lazy singleton setup, and registered `Simulator/cPlayer` factory
+candidate are documented in
+[startup-gge-scenarioplay-service-phase-progression.md](startup-gge-scenarioplay-service-phase-progression.md).
 The object synchronization and Boolean readiness bookkeeping boundary is documented in
 [startup-gge-scenario-object-readiness.md](startup-gge-scenario-object-readiness.md). The next
 world-related boundary is the successful result/consumer of these service and object paths, not
