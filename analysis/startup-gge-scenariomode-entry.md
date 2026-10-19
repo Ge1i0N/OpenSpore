@@ -74,7 +74,8 @@ that the other completed successfully.
 ## First entry-side callback boundary
 
 `EF1D20` performs ScenarioMode entry-side strategy/resource setup based on the rebuilt launch record
-and internal mode request. This is the beginning of ScenarioMode-specific processing, but the
+and internal mode request. The loading-context and Update phase gate are bounded in
+[startup-gge-scenariomode-preplay-update.md](startup-gge-scenariomode-preplay-update.md). This is the beginning of ScenarioMode-specific processing, but the
 bounded entry path does not establish terrain/world/stage materialization or a playable tick.
 
 The mode object may own edit/play strategies and scenario data services. Those are separate from

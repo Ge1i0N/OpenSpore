@@ -641,6 +641,20 @@ def verify() -> None:
     exact(0x7D8670, "64 a1 00 00 00 00 6a ff 68 23 60 21 01 50 64 89 25 00 00 00 00")
     exact(0x7D86A5, "33 db 3b cd 7c 38 8b 56 18 2b 56 14 b8 ab aa aa 2a f7 ea c1 fa 02")
     exact(0x7D8520, "8b 42 18 ff e0")
+    # ScenarioMode OnEnter/pre-play Update phase gate remains separate from world readiness.
+    exact(0xEF24C0, "56 8b f1 8d 4e 20 e8 b5 54 7a ff 6a 01 e8 fe b0 c4 ff")
+    exact(0xEF252B, "c6 86 dc 00 00 00 01 e8 49 af c4 ff 68 a7 38 bf 04")
+    exact(0xEF1D20, "51 53 56 57 8b f1 e8 e5 b6 c4 ff 33 ff c6 40 24 00 3b f7")
+    exact(0xEF1D8C, "a1 f0 cc 5a 01 6a 00 6a 00 6a 00 6a 00 68 90 09 3f 01 68 cc 01 00 00")
+    exact(0xEF1E53, "83 be cc 00 00 00 00 75 25 a1 f0 cc 5a 01 85 c0 74 12 48 83 f8 01")
+    exact(0xEF1E6B, "c7 86 cc 00 00 00 02 00 00 00 eb 0a c7 86 cc 00 00 00 01 00 00 00")
+    exact(0xEF2EF0, "83 ec 0c 56 8b f1 e8 25 a5 c4 ff 80 78 28 00 0f 85 71 03 00 00")
+    exact(0xEF2F05, "83 3d 34 cc 5a 01 04 74 20 83 3d 40 cc 5a 01 00 74 06 ff 05 40 cc 5a 01")
+    call(0xEF2F22, 0xEF2930)
+    exact(0xEF2930, "56 8b f1 8b 46 04 83 f8 03 0f 87 e4 00 00 00 ff 24 85 28 2a ef 00")
+    exact(0xEF29AE, "e8 5d e6 50 ff 8b 10 8b c8 8b 42 28 ff d0 85 c0 75 63")
+    exact(0xEF2FBD, "6a 01 68 c5 9d 1c 81 68 fc b0 48 01 e8 82 fe a3 ff 8b 16 83 c4 0c")
+    exact(0xEF3023, "8b 86 cc 00 00 00 83 e8 01 0f 84 44 01 00 00 83 e8 01")
 
     # Negative controls for prior timing/slot conflation.
 
