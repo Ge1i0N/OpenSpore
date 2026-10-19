@@ -715,6 +715,14 @@ def verify() -> None:
     exact(0xB22A56, "8b 4c 24 10 8b 39 8b 77 04 8b 56 04 8b 06 89 02 8b 0e 8b 56 04 89 51 04")
     exact(0xB22A8F, "c7 44 24 20 00 b9 3e 01 33 c0 8d 4c 24 24 87 01 c7 44 24 20 44 b8 3e 01")
     exact(0xB22AE5, "8b 44 24 18 05 0c 01 00 00 39 44 24 10 0f 85 4c fe ff ff 8b 74 24 18")
+    # F3D930/B22C50 are record-component synchronization and invalidation, not world readiness.
+    exact(0xF3D930, "83 ec 0c 53 55 57 8b 7c 24 1c 8b d9 3b bb 8c 00 00 00 75 4f 8b 43 10 8b 4f 10")
+    exact(0xF3D9E5, "8b 11 8b 42 0c 68 03 b4 33 b0 ff d0 89 44 24 10 85 c0 74 25 8b 50 34 8d 48 34")
+    exact(0xF3DA7E, "8b 44 24 24 50 51 e8 87 f9 bf ff 8b c8 e8 e0 ad c0 ff 8d 8e a8 00 00 00")
+    exact(0xB22C50, "51 55 8b 6c 24 0c 8b 45 00 56 50 89 4c 24 0c e8 8c df ff ff 8b f0 85 f6")
+    exact(0xB22C87, "8b 44 24 1c 85 c0 74 0a 8b 17 50 8b 42 38 8b cf ff d0 8b 44 24 20 85 c0")
+    exact(0xB22CB6, "8d 4c 24 14 51 68 15 8e d0 03 50 c6 44 24 20 00 e8 c5 44 8e ff 83 c4 0c")
+    exact(0xB22D38, "8b 44 24 1c 8b 4c 24 18 8b 16 8b 52 24 50 51 55 8b ce ff d2 5f 84 c0")
 
     # Negative controls for prior timing/slot conflation.
 

@@ -122,6 +122,13 @@ These are lifecycle/status operations, not proof of resource mounting, terrain c
 activation or playable gameplay. See
 [startup-gge-scenario-object-finalizer-lifecycle.md](../../startup-gge-scenario-object-finalizer-lifecycle.md).
 
+`F3D930` provides the adjacent state-sync path: record vectors are copied into ScenarioMode
+backing fields, component `0x01186577` setters are invoked, `EED640` status is recomputed, and
+owner callback `+0x84` is notified. `B22C50` applies optional component/tag updates and sends a
+failed virtual validity predicate to `B22560/B20CC0` release handling. The `B48870` configuration
+key `useGameplayPhantom` is gameplay-adjacent policy only, not gameplay readiness. See
+[startup-gge-scenario-object-state-sync.md](../../startup-gge-scenario-object-state-sync.md).
+
 ## Remaining world boundary
 
 The next unresolved edges are the successful results and consumers of the `EEDD40` identity

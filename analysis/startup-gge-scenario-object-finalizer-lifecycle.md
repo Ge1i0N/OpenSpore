@@ -6,6 +6,8 @@ Static shipped-binary evidence only. No native execution, resource completion, t
 creation or gameplay tick was observed.
 
 Continuation of [startup-gge-scenario-object-factory-dispatch.md](startup-gge-scenario-object-factory-dispatch.md).
+The record/component update and invalidation boundary is detailed in
+[startup-gge-scenario-object-state-sync.md](startup-gge-scenario-object-state-sync.md).
 
 ## `EED640`: status synthesis
 
@@ -66,7 +68,9 @@ B228F0
   └─ fail: unlink/release + event 0x01A0219E
 ```
 
-The strongest supported semantic is **object lifecycle and status synchronization**. Returned
+The strongest supported semantic is **object lifecycle and status synchronization**. The detailed
+record/component update and invalidation path is documented in
+[startup-gge-scenario-object-state-sync.md](startup-gge-scenario-object-state-sync.md). Returned
 object class, resource population, terrain/stage consumer, actor activation and gameplay remain
 Unknown.
 
