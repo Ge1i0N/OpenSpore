@@ -126,8 +126,10 @@ it is not equivalent to `F1F060` initialization.
 The [service/phase continuation](../../startup-gge-scenarioplay-service-phase-progression.md)
 pins the exact phase targets: phases 1/3/5/6 select `F1F9CF/F1FB3B/F1FBE3/F1FD7A`; phases 2/4
 select the return path after `F1F4E0`. It also separates the `0x02C21781` player-object request
-from its registered `Simulator/cPlayer` factory candidate `B1E960 → C7B930`. The virtual factory
-join, successful object creation, avatar/world attachment and input remain Unknown.
+from its registered `Simulator/cPlayer` factory `B1E960 → C7B930`. The
+[factory dispatch follow-up](../../startup-gge-scenarioplay-player-factory-dispatch.md) resolves
+the conditional virtual factory join and requested interface-query route. Successful native object
+creation, avatar/world attachment and input remain Unknown.
 
 The external SDK layout corroborates that `+0xF8` is an intro fade timer, `+0xFC` is its active
 flag and `+0xFD` is an adventure-active flag. In this audit, those labels remain semantic

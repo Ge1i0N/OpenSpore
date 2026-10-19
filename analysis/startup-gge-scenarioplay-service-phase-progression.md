@@ -62,10 +62,11 @@ address. Constructor `C7B930` calls `B185A0`, installs table pointers `0x01472CC
 and `0x01472CA4`, and initializes embedded data. `C755F0` independently returns type identity
 `0x02C21781`; `C755D0` accepts interface identity `0x02C216ED`.
 
-This proves a **cPlayer-labelled allocation/constructor candidate registered for the requested
-identity**. The virtual factory/service `+0x20` implementation and its join to that registration
-table have not been resolved in this pass. Successful instantiation, avatar population, world
-attachment and input ownership are still Unknown. The nearby `B1E930` allocation is labelled
+This proves a **cPlayer-labelled allocation/constructor registered for the requested identity**.
+The follow-up [player factory dispatch audit](startup-gge-scenarioplay-player-factory-dispatch.md)
+resolves the conditional service `+0x20` → class-factory selection → constructor-table call →
+interface-query route. Successful native instantiation, avatar population, world attachment and
+input ownership are still Unknown. The nearby `B1E930` allocation is labelled
 `Simulator/cMissionAdventure` and is not this `cPlayer` factory.
 
 ## Lazy singleton setup is not two separate objects
@@ -107,11 +108,11 @@ confused with global loading phase, ScenarioMode strategy or GGE state numbers.
 
 - **Established:** ordinary-update call site, precise six-phase table, lazy singleton setup,
   object-manager player request, and a registered cPlayer-labelled allocation/constructor candidate.
-- **Partially answered:** requested identity versus registered factory. The service `+0x20`
-  implementation-to-table join remains unresolved.
+- **Established in the follow-up:** the service `+0x20` implementation-to-table join, conditional
+  on Simulator class-factory registration/selection and successful allocation.
 - **Unknown:** successful resource population, world/terrain/stage construction, avatar attachment,
   input activation, native gameplay tick and playable readiness.
 - Object-74 `Play Scenario 0x070D7509` still has no new producer join to ScenarioMode here.
 
-Next focused candidates are factory/service `+0x20` for identity `0x02C21781` and the ordinary
-phase-3 continuation `EF72C0`. These are not authorization to execute the native game/save paths.
+Next focused candidates are the returned cPlayer initialization callback and the ordinary phase-3
+continuation `EF72C0`. These are not authorization to execute the native game/save paths.

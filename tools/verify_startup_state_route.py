@@ -811,6 +811,37 @@ def verify() -> None:
     call(0xF1FF44, 0xADDE10)
     exact(0xF1FF49, "c7 86 94 00 00 00 01 00 00 00")
 
+    # Conditional player factory join: publication, class registration, selection and interface.
+    exact(0x920320, "a1 84 7b 66 01 c3")
+    exact(0x920330, "8b 4c 24 04 a1 84 7b 66 01 89 0d 84 7b 66 01 c3")
+    call(0xF47F12, 0x920960)
+    exact(0xF47F19, "33 c0 53 50 89 46 24")
+    call(0xF47F20, 0x920330)
+    call(0xF47798, 0x920330)
+    exact(0x92096C, "c7 06 bc d9 43 01")
+    for off, target in ((0x04, 0x920DC0), (0x14, 0x920C50),
+                        (0x20, 0x9203A0), (0x24, 0x920360)):
+        slot(0x143D9BC, off, target)
+    exact(0xB221D9, "c7 05 0c c3 67 01 ac ec 45 01")
+    slot(0x145ECAC, 0x04, 0xB21060)
+    slot(0x145ECAC, 0x08, 0xB210D0)
+    call(0xB25CB0, 0xB221A0)
+    call(0xB25CB7, 0xB24720)
+    call(0xB25CBC, 0xB221A0)
+    call(0xB25CC3, 0x692810)
+    exact(0xB2473F, "83 c6 10 50 8b ce")
+    exact(0x692827, "8b 4e 08 8b 10 8b 52 04 51 56 8b c8 ff d2 88 46 0c")
+    exact(0x920E2D, "81 c1 08 01 00 00 89 74 24 34 89 5c 24 38")
+    call(0x920E3B, 0x920720)
+    exact(0x920CA0, "39 30 75 2a 85 ff 74 08 8b 68 08 3b 6f 04 7e 03 8d 78 04")
+    exact(0x920360, "8b 44 24 0c 56 8b 74 24 08 85 c0 75 0c 8b 01 8b 50 14 56 ff d2 85 c0 74 13 8b 4c 24 0c 8b 10 8b 52 08 51 56 8b c8 ff d2 5e c2 0c 00 33 c0 5e c2 0c 00")
+    exact(0xB210D0, "83 ec 08 56 8d 71 10 8d 44 24 10 50 8d 4c 24 08 51 8b ce e8 58 4d b2 ff 8b 56 08 8b 4e 04 8b 44 24 04 5e 3b 04 91 74 09 ff 50 04 83 c4 08 c2 08 00 33 c0 83 c4 08 c2 08 00")
+    exact(0x9203A0, "8b 54 24 10 8b 01 8b 40 24 56 52 8b 54 24 14 52 8b 54 24 10 52 ff d0 8b f0 85 f6 74 23 8b 16 8b 44 24 0c 8b 52 0c 50 8b ce ff d2 85 c0 75 13 8b 06 8b 10 8b ce ff d2 8b 06 8b 50 04 8b ce ff d2 33 c0 5e c2 10 00")
+    slot(0x1472CC8, 0x0C, 0xC755D0)
+    exact(0xC755D0, "8b 44 24 04 3d ed 16 c2 02 75 05 8b c1 c2 04 00")
+    exact(0xC755E4, "e9 b7 2d ea ff")
+    exact(0xB183B6, "33 d2 81 f9 3b 24 7f 01 0f 95 c2 4a 23 c2 c2 04 00")
+
     # Negative controls for prior timing/slot conflation.
 
     # Negative controls for prior timing/slot conflation.
