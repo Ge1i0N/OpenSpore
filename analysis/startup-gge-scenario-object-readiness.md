@@ -17,8 +17,9 @@ service-provided byte from `0x015FD918`. Under those guards it:
 5. clears returned-object flag bit 0, increments returned-object `+0x40`, and appends the object;
 6. calls `F45E70(2, 0, 0)`.
 
-These are object/reference bookkeeping operations. The returned object class and its relation to
-terrain, planet, avatar or stage remain Unknown.
+These are object/reference bookkeeping operations. The conditional construction and back-link
+boundary is detailed in [startup-gge-scenario-object-construction.md](startup-gge-scenario-object-construction.md).
+The returned object class and its relation to terrain, planet, avatar or stage remain Unknown.
 
 ## `F45E70`: synchronization wrapper
 

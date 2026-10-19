@@ -684,6 +684,12 @@ def verify() -> None:
     exact(0xF40260, "21 b0 28 02 00 00 8b c8 8b 09 c1 e9 1e 05 38 02 00 00")
     exact(0xF4028F, "8b 4d 10 8b 81 24 2c 00 00 81 c1 10 2c 00 00 3d ff ff ff 3f")
     exact(0xF40353, "a1 a4 7a 6c 01 83 b8 cc 00 00 00 02 5f 74 07 8b cd e8 37 d4 ff ff")
+    # Scenario record object construction/back-links are not terrain/world readiness.
+    exact(0xF3F8C0, "51 3b b0 8c 00 00 00 0f 94 c0 88 04 24 84 c0 75 3d")
+    exact(0xF3F8D1, "8b 16 8b 0d a4 7a 6c 01 8b 49 74 52 e8 5e ee ff ff 8b c8")
+    exact(0xF3F8ED, "a1 a4 7a 6c 01 83 b8 cc 00 00 00 02 75 13 56 e8 af 3e fe ff")
+    exact(0xF3F906, "89 50 1c 89 70 18 59 c3 8b 4e 2c 2b 4e 28 b8 4f ec c4 4e")
+    call(0xF3F950, 0xEEDD40)
 
     # Negative controls for prior timing/slot conflation.
 
