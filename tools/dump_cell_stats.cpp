@@ -42,10 +42,10 @@ int main(int argc, char** argv) {
         std::printf("    ai: speed=%.3f chase=%.3f wander=%.3f flee=%.3f turn=%.3f flocking=%.3f\n",
                     ai.speed, ai.chase_speed, ai.wander_speed, ai.flee_speed, ai.turn_factor,
                     ai.flocking);
-        std::printf("        aware=%.3f food=%.3f pred=%.3f protectR=%.3f protectT=%.3f\n",
+        std::printf("        aware=%.3f awareFood=%.3f awarePred=%.3f protectR=%.3f protectT=%.3f\n",
                     ai.awareness_radius, ai.awareness_radius_food, ai.awareness_radius_predator,
                     ai.protect_radius, ai.protect_time);
-        std::printf("        food=%.3f growCount=%.3f growAmount=%.3f hatch=%.3f chaseTime=%.3f\n",
+        std::printf("        foodValue=%.3f growCount=%.3f growAmount=%.3f hatch=%.3f chaseTime=%.3f\n",
                     ai.food, ai.grow_count, ai.grow_amount, ai.hatch_duration, ai.chase_time);
         std::printf("\n");
     }
