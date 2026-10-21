@@ -329,6 +329,25 @@ Sixteen resource-id references (`+0x00..+0x3C`) then **~31 tuning floats** from 
 20.0, 0.5, 0.5, 100.0, 20.0, 1.0, 2.0, 7.0, 10.0, 6.0, 3.0, 15.0, 3.0`, tail `10, 2`). The
 floats have no shipped key names (unlike `cell_properties`), so they are exposed raw.
 
+**The references ARE named** (they resolve through the registry):
+
+| ref | id | name | ref | id | name |
+|---|---|---|---|---|---|
+| 0 | `0x8393271F` | `world_ice` | 8 | `0x5F180E4F` | `world_water_bg` |
+| 1 | `0x3AAF1035` | `world_rock` | 9 | `0x664987EB` | `world_beach_bg` |
+| 2 | `0x81A666D9` | `world_plant` | 10 | `0x6F95F97B` | `world_random` |
+| 3 | `0x17BE63FB` | `world_water` | 11 | `0x29C95ACF` | `world_random_bg` |
+| 4 | `0xDB9066CF` | `world_beach` | 12 | `0xCBCD1287` | `cell_hero_L0` (the player) |
+| 5 | `0x33BEB73B` | `world_ice_bg` | 13 | `0xB716C401` | (unresolved) |
+| 6 | `0x06A14891` | `world_rock_bg` | 14 | `0x9D14A758` | (unresolved) |
+| 7 | `0xC30611CD` | `world_plant_bg` | 15 | `0xAACC3A75` | `CellEffects` (the effect map) |
+
+So refs 0-11 are the **shipped biome list** (five playable biomes, their `_bg` variants, then
+`random`), ref 12 is the player archetype and ref 15 is the effect map. The engine now reads the
+biome list from here (`World::level_list()`) and walks it for the level progression
+(`World::next_level()`), instead of guessing with a `name + "_2"` string hack. The list *order* is
+the record's order; that it is also the **campaign** order is not independently confirmed.
+
 ## Background fields — `CellGame_Layers.package` (33)
 
 `advect` (28) and `density` (5) resources are raw background fields:

@@ -192,6 +192,8 @@ public:
     std::vector<std::string> biome_names() const;
     // List available level names from `populate` resources.
     std::vector<std::string> level_names() const;
+    // The shipped biome list, taken from the `CellGame` globals record's world references.
+    std::vector<std::string> level_list() const;
     // Get the next level name in progression (e.g. "level_water" -> "level_water_2").
     std::string next_level(const std::string& current) const;
 

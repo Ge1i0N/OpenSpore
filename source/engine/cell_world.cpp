@@ -534,19 +534,44 @@ const std::vector<StructurePart>* World::parts_for(u32 archetype_id) const {
     return nullptr;
 }
 
-std::string World::next_level(const std::string& current) const {
-    const u32 cur_id = fnv1_lower(current.c_str());
-    for (const Population& p : m_data.populations) {
-        if (p.id == cur_id || p.name == current) {
-            if (p.type == 4) {
-                std::string next = current + "_2";
-                const u32 next_id = fnv1_lower(next.c_str());
-                for (const Population& np : m_data.populations) {
-                    if (np.id == next_id || np.name == next) return next;
-                }
-            }
-            return "";
+std::vector<std::string> World::level_list() const {
+    std::vector<std::string> out;
+    for (const Globals& g : m_data.globals) {
+        for (const std::string& n : g.ref_names) {
+            if (n.rfind("world_", 0) != 0) continue;
+            if (n.size() > 6 && n.compare(n.size() - 3, 3, "_bg") == 0) continue;
+            out.push_back(n.substr(6));
         }
+    }
+    return out;
+}
+
+std::string World::next_level(const std::string& current) const {
+    std::string biome = current;
+    const std::string kLevelPrefix = "level_";
+    if (biome.rfind(kLevelPrefix, 0) == 0) biome = biome.substr(kLevelPrefix.size());
+    bool second = false;
+    if (biome.size() > 2 && biome.compare(biome.size() - 2, 2, "_2") == 0) {
+        biome = biome.substr(0, biome.size() - 2);
+        second = true;
+    }
+    const std::vector<std::string> list = level_list();
+    if (list.empty()) return "";
+    for (size_t i = 0; i < list.size(); ++i) {
+        if (list[i] != biome) continue;
+        if (!second) {
+            const std::string stage2 = kLevelPrefix + biome + "_2";
+            for (const Population& p : m_data.populations) {
+                if (p.name == stage2 || p.id == fnv1_lower(stage2.c_str())) return stage2;
+            }
+        }
+        for (size_t k = i + 1; k < list.size(); ++k) {
+            const std::string next = kLevelPrefix + list[k];
+            for (const Population& p : m_data.populations) {
+                if (p.name == next || p.id == fnv1_lower(next.c_str())) return next;
+            }
+        }
+        return "";
     }
     return "";
 }

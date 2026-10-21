@@ -207,7 +207,11 @@ Globals parse_globals(u32 id, const std::vector<u8>& d) {
     Globals g;
     g.id = id;
     if (const char* n = naming::instance_name(id)) g.name = n;
-    for (size_t o = 0; o + 4 <= d.size() && o < 0x40; o += 4) g.refs.push_back(le32(d.data() + o));
+    for (size_t o = 0; o + 4 <= d.size() && o < 0x40; o += 4) {
+        const u32 r = le32(d.data() + o);
+        g.refs.push_back(r);
+        g.ref_names.push_back(naming::instance_name(r) ? naming::instance_name(r) : std::string());
+    }
     for (size_t o = 0x40; o + 4 <= d.size(); o += 4) g.floats.push_back(le_f32(d.data() + o));
     return g;
 }

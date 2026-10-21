@@ -207,11 +207,15 @@ struct Structure {
 };
 
 // Master tuning record (`globals`, 196 B): 16 resource-id references then ~31 floats from
-// +0x40. The floats are POSITIONAL (no shipped key names), so they are exposed raw.
+// +0x40. The floats are POSITIONAL (no shipped key names), so they are exposed raw. The
+// references ARE named: they are the shipped world/biome list (world_ice, world_rock, world_plant,
+// world_water, world_beach, then their _bg variants, world_random, world_random_bg), the player
+// archetype (cell_hero_L0) and the effect map (CellEffects).
 struct Globals {
     u32 id = 0;
     std::string name;
     std::vector<u32> refs;    // 16 id references at +0x00..+0x3C
+    std::vector<std::string> ref_names;  // the resolved name of each reference ("" when unknown)
     std::vector<float> floats;  // tuning floats from +0x40
 };
 
