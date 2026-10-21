@@ -62,6 +62,18 @@ ids that are not FNV of the name.
 A property table (`tools/prop.py`; type `0x0030009C` = float2 array) whose keys are the
 game's tuning names. Each value is a **curve** `(x, y)` pairs:
 
+> **Engine note (fixed).** `engine/cell_game.cpp` used to read this resource as a flat
+> run of `(x, y)` pairs and key it by the *resource* instance, so every
+> `World::curve_value()` lookup fell back to a hardcoded default and all 17 shipped
+> curves were inert. The real layout is `u32 BE entry_count` then, per entry,
+> `{u32 BE key, u32 BE type, u32 BE item_count, u32 BE item_size}` followed by that
+> much item data (the float2 points are little-endian). The decoder now walks that
+> table and keys each curve by its **property name**, resolved from the hashed
+> property id through `reg_property.txt` (a new `naming::property_name()`).
+> `cell_game_verify` now has a case that decodes a synthetic property table and
+> asserts the curve is keyed `time_dilation`; with the real package the decoder
+> reports **17 property curves**.
+
 | key | curve (x, y) | reading |
 |---|---|---|
 | `evo_points` | (1,20)(2,40)(3,60)(4,80)(5,100) | evo points granted per level |
@@ -95,6 +107,115 @@ Each archetype is a 400-byte record: a 4-byte header then a **UTF-16LE display n
 (`cell_flora_clover_L0..2`, `cell_plant`), eggs (`egg_eggkid`, `cell_eggmom`,
 `cell_eggdad`) and unlock pickups (`cell_unlock_proboscis`, `cell_unlock_jet`, …).
 109/189 resolve to names from the registry; the rest are internal variants.
+
+### The archetype record layout (recovered from the GA binary)
+
+The record is **not** an opaque blob: the GA `cell` type descriptor
+(`FUN_01375e30` @ `0x1375e30`, registered by the thunk at `0x1375df0` with the type
+name `"cell"`) names every field and its **byte offset**. The descriptor is 26
+entries of 40 bytes (`{char* name; u32 nameHash; u32 offset; u32 flags; ...}`) and
+its offsets are 4-byte-strided, so they are struct byte offsets, not property ids.
+
+Top-level fields (all inside the shipped 400-byte record):
+
+| offset | field | observed |
+|---|---|---|
+| `+0x000` | `structure` (template id) | `cell_hero_L0` → `0xCBCD1287` |
+| `+0x004` | UTF-16LE display name | `"Snorf"`, `"Chomper"`, `"Squirty"` |
+| `+0x0A4` | part count (u16) | 0..25 |
+| `+0x0A8` | `hp` (tier) | hero 3, squid 2, Ducky 2 |
+| `+0x0AC` | `fixedOrientation` | 0 |
+| `+0x0B0` | `flags` | 1..4 |
+| `+0x0B4` | `cellType` | 0 |
+| `+0x0B8` | `unlockType` | 0..4 |
+| `+0x0BC` | `density` | 0 |
+| `+0x0C0` | `sound` | 0 |
+| `+0x0C4` | `break` | effect id |
+| `+0x0C8` | `pieces` | 0 |
+| `+0x0CC` | `leak` | 0 |
+| `+0x0D0` | `expel` | effect id |
+| `+0x0D4` | `loot` | loot-table id |
+| `+0x0D8` | `explosionTable` | effect id |
+| `+0x0DC` | `poison` | effect id (0x1000 / 0x1006) |
+| `+0x0E0` | `ai` — a **`cAIData`** block (0xb4 B) | see below |
+
+The descriptor also names `ai_hard` @ `+0x194`, `ai_easy` @ `+0x248`,
+`friendGroup` @ `+0x2FC`, `wontAttackPlayer` @ `+0x300`,
+`wontAttackPlayerWhenSmall` @ `+0x301`, `size` @ `+0x304`, `eat` @ `+0x30C` and
+`triggersEscapeMission` @ `+0x318`, and the registered record size is **0x31C
+(796 B)** — larger than the 400 B the shipped resources carry, so only the
+`ai` block and the scalars above are readable from the shipped data.
+
+### `cAIData` — the per-cell AI block (record `+0xE0`)
+
+The `cAIData` type (registered at `0x13746e0`, descriptor built at `0x1374725`,
+size 0xb4) names its fields in this order. Offsets are relative to the block
+base; the absolute offset adds the block base (`+0xE0` for the default `ai`):
+
+| off | field | abs | observed (Cell_DuckyMed) |
+|---|---|---|---|
+| `+0x04` | `awarenessRadius` | `+0xE4` | 0 |
+| `+0x08` | `awarenessRadiusFood` | `+0xE8` | 5 |
+| `+0x0C` | `awarenessRadiusPredator` | `+0xEC` | 0 |
+| `+0x10` | `movementStyle` | `+0xF0` | 0 |
+| `+0x14` | `flocking` | `+0xF4` | 1 |
+| `+0x18` | `speed` | `+0xF8` | 11 |
+| `+0x1C` | `chaseSpeed` | `+0xFC` | 8 |
+| `+0x20` | `wanderSpeed` | `+0x100` | 15 |
+| `+0x24` | `fleeSpeed` | `+0x104` | 0 |
+| `+0x28` | `fearsNearbyDamageRadius` | `+0x108` | 0 |
+| `+0x2C` | `fearsNearbyDeathRadius` | `+0x10C` | 0 |
+| `+0x30` | `fearsNearbyDamageTime` | `+0x110` | 0 |
+| `+0x34` | `fearsNearbyDeathTime` | `+0x114` | 1 |
+| `+0x38` | `protectRadius` | `+0x118` | 3 |
+| `+0x3C` | `protectTime` | `+0x11C` | 0 |
+| `+0x40` | `turnFactor` | `+0x120` | 0 |
+| `+0x44` | `axialMovement` | `+0x124` | 0 |
+| `+0x48` | `spawnTime` | `+0x128` | 0 |
+| `+0x4C` | `spawnRestTime` | `+0x12C` | 0 |
+| `+0x50` | `spawnOutput` | `+0x130` | 0 |
+| `+0x54` | `arcLength` | `+0x134` | 0 |
+| `+0x58` | `arcLengthSecondary` | `+0x138` | 4 |
+| `+0x5C` | `numArcs` | `+0x13C` | 0 |
+| `+0x60` | `keyTransformation` | `+0x140` | 2 |
+| `+0x64` | `keyProjectile` | `+0x144` | 0 |
+| `+0x68` | `food` | `+0x148` | 180 |
+| `+0x6C` | `growCount` | `+0x14C` | 1 |
+| `+0x70` | `digestionCount` | `+0x150` | 0 |
+| `+0x74` | `digestionTime` | `+0x154` | 0 |
+| `+0x78` | `digestionOutput` | `+0x158` | 0 |
+| `+0x7C` | `fleeTime` | `+0x15C` | 0 |
+| `+0x80` | `fleeRestTime` | `+0x160` | 0 |
+| `+0x84` | `chaseTime` | `+0x164` | 10 |
+| `+0x88` | `chaseRestTime` | `+0x168` | 0 |
+| `+0x8C` | `chasesDamage` | `+0x16C` | u8 |
+| `+0x8D` | `fearsMouths` | `+0x16D` | u8 |
+| `+0x8E` | `fearsWeapons` | `+0x16E` | u8 |
+| `+0x8F` | `fearsDamage` | `+0x16F` | u8 |
+| `+0x90` | `fearsElectric` | `+0x170` | u8 |
+| `+0x91` | `fearsPoison` | `+0x171` | u8 |
+| `+0x92` | `ignoresFood` | `+0x172` | u8 |
+| `+0x94` | `awakeTime` | `+0x174` | 0 |
+| `+0x98` | `sleepTime` | `+0x178` | 0 |
+| `+0x9C` | `growAmount` | `+0x17C` | 0.4 |
+| `+0xA0` | `hatchDuration` | `+0x180` | 0.4 |
+| `+0xA4` | `poisonRecharge` | `+0x184` | 0 |
+| `+0xA8` | `electricRecharge` | `+0x188` | 0 |
+| `+0xAC` | `electricRechargeVsSmall` | `+0x18C` | 0 |
+| `+0xB0` | `electricDischarge` | `+0x190` | 0 |
+
+Cross-checks on the shipped records: `cell_hero_L0` → `food` 10000, `growAmount`
+0.275, `chaseTime` 10, `protectRadius` 3; `cell_squid` → `food` 6, `growCount` 4,
+`speed` 4, `chaseSpeed` 2, `growAmount` 0.26; `cell_poisonerMed` → `food` 4,
+`speed` 20, `chaseSpeed` 15, `wanderSpeed` 20, `growAmount` 0.3.
+These are the **game's** numbers, and `engine/cell_world.cpp` now reads the AI
+block and the scalars by these names instead of guessing offsets.
+
+The old `kStatOffsets` list in `engine/cell_game.h` is superseded: it read the
+`+0x0E0` block with the wrong assumption that every slot was a float, which is
+why `tools/decode_cell_stats.py` printed garbage (that tool also called
+`refpack.decode` with three arguments; the signature is `decode(data, expect)`).
+`tools/dump_cell_stats.cpp` now prints the named fields.
 
 ## Loot tables — `loottable` (48)
 
@@ -278,12 +399,25 @@ unites the decode with the engine:
 
 ## Boundaries
 
-* Per-archetype **stats** (HP, damage, social) are not in these records as named fields;
-  the 400-byte archetype payload and the 80-byte `structure` records are positional
-  (offset-based), not keyed. See `analysis/cell-save.md` for the save-side field ids.
+* The archetype **field names and offsets are now recovered** (see *The archetype
+  record layout* above): the `cAIData` AI block at `+0xE0` and the scalars at
+  `+0xA8..+0xDC` are named and read by name in `engine/cell_world.cpp`. What is
+  still **not** recovered is the *formula* each value feeds in the original
+  (e.g. how `hp`/tier becomes hit points, and the size→HP progression): the
+  descriptor gives the data, not the consuming arithmetic, and no size→HP table
+  exists in the binary.
+* The descriptor also names fields at offsets **beyond the shipped 400-byte
+  record** (`ai_hard` `+0x194`, `ai_easy` `+0x248`, `friendGroup` `+0x2FC`,
+  `size` `+0x304`, `eat` `+0x30C`, `triggersEscapeMission` `+0x318`; the
+  registered record size is 0x31C). They are part of the runtime structure and
+  are **not** in the on-disk archetype, so they stay unread.
+* The 80-byte `structure` records are still positional (part parent/flag/id/scale).
 * The save-field ids in `analysis/audit/cell-field-descriptors.json` remain structural;
   the FNV registry does **not** contain them (they look like per-class sequential
-  property indices, not name hashes).
+  property indices, not name hashes). The *runtime* creature fields, however, are
+  named: `mHealthPoints`/`mMaxHealthPoints` (registration `FUN_013326c0`),
+  `mFoodValue`/`mSpeciesKey`/`mAge`/`mArchetype` (`FUN_01335000`),
+  `mPosition`/`mOrientation`/`mScale`/`mBoundingRadius` (`FUN_01353d90`).
 * `xls` decoding needs `xlrd` (analysis-time only); the tool degrades gracefully.
 
 ## Reproduce

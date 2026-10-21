@@ -1,20 +1,33 @@
 # Playable stage drivers — the Cell stage (playable)
 
-> **Current verdict, 2026-10-17:** the five playable-stage rows (mode/tag/registrar/object
+> **Current verdict, 2026-10-22:** the five playable-stage rows (mode/tag/registrar/object
 > size/state/next) are held in `source/engine/game_stages.cpp`, cross-checked against the
 > binary and the shipped script. `Game_Cell` owns the first real driver attached to the
 > `CellGame` state: on enter it loads `Data/CellGame.package`, spawns a level's cells from the
-> decoded `populate` table (see [cell-game](cell-game.md)), and now **simulates and draws a
+> decoded `populate` table (see [cell-game](cell-game.md)), and **simulates and draws a
 > playable tide pool** — you steer a hero cell with the mouse, eat food and smaller cells to
 > grow, flee and get bitten by larger ones, lose HP and respawn, and evolve at size 3.0. The
 > other four stages parse but have no behaviour; their states keep the honest "mode NOT
 > EXECUTED" placeholder.
 >
-> **Honest scope:** the spawn list and each cell's body structure are the game's data; the
-> **positions, sizes, food/creature split, growth rates, HP, predator aggression, camera,
-> physics and colours are OUR seeds**, not the shipped tide-pool balance (the original's
-> archetype stat slots are positional and unnamed — see [cell-game](cell-game.md)). There is
-> **no mesh/RenderWare rendering**: each cell is a tinted disc sized by its (seeded) radius.
+> **What is now the game's data (2026-10-22).** The cell archetype record's field names and
+> byte offsets were recovered from the GA binary (`FUN_01375e30` / the `cAIData` descriptor
+> at `0x1374725`): the per-cell AI block at record `+0xE0` carries `speed`, `chaseSpeed`,
+> `wanderSpeed`, `fleeSpeed`, `awarenessRadius{,Food,Predator}`, `flocking`, `turnFactor`,
+> `protectRadius`, `food`, `growCount`, `growAmount`, `hatchDuration`, `chaseTime`, … and
+> the scalars at `+0xA8..+0xDC` carry `hp`, `flags`, `cellType`, `unlockType`, `loot`,
+> `poison`, …. The engine reads them **by name** now, so the simulation uses the shipped
+> numbers (Ducky: speed 11 / chase 8 / food 180; squid: food 6 / growCount 4; hero: food
+> 10000 / growAmount 0.275). The 17 shipped tuning curves (`time_dilation`,
+> `npc_turn_factor`, `eye_count`, `camera_lookahead`, `mouse_zoom`, …) are decoded from the
+> `prop` resource and are no longer inert.
+>
+> **Honest scope.** The spawn list, the body structures, the per-cell AI/stat fields and the
+> tuning curves are the game's data. Still ours: entity **positions**, the **arena**, the
+> camera framing, the HP **formula** (the archetype's `hp` is a tier, the size→HP progression
+> was not found in the binary), the DNA costs, and the **particle/audio** presentation. The
+> scene is drawn with the real `gmdl` cell bodies (top-down), not the original's
+> RenderWare tide-pool scene, and there is no game audio.
 
 ## Evidence
 
@@ -51,18 +64,33 @@
 * **Spawn** (`set_level`): one `Entity` per unit of each `populate` entry's count; structure
   resolved from the archetype's `+0x000` template id. Player = the `cell_hero_L0` archetype
   (found by id), else `cell_minno1`, else the first cell.
-* **Roles** (seeded): a cell whose name contains food/flora/plant/clump/egg is `Food` (always
+* **Roles**: a cell whose name contains food/flora/plant/clump/egg is `Food` (always
   edible); everything else is a `Creature` (prey when smaller than the player, predator when
-  larger). Sizes are a stable function of the archetype id.
+  larger). The level's **`_bg` population** is scenery: it spawns as `Role::Prop`, so it drifts
+  but never hunts, never is eaten, and never eats the entity budget.
+* **Sizes and AI** come from the archetype's `cAIData` block: `growAmount` is the body radius,
+  `speed`/`chaseSpeed`/`fleeSpeed` the movement speeds, `awarenessRadius{,Food,Predator}` the
+  detection radii, `turnFactor` the turn rate, `flocking` the cohesion weight, `food` the DNA
+  value of eating the cell, `growCount`/`growAmount` the growth, `protectRadius` the spawn
+  protection. See [cell-game](cell-game.md#the-archetype-record-layout-recovered-from-the-ga-binary).
 * **Player**: accelerates toward the world-space pointer target (mouse input), with drag and a
-  speed cap. Eating (`dist ≤ sizes`, edible) grows it by area; a larger creature in contact
-  drains HP; at 0 HP the player dies and respawns at the arena centre after 1.5 s; at size 3.0
-  it is "ready to evolve" (the Creature stage is not implemented).
-* **AI**: predators within the aggro radius chase the player; prey flee; food drifts.
+  speed cap. Eating (within the sum of the radii, edible) grows it by area; a larger creature
+  in contact drains HP; at 0 HP the player dies and respawns at the arena centre after 1.5 s;
+  at size 3.0 it is "ready to evolve" (the Creature stage is not implemented).
+* **AI**: a creature bigger than the player is a predator and chases it; a smaller one is prey
+  and flees. Both use the archetype's own chase/flee speed, the `npc_mad` / `npc_scared` look
+  tables, the archetype's `turnFactor` and its awareness radius. Same-archetype neighbours
+  flock together when the archetype's `flocking` weight is non-zero. (This replaced the old
+  test that read the **speed** slot to decide "predator", which made every moving cell a
+  predator and left the flee branch dead.)
+* **Damage**: the player's bite damages the creature it overlaps, so NPCs have HP and can die
+  (they drop a meat chunk and their loot); the bite amount is a documented seed.
 * **Camera**: follows the player; zoom scales with size so the whole arena stays legible.
 * The RNG is seeded from the level name, so the same data always produces the same world.
 * `tools/cell_world_verify.cpp` unit-tests it all offline (steering, camera, eating/growth,
-  predator death, respawn, determinism, unknown-level error, cleared-world tick drop).
+  predator death, respawn, determinism, unknown-level error, cleared-world tick drop, the
+  save round-trip, the `_bg` scenery role, and — with a real package — the archetype's
+  `hp`/`growAmount`/`food` values).
 
 ### Presentation (`source/states/cellpresent.cpp`)
 
@@ -90,15 +118,35 @@
 ## Boundaries
 
 * No sprite-atlas or RenderWare tide-pool *scene* rendering (we draw the decoded gmdl bodies, not
-  the original's RenderWare world), and no audio. The overlay/HUD is our own immediate-mode 2D.
-* Positions, velocities, sizes, role split, growth/HP/aggression rates, arena and camera are
-  **seed placeholders**; not GA behaviour claims. The original's placement and player-creation
-  are not recovered.
+  the original's RenderWare world), and no game audio (the sound is a `Beep()` stand-in). The
+  overlay/HUD is our own immediate-mode 2D.
+* Entity **positions**, the **arena**, the camera framing, the **HP formula** (the archetype's
+  `hp` is a tier; no size→HP table exists in the binary), the DNA **costs** and the bite damage
+  are still **our seeds**. The original's placement and player-creation are not recovered.
+* The archetype fields beyond the shipped 400-byte record (`ai_hard`, `ai_easy`, `size`, `eat`,
+  `friendGroup`, …) are named in the binary but not present in the data, so the engine reads only
+  the default `ai` block.
 * No `CreatureGame`/`TribeGame`/`CivilisationGame`/`SpaceGame` behaviour; no editor
   drivers; no `FUN_00b5dcd0` tag dispatch in the runtime.
 * Host policies: case-insensitive name match (same rule as `appmodes`), `u64` tick
   counter, idle/active/reset lifecycle, level matched by resolved name or its own FNV-1 id.
   None of these are GA behaviour claims.
+
+## Reproduce
+
+```powershell
+cmake --build build --config Debug --target game_stages_verify cell_world_verify cell_game_verify
+.\build\Debug\game_stages_verify.exe
+.\build\Debug\cell_world_verify.exe "S:\Games\Other\Spore\Data\CellGame.package"
+.\build\Debug\cell_game_verify.exe "S:\Games\Other\Spore\Data\CellGame.package"
+# the live stage (the app lives in build\bin\Debug\, next to its Data\ tree):
+.\build\bin\Debug\OpenSpore.exe -w -devDirs -state:CellGame -quitAfter 140 -capture cell.bmp -captureAfter 120
+```
+
+> The verification tools are built into `build\bin\Debug\` and **mirrored into `build\Debug\`**,
+> so the paths above always run the fresh binary. (Before the mirror existed, `build\Debug\`
+> held stale executables from an older output layout, so the documented commands silently
+> verified the wrong build.)
 
 ## Reproduce
 

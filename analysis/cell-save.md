@@ -157,8 +157,20 @@ they ship in the game's `Data` packages.
 
 - Field IDs are structural; **per-id semantics not yet confirmed** (which
   float is speed, attack, social). Callback chains now type each field by
-  size class (1/4/12/16/24/92 B); naming individual stats needs the
-  registration functions (`0x1469990` etc.) or gameplay cross-references.
+  size class (1/4/12/16/24/92 B).
+- The **runtime creature fields, however, are now named**: the registration
+  functions `FUN_013326c0` (`mHealthPoints`=0x38, `mMaxHealthPoints`=0x2c,
+  `mLastAttacker`=0x3c, `mArmorProbability`=0x40), `FUN_01335000`
+  (`mFoodValue`, `mSpeciesKey`, `mAge`, `mArchetype`, `mSpeedState`,
+  `mStrengthRating`, `mHunger*`, `mCreatureName`, ...), `FUN_01353d90`
+  (`mPosition`=0x04, `mOrientation`=0x10, `mScale`=0x64, `mBoundingRadius`=0x5c,
+  `mFootprintRadius`=0x60, `mIsTangible`, `mbPickable`, ...) and `FUN_01335fe0`
+  (`mSelectionGroup`, `mSpecializedTool`, `mpOwnerCity`, `mpOwnerTribe`, ...)
+  each write a `{name, id, offset, ...}` descriptor entry, so the **object**
+  side of the save is named even though the **wire ids** are not. The
+  `cell` archetype's own fields (HP, speed, awareness, food, growth) are
+  named and offset-mapped too - see
+  [cell-game](cell-game.md#the-archetype-record-layout-recovered-from-the-ga-binary).
 - **Semantic naming via property-strings is closed as a dead end.** The 107
   registration blocks contain **no string pointers** (scan of `mov[esp]/push/lea`
   immediates → zero name candidates). Each wire id appears **exactly once** in
@@ -194,3 +206,15 @@ they ship in the game's `Data` packages.
   **no per-object stat spread** to correlate against gameplay; the
   speed/attack/social values are constants (creature defaults), and their
   meaning cannot be recovered from value correlation.
+
+## The engine's own save round-trip
+
+`World::write_save` now emits the **same frame shape the decoder reads**: a stream
+header `[count][crc][token][12 bytes]`, then the shipped 8-frame field-count
+pattern `[5][4][25][11][4][2][35][8]`, each frame a `0x01A80D26` record
+(`[tag][length][count]` + per-field `[id][size]` + payloads), closed by the 24-byte
+object trailer, inside a well-formed DBPF (kind-4 index, count 1). Previously the
+writer emitted a bare run of field ids with no frame header, so the decoder read
+**zero** creatures and `World::load_save` silently restored nothing.
+`cell_world_verify` now has a round-trip case: write -> read back -> the player's
+position is restored.
