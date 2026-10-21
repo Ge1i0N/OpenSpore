@@ -39,6 +39,18 @@ group count. Frame field-count pattern and ids (group 0 of stream A):
 | 6 | 35 | big mixed block incl. the 92-byte `076c8f46/4d` blobs |
 | 7 | 8 (A) / 13 (B) | `02e6e1ab..b2 05f0d6f3 06a814a9` (stream B adds 5) |
 
+**The two streams are two CLASSES, not two views of one.** Frames 0-6 are
+byte-identical in both; only frame 7 differs, and the group block sizes differ
+by exactly that frame (1503 B per group in A, 1648 B in B). A's frame-7 ids are
+one consecutive family (`02e6e1ab 02e6e1ad 02e6e1af 02e6e1b0 02e6e1b1
+02e6e1b2`) plus two more; B's are 13 scattered ids. `tools/check_save_tables.py`
+re-derives the writer's tables from `analysis/audit/cell-save-full.json` and
+checks them against the shipped `0x018eb4b7` class: all 8 frames match in ids,
+payload sizes **and** the frame length word
+(`length = 4 + 8*count + sum(sizes)` -> 61, 52, 330, 149, 52, 28, 622, 97).
+`World::write_save` emits that class. The `0x018eb45e` class is **not**
+emitted - the engine writes one group (the player), not 250.
+
 `0x03cdd54b` is the object **sequence id** (79, 80, 81 … in stream A;
 stream B continues 0xac=172…). Type-3-style float samples in the detailed
 block (`3f800000`=1.0, `40490fdb`≈π, `3f000000`=0.5, `42c80000`=100.0,
@@ -80,6 +92,9 @@ The true counts are 150 + 100 creature groups (8 frames each).
   `engine/pkg.cpp` + RefPack). `decode_save(path)` / `decode_save_from_memory`.
 - `tools/cell_save_verify` — 5 constructed-input tests, no game data needed.
 - `tools/cell_save_dump <path.spo>` — CLI dump of a real save.
+- `tools/check_save_tables.py` — re-derives the writer's per-frame wire tables
+  from the shipped audit and checks them against it (ids, payload sizes and
+  the frame length word).
 - `tools/cell_field_descriptors.py` — recovers all wire-id registration
   descriptors from the binary; writes `audit/cell-field-descriptors.json`.
 
