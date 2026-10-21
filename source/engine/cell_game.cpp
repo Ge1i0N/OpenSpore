@@ -1,5 +1,6 @@
 #include "engine/cell_game.h"
 
+#include <cstdio>
 #include <cstring>
 
 #include "engine/naming.h"
@@ -11,6 +12,9 @@ namespace {
 u32 le32(const u8* p) { return u32(p[0]) | (u32(p[1]) << 8) | (u32(p[2]) << 16) | (u32(p[3]) << 24); }
 i32 le_i32(const u8* p) { return static_cast<i32>(le32(p)); }
 u16 le16(const u8* p) { return static_cast<u16>(u32(p[0]) | (u32(p[1]) << 8)); }
+
+// Big-endian u32: the `prop` property table's headers are big-endian (tools/prop.py).
+u32 be32(const u8* p) { return (u32(p[0]) << 24) | (u32(p[1]) << 16) | (u32(p[2]) << 8) | u32(p[3]); }
 
 f32 le_f32(const u8* p) {
     u32 bits = le32(p);
@@ -34,6 +38,63 @@ std::string utf16_name(const std::vector<u8>& d, size_t off) {
     return s;
 }
 
+// The `ai` cAIData block at record +0xe0 (see AiData in cell_game.h).
+void parse_ai(const std::vector<u8>& d, AiData& a) {
+    constexpr size_t kBase = 0xe0;
+    auto f = [&](size_t off) { return off + 4 <= d.size() ? le_f32(d.data() + off) : 0.0f; };
+    auto dw = [&](size_t off) { return off + 4 <= d.size() ? le32(d.data() + off) : 0u; };
+    auto b = [&](size_t off) { return off < d.size() ? d[off] : u8(0); };
+    a.awareness_radius = f(kBase + 0x04);
+    a.awareness_radius_food = f(kBase + 0x08);
+    a.awareness_radius_predator = f(kBase + 0x0c);
+    a.movement_style = dw(kBase + 0x10);
+    a.flocking = f(kBase + 0x14);
+    a.speed = f(kBase + 0x18);
+    a.chase_speed = f(kBase + 0x1c);
+    a.wander_speed = f(kBase + 0x20);
+    a.flee_speed = f(kBase + 0x24);
+    a.fears_nearby_damage_radius = f(kBase + 0x28);
+    a.fears_nearby_death_radius = f(kBase + 0x2c);
+    a.fears_nearby_damage_time = f(kBase + 0x30);
+    a.fears_nearby_death_time = f(kBase + 0x34);
+    a.protect_radius = f(kBase + 0x38);
+    a.protect_time = f(kBase + 0x3c);
+    a.turn_factor = f(kBase + 0x40);
+    a.axial_movement = f(kBase + 0x44);
+    a.spawn_time = f(kBase + 0x48);
+    a.spawn_rest_time = f(kBase + 0x4c);
+    a.spawn_output = f(kBase + 0x50);
+    a.arc_length = f(kBase + 0x54);
+    a.arc_length_secondary = f(kBase + 0x58);
+    a.num_arcs = f(kBase + 0x5c);
+    a.key_transformation = dw(kBase + 0x60);
+    a.key_projectile = dw(kBase + 0x64);
+    a.food = f(kBase + 0x68);
+    a.grow_count = f(kBase + 0x6c);
+    a.digestion_count = f(kBase + 0x70);
+    a.digestion_time = f(kBase + 0x74);
+    a.digestion_output = f(kBase + 0x78);
+    a.flee_time = f(kBase + 0x7c);
+    a.flee_rest_time = f(kBase + 0x80);
+    a.chase_time = f(kBase + 0x84);
+    a.chase_rest_time = f(kBase + 0x88);
+    a.chases_damage = b(kBase + 0x8c);
+    a.fears_mouths = b(kBase + 0x8d);
+    a.fears_weapons = b(kBase + 0x8e);
+    a.fears_damage = b(kBase + 0x8f);
+    a.fears_electric = b(kBase + 0x90);
+    a.fears_poison = b(kBase + 0x91);
+    a.ignores_food = b(kBase + 0x92);
+    a.awake_time = f(kBase + 0x94);
+    a.sleep_time = f(kBase + 0x98);
+    a.grow_amount = f(kBase + 0x9c);
+    a.hatch_duration = f(kBase + 0xa0);
+    a.poison_recharge = f(kBase + 0xa4);
+    a.electric_recharge = f(kBase + 0xa8);
+    a.electric_recharge_vs_small = f(kBase + 0xac);
+    a.electric_discharge = f(kBase + 0xb0);
+}
+
 Archetype parse_archetype(u32 id, const std::vector<u8>& d) {
     Archetype a;
     a.id = id;
@@ -41,6 +102,22 @@ Archetype parse_archetype(u32 id, const std::vector<u8>& d) {
     if (d.size() >= 4) a.template_id = le32(d.data());
     a.display = utf16_name(d, 4);
     if (d.size() >= 0x0A6) a.part_count = le16(d.data() + 0x0A4);
+    auto dw = [&](size_t off) { return off + 4 <= d.size() ? le32(d.data() + off) : 0u; };
+    a.scalars.hp = dw(0x0a8);
+    a.scalars.fixed_orientation = dw(0x0ac);
+    a.scalars.flags = dw(0x0b0);
+    a.scalars.cell_type = dw(0x0b4);
+    a.scalars.unlock_type = dw(0x0b8);
+    a.scalars.density = dw(0x0bc);
+    a.scalars.sound = dw(0x0c0);
+    a.scalars.break_id = dw(0x0c4);
+    a.scalars.pieces = dw(0x0c8);
+    a.scalars.leak = dw(0x0cc);
+    a.scalars.expel = dw(0x0d0);
+    a.scalars.loot = dw(0x0d4);
+    a.scalars.explosion_table = dw(0x0d8);
+    a.scalars.poison = dw(0x0dc);
+    parse_ai(d, a.ai);
     const char* n = naming::instance_name(id);
     if (n) a.name = n;
     return a;
@@ -134,16 +211,44 @@ Globals parse_globals(u32 id, const std::vector<u8>& d) {
     return g;
 }
 
-PropertyCurve parse_prop_curve(u32 id, const std::vector<u8>& d) {
-    PropertyCurve c;
-    if (const char* n = naming::instance_name(id)) c.key = n;
-    // Format: sequence of (x, y) float pairs, 8 bytes each.
-    for (size_t o = 0; o + 8 <= d.size(); o += 8) {
-        float x = le_f32(d.data() + o);
-        float y = le_f32(d.data() + o + 4);
-        c.points.push_back({x, y});
+// The `prop` property table (tools/prop.py): u32 BE entry_count, then per entry
+// {u32 BE key, u32 BE type, u32 BE item_count, u32 BE item_size} followed by that much item data.
+// A float2 curve has type 0x0030009C and item_size 8; its points are little-endian (x, y) pairs.
+// Each entry's key is a hashed tuning-property id (reg_property.txt), so the curve is keyed by its
+// resolved property NAME (e.g. "time_dilation"), which is what World::curve_value() looks up.
+std::vector<PropertyCurve> parse_prop_curves(const std::vector<u8>& d) {
+    std::vector<PropertyCurve> out;
+    if (d.size() < 4) return out;
+    const u32 count = be32(d.data());
+    if (count == 0 || count > 100000) return out;
+    size_t off = 4;
+    for (u32 k = 0; k < count; ++k) {
+        if (off + 16 > d.size()) break;
+        const u32 key = be32(d.data() + off);
+        const u32 type = be32(d.data() + off + 4);
+        const u32 icnt = be32(d.data() + off + 8);
+        const u32 isz = be32(d.data() + off + 12);
+        off += 16;
+        if (off + static_cast<size_t>(icnt) * isz > d.size()) break;
+        if (type == 0x0030009Cu && isz == 8 && icnt >= 1) {
+            PropertyCurve c;
+            if (const char* n = naming::property_name(key)) {
+                c.key = n;
+            } else {
+                char b[24];
+                std::snprintf(b, sizeof(b), "0x%08X", key);
+                c.key = b;
+            }
+            for (u32 j = 0; j < icnt; ++j) {
+                const float x = le_f32(d.data() + off + static_cast<size_t>(j) * 8);
+                const float y = le_f32(d.data() + off + static_cast<size_t>(j) * 8 + 4);
+                c.points.push_back({x, y});
+            }
+            out.push_back(std::move(c));
+        }
+        off += static_cast<size_t>(icnt) * isz;
     }
-    return c;
+    return out;
 }
 
 LayerField parse_layer(u32 id, const std::vector<u8>& d, u32 components) {
@@ -250,7 +355,12 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
             out.background.insert(out.background.end(), bands.begin(), bands.end());
             break;
         }
-        case kTypeProp: out.properties.push_back(parse_prop_curve(id, d)); break;
+        case kTypeProp: {
+            // One `prop` resource holds every tuning curve (17 in the shipped package).
+            std::vector<PropertyCurve> curves = parse_prop_curves(d);
+            for (PropertyCurve& c : curves) out.properties.push_back(std::move(c));
+            break;
+        }
         default: break;
         }
     }

@@ -30,8 +30,9 @@ namespace os::cell {
 
 // What an entity is for the food chain. Food is eaten (a plant/plankton mote); Meat is a chunk a
 // cell drops when it is eaten (the carnivore diet); a Creature is eaten (prey) when it is smaller
-// than the player and bites (predator) when it is larger.
-enum class Role : u8 { Food = 0, Creature = 1, Meat = 2 };
+// than the player and bites (predator) when it is larger. Prop is the level's `_bg` background
+// population (cell_jawhead/puffish/megamouth): scenery that drifts but neither hunts nor is eaten.
+enum class Role : u8 { Food = 0, Creature = 1, Meat = 2, Prop = 3 };
 
 // The player's diet: which food the player has been eating. A seed model (the original tracks it
 // through the mouth parts chosen in the cell editor), but it makes eating read as a choice.
@@ -52,7 +53,15 @@ struct Entity {
     Role role = Role::Creature;
     float x = 0.0f, y = 0.0f, z = 0.0f;
     float vx = 0.0f, vy = 0.0f;
-    float size = 1.0f;    // body radius (world units) - seed, not a decoded stat
+    float size = 1.0f;    // body radius (world units) - from the archetype's cAIData growAmount
+    float hp = 0.0f;      // current HP (0 = dead); NPCs can be damaged and die
+    float max_hp = 0.0f;  // max HP
+    float chase_speed = 0.0f;   // archetype cAIData chaseSpeed
+    float flee_speed = 0.0f;    // archetype cAIData fleeSpeed
+    float wander_speed = 0.0f;  // archetype cAIData wanderSpeed
+    float turn_factor = 0.0f;   // archetype cAIData turnFactor
+    float aware_food = 0.0f;      // archetype cAIData awarenessRadiusFood
+    float aware_predator = 0.0f;  // archetype cAIData awarenessRadiusPredator
     float ttl = 0.0f;     // seconds left before a dropped meat chunk rots (0 = never)
     bool alive = true;    // cleared when eaten
     const char* anim = kAnimIdle;  // current animation event (from xls table)

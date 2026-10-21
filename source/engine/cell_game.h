@@ -87,6 +87,81 @@ struct LootTable {
     std::vector<LootEntry> entries;
 };
 
+// The `ai` cAIData block of a cell archetype, at record +0xe0. Field offsets are the REA
+// descriptor's (cell type descriptor FUN_01375e30 @0x1375e30; cAIData builder @0x1374725); the
+// block is 0xb4 bytes. Values verified against the shipped records (e.g. Cell_DuckyMed: speed 11,
+// chaseSpeed 8, wanderSpeed 15, food 180, growAmount 0.4, hatchDuration 0.4, chaseTime 10).
+struct AiData {
+    float awareness_radius = 0.0f;            // +0x04
+    float awareness_radius_food = 0.0f;       // +0x08
+    float awareness_radius_predator = 0.0f;   // +0x0c
+    u32   movement_style = 0;                 // +0x10
+    float flocking = 0.0f;                    // +0x14
+    float speed = 0.0f;                       // +0x18
+    float chase_speed = 0.0f;                 // +0x1c
+    float wander_speed = 0.0f;                // +0x20
+    float flee_speed = 0.0f;                  // +0x24
+    float fears_nearby_damage_radius = 0.0f;  // +0x28
+    float fears_nearby_death_radius = 0.0f;   // +0x2c
+    float fears_nearby_damage_time = 0.0f;    // +0x30
+    float fears_nearby_death_time = 0.0f;     // +0x34
+    float protect_radius = 0.0f;              // +0x38
+    float protect_time = 0.0f;                // +0x3c
+    float turn_factor = 0.0f;                 // +0x40
+    float axial_movement = 0.0f;              // +0x44
+    float spawn_time = 0.0f;                  // +0x48
+    float spawn_rest_time = 0.0f;             // +0x4c
+    float spawn_output = 0.0f;                // +0x50
+    float arc_length = 0.0f;                  // +0x54
+    float arc_length_secondary = 0.0f;        // +0x58
+    float num_arcs = 0.0f;                    // +0x5c
+    u32   key_transformation = 0;             // +0x60
+    u32   key_projectile = 0;                 // +0x64
+    float food = 0.0f;                        // +0x68
+    float grow_count = 0.0f;                  // +0x6c
+    float digestion_count = 0.0f;             // +0x70
+    float digestion_time = 0.0f;              // +0x74
+    float digestion_output = 0.0f;            // +0x78
+    float flee_time = 0.0f;                   // +0x7c
+    float flee_rest_time = 0.0f;              // +0x80
+    float chase_time = 0.0f;                  // +0x84
+    float chase_rest_time = 0.0f;             // +0x88
+    u8    chases_damage = 0;                  // +0x8c
+    u8    fears_mouths = 0;                   // +0x8d
+    u8    fears_weapons = 0;                  // +0x8e
+    u8    fears_damage = 0;                   // +0x8f
+    u8    fears_electric = 0;                 // +0x90
+    u8    fears_poison = 0;                   // +0x91
+    u8    ignores_food = 0;                   // +0x92
+    float awake_time = 0.0f;                  // +0x94
+    float sleep_time = 0.0f;                  // +0x98
+    float grow_amount = 0.0f;                 // +0x9c
+    float hatch_duration = 0.0f;              // +0xa0
+    float poison_recharge = 0.0f;             // +0xa4
+    float electric_recharge = 0.0f;           // +0xa8
+    float electric_recharge_vs_small = 0.0f;  // +0xac
+    float electric_discharge = 0.0f;          // +0xb0
+};
+
+// Top-level cell-archetype scalars (REA descriptor FUN_01375e30 @0x1375e30). Offsets are byte
+// offsets in the 400-byte record; the fields up to +0x0dc fit the shipped record.
+struct CellScalars {
+    u32 hp = 0;                // +0x0a8
+    u32 fixed_orientation = 0; // +0x0ac
+    u32 flags = 0;             // +0x0b0
+    u32 cell_type = 0;         // +0x0b4
+    u32 unlock_type = 0;       // +0x0b8
+    u32 density = 0;           // +0x0bc
+    u32 sound = 0;             // +0x0c0
+    u32 break_id = 0;          // +0x0c4
+    u32 pieces = 0;            // +0x0c8
+    u32 leak = 0;              // +0x0cc
+    u32 expel = 0;             // +0x0d0
+    u32 loot = 0;              // +0x0d4
+    u32 explosion_table = 0;   // +0x0d8
+    u32 poison = 0;            // +0x0dc
+};
+
 struct Archetype {
     u32 id = 0;
     u32 template_id = 0;   // record +0x000
@@ -94,6 +169,8 @@ struct Archetype {
     std::string display;   // record +0x004, UTF-16LE
     std::string name;      // reg_file.txt name for `id`, or "" when unknown
     std::vector<u8> record;  // the full 400-byte record
+    AiData ai;             // record +0xe0 (`ai` cAIData block)
+    CellScalars scalars;   // record +0x0a8..+0x0dc
 
     // Read a little-endian f32 at a documented stat offset (returns 0 if out of range).
     float stat(u32 offset) const;

@@ -27,7 +27,7 @@ struct Rng {
     float signed_unit() { return unit() * 2.0f - 1.0f; }                          // [-1,1)
 };
 
-constexpr int kMaxEntities = 400;
+constexpr int kMaxEntities = 1000;
 constexpr float kPlayerAccel = 70.0f;
 constexpr float kPlayerSpeed = 24.0f;
 constexpr float kDrag = 4.0f;
@@ -40,7 +40,7 @@ constexpr float kGrowRate = 0.55f;        // SEED: not recovered
 constexpr float kPredatorFraction = 1.05f;  // SEED: not recovered
 constexpr float kMaxSize = 16.0f;
 constexpr float kPlayerBaseSize = 1.0f;
-constexpr float kEvolveSize = 8.0f;  // SEED: not recovered
+constexpr float kEvolveSize = 3.0f;  // documented evolve threshold (analysis/game-stages.md)
 constexpr float kRespawnDelay = 1.5f;  // SEED: not in cell_properties
 constexpr float kMeatTtl = 14.0f;
 constexpr float kRefillInterval = 3.0f;
@@ -91,6 +91,21 @@ float hash01(u32 h) {
     h *= 0x846ca68bu;
     h ^= h >> 16;
     return static_cast<float>(h & 0xFFFFFF) / 16777216.0f;
+}
+
+// A cell's body radius. The archetype's cAIData `growAmount` (record +0x17c) is the shipped
+// size-like value (hero 0.275, Ducky 0.4, flora 0.3); the hash fallback only covers records with
+// none (the unnamed food props).
+float archetype_size(const Archetype& a) {
+    if (a.ai.grow_amount > 0.0f) return a.ai.grow_amount;
+    return 0.55f + 1.35f * hash01(a.id);
+}
+
+// A cell's max HP. The archetype's `hp` (record +0xa8) is a small tier value (hero 3, squid 2,
+// Ducky 2); the shipped HP formula was not recovered, so this is a documented seed.
+float archetype_hp(const Archetype& a) {
+    const float tier = a.scalars.hp > 0 ? static_cast<float>(a.scalars.hp) : 1.0f;
+    return tier * 20.0f;
 }
 
 const Archetype* find_archetype(const GameData& d, const char* name) {
@@ -253,23 +268,19 @@ bool World::select_part(const std::string& part_name) {
 }
 
 std::vector<World::PartInfo> World::parts_list() const {
-    static const char* kParts[] = {
-        "mandible", "spike", "filter", "proboscis", "flagellum",
-        "stinger", "electrocyte", "poison"
-    };
-    static const int kCosts[] = {10, 15, 10, 20, 15, 20, 25, 25};
+    // The part list IS the shipped data: each `cell_unlock_<part>` archetype in CellGame.package
+    // (reg_file.txt confirms the names) is a part the cell editor offers. The `_pickup` variants are
+    // the in-world pickup props, not separate parts. DNA cost is NOT in the shipped record, so it is
+    // a documented seed (see cell_world.h).
     std::vector<PartInfo> parts;
-    for (size_t i = 0; i < sizeof(kParts) / sizeof(kParts[0]); ++i) {
+    for (const Archetype& a : m_data.archetypes) {
+        if (a.name.rfind("cell_unlock_", 0) != 0) continue;
+        if (a.name.find("_pickup") != std::string::npos) continue;
         PartInfo info;
-        info.name = kParts[i];
-        info.display = kParts[i];
-        info.cost = kCosts[i];
-        const std::string unlock_name = "cell_unlock_" + std::string(kParts[i]);
-        const u32 unlock_id = fnv1_lower(unlock_name.c_str());
-        info.unlocked = false;
-        for (const Archetype& a : m_data.archetypes) {
-            if (a.id == unlock_id) { info.unlocked = true; break; }
-        }
+        info.name = a.name.substr(std::strlen("cell_unlock_"));
+        info.display = info.name;
+        info.cost = 10;  // SEED: DNA cost not recovered from the shipped data
+        info.unlocked = true;
         parts.push_back(info);
     }
     return parts;
@@ -302,44 +313,123 @@ bool World::write_save(const std::string& path, std::string& error) const {
         error = "empty save path";
         return false;
     }
-    std::vector<u8> payload;
-    auto put32 = [&](u32 v) { payload.push_back(v & 0xFF); payload.push_back((v >> 8) & 0xFF); payload.push_back((v >> 16) & 0xFF); payload.push_back((v >> 24) & 0xFF); };
-    auto putf32 = [&](float f) { u32 bits; memcpy(&bits, &f, 4); put32(bits); };
-    put32(0x0240E421); put32(0x0240E422); put32(0x0240E423); put32(0x02E9EFD3); put32(0x03CDD54B);
+    // The cell save stream is a sequence of field frames, each
+    // [tag 0x01A80D26 BE][length BE][count BE][fid BE][size BE]*[payloads], grouped into one
+    // creature by a 24-byte object trailer (see engine/cell_save.cpp). The shipped creature uses
+    // the 8-frame field-count pattern [5][4][25][11][4][2][35][8]; we emit that shape so the
+    // decoder reads it back. Field ids are the shipped wire ids (analysis/cell-save.md).
+    auto put32be = [](std::vector<u8>& v, u32 x) {
+        v.push_back((x >> 24) & 0xFF); v.push_back((x >> 16) & 0xFF);
+        v.push_back((x >> 8) & 0xFF); v.push_back(x & 0xFF);
+    };
+    auto putf32be = [&](std::vector<u8>& v, float f) { u32 b; memcpy(&b, &f, 4); put32be(v, b); };
+    auto zeros = [](std::vector<u8>& v, size_t n) { v.insert(v.end(), n, u8(0)); };
+    struct Field { u32 fid; std::vector<u8> val; };
+    auto frame = [&](std::vector<u8>& v, const std::vector<Field>& fields) {
+        u32 sum = 0;
+        for (const Field& f : fields) sum += static_cast<u32>(f.val.size());
+        put32be(v, 0x01A80D26u);
+        put32be(v, 4 + 8 * static_cast<u32>(fields.size()) + sum);
+        put32be(v, static_cast<u32>(fields.size()));
+        for (const Field& f : fields) { put32be(v, f.fid); put32be(v, static_cast<u32>(f.val.size())); }
+        for (const Field& f : fields) v.insert(v.end(), f.val.begin(), f.val.end());
+    };
+    auto be4 = [&](u32 x) { std::vector<u8> v; put32be(v, x); return v; };
+    auto be1 = [&](u8 x) { return std::vector<u8>{x}; };
+
     const Entity* p = player();
-    if (p) {
-        put32(static_cast<u32>(static_cast<i32>(p->x * 1000.0f)));
-        put32(static_cast<u32>(static_cast<i32>(p->y * 1000.0f)));
-        put32(static_cast<u32>(static_cast<i32>(p->vx * 100.0f)));
-        put32(static_cast<u32>(static_cast<i32>(p->vy * 100.0f)));
-    } else {
-        put32(0); put32(0); put32(0); put32(0);
+    std::vector<u8> blob;
+    // Stream header: [count][crc][token][12-byte header].
+    put32be(blob, 1503);            // declared count word (block byte size in the real save)
+    put32be(blob, 0);               // crc
+    put32be(blob, 0);               // token
+    zeros(blob, 12);
+    // Frame 0: 5 stat fields.
+    frame(blob, {{0x0240E421u, be4(0)}, {0x0240E422u, be1(0)}, {0x0240E423u, be4(0xFFFFFFFFu)},
+                 {0x02E9EFD3u, be4(0)}, {0x03CDD54Bu, be4(79)}});
+    // Frame 1: 4 packed coordinate fields (int16 pairs on the wire; we store world units * 1000).
+    const i32 px = p ? static_cast<i32>(p->x * 1000.0f) : 0;
+    const i32 py = p ? static_cast<i32>(p->y * 1000.0f) : 0;
+    const i32 pz = p ? static_cast<i32>(p->vx * 100.0f) : 0;
+    const i32 pw = p ? static_cast<i32>(p->vy * 100.0f) : 0;
+    frame(blob, {{0x024162BFu, be4(static_cast<u32>(px))}, {0x024162C0u, be4(static_cast<u32>(py))},
+                 {0x024162C1u, be4(static_cast<u32>(pz))}, {0x024162C2u, be4(static_cast<u32>(pw))}});
+    // Frame 2: 25 detailed stat fields (0x02416C5E..0x02416C6E).
+    {
+        std::vector<Field> f;
+        f.push_back({0x02416C5Eu, std::vector<u8>(12, 0)});
+        f.push_back({0x02416C60u, std::vector<u8>(16, 0)});
+        for (u32 k = 0x02416C61u; k <= 0x02416C63u; ++k) f.push_back({k, be1(0)});
+        f.push_back({0x02416C64u, [&] { std::vector<u8> v; putf32be(v, p ? p->size : 1.0f); return v; }()});
+        for (u32 k = 0x02416C65u; k <= 0x02416C6Au; ++k) f.push_back({k, be1(0)});
+        f.push_back({0x02416C6Bu, be4(0)});
+        f.push_back({0x02416C6Cu, be1(0)});
+        f.push_back({0x02416C6Du, be4(0)});
+        f.push_back({0x02416C6Eu, be4(0)});
+        while (f.size() < 25) f.push_back({0x02416C6Eu, be1(0)});
+        frame(blob, f);
     }
-    for (int i = 0; i < 25; ++i) put32(0);
-    for (int i = 0; i < 11; ++i) put32(0);
-    for (int i = 0; i < 4; ++i) put32(0);
-    put32(m_dna); put32(m_eaten);
-    for (int i = 0; i < 35; ++i) put32(0);
-    if (p) putf32(p->size); else putf32(1.0f);
-    for (int i = 0; i < 7; ++i) put32(0);
-    for (int i = 0; i < 24; ++i) payload.push_back(0);
+    // Frame 3: 11 fields (0x02415689..0x02415693).
+    {
+        std::vector<Field> f;
+        for (u32 k = 0x02415689u; k <= 0x02415693u; ++k) f.push_back({k, be4(0)});
+        frame(blob, f);
+    }
+    // Frame 4: 4 fields (0x02415EB8..0x02415EBB).
+    {
+        std::vector<Field> f;
+        for (u32 k = 0x02415EB8u; k <= 0x02415EBBu; ++k) f.push_back({k, be4(0)});
+        frame(blob, f);
+    }
+    // Frame 5: 2 fields (dna, eaten).
+    frame(blob, {{0x043C4AB2u, be4(static_cast<u32>(m_dna))},
+                 {0x04BFED68u, be4(static_cast<u32>(m_eaten))}});
+    // Frame 6: 35 mixed fields.
+    {
+        std::vector<Field> f;
+        for (int k = 0; k < 35; ++k) f.push_back({0x02E6E1ABu + static_cast<u32>(k), be1(0)});
+        frame(blob, f);
+    }
+    // Frame 7: 8 fields (0x02E6E1AB..0x02E6E1B2).
+    {
+        std::vector<Field> f;
+        for (u32 k = 0x02E6E1ABu; k <= 0x02E6E1B2u; ++k) f.push_back({k, be4(0)});
+        frame(blob, f);
+    }
+    // 24-byte object trailer closes the group.
+    zeros(blob, 24);
+
+    // DBPF (little-endian): header, then the payload at 0x60, then a kind-4 index (prefix 8 +
+    // one 28-byte record: type, group, instance, offset, size, usize, sentinel).
     std::vector<u8> out;
-    auto put32be = [&](u32 v) { out.push_back((v >> 24) & 0xFF); out.push_back((v >> 16) & 0xFF); out.push_back((v >> 8) & 0xFF); out.push_back(v & 0xFF); };
+    auto put32le = [&](u32 v) {
+        out.push_back(v & 0xFF); out.push_back((v >> 8) & 0xFF);
+        out.push_back((v >> 16) & 0xFF); out.push_back((v >> 24) & 0xFF);
+    };
     out.insert(out.end(), {'D', 'B', 'P', 'F'});
-    put32be(3);  // major version
-    put32be(0);  // minor version
-    put32be(0x60);  // index offset
-    put32be(8 + 28);  // index size (1 record)
-    out.resize(0x60, 0);
-    out.insert(out.end(), payload.begin(), payload.end());
-    put32be(0x018EB4B7);  // type
-    put32be(0);  // group
-    put32be(0);  // instance
-    put32be(0x60);  // offset
-    put32be(static_cast<u32>(payload.size()));  // size
-    put32be(0x80000000u | static_cast<u32>(payload.size()));  // compressed size
-    put32be(static_cast<u32>(payload.size()));  // uncompressed size
-    put32be(0x00010000u);  // flags
+    put32le(3);                                   // major version
+    put32le(0);                                   // minor version
+    out.resize(0x24, 0); put32le(1);              // count = 1
+    out.resize(0x2C, 0); put32le(36);             // index size = 8 + 28
+    out.resize(0x3C, 0); put32le(3);              // field_3c
+    out.resize(0x40, 0);
+    const u32 payload_off = 0x60;
+    const u32 index_offset = payload_off + static_cast<u32>(blob.size());
+    put32le(index_offset);
+    out.resize(payload_off, 0);
+    out.insert(out.end(), blob.begin(), blob.end());
+    const size_t ix = index_offset;
+    out.resize(ix + 36, 0);
+    auto put32at = [&](size_t at, u32 v) { memcpy(out.data() + at, &v, 4); };
+    put32at(ix + 0, 4);                     // kind 4
+    put32at(ix + 4, 0);                     // shared unknown
+    put32at(ix + 8, 0x018EB4B7u);           // type
+    put32at(ix + 12, 0);                    // group
+    put32at(ix + 16, 0);                    // instance
+    put32at(ix + 20, payload_off);          // offset
+    put32at(ix + 24, static_cast<u32>(blob.size()));  // size (raw)
+    put32at(ix + 28, static_cast<u32>(blob.size()));  // usize
+    put32at(ix + 32, 0x00010000u);          // sentinel/flags
     FILE* f = nullptr;
     errno_t err = fopen_s(&f, path.c_str(), "wb");
     if (err != 0 || !f) {
@@ -456,8 +546,12 @@ std::string World::next_level(const std::string& current) const {
 
 const LootTable* World::biome_loot(const char* biome_name) const {
     if (!biome_name || !*biome_name) return nullptr;
-    std::string prefix = "loot_";
-    std::string table_name = prefix + biome_name;
+    // A level name is "level_<biome>"; the shipped loot tables are "loot_<biome>"
+    // (loot_water / loot_beach / loot_ice / loot_rock / loot_plant / loot_random).
+    std::string name = biome_name;
+    static const char* kLevelPrefix = "level_";
+    if (name.rfind(kLevelPrefix, 0) == 0) name = name.substr(std::strlen(kLevelPrefix));
+    std::string table_name = "loot_" + name;
     const u32 table_id = fnv1_lower(table_name.c_str());
     for (const LootTable& t : m_data.loot_tables) {
         if (t.id == table_id || t.name == table_name) return &t;
@@ -507,19 +601,16 @@ void World::spawn_from_level(const Population& pop) {
             if (contains_ci(name, "egg")) {
                 en.hatch_time = curve_value("hatchDuration", 0.0f, 3.0f);
             }
-            float struct_scale = 0.0f;
-            if (en.structure >= 0 && static_cast<size_t>(en.structure) < m_data.structures.size()) {
-                const float s = m_data.structures[static_cast<size_t>(en.structure)].scale[0];
-                if (s > 0.0f) struct_scale = s;
-            }
-            if (struct_scale > 0.0f) {
-                en.size = food ? struct_scale * 0.3f : struct_scale;
-            } else {
-                float real_size = stat_for_archetype(e.cell, 0x17C);
-                if (real_size <= 0.0f) real_size = stat_for_archetype(e.cell, 0x180);
-                if (real_size > 0.0f) en.size = real_size;
-                else en.size = food ? (0.40f + 0.12f * hash01(e.cell))
-                                    : (0.55f + 1.35f * hash01(e.cell));
+            // The shipped archetype record carries the cell's size (cAIData `growAmount`).
+            en.size = archetype_size(arch ? *arch : Archetype{});
+            if (arch) {
+                en.hp = en.max_hp = archetype_hp(*arch);
+                en.chase_speed = arch->ai.chase_speed;
+                en.flee_speed = arch->ai.flee_speed;
+                en.wander_speed = arch->ai.wander_speed;
+                en.turn_factor = arch->ai.turn_factor;
+                en.aware_food = arch->ai.awareness_radius_food;
+                en.aware_predator = arch->ai.awareness_radius_predator;
             }
             en.x = rng.signed_unit() * m_arena;
             en.y = rng.signed_unit() * m_arena;
@@ -584,15 +675,14 @@ bool World::set_level(const std::string& level, std::string& error) {
                     if (a.id == e.cell) { arch = &a; break; }
                 }
                 const std::string name = arch ? archetype_label(m_data, *arch) : std::string();
-                const bool food = looks_like_food(name);
                 for (int k = 0; k < n && static_cast<int>(m_entities.size()) < kMaxEntities; ++k) {
                     Entity en;
                     en.archetype = e.cell;
                     if (arch) en.structure = structure_of(*arch);
-                    en.role = food ? Role::Food : Role::Creature;
+                    // The `_bg` population is scenery: it drifts, never hunts and is not eaten.
+                    en.role = Role::Prop;
                     en.diet = diet_from_name(name);
-                    en.size = food ? (0.40f + 0.12f * hash01(e.cell))
-                                   : (0.55f + 1.35f * hash01(e.cell));
+                    en.size = archetype_size(arch ? *arch : Archetype{});
                     en.x = rng.signed_unit() * m_arena;
                     en.y = rng.signed_unit() * m_arena;
                     en.vx = rng.signed_unit() * 2.0f;
@@ -836,25 +926,27 @@ void World::tick(float dt) {
         if (!m_player_alive) continue;  // food drifts; nothing hunts a dead player
         const float dx = px - e.x, dy = py - e.y;
         const float dist = std::sqrt(dx * dx + dy * dy);
-        const float eye_count = curve_value("eye_count", 0.0f, 1.0f);
-        const float aggro = kAggro * eye_count;
-        if (dist < aggro && dist > 0.001f) {
-            const bool predator = e.role == Role::Creature &&
-                (e.size > psize * kPredatorFraction || is_predator_archetype(e.archetype));
-            const bool prey = e.role == Role::Food ||
-                              (e.role == Role::Creature && e.size <= psize * kPredatorFraction);
-            const char* table = predator ? "npc_mad" : (prey ? "npc_scared" : "NPC_idle");
-            const float pursue_w = look_weight(table, 4);   // pursue_target
-            const float flee_w = look_weight(table, 5);     // flee_target
-            const float turn_factor = curve_value("npc_turn_factor", e.size, 1.0f);
-            if (predator) {
-                const float w = (pursue_w > 0.f ? pursue_w : 1.0f) * turn_factor;
-                e.vx += (dx / dist) * kPredatorAccel * w * dt;
-                e.vy += (dy / dist) * kPredatorAccel * w * dt;
-            } else if (prey && e.role == Role::Creature) {
-                const float w = (flee_w > 0.f ? flee_w : 1.0f) * turn_factor;
-                e.vx -= (dx / dist) * kPreyAccel * w * dt;
-                e.vy -= (dy / dist) * kPreyAccel * w * dt;
+        // Awareness: the archetype's cAIData awareness radius (food-specific, else predator).
+        const float aware = e.aware_food > 0.0f ? e.aware_food
+                           : e.aware_predator > 0.0f ? e.aware_predator : kAggro;
+        if (dist < aware && dist > 0.001f) {
+            // A creature is a predator when it is bigger than the player, prey when smaller (the
+            // real mechanic: bigger eats smaller). This replaces the old speed-slot test.
+            const bool predator = e.role == Role::Creature && e.size > psize * kPredatorFraction;
+            const bool prey = e.role == Role::Creature && !predator;
+            const char* table = predator ? "npc_mad" : "npc_scared";
+            const float w = look_weight(table, predator ? 4 : 5);   // pursue / flee target
+            const float turn = e.turn_factor > 0.0f ? e.turn_factor : 1.0f;
+            const float speed = predator
+                ? (e.chase_speed > 0.0f ? e.chase_speed : kPredatorSpeed)
+                : (e.flee_speed > 0.0f ? e.flee_speed : kPreySpeed);
+            if (predator || prey) {
+                const float dir = predator ? 1.0f : -1.0f;
+                const float ww = (w > 0.0f ? w : 1.0f) * turn;
+                e.vx += (dx / dist) * speed * dir * ww * dt;
+                e.vy += (dy / dist) * speed * dir * ww * dt;
+                const float sp = std::sqrt(e.vx * e.vx + e.vy * e.vy);
+                if (sp > speed) { e.vx *= speed / sp; e.vy *= speed / sp; }
             }
             const float flock_w = look_weight("NPC_idle", 6);
             if (flock_w > 0.0f && e.role == Role::Creature) {
@@ -864,7 +956,7 @@ void World::tick(float dt) {
                     if (!other.alive || other.role != Role::Creature) continue;
                     if (other.archetype == e.archetype) {
                         const float dx2 = other.x - e.x, dy2 = other.y - e.y;
-                        if (dx2 * dx2 + dy2 * dy2 < kAggro * kAggro) {
+                        if (dx2 * dx2 + dy2 * dy2 < aware * aware) {
                             avg_x += other.x;
                             avg_y += other.y;
                             ++count;
@@ -877,16 +969,10 @@ void World::tick(float dt) {
                     const float fdx = avg_x - e.x, fdy = avg_y - e.y;
                     const float flen = std::sqrt(fdx * fdx + fdy * fdy);
                     if (flen > 0.001f) {
-                e.vx += (fdx / flen) * kPreyAccel * flock_w * dt;
-                e.vy += (fdy / flen) * kPreyAccel * flock_w * dt;
+                        e.vx += (fdx / flen) * kPreyAccel * flock_w * dt;
+                        e.vy += (fdy / flen) * kPreyAccel * flock_w * dt;
                     }
                 }
-            }
-            const float cap = predator ? kPredatorSpeed : kPreySpeed;
-            const float sp = std::sqrt(e.vx * e.vx + e.vy * e.vy);
-            if (sp > cap) {
-                e.vx *= cap / sp;
-                e.vy *= cap / sp;
             }
         }
     }
@@ -909,8 +995,9 @@ void World::tick(float dt) {
             const float dx = e.x - pl->x, dy = e.y - pl->y;
             const float reach = pl->size + e.size;
             if (dx * dx + dy * dy > reach * reach) continue;
-            if (e.role == Role::Food || e.role == Role::Meat ||
-                e.size <= pl->size * kPredatorFraction) {
+            if (e.role != Role::Prop &&
+                (e.role == Role::Food || e.role == Role::Meat ||
+                 e.size <= pl->size * kPredatorFraction)) {
                 const float area = pl->size * pl->size + e.size * e.size * kGrowRate;
                 pl->size = std::sqrt(area) > kMaxSize ? kMaxSize : std::sqrt(area);
                 if (e.role == Role::Food) {
@@ -940,6 +1027,21 @@ void World::tick(float dt) {
                 if (pl->protect_time <= 0.0f) {
                     m_hp -= e.size * 18.0f * dt;
                     pl->protect_time = protect_time;
+                }
+                // The player bites back: a bigger creature still takes damage from the overlap.
+                if (e.role == Role::Creature && e.hp > 0.0f) {
+                    e.hp -= pl->size * 2.0f * dt;  // SEED: bite damage not recovered
+                    if (e.hp <= 0.0f) {
+                        e.hp = 0.0f;
+                        e.alive = false;
+                        drops.push_back(e);
+                        drop_loot(e);
+                        ++m_eaten;
+                        ++m_eaten_meat;
+                        m_dna += kPreyDna;
+                        pl->anim = kAnimEat;
+                        pl->anim_time = 0.0f;
+                    }
                 }
                 std::string attacker_label;
                 for (const Archetype& a : m_data.archetypes) {

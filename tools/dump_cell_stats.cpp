@@ -35,12 +35,18 @@ int main(int argc, char** argv) {
         const cell::Archetype& a = data.archetypes[i];
         std::printf("0x%08X  display=\"%s\"  name=\"%s\"  template=0x%08X  parts=%u\n",
                     a.id, a.display.c_str(), a.name.c_str(), a.template_id, a.part_count);
-        for (u32 off : cell::kStatOffsets) {
-            float v = a.stat(off);
-            if (v != 0.0f) {
-                std::printf("    +0x%03X: %.4f\n", off, v);
-            }
-        }
+        const cell::AiData& ai = a.ai;
+        std::printf("    hp=%u flags=%u cellType=%u unlockType=%u poison=0x%08X sound=0x%08X\n",
+                    a.scalars.hp, a.scalars.flags, a.scalars.cell_type, a.scalars.unlock_type,
+                    a.scalars.poison, a.scalars.sound);
+        std::printf("    ai: speed=%.3f chase=%.3f wander=%.3f flee=%.3f turn=%.3f flocking=%.3f\n",
+                    ai.speed, ai.chase_speed, ai.wander_speed, ai.flee_speed, ai.turn_factor,
+                    ai.flocking);
+        std::printf("        aware=%.3f food=%.3f pred=%.3f protectR=%.3f protectT=%.3f\n",
+                    ai.awareness_radius, ai.awareness_radius_food, ai.awareness_radius_predator,
+                    ai.protect_radius, ai.protect_time);
+        std::printf("        food=%.3f growCount=%.3f growAmount=%.3f hatch=%.3f chaseTime=%.3f\n",
+                    ai.food, ai.grow_count, ai.grow_amount, ai.hatch_duration, ai.chase_time);
         std::printf("\n");
     }
 
