@@ -604,7 +604,8 @@ bool present_cell_world() {
                 u32 col = part.unlocked ? (selected ? 0xFF80FF80u : 0xFFC0D0E0u) : 0xFF606060u;
                 const char* mark = part.unlocked ? (selected ? "[x]" : "[ ]") : "[-]";
                 ov.text_fmt(panel_x + 16.f, panel_y + (float)y_off, col,
-                            "%s %s (%d DNA)", mark, part.display.c_str(), part.cost);
+                            "%s %s (type %u, %d DNA)", mark, part.display.c_str(), part.cell_type,
+                            part.cost);
                 y_off += 22;
             }
             ov.text_fmt(panel_x + 16.f, panel_y + (float)y_off + 8.f, 0xFFE8FFE8u,

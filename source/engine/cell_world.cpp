@@ -288,6 +288,7 @@ std::vector<World::PartInfo> World::parts_list() const {
         info.display = info.name;
         info.cost = 10;  // SEED: DNA cost not recovered from the shipped data
         info.unlocked = true;
+        info.cell_type = a.scalars.cell_type;
         parts.push_back(info);
     }
     return parts;

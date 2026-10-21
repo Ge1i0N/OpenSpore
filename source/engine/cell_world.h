@@ -98,6 +98,7 @@ public:
         std::string display;
         int cost;
         bool unlocked;
+        u32 cell_type = 0;  // the archetype's `cellType` (the shipped part taxonomy id)
     };
     std::vector<PartInfo> parts_list() const;
     // Get the list of selected parts.
