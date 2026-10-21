@@ -229,6 +229,11 @@ entry is `{type, cellID, tableID, weight(float), count, countDelta, levelOffset}
   `loot_random`, `loot_ice_chunk`, `loot_rock_chunk`, `solid_pieces`
 * `loot_unlocks` (all part unlocks), `loot_placeholder`
 
+The table header also carries `mustHavePart` (record `+0x1c`, an int32 the docs describe as a
+flag): a table with it set only drops when the player already has a part equipped. In the
+shipped package exactly one table sets it — `loot_random`. The engine decodes the field and
+honours it as a drop gate.
+
 ## Look tables — `look_table` (9)
 
 Steering weights (`docs/LOOKTABLE_FORMAT.md`), one per behaviour:

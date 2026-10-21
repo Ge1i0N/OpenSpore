@@ -108,6 +108,11 @@ float archetype_hp(const Archetype& a) {
     return tier * 20.0f;
 }
 
+// A loot table with `mustHavePart` set only drops when the player has a part equipped.
+bool loot_allowed(const LootTable& t, const std::vector<std::string>& parts) {
+    return t.must_have_part == 0 || !parts.empty();
+}
+
 const Archetype* find_archetype(const GameData& d, const char* name) {
     const u32 id = fnv1_lower(name);
     for (const Archetype& a : d.archetypes) {
@@ -791,7 +796,7 @@ void World::drop_loot(const Entity& from) {
         if (t.id == table_id || t.name == table_name) { lt = &t; break; }
     }
     const LootTable* biome_lt = biome_loot(m_level.c_str());
-    if (biome_lt && biome_lt != lt) {
+    if (biome_lt && biome_lt != lt && loot_allowed(*biome_lt, m_selected_parts)) {
         for (const LootEntry& e : biome_lt->entries) {
             if (e.type == 1 && e.cell != 0 && e.weight > 0.0f) {
                 if (static_cast<int>(m_entities.size()) >= kMaxEntities) return;
@@ -810,6 +815,7 @@ void World::drop_loot(const Entity& from) {
         }
     }
     if (!lt || lt->entries.empty()) return;
+    if (!loot_allowed(*lt, m_selected_parts)) return;
     float total_weight = 0.0f;
     for (const LootEntry& e : lt->entries) {
         if (e.weight > 0.0f) total_weight += e.weight;

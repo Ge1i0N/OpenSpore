@@ -83,6 +83,7 @@ struct LootTable {
     std::string name;
     float min_radius = 0.0f, max_radius = 0.0f, initial_alpha = 0.0f, expel_force = 0.0f;
     u32 effect = 0;
+    u32 must_have_part = 0;  // record +0x1c: the table only drops when the player has a part
     float delay = 0.0f;
     std::vector<LootEntry> entries;
 };

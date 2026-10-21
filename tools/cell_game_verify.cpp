@@ -80,7 +80,7 @@ static std::vector<u8> make_loot_table() {
     put_le32(d, 36); put_le32(d, 1);       // off=36, count=1
     put_le_f32(d, 1.0f); put_le_f32(d, 2.0f); put_le_f32(d, 0.5f); put_le_f32(d, 3.0f);
     put_le32(d, 0x12345678u);              // effect
-    put_le32(d, 0);                        // pad
+    put_le32(d, 1);                        // mustHavePart
     put_le_f32(d, 0.5f);                   // delay
     put_le32(d, 1);                        // type cell
     put_le32(d, fnv1_lower("cell_unlock_mandible"));
@@ -207,6 +207,8 @@ int main(int argc, char** argv) {
         check(g.loot_tables[0].entries[0].weight == 90.0f, "loot weight");
         check(g.loot_tables[0].entries[0].cell == fnv1_lower("cell_unlock_mandible"), "loot cell id");
         check(g.loot_tables[0].effect == 0x12345678u, "loot effect");
+        check(g.loot_tables[0].must_have_part == 1, "loot mustHavePart");
+        check(g.loot_tables[0].delay == 0.5f, "loot delay");
     }
 
     // 4: mixed package type counts

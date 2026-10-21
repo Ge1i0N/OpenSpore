@@ -153,6 +153,7 @@ LootTable parse_loot_table(u32 id, const std::vector<u8>& d) {
     t.initial_alpha = le_f32(d.data() + 16);
     t.expel_force = le_f32(d.data() + 20);
     t.effect = le32(d.data() + 24);
+    t.must_have_part = le32(d.data() + 28);
     t.delay = le_f32(d.data() + 32);
     for (i32 k = 0; k < cnt; ++k) {
         size_t at = static_cast<size_t>(off) + static_cast<size_t>(k) * 28;
