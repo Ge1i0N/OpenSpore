@@ -68,6 +68,9 @@ struct CreatureStats {
     std::optional<u8> stat17;   // 0x02416C6C
     std::optional<u32> stat18;  // 0x02416C6D
     std::optional<u32> stat19;  // 0x02416C6E
+    // The cell-stage progress fields the engine writes: DNA earned and cells eaten.
+    u32 dna = 0;    // 0x043C4AB2
+    u32 eaten = 0;  // 0x04BFED68
 };
 
 struct StreamInfo {

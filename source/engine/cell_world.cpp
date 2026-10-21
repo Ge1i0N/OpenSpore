@@ -178,6 +178,8 @@ bool World::load_save(const std::string& path, std::string& error) {
                 m_entities[static_cast<size_t>(m_player)].size = sz;
             }
         }
+        m_dna = static_cast<int>(c.dna);
+        m_eaten = static_cast<int>(c.eaten);
     }
     return true;
 }

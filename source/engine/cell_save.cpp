@@ -60,6 +60,8 @@ void apply_field(CreatureStats& stats, u32 fid, const std::vector<u8>& val) {
     case 0x02416C6Cu: stats.stat17 = val[0]; break;
     case 0x02416C6Du: if (val.size() >= 4) stats.stat18 = be32(val.data()); break;
     case 0x02416C6Eu: if (val.size() >= 4) stats.stat19 = be32(val.data()); break;
+    case 0x043C4AB2u: if (val.size() >= 4) stats.dna = be32(val.data()); break;
+    case 0x04BFED68u: if (val.size() >= 4) stats.eaten = be32(val.data()); break;
     default: break;
     }
 }

@@ -263,6 +263,17 @@ int main(int argc, char** argv) {
         check(w.load_memory(dbpf.data(), dbpf.size(), "save", err), "save load");
         std::string lerr;
         check(w.set_level("level_water", lerr), "save set level");
+        // Eat a food item so the save carries a non-zero DNA / eaten count.
+        for (size_t i = 0; i < w.entities().size(); ++i) {
+            if (w.entities()[i].role == Role::Food && w.entities()[i].alive) {
+                w.teleport_player(w.entities()[i].x, w.entities()[i].y);
+                w.tick(0.05f);
+                break;
+            }
+        }
+        check(w.dna() > 0, "eating awards DNA before the save");
+        const int dna_before = w.dna();
+        const int eaten_before = w.eaten();
         if (w.player()) {
             w.teleport_player(12.0f, -7.0f);
             w.tick(0.05f);
@@ -283,6 +294,8 @@ int main(int argc, char** argv) {
         } else {
             check(false, "save restores a player");
         }
+        check(w2.dna() == dna_before, "save restores the DNA count");
+        check(w2.eaten() == eaten_before, "save restores the eaten count");
         _unlink(path);
     }
 
