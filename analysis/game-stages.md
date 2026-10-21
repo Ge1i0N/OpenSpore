@@ -126,6 +126,11 @@
 * The archetype fields beyond the shipped 400-byte record (`ai_hard`, `ai_easy`, `size`, `eat`,
   `friendGroup`, …) are named in the binary but not present in the data, so the engine reads only
   the default `ai` block.
+* The **level progression** walks the shipped biome list in the `CellGame` globals record
+  (`ice, rock, plant, water, beach, random`). That is the record's order; that it is also the
+  **campaign** order is not independently confirmed.
+* The DNA a killed cell is worth is still a seed (`kPlantDna`/`kMeatDna`/`kPreyDna`); the
+  archetype's `food` value is decoded but the original's food→DNA formula was not recovered.
 * No `CreatureGame`/`TribeGame`/`CivilisationGame`/`SpaceGame` behaviour; no editor
   drivers; no `FUN_00b5dcd0` tag dispatch in the runtime.
 * Host policies: case-insensitive name match (same rule as `appmodes`), `u64` tick
