@@ -283,7 +283,7 @@ target_compile_definitions(gge_star_input_verify PRIVATE WIN32_LEAN_AND_MEAN NOM
 target_link_libraries(gge_star_input_verify PRIVATE user32 gdi32 ole32)
 add_executable(game_stages_verify EXCLUDE_FROM_ALL tools/game_stages_verify.cpp
   source/engine/game_stages.cpp source/engine/cell_world.cpp source/engine/cell_game.cpp
-  source/engine/naming.cpp source/engine/pkg.cpp source/engine/refpack.cpp
+  source/engine/cell_save.cpp source/engine/naming.cpp source/engine/pkg.cpp source/engine/refpack.cpp
   source/engine/fs.cpp source/engine/log.cpp)
 target_include_directories(game_stages_verify PRIVATE source)
 target_compile_definitions(game_stages_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
@@ -338,6 +338,32 @@ add_executable(overlay_clip_verify EXCLUDE_FROM_ALL tools/overlay_clip_verify.cp
 target_include_directories(overlay_clip_verify PRIVATE source)
 target_compile_definitions(overlay_clip_verify PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_link_libraries(overlay_clip_verify PRIVATE d3d9 user32 gdi32)
+# The documented verification commands run build\Debug\<tool>.exe (RESUME.md, README.md), but
+# CMake writes executables to build\bin\Debug\. Mirror every verification tool into build\Debug\
+# as well, so the documented path always runs the FRESH binary: running a stale one silently
+# invalidates a verification. The app itself stays in build\bin\Debug\, where its Data/ tree is.
+set(OS_VERIFY_TOOLS
+  cell_game_verify cell_save_dump cell_save_verify cell_world_verify
+  dbpf_inventory_inspect dbpf_resource_inspect dbpf_serialized_frame_inspect
+  dump_cell_stats game_stages_verify gge_animated_verify
+  gge_catalog_snapshot_inspect gge_catalog_snapshot_verify gge_catalog_verify
+  gge_dbcheck_verify gge_image_verify gge_intro_verify gge_star_input_verify
+  gge_star_instance_verify gge_star_lifecycle_verify gge_star_phase1_verify
+  gge_star_present_verify gge_star_scene_verify gge_star_transition_verify
+  gge_streaming_image_verify mode_ui_verify overlay_clip_verify pkg_lifetime_verify
+  planet_record_inspect planet_record_verify save_header_inspect save_header_verify
+  spui_verify starsdb_context_inspect starsdb_context_verify starsdb_dbpf_inspect
+  starsdb_dbpf_verify starsdb_gge_capture starsdb_inspect starsdb_links_verify
+  starsdb_postload_verify starsdb_save_corpus_inspect starsdb_verify)
+foreach(t IN LISTS OS_VERIFY_TOOLS)
+  if(TARGET ${t})
+    add_custom_command(TARGET ${t} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/$<CONFIG>"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+              "$<TARGET_FILE:${t}>" "${CMAKE_BINARY_DIR}/$<CONFIG>/${t}.exe")
+  endif()
+endforeach()
+
 if(MSVC)
   target_compile_options(spui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
   target_compile_options(mode_ui_verify PRIVATE /W4 /permissive- /utf-8 /EHsc)
