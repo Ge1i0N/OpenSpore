@@ -32,6 +32,10 @@ u32 hash_lower(const char* s);
 const char* instance_name(u32 id);
 const char* type_name(u32 id);
 
+// Returns the tuning-property name for a property id (reg_property.txt), or nullptr. The cell
+// stage's `prop` resource keys its curves by these hashed property ids.
+const char* property_name(u32 id);
+
 // `group/instance.type` style path, or a hex form when the id is unknown.
 std::string resource_path(u32 type, u32 group, u32 instance);
 

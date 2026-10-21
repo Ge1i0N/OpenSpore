@@ -12,6 +12,7 @@ namespace {
 
 std::unordered_map<u32, std::string> g_instances;
 std::unordered_map<u32, std::string> g_types;
+std::unordered_map<u32, std::string> g_properties;
 bool g_loaded = false;
 
 bool read_lines(const std::filesystem::path& p, std::vector<std::string>& out) {
@@ -93,11 +94,14 @@ u32 load() {
     g_loaded = true;
     auto rf = find_file("reg_file.txt");
     auto rt = find_file("reg_type.txt");
+    auto rp = find_file("reg_property.txt");
     if (!rf.empty()) parse_registry(rf, g_instances);
     if (!rt.empty()) parse_registry(rt, g_types);
-    LOG_INFO("naming", "registry: %zu instance/group names, %zu type names (source: %s)",
-             g_instances.size(), g_types.size(), rf.empty() ? "<none>" : rf.string().c_str());
-    return (u32)(g_instances.size() + g_types.size());
+    if (!rp.empty()) parse_registry(rp, g_properties);
+    LOG_INFO("naming", "registry: %zu instance/group names, %zu type names, %zu property names (source: %s)",
+             g_instances.size(), g_types.size(), g_properties.size(),
+             rf.empty() ? "<none>" : rf.string().c_str());
+    return (u32)(g_instances.size() + g_types.size() + g_properties.size());
 }
 
 bool loaded() { return g_loaded; }
@@ -110,6 +114,11 @@ const char* instance_name(u32 id) {
 const char* type_name(u32 id) {
     auto it = g_types.find(id);
     return it == g_types.end() ? nullptr : it->second.c_str();
+}
+
+const char* property_name(u32 id) {
+    auto it = g_properties.find(id);
+    return it == g_properties.end() ? nullptr : it->second.c_str();
 }
 
 std::string resource_path(u32 type, u32 group, u32 instance) {

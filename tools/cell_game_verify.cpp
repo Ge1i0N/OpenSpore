@@ -140,6 +140,26 @@ static std::vector<u8> make_density() {
     return d;
 }
 
+// The `prop` property table (tools/prop.py): u32 BE entry_count, then per entry
+// {u32 BE key, u32 BE type, u32 BE item_count, u32 BE item_size} + item data. A float2 curve has
+// type 0x0030009C, item_size 8, and little-endian (x, y) points. `time_dilation` is the shipped
+// key 0x18B75C47 (reg_property.txt).
+static std::vector<u8> make_prop() {
+    std::vector<u8> d;
+    auto put_be32 = [&](u32 x) {
+        d.push_back((x >> 24) & 0xFF); d.push_back((x >> 16) & 0xFF);
+        d.push_back((x >> 8) & 0xFF); d.push_back(x & 0xFF);
+    };
+    put_be32(1);                        // one entry
+    put_be32(0x18B75C47u);              // time_dilation
+    put_be32(0x0030009Cu);              // float2 array
+    put_be32(2);                        // 2 points
+    put_be32(8);                        // 8 bytes/point
+    put_le_f32(d, 0.5f); put_le_f32(d, 4.0f);
+    put_le_f32(d, 1.0f); put_le_f32(d, 2.0f);
+    return d;
+}
+
 int main(int argc, char** argv) {
     const u32 squid = fnv1_lower("cell_squid");
     const u32 booster = fnv1_lower("loot_booster");
@@ -285,6 +305,24 @@ int main(int argc, char** argv) {
         check(g.layers[0].data.size() == 65536, "density payload retained");
     }
 
+    // 11: prop property table — the real tuning-curve format
+    {
+        std::vector<Rec> recs = {{cell::kTypeProp, 0, 0xC951EB63u, make_prop()}};
+        auto dbpf = make_dbpf(recs);
+        cell::GameData g; std::string err;
+        bool ok = cell::decode_from_memory(dbpf.data(), dbpf.size(), "test", g, err);
+        check(ok, "decode prop");
+        check(g.properties.size() == 1, "one prop curve");
+        if (!g.properties.empty()) {
+            check(g.properties[0].key == "time_dilation", "prop curve keyed by property name");
+            check(g.properties[0].points.size() == 2, "prop curve point count");
+            check(g.properties[0].points[0].first == 0.5f && g.properties[0].points[0].second == 4.0f,
+                  "prop curve point 0");
+            check(g.properties[0].points[1].first == 1.0f && g.properties[0].points[1].second == 2.0f,
+                  "prop curve point 1");
+        }
+    }
+
     // Optional: real package.
     if (argc > 1 && argv[1] && argv[1][0]) {
         cell::GameData g; std::string err;
@@ -296,7 +334,12 @@ int main(int argc, char** argv) {
                       << " random_spawns, " << g.worlds.size() << " worlds, "
                       << g.structures.size() << " structures, " << g.globals.size()
                       << " globals, " << g.background.size() << " background bands, "
-                      << g.layers.size() << " layers\n";
+                      << g.layers.size() << " layers, " << g.properties.size()
+                      << " property curves\n";
+            // The shipped package carries all 17 tuning curves; assert a known one resolves.
+            bool have_time = false;
+            for (const auto& c : g.properties) if (c.key == "time_dilation") have_time = true;
+            check(have_time, "real package has time_dilation curve");
         } else {
             std::cerr << "real package decode failed: " << err << "\n";
             ++failures;
@@ -307,6 +350,6 @@ int main(int argc, char** argv) {
         std::cerr << failures << " cell_game_verify check(s) failed\n";
         return 1;
     }
-    std::cout << "cell_game_verify: 10 constructed-input checks PASS\n";
+    std::cout << "cell_game_verify: 11 constructed-input checks PASS\n";
     return 0;
 }
