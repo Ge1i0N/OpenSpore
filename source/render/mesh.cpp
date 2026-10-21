@@ -285,11 +285,12 @@ void Mesh::bind_and_draw(IDirect3DDevice9* dev, D3DCOLOR tint, IDirect3DTexture9
         dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
         dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
         // Alpha TEST (not blend) so a texture's transparent regions (fins, gaps) are cut away
-        // without needing back-to-front sorting. The shipped cell-body rasters carry low alpha in
-        // their opaque regions, so a high reference culls the whole mesh; keep it at zero.
+        // without needing back-to-front sorting. The shipped cell-body rasters are mostly
+        // PARTIALLY transparent, so the reference has to stay at the lowest non-zero value:
+        // it cuts exactly the fully transparent texels and keeps the rest.
         dev->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
         dev->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-        dev->SetRenderState(D3DRS_ALPHAREF, 0x00);
+        dev->SetRenderState(D3DRS_ALPHAREF, 0x01);
     } else {
         dev->SetTexture(0, nullptr);
         dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);

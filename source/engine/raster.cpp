@@ -66,19 +66,21 @@ void decode_block(const u8* p, bool dxt1, u8 out[16][4]) {
     rgb565(c0, r0, g0, b0);
     rgb565(c1, r1, g1, b1);
     u8 cr[4] = {r0, r1, 0, 0}, cg[4] = {g0, g1, 0, 0}, cb[4] = {b0, b1, 0, 0};
+    u8 alphas[4] = {255, 255, 255, 255};
     if (c0 > c1) {
         cr[2] = (u8)((2 * r0 + r1) / 3); cg[2] = (u8)((2 * g0 + g1) / 3); cb[2] = (u8)((2 * b0 + b1) / 3);
         cr[3] = (u8)((r0 + 2 * r1) / 3); cg[3] = (u8)((g0 + 2 * g1) / 3); cb[3] = (u8)((b0 + 2 * b1) / 3);
     } else {
         cr[2] = (u8)((r0 + r1) / 2); cg[2] = (u8)((g0 + g1) / 2); cb[2] = (u8)((b0 + b1) / 2);
         cr[3] = cg[3] = cb[3] = 0;
+        alphas[3] = 0;  // DXT1: when c0 <= c1 the fourth colour is the transparent one
     }
     for (int i = 0; i < 16; ++i) {
         int ci = (bits >> (2 * i)) & 3;
         out[i][0] = cb[ci];
         out[i][1] = cg[ci];
         out[i][2] = cr[ci];
-        out[i][3] = 255;
+        out[i][3] = alphas[ci];
     }
 }
 
