@@ -93,8 +93,14 @@ void decode_stream(const std::vector<u8>& blob, std::vector<CreatureStats>& out,
         if (tag != kObjectTag) { pos++; continue; }
         u32 length = be32(blob.data() + pos + 4);
         u32 cnt = be32(blob.data() + pos + 8);
+        // The per-field header block (8 bytes each) is read INSIDE the loop below, so it must be
+        // inside the blob: a frame that claims 128 fields but a short length would otherwise read
+        // past the end. The length must also cover the count word plus that header block.
+        if (cnt > 128) { pos++; continue; }
+        if (pos + 12 + 8 * static_cast<size_t>(cnt) > blob.size()) { pos++; continue; }
         size_t frame_end = pos + 8 + length;
-        if (cnt > 128 || frame_end > blob.size()) { pos++; continue; }
+        if (frame_end > blob.size()) { pos++; continue; }
+        if (length < 4 + 8 * static_cast<size_t>(cnt)) { pos++; continue; }
         // A real frame's field sizes sum exactly to the frame length; the
         // tag dword can also occur inside payloads, so reject on mismatch
         // instead of stopping the walk.

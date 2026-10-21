@@ -17,11 +17,9 @@
 //   0x0240E422: stat1 (u8)  — offset 0x04, default 0
 //   0x0240E423: stat2 (u32) — offset 0x08, default 0xFFFFFFFF
 //   0x02E9EFD3: stat3 (u32) — offset 0x0C, default 0
-//   0x03CDD54B: stat4 (u32) — offset 0x10, default 79
-//   0x024162BF: pos_x (f32) — offset 0x14
-//   0x024162C0: pos_y (f32) — offset 0x18
-//   0x024162C1: pos_z (f32) — offset 0x1C
-//   0x024162C2: pos_w (f32) — offset 0x20
+//   0x03CDD54B: stat4 (u32) — offset 0x10, default 79. In the shipped save this is the object
+//               sequence id: it counts 79, 80, 81 … across a stream's groups.
+//   0x024162BF..C2: packed int coordinates, NOT floats (the wire values look like int16 pairs)
 //   0x02416C5E: 12 B, in data always zeros (vec3-sized)
 //   0x02416C60: 16 B, in data 0,0,0,1.0 (vec4/quat-sized)
 //   0x02416C64: f32, in data 1.0
@@ -68,7 +66,10 @@ struct CreatureStats {
     std::optional<u8> stat17;   // 0x02416C6C
     std::optional<u32> stat18;  // 0x02416C6D
     std::optional<u32> stat19;  // 0x02416C6E
-    // The cell-stage progress fields the engine writes: DNA earned and cells eaten.
+    // The engine's two progress slots. Their GAME meaning is UNPROVEN: every one of the 250
+    // shipped creatures stores 0 in both (analysis/audit/cell-save-full.json), so they cannot be
+    // matched against a shipped value. The engine's use of them - DNA earned in `dna`, cells
+    // eaten in `eaten` - is a host convention, not a recovered semantic.
     u32 dna = 0;    // 0x043C4AB2
     u32 eaten = 0;  // 0x04BFED68
 };

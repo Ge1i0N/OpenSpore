@@ -418,7 +418,9 @@ bool present_cell_world() {
             }
         }
     }
-    // The level's `_bg` scenery (Role::Prop) is drawn dimmed, behind the playable cells.
+    // The level's `_bg` scenery (Role::Prop). The shipped `_bg` archetypes DO have gmdl bodies
+    // (cell_jawhead, cell_puffish, cell_megamouth), so they are drawn by the 3D mesh pass above;
+    // this disc fallback only covers a prop without a body mesh.
     for (const cell::Entity& e : ents) {
         if (!e.alive || e.role != cell::Role::Prop) continue;
         if (body_for(world, e)) continue;
@@ -556,15 +558,18 @@ bool present_cell_world() {
     char line[192];
     std::snprintf(line, sizeof(line), "CELL STAGE  -  %s", world.level().c_str());
     ov.text_fmt(16.f, 10.f, 0xFFBEE8FF, "%s", line);
-    size_t alive_cells = 0;
-    for (const cell::Entity& e : ents)
-        if (e.alive && e.role != cell::Role::Food && e.role != cell::Role::Meat) ++alive_cells;
+    size_t alive_cells = 0, scenery = 0;
+    for (const cell::Entity& e : ents) {
+        if (!e.alive) continue;
+        if (e.role == cell::Role::Prop) ++scenery;
+        else if (e.role != cell::Role::Food && e.role != cell::Role::Meat) ++alive_cells;
+    }
     const char* diet = world.diet() == cell::Diet::Carnivore   ? "CARNIVORE"
                         : world.diet() == cell::Diet::Omnivore ? "OMNIVORE"
                                                                : "HERBIVORE";
     const char* anim_name = world.player() ? world.player()->anim : "ANIM_IDLE";
-    std::snprintf(line, sizeof(line), "cells %zu   eaten %d   DNA %d   %s   size %.2f   t %.1fs",
-                  alive_cells, world.eaten(), world.dna(), diet, psize, world.time());
+    std::snprintf(line, sizeof(line), "cells %zu (+%zu scenery)   eaten %d   DNA %d   %s   size %.2f   t %.1fs",
+                  alive_cells, scenery, world.eaten(), world.dna(), diet, psize, world.time());
     ov.text_fmt(16.f, 28.f, 0xFF8FB8D8, "%s", line);
     ov.text_fmt(16.f, 44.f, 0xFF6A8AAA, "anim: %s  evo: %d", anim_name, world.evo_points());
 

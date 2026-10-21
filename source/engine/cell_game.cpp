@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstring>
 
+#include "engine/log.h"
 #include "engine/naming.h"
 #include "engine/pkg.h"
 
@@ -46,7 +47,7 @@ void parse_ai(const std::vector<u8>& d, AiData& a) {
     auto b = [&](size_t off) { return off < d.size() ? d[off] : u8(0); };
     a.awareness_radius = f(kBase + 0x04);
     a.awareness_radius_food = f(kBase + 0x08);
-    a.awareness_radius_predator = f(kBase + 0x0c);
+    a.awareness_radius_predator = dw(kBase + 0x0c);
     a.movement_style = dw(kBase + 0x10);
     a.flocking = f(kBase + 0x14);
     a.speed = f(kBase + 0x18);
@@ -59,23 +60,23 @@ void parse_ai(const std::vector<u8>& d, AiData& a) {
     a.fears_nearby_death_time = f(kBase + 0x34);
     a.protect_radius = f(kBase + 0x38);
     a.protect_time = f(kBase + 0x3c);
-    a.turn_factor = f(kBase + 0x40);
-    a.axial_movement = f(kBase + 0x44);
-    a.spawn_time = f(kBase + 0x48);
-    a.spawn_rest_time = f(kBase + 0x4c);
-    a.spawn_output = f(kBase + 0x50);
-    a.arc_length = f(kBase + 0x54);
+    a.turn_factor = dw(kBase + 0x40);
+    a.axial_movement = dw(kBase + 0x44);
+    a.spawn_time = dw(kBase + 0x48);
+    a.spawn_rest_time = dw(kBase + 0x4c);
+    a.spawn_output = dw(kBase + 0x50);
+    a.arc_length = dw(kBase + 0x54);
     a.arc_length_secondary = f(kBase + 0x58);
-    a.num_arcs = f(kBase + 0x5c);
-    a.key_transformation = dw(kBase + 0x60);
-    a.key_projectile = dw(kBase + 0x64);
+    a.num_arcs = dw(kBase + 0x5c);
+    a.key_transformation = f(kBase + 0x60);
+    a.key_projectile = f(kBase + 0x64);
     a.food = f(kBase + 0x68);
     a.grow_count = f(kBase + 0x6c);
-    a.digestion_count = f(kBase + 0x70);
-    a.digestion_time = f(kBase + 0x74);
+    a.digestion_count = dw(kBase + 0x70);
+    a.digestion_time = dw(kBase + 0x74);
     a.digestion_output = f(kBase + 0x78);
     a.flee_time = f(kBase + 0x7c);
-    a.flee_rest_time = f(kBase + 0x80);
+    a.flee_rest_time = dw(kBase + 0x80);
     a.chase_time = f(kBase + 0x84);
     a.chase_rest_time = f(kBase + 0x88);
     a.chases_damage = b(kBase + 0x8c);
@@ -85,13 +86,13 @@ void parse_ai(const std::vector<u8>& d, AiData& a) {
     a.fears_electric = b(kBase + 0x90);
     a.fears_poison = b(kBase + 0x91);
     a.ignores_food = b(kBase + 0x92);
-    a.awake_time = f(kBase + 0x94);
-    a.sleep_time = f(kBase + 0x98);
+    a.awake_time = dw(kBase + 0x94);
+    a.sleep_time = dw(kBase + 0x98);
     a.grow_amount = f(kBase + 0x9c);
     a.hatch_duration = f(kBase + 0xa0);
-    a.poison_recharge = f(kBase + 0xa4);
-    a.electric_recharge = f(kBase + 0xa8);
-    a.electric_recharge_vs_small = f(kBase + 0xac);
+    a.poison_recharge = dw(kBase + 0xa4);
+    a.electric_recharge = dw(kBase + 0xa8);
+    a.electric_recharge_vs_small = dw(kBase + 0xac);
     a.electric_discharge = f(kBase + 0xb0);
 }
 
@@ -207,12 +208,23 @@ Globals parse_globals(u32 id, const std::vector<u8>& d) {
     Globals g;
     g.id = id;
     if (const char* n = naming::instance_name(id)) g.name = n;
-    for (size_t o = 0; o + 4 <= d.size() && o < 0x40; o += 4) {
+    // The record interleaves ids and floats (see struct Globals). Reading it as one block of
+    // ids followed by one block of floats puts `CellBackgrounds` in the float list and misses
+    // `default_look_algorithm`.
+    auto add_ref = [&](size_t o) {
+        if (o + 4 > d.size()) return;
         const u32 r = le32(d.data() + o);
         g.refs.push_back(r);
         g.ref_names.push_back(naming::instance_name(r) ? naming::instance_name(r) : std::string());
+    };
+    for (size_t o = 0; o <= 0x40 && o + 4 <= d.size(); o += 4) add_ref(o);
+    for (size_t o = 0x44; o <= 0x7C && o + 4 <= d.size(); o += 4) g.floats.push_back(le_f32(d.data() + o));
+    add_ref(0x80);
+    for (size_t o = 0x84; o <= 0xB8 && o + 4 <= d.size(); o += 4) g.floats.push_back(le_f32(d.data() + o));
+    if (d.size() >= 0xC4) {
+        g.num_high_lod_fg = le32(d.data() + 0xBC);
+        g.num_high_lod_bg = le32(d.data() + 0xC0);
     }
-    for (size_t o = 0x40; o + 4 <= d.size(); o += 4) g.floats.push_back(le_f32(d.data() + o));
     return g;
 }
 
@@ -221,25 +233,53 @@ Globals parse_globals(u32 id, const std::vector<u8>& d) {
 // A float2 curve has type 0x0030009C and item_size 8; its points are little-endian (x, y) pairs.
 // Each entry's key is a hashed tuning-property id (reg_property.txt), so the curve is keyed by its
 // resolved property NAME (e.g. "time_dilation"), which is what World::curve_value() looks up.
-std::vector<PropertyCurve> parse_prop_curves(const std::vector<u8>& d) {
+// How a `prop` record parsed. tools/prop.py reports the same three things: whether the parse
+// consumed the record EXACTLY, how many entries it claimed, and which curve keys could not be
+// resolved to a property name.
+struct PropDiagnostics {
+    u32 entries = 0;
+    u32 curves = 0;
+    u32 unresolved = 0;
+    u32 other_types = 0;
+    u32 consumed = 0;
+    bool exact = false;
+    std::string why;
+};
+
+std::vector<PropertyCurve> parse_prop_curves(const std::vector<u8>& d, PropDiagnostics& diag) {
     std::vector<PropertyCurve> out;
-    if (d.size() < 4) return out;
+    diag = PropDiagnostics{};
+    if (d.size() < 4) {
+        diag.why = "record shorter than the count word";
+        return out;
+    }
     const u32 count = be32(d.data());
-    if (count == 0 || count > 100000) return out;
+    diag.entries = count;
+    if (count == 0 || count > 100000) {
+        diag.why = "implausible entry count";
+        return out;
+    }
     size_t off = 4;
     for (u32 k = 0; k < count; ++k) {
-        if (off + 16 > d.size()) break;
+        if (off + 16 > d.size()) {
+            diag.why = "entry header past end";
+            break;
+        }
         const u32 key = be32(d.data() + off);
         const u32 type = be32(d.data() + off + 4);
         const u32 icnt = be32(d.data() + off + 8);
         const u32 isz = be32(d.data() + off + 12);
         off += 16;
-        if (off + static_cast<size_t>(icnt) * isz > d.size()) break;
+        if (off + static_cast<size_t>(icnt) * isz > d.size()) {
+            diag.why = "item data past end";
+            break;
+        }
         if (type == 0x0030009Cu && isz == 8 && icnt >= 1) {
             PropertyCurve c;
             if (const char* n = naming::property_name(key)) {
                 c.key = n;
             } else {
+                ++diag.unresolved;
                 char b[24];
                 std::snprintf(b, sizeof(b), "0x%08X", key);
                 c.key = b;
@@ -250,9 +290,15 @@ std::vector<PropertyCurve> parse_prop_curves(const std::vector<u8>& d) {
                 c.points.push_back({x, y});
             }
             out.push_back(std::move(c));
+            ++diag.curves;
+        } else {
+            ++diag.other_types;
         }
         off += static_cast<size_t>(icnt) * isz;
     }
+    diag.consumed = static_cast<u32>(off);
+    diag.exact = diag.why.empty() && off == d.size();
+    if (diag.why.empty() && !diag.exact) diag.why = "trailing bytes";
     return out;
 }
 
@@ -362,8 +408,15 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
         }
         case kTypeProp: {
             // One `prop` resource holds every tuning curve (17 in the shipped package).
-            std::vector<PropertyCurve> curves = parse_prop_curves(d);
+            PropDiagnostics diag;
+            std::vector<PropertyCurve> curves = parse_prop_curves(d, diag);
             for (PropertyCurve& c : curves) out.properties.push_back(std::move(c));
+            LOG_INFO("cell", "prop 0x%08X: %u entries -> %u curves (%u unresolved, %u other types), "
+                             "consumed %u of %zu bytes%s",
+                     id, diag.entries, diag.curves, diag.unresolved, diag.other_types,
+                     diag.consumed, d.size(), diag.exact ? "" : " - MISMATCH");
+            if (!diag.exact)
+                LOG_WARN("cell", "prop 0x%08X did not parse exactly: %s", id, diag.why.c_str());
             break;
         }
         default: break;

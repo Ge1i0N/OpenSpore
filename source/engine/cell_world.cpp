@@ -32,9 +32,9 @@ constexpr float kPlayerAccel = 70.0f;
 constexpr float kPlayerSpeed = 24.0f;
 constexpr float kDrag = 4.0f;
 constexpr float kPredatorAccel = 34.0f;  // SEED: not recovered
-constexpr float kPredatorSpeed = 10.0f;   // from cell_hero_L0 +0x0E0=10
+constexpr float kPredatorSpeed = 10.0f;   // SEED: fallback when the archetype has no speed
 constexpr float kPreyAccel = 20.0f;       // SEED: not recovered
-constexpr float kPreySpeed = 5.0f;        // from Cell_DuckyMed +0x0E0=5
+constexpr float kPreySpeed = 5.0f;        // SEED: fallback when the archetype has no speed
 constexpr float kAggro = 24.0f;           // SEED: not recovered
 constexpr float kGrowRate = 0.55f;        // SEED: not recovered
 constexpr float kPredatorFraction = 1.05f;  // SEED: not recovered
@@ -96,8 +96,10 @@ float hash01(u32 h) {
 // A cell's body radius. The archetype's cAIData `growAmount` (record +0x17c) is the shipped
 // size-like value (hero 0.275, Ducky 0.4, flora 0.3); the hash fallback only covers records with
 // none (the unnamed food props).
+// A cell's body radius. SEED: the archetype's real size field is `size` @ record +0x304, which
+// is OUTSIDE the shipped 400-byte record, so no size ships with the data. The cAIData
+// `growAmount` is a GROWTH amount, not a size, so it must not be used here.
 float archetype_size(const Archetype& a) {
-    if (a.ai.grow_amount > 0.0f) return a.ai.grow_amount;
     return 0.55f + 1.35f * hash01(a.id);
 }
 
@@ -161,7 +163,17 @@ bool World::load_save(const std::string& path, std::string& error) {
         return false;
     }
     if (!creatures.empty()) {
-        const cell::CreatureStats& c = creatures[0];
+        // The shipped save carries NO player marker: all 250 groups are identical apart from
+        // their object sequence id (0x03CDD54B, counting 79, 80, 81 …). Our own writer emits
+        // exactly one group - the player - so a single group is unambiguous. With several
+        // groups the engine takes the one with the LOWEST sequence id, i.e. the first creature
+        // created, which is the player at level start. That choice is a host policy, not a
+        // recovered rule.
+        size_t player_group = 0;
+        for (size_t i = 1; i < creatures.size(); ++i) {
+            if (creatures[i].stat4 < creatures[player_group].stat4) player_group = i;
+        }
+        const cell::CreatureStats& c = creatures[player_group];
         const float px = static_cast<float>(static_cast<i32>(c.pos_x)) / 1000.0f;
         const float py = static_cast<float>(static_cast<i32>(c.pos_y)) / 1000.0f;
         const float vx = static_cast<float>(static_cast<i32>(c.pos_z)) / 100.0f;
@@ -184,15 +196,17 @@ bool World::load_save(const std::string& path, std::string& error) {
     return true;
 }
 
-bool World::is_predator_archetype(u32 archetype_id) const {
-    for (const Archetype& a : m_data.archetypes) {
-        if (a.id != archetype_id) continue;
-        float e0 = a.stat(0x0E0);
-        float e8 = a.stat(0x0E8);
-        if (e0 > 0.0f || e8 > 0.0f) return true;
-        return false;
+// The player's invulnerability window after a hit: the archetype's cAIData `protectTime` when it
+// is set, else a documented seed. There is NO `protectTime` curve in the shipped prop table (its
+// 17 keys are the tuning names), so the old curve lookup could only ever return its default.
+float World::player_protect_time() const {
+    if (m_player >= 0 && static_cast<size_t>(m_player) < m_entities.size()) {
+        const u32 id = m_entities[static_cast<size_t>(m_player)].archetype;
+        for (const Archetype& a : m_data.archetypes) {
+            if (a.id == id && a.ai.protect_time > 0.0f) return a.ai.protect_time;
+        }
     }
-    return false;
+    return 0.5f;  // SEED: not recovered
 }
 
 std::vector<const Entity*> World::electric_targets(const Entity& source, float range) const {
@@ -324,88 +338,129 @@ bool World::write_save(const std::string& path, std::string& error) const {
     // The cell save stream is a sequence of field frames, each
     // [tag 0x01A80D26 BE][length BE][count BE][fid BE][size BE]*[payloads], grouped into one
     // creature by a 24-byte object trailer (see engine/cell_save.cpp). The shipped creature uses
-    // the 8-frame field-count pattern [5][4][25][11][4][2][35][8]; we emit that shape so the
-    // decoder reads it back. Field ids are the shipped wire ids (analysis/cell-save.md).
+    // the 8-frame field-count pattern [5][4][25][11][4][2][35][8].
+    //
+    // The wire ids and payload sizes below are the SHIPPED ones, taken from the shipped save
+    // audit (analysis/audit/cell-save-full.json, stream 0x018eb4b7): that stream's 150 creatures
+    // all use the identical 8-frame id/size pattern, so this is the shipped layout and not an
+    // invented one.
+    static const u32 kFrame0Ids[] = {0x0240E421u, 0x0240E422u, 0x0240E423u, 0x02E9EFD3u, 0x03CDD54Bu};
+    static const u32 kFrame0Sizes[] = {4, 1, 4, 4, 4};
+    static const u32 kFrame1Ids[] = {0x024162BFu, 0x024162C0u, 0x024162C1u, 0x024162C2u};
+    static const u32 kFrame1Sizes[] = {4, 4, 4, 4};
+    static const u32 kFrame2Ids[] = {
+        0x02416C5Eu, 0x02416C60u, 0x02416C61u, 0x02416C62u, 0x02416C63u, 0x02416C64u, 0x02416C65u,
+        0x02416C66u, 0x02416C67u, 0x02416C68u, 0x02416C69u, 0x02416C6Au, 0x02416C6Bu, 0x02416C6Cu,
+        0x02416C6Du, 0x02416C6Eu, 0x0316F520u, 0x0445DC86u, 0x047DF70Du, 0x047DF723u, 0x049100ECu,
+        0x05E8FAA8u, 0x0771D7B4u, 0xB1A64F7Bu, 0xD24B464Bu};
+    static const u32 kFrame2Sizes[] = {12, 16, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 4, 1, 4,
+                                       4, 4, 1, 12, 24, 4, 24, 1, 1, 1};
+    static const u32 kFrame3Ids[] = {0x02415689u, 0x0241568Au, 0x0241568Cu, 0x0241568Fu, 0x02415690u,
+                                    0x02415692u, 0x02415693u, 0x037D3DF5u, 0x039A844Fu, 0x049489A3u,
+                                    0x04C919ABu};
+    static const u32 kFrame3Sizes[] = {1, 4, 4, 4, 4, 12, 4, 4, 4, 12, 4};
+    static const u32 kFrame4Ids[] = {0x02415EB8u, 0x02415EB9u, 0x02415EBAu, 0x02415EBBu};
+    static const u32 kFrame4Sizes[] = {4, 4, 4, 4};
+    static const u32 kFrame5Ids[] = {0x043C4AB2u, 0x04BFED68u};
+    static const u32 kFrame5Sizes[] = {4, 4};
+    static const u32 kFrame6Ids[] = {
+        0x021D1BA5u, 0x021D1BAAu, 0x021D1BABu, 0x021D1BACu, 0x021D239Fu, 0x02415EBCu, 0x02415EBDu,
+        0x02415EBEu, 0x02415EC6u, 0x02415EC8u, 0x02415ECAu, 0x024CD902u, 0x0303FB98u, 0x03D97B19u,
+        0x03F64A78u, 0x042A2B0Eu, 0x04653B60u, 0x051B38FFu, 0x0521E608u, 0x0528933Eu, 0x0535A140u,
+        0x0547C1BFu, 0x05501F64u, 0x05501F65u, 0x05675535u, 0x05EF360Eu, 0x06948B64u, 0x076C8F46u,
+        0x076C8F4Du, 0x33ACE6B5u, 0x5242896Au, 0x52773F6Fu, 0x72774074u, 0xB2774021u, 0xD277405Au};
+    static const u32 kFrame6Sizes[] = {4, 4, 4, 4, 4, 1, 1, 1, 1, 4, 4, 1, 1, 4, 12, 1, 37, 4, 4, 8,
+                                       8, 4, 4, 4, 4, 4, 1, 92, 92, 4, 4, 4, 1, 4, 4};
+    static const u32 kFrame7Ids[] = {0x02E6E1ABu, 0x02E6E1ADu, 0x02E6E1AFu, 0x02E6E1B0u, 0x02E6E1B1u,
+                                     0x02E6E1B2u, 0x05F0D6F3u, 0x06A814A9u};
+    static const u32 kFrame7Sizes[] = {1, 4, 4, 4, 4, 4, 4, 4};
     auto put32be = [](std::vector<u8>& v, u32 x) {
         v.push_back((x >> 24) & 0xFF); v.push_back((x >> 16) & 0xFF);
         v.push_back((x >> 8) & 0xFF); v.push_back(x & 0xFF);
     };
     auto putf32be = [&](std::vector<u8>& v, float f) { u32 b; memcpy(&b, &f, 4); put32be(v, b); };
     auto zeros = [](std::vector<u8>& v, size_t n) { v.insert(v.end(), n, u8(0)); };
-    struct Field { u32 fid; std::vector<u8> val; };
-    auto frame = [&](std::vector<u8>& v, const std::vector<Field>& fields) {
-        u32 sum = 0;
-        for (const Field& f : fields) sum += static_cast<u32>(f.val.size());
-        put32be(v, 0x01A80D26u);
-        put32be(v, 4 + 8 * static_cast<u32>(fields.size()) + sum);
-        put32be(v, static_cast<u32>(fields.size()));
-        for (const Field& f : fields) { put32be(v, f.fid); put32be(v, static_cast<u32>(f.val.size())); }
-        for (const Field& f : fields) v.insert(v.end(), f.val.begin(), f.val.end());
-    };
     auto be4 = [&](u32 x) { std::vector<u8> v; put32be(v, x); return v; };
     auto be1 = [&](u8 x) { return std::vector<u8>{x}; };
+    auto beN = [&](u32 n) { return std::vector<u8>(n, u8(0)); };
+    auto beFloat = [&](float f) { std::vector<u8> v; putf32be(v, f); return v; };
+    // Emit one frame: the header, the id/size pairs, then the payloads (each already the length
+    // its shipped size demands).
+    auto emit = [&](std::vector<u8>& v, const u32* ids, const u32* sizes, u32 n,
+                    const std::vector<std::vector<u8>>& vals) {
+        u32 sum = 0;
+        for (u32 i = 0; i < n; ++i) sum += sizes[i];
+        put32be(v, 0x01A80D26u);
+        put32be(v, 4 + 8 * n + sum);
+        put32be(v, n);
+        for (u32 i = 0; i < n; ++i) { put32be(v, ids[i]); put32be(v, sizes[i]); }
+        for (u32 i = 0; i < n; ++i) v.insert(v.end(), vals[i].begin(), vals[i].end());
+    };
 
     const Entity* p = player();
     std::vector<u8> blob;
-    // Stream header: [count][crc][token][12-byte header].
-    put32be(blob, 1503);            // declared count word (block byte size in the real save)
+    // Stream header: [count][crc][token][12-byte header]. The count word holds the byte size of
+    // one group block, so it is patched in once the block is complete.
+    put32be(blob, 0);               // group byte size (patched below)
     put32be(blob, 0);               // crc
     put32be(blob, 0);               // token
     zeros(blob, 12);
-    // Frame 0: 5 stat fields.
-    frame(blob, {{0x0240E421u, be4(0)}, {0x0240E422u, be1(0)}, {0x0240E423u, be4(0xFFFFFFFFu)},
-                 {0x02E9EFD3u, be4(0)}, {0x03CDD54Bu, be4(79)}});
-    // Frame 1: 4 packed coordinate fields (int16 pairs on the wire; we store world units * 1000).
+    // Frame 0: 5 stat fields (the shipped values).
+    emit(blob, kFrame0Ids, kFrame0Sizes, 5,
+         {be4(0), be1(0), be4(0xFFFFFFFFu), be4(0), be4(79)});
+    // Frame 1: 4 packed coordinate fields (we store world units * 1000).
     const i32 px = p ? static_cast<i32>(p->x * 1000.0f) : 0;
     const i32 py = p ? static_cast<i32>(p->y * 1000.0f) : 0;
     const i32 pz = p ? static_cast<i32>(p->vx * 100.0f) : 0;
     const i32 pw = p ? static_cast<i32>(p->vy * 100.0f) : 0;
-    frame(blob, {{0x024162BFu, be4(static_cast<u32>(px))}, {0x024162C0u, be4(static_cast<u32>(py))},
-                 {0x024162C1u, be4(static_cast<u32>(pz))}, {0x024162C2u, be4(static_cast<u32>(pw))}});
-    // Frame 2: 25 detailed stat fields (0x02416C5E..0x02416C6E).
+    emit(blob, kFrame1Ids, kFrame1Sizes, 4,
+         {be4(static_cast<u32>(px)), be4(static_cast<u32>(py)), be4(static_cast<u32>(pz)),
+          be4(static_cast<u32>(pw))});
+    // Frame 2: 25 detailed fields. 0x02416C60 is the position triple plus a trailing 1.0, and
+    // 0x02416C64 is the creature's scale.
     {
-        std::vector<Field> f;
-        f.push_back({0x02416C5Eu, std::vector<u8>(12, 0)});
-        f.push_back({0x02416C60u, std::vector<u8>(16, 0)});
-        for (u32 k = 0x02416C61u; k <= 0x02416C63u; ++k) f.push_back({k, be1(0)});
-        f.push_back({0x02416C64u, [&] { std::vector<u8> v; putf32be(v, p ? p->size : 1.0f); return v; }()});
-        for (u32 k = 0x02416C65u; k <= 0x02416C6Au; ++k) f.push_back({k, be1(0)});
-        f.push_back({0x02416C6Bu, be4(0)});
-        f.push_back({0x02416C6Cu, be1(0)});
-        f.push_back({0x02416C6Du, be4(0)});
-        f.push_back({0x02416C6Eu, be4(0)});
-        while (f.size() < 25) f.push_back({0x02416C6Eu, be1(0)});
-        frame(blob, f);
+        std::vector<std::vector<u8>> f;
+        for (u32 i = 0; i < 25; ++i) f.push_back(beN(kFrame2Sizes[i]));
+        std::vector<u8> pos;
+        putf32be(pos, p ? p->x : 0.0f);
+        putf32be(pos, p ? p->y : 0.0f);
+        putf32be(pos, p ? p->z : 0.0f);
+        putf32be(pos, 1.0f);
+        f[1] = pos;
+        f[5] = beFloat(p ? p->size : 1.0f);
+        emit(blob, kFrame2Ids, kFrame2Sizes, 25, f);
     }
-    // Frame 3: 11 fields (0x02415689..0x02415693).
+    // Frame 3: 11 fields.
     {
-        std::vector<Field> f;
-        for (u32 k = 0x02415689u; k <= 0x02415693u; ++k) f.push_back({k, be4(0)});
-        frame(blob, f);
+        std::vector<std::vector<u8>> f;
+        for (u32 i = 0; i < 11; ++i) f.push_back(beN(kFrame3Sizes[i]));
+        emit(blob, kFrame3Ids, kFrame3Sizes, 11, f);
     }
-    // Frame 4: 4 fields (0x02415EB8..0x02415EBB).
+    // Frame 4: 4 fields.
     {
-        std::vector<Field> f;
-        for (u32 k = 0x02415EB8u; k <= 0x02415EBBu; ++k) f.push_back({k, be4(0)});
-        frame(blob, f);
+        std::vector<std::vector<u8>> f;
+        for (u32 i = 0; i < 4; ++i) f.push_back(beN(kFrame4Sizes[i]));
+        emit(blob, kFrame4Ids, kFrame4Sizes, 4, f);
     }
-    // Frame 5: 2 fields (dna, eaten).
-    frame(blob, {{0x043C4AB2u, be4(static_cast<u32>(m_dna))},
-                 {0x04BFED68u, be4(static_cast<u32>(m_eaten))}});
+    // Frame 5: the 2 progress fields (dna, eaten) - the shipped 2-field frame.
+    emit(blob, kFrame5Ids, kFrame5Sizes, 2,
+         {be4(static_cast<u32>(m_dna)), be4(static_cast<u32>(m_eaten))});
     // Frame 6: 35 mixed fields.
     {
-        std::vector<Field> f;
-        for (int k = 0; k < 35; ++k) f.push_back({0x02E6E1ABu + static_cast<u32>(k), be1(0)});
-        frame(blob, f);
+        std::vector<std::vector<u8>> f;
+        for (u32 i = 0; i < 35; ++i) f.push_back(beN(kFrame6Sizes[i]));
+        emit(blob, kFrame6Ids, kFrame6Sizes, 35, f);
     }
-    // Frame 7: 8 fields (0x02E6E1AB..0x02E6E1B2).
+    // Frame 7: 8 fields.
     {
-        std::vector<Field> f;
-        for (u32 k = 0x02E6E1ABu; k <= 0x02E6E1B2u; ++k) f.push_back({k, be4(0)});
-        frame(blob, f);
+        std::vector<std::vector<u8>> f;
+        for (u32 i = 0; i < 8; ++i) f.push_back(beN(kFrame7Sizes[i]));
+        emit(blob, kFrame7Ids, kFrame7Sizes, 8, f);
     }
     // 24-byte object trailer closes the group.
     zeros(blob, 24);
+    const size_t group_bytes = blob.size();
+    for (int i = 0; i < 4; ++i) blob[i] = static_cast<u8>((group_bytes >> (24 - 8 * i)) & 0xFF);
 
     // DBPF (little-endian): header, then the payload at 0x60, then a kind-4 index (prefix 8 +
     // one 28-byte record: type, group, instance, offset, size, usize, sentinel).
@@ -632,16 +687,22 @@ void World::spawn_from_level(const Population& pop) {
             en.role = food ? Role::Food : Role::Creature;
             en.diet = diet;
             if (contains_ci(name, "egg")) {
-                en.hatch_time = curve_value("hatchDuration", 0.0f, 3.0f);
+                // The egg's hatch time is the archetype's cAIData `hatchDuration` (a cAIData
+                // field, not a curve - the shipped prop table has no `hatchDuration` key).
+                en.hatch_time = arch && arch->ai.hatch_duration > 0.0f ? arch->ai.hatch_duration
+                                                                      : 3.0f;  // SEED
             }
-            // The shipped archetype record carries the cell's size (cAIData `growAmount`).
+            // The archetype's real size field (`size` @ record +0x304) is outside the shipped
+            // 400-byte record, so the body radius is a SEED (see archetype_size).
             en.size = archetype_size(arch ? *arch : Archetype{});
             if (arch) {
                 en.hp = en.max_hp = archetype_hp(*arch);
+                en.move_speed = arch->ai.speed;
                 en.chase_speed = arch->ai.chase_speed;
                 en.flee_speed = arch->ai.flee_speed;
                 en.wander_speed = arch->ai.wander_speed;
                 en.turn_factor = arch->ai.turn_factor;
+                en.flocking = arch->ai.flocking;
                 en.aware_food = arch->ai.awareness_radius_food;
                 en.aware_predator = arch->ai.awareness_radius_predator;
             }
@@ -772,15 +833,19 @@ float World::stat_for_archetype(u32 archetype_id, u32 offset) const {
 }
 
 float World::hp_for_size(float size) const {
-    // Real HP from the archetype record +0x148 (game data).
-    // cell_hero_L0 has +0x148=10000, cell_poisonerMed has +0x148=8.
-    float real_hp = 0.0f;
+    // The archetype's `hp` (record +0xa8) is a small TIER (hero 3, squid 2, Ducky 2). The shipped
+    // HP formula was not recovered, so the tier -> points mapping below is a documented seed.
+    // Record +0x148 is NOT the HP: per the recovered descriptor that slot is the cAIData `food`
+    // value (the hero's is 10000), which is why it must not be read as hit points.
     if (m_player >= 0 && static_cast<size_t>(m_player) < m_entities.size()) {
         const Entity& p = m_entities[static_cast<size_t>(m_player)];
-        real_hp = stat_for_archetype(p.archetype, 0x148);
+        for (const Archetype& a : m_data.archetypes) {
+            if (a.id != p.archetype) continue;
+            if (a.scalars.hp > 0) return archetype_hp(a);
+            break;
+        }
     }
-    if (real_hp > 0.0f) return real_hp;
-    return 50.0f + size * 25.0f;  // fallback
+    return 50.0f + size * 25.0f;  // SEED fallback
 }
 
 void World::respawn_player() {
@@ -958,25 +1023,32 @@ void World::tick(float dt) {
             continue;
         }
         if (!m_player_alive) continue;  // food drifts; nothing hunts a dead player
+        if (e.role != Role::Creature) continue;  // scenery and food never hunt
         const float dx = px - e.x, dy = py - e.y;
         const float dist = std::sqrt(dx * dx + dy * dy);
-        // Awareness: the archetype's cAIData awareness radius (food-specific, else predator),
-        // scaled by the shipped `awareness_dilation` curve (perception radius vs size).
+        // Awareness: the archetype's cAIData awareness radius (the food-specific one, else the
+        // predator one), scaled by the shipped `awareness_dilation` curve (perception vs size).
         const float base_aware = e.aware_food > 0.0f ? e.aware_food
-                              : e.aware_predator > 0.0f ? e.aware_predator : kAggro;
+                              : (e.aware_predator > 0 ? static_cast<float>(e.aware_predator)
+                                                      : kAggro);
         const float aware = base_aware * curve_value("awareness_dilation", e.size, 1.0f);
         if (dist < aware && dist > 0.001f) {
             // A creature is a predator when it is bigger than the player, prey when smaller (the
             // real mechanic: bigger eats smaller). This replaces the old speed-slot test.
-            const bool predator = e.role == Role::Creature && e.size > psize * kPredatorFraction;
-            const bool prey = e.role == Role::Creature && !predator;
+            const bool predator = e.size > psize * kPredatorFraction;
             const char* table = predator ? "npc_mad" : "npc_scared";
             const float w = look_weight(table, predator ? 4 : 5);   // pursue / flee target
-            const float turn = e.turn_factor > 0.0f ? e.turn_factor : 1.0f;
+            // The archetype's own speeds: `chaseSpeed` drives a predator, `speed` drives a normal
+            // move. The shipped `fleeSpeed` is 0 in 188 of the 189 archetypes, so it cannot be the
+            // flee speed. The steering acceleration is the integer `turnFactor`; the exact
+            // original formula was not recovered, so this is a host policy over shipped values.
             const float speed = predator
-                ? (e.chase_speed > 0.0f ? e.chase_speed : kPredatorSpeed)
-                : (e.flee_speed > 0.0f ? e.flee_speed : kPreySpeed);
-            if (predator || prey) {
+                ? (e.chase_speed > 0.0f ? e.chase_speed
+                                        : (e.move_speed > 0.0f ? e.move_speed : kPredatorSpeed))
+                : (e.flee_speed > 0.0f ? e.flee_speed
+                                       : (e.move_speed > 0.0f ? e.move_speed : kPreySpeed));
+            const float turn = e.turn_factor > 0 ? static_cast<float>(e.turn_factor) : 1.0f;
+            {
                 const float dir = predator ? 1.0f : -1.0f;
                 const float ww = (w > 0.0f ? w : 1.0f) * turn;
                 e.vx += (dx / dist) * speed * dir * ww * dt;
@@ -984,8 +1056,9 @@ void World::tick(float dt) {
                 const float sp = std::sqrt(e.vx * e.vx + e.vy * e.vy);
                 if (sp > speed) { e.vx *= speed / sp; e.vy *= speed / sp; }
             }
-            const float flock_w = look_weight("NPC_idle", 6);
-            if (flock_w > 0.0f && e.role == Role::Creature) {
+            // Cohesion with same-archetype neighbours, weighted by the archetype's `flocking`.
+            const float flock_w = e.flocking;
+            if (flock_w > 0.0f) {
                 float avg_x = 0.0f, avg_y = 0.0f;
                 int count = 0;
                 for (const Entity& other : m_entities) {
@@ -1058,11 +1131,12 @@ void World::tick(float dt) {
                 pl->anim = kAnimEat;
                 pl->anim_time = 0.0f;
                 play_sound("eat");
-            } else {
-                const float protect_time = curve_value("protectTime", 0.0f, 0.5f);
+            } else if (e.role != Role::Prop) {
+                // Scenery (the level's `_bg` population) is neither eaten nor harmful: it drifts
+                // and must never damage, knock back or kill the player.
                 if (pl->protect_time <= 0.0f) {
                     m_hp -= e.size * 18.0f * dt;
-                    pl->protect_time = protect_time;
+                    pl->protect_time = player_protect_time();
                 }
                 // The player bites back: a bigger creature still takes damage from the overlap.
                 if (e.role == Role::Creature && e.hp > 0.0f) {

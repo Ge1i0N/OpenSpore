@@ -119,8 +119,13 @@ static std::vector<u8> make_globals() {
     std::vector<u8> d(196, 0);
     auto put = [&](size_t at, u32 x) { memcpy(d.data() + at, &x, 4); };
     put(0x00, fnv1_lower("cell_food_L0"));        // ref 0
-    float f5 = 5.0f; memcpy(d.data() + 0x40, &f5, 4);   // first float
-    float f2 = 0.5f; memcpy(d.data() + 0x44, &f2, 4);
+    put(0x40, fnv1_lower("CellBackgrounds"));     // ref 16 (the last of the leading ids)
+    float f5 = 5.0f; memcpy(d.data() + 0x44, &f5, 4);   // first float
+    float f2 = 0.5f; memcpy(d.data() + 0x48, &f2, 4);
+    put(0x80, fnv1_lower("default_look_algorithm"));  // the id between the two float runs
+    float f3 = 1.0f; memcpy(d.data() + 0x84, &f3, 4);
+    put(0xBC, 10);   // numHighLOD_FG
+    put(0xC0, 2);    // numHighLOD_BG
     return d;
 }
 
@@ -276,10 +281,15 @@ int main(int argc, char** argv) {
         bool ok = cell::decode_from_memory(dbpf.data(), dbpf.size(), "test", g, err);
         check(ok, "decode globals");
         check(g.globals.size() == 1, "one globals");
-        check(g.globals[0].refs.size() == 16, "16 globals refs");
+        check(g.globals[0].refs.size() == 18, "18 globals refs");
         check(g.globals[0].refs[0] == fnv1_lower("cell_food_L0"), "globals ref 0");
-        check(g.globals[0].floats.size() == (196 - 0x40) / 4, "globals float count");
+        check(g.globals[0].refs[16] == fnv1_lower("CellBackgrounds"), "globals ref 16");
+        check(g.globals[0].refs[17] == fnv1_lower("default_look_algorithm"), "globals ref 17");
+        check(g.globals[0].floats.size() == 29, "globals float count");
         check(g.globals[0].floats[0] == 5.0f && g.globals[0].floats[1] == 0.5f, "globals floats");
+        check(g.globals[0].floats[15] == 1.0f, "globals float after the mid-record id");
+        check(g.globals[0].num_high_lod_fg == 10 && g.globals[0].num_high_lod_bg == 2,
+              "globals numHighLOD");
     }
 
     // 9: backgroundMap parallax bands

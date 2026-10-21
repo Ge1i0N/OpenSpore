@@ -53,15 +53,18 @@ struct Entity {
     Role role = Role::Creature;
     float x = 0.0f, y = 0.0f, z = 0.0f;
     float vx = 0.0f, vy = 0.0f;
-    float size = 1.0f;    // body radius (world units) - from the archetype's cAIData growAmount
+    float size = 1.0f;    // body radius (world units) - SEED: the archetype's real size field
+                           // (`size` @ record +0x304) is outside the shipped record
     float hp = 0.0f;      // current HP (0 = dead); NPCs can be damaged and die
     float max_hp = 0.0f;  // max HP
-    float chase_speed = 0.0f;   // archetype cAIData chaseSpeed
-    float flee_speed = 0.0f;    // archetype cAIData fleeSpeed
-    float wander_speed = 0.0f;  // archetype cAIData wanderSpeed
-    float turn_factor = 0.0f;   // archetype cAIData turnFactor
+    float move_speed = 0.0f;   // archetype cAIData speed
+    float chase_speed = 0.0f;  // archetype cAIData chaseSpeed
+    float flee_speed = 0.0f;   // archetype cAIData fleeSpeed
+    float wander_speed = 0.0f; // archetype cAIData wanderSpeed
+    u32   turn_factor = 0;     // archetype cAIData turnFactor (an integer, not a float)
+    float flocking = 0.0f;      // archetype cAIData flocking
     float aware_food = 0.0f;      // archetype cAIData awarenessRadiusFood
-    float aware_predator = 0.0f;  // archetype cAIData awarenessRadiusPredator
+    u32   aware_predator = 0;     // archetype cAIData awarenessRadiusPredator (an integer)
     float ttl = 0.0f;     // seconds left before a dropped meat chunk rots (0 = never)
     bool alive = true;    // cleared when eaten
     const char* anim = kAnimIdle;  // current animation event (from xls table)
@@ -210,7 +213,7 @@ private:
     void update_diet();
     float hp_for_size(float size) const;
     float stat_for_archetype(u32 archetype_id, u32 offset) const;
-    bool is_predator_archetype(u32 archetype_id) const;
+    float player_protect_time() const;
     void drop_loot(const Entity& from);
 
     GameData m_data;

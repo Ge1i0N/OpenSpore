@@ -39,10 +39,10 @@ int main(int argc, char** argv) {
         std::printf("    hp=%u flags=%u cellType=%u unlockType=%u poison=0x%08X sound=0x%08X\n",
                     a.scalars.hp, a.scalars.flags, a.scalars.cell_type, a.scalars.unlock_type,
                     a.scalars.poison, a.scalars.sound);
-        std::printf("    ai: speed=%.3f chase=%.3f wander=%.3f flee=%.3f turn=%.3f flocking=%.3f\n",
+        std::printf("    ai: speed=%.3f chase=%.3f wander=%.3f flee=%.3f turn=%u flocking=%.3f\n",
                     ai.speed, ai.chase_speed, ai.wander_speed, ai.flee_speed, ai.turn_factor,
                     ai.flocking);
-        std::printf("        aware=%.3f awareFood=%.3f awarePred=%.3f protectR=%.3f protectT=%.3f\n",
+        std::printf("        aware=%.3f awareFood=%.3f awarePred=%u protectR=%.3f protectT=%.3f\n",
                     ai.awareness_radius, ai.awareness_radius_food, ai.awareness_radius_predator,
                     ai.protect_radius, ai.protect_time);
         std::printf("        foodValue=%.3f growCount=%.3f growAmount=%.3f hatch=%.3f chaseTime=%.3f\n",

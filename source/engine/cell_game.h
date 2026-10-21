@@ -31,7 +31,9 @@
 //   +0x004 UTF-16LE display  NUL-terminated creature name ("Snorf", "Chomper")
 //   +0x0A4 u16 part_count    low 16 bits of the word (high 16 bits are 0xCCCC padding on most)
 //   +0x0C0..+0x0D8 u32 refs  template/skeleton/animation ids
-//   +0x0E0..+0x18C f32 stats interleaved with small flag ints; see cell::kStatOffsets
+//   +0x0E0..+0x194 cAIData block (0xb4 B) - MIXED types (int/float/packed), see struct AiData
+//   +0x194..+0x248 cAIData block for the "hard" difficulty (absent from the shipped record)
+//   +0x248..+0x2FC cAIData block for the "easy" difficulty (absent from the shipped record)
 //
 // Read-only. No writes; no game-state mutation.
 #include <cstdint>
@@ -92,11 +94,19 @@ struct LootTable {
 // descriptor's (cell type descriptor FUN_01375e30 @0x1375e30; cAIData builder @0x1374725); the
 // block is 0xb4 bytes. Values verified against the shipped records (e.g. Cell_DuckyMed: speed 11,
 // chaseSpeed 8, wanderSpeed 15, food 180, growAmount 0.4, hatchDuration 0.4, chaseTime 10).
+// The `cAIData` block at record +0xE0 (the runtime structure is 0xb4 B; the shipped 400-byte
+// record carries only its first 0xb0, so `electric_discharge` @+0xb0 is absent).
+//
+// The block is MIXED-TYPE, and the types below were measured over all 189 shipped archetypes: a
+// field whose raw word is a small integer in every record is an integer, one whose raw word is a
+// sane float bit pattern is a float, and the rest are kept raw. Reading an integer field as a
+// float yields a denormal (turn_factor 3 read as f32 = 4.2e-45), which silently disabled the
+// steering. Only the non-float fields are annotated; everything else is a float.
 struct AiData {
     float awareness_radius = 0.0f;            // +0x04
     float awareness_radius_food = 0.0f;       // +0x08
-    float awareness_radius_predator = 0.0f;   // +0x0c
-    u32   movement_style = 0;                 // +0x10
+    u32   awareness_radius_predator = 0;      // +0x0c  int  {0,4,8}
+    u32   movement_style = 0;                 // +0x10  int
     float flocking = 0.0f;                    // +0x14
     float speed = 0.0f;                       // +0x18
     float chase_speed = 0.0f;                 // +0x1c
@@ -108,23 +118,23 @@ struct AiData {
     float fears_nearby_death_time = 0.0f;     // +0x34
     float protect_radius = 0.0f;              // +0x38
     float protect_time = 0.0f;                // +0x3c
-    float turn_factor = 0.0f;                 // +0x40
-    float axial_movement = 0.0f;              // +0x44
-    float spawn_time = 0.0f;                  // +0x48
-    float spawn_rest_time = 0.0f;             // +0x4c
-    float spawn_output = 0.0f;                // +0x50
-    float arc_length = 0.0f;                  // +0x54
+    u32   turn_factor = 0;                    // +0x40  int  {0,1,2,3}
+    u32   axial_movement = 0;                 // +0x44  raw
+    u32   spawn_time = 0;                     // +0x48  raw
+    u32   spawn_rest_time = 0;                // +0x4c  int  {0,3}
+    u32   spawn_output = 0;                   // +0x50  int
+    u32   arc_length = 0;                     // +0x54  int  {0,1}
     float arc_length_secondary = 0.0f;        // +0x58
-    float num_arcs = 0.0f;                    // +0x5c
-    u32   key_transformation = 0;             // +0x60
-    u32   key_projectile = 0;                 // +0x64
+    u32   num_arcs = 0;                       // +0x5c  raw
+    float key_transformation = 0.0f;          // +0x60
+    float key_projectile = 0.0f;              // +0x64
     float food = 0.0f;                        // +0x68
     float grow_count = 0.0f;                  // +0x6c
-    float digestion_count = 0.0f;             // +0x70
-    float digestion_time = 0.0f;              // +0x74
+    u32   digestion_count = 0;                // +0x70  raw (packed byte pair)
+    u32   digestion_time = 0;                 // +0x74  int  {0,1}
     float digestion_output = 0.0f;            // +0x78
     float flee_time = 0.0f;                   // +0x7c
-    float flee_rest_time = 0.0f;              // +0x80
+    u32   flee_rest_time = 0;                 // +0x80  int  {0,1}
     float chase_time = 0.0f;                  // +0x84
     float chase_rest_time = 0.0f;             // +0x88
     u8    chases_damage = 0;                  // +0x8c
@@ -134,14 +144,14 @@ struct AiData {
     u8    fears_electric = 0;                 // +0x90
     u8    fears_poison = 0;                   // +0x91
     u8    ignores_food = 0;                   // +0x92
-    float awake_time = 0.0f;                  // +0x94
-    float sleep_time = 0.0f;                  // +0x98
+    u32   awake_time = 0;                     // +0x94  int  {0,1,10,20,21,30}
+    u32   sleep_time = 0;                     // +0x98  int  {0,256}
     float grow_amount = 0.0f;                 // +0x9c
     float hatch_duration = 0.0f;              // +0xa0
-    float poison_recharge = 0.0f;             // +0xa4
-    float electric_recharge = 0.0f;           // +0xa8
-    float electric_recharge_vs_small = 0.0f;  // +0xac
-    float electric_discharge = 0.0f;          // +0xb0
+    u32   poison_recharge = 0;                // +0xa4  int  {3,6,10,15}
+    u32   electric_recharge = 0;              // +0xa8  int  {1,2}
+    u32   electric_recharge_vs_small = 0;     // +0xac  int  {0,1,256}
+    float electric_discharge = 0.0f;          // +0xb0  absent from the shipped record
 };
 
 // Top-level cell-archetype scalars (REA descriptor FUN_01375e30 @0x1375e30). Offsets are byte
@@ -214,9 +224,13 @@ struct Structure {
 struct Globals {
     u32 id = 0;
     std::string name;
-    std::vector<u32> refs;    // 16 id references at +0x00..+0x3C
+    // The record interleaves ids and floats: 17 ids at +0x00..+0x40, 15 floats at
+    // +0x44..+0x7C, one more id at +0x80, 14 floats at +0x84..+0xB8, then two integers.
+    std::vector<u32> refs;    // the 18 id references, in record order
     std::vector<std::string> ref_names;  // the resolved name of each reference ("" when unknown)
-    std::vector<float> floats;  // tuning floats from +0x40
+    std::vector<float> floats;  // the 29 tuning floats, in record order
+    u32 num_high_lod_fg = 0;   // +0xBC (the GA globals type names it numHighLOD_FG, default 10)
+    u32 num_high_lod_bg = 0;   // +0xC0 (numHighLOD_BG, default 2)
 };
 
 // A tuning curve from the prop/cell_properties resource (type 0x00B1B104).
@@ -322,13 +336,10 @@ inline constexpr const char* kAnimProbSourceExpelled = "ANIM_PROB_SOURCE_EXPELED
 inline constexpr const char* kAnimProbStun = "ANIM_PROB_STUN";
 inline constexpr const char* kAnimStartled = "ANIM_STARTLED";
 
-// Documented float offsets inside a cell archetype record (see header comment). These are
-// offsets that were observed to carry gameplay-scale floats; the mapping to a specific stat is
-// NOT proven, so callers read them raw via Archetype::stat().
-inline constexpr u32 kStatOffsets[] = {
-    0x0E0, 0x0E8, 0x0F4, 0x0F8, 0x0FC, 0x100, 0x104, 0x108, 0x10C, 0x110,
-    0x114, 0x138, 0x140, 0x144, 0x148, 0x14C, 0x15C, 0x164, 0x16C, 0x17C, 0x180,
-};
+// The archetype record's cAIData block starts here. It is NOT a table of float offsets: the
+// block is mixed-type (int / float / packed), so the fields are decoded by NAME into struct
+// AiData instead. The raw reader Archetype::stat(offset) stays for offsets outside that block.
+inline constexpr u32 kAiDataOffset = 0x0E0;
 
 // Decode a CellGame.package from disk. Read-only.
 bool decode(const std::string& path, GameData& out, std::string& error);
