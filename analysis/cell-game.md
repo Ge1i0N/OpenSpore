@@ -169,7 +169,7 @@ base; the absolute offset adds the block base (`+0xE0` for the default `ai`):
 | `+0x34` | `fearsNearbyDeathTime` | `+0x114` | 1 |
 | `+0x38` | `protectRadius` | `+0x118` | 3 |
 | `+0x3C` | `protectTime` | `+0x11C` | 0 |
-| `+0x40` | `turnFactor` | `+0x120` | 0 |
+| `+0x40` | `turnFactor` | `+0x120` | 3 (int) |
 | `+0x44` | `axialMovement` | `+0x124` | 0 |
 | `+0x48` | `spawnTime` | `+0x128` | 0 |
 | `+0x4C` | `spawnRestTime` | `+0x12C` | 0 |
@@ -211,11 +211,78 @@ Cross-checks on the shipped records: `cell_hero_L0` → `food` 10000, `growAmoun
 These are the **game's** numbers, and `engine/cell_world.cpp` now reads the AI
 block and the scalars by these names instead of guessing offsets.
 
+**The block is MIXED-TYPE.** The types were measured over all 189 shipped
+archetypes: a field whose raw word is a small integer in every record is an
+integer, one whose raw word is a sane float bit pattern is a float, and the rest
+are packed/raw.
+
+* **int:** `awarenessRadiusPredator` {0,4,8}, `turnFactor` {0,1,2,3},
+  `spawnRestTime` {0,3}, `spawnOutput` {0}, `arcLength` {0,1},
+  `digestionTime` {0,1}, `fleeRestTime` {0,1}, `awakeTime` {0,1,10,20,21,30},
+  `sleepTime` {0,256}, `poisonRecharge` {3,6,10,15}, `electricRecharge` {1,2},
+  `electricRechargeVsSmall` {0,1,256}
+* **float:** everything else, including `keyTransformation` and `keyProjectile`
+  (which are 1.0/2.0/3.0-style floats, not the u32 the first decoder assumed)
+* **raw/packed:** `axialMovement`, `spawnTime`, `numArcs`, `digestionCount`
+  (raw `0x01010000` = a byte pair, not a float)
+
+Reading an integer field as a float yields a denormal — `turnFactor` 3 read as
+f32 is 4.2e-45 — which silently disabled the steering (every NPC's turn weight
+collapsed to zero). `struct AiData` therefore carries the mixed types and
+`parse_ai` reads the integer fields as words.
+
+**The tail is uncertain.** The runtime reads AI offsets `+0xA8/+0xAC/+0xB0` as a
+*digestion* trio (capacity / progress / max, with fallbacks at the creature
+state's `+0x125C/+0x1260/+0x1264`), while the descriptor's name strings for
+that tail say `electricRecharge` / `electricRechargeVsSmall` / `electricDischarge`.
+At most one of the two readings is right; the names are kept as the descriptor
+gives them and the conflict is recorded here.
+
 The old `kStatOffsets` list in `engine/cell_game.h` is superseded: it read the
 `+0x0E0` block with the wrong assumption that every slot was a float, which is
 why `tools/decode_cell_stats.py` printed garbage (that tool also called
 `refpack.decode` with three arguments; the signature is `decode(data, expect)`).
 `tools/dump_cell_stats.cpp` now prints the named fields.
+
+### Recovered cell-simulation formulas (GA binary)
+
+These were decompiled from the GA oracle (`refs/bins/ReleaseGA/SporeApp.exe.unpacked.exe`,
+image base `0x400000`). They are the game's rules; where the shipped data does not
+carry the inputs, the engine keeps a documented seed and says so.
+
+| rule | where | formula |
+|---|---|---|
+| property id | `FUN_00e4a9d0` → `FUN_00932e80` | FNV-1 **lowercase**: basis `0x811c9dc5`, prime `0x1000193`, multiply-then-XOR. Verified: `fnv1_lower("CellGame") == 0xa426730b`, the first word of the CellGame resource table at `0x15a7584`. |
+| AI block choice | `FUN_00e52910` | difficulty 0 → `ai_easy` @ record `+0x248`, 2 → `ai_hard` @ `+0x194`, else `ai` @ `+0xE0`; an unset (`-1`) block falls back to `ai`. Only `ai` ships in the 400-byte record. |
+| turn rate | globals + cAIData | `turnFactor` × the movement-mode multiplier (`npcTurnSpeedMultiplier_Jet/_Flagella/_Cilia`, all 1.0) × the per-mode turn speed (`jetTurnSpeed` 3.0, `ciliaTurnSpeed` 0.75, `flagellaTurnSpeedMin..Max` 3.0…10.0 ramped over `flagellaRampTime` 2.0 s, reset at `flagellaRampResetAngle` 30°). |
+| speed cap | globals + cAIData | the archetype's `speed` / `chaseSpeed` / `fleeSpeed` / `wanderSpeed` × `npcSpeedMultiplier` (1.0). |
+| size class | `FUN_00e4ee60` / `FUN_00e57340` | a threshold table at `0x1483c14` (28-byte stride; thresholds 0, 50, 100, 150, 200, 250, 300 …, class values 1,1,2,2,3,3 …, `size == 1000 → 10`) maps a raw size to a class, clamped to 0…4 by the row at `0x1483e60`. |
+| predator / prey | `FUN_00e573e0` | `clamp(class_b - class_a + 2, 0, 4)` — the size-class difference, not a raw ratio. The engine's size-ratio test is a seed approximation of this. |
+| food gained | `FUN_00e69480` | `magnitudeLadder[sizeIndex] / (cellGameScale × 60) × baseFoodValue`, where the magnitude ladder at `0x1483bd0` is `10, 30, 100, 300, 1000, 3000, 1e4, 3e4, 1e5, 3e5, 1e6, 3e6, 1e7, 3e7, 1e8, 3e8, 1e9, 3e9, 1e10, 3e10` (20 magnitudes). |
+| food credited | `FUN_00e71520` | `min(computed amount, cap)` — the cap lives in the creature state at `+0x126C`. |
+| `cEatData` | type `cEatData` (table `0x15a6680`) | `{foodValue +0, hpValue +4, bomb +8, poisonNova +9}`, exposed as the archetype's `eat` property (record `+0x30C`, outside the shipped 400-byte record). |
+| digestion | `FUN_00e71980` / `FUN_00e76a80` | a 0.3 s tick (the timer at `+0x154` wraps at 0.3 s); a 1.0-unit threshold gates the growth roll with probability 0.25 while idle-pending and 0.10 while digesting; the "wants to grow" flag is at `+0x18A`, the stored food value at `+0x160`. |
+| HP | — | **not recovered.** The archetype's `hp` (`+0xA8`, a tier: hero 3, squid 2, Ducky 2) seeds the creature state's `+0x125C` capacity field, but the `maxHP(size)` expression lives in an undiscovered vtable method. The engine's tier→points mapping is a seed. |
+| next level | — | **not recovered** as a function. The *ordering* is: the `globals` record's first five refs are the campaign worlds (`world_1`…`world_5` in the GA type = the shipped `world_ice, world_rock, world_plant, world_water, world_beach`), then `worldRandom`. The engine walks that shipped list. |
+
+The GA binary's `globals` type (`0x16b0b5c`, 0x114 B, table `0x15a6ab8`) names the
+tuning vocabulary the shipped record does not: `flowMultiplier` 25.0,
+`npcSpeedMultiplier` 1.0, `npcTurnSpeedMultiplier_Jet/_Flagella/_Cilia` 1.0,
+`densityRock/Solid/Liquid/Air` 100/10/1/0.1, `backgroundDistance` 10,
+`minDragCollisionSpeed` 0.1, `minImpactCollisionSpeed` 1.0,
+`ciliaSpeedAsJet` / `flagellaSpeedAsJet` / `flagellaSpeedAsCilia` /
+`ciliaSpeedAsFlagella` 1.0, `beachDistance` 20, `finishLineDistance` 20,
+`noPartSpeed` 1.0, `flagellaRampMinFactor` 0.5, `flagellaRampTime` 2.0,
+`flagellaRampResetAngle` 30, `flagellaTurnSpeedRampStart/End` 1.0/2.0,
+`flagellaTurnSpeedMin/Max` 3.0/10.0, `ciliaTurnSpeed` 0.75, `jetTurnSpeed` 3.0,
+`startLevelNoCreatureRadius` 10, `startLevelNoAnythingRadius` 3,
+`numHighLOD_FG/BG` 10/2, `percentAnimalFood/percentPlantFood` 0.3/0.3,
+`escapeMinDistance` 8, `escapeMaxDistance` 20, `escapeDelayMedium` 20,
+`escapeTimerHard` 20, `nonAnimatingCilia/JetMovementFactor` 10,
+`mateTriggerDistance` 4, `mateSpawnDistance` 1, `missionTime` 10,
+`missionResetTime` 3, `timeToGoldyCinematic` 15. The shipped `globals` record is
+196 B, a **different revision** of that type, so these names are not applied
+positionally to the shipped floats.
 
 ## Loot tables — `loottable` (48)
 
@@ -324,10 +391,10 @@ positional.
 
 ## Cell globals — `globals`/`cellgame` (raw struct, 196 B)
 
-Sixteen resource-id references (`+0x00..+0x3C`) then **~31 tuning floats** from `+0x40`
-(`5.0, 0.5, 0.2, 1.0, 3.0, 250.0, 50.0, 5.0, 0.5, 35.0, 0.1, 0.1, 0.5, 1.0, 1.0, 40.0,
-20.0, 0.5, 0.5, 100.0, 20.0, 1.0, 2.0, 7.0, 10.0, 6.0, 3.0, 15.0, 3.0`, tail `10, 2`). The
-floats have no shipped key names (unlike `cell_properties`), so they are exposed raw.
+Seventeen resource-id references (`+0x00..+0x40`), then **15 tuning floats**
+(`+0x44..+0x7C`), then one more reference (`+0x80`), then **14 more floats**
+(`+0x84..+0xB8`) and two integers (`+0xBC..+0xC0`). The record interleaves ids
+and floats, so it cannot be read as one array of either.
 
 **The references ARE named** (they resolve through the registry):
 
@@ -338,15 +405,25 @@ floats have no shipped key names (unlike `cell_properties`), so they are exposed
 | 2 | `0x81A666D9` | `world_plant` | 10 | `0x6F95F97B` | `world_random` |
 | 3 | `0x17BE63FB` | `world_water` | 11 | `0x29C95ACF` | `world_random_bg` |
 | 4 | `0xDB9066CF` | `world_beach` | 12 | `0xCBCD1287` | `cell_hero_L0` (the player) |
-| 5 | `0x33BEB73B` | `world_ice_bg` | 13 | `0xB716C401` | (unresolved) |
-| 6 | `0x06A14891` | `world_rock_bg` | 14 | `0x9D14A758` | (unresolved) |
+| 5 | `0x33BEB73B` | `world_ice_bg` | 13 | `0xB716C401` | (a blank `structure` + `cell`) |
+| 6 | `0x06A14891` | `world_rock_bg` | 14 | `0x9D14A758` | (a blank `structure` + `cell`) |
 | 7 | `0xC30611CD` | `world_plant_bg` | 15 | `0xAACC3A75` | `CellEffects` (the effect map) |
+| | | | 16 | `0x1D3FBACC` | `CellBackgrounds` |
+| | | | 17 | `0xE69CBA48` | `default_look_algorithm` (`+0x80`) |
 
-So refs 0-11 are the **shipped biome list** (five playable biomes, their `_bg` variants, then
-`random`), ref 12 is the player archetype and ref 15 is the effect map. The engine now reads the
-biome list from here (`World::level_list()`) and walks it for the level progression
-(`World::next_level()`), instead of guessing with a `name + "_2"` string hack. The list *order* is
-the record's order; that it is also the **campaign** order is not independently confirmed.
+So refs 0-11 are the **shipped biome list** (five playable biomes, their `_bg`
+variants, then `random`), ref 12 is the player archetype, refs 13-14 are the
+starting-cell pointers (both point at blank placeholder resources in the shipped
+packages), ref 15 is the effect map, ref 16 the background map and ref 17 the
+default look algorithm. The engine reads the biome list from here
+(`World::level_list()`) and walks it for the level progression
+(`World::next_level()`), instead of guessing with a `name + "_2"` string hack. The
+GA binary's `globals` type names the first five slots `world_1`…`world_5` and the
+next five `worldBackground_1`…`worldBackground_5`, with `worldRandom` and
+`worldRandomBg` after them — so the shipped order **is** the campaign order:
+**ice → rock → plant → water → beach**, with `random` as the randomised level.
+The shipped floats have no key names of their own (the GA type's names belong to
+a longer, 0x114 B revision of the record), so they are exposed raw.
 
 ## Background fields — `CellGame_Layers.package` (33)
 

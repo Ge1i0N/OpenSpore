@@ -17,17 +17,18 @@
 > `protectRadius`, `food`, `growCount`, `growAmount`, `hatchDuration`, `chaseTime`, … and
 > the scalars at `+0xA8..+0xDC` carry `hp`, `flags`, `cellType`, `unlockType`, `loot`,
 > `poison`, …. The engine reads them **by name** now, so the simulation uses the shipped
-> numbers (Ducky: speed 11 / chase 8 / food 180; squid: food 6 / growCount 4; hero: food
-> 10000 / growAmount 0.275). The 17 shipped tuning curves (`time_dilation`,
+> numbers for the fields it consumes (Ducky: speed 11 / chase 8; hero: food 10000 /
+> growAmount 0.275). The 17 shipped tuning curves (`time_dilation`,
 > `npc_turn_factor`, `eye_count`, `camera_lookahead`, `mouse_zoom`, …) are decoded from the
 > `prop` resource and are no longer inert.
 >
 > **Honest scope.** The spawn list, the body structures, the per-cell AI/stat fields and the
 > tuning curves are the game's data. Still ours: entity **positions**, the **arena**, the
-> camera framing, the HP **formula** (the archetype's `hp` is a tier, the size→HP progression
-> was not found in the binary), the DNA costs, and the **particle/audio** presentation. The
-> scene is drawn with the real `gmdl` cell bodies (top-down), not the original's
-> RenderWare tide-pool scene, and there is no game audio.
+> camera framing, the body **radius** (the archetype's size field is outside the shipped
+> record), the HP **formula** (the archetype's `hp` is a tier, the size→HP progression was not
+> found in the binary), the DNA costs, and the **particle/audio** presentation. The scene is
+> drawn with the real `gmdl` cell bodies (top-down), not the original's RenderWare tide-pool
+> scene, and there is no game audio.
 
 ## Evidence
 
@@ -68,11 +69,26 @@
   edible); everything else is a `Creature` (prey when smaller than the player, predator when
   larger). The level's **`_bg` population** is scenery: it spawns as `Role::Prop`, so it drifts
   but never hunts, never is eaten, and never eats the entity budget.
-* **Sizes and AI** come from the archetype's `cAIData` block: `growAmount` is the body radius,
-  `speed`/`chaseSpeed`/`fleeSpeed` the movement speeds, `awarenessRadius{,Food,Predator}` the
-  detection radii, `turnFactor` the turn rate, `flocking` the cohesion weight, `food` the DNA
-  value of eating the cell, `growCount`/`growAmount` the growth, `protectRadius` the spawn
-  protection. See [cell-game](cell-game.md#the-archetype-record-layout-recovered-from-the-ga-binary).
+* **Sizes and AI** come from the archetype's `cAIData` block at record `+0xE0`. What the
+  simulation actually reads: `speed` (the creature's own move speed), `chaseSpeed` (a predator's
+  speed), `fleeSpeed` (a prey's speed - it is 0 in 188 of the 189 shipped archetypes, so `speed`
+  is the fallback), `awarenessRadiusFood` / `awarenessRadiusPredator` (the detection radii),
+  `turnFactor` (the steering weight - an INTEGER, not a float), `flocking` (the cohesion
+  weight), `protectTime` (the post-hit invulnerability window) and `hatchDuration` (the egg's
+  hatch time). Decoded but **not** used by the simulation: `food`, `growCount`, `growAmount`,
+  `protectRadius`, `wanderSpeed`, `awarenessRadius` (0 in every shipped archetype), `chaseTime`,
+  the digestion trio, the sleep/awake times, the recharge timers and the `fears*` flags. The
+  block is **mixed-type**: the integer fields were measured over all 189 shipped archetypes, and
+  reading one as a float yields a denormal (turnFactor 3 as f32 = 4.2e-45) that silently
+  disables the steering. See
+  [cell-game](cell-game.md#the-archetype-record-layout-recovered-from-the-ga-binary).
+* **Body radius is a seed, not shipped data.** The archetype's real size field (`size` @ record
+  `+0x304`) lies outside the shipped 400-byte record, so no size ships with the data. `growAmount`
+  is a GROWTH amount, not a size. The engine therefore derives the radius from a hash of the
+  archetype id (documented seed). The game's real rule is a discrete size CLASS: a threshold
+  table (0, 50, 100, 150, 200, 250, 300 …, with `size == 1000 → 10`) maps a raw size to a class,
+  and the predator/prey relation is `clamp(class_predator - class_player + 2, 0, 4)`; the engine's
+  size-ratio test is a seed approximation of that rule.
 * **Player**: accelerates toward the world-space pointer target (mouse input), with drag and a
   speed cap. Eating (within the sum of the radii, edible) grows it by area; a larger creature
   in contact drains HP; at 0 HP the player dies and respawns at the arena centre after 1.5 s;
