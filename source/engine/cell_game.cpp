@@ -172,11 +172,27 @@ LootTable parse_loot_table(u32 id, const std::vector<u8>& d) {
     return t;
 }
 
-NamedResource named_resource(u32 id, const std::vector<u8>& d) {
-    NamedResource r;
+// A `world` record: a 4-word header, then the level slots (12 B each: the population id, a
+// flag and an index) and a second list at the offset in the header. The level slots are the
+// level populations the world hosts - the campaign progression is in the shipped data.
+WorldResource parse_world(u32 id, const std::vector<u8>& d) {
+    WorldResource r;
     r.id = id;
     r.size = static_cast<u32>(d.size());
     if (const char* n = naming::instance_name(id)) r.name = n;
+    if (d.size() < 16) return r;
+    r.level_count = le32(d.data() + 0x00);
+    r.extra_count = le32(d.data() + 0x08);
+    r.extra_offset = le32(d.data() + 0x0C);
+    for (u32 i = 0; i < r.level_count; ++i) {
+        const size_t at = 0x10 + static_cast<size_t>(i) * 12;
+        if (at + 12 > d.size()) break;
+        LevelSlot slot;
+        slot.ref = le32(d.data() + at);
+        slot.flag = le32(d.data() + at + 4);
+        slot.index = le32(d.data() + at + 8);
+        r.levels.push_back(slot);
+    }
     return r;
 }
 
@@ -396,7 +412,7 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
         case kTypeLookTable: out.look_tables.push_back(parse_look_table(id, d)); break;
         case kTypePopulate: out.populations.push_back(parse_population(id, d)); break;
         case kTypeRandomCreature: out.random_spawns.push_back(parse_random_spawn(id, d)); break;
-        case kTypeWorld: out.worlds.push_back(named_resource(id, d)); break;
+        case kTypeWorld: out.worlds.push_back(parse_world(id, d)); break;
         case kTypeStructure: out.structures.push_back(parse_structure(id, d)); break;
         case kTypeGlobals: out.globals.push_back(parse_globals(id, d)); break;
         case kTypeAdvect: out.layers.push_back(parse_layer(id, d, 3)); break;

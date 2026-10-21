@@ -102,6 +102,16 @@ static std::vector<u8> make_population() {
     return d;
 }
 
+static std::vector<u8> make_world() {
+    // A `world` record: a 4-word header, then two 12-byte level slots.
+    std::vector<u8> d(16 + 2 * 12, 0);
+    auto put = [&](size_t at, u32 x) { memcpy(d.data() + at, &x, 4); };
+    put(0x00, 2); put(0x04, 0x10); put(0x08, 0); put(0x0C, 0);
+    put(0x10, fnv1_lower("level_water")); put(0x14, 1); put(0x18, 0xFFFFFFFFu);
+    put(0x1C, fnv1_lower("level_water_2")); put(0x20, 0); put(0x24, 0xFFFFFFFFu);
+    return d;
+}
+
 static std::vector<u8> make_structure() {
     std::vector<u8> d(0x50 + 32, 0);
     auto put = [&](size_t at, u32 x) { memcpy(d.data() + at, &x, 4); };
@@ -292,7 +302,25 @@ int main(int argc, char** argv) {
               "globals numHighLOD");
     }
 
-    // 9: backgroundMap parallax bands
+    // 9: world level slots
+    {
+        std::vector<Rec> recs = {{cell::kTypeWorld, 0, fnv1_lower("world_water"), make_world()}};
+        auto dbpf = make_dbpf(recs);
+        cell::GameData g; std::string err;
+        bool ok = cell::decode_from_memory(dbpf.data(), dbpf.size(), "test", g, err);
+        check(ok, "decode world");
+        check(g.worlds.size() == 1, "one world");
+        check(g.worlds[0].level_count == 2, "world level count");
+        check(g.worlds[0].levels.size() == 2, "world level slots");
+        if (g.worlds[0].levels.size() == 2) {
+            check(g.worlds[0].levels[0].ref == fnv1_lower("level_water"), "world level slot 0");
+            check(g.worlds[0].levels[0].flag == 1, "world level slot 0 flag");
+            check(g.worlds[0].levels[1].ref == fnv1_lower("level_water_2"), "world level slot 1");
+            check(g.worlds[0].levels[1].flag == 0, "world level slot 1 flag");
+        }
+    }
+
+    // 10: backgroundMap parallax bands
     {
         std::vector<Rec> recs = {{cell::kTypeBackgroundMap, 0, fnv1_lower("CellBackgrounds"),
                                   make_background()}};
@@ -305,7 +333,7 @@ int main(int argc, char** argv) {
         check(g.background[1].depth == 15.0f, "band 1 depth");
     }
 
-    // 10: a density layer keeps its payload (for the backdrop texture)
+    // 11: a density layer keeps its payload (for the backdrop texture)
     {
         std::vector<Rec> recs = {{cell::kTypeDensity, 0, fnv1_lower("Level1-zone1"), make_density()}};
         auto dbpf = make_dbpf(recs);
@@ -317,7 +345,7 @@ int main(int argc, char** argv) {
         check(g.layers[0].data.size() == 65536, "density payload retained");
     }
 
-    // 11: prop property table — the real tuning-curve format
+    // 12: prop property table — the real tuning-curve format
     {
         std::vector<Rec> recs = {{cell::kTypeProp, 0, 0xC951EB63u, make_prop()}};
         auto dbpf = make_dbpf(recs);
@@ -362,6 +390,6 @@ int main(int argc, char** argv) {
         std::cerr << failures << " cell_game_verify check(s) failed\n";
         return 1;
     }
-    std::cout << "cell_game_verify: 11 constructed-input checks PASS\n";
+    std::cout << "cell_game_verify: 12 constructed-input checks PASS\n";
     return 0;
 }

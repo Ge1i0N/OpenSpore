@@ -188,11 +188,29 @@ struct Archetype {
     u32 dword(u32 offset) const;
 };
 
-// Named resources that are decoded as counts only (world).
-struct NamedResource {
+// One level slot inside a `world` record. The world record lists the level populations it
+// hosts as 12-byte entries: the population id, a flag and an index.
+struct LevelSlot {
+    u32 ref = 0;     // the `populate` instance id (level_ice, level_ice_2, ...)
+    u32 flag = 0;    // 1 on a playable world, 0 on a background one (see analysis/cell-game.md)
+    u32 index = 0;   // the level's position (0xFFFFFFFF when the record does not order it)
+};
+
+// A `world` record (one biome). Layout, recovered from the shipped records:
+//   +0x00 u32 level_count     the number of 12-byte level slots
+//   +0x04 u32 0x10            a version word (0 in the empty `cell_empty` record)
+//   +0x08 u32 extra_count     the number of 24-byte entries in the second list
+//   +0x0C u32 extra_offset    the byte offset of that second list (0 when there is none)
+//   +0x10 level_count * 12 B  the level slots: [populate id][flag][index]
+// The second list's 24-byte entries are not decoded (their layout is not established).
+struct WorldResource {
     u32 id = 0;
     std::string name;
     u32 size = 0;
+    u32 level_count = 0;
+    u32 extra_count = 0;
+    u32 extra_offset = 0;
+    std::vector<LevelSlot> levels;
 };
 
 // One part attached to a structure body. Part entry: +0x00 parent (-1 = root),
@@ -216,11 +234,12 @@ struct Structure {
     std::vector<StructurePart> parts;
 };
 
-// Master tuning record (`globals`, 196 B): 16 resource-id references then ~31 floats from
-// +0x40. The floats are POSITIONAL (no shipped key names), so they are exposed raw. The
-// references ARE named: they are the shipped world/biome list (world_ice, world_rock, world_plant,
+// Master tuning record (`globals`, 196 B): 18 resource-id references interleaved with 29 floats.
+// The floats are POSITIONAL (no shipped key names), so they are exposed raw. The references ARE
+// named: they are the shipped world/biome list (world_ice, world_rock, world_plant,
 // world_water, world_beach, then their _bg variants, world_random, world_random_bg), the player
-// archetype (cell_hero_L0) and the effect map (CellEffects).
+// archetype (cell_hero_L0), the effect map (CellEffects), the background map (CellBackgrounds)
+// and the default look algorithm.
 struct Globals {
     u32 id = 0;
     std::string name;
@@ -287,7 +306,7 @@ struct GameData {
     std::vector<LootTable> loot_tables;
     std::vector<Population> populations;
     std::vector<RandomSpawn> random_spawns;
-    std::vector<NamedResource> worlds;
+    std::vector<WorldResource> worlds;
     std::vector<Structure> structures;
     std::vector<Globals> globals;
     std::vector<LayerField> layers;

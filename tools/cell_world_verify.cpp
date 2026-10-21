@@ -377,15 +377,22 @@ int main(int argc, char** argv) {
                 check(std::fabs(hero->ai.grow_amount - 0.275f) < 1e-4f, "hero growAmount from cAIData +0x9c");
                 check(std::fabs(hero->ai.food - 10000.0f) < 1e-3f, "hero food value from cAIData +0x68");
             }
-            // The shipped biome list is the CellGame globals record's world references.
-            const std::vector<std::string> biomes = w.level_list();
-            check(biomes.size() == 6, "the shipped globals list six biomes");
-            if (biomes.size() == 6) {
-                check(biomes[0] == "ice" && biomes[3] == "water" && biomes[5] == "random",
-                      "the shipped biome list order");
+            // The campaign level list is in the shipped `world` records: every world lists the
+            // level populations it hosts and the world_ice record lists all ten campaign levels.
+            const std::vector<std::string> levels = w.level_list();
+            check(levels.size() == 11, "the shipped world records list eleven campaign levels");
+            if (levels.size() == 11) {
+                check(levels[0] == "level_ice" && levels[1] == "level_ice_2" &&
+                          levels[2] == "level_rock" && levels[3] == "level_rock_2" &&
+                          levels[6] == "level_water" && levels[7] == "level_water_2" &&
+                          levels[8] == "level_beach" && levels[9] == "level_beach_2" &&
+                          levels[10] == "level_random",
+                      "the shipped campaign level order");
             }
             check(w.next_level("level_water") == "level_water_2", "next_level uses the shipped stage");
             check(w.next_level("level_water_2") == "level_beach", "next_level walks the shipped biome list");
+            check(w.next_level("level_beach_2") == "level_random", "next_level reaches the random level");
+            check(w.next_level("level_random").empty(), "the random level is the last one");
         } else {
             std::cerr << "real package load failed: " << err << "\n";
             ++failures;

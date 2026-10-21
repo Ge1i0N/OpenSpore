@@ -563,7 +563,7 @@ const PropertyCurve* World::property_curve(const char* name) const {
 
 std::vector<std::string> World::biome_names() const {
     std::vector<std::string> names;
-    for (const NamedResource& w : m_data.worlds) {
+    for (const WorldResource& w : m_data.worlds) {
         if (!w.name.empty()) names.push_back(w.name);
     }
     return names;
@@ -590,41 +590,48 @@ const std::vector<StructurePart>* World::parts_for(u32 archetype_id) const {
     return nullptr;
 }
 
+std::vector<u32> World::level_refs() const {
+    std::vector<u32> out;
+    for (const Globals& g : m_data.globals) {
+        for (u32 wref : g.refs) {
+            const WorldResource* w = nullptr;
+            for (const WorldResource& cand : m_data.worlds) {
+                if (cand.id == wref) { w = &cand; break; }
+            }
+            if (!w || w->levels.empty()) continue;
+            // A world is playable when its first level slot has flag 1; the `_bg` worlds have
+            // flag 0 on every slot and only host scenery.
+            if (w->levels.front().flag != 1) continue;
+            for (const LevelSlot& s : w->levels) {
+                if (std::find(out.begin(), out.end(), s.ref) == out.end()) out.push_back(s.ref);
+            }
+        }
+    }
+    return out;
+}
+
 std::vector<std::string> World::level_list() const {
     std::vector<std::string> out;
-    for (const Globals& g : m_data.globals) {
-        for (const std::string& n : g.ref_names) {
-            if (n.rfind("world_", 0) != 0) continue;
-            if (n.size() > 6 && n.compare(n.size() - 3, 3, "_bg") == 0) continue;
-            out.push_back(n.substr(6));
+    for (u32 ref : level_refs()) {
+        for (const Population& p : m_data.populations) {
+            if (p.id != ref || p.name.empty()) continue;
+            out.push_back(p.name);
+            break;
         }
     }
     return out;
 }
 
 std::string World::next_level(const std::string& current) const {
-    std::string biome = current;
-    const std::string kLevelPrefix = "level_";
-    if (biome.rfind(kLevelPrefix, 0) == 0) biome = biome.substr(kLevelPrefix.size());
-    bool second = false;
-    if (biome.size() > 2 && biome.compare(biome.size() - 2, 2, "_2") == 0) {
-        biome = biome.substr(0, biome.size() - 2);
-        second = true;
-    }
-    const std::vector<std::string> list = level_list();
-    if (list.empty()) return "";
-    for (size_t i = 0; i < list.size(); ++i) {
-        if (list[i] != biome) continue;
-        if (!second) {
-            const std::string stage2 = kLevelPrefix + biome + "_2";
+    const std::vector<u32> refs = level_refs();
+    if (refs.empty()) return "";
+    const u32 want = fnv1_lower(current.c_str());
+    for (size_t i = 0; i < refs.size(); ++i) {
+        if (refs[i] != want) continue;
+        for (size_t k = i + 1; k < refs.size(); ++k) {
             for (const Population& p : m_data.populations) {
-                if (p.name == stage2 || p.id == fnv1_lower(stage2.c_str())) return stage2;
-            }
-        }
-        for (size_t k = i + 1; k < list.size(); ++k) {
-            const std::string next = kLevelPrefix + list[k];
-            for (const Population& p : m_data.populations) {
-                if (p.name == next || p.id == fnv1_lower(next.c_str())) return next;
+                if (p.id != refs[k] || p.name.empty()) continue;
+                return p.name;
             }
         }
         return "";

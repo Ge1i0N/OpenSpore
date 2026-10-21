@@ -196,8 +196,13 @@ public:
     std::vector<std::string> biome_names() const;
     // List available level names from `populate` resources.
     std::vector<std::string> level_names() const;
-    // The shipped biome list, taken from the `CellGame` globals record's world references.
+    // The shipped campaign level list, taken from the `world` records: every world lists the
+    // level populations it hosts, and the world_ice record lists all ten campaign levels in
+    // order (level_ice, level_ice_2, level_rock, level_rock_2, level_plant, level_plant_2,
+    // level_water, level_water_2, level_beach, level_beach_2).
     std::vector<std::string> level_list() const;
+    // The same list as level ids, in the same order.
+    std::vector<u32> level_refs() const;
     // Get the next level name in progression (e.g. "level_water" -> "level_water_2").
     std::string next_level(const std::string& current) const;
 
