@@ -323,6 +323,22 @@ int main(int argc, char** argv) {
         check(others == 3, "the main level and the player spawn normally");
     }
 
+    // 13: a missing or corrupt save is an error, not a crash (the stage loads a user-writable
+    // .spo at startup).
+    {
+        World w; std::string err;
+        check(!w.load_save("cell_missing_save.spo", err) && !err.empty(), "missing save is an error");
+        FILE* f = nullptr;
+        if (fopen_s(&f, "cell_corrupt_test.spo", "wb") == 0 && f) {
+            const char* junk = "not a dbpf file at all";
+            fwrite(junk, 1, 26, f);
+            fclose(f);
+        }
+        World w2; std::string err2;
+        check(!w2.load_save("cell_corrupt_test.spo", err2) && !err2.empty(), "corrupt save is an error");
+        _unlink("cell_corrupt_test.spo");
+    }
+
     // Optional: real package.
     if (argc > 1 && argv[1] && argv[1][0]) {
         World w; std::string err;
