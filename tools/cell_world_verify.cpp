@@ -339,6 +339,22 @@ int main(int argc, char** argv) {
         _unlink("cell_corrupt_test.spo");
     }
 
+    // 14: the shipped animation table resolves every cell-stage animation event.
+    {
+        static const char* kEvents[] = {
+            "ANIM_MOVE", "ANIM_IDLE", "ANIM_EAT_JAW", "ANIM_EAT_FAIL_JAW", "ANIM_EAT_FILTER",
+            "ANIM_EAT_PROB", "ANIM_DEATH", "ANIM_DEAD", "ANIM_HATCH", "ANIM_GROW", "ANIM_ZAP",
+            "ANIM_GET_HIT_SPIKE", "ANIM_GET_HIT_POISON", "ANIM_GET_HIT_ELEC", "ANIM_ATTACK_JAW",
+            "ANIM_ATTACK_SPIKE", "ANIM_POP", "ANIM_STARTLED", "ANIM_SCARED", "ANIM_MOVE_MAD",
+            "ANIM_MOVE_SCARED", "ANIM_POKE_SPIKE", "ANIM_PROB_STUN", "ANIM_PROB_TARGET_EXPEL",
+            "ANIM_PROB_SOURCE_EXPELED", "ANIM_GLANCE_JAW", "ANIM_GLANCE_SPIKE", "ANIM_JOUST_SPIKE"};
+        bool all = true;
+        for (const char* e : kEvents) {
+            if (!cell::find_anim(e)) all = false;
+        }
+        check(all, "every cell animation event resolves in the shipped table");
+    }
+
     // Optional: real package.
     if (argc > 1 && argv[1] && argv[1][0]) {
         World w; std::string err;
