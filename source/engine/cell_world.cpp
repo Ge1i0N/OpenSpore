@@ -932,9 +932,11 @@ void World::tick(float dt) {
         if (!m_player_alive) continue;  // food drifts; nothing hunts a dead player
         const float dx = px - e.x, dy = py - e.y;
         const float dist = std::sqrt(dx * dx + dy * dy);
-        // Awareness: the archetype's cAIData awareness radius (food-specific, else predator).
-        const float aware = e.aware_food > 0.0f ? e.aware_food
-                           : e.aware_predator > 0.0f ? e.aware_predator : kAggro;
+        // Awareness: the archetype's cAIData awareness radius (food-specific, else predator),
+        // scaled by the shipped `awareness_dilation` curve (perception radius vs size).
+        const float base_aware = e.aware_food > 0.0f ? e.aware_food
+                              : e.aware_predator > 0.0f ? e.aware_predator : kAggro;
+        const float aware = base_aware * curve_value("awareness_dilation", e.size, 1.0f);
         if (dist < aware && dist > 0.001f) {
             // A creature is a predator when it is bigger than the player, prey when smaller (the
             // real mechanic: bigger eats smaller). This replaces the old speed-slot test.
