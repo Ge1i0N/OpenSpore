@@ -142,9 +142,15 @@
 * The archetype fields beyond the shipped 400-byte record (`ai_hard`, `ai_easy`, `size`, `eat`,
   `friendGroup`, …) are named in the binary but not present in the data, so the engine reads only
   the default `ai` block.
-* The **level progression** walks the shipped biome list in the `CellGame` globals record
-  (`ice, rock, plant, water, beach, random`). That is the record's order; that it is also the
-  **campaign** order is not independently confirmed.
+* The **level progression** comes from the shipped `world` records: every world lists the level
+  populations it hosts, and the `world_ice` record lists all ten campaign levels in order —
+  `level_ice, level_ice_2, level_rock, level_rock_2, level_plant, level_plant_2, level_water,
+  level_water_2, level_beach, level_beach_2` — followed by the randomised `level_random`. The
+  globals record's world references give the order of the worlds; the slot `flag` separates the
+  playable worlds from the `_bg` ones (scenery only). The campaign order is therefore confirmed
+  by two independent sources: the globals' reference order and the world records' slot list.
+  The old implementation synthesised the `_2` levels by string concatenation and never reached
+  `level_beach_2`.
 * The DNA a killed cell is worth is still a seed (`kPlantDna`/`kMeatDna`/`kPreyDna`); the
   archetype's `food` value is decoded but the original's food→DNA formula was not recovered.
 * No `CreatureGame`/`TribeGame`/`CivilisationGame`/`SpaceGame` behaviour; no editor

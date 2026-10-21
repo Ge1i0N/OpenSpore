@@ -263,7 +263,7 @@ carry the inputs, the engine keeps a documented seed and says so.
 | `cEatData` | type `cEatData` (table `0x15a6680`) | `{foodValue +0, hpValue +4, bomb +8, poisonNova +9}`, exposed as the archetype's `eat` property (record `+0x30C`, outside the shipped 400-byte record). |
 | digestion | `FUN_00e71980` / `FUN_00e76a80` | a 0.3 s tick (the timer at `+0x154` wraps at 0.3 s); a 1.0-unit threshold gates the growth roll with probability 0.25 while idle-pending and 0.10 while digesting; the "wants to grow" flag is at `+0x18A`, the stored food value at `+0x160`. |
 | HP | — | **not recovered.** The archetype's `hp` (`+0xA8`, a tier: hero 3, squid 2, Ducky 2) seeds the creature state's `+0x125C` capacity field, but the `maxHP(size)` expression lives in an undiscovered vtable method. The engine's tier→points mapping is a seed. |
-| next level | — | **not recovered** as a function. The *ordering* is: the `globals` record's first five refs are the campaign worlds (`world_1`…`world_5` in the GA type = the shipped `world_ice, world_rock, world_plant, world_water, world_beach`), then `worldRandom`. The engine walks that shipped list. |
+| next level | — | **recovered from the data, not from a function.** The `globals` record's first five refs are the campaign worlds (`world_1`…`world_5` in the GA type = the shipped `world_ice, world_rock, world_plant, world_water, world_beach`), then `worldRandom`; and each `world` record lists the level populations it hosts, with `world_ice` listing all ten campaign levels in order (see the world section). The engine walks that. |
 
 The GA binary's `globals` type (`0x16b0b5c`, 0x114 B, table `0x15a6ab8`) names the
 tuning vocabulary the shipped record does not: `flowMultiplier` 25.0,
@@ -337,12 +337,49 @@ from the shipped data.
 ## World biomes — `world` (13)
 
 `world_water`, `world_beach`, `world_ice`, `world_rock`, `world_plant`, `world_random`
-plus `_bg` background variants and `cell_empty`. Each record starts with an entry **count**
-(`world_water` = 2, `world_ice` = 20, `cell_empty` = 0) followed by that many entries; two
-record shapes occur (24-byte `{id, 1, idx, id, 0, idx}` region point, and 28-byte
-`{idx, k, f, 0, 1.0, id, x, y}` layer/spawn row, e.g. `world_ice` rows ending `… 3.5 0 1.0`).
-Sizes 16/28/64/136/544. The 64-byte `world_water` ends `… 3.5, 0, 1.0`. The entry lists are
-positional; only the count is treated as a stable field.
+plus `_bg` background variants and `cell_empty`.
+
+### The `world` record layout (recovered)
+
+```
++0x00 u32 level_count      the number of 12-byte level slots
++0x04 u32 0x10             a version word (0 in the empty `cell_empty` record)
++0x08 u32 extra_count      the number of 24-byte entries in the second list
++0x0C u32 extra_offset     the byte offset of that second list (0 when there is none)
++0x10 level_count * 12 B   the level slots: [populate id][flag][index]
+```
+
+The level slots are 12 bytes and the first list ends exactly at `extra_offset`
+(`world_ice`: 20 slots = 240 B, so the second list starts at `+0x100`;
+`world_water`: 2 slots = 24 B, so it starts at `+0x28`), which confirms both the
+stride and the count. The second list holds `extra_count` entries of 24 B; its layout
+is not decoded (the entries read `{count, -1, 3.5, 0, 1.0, id}` on the playable worlds
+and `{index, index, f, id, 0, 1.0}` on `world_ice`).
+
+### The level slots ARE the campaign progression
+
+| world | slots | level populations |
+|---|---|---|
+| `world_ice` | 20 | `level_ice`, `level_ice_2`, `level_rock`, `level_rock_2`, `level_plant`, `level_plant_2`, `level_water`, `level_water_2`, `level_beach`, `level_beach_2` (each twice: flag 1 then flag 0) |
+| `world_rock` / `world_plant` / `world_water` / `world_beach` | 2 | their own level, twice (flag 1 then flag 0) |
+| `world_random` | 2 | `level_random`, twice |
+| the `_bg` worlds | 1 (`world_ice_bg`: 10) | `level_*_bg` and `level_*_bg_2` |
+| `cell_empty` | 0 | - |
+
+The `flag` distinguishes the two kinds of world: a **playable** world has flag 1 on
+its first slot, a `_bg` world has flag 0 on every slot (it hosts scenery only). So the
+shipped campaign order is the data's:
+**ice -> ice_2 -> rock -> rock_2 -> plant -> plant_2 -> water -> water_2 -> beach ->
+beach_2**, then the randomised `level_random`. `world_ice` holds the whole table and
+the other campaign worlds repeat their own level, which is why the union of the
+playable worlds' slots is exactly that list.
+
+`World::level_list()` and `World::next_level()` use these slots: the globals record's
+world references give the order, the world records give the levels, and no level name
+is invented (the old code synthesised `level_<biome>_2` by string concatenation and
+never reached `level_beach_2`).
+
+Sizes 16/28/64/136/544.
 
 ## Structures — `structure` (144)
 
@@ -415,9 +452,9 @@ So refs 0-11 are the **shipped biome list** (five playable biomes, their `_bg`
 variants, then `random`), ref 12 is the player archetype, refs 13-14 are the
 starting-cell pointers (both point at blank placeholder resources in the shipped
 packages), ref 15 is the effect map, ref 16 the background map and ref 17 the
-default look algorithm. The engine reads the biome list from here
-(`World::level_list()`) and walks it for the level progression
-(`World::next_level()`), instead of guessing with a `name + "_2"` string hack. The
+default look algorithm. The engine takes the **order** of the worlds from here and
+the **levels** from the `world` records (see the world section), so
+`World::level_list()` and `World::next_level()` need no name convention. The
 GA binary's `globals` type names the first five slots `world_1`…`world_5` and the
 next five `worldBackground_1`…`worldBackground_5`, with `worldRandom` and
 `worldRandomBg` after them — so the shipped order **is** the campaign order:
