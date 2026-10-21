@@ -89,7 +89,11 @@ void cell_enter() {
             }
             // Load saved progress if available.
             std::string save_err;
-            g_world.load_save("cell_progress.spo", save_err);
+            if (g_world.load_save("cell_progress.spo", save_err)) {
+                LOG_INFO("stages", "cell progress restored: %s", g_world.status().c_str());
+            } else if (!save_err.empty()) {
+                LOG_INFO("stages", "no cell progress: %s", save_err.c_str());
+            }
         } else if (!g_world_tried) {
             LOG_WARN("stages", "cell world unavailable: %s", err.c_str());
         }
