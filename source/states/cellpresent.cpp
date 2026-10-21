@@ -418,6 +418,16 @@ bool present_cell_world() {
             }
         }
     }
+    // The level's `_bg` scenery (Role::Prop) is drawn dimmed, behind the playable cells.
+    for (const cell::Entity& e : ents) {
+        if (!e.alive || e.role != cell::Role::Prop) continue;
+        if (body_for(world, e)) continue;
+        const float x = sx(e.x), y = sy(e.y);
+        const float r = e.size * ppu;
+        if (r < 1.2f) continue;
+        if (x < -r - 8.f || y < -r - 8.f || x > w + r + 8.f || y > h + r + 8.f) continue;
+        ov.circle(x, y, r, hsv(0.02f + 0.80f * hash01(e.archetype), 0.35f, 0.55f));
+    }
     for (const cell::Entity& e : ents) {
         if (!e.alive || e.role != cell::Role::Food) continue;
         if (body_for(world, e)) continue;

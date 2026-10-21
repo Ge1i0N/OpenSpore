@@ -249,6 +249,67 @@ int main(int argc, char** argv) {
         }
     }
 
+    // 11: save round-trip — write_save emits 0x01A80D26 frames that load_save reads back.
+    {
+        const u32 hero = fnv1_lower("cell_hero_L0");
+        const u32 food = fnv1_lower("cell_food_L0");
+        std::vector<Rec> recs = {
+            {cell::kTypeCell, 0, hero, make_archetype(fnv1_lower("struct_hero"), "Hero")},
+            {cell::kTypeCell, 0, food, make_archetype(fnv1_lower("struct_food"), "food")},
+            {cell::kTypePopulate, 0, lvl, make_population({{food, 4.0f}})},
+        };
+        auto dbpf = make_dbpf(recs);
+        World w; std::string err;
+        check(w.load_memory(dbpf.data(), dbpf.size(), "save", err), "save load");
+        std::string lerr;
+        check(w.set_level("level_water", lerr), "save set level");
+        if (w.player()) {
+            w.teleport_player(12.0f, -7.0f);
+            w.tick(0.05f);
+        }
+        const char* path = "cell_roundtrip_test.spo";
+        std::string werr;
+        check(w.write_save(path, werr), "write_save");
+        // Re-open a fresh world and restore the save.
+        World w2; std::string lerr2;
+        check(w2.load_memory(dbpf.data(), dbpf.size(), "save2", lerr2), "save2 load");
+        std::string lerr3;
+        check(w2.set_level("level_water", lerr3), "save2 set level");
+        std::string serr;
+        check(w2.load_save(path, serr), "load_save");
+        if (w2.player()) {
+            check(std::fabs(w2.player()->x - 12.0f) < 0.5f, "save restores player x");
+            check(std::fabs(w2.player()->y - (-7.0f)) < 0.5f, "save restores player y");
+        } else {
+            check(false, "save restores a player");
+        }
+        _unlink(path);
+    }
+
+    // 12: the `_bg` population is scenery (Role::Prop), never hunted or eaten.
+    {
+        const u32 hero = fnv1_lower("cell_hero_L0");
+        const u32 food = fnv1_lower("cell_food_L0");
+        std::vector<Rec> recs = {
+            {cell::kTypeCell, 0, hero, make_archetype(fnv1_lower("struct_hero"), "Hero")},
+            {cell::kTypeCell, 0, food, make_archetype(fnv1_lower("struct_food"), "food")},
+            {cell::kTypePopulate, 0, fnv1_lower("level_water"), make_population({{food, 2.0f}})},
+            {cell::kTypePopulate, 0, fnv1_lower("level_water_bg"),
+             make_population({{fnv1_lower("cell_jawhead"), 3.0f}})},
+        };
+        auto dbpf = make_dbpf(recs);
+        World w; std::string err;
+        check(w.load_memory(dbpf.data(), dbpf.size(), "bg", err), "bg load");
+        std::string lerr;
+        check(w.set_level("level_water", lerr), "bg set level");
+        int props = 0, others = 0;
+        for (const Entity& e : w.entities()) {
+            if (e.role == Role::Prop) ++props; else ++others;
+        }
+        check(props == 3, "the _bg population spawns as scenery props");
+        check(others == 3, "the main level and the player spawn normally");
+    }
+
     // Optional: real package.
     if (argc > 1 && argv[1] && argv[1][0]) {
         World w; std::string err;
@@ -261,6 +322,15 @@ int main(int argc, char** argv) {
             } else {
                 std::cerr << "real level spawn failed: " << lerr << "\n";
                 ++failures;
+            }
+            // The shipped archetype record carries the real cAIData/scalar fields.
+            const Archetype* hero = nullptr;
+            for (const auto& a : w.data().archetypes) if (a.name == "cell_hero_L0") hero = &a;
+            check(hero != nullptr, "real package has cell_hero_L0");
+            if (hero) {
+                check(hero->scalars.hp == 3, "hero hp tier from record +0xa8");
+                check(std::fabs(hero->ai.grow_amount - 0.275f) < 1e-4f, "hero growAmount from cAIData +0x9c");
+                check(std::fabs(hero->ai.food - 10000.0f) < 1e-3f, "hero food value from cAIData +0x68");
             }
         } else {
             std::cerr << "real package load failed: " << err << "\n";
