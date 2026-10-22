@@ -307,12 +307,26 @@ extern const SizeBand kSizeBandMax;
 int size_class_of(int size_int);
 // The GA's class relation: clamp(a - b + 2, 0, 4). `FUN_00e57340` @0xe57340.
 int size_relation(int class_a, int class_b);
-// The class a body radius falls into. The GA's class ladder is the `hp_max` column of
-// the band table (1, 3, 10, 30, 100, 300, 1000, 3000, 10000, 30000): a radius belongs
-// to the class whose ceiling it is below. The GA expresses the class through the
-// cell's size integer, which the engine does not carry, so this is the radius ->
-// class mapping the engine uses.
-int size_class_for_radius(float radius);
+// The class a body size falls into. The GA expresses the class through the cell's size
+// integer (0..1000); the engine carries a body size in its own world units, and one
+// engine size unit is a hundredth of a GA size unit - the engine's own size constants
+// line up with the GA's class boundaries that way (the player starts at 1.0, which is the
+// GA's size 100, and the evolve threshold at 3.0 is the GA's size 300).
+int size_class_of_size(float size);
+// The GA's growth rate at a size integer: the band table's growth column, interpolated
+// between the band's own growth and the next band's and rounded to an integer.
+// `FUN_00e51430` @0xe51430.
+int size_growth(int size_int);
+
+// The magnitude ladder at `0x1483bd0`: twenty entries, one per size band, from 10 to
+// 3e10. The GA scales the food a creature gains by the ladder entry of its size band.
+extern const float kMagnitudeLadder[20];
+
+// The food value a creature gains from eating: the magnitude ladder's entry for the
+// size's band, divided by (cellGameScale * 60), times the eaten archetype's food value.
+// `FUN_00e69480`. The GA's cellGameScale constant was not recovered, so the caller
+// supplies it.
+float food_gained(int size_int, float base_food_value, float cell_game_scale);
 // The class's HP ceiling (the `hp_max` column of the band table).
 float size_class_max_hp(int size_class);
 

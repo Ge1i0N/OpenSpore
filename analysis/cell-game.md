@@ -229,6 +229,50 @@ still has to decide each NPC's class from its own body radius. The
 `size_ratio` test the AI uses is therefore still a seed approximation of the
 GA rule.
 
+#### The size integer, the growth and the food
+
+The GA's cell keeps its size as an **integer** (the player's at `+0x1c`, an
+NPC's at `+0x54`, the class cached at `+0x358`), not as a float. It grows:
+
+* `FUN_00e7c8c0` @ `0xe7c8c0` adds `size += rate * dt` every tick, where the
+  rate is the entity's own field at `+0x98`;
+* that rate is the band table's **growth** column, interpolated over the
+  band: `FUN_00e51430` @ `0xe51430` takes the band's growth and the next
+  band's growth and lerps them with
+  `t = (size - band_start) / (next_band_start - band_start + 1.5258789e-05)`,
+  clamped to 0…1, and rounds the result to an integer
+  (`FUN_00e513d0` @ `0xe513d0` and `FUN_01041cd0` @ `0x1041cd0` are the lerp
+  and its inverse). At the size 125 the interpolation lands exactly on 11.5 in
+  float32, so the GA's own rounding yields 12.
+
+The size integer is what the class, the HP and the food all key off:
+
+* the class is the band the size integer falls in (above);
+* the HP ceiling is the band's `hp max` column, and the band's own `hp`
+  column is the ×√3 upper band of the class;
+* the food a creature gains is `FUN_00e69480` @ `0xe69480`:
+  `magnitudeLadder[sizeIndex] / (cellGameScale * 60) * baseFoodValue`, where
+  the magnitude ladder at `0x1483bd0` is
+  `10, 30, 100, 300, 1e3, 3e3, 1e4, 3e4, 1e5, 3e5, 1e6, 3e6, 1e7, 3e7, 1e8, 3e8, 1e9, 3e9, 1e10, 3e10`
+  — twenty entries, one per band, and `baseFoodValue` is the eaten
+  archetype's `food` field (the hero 10000, the squid 6, the Ducky 180).
+
+`cellGameScale` was **not** recovered, so the engine takes it as an argument
+(`cell::food_gained`) and the constant itself stays a seed. The digestion
+tick that turns the accumulated food value into size growth is documented
+below: a 0.3 s tick, a 1.0-unit threshold and a growth roll with probability
+0.25 while idle-pending and 0.10 while digesting.
+
+**What the engine still does differently.** The engine's cells carry a float
+body size (the radius) instead of the GA's size integer, the food grows the
+radius instead of the food value, and the NPCs do not grow at all. One engine
+size unit therefore corresponds to a hundredth of a GA size unit, which lines
+the engine's own constants up with the GA's class boundaries: the player
+starts at 1.0 = the GA's size 100 = class 2, and the evolve threshold 3.0 =
+the GA's size 300 = class 4. Wiring the class comparison into the AI before
+the size integer grows would make every NPC flee as soon as the player grew,
+so the engine keeps the size-ratio test until the size integer is modelled.
+
 ### `cAIData` — the per-cell AI block (record `+0xE0`)
 
 The `cAIData` type (registered at `0x13746e0`, descriptor built at `0x1374725`,
@@ -341,9 +385,9 @@ carry the inputs, the engine keeps a documented seed and says so.
 | AI block choice | `FUN_00e52910` | difficulty 0 → `ai_easy` @ record `+0x248`, 2 → `ai_hard` @ `+0x194`, else `ai` @ `+0xE0`; an unset (`-1`) block falls back to `ai`. Only `ai` ships in the 400-byte record. |
 | turn rate | globals + cAIData | `turnFactor` × the movement-mode multiplier (`npcTurnSpeedMultiplier_Jet/_Flagella/_Cilia`, all 1.0) × the per-mode turn speed (`jetTurnSpeed` 3.0, `ciliaTurnSpeed` 0.75, `flagellaTurnSpeedMin..Max` 3.0…10.0 ramped over `flagellaRampTime` 2.0 s, reset at `flagellaRampResetAngle` 30°). |
 | speed cap | globals + cAIData | the archetype's `speed` / `chaseSpeed` / `fleeSpeed` / `wanderSpeed` × `npcSpeedMultiplier` (1.0). |
-| size class | `FUN_00e4ee60` @ `0xe4ee60` | the band table at `0x1483c14` (28-byte rows) maps a 0…1000 size integer to one of ten classes: class 1 for 0…99, 2 for 100…199, … 10 for 900…1000, with a separate row at `0x1483e60` for a size of exactly 1000. The full table is in the size-class section. |
+| size class | `FUN_00e4ee60` @ `0xe4ee60` | the band table at `0x1483c14` (28-byte rows) maps a 0…1000 size integer to one of ten classes: class 1 for 0…99, 2 for 100…199, … 10 for 900…1000, with a separate row at `0x1483e60` for a size of exactly 1000. The full table is in the size-class section. The size integer is a cell field (the player's at `+0x1c`), it grows over time through the interpolated growth column (`FUN_00e51430` @ `0xe51430`), and the engine carries the equivalent class function. |
 | predator / prey | `FUN_00e57340` @ `0xe57340` | `clamp(class_cell - class_player + 2, 0, 4)` — the size-class difference, not a raw ratio. An NPC hunts the player unless the relation is exactly 1 (`FUN_00e57ce0`) and treats the player as prey only at relation 4 (`FUN_00e59e50`). The engine's size-ratio test is a seed approximation of this: the per-species class is unknown because the archetype's `size` field does not ship. |
-| food gained | `FUN_00e69480` | `magnitudeLadder[sizeIndex] / (cellGameScale × 60) × baseFoodValue`, where the magnitude ladder at `0x1483bd0` is `10, 30, 100, 300, 1000, 3000, 1e4, 3e4, 1e5, 3e5, 1e6, 3e6, 1e7, 3e7, 1e8, 3e8, 1e9, 3e9, 1e10, 3e10` (20 magnitudes). |
+| food gained | `FUN_00e69480` | `magnitudeLadder[sizeIndex] / (cellGameScale × 60) × baseFoodValue`, where the magnitude ladder at `0x1483bd0` is `10, 30, 100, 300, 1000, 3000, 1e4, 3e4, 1e5, 3e5, 1e6, 3e6, 1e7, 3e7, 1e8, 3e8, 1e9, 3e9, 1e10, 3e10` (20 magnitudes, one per size band - the size index IS the band). The engine implements it as `cell::food_gained`; `cellGameScale` was not recovered and stays a seed. |
 | food credited | `FUN_00e71520` | `min(computed amount, cap)` — the cap lives in the creature state at `+0x126C`. |
 | `cEatData` | type `cEatData` (table `0x15a6680`) | `{foodValue +0, hpValue +4, bomb +8, poisonNova +9}`, exposed as the archetype's `eat` property (record `+0x30C`, outside the shipped 400-byte record). |
 | digestion | `FUN_00e71980` / `FUN_00e76a80` | a 0.3 s tick (the timer at `+0x154` wraps at 0.3 s); a 1.0-unit threshold gates the growth roll with probability 0.25 while idle-pending and 0.10 while digesting; the "wants to grow" flag is at `+0x18A`, the stored food value at `+0x160`. |

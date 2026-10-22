@@ -1,6 +1,7 @@
 // Constructed-input tests for cell_game.cpp — no game data required.
 // With an optional argv[1] = a real CellGame.package, also decodes it and prints a summary.
 #include "engine/cell_game.h"
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <vector>
@@ -415,19 +416,39 @@ int main(int argc, char** argv) {
         check(size_relation(1, 3) == 0, "relation of two classes smaller is 0");
         check(size_relation(1, 10) == 0, "relation clamps at 0");
 
-        // The class ladder: a class covers the radii up to the next class's value.
-        check(size_class_for_radius(0.5f) == 1, "radius 0.5 is class 1");
-        check(size_class_for_radius(1.0f) == 1, "radius 1 is class 1");
-        check(size_class_for_radius(2.9f) == 1, "radius 2.9 is class 1");
-        check(size_class_for_radius(3.0f) == 2, "radius 3 is class 2");
-        check(size_class_for_radius(10.0f) == 3, "radius 10 is class 3");
-        check(size_class_for_radius(30000.0f) == 10, "radius 30000 is class 10");
+        // The class a body size falls into: one engine size unit is a hundredth of a
+        // GA size unit, so the player's 1.0 is the GA's size 100 and the evolve
+        // threshold 3.0 is the GA's size 300.
+        check(size_class_of_size(0.55f) == 1, "size 0.55 is class 1");
+        check(size_class_of_size(1.0f) == 2, "size 1.0 is class 2");
+        check(size_class_of_size(1.9f) == 2, "size 1.9 is class 2");
+        check(size_class_of_size(2.0f) == 3, "size 2.0 is class 3");
+        check(size_class_of_size(3.0f) == 4, "size 3.0 is class 4");
+        check(size_class_of_size(16.0f) == 10, "size 16.0 is class 10");
+
+        // The GA's growth rate: the band's own growth, interpolated towards the
+        // next band's growth over the band's width.
+        check(size_growth(0) == 0, "growth at size 0 is 0");
+        check(size_growth(50) == 5, "growth at size 50 is 5");
+        check(size_growth(100) == 10, "growth at size 100 is 10");
+        check(size_growth(25) == 2, "growth at size 25 is 2");
+        check(size_growth(75) == 7, "growth at size 75 is 7");
+        check(size_growth(125) == 12, "growth at size 125 is 12");
 
         // The class HP ceilings from the band's hp-max column.
         check(size_class_max_hp(1) == 1.0f, "class 1 HP ceiling is 1");
         check(size_class_max_hp(2) == 3.0f, "class 2 HP ceiling is 3");
         check(size_class_max_hp(5) == 100.0f, "class 5 HP ceiling is 100");
         check(size_class_max_hp(10) == 30000.0f, "class 10 HP ceiling is 30000");
+
+        // The gained food: the magnitude ladder's entry for the size's band, divided by
+        // (cellGameScale * 60), times the eaten archetype's food value.
+        const auto near = [](float got, float want) { return std::fabs(got - want) < 0.5f; };
+        check(near(food_gained(0, 60.0f, 1.0f), 10.0f), "food at size 0 is 10");
+        check(near(food_gained(50, 60.0f, 1.0f), 30.0f), "food at size 50 is 30");
+        check(near(food_gained(100, 60.0f, 1.0f), 100.0f), "food at size 100 is 100");
+        check(near(food_gained(200, 60.0f, 1.0f), 1000.0f), "food at size 200 is 1000");
+        check(near(food_gained(0, 30.0f, 2.0f), 2.5f), "the scale divides the food");
     }
 
     if (failures) {

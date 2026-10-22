@@ -1050,6 +1050,10 @@ void World::tick(float dt) {
         if (dist < aware && dist > 0.001f) {
             // A creature is a predator when it is bigger than the player, prey when smaller (the
             // real mechanic: bigger eats smaller). This replaces the old speed-slot test.
+            // The GA compares classes rather than raw sizes, but the class follows the cell's
+            // size integer, and the engine's cells do not grow that integer yet (the GA grows
+            // it from the digested food value, see analysis/cell-game.md), so a class
+            // comparison here would make every NPC flee as soon as the player grew.
             const bool predator = e.size > psize * kPredatorFraction;
             const char* table = predator ? "npc_mad" : "npc_scared";
             const float w = look_weight(table, predator ? 4 : 5);   // pursue / flee target

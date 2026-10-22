@@ -493,17 +493,24 @@ int size_relation(int class_a, int class_b) {
     return relation;
 }
 
-int size_class_for_radius(float radius) {
-    // The class ladder is the hp-max column of the band table: a class covers the radii
-    // from its own value up to the next class's value.
-    static const float kLadder[10] = {1.0f, 3.0f, 10.0f, 30.0f, 100.0f,
-                                      300.0f, 1000.0f, 3000.0f, 10000.0f, 30000.0f};
-    int cls = 1;
-    for (int i = 0; i < 10; ++i) {
-        if (radius < kLadder[i]) break;
-        cls = i + 1;
-    }
-    return cls;
+int size_class_of_size(float size) {
+    return size_class_of(static_cast<int>(size * 100.0f + 0.5f));
+}
+
+int size_growth(int size_int) {
+    int band = 1;
+    while (band < 20 && kSizeBands[band].threshold <= size_int) ++band;
+    --band;
+    const SizeBand& here = kSizeBands[band];
+    if (size_int == here.threshold) return here.growth;
+    const SizeBand& next = kSizeBands[band + 1];
+    float t = static_cast<float>(size_int - here.threshold) /
+              (static_cast<float>(next.threshold - here.threshold) + 1.5258789e-05f);
+    if (t < 0.0f) t = 0.0f;
+    if (t > 1.0f) t = 1.0f;
+    const float growth = static_cast<float>(next.growth - here.growth) * t +
+                         static_cast<float>(here.growth);
+    return static_cast<int>(growth + 0.5f);
 }
 
 float size_class_max_hp(int size_class) {
@@ -513,6 +520,19 @@ float size_class_max_hp(int size_class) {
         if (kSizeBands[i].size_class == size_class) return kSizeBands[i].hp_max;
     }
     return 0.0f;
+}
+
+// The magnitude ladder the GA scales the gained food by, read from 0x1483bd0: one entry
+// per size band, from 10 to 3e10.
+const float kMagnitudeLadder[20] = {
+    10.0f, 30.0f, 100.0f, 300.0f, 1.0e3f, 3.0e3f, 1.0e4f, 3.0e4f, 1.0e5f, 3.0e5f,
+    1.0e6f, 3.0e6f, 1.0e7f, 3.0e7f, 1.0e8f, 3.0e8f, 1.0e9f, 3.0e9f, 1.0e10f, 3.0e10f};
+
+float food_gained(int size_int, float base_food_value, float cell_game_scale) {
+    int band = 1;
+    while (band < 20 && kSizeBands[band].threshold <= size_int) ++band;
+    --band;
+    return kMagnitudeLadder[band] / (cell_game_scale * 60.0f) * base_food_value;
 }
 
 float Archetype::stat(u32 offset) const {
