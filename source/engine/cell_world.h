@@ -217,7 +217,6 @@ private:
     void drop_meat(const Entity& from);
     void update_diet();
     float hp_for_size(float size) const;
-    float stat_for_archetype(u32 archetype_id, u32 offset) const;
     float player_protect_time() const;
     void drop_loot(const Entity& from);
 

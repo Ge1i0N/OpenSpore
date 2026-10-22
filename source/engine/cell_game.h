@@ -183,9 +183,8 @@ struct Archetype {
     AiData ai;             // record +0xe0 (`ai` cAIData block)
     CellScalars scalars;   // record +0x0a8..+0x0dc
 
-    // Read a little-endian f32 at a documented stat offset (returns 0 if out of range).
+    // Read a little-endian f32 at a raw record offset (returns 0 if out of range).
     float stat(u32 offset) const;
-    u32 dword(u32 offset) const;
 };
 
 // One level slot inside a `world` record. The world record lists the level populations it
@@ -248,8 +247,11 @@ struct Globals {
     std::vector<u32> refs;    // the 18 id references, in record order
     std::vector<std::string> ref_names;  // the resolved name of each reference ("" when unknown)
     std::vector<float> floats;  // the 29 tuning floats, in record order
-    u32 num_high_lod_fg = 0;   // +0xBC (the GA globals type names it numHighLOD_FG, default 10)
-    u32 num_high_lod_bg = 0;   // +0xC0 (numHighLOD_BG, default 2)
+    // The record's last two words (10 and 2). The GA globals type names the same two slots
+    // numHighLOD_FG / numHighLOD_BG, but the shipped record is a shorter revision of that
+    // type, so the identification is INFERRED, not proven. Nothing consumes them.
+    u32 tail_int0 = 0;   // +0xBC
+    u32 tail_int1 = 0;   // +0xC0
 };
 
 // A tuning curve from the prop/cell_properties resource (type 0x00B1B104).
@@ -354,11 +356,6 @@ inline constexpr const char* kAnimProbTargetExpel = "ANIM_PROB_TARGET_EXPEL";
 inline constexpr const char* kAnimProbSourceExpelled = "ANIM_PROB_SOURCE_EXPELED";
 inline constexpr const char* kAnimProbStun = "ANIM_PROB_STUN";
 inline constexpr const char* kAnimStartled = "ANIM_STARTLED";
-
-// The archetype record's cAIData block starts here. It is NOT a table of float offsets: the
-// block is mixed-type (int / float / packed), so the fields are decoded by NAME into struct
-// AiData instead. The raw reader Archetype::stat(offset) stays for offsets outside that block.
-inline constexpr u32 kAiDataOffset = 0x0E0;
 
 // Decode a CellGame.package from disk. Read-only.
 bool decode(const std::string& path, GameData& out, std::string& error);

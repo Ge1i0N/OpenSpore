@@ -18,9 +18,15 @@
 > the scalars at `+0xA8..+0xDC` carry `hp`, `flags`, `cellType`, `unlockType`, `loot`,
 > `poison`, …. The engine reads them **by name** now, so the simulation uses the shipped
 > numbers for the fields it consumes (Ducky: speed 11 / chase 8; hero: food 10000 /
-> growAmount 0.275). The 17 shipped tuning curves (`time_dilation`,
-> `npc_turn_factor`, `eye_count`, `camera_lookahead`, `mouse_zoom`, …) are decoded from the
-> `prop` resource and are no longer inert.
+> growAmount 0.275). The 17 shipped tuning curves are decoded from the
+> `prop` resource and keyed by property name; the simulation **consumes 9** of them
+> (`time_dilation`, `camera_lookahead`, `camera_lerpfactor`, `mouse_zoom`,
+> `awareness_dilation`, `anim_dilation`, `poison_count`, `electric_jumps_count`,
+> `electric_range_count`). The other 8 - `evo_points`, `npc_turn_factor`, `eye_count`,
+> `jet_count`, `cilia_count`, `cilia_graph`, `flagella_count`,
+> `electric_recharge_count` - are decoded but not consumed yet: their consumers were not
+> recovered, so the engine still uses the archetype's `turnFactor` and a hardcoded
+> evolve threshold.
 >
 > **Honest scope.** The spawn list, the body structures, the per-cell AI/stat fields and the
 > tuning curves are the game's data. Still ours: entity **positions**, the **arena**, the
@@ -68,14 +74,23 @@
 * **Roles**: a cell whose name contains food/flora/plant/clump/egg is `Food` (always
   edible); everything else is a `Creature` (prey when smaller than the player, predator when
   larger). The level's **`_bg` population** is scenery: it spawns as `Role::Prop`, so it drifts
-  but never hunts, never is eaten, and never eats the entity budget.
+  but never hunts, never is eaten, and never eats the entity budget. That covers the whole
+  background layer, **including its food**: `level_random_bg` lists 113 `cell_food_L0`
+  (background plankton) next to 1130 unnamed props, and they are scenery too - the
+  background is a separate, non-interactive scene. The foreground levels keep their own
+  food edible.
 * **Sizes and AI** come from the archetype's `cAIData` block at record `+0xE0`. What the
-  simulation actually reads: `speed` (the creature's own move speed), `chaseSpeed` (a predator's
-  speed), `fleeSpeed` (a prey's speed - it is 0 in 188 of the 189 shipped archetypes, so `speed`
-  is the fallback), `awarenessRadiusFood` / `awarenessRadiusPredator` (the detection radii),
-  `turnFactor` (the steering weight - an INTEGER, not a float), `flocking` (the cohesion
-  weight), `protectTime` (the post-hit invulnerability window) and `hatchDuration` (the egg's
-  hatch time). Decoded but **not** used by the simulation: `food`, `growCount`, `growAmount`,
+  simulation actually reads: `speed` / `chaseSpeed` / `fleeSpeed` (the archetype's speed values -
+  the GA binary scales them by `npcSpeedMultiplier`, which is 1.0, and no per-mode base speed was
+  recovered, so the engine uses the shipped value directly as a world-unit speed; the shipped
+  range is 0.2 (a nearly stationary "booster") to 45 (a darting small creature), both plausible
+  against the player's 24 s·⁻¹ seed. `chaseSpeed` drives a predator and `speed` a normal move;
+  the shipped `fleeSpeed` is 0 in 188 of the 189 archetypes, so it cannot be the flee speed and
+  `speed` is the fallback), `awarenessRadiusFood` / `awarenessRadiusPredator` (the detection
+  radii), `turnFactor` (the steering weight - an INTEGER, not a float), `flocking` (the cohesion
+  weight), `protectTime` (the post-hit invulnerability window - it is read from the archetype but
+  is **0 in all 189 shipped archetypes**, so the documented 0.5 s seed is what actually runs) and
+  `hatchDuration` (the egg's hatch time). Decoded but **not** used by the simulation: `food`, `growCount`, `growAmount`,
   `protectRadius`, `wanderSpeed`, `awarenessRadius` (0 in every shipped archetype), `chaseTime`,
   the digestion trio, the sleep/awake times, the recharge timers and the `fears*` flags. The
   block is **mixed-type**: the integer fields were measured over all 189 shipped archetypes, and
@@ -166,6 +181,7 @@ cmake --build build --config Debug --target game_stages_verify cell_world_verify
 .\build\Debug\game_stages_verify.exe
 .\build\Debug\cell_world_verify.exe "S:\Games\Other\Spore\Data\CellGame.package"
 .\build\Debug\cell_game_verify.exe "S:\Games\Other\Spore\Data\CellGame.package"
+python tools/tests/test_game_stages_table.py  # cross-checks the table against modes.md + script
 # the live stage (the app lives in build\bin\Debug\, next to its Data\ tree):
 .\build\bin\Debug\OpenSpore.exe -w -devDirs -state:CellGame -quitAfter 140 -capture cell.bmp -captureAfter 120
 ```
@@ -174,16 +190,6 @@ cmake --build build --config Debug --target game_stages_verify cell_world_verify
 > so the paths above always run the fresh binary. (Before the mirror existed, `build\Debug\`
 > held stale executables from an older output layout, so the documented commands silently
 > verified the wrong build.)
-
-## Reproduce
-
-```powershell
-cmake --build build --config Debug --target game_stages_verify cell_world_verify
-.\build\Debug\game_stages_verify.exe
-.\build\Debug\cell_world_verify.exe "S:\Games\Other\Spore\Data\CellGame.package"
-python tools/tests/test_game_stages_table.py  # cross-checks the table against modes.md + script
-.\build\bin\Debug\OpenSpore.exe -w -devDirs -state:CellGame -quitAfter 140 -capture cell.bmp -captureAfter 120
-```
 
 `game_stages_verify` checks table transcription, case-insensitive/unknown lookups, the
 `next` chain, driver coverage (Cell only), the idle/active/exit lifecycle and the offline

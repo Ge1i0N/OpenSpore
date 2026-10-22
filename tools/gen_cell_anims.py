@@ -108,7 +108,7 @@ def parse_xls_sheet(data):
 def parse_anim_rows(rows):
     """Parse animation rows into structured data.
 
-    A blank EVENT cell is part of the shipped table (13 of the 74 rows), not a row to drop: the
+    A blank EVENT cell is part of the shipped table (12 of the 73 rows), not a row to drop: the
     clip name is the only key for those. Only a row with no clip at all is skipped.
     """
     anims = []

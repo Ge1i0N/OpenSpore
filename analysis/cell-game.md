@@ -156,7 +156,7 @@ base; the absolute offset adds the block base (`+0xE0` for the default `ai`):
 |---|---|---|---|
 | `+0x04` | `awarenessRadius` | `+0xE4` | 0 |
 | `+0x08` | `awarenessRadiusFood` | `+0xE8` | 5 |
-| `+0x0C` | `awarenessRadiusPredator` | `+0xEC` | 0 |
+| `+0x0C` | `awarenessRadiusPredator` | `+0xEC` | 0 (int) |
 | `+0x10` | `movementStyle` | `+0xF0` | 0 |
 | `+0x14` | `flocking` | `+0xF4` | 1 |
 | `+0x18` | `speed` | `+0xF8` | 11 |
@@ -170,22 +170,22 @@ base; the absolute offset adds the block base (`+0xE0` for the default `ai`):
 | `+0x38` | `protectRadius` | `+0x118` | 3 |
 | `+0x3C` | `protectTime` | `+0x11C` | 0 |
 | `+0x40` | `turnFactor` | `+0x120` | 3 (int) |
-| `+0x44` | `axialMovement` | `+0x124` | 0 |
-| `+0x48` | `spawnTime` | `+0x128` | 0 |
-| `+0x4C` | `spawnRestTime` | `+0x12C` | 0 |
-| `+0x50` | `spawnOutput` | `+0x130` | 0 |
-| `+0x54` | `arcLength` | `+0x134` | 0 |
+| `+0x44` | `axialMovement` | `+0x124` | 0 (raw) |
+| `+0x48` | `spawnTime` | `+0x128` | 0 (raw) |
+| `+0x4C` | `spawnRestTime` | `+0x12C` | 3 (int) |
+| `+0x50` | `spawnOutput` | `+0x130` | 0 (int) |
+| `+0x54` | `arcLength` | `+0x134` | 0 (int) |
 | `+0x58` | `arcLengthSecondary` | `+0x138` | 4 |
-| `+0x5C` | `numArcs` | `+0x13C` | 0 |
+| `+0x5C` | `numArcs` | `+0x13C` | 0 (raw) |
 | `+0x60` | `keyTransformation` | `+0x140` | 2 |
 | `+0x64` | `keyProjectile` | `+0x144` | 0 |
 | `+0x68` | `food` | `+0x148` | 180 |
 | `+0x6C` | `growCount` | `+0x14C` | 1 |
-| `+0x70` | `digestionCount` | `+0x150` | 0 |
-| `+0x74` | `digestionTime` | `+0x154` | 0 |
+| `+0x70` | `digestionCount` | `+0x150` | 0x01010000 (raw) |
+| `+0x74` | `digestionTime` | `+0x154` | 1 (int) |
 | `+0x78` | `digestionOutput` | `+0x158` | 0 |
 | `+0x7C` | `fleeTime` | `+0x15C` | 0 |
-| `+0x80` | `fleeRestTime` | `+0x160` | 0 |
+| `+0x80` | `fleeRestTime` | `+0x160` | 1 (int) |
 | `+0x84` | `chaseTime` | `+0x164` | 10 |
 | `+0x88` | `chaseRestTime` | `+0x168` | 0 |
 | `+0x8C` | `chasesDamage` | `+0x16C` | u8 |
@@ -195,18 +195,18 @@ base; the absolute offset adds the block base (`+0xE0` for the default `ai`):
 | `+0x90` | `fearsElectric` | `+0x170` | u8 |
 | `+0x91` | `fearsPoison` | `+0x171` | u8 |
 | `+0x92` | `ignoresFood` | `+0x172` | u8 |
-| `+0x94` | `awakeTime` | `+0x174` | 0 |
-| `+0x98` | `sleepTime` | `+0x178` | 0 |
+| `+0x94` | `awakeTime` | `+0x174` | 32 (int) |
+| `+0x98` | `sleepTime` | `+0x178` | 256 (int) |
 | `+0x9C` | `growAmount` | `+0x17C` | 0.4 |
 | `+0xA0` | `hatchDuration` | `+0x180` | 0.4 |
-| `+0xA4` | `poisonRecharge` | `+0x184` | 0 |
-| `+0xA8` | `electricRecharge` | `+0x188` | 0 |
+| `+0xA4` | `poisonRecharge` | `+0x184` | 10 (int) |
+| `+0xA8` | `electricRecharge` | `+0x188` | 1 (int) |
 | `+0xAC` | `electricRechargeVsSmall` | `+0x18C` | 0 |
 | `+0xB0` | `electricDischarge` | `+0x190` | 0 |
 
 Cross-checks on the shipped records: `cell_hero_L0` → `food` 10000, `growAmount`
 0.275, `chaseTime` 10, `protectRadius` 3; `cell_squid` → `food` 6, `growCount` 4,
-`speed` 4, `chaseSpeed` 2, `growAmount` 0.26; `cell_poisonerMed` → `food` 4,
+`speed` 4, `chaseSpeed` 2, `growAmount` 0.26; `cell_poisonerMed` → `food` 8,
 `speed` 20, `chaseSpeed` 15, `wanderSpeed` 20, `growAmount` 0.3.
 These are the **game's** numbers, and `engine/cell_world.cpp` now reads the AI
 block and the scalars by these names instead of guessing offsets.
@@ -223,6 +223,8 @@ are packed/raw.
   `electricRechargeVsSmall` {0,1,256}
 * **float:** everything else, including `keyTransformation` and `keyProjectile`
   (which are 1.0/2.0/3.0-style floats, not the u32 the first decoder assumed)
+* **unobservable:** `movementStyle` is 0 in all 189 records, so its type cannot be
+  measured; the engine reads it as an int
 * **raw/packed:** `axialMovement`, `spawnTime`, `numArcs`, `digestionCount`
   (raw `0x01010000` = a byte pair, not a float)
 

@@ -93,9 +93,6 @@ float hash01(u32 h) {
     return static_cast<float>(h & 0xFFFFFF) / 16777216.0f;
 }
 
-// A cell's body radius. The archetype's cAIData `growAmount` (record +0x17c) is the shipped
-// size-like value (hero 0.275, Ducky 0.4, flora 0.3); the hash fallback only covers records with
-// none (the unnamed food props).
 // A cell's body radius. SEED: the archetype's real size field is `size` @ record +0x304, which
 // is OUTSIDE the shipped 400-byte record, so no size ships with the data. The cAIData
 // `growAmount` is a GROWTH amount, not a size, so it must not be used here.
@@ -850,13 +847,6 @@ void World::reset_protection() {
     m_entities[static_cast<size_t>(m_player)].protect_time = 0.0f;
 }
 
-float World::stat_for_archetype(u32 archetype_id, u32 offset) const {
-    for (const Archetype& a : m_data.archetypes) {
-        if (a.id == archetype_id) return a.stat(offset);
-    }
-    return 0.0f;
-}
-
 float World::hp_for_size(float size) const {
     // The archetype's `hp` (record +0xa8) is a small TIER (hero 3, squid 2, Ducky 2). The shipped
     // HP formula was not recovered, so the tier -> points mapping below is a documented seed.
@@ -1063,9 +1053,13 @@ void World::tick(float dt) {
             const bool predator = e.size > psize * kPredatorFraction;
             const char* table = predator ? "npc_mad" : "npc_scared";
             const float w = look_weight(table, predator ? 4 : 5);   // pursue / flee target
-            // The archetype's own speeds: `chaseSpeed` drives a predator, `speed` drives a normal
-            // move. The shipped `fleeSpeed` is 0 in 188 of the 189 archetypes, so it cannot be the
-            // flee speed. The steering acceleration is the integer `turnFactor`; the exact
+            // The archetype's own speeds, used as world-unit speeds: the GA binary scales them by
+            // `npcSpeedMultiplier` (1.0) and no per-mode base speed was recovered, so the shipped
+            // value is the speed. The shipped range is 0.2 (a nearly stationary "booster") to 45 (a
+            // darting small creature), which is plausible against the player's 24 seed.
+            // `chaseSpeed` drives a predator, `speed` drives a normal move. The shipped
+            // `fleeSpeed` is 0 in 188 of the 189 archetypes, so it cannot be the flee speed.
+            // The steering acceleration is the integer `turnFactor`; the exact
             // original formula was not recovered, so this is a host policy over shipped values.
             const float speed = predator
                 ? (e.chase_speed > 0.0f ? e.chase_speed

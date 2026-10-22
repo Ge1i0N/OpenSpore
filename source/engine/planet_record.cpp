@@ -106,8 +106,7 @@ static bool unwrap_planet_resource(const std::vector<u8>& bytes,std::vector<u8>&
         starsdb::ExplicitDbpfReader nested;
         if(!nested.open_from_memory(inner,error)){error="nested planet DBPF rejected: "+error;return false;}
         if(nested.package().records().size()!=1){error="nested planet DBPF requires sole exact key(1,1,1)";return false;}
-        constexpr pkg::ResourceKey expected{1,1,1};
-        auto resource=nested.read_unique(expected);
+        auto resource=nested.read_unique(kNestedPlanetKey);
         if(resource.status!=starsdb::ResourceReadStatus::Found){error="nested planet key(1,1,1): "+resource.error;return false;}
         const auto le32=[&](size_t at){return u32(inner[at])|(u32(inner[at+1])<<8)|(u32(inner[at+2])<<16)|(u32(inner[at+3])<<24);};
         const size_t index=le32(0x40)?le32(0x40):le32(0x28);

@@ -270,7 +270,7 @@ int main(int argc,char** argv) {
     // Real planetRecords.pkp transport: 4-byte prefix + nested single-record DBPF.
     auto wrapped_star=star; wrapped_star.planet_count=(u8)1;
     planet::resource_keys(wrapped_star,keys,error);
-    const auto inner_pkg=package({{pkg::ResourceKey{1,1,1},named(u"Wrapped World")}});
+    const auto inner_pkg=package({{planet::kNestedPlanetKey,named(u"Wrapped World")}});
     Bytes wrapped_rec={0x00,0x25,0x00,0x03};
     append(wrapped_rec,inner_pkg);
     const auto outer_pkg=package({{keys[0],wrapped_rec}});

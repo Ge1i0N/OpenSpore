@@ -67,6 +67,21 @@ AI = [
 ]
 AI_BASE = 0xE0
 
+# The cAIData block is MIXED-TYPE. The split was measured over all 189 shipped archetypes:
+# a field whose raw word is a small integer in every record is an integer, one whose raw word
+# is a sane float bit pattern is a float, and the rest are packed/raw words. Reading an
+# integer field as a float yields a denormal (turnFactor 3 -> 4.2e-45).
+AI_INT = {
+    "awarenessRadiusPredator", "turnFactor", "spawnRestTime", "spawnOutput", "arcLength",
+    "digestionTime", "fleeRestTime", "awakeTime", "sleepTime", "poisonRecharge",
+    "electricRecharge", "electricRechargeVsSmall",
+}
+AI_BYTE = {
+    "chasesDamage", "fearsMouths", "fearsWeapons", "fearsDamage", "fearsElectric",
+    "fearsPoison", "ignoresFood",
+}
+AI_RAW = {"axialMovement", "spawnTime", "numArcs", "digestionCount"}
+
 
 def u32(d: bytes, off: int) -> int:
     return struct.unpack_from("<I", d, off)[0] if off + 4 <= len(d) else 0
@@ -100,7 +115,14 @@ def describe(rec: bytes) -> dict:
         out[name] = u32(rec, off)
     ai = {}
     for name, off in AI:
-        ai[name] = u8(rec, AI_BASE + off) if 0x8C <= off <= 0x92 else f32(rec, AI_BASE + off)
+        if name in AI_BYTE:
+            ai[name] = u8(rec, AI_BASE + off)
+        elif name in AI_INT:
+            ai[name] = u32(rec, AI_BASE + off)
+        elif name in AI_RAW:
+            ai[name] = "0x%08X" % u32(rec, AI_BASE + off)
+        else:
+            ai[name] = f32(rec, AI_BASE + off)
     out["ai"] = ai
     return out
 

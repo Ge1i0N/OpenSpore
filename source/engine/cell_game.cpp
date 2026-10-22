@@ -238,8 +238,8 @@ Globals parse_globals(u32 id, const std::vector<u8>& d) {
     add_ref(0x80);
     for (size_t o = 0x84; o <= 0xB8 && o + 4 <= d.size(); o += 4) g.floats.push_back(le_f32(d.data() + o));
     if (d.size() >= 0xC4) {
-        g.num_high_lod_fg = le32(d.data() + 0xBC);
-        g.num_high_lod_bg = le32(d.data() + 0xC0);
+        g.tail_int0 = le32(d.data() + 0xBC);
+        g.tail_int1 = le32(d.data() + 0xC0);
     }
     return g;
 }
@@ -275,7 +275,7 @@ std::vector<PropertyCurve> parse_prop_curves(const std::vector<u8>& d, PropDiagn
         diag.why = "implausible entry count";
         return out;
     }
-    size_t off = 4;
+    u64 off = 4;
     for (u32 k = 0; k < count; ++k) {
         if (off + 16 > d.size()) {
             diag.why = "entry header past end";
@@ -286,7 +286,10 @@ std::vector<PropertyCurve> parse_prop_curves(const std::vector<u8>& d, PropDiagn
         const u32 icnt = be32(d.data() + off + 8);
         const u32 isz = be32(d.data() + off + 12);
         off += 16;
-        if (off + static_cast<size_t>(icnt) * isz > d.size()) {
+        // The product is computed in 64 bits: the x86 build has a 32-bit size_t, where
+        // icnt * isz could wrap and let a malformed record pass this check.
+        const u64 need = static_cast<u64>(icnt) * static_cast<u64>(isz);
+        if (need > static_cast<u64>(d.size()) - off) {
             diag.why = "item data past end";
             break;
         }
@@ -301,8 +304,8 @@ std::vector<PropertyCurve> parse_prop_curves(const std::vector<u8>& d, PropDiagn
                 c.key = b;
             }
             for (u32 j = 0; j < icnt; ++j) {
-                const float x = le_f32(d.data() + off + static_cast<size_t>(j) * 8);
-                const float y = le_f32(d.data() + off + static_cast<size_t>(j) * 8 + 4);
+                const float x = le_f32(d.data() + off + static_cast<u64>(j) * 8);
+                const float y = le_f32(d.data() + off + static_cast<u64>(j) * 8 + 4);
                 c.points.push_back({x, y});
             }
             out.push_back(std::move(c));
@@ -310,7 +313,7 @@ std::vector<PropertyCurve> parse_prop_curves(const std::vector<u8>& d, PropDiagn
         } else {
             ++diag.other_types;
         }
-        off += static_cast<size_t>(icnt) * isz;
+        off += need;
     }
     diag.consumed = static_cast<u32>(off);
     diag.exact = diag.why.empty() && off == d.size();
@@ -450,13 +453,8 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
 }  // namespace
 
 float Archetype::stat(u32 offset) const {
-    if (offset + 4 > record.size()) return 0.0f;
+    if (static_cast<u64>(offset) + 4 > record.size()) return 0.0f;
     return le_f32(record.data() + offset);
-}
-
-u32 Archetype::dword(u32 offset) const {
-    if (offset + 4 > record.size()) return 0u;
-    return le32(record.data() + offset);
 }
 
 bool decode(const std::string& path, GameData& out, std::string& error) {

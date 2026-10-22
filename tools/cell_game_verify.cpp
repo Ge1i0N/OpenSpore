@@ -298,8 +298,8 @@ int main(int argc, char** argv) {
         check(g.globals[0].floats.size() == 29, "globals float count");
         check(g.globals[0].floats[0] == 5.0f && g.globals[0].floats[1] == 0.5f, "globals floats");
         check(g.globals[0].floats[15] == 1.0f, "globals float after the mid-record id");
-        check(g.globals[0].num_high_lod_fg == 10 && g.globals[0].num_high_lod_bg == 2,
-              "globals numHighLOD");
+        check(g.globals[0].tail_int0 == 10 && g.globals[0].tail_int1 == 2,
+              "globals trailing words");
     }
 
     // 9: world level slots

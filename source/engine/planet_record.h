@@ -3,6 +3,9 @@
 
 namespace os::planet {
 constexpr u32 kResourceType=0x05220cb8u, kResourceGroup=1u;
+// The nested planet DBPF holds exactly one record, and the shipped file keys it
+// (instance 1, type 1, group 1) - NOT the outer planet record type.
+constexpr pkg::ResourceKey kNestedPlanetKey{1,1,1};
 struct Record {
     serialized::Frame fields;
     std::optional<u32> key, type, tech_level, flags;
