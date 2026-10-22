@@ -355,7 +355,12 @@ Population parse_population(u32 id, const std::vector<u8>& d) {
         size_t at = 16 + static_cast<size_t>(k) * stride;
         if (at + 0x30 > d.size()) break;
         SpawnEntry e;
+        // The 64-byte entry names its archetype in one of two adjacent slots: the kind field at
+        // +0x28 is 0 when the id is at +0x18, 1 when it is at +0x1C and 2 when the entry names
+        // no archetype at all. The two slots are mutually exclusive in all 233 shipped entries,
+        // so reading only +0x18 silently dropped every kind-1 entry (46 of 224 spawns).
         e.cell = le32(d.data() + at + 0x18);
+        if (e.cell == 0) e.cell = le32(d.data() + at + 0x1C);
         e.count = le_f32(d.data() + at + 0x2C);
         p.entries.push_back(e);
     }

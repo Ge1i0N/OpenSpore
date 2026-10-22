@@ -310,6 +310,18 @@ Steering weights (`docs/LOOKTABLE_FORMAT.md`), one per behaviour:
 
 ## Spawn model — `populate` + `random_creature`
 
+### The populate entry names its archetype in one of two slots
+
+A `populate` record is a 4-word header plus 64-byte entries (every shipped
+record is exactly `16 + count * 64` bytes). The entry's archetype id sits in
+`+0x18` **or** `+0x1C`, never both, and the kind field at `+0x28` says which:
+kind 0 -> the id is at `+0x18` (178 shipped entries), kind 1 -> at `+0x1C`
+(46 entries), kind 2 -> the entry names no archetype at all (9 entries). The
+count is at `+0x2C` in every case.
+
+Reading only `+0x18` silently dropped every kind-1 entry - 46 of the 224
+spawn entries across the 23 shipped levels, about 76 spawns.
+
 These define **what cells appear in a level** — the direct input a playable stage needs.
 
 `populate` (23 resources, one per level: `level_water`, `level_plant`, `level_ice`,
