@@ -75,6 +75,10 @@ goes to `GalaxyGameEntry`. `-preload` enters the empty `Preload`. There is a com
 `# gotoState DevLauncher` in `Main` — the dev launcher is the alternate boot path, and `LaunchScreen`
 exists only as "backwards compat. for sniffs" forwarding to `DevLauncher`.
 
+**Native startup nuance:** the later audit of `7E2370` shows that `-preload` requests `Preload`
+but then continues to the normal Demo / explicit `-state` / Main selection; it is not an exclusive
+early-return branch. See [startup-state-registration.md](startup-state-registration.md).
+
 **The five game stages**, each a real `mode`, each with `From*` forwarding states:
 
 | stage state | mode | entered from |
@@ -139,6 +143,11 @@ field order from bytes.
 
 ## The `-id` semantics, SETTLED BY DISASSEMBLY (it changes how a state is addressed)
 
+**Later native-owner clarification:** [startup-state-registration.md](startup-state-registration.md)
+links the callback's `[handler+0x30]` to the manager. Thus `+0x28` in the open callback below is
+the manager's staged identity, not a separately allocated state's field. The close callback
+commits a `0x50`-byte record and the name/ID indexes. The explicit-ID conclusion is unchanged.
+
 The state-add method is `0x007e3fb0`, and its branch structure answers the question our engine had to
 get right before `-state:<Name>` could work at all:
 
@@ -175,6 +184,18 @@ reads precisely: the assigned ids are what the **UI layouts and the editor-switc
 state by, which is why the id namespace, not the name namespace, is the one `spui` will reference.
 
 ## Transitions are a CHAIN, not a stack
+
+**Later correction:** the paragraph below records the host queue design and its old rationale,
+not a proved native scheduling contract. [startup-state-dispatch.md](startup-state-dispatch.md)
+now shows `gotoState` as a stored `00E11330` message action; its listener resolves the target name
+and invokes the switch body. The nesting diagnostic guards script declarations, not established
+runtime switch reentrancy. Message delivery timing, native chain limits and the `00E1132D`
+pending-field event producer remain unresolved. The host's 32-hop cap is a host policy.
+
+**Message-service continuation:** [startup-message-delivery.md](startup-message-delivery.md)
+resolves `00E1132D` as the console `state -next` direct-listener call and identifies queued
+delivery from the app frame. State-manager constructor policy is zero (queued actions);
+startup clears the service's drain-until-empty flag. Actual activation remains unobserved.
 
 `endChain` (`0x014130f8`) sits in the same .rdata cluster as `entry`/`exit`/`onExit`/`transition`, and
 `Main`'s body is a bare `gotoState` with no `entry` block — so a state's transition fires as part of

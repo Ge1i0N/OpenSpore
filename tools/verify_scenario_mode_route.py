@@ -16,6 +16,53 @@ from tools.pe import PE
 AUTHORITY = "086f299216f6a70d2c23be0fb04b4b7c570d3bbd94ca0b26bcad53681b3e9fe7"
 
 
+def countdown_tail(pe: PE, countdown: int, state: int) -> tuple[str, int]:
+    """Interpret only DFC210's pinned countdown tail; never run PE/services.
+
+    Caller must already have selected +0x80 == 0, local state != 11.
+    The count/state arguments are controlled verifier inputs, not native state.
+    """
+    pc, eax, zero = 0xDFC473, 0, False
+    countdown &= 0xFFFFFFFF
+    for _ in range(32):
+        if pc == 0xDFC493:
+            return "other-state-route", countdown
+        data = pe.read(pc, 6)
+        if data[:3] in (b"\x8b\x45\x28", b"\x8b\x45\x20"):
+            eax = countdown if data[2] == 0x28 else state & 0xFFFFFFFF
+            pc += 3
+        elif data[:2] == b"\x85\xc0":  # TEST clears CF; JBE below means ZF.
+            zero = eax == 0
+            pc += 2
+        elif data[:3] == b"\x83\xf8\x0a" or data[:3] == b"\x83\xf8\x09":
+            zero = eax == data[2]
+            pc += 3
+        elif data[0] in (0x74, 0x76):
+            pc += 2 + (int.from_bytes(data[1:2], "little", signed=True) if zero else 0)
+        elif data[0] == 0x48:  # DEC EAX
+            eax = (eax - 1) & 0xFFFFFFFF
+            pc += 1
+        elif data[:3] == b"\x89\x45\x28":
+            countdown = eax
+            pc += 3
+        elif data[0] in (0x5E, 0x5D):  # POP ESI/EBP: no abstract state effect.
+            pc += 1
+        elif data[:3] == b"\x83\xc4\x44":
+            pc += 3
+        elif data[:3] == b"\xc2\x04\x00":
+            return "returned", countdown
+        elif data[:2] == b"\x8b\xcd":
+            pc += 2
+        elif data[0] == 0xE8:
+            target = pc + 5 + int.from_bytes(data[1:5], "little", signed=True)
+            if target != 0xDFBD40:
+                raise ValueError(f"unexpected countdown-tail call {target:#x}")
+            return "completion-call", countdown
+        else:
+            raise ValueError(f"unsupported countdown-tail instruction at {pc:#x}")
+    raise ValueError("countdown-tail instruction budget exceeded")
+
+
 def verify() -> None:
     pe = PE()
     if hashlib.sha256(pe.raw).hexdigest() != AUTHORITY:
@@ -349,6 +396,328 @@ def verify() -> None:
     # branch. It never changes the component activation ControlID to GA ID.
     exact(0x964181, "8b 86 14 02 00 00 83 f8 02 74 19 83 f8 03 74 14")
     exact(0x9641B7, "c7 44 24 2c 18 00 00 00")
+
+    # Launch waiting subphases are not skipped by a zero countdown.
+    call(0xDFAE23, 0xDF9AA0)
+    call(0xDFAE2C, 0xDFAAF0)
+    exact(0xDFAE59, "e9 52 ed ff ff")  # tail-jump DF9BB0
+    exact(0xDF9BF8, "c7 46 78 00 00 00 00")
+    call(0xDF9C41, 0xDDBA70)
+    exact(0xDFC246, "83 7d 20 0b 0f 84 71 02 00 00")
+    exact(0xDFC32D, "80 bd 80 00 00 00 00 0f 84 39 01 00 00")
+    call(0xDFC345, 0x93A310)
+    exact(0x145BE38, "00 00 00 3f")  # 0.5 threshold, not a frame count.
+    exact(0xDFC356, "d8 4e 14 d9 05 38 be 45 01 d9 c9 df f1 dd d8 76 10")
+    call(0xDFC36B, 0xDFA760)
+    exact(0xDFC370, "c7 45 78 01 00 00 00")
+    exact(0xDFC385, "e8 d6 10 d4 ff 83 c0 20 39 00 74 02 32 db")
+    exact(0xDFC39C, "8b 42 28 ff d0 85 c0 7e 02 32 db")
+    call(0xDFC3B0, 0xEC42D0)
+    exact(0xDFC3B5, "84 c0 75 07 84 db 74 03 89 75 78")
+    exact(0xDFC3C1, "39 75 78 0f 85 f6 00 00 00")
+    call(0xDFC3D1, 0xDD9140)
+    exact(0xDD9140, "a0 04 0b 6a 01 c3")
+    exact(0xDFC3D6, "84 c0 0f 84 e2 00 00 00")
+    exact(0xDFC3E4, "c6 85 80 00 00 00 00 c7 45 28 0a 00 00 00")
+    call(0xDFC466, 0xE3E350)
+    exact(0xDFC46B, "5e 5d 83 c4 44 c2 04 00")
+    exact(0xEC42D0, "33 c0 83 79 1c 01 0f 94 c0 c3")
+
+    # Latch provenance: reset, alternate write and the uncarved timed phase.
+    exact(0xDDBA7C, "33 db")
+    exact(0xDDBA87, "88 1d 04 0b 6a 01")
+    exact(0xDDBDC7, "c6 05 04 0b 6a 01 01")
+    vslot(0x147D1F0, 0, 0xDD96F0)
+    vslot(0x147D1F0, 4, 0xDD9740)
+    exact(0x15A2DB0, "f0 d1 47 01")
+    exact(0xDDD655, "c7 44 24 14 b0 2d 5a 01")
+    exact(0xDDD673, "c7 01 b0 2d 5a 01")
+    call(0xDD97C5, 0x93A310)
+    exact(0xDD97D6, "b0 01 d8 4e 14 5e d9 e8 d9 c9 df f1 dd d8 76 05 a2 04 0b 6a 01")
+
+    # Zero is observed on the next Update, not when DEC first produces zero.
+    exact(0xDFC473, "8b 45 28 85 c0 76 0c 48 5e 89 45 28 5d 83 c4 44 c2 04 00")
+    for state in (0, 1, 8, 9, 10, 12):
+        for count in (0, 1, 10, 0xFFFFFFFF):
+            expected = (("returned", count - 1) if count else
+                        ("completion-call" if state in (9, 10) else "other-state-route", 0))
+            if countdown_tail(pe, count, state) != expected:
+                raise ValueError(f"countdown-tail mismatch state={state} count={count}")
+            checks += 1
+    count = 10
+    for _ in range(10):
+        action, count = countdown_tail(pe, count, 10)
+        if action != "returned":
+            raise ValueError("countdown completion occurred during decrement")
+    if count != 0 or countdown_tail(pe, count, 10) != ("completion-call", 0):
+        raise ValueError("countdown did not complete on the following Update")
+    checks += 1
+
+    # ScenarioMode has a SEPARATE global loading context, not mMode fields.
+    exact(0xEF252B, "c6 86 dc 00 00 00 01")
+    exact(0xEF2543, "b9 30 cc 5a 01")
+    call(0xEF2548, 0xEF1BC0)
+    exact(0xEF1BCC, "89 46 04 0b d1 89 4e 08 57 33 ff 89 56 0c 8b ce 89 7e 10")
+    exact(0xEF2EFB, "80 78 28 00 0f 85 71 03 00 00")
+    exact(0xEF2F05, "83 3d 34 cc 5a 01 04 74 20")
+    exact(0xEF2F1D, "b9 30 cc 5a 01")
+    call(0xEF2F22, 0xEF2930)
+    exact(0xEF2F27, "5e 83 c4 0c c2 08 00")
+    exact(0xEF2933, "8b 46 04 83 f8 03 0f 87 e4 00 00 00 ff 24 85 28 2a ef 00")
+    for index, target in enumerate((0xEF2946, 0xEF29AE, 0xEF29C5, 0xEF29DA)):
+        vslot(0xEF2A28, index * 4, target)
+    exact(0xEF2981, "80 3e 00 74 0b 8b 56 10 3b 15 1c cd 5a 01 73 0a")
+    exact(0xEF2991, "83 7e 10 1e 0f 86 88 00 00 00")
+    call(0xEF299D, 0xEF2860)
+    call(0xEF29A4, 0xEF0140)
+    exact(0xEF29A9, "ff 46 04 5e c3")
+    exact(0xEF29B7, "8b 42 28 ff d0 85 c0 75 63 ff 46 04 5e c3")
+    call(0xEF29C5, 0xEF01C0)
+    exact(0xEF29CA, "84 c0 74 55")
+    call(0xEF29D0, 0xEF1B60)
+    call(0xEF29DB, 0xEF25E0)
+    exact(0xEF2A1F, "ff 46 04 5f 5e c3")
+
+    # Actual model predicate: each pointer must exist, bit14 set, bit18 clear.
+    exact(0xEF01C4, "8b 73 64 2b 73 60 57 c1 fe 02 33 ff 85 f6 76 2d")
+    exact(0xEF01DC, "8b 82 ac 00 00 00 ff d0 85 c0 74 1f")
+    exact(0xEF01E8, "8b 40 04 8b c8 c1 e9 0e f6 c1 01 74 12 c1 e8 12 a8 01 75 0b")
+    exact(0xEF0201, "5f 5e b0 01 5b c3 5f 5e 32 c0 5b c3")
+    required_shift = pe.read(0xEF01EF, 1)[0]
+    rejected_shift = pe.read(0xEF01F7, 1)[0]
+    for flags, expected in ((0, False), (1 << 14, True), (1 << 18, False),
+                             ((1 << 14) | (1 << 18), False), (0xFFFFFFFF, False)):
+        actual = bool(flags & (1 << required_shift)) and not bool(flags & (1 << rejected_shift))
+        if actual != expected:
+            raise ValueError(f"pre-play model flag predicate mismatch: {flags:#x}")
+        checks += 1
+
+    # Enter latch is a one-shot setup call with return before ordinary play.
+    exact(0xEF2F2E, "80 be dc 00 00 00 00 57 0f 84 a7 00 00 00")
+    exact(0xEF2F3C, "c6 86 dc 00 00 00 00")
+    exact(0xEF2F9E, "83 be cc 00 00 00 02 8b ce 75 07")
+    call(0xEF2FA9, 0xEF0E00)
+    call(0xEF2FB2, 0xEF0990)
+    exact(0xEF2FDB, "5f 5e 83 c4 0c c2 08 00")
+
+    # ScenarioPlanet is a LIGHTING config on a concrete Graphics world.
+    exact(0xEF2FB7, "8b 35 54 ea 67 01")
+    exact(0x148B0FC, b"ScenarioPlanet\0".hex())
+    exact(0xEF2FC4, "68 fc b0 48 01")
+    call(0xEF2FC9, 0x932E50)
+    exact(0xEF2FD3, "50 8b 42 30 8b ce ff d0")
+    call(0xB3AE69, 0x67DD50)
+    exact(0xB3AE74, "8b 42 18 68 a0 de a4 04 ff d0")
+    exact(0xB3AE9A, "89 0d 54 ea 67 01")
+    exact(0x67DD50, "a1 d0 d8 5f 01 c3")
+    exact(0x709CC5, "c7 00 5c c7 40 01")
+    vslot(0x140C75C, 0x18, 0x70DD00)
+    exact(0x70D372, "c7 06 a0 c7 40 01")
+    vslot(0x140C7A0, 0x30, 0x70A5D0)
+    call(0x70A5E5, 0x705B60)
+    exact(0x70A5EC, "89 46 10 89 7e 14")
+    call(0x70A5F2, 0x709530)
+    lighting_id = 0x811C9DC5
+    for byte in b"scenarioplanet":
+        lighting_id = ((lighting_id * 0x1000193) & 0xFFFFFFFF) ^ byte
+    if lighting_id != 0x24720859:
+        raise ValueError("ScenarioPlanet lighting-name hash mismatch")
+    checks += 1
+
+    # EF25E0 prepares existing Scenario objects, then synchronizes records. It
+    # is not itself a terrain/world loader.
+    call(0xEF25EB, 0xB3D400)
+    call(0xEF25F2, 0xB228F0)
+    exact(0xEF25F7, "8b 0d 18 d9 5f 01 32 db 85 c9 74 27")
+    exact(0xEF2630, "83 b9 cc 00 00 00 02 0f 85 65 01 00 00 84 db 0f 84 5d 01 00 00")
+    call(0xEF26AC, 0xEF18B0)
+    call(0xEF26B7, 0x4E08F0)
+    call(0xEF2797, 0xF45E70)
+    call(0xEF27BF, 0xF40210)
+    call(0xEF27EB, 0xF45E70)
+    call(0xEF2801, 0xF42660)
+    exact(0xEF2700, "83 60 04 fe bb 01 00 00 00 01 58 40")
+
+    # F45E70 is a two-pass wrapper around F45AD0 with an intervening service
+    # call; F45AD0 uses 0x238 Scenario records and 0x4E0 payloads.
+    call(0xF45E91, 0xF45AD0)
+    call(0xF45E96, 0xB3D400)
+    call(0xF45E9D, 0xB228F0)
+    call(0xF45EAA, 0xF45AD0)
+    exact(0xF45B32, "69 c0 e0 04 00 00")
+    call(0xF45B51, 0xED36D0)
+    call(0xF45B80, 0xF3F8C0)
+    call(0xF45BC2, 0xB475C0)
+    call(0xF45BD3, 0xB70020)
+    call(0xF45C3A, 0xF3D930)
+    call(0xF45DC2, 0xF3C4B0)
+    call(0xF45E58, 0xF432C0)
+    exact(0xF3F8FB, "56 e8 af 3e fe ff 8b 16 83 c4 04 89 50 1c 89 70 18")
+
+    # F40210 aggregates F400E0 results; F400E0 delegates classification to
+    # F3EFB0 and sets record wait/error bits rather than constructing terrain.
+    call(0xF400EE, 0xF3D620)
+    call(0xF400F6, 0xB18D40)
+    call(0xF4014D, 0xB18470)
+    call(0xF40158, 0xF25D50)
+    call(0xF401BE, 0xF3EFB0)
+    exact(0xF40131, "83 8d 24 02 00 00 10 eb 07 83 a5 24 02 00 00")
+    exact(0xF40227, "21 b0 24 02 00 00")
+    call(0xF402BE, 0xF400E0)
+    call(0xF4032C, 0xF400E0)
+
+    # ScenarioPlayMode initialization and act/goal lifecycle. These are
+    # separate local play-mode phases, not the GGE controller states or the
+    # global loading-context phase.
+    call(0xEF0E63, 0xF1F060)
+    call(0xF1F066, 0xF1DF00)
+    exact(0xF1F06B, "c6 83 b4 00 00 00 00")
+    call(0xF1F081, 0xEED7E0)
+    exact(0xF1F089, "83 bb 90 00 00 00 02 89 83 c4 00 00 00 0f 85 e2 01 00 00")
+    exact(0xF1F0A2, "c7 83 90 00 00 00 00 00 00 00")
+    call(0xF1F0AC, 0xF1EE70)
+    exact(0xF1F0B1, "8b 0d a4 7a 6c 01 8b 81 d0 00 00 00 83 f8 01 74 43 83 f8 02 74 3e")
+    call(0xF1F0C9, 0xF1C390)
+    exact(0xF1F0DB, "c7 83 90 00 00 00 03 00 00 00")
+    exact(0xF1F100, "e9 ab 57 ef ff")
+    exact(0xF1EE7B, "57 89 be b8 00 00 00")
+    call(0xF1EE82, 0xF1ABE0)
+    call(0xF1EE8C, 0xF1EBD0)
+    call(0xF1EED4, 0xF3BD00)
+    exact(0xF1EF02, "c7 86 f0 00 00 00 00 00 00 00 c7 86 f4 00 00 00 00 00 00 00")
+    exact(0xF1EF39, "89 86 f4 00 00 00")
+    call(0xF1EF3F, 0xA20670)
+    call(0xF1F02F, 0xF0E5A0)
+    call(0xF1F03D, 0xF11380)
+    exact(0xF1F273, "c7 83 90 00 00 00 01 00 00 00")
+
+    # Update-goal scan: inactive act records use 0x1AC stride; successful
+    # checks request ScenarioMode through the shipped state hash.
+    exact(0xF1C390, "83 ec 28 a1 a4 7a 6c 01 53 55 56 57 8b f9")
+    exact(0xF1C3C3, "89 5c 24 14 89 44 24 20 0f 84 33 01 00 00")
+    exact(0xF1C3EC, "8b 77 64 03 74 24 18 80 3e 00 75 3f")
+    call(0xF1C408, 0xF41C60)
+    call(0xF1C42D, 0xF1B610)
+    exact(0xF1C474, "c7 87 b0 00 00 00 04 00 00 00")
+    exact(0xF1C47E, "e8 6d 8b 79 ff")
+    exact(0xF1C48A, "68 be 1e 85 21")
+    call(0xF1C493, 0x6B5440)
+    call(0xF1C49C, 0x6B5550)
+    call(0xF1C4D7, 0xF1A9C0)
+    call(0xF1C51C, 0xF41F70)
+    call(0xF1C54F, 0xF1B610)
+
+    # Jump/advance path synchronizes Scenario records, selects the next act,
+    # re-runs current-act setup and then goal scanning.
+    exact(0xF1F3C0, "51 56 8b f1 83 be 90 00 00 00 03 0f 85 fd 00 00 00")
+    exact(0xF1F3F1, "c6 86 ec 00 00 00 01 e8 53 e0 c1 ff")
+    call(0xF1F417, 0xF45E70)
+    call(0xF1F428, 0xF1EE70)
+    call(0xF1F48D, 0xF462B0)
+    call(0xF1F4A2, 0xF1EE70)
+    call(0xF1F4B2, 0xF1C390)
+    exact(0xF1F4B7, "c6 86 ec 00 00 00 00")
+    call(0xF1F4C7, 0xF0E5A0)
+
+    # F0E5A0 is only a launch-context transition gate; nonzero context returns.
+    exact(0xF0E5A0, "a1 a4 7a 6c 01 83 b8 d0 00 00 00 00 75 0b")
+    exact(0xF0E5B4, "e9 27 63 f0 ff")
+
+    # F11380 consumes act/Scenario records into descriptors through E10560 and
+    # F0FD40. It is not classified as terrain construction.
+    exact(0xF11380, "81 ec 90 00 00 00 53 8b d9 8b 8b e0 02 00 00 55 33 ed")
+    call(0xF113A0, 0xE0FB30)
+    call(0xF113AD, 0xE0ACE0)
+    call(0xF113C1, 0x10212D0)
+    exact(0xF11472, "c7 44 24 10 00 00 e0 17")
+    call(0xF11464, 0xE10560)
+    call(0xF114B6, 0xF3D620)
+    call(0xF114C8, 0xF3E7A0)
+    exact(0xF114E6, "69 c9 e0 04 00 00 80 3c 11 00")
+    call(0xF1151B, 0xF3BD00)
+    exact(0xF11540, "8b 4e 04 83 f9 fe 0f 84 07 01 00 00 80 7e 10 00")
+    call(0xF11601, 0xE10560)
+    call(0xF11618, 0xF0FD40)
+    call(0xF11717, 0xE10560)
+    call(0xF11731, 0xF0FD40)
+
+    # F41C60 initializes and writes bounded local outcome codes; preserve them
+    # as Unknown classifications rather than universal readiness meanings.
+    exact(0xF41C60, "83 ec 08 55 56 8b 74 24 14 8b e9 8b 4c 24 1c")
+    exact(0xF41C75, "c7 86 84 01 00 00 ff ff ff ff")
+    for address, status in ((0xF41D31, 0x11), (0xF41D5B, 0x14),
+                            (0xF41E0F, 0x11), (0xF41E6A, 0x14),
+                            (0xF41EA9, 0x15), (0xF41ECD, 0x13),
+                            (0xF41F36, 0x16)):
+        exact(address, "c7 86 84 01 00 00 " + status.to_bytes(4, "little").hex())
+
+    # Descriptor registry boundary: ordered lookup/insert, then E10560 maps
+    # descriptor flags to downstream command/service entries. No terrain claim.
+    exact(0xF0FD40, "8b 41 0c 83 ec 0c 53 56 8d 51 04 57 8b 7c 24 1c")
+    call(0xF0FDA1, 0xABFE60)
+    exact(0xF0FDB6, "5f 8d 46 14 5e 5b 83 c4 0c c2 04 00")
+    exact(0xABFE60, "83 ec 08 56 8b f1 8b 46 04 8b 4c 24 14 8d 56 04")
+    call(0xABFE7A, 0x921810)
+    call(0xABFEA6, 0xF0F050)
+    call(0xABFF0C, 0xF0F0E0)
+    exact(0xE1060D, "e8 be d6 86 ff 8b 10 8b c8 8b 42 38 ff d0")
+    exact(0xE106EC, "81 fe 10 4c 65 01 75 09")
+    call(0xE107FB, 0x8062B0)
+    call(0xE10868, 0x951220)
+    call(0xE10877, 0x951230)
+    call(0xE10887, 0x966CE0)
+    exact(0xE10957, "81 7c 24 14 02 4c 65 01")
+
+    # Immediate service/UI registry consumers of E10560.
+    exact(0x951220, "a1 b4 aa 66 01 c3")
+    exact(0x951230, "8b 44 24 08 48 83 c8 07 56 8b 74 24 14 40 85 f6")
+    call(0x95127A, 0x928CC0)
+    exact(0x95127F, "85 c0 75 02 5e c3")
+    exact(0xF0F050, "80 7c 24 10 00 53 55 8b 6c 24 10 56 57 8b f1")
+    call(0xF0F0BD, 0x921930)
+    exact(0xF0F0C6, "ff 46 14 83 c4 10 89 38")
+    exact(0x8062B0, "8b 4c 24 04 85 c9 75 03 33 c0 c3")
+    call(0x8062C2, 0x810650)
+    exact(0x8062E3, "68 cf 47 3c ef")
+    exact(0x8062FF, "68 08 19 3c 10")
+    exact(0x966CE0, "8b c1 c7 40 04 40 4c 44 01 33 c9 89 48 08")
+    exact(0x921930, "8b 44 24 04 8b 4c 24 08 53 33 db 56 8b 74 24 14")
+    exact(0x921943, "89 18 89 58 04 88 58 0c")
+    exact(0x928CC0, "56 57 8b f9 8b b7 e4 04 00 00 85 f6 74 0a")
+    call(0x928CEE, 0x928570)
+    exact(0x928CF3, "8b f8 85 f6 74 0a ff 4e 18")
+    exact(0x810650, "8b 49 14 85 c9 74 05 e9 44 fc ff ff")
+    exact(0xE108AB, "6a 00 53 8b cf ff d0 f3 0f 2a 43 20")
+    exact(0xE10957, "81 7c 24 14 02 4c 65 01 0f 84 41 01 00 00")
+    exact(0xE10A81, "81 7c 24 14 10 4c 65 01 8b 17 8a d8")
+    exact(0xE10A92, "f6 44 24 54 80 74 34 8b 82 e8 00 00 00")
+
+    # E0BC90/E0BF20 are spatial/grid consumers: bounds, scale and identity
+    # checks, not direct terrain/stage allocation.
+    exact(0xE0BC90, "83 ec 08 56 57 8b f9 e8 b4 17 d3 ff 85 c0 74 05")
+    call(0xE0BCF1, 0xE0B560)
+    call(0xE0BD33, 0xE0AA60)
+    exact(0xE0AA60, "83 ec 14 8b d1 f3 0f 10 82 18 02 00 00 f3 0f 59")
+    exact(0xE0AA94, "7d 04 33 c0 eb 0c 3d 80 00 00 00 7e 05")
+    exact(0xE0BF20, "83 ec 14 56 57 8b 7c 24 24 8b 07 8b 50 38 8b f1")
+    exact(0xE0BFD3, "8a 4c 24 28 3d 02 4c 65 01 74 13 3d 10 4c 65 01 0f 85")
+    exact(0xE0C062, "3d 10 4c 65 01 0f 85 e3 00 00 00 84 c9 0f 85")
+    exact(0xE0D0E0, "83 ec 24 56 8b f1 83 be 8c 09 00 00 00 0f 84")
+    call(0xE0D12C, 0xE0BF20)
+    exact(0xE0D192, "81 ff 10 4c 65 01 75 0a")
+    call(0xE0D211, 0x807430)
+    call(0xE0D259, 0x8082E0)
+    call(0xE0D275, 0x8082C0)
+    exact(0xE0D261, "81 ff 10 4c 65 01 5f 74 22")
+    exact(0x806E00, "83 ec 10 56 8b 74 24 18 85 f6 0f 84 89 00 00 00")
+    call(0x806E5A, 0x11E0946)
+    call(0x806E84, 0x11E0946)
+
+    # Play update is a distinct dispatcher with its own phase table and
+    # goal-progress entry; it is not proof of a completed gameplay tick.
+    exact(0xF1F960, "83 ec 0c 53 56 8b f1 e8 c4 16 4e ff 8a 58 1c 84 db 74 1c")
+    call(0xF1F9B1, 0xF1F4E0)
+    exact(0xF1F9B6, "8b 86 90 00 00 00 48 83 f8 05 0f 87")
 
     # Launch record +0x24 is final requested internal mode; +0x28 is a
     # separate provenance/context value, read into ScenarioMode +0xD0.

@@ -15,6 +15,11 @@ DFC210: after its guards/countdown, local state 9 or 10
   → StateManager +0x28(0x21851EBE)
 ```
 
+The [launch-gates audit](launch-gates.md) resolves those prerequisites: waiting subphases,
+service/list predicates, presentation latch and a decrement-and-return countdown. A countdown
+transition `1 → 0` does not call `DFBD40` until a subsequent Update sees zero; no resource-readiness
+shortcut or native save-writing probe is permitted.
+
 `0x21851EBE` is the lowercase FNV-1 state-name identity of `ScenarioMode`, not its mode tag
 `0x01654C10`. The retained shipped [state script](../../scripts/SporeAppStates.txt) contains:
 
@@ -47,7 +52,10 @@ carried unchanged into ScenarioMode. The completion branches write:
 State 9 additionally copies a three-word key from controller `+0xB0/+0xB4/+0xB8` to record
 `+0x0C/+0x10/+0x14`. Both branches copy the primary three-word key from `+0x8C/+0x90/+0x94`.
 The other branch prepares an asset-key collection and a key at record `+0x18..+0x20`. The semantic
-types of every key are not established by these copies alone.
+types of every key are not established by these copies alone. The later
+[captain-key follow-up](../../startup-gge-captain-key-anim-world.md) joins controller state-2
+selection `+0xA4` to record `+0x18` and then `mAvatarAsset` through `EF1D20 → F42420`.
+It is applied after first Scenario synchronization, not necessarily before initial creature creation.
 
 `EF1D20` supplies the matching consumer:
 
@@ -304,9 +312,10 @@ Focused instruction inspection resolves the generic selection machinery:
    `+0x28 = 7D8CF0` searches tags at entry `+0x04` and calls `7D8670` on a match; a miss returns
    false, not a fallback index. The earlier [mode-message route](message-route.md) then applies.
 
-This supplies name-based and tag-based selection endpoints. The state command-list executor and
-actual delivery are not re-established end-to-end here: script/registration, command producer,
-listener branch and setters remain separate static observations, not a runtime trace. SDK names
+This supplies name-based and tag-based selection endpoints. The later
+[startup dispatch audit](../../startup-state-dispatch.md) supplies the command-list executor
+`7E3BF0 → 7E2D90` and its message-service calls. Actual delivery/scheduling and successful
+activation remain unobserved; these are linked static endpoints, not a runtime trace. SDK names
 `kMsgSetGameModeByName`/`SetActiveMode` are semantic corroboration only; addresses and calls above
 come from the selected binary.
 

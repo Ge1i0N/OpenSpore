@@ -63,6 +63,11 @@ run  0x00f47e90
 - **The app-mode / state-manager host is created by `0x007e8a00`** (496-byte object, ctor
   `0x007e76e0`) and stored at `[app+0x20]`; the whole run method then dispatches through its vtable.
   This is the object whose state machinery we reversed (`AppStateManager`, the `state` verb).
+- Before the later `SporeAppStates` load, `run` reaches a separate data/config-root setup at
+  `0x00f47c20` (called from `0x00f48054`). It handles `shipDirs`/`devDirs` and nearby shipped
+  roots such as `../Data/`, `../EP1Data/` and `../BP1Data/`, using temporary descriptor/range
+  objects. See [startup-pre-state.md](startup-pre-state.md). This is startup configuration, not
+  Scenario resource readiness.
 
 ## run `0x00f47e90` — full extent and what it does
 
@@ -85,10 +90,13 @@ message loop; it initialises subsystems and dispatches through the AppMode objec
   | +0x20 | `0x007eaae0` | shader/script config: `-dumpShaders` 0x14142a8, `-dumpShadersForPIX` 0x1414284 / `-pix` 0x141427c, `-dumpFragmentShaders` 0x1414254, `-dumpDirectShaders` 0x1414230, `-noScripts` 0x141421c, `-noMaterialScripts` 0x14141f8, `-noEffectScripts` 0x14141d8 |
 - Other manager getters used: `0x67dc90/0x67dcb0/0x67dcd0/0x67dce0/0x67dcf0/0x67dda0`, `0x6a17e0`
   (a profiler/marker call), `0x951220`/`0x951230` (allocator pair), `0x5a7560`, `0x456230`.
-- **`run` loads the app's state list** at `0xf48505`: `[app+0x34]->vtable+0x1c` is called with the
-  group id **`0xd6396913` = `SporeAppStates`** (resolved via FNV-1-lower over `reg_file.txt`). So the
-  state machine's states come from a `trigger` resource of group `SporeAppStates` (see
-  `analysis/content-loading.md`).
+- **`run` loads the app's state list**: `0xf48505` pushes **instance** `0xd6396913` =
+  `SporeAppStates` (group 0, type `0x024A0E52`); the indirect call is at `0xf4850a`.
+  The receiver comes from `67DCE0`, the separate state manager retained at **AppMode** `+0x34`
+  and published in `015FD8B4`, not `run`'s app `+0x34` or AppMode's graphics slot.
+  Its vtable `01413698` has `+0x1C = 7E2370`. That consumer calls the trigger parser and,
+  on success, selects/requests the initial state. See
+  [startup-state-registration.md](startup-state-registration.md).
 
 ## The main loop — FOUND: `0x008482f0` (window-class vtable `+0x84`)
 
@@ -137,6 +145,19 @@ LOOP:
 So the engine's frame/event pump is: `PeekMessageW` -> (WM_QUIT check) -> dispatch to registered
 window-event handlers -> `TranslateMessage` -> `DispatchMessageW`, repeated until the queue is
 empty, then return 1 (the caller loops). `PM_REMOVE = 1`.
+
+The Win32 pump is separate from the app's **queued-message pump**: frame routine `F477D0`
+calls `67DC80` at `F478E5` and service virtual `+0x38 = 8847F0` at `F478F1`, before AppMode
+update (`F47945`, AppMode `+0x78 = 7E9E80`). See
+[startup-message-delivery.md](startup-message-delivery.md) for queued state actions and the
+startup setting that disables drain-until-empty. These static call sites do not prove a
+successful native frame or playable tick.
+
+The selected mode's frame continuation is now linked in
+[startup-mode-frame.md](startup-mode-frame.md): AppMode `7E9E80` asks its mode manager for
+the selected driver through `+0x2C` and invokes driver `+0x3C`; for GGE this is
+`DDDB80 → DE8710`. Manager `+0x50` returns a different auxiliary owner. Driver setup-all,
+selection/activation and internal GGE handler updates are separate lifecycle stages.
 
 Note there are **two** PeekMessage users: this main loop uses **`PeekMessageW`** (via `edi`), while
 the mouse-coalescing helper `0x84a050` uses **`PeekMessageA`** directly (IAT 0x13cc5f0). That is why

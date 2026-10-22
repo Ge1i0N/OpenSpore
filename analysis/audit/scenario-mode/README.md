@@ -101,6 +101,10 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   panel skips, pending-to-selected key promotion, state 8 `WaitingForAutoPollinate`, and the
   separate internal-message wait route. Selected key, name and `EC42D0` conditions feed UI gates;
   resource-service readiness and notification delivery are not assumed.
+- The [launch-gates audit](launch-gates.md) separates waiting subphases `0/1/2`, service/list
+  guards, presentation latch `0x016A0B04` and countdown. Ten decrementing Update calls return;
+  only a later call observing zero can reach completion. The latch has a timed presentation
+  writer and an alternative lookup-miss write, so it must not be treated as universal resource readiness.
 - The constructor-established primary vtable is `0x0147EDA0`; its `+0x2C` method `DFC6C0`
   requests `GGENewScenariov3` (FNV-1 identity `0x611E869D`) and creates the labelled records
   `choose adventure → 0x05933FE0`, `choose captain name → 0x05933FE1/2`, and
@@ -141,8 +145,17 @@ The bounded GA bodies add a concrete, still-static lifecycle shape:
   statically; no runtime ScenarioMode instance was observed.
 - `EF2EF0` (`Update`) branches on `cScenarioMode::mMode` at `+0xCC`: mode `1` follows the edit
   path; mode `2` follows the play path and invokes play-mode/goal/terrain helpers. When the initial
-  latch is set it requests the `ScenarioPlanet` simulator resource and performs the play/edit
-  transition work. These calls are retained as native candidates, not host readiness.
+  latch is set it performs play/edit setup and selects the **ScenarioPlanet lighting configuration**
+  on graphics world global `0x0167EA54`; this is not a simulator planet-creation request. The
+  [pre-play audit](preplay.md) resolves the preceding separate loading-context phases `0..4`,
+  service count, model predicates and the concrete graphics receiver chain. All remain static
+  observations, not host readiness or successful world creation.
+- [scene-object-flow.md](scene-object-flow.md) separates `EF25E0` object-list preparation,
+  `F45E70/F45AD0` record synchronization and conditional object construction from `F40210/F400E0`
+  readiness aggregation. These edges do not prove terrain or stage creation.
+- [play-mode-flow.md](play-mode-flow.md) follows `ScenarioPlayMode::Initialize`, current-act setup,
+  goal scanning and act advancement. It establishes the next native state-machine boundary without
+  promoting play-mode entry to successful world/gameplay readiness.
 
 This makes ScenarioMode a real next reverse-engineering target after a selected star, but it does
 not connect the GGE `Play Scenario` ControlID `0x070D7509` to `ScenarioMode` or prove an adventure
