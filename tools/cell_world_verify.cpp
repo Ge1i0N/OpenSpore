@@ -3,6 +3,7 @@
 #include "engine/cell_world.h"
 #include "engine/cell_game.h"
 
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <cstdio>
@@ -362,6 +363,16 @@ int main(int argc, char** argv) {
             std::string lerr;
             if (w.set_level("level_water", lerr)) {
                 w.tick(0.016f);
+                {
+                    const auto t0 = std::chrono::steady_clock::now();
+                    for (int i = 0; i < 60; ++i) w.tick(1.0f / 60.0f);
+                    const auto t1 = std::chrono::steady_clock::now();
+                    const double ms =
+                        std::chrono::duration<double, std::milli>(t1 - t0).count();
+                    std::printf("cell_world_verify: %zu entities, 60 ticks in %.1f ms "
+                                "(%.3f ms/tick)\n",
+                                w.entities().size(), ms, ms / 60.0);
+                }
                 std::cout << "real world: " << w.data().archetypes.size() << " archetypes, "
                           << w.data().structures.size() << " structures; " << w.status() << "\n";
             } else {
