@@ -131,6 +131,16 @@
   paired `raster` texture — 865/865). Loaded once by base id and drawn top-down through
   `render::Mesh::draw_at()` (one `set_topdown_camera()` per frame, one WORLD matrix per cell,
   depth buffer separating them), each with its own texture.
+
+* **The geometry load is the frame cost.** The shipped bodies are whole cell models
+  (about 6,300 vertices and 31,000 indices each), and `level_water` spawns 714 of
+  them - about 3.9M vertices and 18.7M indices per frame. With the device's
+  **software** vertex processing that frame took over a second (the stage ran at
+  0.9 fps); the device now asks for **hardware** vertex processing and falls back
+  to software when the adapter refuses it, which puts the stage at ~99 fps on the
+  same machine. The draw count itself is the game's own: `level_water` spawns 163
+  foreground cells and 550 background ones, exactly as the shipped `populate`
+  records say.
 * The player is white with a cyan ring and a heading notch; predators carry a red ring; cells with
   no gmdl body (the procedural `amoeba_cell`, flora/rock props) keep a tinted-disc fallback, so
   nothing disappears. Food is green.

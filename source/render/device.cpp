@@ -52,13 +52,24 @@ bool Device::init(HWND hwnd, const Config& cfg, std::string& err) {
         return false;
     }
 
-    // 3. Create the device. Software vertex processing keeps this scaffold independent of
-    //    shader profiles; the RenderWare bridge will revisit this (field guide §3).
+    // 3. Create the device. The cell stage draws the shipped bodies verbatim - about 3.9M
+    //    vertices per frame at level_water - so the vertices go through the GPU whenever it
+    //    can: with software vertex processing that same frame took over a second. The device
+    //    is created with hardware vertex processing first and falls back to software when the
+    //    adapter refuses it (the same pattern as the resolution fallback below).
     m_width = cfg.width;
     m_height = cfg.height;
     fill_pp(m_pp, m_width, m_height, cfg.windowed);
-    DWORD flags = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+    DWORD flags = D3DCREATE_HARDWARE_VERTEXPROCESSING;
     hr = m_d3d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, flags, &m_pp, &m_device);
+    bool hardware_vp = SUCCEEDED(hr);
+    if (FAILED(hr)) {
+        LOG_WARN("render", "CreateDevice with hardware vertex processing failed (0x%08lx), "
+                 "falling back to software", (unsigned long)hr);
+        flags = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+        fill_pp(m_pp, m_width, m_height, cfg.windowed);
+        hr = m_d3d9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, flags, &m_pp, &m_device);
+    }
     if (FAILED(hr) && cfg.windowed) {
         // The original's own fallback resolution: 0x7e74f1 passes 0x320(800) x 0x258(600)
         // to 0x410330 as a (w,h) pair.
@@ -75,9 +86,10 @@ bool Device::init(HWND hwnd, const Config& cfg, std::string& err) {
         return false;
     }
     m_present_interval_one = (m_pp.PresentationInterval == D3DPRESENT_INTERVAL_ONE);
-    LOG_INFO("render", "device %s %dx%d vsync=%d (desktop %dx%d fmt=%d) flags=SWVP",
+    LOG_INFO("render", "device %s %dx%d vsync=%d (desktop %dx%d fmt=%d) flags=%s",
              cfg.windowed ? "windowed" : "fullscreen", m_width, m_height, (int)m_present_interval_one,
-             (int)m_desktop.Width, (int)m_desktop.Height, (int)m_desktop.Format);
+             (int)m_desktop.Width, (int)m_desktop.Height, (int)m_desktop.Format,
+             hardware_vp ? "HWVP" : "SWVP");
     return true;
 }
 
