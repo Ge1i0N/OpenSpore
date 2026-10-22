@@ -63,6 +63,15 @@ Wire values like `04f30503` / `ee0f01f4` decode as int16 pairs
 Their callback chains are the u32 families (see the descriptor section),
 not the float one. Kept as raw u32 until the packing is fully decoded.
 
+**Which field holds what.** Measured over all 150 shipped groups of the
+`0x018eb4b7` class: `0x024162BF` and `0x024162C2` are **0 in every group**;
+`0x024162C0` holds a packed int16 pair and `0x024162C1` a second one (both
+spanning the whole int16 range, -32713..32767). So the position block is
+`0, (x, y), (vx, vy), 0` - and the engine's writer now emits exactly that
+instead of putting the coordinates in the first field. The **wire scale is a
+SEED** (1/100 of a world unit): the shipped values cover the whole int16
+range and the game's world size was not recovered.
+
 ## Single-envelope streams
 
 | type | count | content |

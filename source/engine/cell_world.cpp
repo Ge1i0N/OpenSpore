@@ -174,10 +174,18 @@ bool World::load_save(const std::string& path, std::string& error) {
             if (creatures[i].stat4 < creatures[player_group].stat4) player_group = i;
         }
         const cell::CreatureStats& c = creatures[player_group];
-        const float px = static_cast<float>(static_cast<i32>(c.pos_x)) / 1000.0f;
-        const float py = static_cast<float>(static_cast<i32>(c.pos_y)) / 1000.0f;
-        const float vx = static_cast<float>(static_cast<i32>(c.pos_z)) / 100.0f;
-        const float vy = static_cast<float>(static_cast<i32>(c.pos_w)) / 100.0f;
+        // The position block holds packed int16 pairs: 0x024162C0 is (x, y) and 0x024162C1 is
+        // (vx, vy). The wire scale is a SEED (1/100 of a world unit) - the shipped values span
+        // the whole int16 range and the game's world size is not recovered.
+        const auto unpack2 = [](u32 v, float& a, float& b) {
+            const i32 ia = static_cast<i32>(static_cast<std::int16_t>((v >> 16) & 0xFFFF));
+            const i32 ib = static_cast<i32>(static_cast<std::int16_t>(v & 0xFFFF));
+            a = static_cast<float>(ia) / 100.0f;
+            b = static_cast<float>(ib) / 100.0f;
+        };
+        float px = 0.0f, py = 0.0f, vx = 0.0f, vy = 0.0f;
+        unpack2(c.pos_y, px, py);
+        unpack2(c.pos_z, vx, vy);
         if (m_player >= 0 && static_cast<size_t>(m_player) < m_entities.size()) {
             m_entities[static_cast<size_t>(m_player)].x = px;
             m_entities[static_cast<size_t>(m_player)].y = py;
@@ -400,7 +408,9 @@ bool World::write_save(const std::string& path, std::string& error) const {
     const Entity* p = player();
     std::vector<u8> blob;
     // Stream header: [count][crc][token][12-byte header]. The count word holds the byte size of
-    // one group block, so it is patched in once the block is complete.
+    // ONE creature group - the stream header, the frames and the 24-byte trailer - which is
+    // how the shipped streams read: the shipped 150-group stream is 225450 B = 150 x 1503.
+    // This writer emits a single group, so the count is the blob's size.
     put32be(blob, 0);               // group byte size (patched below)
     put32be(blob, 0);               // crc
     put32be(blob, 0);               // token
@@ -408,14 +418,22 @@ bool World::write_save(const std::string& path, std::string& error) const {
     // Frame 0: 5 stat fields (the shipped values).
     emit(blob, kFrame0Ids, kFrame0Sizes, 5,
          {be4(0), be1(0), be4(0xFFFFFFFFu), be4(0), be4(79)});
-    // Frame 1: 4 packed coordinate fields (we store world units * 1000).
-    const i32 px = p ? static_cast<i32>(p->x * 1000.0f) : 0;
-    const i32 py = p ? static_cast<i32>(p->y * 1000.0f) : 0;
-    const i32 pz = p ? static_cast<i32>(p->vx * 100.0f) : 0;
-    const i32 pw = p ? static_cast<i32>(p->vy * 100.0f) : 0;
+    // Frame 1: the position block. The shipped save stores the coordinates as packed int16
+    // pairs in the SECOND field (0x024162C0) and leaves the first and the last at 0, so
+    // the writer does the same: 0, (x, y), (vx, vy), 0. The wire scale is a SEED - the
+    // shipped values span the whole int16 range and the game's world size is not recovered -
+    // so 1/100 of a world unit is used, which fits the engine's arena in an int16.
+    const auto pack2 = [](float a, float b) {
+        const i32 ia = static_cast<i32>(a * 100.0f);
+        const i32 ib = static_cast<i32>(b * 100.0f);
+        const u32 ua = static_cast<u32>(ia & 0xFFFF);
+        const u32 ub = static_cast<u32>(ib & 0xFFFF);
+        return (ua << 16) | ub;
+    };
+    const u32 packed_pos = p ? pack2(p->x, p->y) : 0u;
+    const u32 packed_vel = p ? pack2(p->vx, p->vy) : 0u;
     emit(blob, kFrame1Ids, kFrame1Sizes, 4,
-         {be4(static_cast<u32>(px)), be4(static_cast<u32>(py)), be4(static_cast<u32>(pz)),
-          be4(static_cast<u32>(pw))});
+         {be4(0u), be4(packed_pos), be4(packed_vel), be4(0u)});
     // Frame 2: 25 detailed fields. 0x02416C60 is the position triple plus a trailing 1.0, and
     // 0x02416C64 is the creature's scale.
     {

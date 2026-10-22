@@ -45,10 +45,13 @@ struct CreatureStats {
     // 0x024162BF..C2: NOT floats — packed int coordinates (CB chains are
     // the u32 families; wire values like 04f30503 = int16 pairs 1267/1283).
     // Kept raw until the packing is decoded.
-    u32 pos_x = 0;         // 0x024162BF
-    u32 pos_y = 0;         // 0x024162C0
-    u32 pos_z = 0;         // 0x024162C1
-    u32 pos_w = 0;         // 0x024162C2
+    // The shipped position block: 0x024162BF and 0x024162C2 are 0 in all 150 shipped
+    // groups; 0x024162C0 holds the coordinates as a packed int16 pair (x, y) and
+    // 0x024162C1 a second packed pair. The wire scale is not recovered.
+    u32 pos_x = 0;         // 0x024162BF (unused by the shipped save)
+    u32 pos_y = 0;         // 0x024162C0 (the packed position)
+    u32 pos_z = 0;         // 0x024162C1 (the second packed pair)
+    u32 pos_w = 0;         // 0x024162C2 (unused by the shipped save)
     // Detailed stats (frame type 3+), all big-endian payloads
     std::optional<std::array<float, 3>> detailed_pos;  // 0x02416C5E, 12 B
     std::optional<std::array<float, 4>> stat5;   // 0x02416C60, 16 B (0,0,0,1.0)
