@@ -452,6 +452,69 @@ bool decode_package(pkg::Package& p, GameData& out, std::string& error) {
 
 }  // namespace
 
+// The GA cell stage's size-class table, read from the GA binary: 28 bytes per row at
+// 0x1483c14, twenty band rows plus the separate row the GA uses for a size of exactly
+// 1000. The row layout the GA reads is (class, band start, growth, hp, hp max, ?, 0).
+const SizeBand kSizeBands[21] = {
+    {1,   0,  0,      1.0f,      1.0f},   // 0x1483c30
+    {1,  50,  5,      1.73f,     1.0f},   // 0x1483c4c
+    {2, 100, 10,      3.0f,      3.0f},   // 0x1483c68
+    {2, 150, 13,      5.2f,      3.0f},   // 0x1483c84
+    {3, 200, 16,     10.0f,     10.0f},   // 0x1483ca0
+    {3, 250, 19,     17.3f,     10.0f},   // 0x1483cbc
+    {4, 300, 22,     30.0f,     30.0f},   // 0x1483cd8
+    {4, 350, 25,     52.0f,     30.0f},   // 0x1483cf4
+    {5, 400, 28,    100.0f,    100.0f},   // 0x1483d10
+    {5, 450, 31,    173.0f,    100.0f},   // 0x1483d2c
+    {6, 500, 34,    300.0f,    300.0f},   // 0x1483d48
+    {6, 550, 37,    520.0f,    300.0f},   // 0x1483d64
+    {7, 600, 40,   1000.0f,   1000.0f},   // 0x1483d80
+    {7, 650, 43,   1730.0f,   1000.0f},   // 0x1483d9c
+    {8, 700, 46,   3000.0f,   3000.0f},   // 0x1483db8
+    {8, 750, 49,   5200.0f,   3000.0f},   // 0x1483dd4
+    {9, 800, 52,  10000.0f,  10000.0f},   // 0x1483df0
+    {9, 850, 55,  17300.0f,  10000.0f},   // 0x1483e0c
+    {10, 900, 58, 30000.0f,  30000.0f},   // 0x1483e28
+    {10, 950, 61, 52000.0f,  30000.0f},   // 0x1483e44
+    {10, 1000, 65, 52000.0f, 30000.0f},   // 0x1483e60 (the size == 1000 row)
+};
+
+int size_class_of(int size_int) {
+    if (size_int == 1000) return kSizeBands[20].size_class;
+    int band = 1;
+    while (band < 20 && kSizeBands[band].threshold <= size_int) ++band;
+    return kSizeBands[band - 1].size_class;
+}
+
+int size_relation(int class_a, int class_b) {
+    int relation = class_a - class_b + 2;
+    if (relation < 0) relation = 0;
+    if (relation > 4) relation = 4;
+    return relation;
+}
+
+int size_class_for_radius(float radius) {
+    // The class ladder is the hp-max column of the band table: a class covers the radii
+    // from its own value up to the next class's value.
+    static const float kLadder[10] = {1.0f, 3.0f, 10.0f, 30.0f, 100.0f,
+                                      300.0f, 1000.0f, 3000.0f, 10000.0f, 30000.0f};
+    int cls = 1;
+    for (int i = 0; i < 10; ++i) {
+        if (radius < kLadder[i]) break;
+        cls = i + 1;
+    }
+    return cls;
+}
+
+float size_class_max_hp(int size_class) {
+    if (size_class < 1) size_class = 1;
+    if (size_class > 10) size_class = 10;
+    for (int i = 20; i >= 0; --i) {
+        if (kSizeBands[i].size_class == size_class) return kSizeBands[i].hp_max;
+    }
+    return 0.0f;
+}
+
 float Archetype::stat(u32 offset) const {
     if (static_cast<u64>(offset) + 4 > record.size()) return 0.0f;
     return le_f32(record.data() + offset);

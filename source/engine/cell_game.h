@@ -261,6 +261,61 @@ struct PropertyCurve {
     std::vector<std::pair<float, float>> points;
 };
 
+// ---------------------------------------------------------------------------
+// The GA cell stage's size-class model (recovered from the GA binary).
+//
+// The GA `cell` type registers a `size` field (record +0x304) that is a FLOAT with
+// the type default 1.0, and the GA cell object keeps a size CLASS: `FUN_00e4ee60`
+// maps a 0..1000 size integer to one of ten classes through the band table at
+// 0x1483c14 (28 bytes per row). The row layout the GA reads is
+// (class, band start, growth, hp, hp max, ?, 0):
+//
+//   class | band start | growth | hp    | max hp
+//   ------+------------+--------+-------+--------
+//     1   |     0      |   0    |  1.0  |  1.0
+//     1   |    50      |   5    |  1.73 |  1.0
+//     2   |   100      |  10    |  3.0  |  3.0
+//     2   |   150      |  13    |  5.2  |  3.0
+//     3   |   200      |  16    | 10.0  | 10.0
+//     ...                       x3 per class, with the upper band at x sqrt(3)
+//
+// A size of exactly 1000 uses the separate row at 0x1483e60 (class 10). The class
+// is therefore 1 for the sizes 0..99, 2 for 100..199, ... 10 for 900..1000.
+//
+// `FUN_00e57340` turns two classes into the GA's relation: clamp(a - b + 2, 0, 4),
+// so 0 is "two classes smaller", 2 is "the same class" and 4 is "two classes
+// bigger". The GA's AI uses it directly: an NPC hunts the player unless the
+// relation is exactly 1 (`FUN_00e57ce0`) and treats the player as prey only at
+// relation 4 (`FUN_00e59e50`).
+// ---------------------------------------------------------------------------
+
+// One row of the GA size-band table.
+struct SizeBand {
+    int size_class = 0;   // the class this band belongs to
+    int threshold = 0;    // the size integer at which the band starts
+    int growth = 0;       // the GA's per-band growth step
+    float hp = 0.0f;      // the band's HP value
+    float hp_max = 0.0f;  // the class's HP ceiling
+};
+
+// The 21 band rows, in table order (the GA's 0x1483c14 block plus the size == 1000 row).
+extern const SizeBand kSizeBands[21];
+// The separate row the GA uses for a size of exactly 1000 (0x1483e60).
+extern const SizeBand kSizeBandMax;
+
+// The GA's size class for a size integer (0..1000). `FUN_00e4ee60` @0xe4ee60.
+int size_class_of(int size_int);
+// The GA's class relation: clamp(a - b + 2, 0, 4). `FUN_00e57340` @0xe57340.
+int size_relation(int class_a, int class_b);
+// The class a body radius falls into. The GA's class ladder is the `hp_max` column of
+// the band table (1, 3, 10, 30, 100, 300, 1000, 3000, 10000, 30000): a radius belongs
+// to the class whose ceiling it is below. The GA expresses the class through the
+// cell's size integer, which the engine does not carry, so this is the radius ->
+// class mapping the engine uses.
+int size_class_for_radius(float radius);
+// The class's HP ceiling (the `hp_max` column of the band table).
+float size_class_max_hp(int size_class);
+
 // A background advection/density field from CellGame_Layers.package.
 // advect = 128x128x3 f32 (196608 B), density = 128x128 f32 (65536 B).
 struct LayerField {

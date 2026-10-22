@@ -386,10 +386,54 @@ int main(int argc, char** argv) {
         }
     }
 
+    // 13: the GA size-class model (FUN_00e4ee60 / FUN_00e57340, 0xe4ee60 / 0xe57340)
+    {
+        using namespace os::cell;
+        // The class boundaries the GA's band table produces: class 1 for 0..99,
+        // 2 for 100..199, ... 10 for 900..1000.
+        check(size_class_of(0) == 1, "class of size 0 is 1");
+        check(size_class_of(49) == 1, "class of size 49 is 1");
+        check(size_class_of(50) == 1, "class of size 50 is 1");
+        check(size_class_of(99) == 1, "class of size 99 is 1");
+        check(size_class_of(100) == 2, "class of size 100 is 2");
+        check(size_class_of(199) == 2, "class of size 199 is 2");
+        check(size_class_of(200) == 3, "class of size 200 is 3");
+        check(size_class_of(449) == 5, "class of size 449 is 5");
+        check(size_class_of(450) == 5, "class of size 450 is 5");
+        check(size_class_of(500) == 6, "class of size 500 is 6");
+        check(size_class_of(899) == 9, "class of size 899 is 9");
+        check(size_class_of(900) == 10, "class of size 900 is 10");
+        check(size_class_of(999) == 10, "class of size 999 is 10");
+        check(size_class_of(1000) == 10, "class of size 1000 is 10");
+
+        // The GA's relation is clamp(a - b + 2, 0, 4).
+        check(size_relation(1, 1) == 2, "relation of equal classes is 2");
+        check(size_relation(2, 1) == 3, "relation of one class bigger is 3");
+        check(size_relation(3, 1) == 4, "relation of two classes bigger is 4");
+        check(size_relation(4, 1) == 4, "relation clamps at 4");
+        check(size_relation(1, 2) == 1, "relation of one class smaller is 1");
+        check(size_relation(1, 3) == 0, "relation of two classes smaller is 0");
+        check(size_relation(1, 10) == 0, "relation clamps at 0");
+
+        // The class ladder: a class covers the radii up to the next class's value.
+        check(size_class_for_radius(0.5f) == 1, "radius 0.5 is class 1");
+        check(size_class_for_radius(1.0f) == 1, "radius 1 is class 1");
+        check(size_class_for_radius(2.9f) == 1, "radius 2.9 is class 1");
+        check(size_class_for_radius(3.0f) == 2, "radius 3 is class 2");
+        check(size_class_for_radius(10.0f) == 3, "radius 10 is class 3");
+        check(size_class_for_radius(30000.0f) == 10, "radius 30000 is class 10");
+
+        // The class HP ceilings from the band's hp-max column.
+        check(size_class_max_hp(1) == 1.0f, "class 1 HP ceiling is 1");
+        check(size_class_max_hp(2) == 3.0f, "class 2 HP ceiling is 3");
+        check(size_class_max_hp(5) == 100.0f, "class 5 HP ceiling is 100");
+        check(size_class_max_hp(10) == 30000.0f, "class 10 HP ceiling is 30000");
+    }
+
     if (failures) {
         std::cerr << failures << " cell_game_verify check(s) failed\n";
         return 1;
     }
-    std::cout << "cell_game_verify: 12 constructed-input checks PASS\n";
+    std::cout << "cell_game_verify: 13 constructed-input checks PASS\n";
     return 0;
 }

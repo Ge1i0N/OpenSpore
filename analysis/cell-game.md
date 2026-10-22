@@ -146,6 +146,89 @@ The descriptor also names `ai_hard` @ `+0x194`, `ai_easy` @ `+0x248`,
 (796 B)** — larger than the 400 B the shipped resources carry, so only the
 `ai` block and the scalars above are readable from the shipped data.
 
+`size` @ `+0x304` is registered with the type id `0x0B` and the **float default
+1.0** (`0x3F800000` at `0x15a5fbc`). The shipped `cell` records are **all
+exactly 400 bytes** (189 of 189), so the field is absent from every shipped
+archetype and every one of them uses the default **1.0**. The same is true of
+`ai_hard`, `ai_easy`, `friendGroup`, `wontAttackPlayer`,
+`wontAttackPlayerWhenSmall` and `eat`.
+
+### The size-class model (recovered from the GA binary)
+
+The GA does not compare two cells by their raw size. It puts each cell into one
+of **ten size classes** and compares the classes.
+
+`FUN_00e4ee60` @ `0xe4ee60` maps a size integer to a class through the band
+table at `0x1483c14` (28 bytes per row):
+
+```c
+int FUN_00e4ee60(int size /* EDX */) {
+  if (size == 1000) return 10;          // the separate row at 0x1483e60
+  int k = 0;
+  if (size >= 0) do { k++; } while (band_start[k] <= size);
+  return class_of[k];
+}
+```
+
+The table's rows (the GA reads `(class, band start, growth, hp, hp max, ?, 0)`):
+
+| class | band start | growth | hp | hp max |
+|---|---|---|---|---|
+| 1 | 0 | 0 | 1.0 | 1.0 |
+| 1 | 50 | 5 | 1.73 | 1.0 |
+| 2 | 100 | 10 | 3.0 | 3.0 |
+| 2 | 150 | 13 | 5.2 | 3.0 |
+| 3 | 200 | 16 | 10.0 | 10.0 |
+| 3 | 250 | 19 | 17.3 | 10.0 |
+| 4 | 300 | 22 | 30.0 | 30.0 |
+| 4 | 350 | 25 | 52.0 | 30.0 |
+| 5 | 400 | 28 | 100.0 | 100.0 |
+| 5 | 450 | 31 | 173.0 | 100.0 |
+| 6 | 500 | 34 | 300.0 | 300.0 |
+| 6 | 550 | 37 | 520.0 | 300.0 |
+| 7 | 600 | 40 | 1000.0 | 1000.0 |
+| 7 | 650 | 43 | 1730.0 | 1000.0 |
+| 8 | 700 | 46 | 3000.0 | 3000.0 |
+| 8 | 750 | 49 | 5200.0 | 3000.0 |
+| 9 | 800 | 52 | 10000.0 | 10000.0 |
+| 9 | 850 | 55 | 17300.0 | 10000.0 |
+| 10 | 900 | 58 | 30000.0 | 30000.0 |
+| 10 | 950 | 61 | 52000.0 | 30000.0 |
+| 10 (the `size == 1000` row, `0x1483e60`) | 1000 | 65 | 52000.0 | 30000.0 |
+
+So the class is 1 for the sizes 0…99, 2 for 100…199, … 10 for 900…1000. The
+`hp max` column is the class ladder **1, 3, 10, 30, 100, 300, 1000, 3000,
+10000, 30000** (×3 per class) and each class's upper band carries the ×√3
+value — the same shape as the magnitude ladder below.
+
+`FUN_00e57340` @ `0xe57340` turns two classes into the GA's relation:
+
+```c
+int FUN_00e57340(int cell) {
+  int mine = cell->class;              // cached at cell + 0x358, -1 = not computed
+  if (mine == -1) mine = FUN_00e4ee60();
+  int theirs = player->size;           // player + 0x1c
+  return clamp(mine - their_class + 2, 0, 4);
+}
+```
+
+0 means "two classes smaller", 2 "the same class" and 4 "two classes bigger".
+Two consumers pin the semantics:
+
+* `FUN_00e57ce0` — an NPC **hunts** the player unless the relation is exactly
+  **1** (one class smaller than the player);
+* `FUN_00e59e50` — the player is the NPC's **prey** only at relation **4**
+  (two classes bigger).
+
+The engine implements the table, `size_class_of`, `size_relation` and the
+class ladder in `source/engine/cell_game.cpp` (with the regression checks in
+`tools/cell_game_verify.cpp`). **What is still missing is the per-species
+class**: the GA derives it from the cell's size integer, and the archetype
+field that would give it (`size` @ `+0x304`) does not ship, so the engine
+still has to decide each NPC's class from its own body radius. The
+`size_ratio` test the AI uses is therefore still a seed approximation of the
+GA rule.
+
 ### `cAIData` — the per-cell AI block (record `+0xE0`)
 
 The `cAIData` type (registered at `0x13746e0`, descriptor built at `0x1374725`,
@@ -258,13 +341,13 @@ carry the inputs, the engine keeps a documented seed and says so.
 | AI block choice | `FUN_00e52910` | difficulty 0 → `ai_easy` @ record `+0x248`, 2 → `ai_hard` @ `+0x194`, else `ai` @ `+0xE0`; an unset (`-1`) block falls back to `ai`. Only `ai` ships in the 400-byte record. |
 | turn rate | globals + cAIData | `turnFactor` × the movement-mode multiplier (`npcTurnSpeedMultiplier_Jet/_Flagella/_Cilia`, all 1.0) × the per-mode turn speed (`jetTurnSpeed` 3.0, `ciliaTurnSpeed` 0.75, `flagellaTurnSpeedMin..Max` 3.0…10.0 ramped over `flagellaRampTime` 2.0 s, reset at `flagellaRampResetAngle` 30°). |
 | speed cap | globals + cAIData | the archetype's `speed` / `chaseSpeed` / `fleeSpeed` / `wanderSpeed` × `npcSpeedMultiplier` (1.0). |
-| size class | `FUN_00e4ee60` / `FUN_00e57340` | a threshold table at `0x1483c14` (28-byte stride; thresholds 0, 50, 100, 150, 200, 250, 300 …, class values 1,1,2,2,3,3 …, `size == 1000 → 10`) maps a raw size to a class, clamped to 0…4 by the row at `0x1483e60`. |
-| predator / prey | `FUN_00e573e0` | `clamp(class_b - class_a + 2, 0, 4)` — the size-class difference, not a raw ratio. The engine's size-ratio test is a seed approximation of this. |
+| size class | `FUN_00e4ee60` @ `0xe4ee60` | the band table at `0x1483c14` (28-byte rows) maps a 0…1000 size integer to one of ten classes: class 1 for 0…99, 2 for 100…199, … 10 for 900…1000, with a separate row at `0x1483e60` for a size of exactly 1000. The full table is in the size-class section. |
+| predator / prey | `FUN_00e57340` @ `0xe57340` | `clamp(class_cell - class_player + 2, 0, 4)` — the size-class difference, not a raw ratio. An NPC hunts the player unless the relation is exactly 1 (`FUN_00e57ce0`) and treats the player as prey only at relation 4 (`FUN_00e59e50`). The engine's size-ratio test is a seed approximation of this: the per-species class is unknown because the archetype's `size` field does not ship. |
 | food gained | `FUN_00e69480` | `magnitudeLadder[sizeIndex] / (cellGameScale × 60) × baseFoodValue`, where the magnitude ladder at `0x1483bd0` is `10, 30, 100, 300, 1000, 3000, 1e4, 3e4, 1e5, 3e5, 1e6, 3e6, 1e7, 3e7, 1e8, 3e8, 1e9, 3e9, 1e10, 3e10` (20 magnitudes). |
 | food credited | `FUN_00e71520` | `min(computed amount, cap)` — the cap lives in the creature state at `+0x126C`. |
 | `cEatData` | type `cEatData` (table `0x15a6680`) | `{foodValue +0, hpValue +4, bomb +8, poisonNova +9}`, exposed as the archetype's `eat` property (record `+0x30C`, outside the shipped 400-byte record). |
 | digestion | `FUN_00e71980` / `FUN_00e76a80` | a 0.3 s tick (the timer at `+0x154` wraps at 0.3 s); a 1.0-unit threshold gates the growth roll with probability 0.25 while idle-pending and 0.10 while digesting; the "wants to grow" flag is at `+0x18A`, the stored food value at `+0x160`. |
-| HP | — | **not recovered.** The archetype's `hp` (`+0xA8`, a tier: hero 3, squid 2, Ducky 2) seeds the creature state's `+0x125C` capacity field, but the `maxHP(size)` expression lives in an undiscovered vtable method. The engine's tier→points mapping is a seed. |
+| HP | — | **partly recovered.** The class's HP ceiling is the band table's `hp max` column (1, 3, 10, 30, 100, 300, …) and the band gives the current HP (the class's value or the ×√3 upper-band value), so the HP follows the size class. The class itself needs the cell's size integer, which the shipped data does not carry, so the engine still maps the archetype's `hp` tier to points with a seed. The `maxHP(size)` expression itself is still in an undiscovered vtable method. |
 | next level | — | **recovered from the data, not from a function.** The `globals` record's first five refs are the campaign worlds (`world_1`…`world_5` in the GA type = the shipped `world_ice, world_rock, world_plant, world_water, world_beach`), then `worldRandom`; and each `world` record lists the level populations it hosts, with `world_ice` listing all ten campaign levels in order (see the world section). The engine walks that. |
 
 The GA binary's `globals` type (`0x16b0b5c`, 0x114 B, table `0x15a6ab8`) names the
@@ -562,7 +645,11 @@ unites the decode with the engine:
   record** (`ai_hard` `+0x194`, `ai_easy` `+0x248`, `friendGroup` `+0x2FC`,
   `size` `+0x304`, `eat` `+0x30C`, `triggersEscapeMission` `+0x318`; the
   registered record size is 0x31C). They are part of the runtime structure and
-  are **not** in the on-disk archetype, so they stay unread.
+  are **not** in the on-disk archetype, so they stay unread. `size` is the
+  important one: it is the float that would give each species its size class
+  (see *The size-class model*), and because it does not ship, the class of
+  every NPC — and therefore the GA's own predator/prey rule — cannot be read
+  from the data and stays a seed in the engine.
 * The 80-byte `structure` records are still positional (part parent/flag/id/scale).
 * The save-field ids in `analysis/audit/cell-field-descriptors.json` remain structural;
   the FNV registry does **not** contain them (they look like per-class sequential
